@@ -11,15 +11,18 @@
   },
   "scripts": {
     "prepare": "node scripts/install-git-hooks.mjs",
+    "storybook": "pnpm --filter @waypoint/storybook run storybook",
+    "storybook:build": "pnpm --filter @waypoint/storybook run storybook:build",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint .",
-    "typecheck": "ngc --noEmit -p packages/icons/tsconfig.lib.json && ngc --noEmit -p packages/icons/tsconfig.spec.json && ngc --noEmit -p packages/ui/tsconfig.lib.json && ngc --noEmit -p packages/ui/tsconfig.spec.json",
+    "typecheck": "ngc --noEmit -p packages/icons/tsconfig.lib.json && ngc --noEmit -p packages/icons/tsconfig.spec.json && ngc --noEmit -p packages/ui/tsconfig.lib.json && ngc --noEmit -p packages/ui/tsconfig.spec.json && ngc --noEmit -p apps/storybook/tsconfig.json",
     "test": "node scripts/ng-test.mjs",
     "test:coverage": "node scripts/ng-test.mjs --coverage",
+    "test:storybook": "pnpm --filter @waypoint/storybook run test:storybook",
     "build": "ng build icons && ng build ui",
     "changeset": "changeset",
-    "quality": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:coverage && pnpm build"
+    "quality": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:coverage && pnpm storybook:build && pnpm test:storybook && pnpm build"
   },
   "devDependencies": {
     "@angular/build": "catalog:",

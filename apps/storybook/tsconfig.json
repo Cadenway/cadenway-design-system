@@ -1,0 +1,17 @@
+/* Storybook application: its configuration, its stories and the stories of the packages. */
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    /* The stories of the packages are part of this project: the root is the workspace. */
+    "rootDir": "../..",
+    "outDir": "../../out-tsc/storybook",
+    /* Declares the stylesheet imports of the preview (`import '../src/styles.css'`). */
+    "types": ["vite/client"]
+  },
+  "include": [
+    ".storybook/*.ts",
+    "src/**/*.ts",
+    "vitest.config.ts",
+    "../../packages/*/src/**/*.stories.ts"
+  ]
+}

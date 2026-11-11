@@ -1,0 +1,10 @@
+/*
+ * Global stylesheet of the Storybook preview, written as a consumer application writes its own:
+ * Tailwind, then the Waypoint tokens, then the Tailwind theme that maps them.
+ */
+@import 'tailwindcss';
+@import '@waypoint/tokens/tokens.css';
+@import '@waypoint/tokens/theme.css';
+
+/* Tailwind scans this application only: the templates of the bricks live in the packages. */
+@source '../../../packages/ui/src';

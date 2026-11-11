@@ -1,0 +1,41 @@
+{
+  "name": "@waypoint/storybook",
+  "version": "0.0.0",
+  "description": "Storybook of the Waypoint design system: stories, interaction tests and accessibility checks.",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "scripts": {
+    "storybook": "storybook dev --port 6006 --no-open",
+    "storybook:build": "storybook build",
+    "test:storybook": "vitest run --project=storybook"
+  },
+  "devDependencies": {
+    "@analogjs/vite-plugin-angular": "^2.7.3",
+    "@angular/build": "catalog:",
+    "@angular/common": "catalog:",
+    "@angular/compiler": "catalog:",
+    "@angular/compiler-cli": "catalog:",
+    "@angular/core": "catalog:",
+    "@angular/platform-browser": "catalog:",
+    "@storybook/addon-a11y": "catalog:",
+    "@storybook/addon-docs": "catalog:",
+    "@storybook/addon-vitest": "catalog:",
+    "@storybook/angular-vite": "catalog:",
+    "@tailwindcss/postcss": "^4.3.0",
+    "@vitest/browser": "catalog:",
+    "@vitest/browser-playwright": "catalog:",
+    "@waypoint/icons": "workspace:*",
+    "@waypoint/tokens": "workspace:*",
+    "@waypoint/ui": "workspace:*",
+    "playwright": "^1.60.0",
+    "postcss": "^8.5.0",
+    "rxjs": "catalog:",
+    "storybook": "catalog:",
+    "tailwindcss": "^4.3.0",
+    "tslib": "catalog:",
+    "typescript": "catalog:",
+    "vite": "^8.0.0",
+    "vitest": "catalog:"
+  }
+}

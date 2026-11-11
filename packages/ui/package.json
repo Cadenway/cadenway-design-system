@@ -15,7 +15,9 @@
   },
   "devDependencies": {
     "@angular/common": "catalog:",
-    "@angular/core": "catalog:"
+    "@angular/core": "catalog:",
+    "@storybook/angular-vite": "catalog:",
+    "storybook": "catalog:"
   },
   "sideEffects": false
 }
