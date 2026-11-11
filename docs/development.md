@@ -32,13 +32,13 @@ The scripts below are this repository's contract. While the repository is being 
 create them with these exact names; afterwards, use them and never an ad-hoc equivalent. Run the
 narrowest check that covers the change first, then widen:
 
-| Changed                 | Minimum check                                              |
-| ----------------------- | ---------------------------------------------------------- |
-| A brick                 | `pnpm test -- <brick>`, its stories, `pnpm test:storybook` |
-| Tokens                  | `pnpm build`, the token stories in light and dark          |
-| Public API              | `pnpm build` and `wp-ds-package-reviewer`                  |
-| Any change to a package | a changeset (`pnpm changeset`)                             |
-| Docs or agent instructions only | Scoped formatting and link review |
+| Changed                         | Minimum check                                              |
+| ------------------------------- | ---------------------------------------------------------- |
+| A brick                         | `pnpm test -- <brick>`, its stories, `pnpm test:storybook` |
+| Tokens                          | `pnpm build`, the token stories in light and dark          |
+| Public API                      | `pnpm build` and `wp-ds-package-reviewer`                  |
+| Any change to a package         | a changeset (`pnpm changeset`)                             |
+| Docs or agent instructions only | Scoped formatting and link review                          |
 
 Report the commands you actually ran and their results; a check you did not run is reported as not
 run.
