@@ -1,0 +1,15 @@
+model = "gpt-6.1-terra"
+model_reasoning_effort = "high"
+developer_instructions = "Before editing or reviewing files, read the applicable path-scoped rules in .codex/rules/; their YAML paths identify the scope. Read rules without paths for every task. Follow AGENTS.md and the repository quality gates. Codex hooks are guardrails, not a complete enforcement boundary; shell edits and other tools may bypass patch hooks. Never read secrets."
+
+[mcp_servers.angular]
+command = "node"
+args = ["-e", "let p=process.cwd(),f=require('fs'),x=require('path');while(!f.existsSync(x.join(p,'.codex/scripts/angular-mcp.mjs'))){let q=x.dirname(p);if(q===p){console.error('Angular MCP launcher not found');process.exit(1)}p=q}let c=require('child_process').spawn(process.execPath,[x.join(p,'.codex/scripts/angular-mcp.mjs')],{stdio:'inherit'});c.on('error',e=>{console.error(e.message);process.exitCode=1});c.on('exit',(n,s)=>{process.exitCode=n??1});for(let s of ['SIGINT','SIGTERM'])process.on(s,()=>c.kill(s))"]
+
+[mcp_servers.playwright]
+command = "npx"
+args = ["-y", "@playwright/mcp"]
+
+[mcp_servers.context7]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp"]

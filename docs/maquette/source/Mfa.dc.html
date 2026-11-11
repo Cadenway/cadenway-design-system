@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Vérification en deux étapes — Waypoint</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="styles/app.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&amp;family=Geist+Mono:wght@400..600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div data-theme="{{theme}}" class="min-h-screen flex flex-col bg-canvas font-sans text-sm text-foreground antialiased">
+  <header class="flex h-14 items-center justify-between gap-4 px-4 sm:px-6">
+    <a href="Main.dc.html" aria-label="Waypoint, page de connexion" class="flex items-center gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas">
+      <svg class="size-6 text-primary" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.4c-3.5-3.3-7-7-7-11.2a7 7 0 0 1 14 0c0 1.8-.6 3.5-1.6 5.1" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="12" cy="10.2" r="3" fill="currentColor"></circle></svg>
+      <span class="text-base font-bold tracking-[-0.035em]">Waypoint</span>
+    </a>
+    <button type="button" onClick="{{toggleTheme}}" aria-label="{{themeLabel}}" class="relative isolate inline-flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-lg text-muted-foreground transition-all hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas whitespace-nowrap">
+      <span class="ng-icon phosphorMoonBold dark:hidden" aria-hidden="true"></span>
+      <span class="ng-icon phosphorSunBold hidden dark:inline-block" aria-hidden="true"></span>
+    </button>
+  </header>
+
+  <main class="flex flex-1 justify-center px-4 py-6 sm:items-center sm:py-10">
+    <div class="flex w-full max-w-[420px] flex-col gap-5">
+      <div class="flex flex-col gap-6 rounded-xl border border-border bg-card p-6 sm:p-8">
+        <div class="flex flex-col gap-3">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex size-10 items-center justify-center rounded-lg bg-muted text-muted-foreground"><span class="ng-icon phosphorShieldCheckBold size-5" aria-hidden="true"></span></div>
+            <div class="flex min-w-0 items-center gap-2 rounded-full border border-border py-0.5 pr-2.5 pl-0.5">
+              <span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-secondary text-[10px] font-semibold leading-none text-secondary-foreground" aria-hidden="true">CM</span>
+              <span class="truncate text-xs text-muted-foreground">camille.martin@ateliernord.fr</span>
+            </div>
+          </div>
+          <div class="flex flex-col gap-1">
+            <h1 class="text-2xl font-semibold tracking-tight">Vérification en deux étapes</h1>
+            <p class="text-sm text-muted-foreground">{{description}}</p>
+          </div>
+        </div>
+
+        <div role="tablist" aria-label="Méthode de vérification" class="grid h-8 grid-cols-3 items-stretch rounded-lg bg-muted p-0.5 dark:border dark:border-border dark:bg-canvas">
+          <sc-for list="{{methods}}" as="m" hint-placeholder-count="3">
+            <button type="button" role="tab" id="{{m.tabId}}" aria-selected="{{m.active}}" aria-controls="mfa-panel" tabindex="{{m.tab}}" data-state="{{m.state}}" onClick="{{m.pick}}" onKeyDown="{{m.key}}" class="inline-flex items-center justify-center gap-1.5 rounded-md border border-transparent px-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-background/50 hover:text-foreground data-[state=active]:border-border data-[state=active]:bg-background data-[state=active]:text-foreground dark:data-[state=active]:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring whitespace-nowrap">
+              <span class="ng-icon {{m.icon}} size-3.5 shrink-0 {{m.iconTone}}" aria-hidden="true"></span>{{m.label}}
+            </button>
+          </sc-for>
+        </div>
+
+        <div id="mfa-panel" role="tabpanel" aria-labelledby="{{activeTabId}}">
+        <sc-if value="{{isApp}}" hint-placeholder-val="{{ true }}">
+          <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-2">
+              <label for="otp-0" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Code de l'application</label>
+              <div class="flex w-full items-center gap-2" data-otp="app" onPaste="{{paste}}">
+                <div class="flex min-w-0 flex-1 items-center">
+                  <sc-for list="{{slotsA}}" as="slot" hint-placeholder-count="3">
+                    <input id="{{slot.id}}" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="1" aria-label="{{slot.label}}" onInput="{{slot.input}}" onKeyDown="{{slot.key}}" class="h-10 min-w-0 flex-1 border-y border-r border-input bg-transparent text-center text-base font-medium tabular-nums outline-none transition-[color,box-shadow] first:rounded-l-lg first:border-l last:rounded-r-lg focus:relative focus:z-10 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background">
+                  </sc-for>
+                </div>
+                <span role="separator" class="flex items-center text-muted-foreground"><span class="ng-icon phosphorMinusBold size-4" aria-hidden="true"></span></span>
+                <div class="flex min-w-0 flex-1 items-center">
+                  <sc-for list="{{slotsB}}" as="slot" hint-placeholder-count="3">
+                    <input id="{{slot.id}}" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="1" aria-label="{{slot.label}}" onInput="{{slot.input}}" onKeyDown="{{slot.key}}" class="h-10 min-w-0 flex-1 border-y border-r border-input bg-transparent text-center text-base font-medium tabular-nums outline-none transition-[color,box-shadow] first:rounded-l-lg first:border-l last:rounded-r-lg focus:relative focus:z-10 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background">
+                  </sc-for>
+                </div>
+              </div>
+              <p class="text-xs text-muted-foreground">Le code change toutes les 30 secondes. Google Authenticator, 1Password, Aegis ou Bitwarden conviennent.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" role="checkbox" id="mfa-trust" aria-checked="{{trust}}" data-state="{{trustState}}" onClick="{{toggleTrust}}" class="grid size-4 shrink-0 place-content-center rounded-[4px] border border-line-control transition-all data-[state=checked]:border-transparent data-[state=checked]:bg-foreground data-[state=checked]:text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">
+                <sc-if value="{{trust}}" hint-placeholder-val="{{ false }}"><span class="ng-icon phosphorCheckBold size-3" aria-hidden="true"></span></sc-if>
+              </button>
+              <label for="mfa-trust" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Faire confiance à cet appareil pendant 30 jours</label>
+            </div>
+            <a href="Organisations.dc.html" aria-disabled="{{appIncomplete}}" onClick="{{guardApp}}" class="relative isolate inline-flex h-9 w-full items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-lg bg-foreground px-4 text-sm font-medium text-background transition-all hover:bg-foreground/90 aria-disabled:pointer-events-none aria-disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Vérifier ({{filledLabel}})</a>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{isKey}}" hint-placeholder-val="{{ false }}">
+          <div class="flex flex-col gap-4">
+            <div class="flex flex-col items-center gap-3 rounded-lg bg-muted px-4 py-6 text-center">
+              <sc-if value="{{keyIdle}}" hint-placeholder-val="{{ true }}">
+                <span class="ng-icon phosphorFingerprintBold size-8 text-muted-foreground" aria-hidden="true"></span>
+                <p class="text-sm text-muted-foreground">2 clés enregistrées : YubiKey 5C NFC, Touch ID (MacBook Air).</p>
+              </sc-if>
+              <sc-if value="{{keyWaiting}}" hint-placeholder-val="{{ false }}">
+                <svg class="size-8 animate-spinner text-foreground motion-reduce:animate-none" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5" class="opacity-20"></circle><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" pathLength="100" class="animate-spinner-arc"></circle></svg>
+                <p class="text-sm font-medium" aria-live="polite">Touchez votre clé ou validez avec la biométrie…</p>
+              </sc-if>
+              <sc-if value="{{keyOk}}" hint-placeholder-val="{{ false }}">
+                <span class="ng-icon phosphorCheckCircleFill size-8 text-jade" aria-hidden="true"></span>
+                <p class="text-sm font-medium" aria-live="polite">Clé reconnue : YubiKey 5C NFC</p>
+              </sc-if>
+            </div>
+            <sc-if value="{{keyNotOk}}" hint-placeholder-val="{{ true }}">
+              <button type="button" onClick="{{useKey}}" aria-busy="{{keyWaiting}}" class="relative isolate inline-flex h-9 w-full items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-lg bg-foreground px-4 text-sm font-medium text-background transition-all hover:bg-foreground/90 aria-busy:cursor-progress aria-busy:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"><span class="ng-icon phosphorKeyBold" aria-hidden="true"></span>Utiliser ma clé de sécurité</button>
+            </sc-if>
+            <sc-if value="{{keyOk}}" hint-placeholder-val="{{ false }}">
+              <a href="Organisations.dc.html" class="relative isolate inline-flex h-9 w-full items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-lg bg-foreground px-4 text-sm font-medium text-background transition-all hover:bg-foreground/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Continuer</a>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{isBackup}}" hint-placeholder-val="{{ false }}">
+          <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-2">
+              <label for="mfa-backup" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Code de secours</label>
+              <input id="mfa-backup" type="text" autocomplete="one-time-code" maxlength="9" placeholder="XXXX-XXXX" onInput="{{onBackup}}" class="h-9 w-full min-w-0 rounded-lg border border-input bg-transparent px-3 py-1 font-mono text-sm tracking-[0.2em] uppercase outline-none transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20">
+              <p class="text-xs text-muted-foreground">Il vous reste 7 codes inutilisés. Pensez à en générer de nouveaux depuis votre profil.</p>
+            </div>
+            <a href="Organisations.dc.html" aria-disabled="{{backupIncomplete}}" onClick="{{guardBackup}}" class="relative isolate inline-flex h-9 w-full items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-lg bg-foreground px-4 text-sm font-medium text-background transition-all hover:bg-foreground/90 aria-disabled:pointer-events-none aria-disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Vérifier le code</a>
+          </div>
+        </sc-if>
+
+        </div>
+
+        <div class="flex flex-col gap-1 border-t border-border pt-4 text-xs text-muted-foreground">
+          <p>Plus accès à aucune méthode ? Demandez une réinitialisation à l'administrateur de votre organisation.</p>
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <a href="Legal.dc.html" onClick="{{goHelp}}" class="w-fit rounded-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Contacter l'administrateur</a>
+            <a href="Main.dc.html" class="w-fit rounded-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Utiliser un autre compte</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 px-6 py-4 text-xs text-muted-foreground">
+    <span>Espace de travail Atelier Nord</span>
+    <a href="Legal.dc.html" onClick="{{goPrivacy}}" class="rounded-sm hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas">Confidentialité</a>
+    <a href="Legal.dc.html" onClick="{{goTerms}}" class="rounded-sm hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas">Conditions d'utilisation</a>
+    <a href="Legal.dc.html" onClick="{{goHelp}}" class="rounded-sm hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas">Aide</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["mémorisé","clair","sombre"],"default":"mémorisé"},"methode":{"editor":"enum","options":["application","clé de sécurité","code de secours"],"default":"application"},"$preview":{"width":1280,"height":820}}'>
+// Lien profond entre écrans (protocole commun « waypoint-nav ») ; from = écran d'origine, pour le bouton Retour.
+const writeNav = (to, section) => {
+  try { window.localStorage.setItem('waypoint-nav', JSON.stringify({ to, section, at: Date.now(), from: 'Mfa' })); } catch (e) {}
+};
+class Component extends DCLogic {
+  componentDidMount() {
+    try {
+      const t = window.localStorage.getItem('waypoint-theme');
+      if (t === 'dark' || t === 'light') this.setState({ stored: t });
+    } catch (e) {}
+    this.onStorage = (e) => {
+      if (e.key === 'waypoint-theme' && (e.newValue === 'dark' || e.newValue === 'light')) this.setState({ stored: e.newValue, theme: null });
+    };
+    window.addEventListener('storage', this.onStorage);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('storage', this.onStorage);
+    clearTimeout(this.keyTimer);
+  }
+  componentDidUpdate(prev) {
+    if (prev.theme !== this.props.theme) this.setState({ theme: null });
+    if (prev.methode !== this.props.methode) this.setState({ method: null });
+  }
+  countFilled(root) {
+    const inputs = root ? Array.from(root.querySelectorAll('input')) : [];
+    return inputs.filter((i) => i.value).length;
+  }
+  themeTransition(e, apply) {
+    let reduce = false;
+    try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (err) {}
+    if (reduce || typeof document.startViewTransition !== 'function') { apply(() => {}); return; }
+    const root = document.documentElement;
+    const el = e && e.currentTarget && e.currentTarget.getBoundingClientRect ? e.currentTarget : null;
+    const r = el ? el.getBoundingClientRect() : null;
+    root.style.setProperty('--wp-vt-origin', r ? Math.round(r.left + r.width / 2) + 'px ' + Math.round(r.top + r.height / 2) + 'px' : '50% 100%');
+    root.dataset.wpVt = 'circle-blur';
+    const vt = document.startViewTransition(() => new Promise((resolve) => { apply(resolve); setTimeout(resolve, 80); }));
+    const end = () => { delete root.dataset.wpVt; };
+    vt.finished.then(end, end);
+    vt.ready.catch(() => {});
+  }
+  renderVals() {
+    const s = this.state || {};
+    const pref = this.props.theme ?? 'mémorisé';
+    const fixed = pref === 'sombre' ? 'dark' : pref === 'clair' ? 'light' : null;
+    const theme = s.theme || fixed || s.stored || 'light';
+    const map = { 'application': 'app', 'clé de sécurité': 'key', 'code de secours': 'backup' };
+    const method = s.method || map[this.props.methode ?? 'application'] || 'app';
+    const filled = s.filled || 0;
+    const key = s.key || 'idle';
+    const descriptions = {
+      app: "Saisissez le code à 6 chiffres affiché par votre application d'authentification.",
+      key: 'Utilisez une clé de sécurité ou la biométrie enregistrée sur ce compte (WebAuthn).',
+      backup: 'Saisissez un de vos codes de secours. Chaque code ne sert qu’une fois.',
+    };
+    const defs = [
+      { id: 'app', label: 'Application', bold: 'phosphorDeviceMobileBold', fill: 'phosphorDeviceMobileFill' },
+      { id: 'key', label: 'Clé de sécurité', bold: 'phosphorKeyBold', fill: 'phosphorKeyFill' },
+      { id: 'backup', label: 'Code de secours', bold: 'phosphorLifebuoyBold', fill: 'phosphorLifebuoyFill' },
+    ];
+    const slot = (i) => ({
+      id: 'otp-' + i,
+      label: 'Chiffre ' + (i + 1) + ' sur 6',
+      input: (e) => {
+        const el = e.target;
+        el.value = el.value.replace(/\D/g, '').slice(-1);
+        const root = el.closest('[data-otp]');
+        const all = Array.from(root.querySelectorAll('input'));
+        if (el.value && all[i + 1]) all[i + 1].focus();
+        this.setState({ filled: this.countFilled(root) });
+      },
+      key: (e) => {
+        if (e.key === 'Backspace' && !e.target.value) {
+          const all = Array.from(e.target.closest('[data-otp]').querySelectorAll('input'));
+          if (all[i - 1]) all[i - 1].focus();
+        }
+      },
+    });
+    return {
+      theme,
+      themeLabel: theme === 'dark' ? 'Passer au thème clair' : 'Passer au thème sombre',
+      toggleTheme: (e) => {
+        const next = theme === 'dark' ? 'light' : 'dark';
+        this.themeTransition(e, (done) => this.setState({ theme: next }, done));
+        try { window.localStorage.setItem('waypoint-theme', next); } catch (err) {}
+      },
+      goPrivacy: () => writeNav('Legal', 'privacy'),
+      goTerms: () => writeNav('Legal', 'terms'),
+      goHelp: () => writeNav('Legal', 'help'),
+      description: descriptions[method],
+      methods: defs.map((d, i) => ({
+        label: d.label,
+        tabId: 'mfa-tab-' + d.id,
+        active: d.id === method,
+        state: d.id === method ? 'active' : 'inactive',
+        tab: d.id === method ? 0 : -1,
+        icon: d.id === method ? d.fill : d.bold,
+        iconTone: d.id === method ? 'text-primary' : '',
+        pick: () => this.setState({ method: d.id }),
+        key: (e) => {
+          const last = defs.length - 1;
+          const to = e.key === 'ArrowRight' ? (i === last ? 0 : i + 1)
+            : e.key === 'ArrowLeft' ? (i === 0 ? last : i - 1)
+            : e.key === 'Home' ? 0 : e.key === 'End' ? last : -1;
+          if (to < 0) return;
+          e.preventDefault();
+          this.setState({ method: defs[to].id });
+          setTimeout(() => { const el = document.getElementById('mfa-tab-' + defs[to].id); if (el) el.focus(); }, 0);
+        },
+      })),
+      activeTabId: 'mfa-tab-' + method,
+      isApp: method === 'app',
+      isKey: method === 'key',
+      isBackup: method === 'backup',
+      slotsA: [0, 1, 2].map(slot),
+      slotsB: [3, 4, 5].map(slot),
+      paste: (e) => {
+        const digits = (e.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 6);
+        if (!digits) return;
+        e.preventDefault();
+        const root = e.currentTarget;
+        const all = Array.from(root.querySelectorAll('input'));
+        all.forEach((inp, j) => { inp.value = digits[j] || ''; });
+        (all[Math.min(digits.length, 5)] || all[0]).focus();
+        this.setState({ filled: this.countFilled(root) });
+      },
+      filledLabel: filled + ' / 6',
+      appIncomplete: filled < 6,
+      trust: !!s.trust,
+      trustState: s.trust ? 'checked' : 'unchecked',
+      toggleTrust: () => this.setState({ trust: !s.trust }),
+      keyIdle: key === 'idle',
+      keyWaiting: key === 'waiting',
+      keyOk: key === 'ok',
+      keyNotOk: key !== 'ok',
+      useKey: () => {
+        this.setState({ key: 'waiting' });
+        clearTimeout(this.keyTimer);
+        this.keyTimer = setTimeout(() => this.setState({ key: 'ok' }), 2200);
+      },
+      onBackup: (e) => {
+        const raw = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
+        e.target.value = raw.length > 4 ? raw.slice(0, 4) + '-' + raw.slice(4) : raw;
+        this.setState({ backupLen: raw.length });
+      },
+      backupIncomplete: (s.backupLen || 0) < 8,
+      // aria-disabled ne bloque que la souris (pointer-events) : on bloque aussi Entrée au clavier.
+      guardApp: (e) => { if (filled < 6) e.preventDefault(); },
+      guardBackup: (e) => { if ((s.backupLen || 0) < 8) e.preventDefault(); },
+    };
+  }
+}
+</script>
+</body>
+</html>

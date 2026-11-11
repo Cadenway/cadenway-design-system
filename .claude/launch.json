@@ -1,0 +1,27 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "storybook",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "storybook"
+      ],
+      "port": 6006
+    },
+    {
+      "name": "maquette",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "4181",
+        "--bind",
+        "127.0.0.1",
+        "--directory",
+        "docs/maquette/source"
+      ],
+      "port": 4181
+    }
+  ]
+}

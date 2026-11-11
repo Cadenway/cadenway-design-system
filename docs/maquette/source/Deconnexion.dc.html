@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Déconnexion — Waypoint</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="styles/app.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&amp;family=Geist+Mono:wght@400..600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div data-theme="{{theme}}" class="min-h-screen flex flex-col bg-canvas font-sans text-sm text-foreground antialiased">
+  <header class="flex h-14 items-center justify-between gap-4 px-4 sm:px-6">
+    <a href="Main.dc.html" aria-label="Waypoint, page de connexion" class="flex items-center gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas">
+      <svg class="size-6 text-primary" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.4c-3.5-3.3-7-7-7-11.2a7 7 0 0 1 14 0c0 1.8-.6 3.5-1.6 5.1" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="12" cy="10.2" r="3" fill="currentColor"></circle></svg>
+      <span class="text-base font-bold tracking-[-0.035em]">Waypoint</span>
+    </a>
+    <button type="button" onClick="{{toggleTheme}}" aria-label="{{themeLabel}}" class="relative isolate inline-flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-lg text-muted-foreground transition-all hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas whitespace-nowrap">
+      <span class="ng-icon phosphorMoonBold dark:hidden" aria-hidden="true"></span>
+      <span class="ng-icon phosphorSunBold hidden dark:inline-block" aria-hidden="true"></span>
+    </button>
+  </header>
+
+  <main class="flex flex-1 justify-center px-4 py-6 sm:items-center sm:py-10">
+    <div class="flex w-full max-w-[400px] flex-col gap-5">
+      <div class="flex flex-col gap-6 rounded-xl border border-border bg-card p-6 sm:p-8">
+        <div class="flex flex-col items-center gap-3 text-center" aria-live="polite">
+          <div class="flex size-10 items-center justify-center rounded-lg bg-muted text-muted-foreground"><span class="ng-icon {{icon}} size-5" aria-hidden="true"></span></div>
+          <div class="flex flex-col gap-1">
+            <h1 class="text-2xl font-semibold tracking-tight">{{title}}</h1>
+            <p class="text-sm text-muted-foreground">{{body}}</p>
+          </div>
+        </div>
+
+        <sc-if value="{{hasAccounts}}" hint-placeholder-val="{{ true }}">
+          <div class="flex flex-col gap-2">
+            <p class="text-xs font-medium text-muted-foreground">Comptes mémorisés sur cet appareil</p>
+            <ul class="flex flex-col overflow-hidden rounded-lg border border-border">
+              <sc-for list="{{accounts}}" as="acc" hint-placeholder-count="2">
+                <li class="flex items-center gap-3 border-b border-border px-3 py-2.5 last:border-b-0">
+                  <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-semibold leading-none text-secondary-foreground" aria-hidden="true">{{acc.initials}}</span>
+                  <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span class="truncate font-medium leading-5">{{acc.name}}</span>
+                    <span class="truncate text-xs text-muted-foreground">{{acc.email}}</span>
+                  </div>
+                  <a href="Main.dc.html" onClick="{{acc.signIn}}" aria-label="{{acc.signInLabel}}" class="relative isolate inline-flex h-7 shrink-0 items-center justify-center overflow-hidden whitespace-nowrap rounded-md border border-input px-2.5 text-sm font-medium transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Se connecter</a>
+                  <button type="button" onClick="{{acc.remove}}" aria-label="{{acc.removeLabel}}" class="relative isolate inline-flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-md text-muted-foreground transition-all hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background whitespace-nowrap"><span class="ng-icon phosphorXBold" aria-hidden="true"></span></button>
+                </li>
+              </sc-for>
+            </ul>
+          </div>
+        </sc-if>
+        <sc-if value="{{hasForgotten}}" hint-placeholder-val="{{ false }}">
+          <div role="status" class="-mt-3 flex items-center justify-between gap-2 text-xs text-muted-foreground">
+            <span class="min-w-0 truncate">{{forgottenLabel}}</span>
+            <button type="button" onClick="{{undoForget}}" class="relative isolate inline-flex h-6 shrink-0 items-center justify-center gap-1 overflow-hidden whitespace-nowrap rounded-md px-1.5 text-xs font-medium text-foreground transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"><span class="ng-icon phosphorArrowCounterClockwiseBold size-3.5" aria-hidden="true"></span>Annuler</button>
+          </div>
+        </sc-if>
+
+        <div class="flex flex-col gap-2">
+          <a href="Main.dc.html" onClick="{{reconnect}}" class="relative isolate inline-flex h-9 w-full items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-lg bg-foreground px-4 text-sm font-medium text-background transition-all hover:bg-foreground/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Se reconnecter</a>
+          <a href="Main.dc.html" class="relative isolate inline-flex h-9 w-full items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-lg px-3 text-sm font-medium transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"><span class="ng-icon phosphorUserSwitchBold" aria-hidden="true"></span>Utiliser un autre compte</a>
+        </div>
+      </div>
+      <sc-if value="{{isExpired}}" hint-placeholder-val="{{ false }}">
+        <p class="flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground"><span class="ng-icon phosphorFloppyDiskBold size-3.5" aria-hidden="true"></span>Votre brouillon de commentaire sur WAY-482 a été conservé.</p>
+      </sc-if>
+    </div>
+  </main>
+
+  <footer class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 px-6 py-4 text-xs text-muted-foreground">
+    <span>Espace de travail Atelier Nord</span>
+    <a href="Legal.dc.html" onClick="{{goPrivacy}}" class="rounded-sm hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas">Confidentialité</a>
+    <a href="Legal.dc.html" onClick="{{goTerms}}" class="rounded-sm hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas">Conditions d'utilisation</a>
+    <a href="Legal.dc.html" onClick="{{goHelp}}" class="rounded-sm hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas">Aide</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["mémorisé","clair","sombre"],"default":"mémorisé"},"motif":{"editor":"enum","options":["volontaire","session expirée","tous les appareils"],"default":"volontaire"},"$preview":{"width":1280,"height":820}}'>
+// Lien profond entre écrans (protocole commun « waypoint-nav ») ; from = écran d'origine, pour le bouton Retour.
+const writeNav = (to, section) => {
+  try { window.localStorage.setItem('waypoint-nav', JSON.stringify({ to, section, at: Date.now(), from: 'Deconnexion' })); } catch (e) {}
+};
+class Component extends DCLogic {
+  componentDidMount() {
+    try {
+      const t = window.localStorage.getItem('waypoint-theme');
+      if (t === 'dark' || t === 'light') this.setState({ stored: t });
+    } catch (e) {}
+    this.onStorage = (e) => {
+      if (e.key === 'waypoint-theme' && (e.newValue === 'dark' || e.newValue === 'light')) this.setState({ stored: e.newValue, theme: null });
+    };
+    window.addEventListener('storage', this.onStorage);
+  }
+  componentWillUnmount() { window.removeEventListener('storage', this.onStorage); }
+  componentDidUpdate(prev) {
+    if (prev.theme !== this.props.theme) this.setState({ theme: null });
+  }
+  themeTransition(e, apply) {
+    let reduce = false;
+    try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (err) {}
+    if (reduce || typeof document.startViewTransition !== 'function') { apply(() => {}); return; }
+    const root = document.documentElement;
+    const el = e && e.currentTarget && e.currentTarget.getBoundingClientRect ? e.currentTarget : null;
+    const r = el ? el.getBoundingClientRect() : null;
+    root.style.setProperty('--wp-vt-origin', r ? Math.round(r.left + r.width / 2) + 'px ' + Math.round(r.top + r.height / 2) + 'px' : '50% 100%');
+    root.dataset.wpVt = 'circle-blur';
+    const vt = document.startViewTransition(() => new Promise((resolve) => { apply(resolve); setTimeout(resolve, 80); }));
+    const end = () => { delete root.dataset.wpVt; };
+    vt.finished.then(end, end);
+    vt.ready.catch(() => {});
+  }
+  renderVals() {
+    const s = this.state || {};
+    const pref = this.props.theme ?? 'mémorisé';
+    const fixed = pref === 'sombre' ? 'dark' : pref === 'clair' ? 'light' : null;
+    const theme = s.theme || fixed || s.stored || 'light';
+    const motif = this.props.motif ?? 'volontaire';
+    const copy = {
+      'volontaire': {
+        icon: 'phosphorSignOutBold',
+        title: 'Vous êtes déconnecté',
+        body: 'À bientôt, Camille. Votre session est fermée sur ce navigateur ; vos autres appareils restent connectés.',
+      },
+      'session expirée': {
+        icon: 'phosphorClockCountdownBold',
+        title: 'Session expirée',
+        body: 'Atelier Nord ferme les sessions après 12 heures d’inactivité. Reconnectez-vous pour reprendre où vous en étiez.',
+      },
+      'tous les appareils': {
+        icon: 'phosphorShieldCheckBold',
+        title: 'Déconnecté de tous les appareils',
+        body: 'Les 4 sessions ouvertes sur votre compte ont été fermées et les jetons d’API conservés. Reconnectez-vous sur cet appareil.',
+      },
+    }[motif] || {};
+    const removed = s.removed || [];
+    const known = [
+      { id: 'cm', initials: 'CM', name: 'Camille Martin', email: 'camille.martin@ateliernord.fr' },
+      { id: 'cl', initials: 'CL', name: 'Camille Martin (Lumen)', email: 'c.martin@lumen.coop' },
+    ];
+    const all = known.filter((a) => !removed.includes(a.id));
+    const lastId = removed[removed.length - 1];
+    const last = known.find((a) => a.id === lastId);
+    // Lien profond vers la connexion : l'adresse du compte choisi y est préremplie.
+    const signInAs = (email) => {
+      try { window.localStorage.setItem('waypoint-nav', JSON.stringify({ to: 'Main', section: 'login', email, at: Date.now(), from: 'Deconnexion' })); } catch (e) {}
+    };
+    return {
+      theme,
+      themeLabel: theme === 'dark' ? 'Passer au thème clair' : 'Passer au thème sombre',
+      toggleTheme: (e) => {
+        const next = theme === 'dark' ? 'light' : 'dark';
+        this.themeTransition(e, (done) => this.setState({ theme: next }, done));
+        try { window.localStorage.setItem('waypoint-theme', next); } catch (err) {}
+      },
+      goPrivacy: () => writeNav('Legal', 'privacy'),
+      goTerms: () => writeNav('Legal', 'terms'),
+      goHelp: () => writeNav('Legal', 'help'),
+      icon: copy.icon,
+      title: copy.title,
+      body: copy.body,
+      isExpired: motif === 'session expirée',
+      hasAccounts: all.length > 0,
+      accounts: all.map((a) => ({
+        ...a,
+        removeLabel: 'Oublier ' + a.email + ' sur cet appareil',
+        remove: () => this.setState({ removed: [...removed, a.id] }),
+        signInLabel: 'Se connecter avec ' + a.email,
+        signIn: () => signInAs(a.email),
+      })),
+      hasForgotten: !!last,
+      forgottenLabel: last ? last.email + ' n’est plus mémorisé sur cet appareil.' : '',
+      undoForget: () => this.setState({ removed: removed.slice(0, -1) }),
+      reconnect: () => { if (all[0]) signInAs(all[0].email); },
+    };
+  }
+}
+</script>
+</body>
+</html>

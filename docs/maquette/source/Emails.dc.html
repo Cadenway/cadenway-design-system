@@ -1,0 +1,719 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Modèles d'e-mails — Waypoint</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="styles/app.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&amp;family=Geist+Mono:wght@400..600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div data-theme="{{theme}}" class="relative flex h-screen min-h-0 flex-col bg-canvas font-sans text-sm text-foreground antialiased">
+  <header class="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-border px-4 sm:px-6">
+    <div class="flex min-w-0 items-center gap-3">
+      <a href="Main.dc.html" aria-label="Waypoint, page de connexion" class="flex shrink-0 items-center gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas">
+        <svg class="size-6 text-primary" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.4c-3.5-3.3-7-7-7-11.2a7 7 0 0 1 14 0c0 1.8-.6 3.5-1.6 5.1" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="12" cy="10.2" r="3" fill="currentColor"></circle></svg>
+        <span class="text-base font-bold tracking-[-0.035em]">Waypoint</span>
+      </a>
+      <span class="h-5 w-px shrink-0 bg-border" aria-hidden="true"></span>
+      <h1 class="truncate text-sm font-semibold whitespace-nowrap">Modèles d'e-mails</h1>
+      <span class="shrink-0 rounded-md border border-border px-1.5 text-xs leading-5 font-medium text-muted-foreground tabular-nums">{{total}}</span>
+    </div>
+    <button type="button" onClick="{{toggleTheme}}" aria-label="{{themeLabel}}" class="relative isolate inline-flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-lg text-muted-foreground transition-all hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas whitespace-nowrap">
+      <span class="ng-icon phosphorMoonBold dark:hidden" aria-hidden="true"></span>
+      <span class="ng-icon phosphorSunBold hidden dark:inline-block" aria-hidden="true"></span>
+    </button>
+  </header>
+
+  <div class="flex min-h-0 flex-1">
+    <aside class="flex w-64 shrink-0 flex-col border-r border-border lg:w-72" aria-label="Modèles">
+      <div class="p-3">
+        <div class="flex h-8 items-center gap-2 rounded-lg border border-input bg-background px-2.5 focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/20">
+          <span class="ng-icon phosphorMagnifyingGlassBold size-4 shrink-0 text-muted-foreground" aria-hidden="true"></span>
+          <input type="text" value="{{query}}" onInput="{{onQuery}}" onKeyDown="{{queryKey}}" placeholder="Rechercher un modèle" aria-label="Rechercher un modèle" class="h-full min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground">
+          <sc-if value="{{hasQuery}}" hint-placeholder-val="{{ false }}">
+            <button type="button" onClick="{{clearQuery}}" aria-label="Effacer la recherche" class="inline-flex size-5 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><span class="ng-icon phosphorXBold size-3" aria-hidden="true"></span></button>
+          </sc-if>
+        </div>
+      </div>
+      <nav class="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-3 pb-3 [scrollbar-gutter:stable]">
+        <sc-for list="{{groups}}" as="g" hint-placeholder-count="3">
+          <div class="flex flex-col gap-0.5">
+            <p class="flex items-center justify-between px-2 pb-1 text-xs font-medium whitespace-nowrap text-muted-foreground"><span>{{g.label}}</span><span class="tabular-nums">{{g.count}}</span></p>
+            <sc-for list="{{g.items}}" as="it" hint-placeholder-count="4">
+              <button type="button" id="{{it.id}}" onClick="{{it.pick}}" onKeyDown="{{it.key}}" aria-current="{{it.current}}" class="flex w-full items-start gap-2.5 rounded-lg px-2 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring {{it.cls}}">
+                <span class="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md border border-border bg-background {{it.iconTone}}" aria-hidden="true"><span class="ng-icon {{it.icon}} size-3.5"></span></span>
+                <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                  <span class="truncate text-sm leading-5 {{it.nameCls}}">{{it.name}}</span>
+                  <span class="truncate text-xs text-muted-foreground">{{it.subject}}</span>
+                </span>
+              </button>
+            </sc-for>
+          </div>
+        </sc-for>
+        <sc-if value="{{noResult}}" hint-placeholder-val="{{ false }}">
+          <div class="flex flex-col items-center gap-2 px-4 py-10 text-center">
+            <span class="ng-icon phosphorEnvelopeOpenBold size-6 text-muted-foreground" aria-hidden="true"></span>
+            <p class="text-sm font-medium">Aucun modèle trouvé</p>
+            <p class="text-xs text-muted-foreground">Essayez « code », « invitation » ou « tâche ».</p>
+          </div>
+        </sc-if>
+      </nav>
+    </aside>
+
+    <main class="flex min-w-0 flex-1 flex-col">
+      <div class="flex shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-border px-6 py-3">
+        <div class="flex min-w-0 items-center gap-2">
+          <h2 class="truncate text-base font-semibold whitespace-nowrap">{{mail.name}}</h2>
+          <span class="inline-flex shrink-0 items-center gap-1 rounded-md border border-border px-1.5 text-xs leading-5 whitespace-nowrap text-muted-foreground"><span class="ng-icon {{mail.kindIcon}} size-3" aria-hidden="true"></span>{{mail.kindLabel}}</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <div role="group" aria-label="Affichage" class="inline-flex h-8 items-center gap-0.5 rounded-lg border border-border bg-background p-0.5">
+            <sc-for list="{{viewOpts}}" as="o" hint-placeholder-count="2">
+              <button type="button" onClick="{{o.pick}}" aria-pressed="{{o.on}}" class="inline-flex h-6 items-center gap-1.5 rounded-md px-2 text-xs font-medium whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring {{o.cls}}"><span class="ng-icon {{o.icon}} size-3.5" aria-hidden="true"></span>{{o.label}}</button>
+            </sc-for>
+          </div>
+          <div role="group" aria-label="Largeur de l'aperçu" class="inline-flex h-8 items-center gap-0.5 rounded-lg border border-border bg-background p-0.5">
+            <sc-for list="{{deviceOpts}}" as="o" hint-placeholder-count="2">
+              <button type="button" onClick="{{o.pick}}" aria-pressed="{{o.on}}" aria-label="{{o.label}}" title="{{o.label}}" class="inline-flex h-6 w-7 items-center justify-center rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring {{o.cls}}"><span class="ng-icon {{o.icon}} size-3.5" aria-hidden="true"></span></button>
+            </sc-for>
+          </div>
+          <div role="group" aria-label="Thème de l'e-mail" class="inline-flex h-8 items-center gap-0.5 rounded-lg border border-border bg-background p-0.5">
+            <sc-for list="{{mailThemeOpts}}" as="o" hint-placeholder-count="2">
+              <button type="button" onClick="{{o.pick}}" aria-pressed="{{o.on}}" aria-label="{{o.label}}" title="{{o.label}}" class="inline-flex h-6 w-7 items-center justify-center rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring {{o.cls}}"><span class="ng-icon {{o.icon}} size-3.5" aria-hidden="true"></span></button>
+            </sc-for>
+          </div>
+          <button type="button" onClick="{{toggleVars}}" aria-pressed="{{varsOn}}" class="inline-flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring {{varsCls}}"><span class="ng-icon phosphorBracketsCurlyBold size-3.5" aria-hidden="true"></span>Variables</button>
+          <span class="h-5 w-px bg-border" aria-hidden="true"></span>
+          <button type="button" onClick="{{copyText}}" class="inline-flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs font-medium whitespace-nowrap text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><span class="ng-icon phosphorCopyBold size-3.5" aria-hidden="true"></span>Copier le texte</button>
+          <button type="button" onClick="{{sendTest}}" class="inline-flex h-8 items-center gap-1.5 rounded-lg bg-foreground px-3 text-xs font-medium whitespace-nowrap text-background transition-colors hover:bg-foreground/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"><span class="ng-icon phosphorPaperPlaneTiltBold size-3.5" aria-hidden="true"></span>Envoyer un test</button>
+        </div>
+      </div>
+
+      <div class="min-h-0 flex-1 overflow-y-auto bg-surface-muted p-6 [scrollbar-gutter:stable]">
+        <article class="mx-auto flex w-full max-w-[760px] flex-col overflow-hidden rounded-xl border border-border bg-background" aria-label="{{mail.articleLabel}}">
+          <div class="flex items-start gap-3 border-b border-border px-6 py-4">
+            <span class="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground" aria-hidden="true"><svg class="size-5" viewBox="0 0 24 24"><path d="M12 21.4c-3.5-3.3-7-7-7-11.2a7 7 0 0 1 14 0c0 1.8-.6 3.5-1.6 5.1" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="12" cy="10.2" r="3" fill="currentColor"></circle></svg></span>
+            <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+              <div class="flex min-w-0 items-baseline gap-2">
+                <span class="shrink-0 font-medium whitespace-nowrap">Waypoint · Atelier Nord</span>
+                <span class="min-w-0 truncate text-xs text-muted-foreground">&lt;{{mail.from}}&gt;</span>
+                <span class="ml-auto shrink-0 text-xs whitespace-nowrap text-muted-foreground tabular-nums">{{mail.time}}</span>
+              </div>
+              <span class="truncate text-xs text-muted-foreground">À : Camille Martin &lt;camille.martin@ateliernord.fr&gt;</span>
+            </div>
+          </div>
+          <div class="flex flex-col gap-1.5 border-b border-border px-6 py-4">
+            <p class="text-lg leading-7 font-semibold">{{mail.subjectShown}}</p>
+            <p class="text-xs leading-5 text-muted-foreground"><span class="font-medium text-foreground">Texte d'aperçu</span> · {{mail.preheaderShown}}</p>
+            <div class="flex flex-wrap gap-x-3 gap-y-1 text-xs whitespace-nowrap text-muted-foreground tabular-nums">
+              <span class="inline-flex items-center gap-1 {{mail.subjectTone}}"><span class="ng-icon {{mail.subjectIcon}} size-3.5" aria-hidden="true"></span>Objet : {{mail.subjectLen}} / 60 caractères</span>
+              <span class="inline-flex items-center gap-1 {{mail.preTone}}"><span class="ng-icon {{mail.preIcon}} size-3.5" aria-hidden="true"></span>Aperçu : {{mail.preLen}} / 90 caractères</span>
+            </div>
+          </div>
+
+          <sc-if value="{{isPreview}}" hint-placeholder-val="{{ true }}">
+            <div class="flex justify-center bg-surface-muted px-4 py-6">
+              <div data-theme="{{mailTheme}}" class="w-full rounded-xl bg-canvas px-5 py-8 text-foreground transition-[max-width] duration-300 ease-snap {{widthCls}}">
+                <div class="mb-6 flex items-center justify-between gap-3 px-1">
+                  <span class="flex items-center gap-2">
+                    <svg class="size-5 text-primary" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.4c-3.5-3.3-7-7-7-11.2a7 7 0 0 1 14 0c0 1.8-.6 3.5-1.6 5.1" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="12" cy="10.2" r="3" fill="currentColor"></circle></svg>
+                    <span class="text-sm font-bold tracking-[-0.035em]">Waypoint</span>
+                  </span>
+                  <span class="text-xs whitespace-nowrap text-muted-foreground">Atelier Nord</span>
+                </div>
+                <div class="flex flex-col gap-5 rounded-xl border border-border bg-card {{cardPad}}">
+                  <sc-for list="{{mail.blocks}}" as="b" hint-placeholder-count="5">
+                    <sc-if value="{{b.isH}}" hint-placeholder-val="{{ false }}">
+                      <h3 class="text-xl leading-7 font-semibold tracking-tight text-balance">{{b.text}}</h3>
+                    </sc-if>
+                    <sc-if value="{{b.isH2}}" hint-placeholder-val="{{ false }}">
+                      <h4 class="-mb-2 text-xs font-semibold tracking-wide whitespace-nowrap text-muted-foreground uppercase">{{b.text}}</h4>
+                    </sc-if>
+                    <sc-if value="{{b.isP}}" hint-placeholder-val="{{ true }}">
+                      <p class="text-sm leading-6 text-pretty text-foreground/85"><sc-for list="{{b.runs}}" as="r" hint-placeholder-count="2"><span class="{{r.cls}}">{{r.text}}</span></sc-for></p>
+                    </sc-if>
+                    <sc-if value="{{b.isBtn}}" hint-placeholder-val="{{ false }}">
+                      <a href="{{b.href}}" onClick="{{b.go}}" class="inline-flex h-10 items-center justify-center gap-2 rounded-lg px-5 text-sm font-medium whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card {{b.btnCls}} {{btnWidth}}">{{b.label}}<span class="ng-icon phosphorArrowRightBold size-4" aria-hidden="true"></span></a>
+                    </sc-if>
+                    <sc-if value="{{b.isLink}}" hint-placeholder-val="{{ false }}">
+                      <p class="text-xs leading-5 text-muted-foreground">Le bouton ne fonctionne pas ? Copiez ce lien dans votre navigateur :<br><span class="font-mono break-all text-foreground">{{b.text}}</span></p>
+                    </sc-if>
+                    <sc-if value="{{b.isCode}}" hint-placeholder-val="{{ false }}">
+                      <div class="flex flex-col items-center gap-1 rounded-lg bg-muted px-4 py-5">
+                        <span class="font-mono text-3xl leading-10 font-semibold tracking-[0.3em] whitespace-nowrap tabular-nums {{b.codeCls}}">{{b.text}}</span>
+                        <span class="text-xs text-muted-foreground">{{b.label}}</span>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{b.isRows}}" hint-placeholder-val="{{ false }}">
+                      <dl class="divide-y divide-border overflow-hidden rounded-lg border border-border">
+                        <sc-for list="{{b.rows}}" as="row" hint-placeholder-count="3">
+                          <div class="flex px-4 py-2.5 text-sm {{rowCls}}">
+                            <dt class="shrink-0 text-muted-foreground {{dtCls}}">{{row.k}}</dt>
+                            <dd class="min-w-0 flex-1 font-medium"><span class="{{row.cls}}">{{row.v}}</span></dd>
+                          </div>
+                        </sc-for>
+                      </dl>
+                    </sc-if>
+                    <sc-if value="{{b.isTask}}" hint-placeholder-val="{{ false }}">
+                      <div class="flex flex-col gap-2.5 rounded-lg border border-border p-4">
+                        <div class="flex items-center gap-2 text-xs whitespace-nowrap text-muted-foreground"><span class="font-mono">{{b.task.id}}</span><span aria-hidden="true">·</span><span class="truncate">{{b.task.list}}</span></div>
+                        <p class="text-base leading-6 font-semibold">{{b.task.title}}</p>
+                        <div class="flex flex-wrap items-center gap-1.5 text-xs whitespace-nowrap">
+                          <span class="inline-flex h-6 items-center gap-1.5 rounded-md border border-border px-2"><span class="size-2 rounded-full {{b.task.dot}}" aria-hidden="true"></span>{{b.task.status}}</span>
+                          <span class="inline-flex h-6 items-center gap-1.5 rounded-md border border-border px-2"><span class="ng-icon phosphorFlagBold size-3.5 {{b.task.prioTone}}" aria-hidden="true"></span>{{b.task.prio}}</span>
+                          <span class="inline-flex h-6 items-center gap-1.5 rounded-md border border-border px-2"><span class="ng-icon phosphorCalendarBlankBold size-3.5 text-muted-foreground" aria-hidden="true"></span>{{b.task.due}}</span>
+                        </div>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{b.isQuote}}" hint-placeholder-val="{{ false }}">
+                      <div class="flex gap-3 rounded-lg bg-muted p-4">
+                        <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground" aria-hidden="true">{{b.who.initials}}</span>
+                        <div class="flex min-w-0 flex-1 flex-col gap-1">
+                          <p class="flex items-baseline gap-2 text-sm whitespace-nowrap"><span class="font-medium">{{b.who.name}}</span><span class="text-xs text-muted-foreground">{{b.who.time}}</span></p>
+                          <p class="text-sm leading-6 text-pretty"><sc-for list="{{b.runs}}" as="r" hint-placeholder-count="2"><span class="{{r.cls}}">{{r.text}}</span></sc-for></p>
+                        </div>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{b.isTasks}}" hint-placeholder-val="{{ false }}">
+                      <ul class="divide-y divide-border overflow-hidden rounded-lg border border-border">
+                        <sc-for list="{{b.items}}" as="t" hint-placeholder-count="3">
+                          <li class="flex items-center gap-3 px-4 py-2.5 text-sm">
+                            <span class="size-2 shrink-0 rounded-full {{t.dot}}" aria-hidden="true"></span>
+                            <span class="w-16 shrink-0 font-mono text-xs whitespace-nowrap text-muted-foreground">{{t.id}}</span>
+                            <span class="min-w-0 flex-1 truncate font-medium">{{t.title}}</span>
+                            <span class="shrink-0 text-xs whitespace-nowrap {{t.metaCls}}">{{t.meta}}</span>
+                          </li>
+                        </sc-for>
+                      </ul>
+                    </sc-if>
+                    <sc-if value="{{b.isMeter}}" hint-placeholder-val="{{ false }}">
+                      <div class="flex flex-col gap-2 rounded-lg border border-border p-4">
+                        <div class="flex items-baseline justify-between gap-3 text-sm whitespace-nowrap"><span class="font-medium">{{b.label}}</span><span class="text-muted-foreground tabular-nums">{{b.text}}</span></div>
+                        <div class="h-2 overflow-hidden rounded-full bg-track" role="meter" aria-label="{{b.label}}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{b.pct}}"><div class="h-full rounded-full bg-balise {{b.fillCls}}"></div></div>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{b.isStats}}" hint-placeholder-val="{{ false }}">
+                      <div class="grid grid-cols-3 gap-2">
+                        <sc-for list="{{b.items}}" as="st" hint-placeholder-count="3">
+                          <div class="flex flex-col items-center gap-0.5 rounded-lg border border-border px-2 py-3 text-center">
+                            <span class="text-2xl leading-8 font-semibold tabular-nums">{{st.v}}</span>
+                            <span class="text-xs leading-4 text-muted-foreground">{{st.l}}</span>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{b.isFeed}}" hint-placeholder-val="{{ false }}">
+                      <ul class="flex flex-col gap-3">
+                        <sc-for list="{{b.items}}" as="f" hint-placeholder-count="3">
+                          <li class="flex items-start gap-2.5 text-sm">
+                            <span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-secondary text-[0.625rem] font-semibold text-secondary-foreground" aria-hidden="true">{{f.initials}}</span>
+                            <span class="min-w-0 flex-1 leading-6"><span class="font-medium">{{f.who}}</span> {{f.text}}</span>
+                            <span class="shrink-0 text-xs leading-6 whitespace-nowrap text-muted-foreground">{{f.time}}</span>
+                          </li>
+                        </sc-for>
+                      </ul>
+                    </sc-if>
+                    <sc-if value="{{b.isInvite}}" hint-placeholder-val="{{ false }}">
+                      <div class="flex flex-col items-center gap-3 py-2 text-center">
+                        <div class="flex items-center gap-3" aria-hidden="true">
+                          <span class="flex size-11 items-center justify-center rounded-full bg-secondary text-sm font-semibold text-secondary-foreground">{{b.inv.initials}}</span>
+                          <span class="ng-icon phosphorArrowRightBold size-4 text-muted-foreground"></span>
+                          <span class="flex size-11 items-center justify-center rounded-lg bg-sidebar-primary text-sm font-semibold text-sidebar-primary-foreground">{{b.inv.orgInitials}}</span>
+                        </div>
+                        <div class="flex flex-col gap-0.5">
+                          <p class="text-xl leading-7 font-semibold tracking-tight">{{b.inv.org}}</p>
+                          <p class="text-xs whitespace-nowrap text-muted-foreground">{{b.inv.meta}}</p>
+                        </div>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{b.isNote}}" hint-placeholder-val="{{ false }}">
+                      <p class="flex items-start gap-2 text-xs leading-5 text-pretty text-muted-foreground"><span class="ng-icon {{b.icon}} mt-0.5 size-4 shrink-0 {{b.iconTone}}" aria-hidden="true"></span><span><sc-for list="{{b.runs}}" as="r" hint-placeholder-count="1"><span class="{{r.cls}}">{{r.text}}</span></sc-for></span></p>
+                    </sc-if>
+                    <sc-if value="{{b.isHr}}" hint-placeholder-val="{{ false }}">
+                      <hr class="border-border">
+                    </sc-if>
+                  </sc-for>
+                </div>
+                <footer class="mt-6 flex flex-col items-center gap-2 px-2 text-center text-xs leading-5 text-muted-foreground">
+                  <p class="text-pretty">{{mail.foot}}</p>
+                  <sc-if value="{{mail.prefs}}" hint-placeholder-val="{{ false }}">
+                    <p class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 whitespace-nowrap">
+                      <a href="Compte.dc.html" onClick="{{goNotifs}}" class="rounded-sm font-medium text-foreground underline decoration-border underline-offset-2 hover:decoration-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Gérer mes notifications</a>
+                      <span aria-hidden="true">·</span>
+                      <button type="button" onClick="{{unsubscribe}}" class="rounded-sm font-medium text-foreground underline decoration-border underline-offset-2 hover:decoration-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Ne plus recevoir ce type d'e-mail</button>
+                    </p>
+                  </sc-if>
+                  <p class="text-pretty">Waypoint · 12 rue de la Charité, 69002 Lyon · Vous recevez cet e-mail en tant que membre d’Atelier Nord</p>
+                </footer>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{isText}}" hint-placeholder-val="{{ false }}">
+            <div class="flex justify-center bg-surface-muted px-4 py-6">
+              <pre class="w-full overflow-x-auto rounded-xl border border-border bg-card px-6 py-5 font-mono text-xs leading-5 whitespace-pre-wrap text-foreground {{widthCls}}">{{plain}}</pre>
+            </div>
+          </sc-if>
+        </article>
+      </div>
+    </main>
+  </div>
+
+  <sc-if value="{{hasToast}}" hint-placeholder-val="{{ false }}">
+    <div role="status" class="animate-pop-in motion-reduce:animate-none absolute bottom-5 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-lg border border-border bg-popover px-3.5 py-2.5 text-sm whitespace-nowrap text-popover-foreground shadow-lg">
+      <span class="ng-icon phosphorCheckCircleFill size-4 text-jade" aria-hidden="true"></span>{{toast}}
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["mémorisé","clair","sombre"],"default":"mémorisé"},"modele":{"editor":"enum","options":["Confirmation de l’adresse","Code de connexion","Réinitialisation du mot de passe","Mot de passe modifié","Nouvelle connexion","Vérification en deux étapes activée","Suppression du compte","Invitation","Stockage presque plein","Tâche assignée","Mention","Rappel d’échéance","Résumé quotidien"],"default":"Confirmation de l’adresse"},"$preview":{"width":1440,"height":900}}'>
+// Lien profond entre écrans (protocole commun « waypoint-nav »).
+const writeNav = (target) => {
+  try { window.localStorage.setItem('waypoint-nav', JSON.stringify({ ...target, at: Date.now(), from: 'Emails' })); } catch (e) {}
+};
+const OB = '{' + '{';
+const CB = '}' + '}';
+const BASE = 'https://app.waypoint.example';
+
+// Contenu : un segment est une chaîne, { b } (gras), { m } (mention) ou { s, v } (valeur d'exemple + variable du modèle).
+const B = (b) => ({ b });
+const V = (s, v) => ({ s, v });
+const P = (...runs) => ({ t: 'p', runs });
+const H = (text) => ({ t: 'h', text });
+const H2 = (text) => ({ t: 'h2', text });
+const BTN = (label, url, href, nav, secondary) => ({ t: 'btn', label, url, href, nav, secondary });
+const LINK = (url) => ({ t: 'link', url });
+const CODE = (code, label) => ({ t: 'code', code, label });
+const ROWS = (rows) => ({ t: 'rows', rows });
+const NOTE = (icon, tone, ...runs) => ({ t: 'note', icon, tone, runs });
+const HR = { t: 'hr' };
+
+const DEVICE = [['Appareil', V('Firefox sur Windows 11', 'request.device')], ['Lieu (approximatif)', V('Lyon, France', 'request.location')], ['Date', V('9 novembre 2026 à 14:07 (heure de Paris)', 'request.date')]];
+
+const MAILS = [
+  {
+    key: 'welcome', group: 'account', name: 'Confirmation de l’adresse', icon: 'phosphorEnvelopeSimpleBold', kind: 'security', time: '14:02',
+    subject: 'Confirmez votre adresse pour activer votre compte',
+    preheader: 'Un clic pour finir votre inscription sur Waypoint. Le lien expire dans 24 heures.',
+    blocks: [
+      H('Bienvenue sur Waypoint'),
+      P('Bonjour ', V('Camille', 'user.first_name'), ', votre compte a été créé dans l’espace de travail ', B(V('Atelier Nord', 'workspace.name')), '. Confirmez votre adresse pour commencer à organiser vos tâches et vos espaces.'),
+      BTN('Confirmer mon adresse', BASE + '/verify?token=8f2c41d0', 'Organisations.dc.html', null),
+      LINK(BASE + '/verify?token=8f2c41d0'),
+      NOTE('phosphorClockBold', '', 'Ce lien expire dans 24 heures. Vous n’avez pas créé de compte ? Ignorez cet e-mail : rien ne sera activé.'),
+    ],
+  },
+  {
+    key: 'otp', group: 'account', name: 'Code de connexion', icon: 'phosphorPasswordBold', kind: 'security', time: '14:07',
+    subject: '482 913 est votre code de connexion Waypoint',
+    preheader: 'Code valable 10 minutes. Ne le communiquez à personne, même à l’assistance.',
+    blocks: [
+      H('Votre code de connexion'),
+      P('Saisissez ce code sur la page de connexion pour accéder à ', B(V('Atelier Nord', 'workspace.name')), '.'),
+      CODE(V('482 913', 'otp.code'), 'Valable 10 minutes, une seule fois'),
+      ROWS(DEVICE),
+      NOTE('phosphorWarningBold', 'text-balise', B('Vous n’avez rien demandé ?'), ' Quelqu’un connaît peut-être votre mot de passe : changez-le depuis votre profil.'),
+      BTN('Ouvrir la page de connexion', BASE + '/login/code', 'Otp.dc.html', null, true),
+    ],
+  },
+  {
+    key: 'reset', group: 'account', name: 'Réinitialisation du mot de passe', icon: 'phosphorLockKeyBold', kind: 'security', time: '14:10',
+    subject: 'Réinitialisez votre mot de passe Waypoint',
+    preheader: 'Lien valable 1 heure. Ignorez cet e-mail si la demande ne vient pas de vous.',
+    blocks: [
+      H('Choisir un nouveau mot de passe'),
+      P('Une réinitialisation a été demandée pour ', B(V('camille.martin@ateliernord.fr', 'user.email')), '. Choisissez un nouveau mot de passe avec le bouton ci-dessous.'),
+      BTN('Choisir un nouveau mot de passe', BASE + '/reset?token=c91e07aa', 'Reinitialisation.dc.html', null),
+      LINK(BASE + '/reset?token=c91e07aa'),
+      ROWS(DEVICE),
+      NOTE('phosphorClockBold', '', 'Le lien expire dans 1 heure. Votre mot de passe actuel reste valable tant que vous n’en choisissez pas un nouveau.'),
+    ],
+  },
+  {
+    key: 'pwdChanged', group: 'account', name: 'Mot de passe modifié', icon: 'phosphorShieldCheckBold', kind: 'security', time: '14:16',
+    subject: 'Votre mot de passe a été modifié',
+    preheader: 'Si ce n’était pas vous, sécurisez votre compte maintenant.',
+    blocks: [
+      H('Mot de passe modifié'),
+      P('Le mot de passe de votre compte vient d’être modifié. Par sécurité, ', B('vos 3 autres sessions ont été fermées'), '.'),
+      ROWS(DEVICE),
+      HR,
+      P(B('Ce n’était pas vous ?'), ' Réinitialisez votre mot de passe tout de suite, puis prévenez l’administrateur de votre organisation.'),
+      BTN('Sécuriser mon compte', BASE + '/forgot', 'MotDePasseOublie.dc.html', null, true),
+    ],
+  },
+  {
+    key: 'newLogin', group: 'account', name: 'Nouvelle connexion', icon: 'phosphorDevicesBold', kind: 'security', time: '08:42',
+    subject: 'Nouvelle connexion depuis Safari sur iPhone',
+    preheader: 'Lyon, France · 9 novembre à 08:42. Vérifiez vos sessions si ce n’était pas vous.',
+    blocks: [
+      H('Nouvelle connexion détectée'),
+      P('Votre compte vient d’être utilisé sur un appareil que nous ne connaissions pas.'),
+      ROWS([['Appareil', V('Safari sur iPhone', 'session.device')], ['Lieu (approximatif)', V('Lyon, France', 'session.location')], ['Adresse IP', V('86.247.12.30', 'session.ip')], ['Date', V('9 novembre 2026 à 08:42 (heure de Paris)', 'session.date')]]),
+      P('Si c’était vous, vous n’avez rien à faire. Sinon, fermez cette session et changez votre mot de passe.'),
+      BTN('Vérifier mes sessions', BASE + '/account/security', 'Compte.dc.html', { to: 'Compte', section: 'security' }),
+    ],
+  },
+  {
+    key: 'mfa', group: 'account', name: 'Vérification en deux étapes activée', icon: 'phosphorFingerprintBold', kind: 'security', time: '14:21',
+    subject: 'La vérification en deux étapes est activée',
+    preheader: 'Gardez vos codes de récupération en lieu sûr : ils remplacent votre téléphone.',
+    blocks: [
+      H('Vérification en deux étapes activée'),
+      P('À chaque connexion, Waypoint vous demandera un code de votre application d’authentification, en plus de votre mot de passe.'),
+      ROWS([['Méthode', V('Application d’authentification', 'mfa.method')], ['Codes de récupération', V('10 codes générés', 'mfa.recovery_count')], ['Activée le', V('9 novembre 2026 à 14:21', 'mfa.enabled_at')]]),
+      NOTE('phosphorKeyBold', 'text-primary', 'Vos codes de récupération sont le seul moyen d’accéder au compte si vous perdez votre téléphone. Imprimez-les ou rangez-les dans un gestionnaire de mots de passe.'),
+      BTN('Voir mes codes de récupération', BASE + '/account/security', 'Compte.dc.html', { to: 'Compte', section: 'security' }, true),
+    ],
+  },
+  {
+    key: 'deletion', group: 'account', name: 'Suppression du compte', icon: 'phosphorTrashBold', kind: 'security', time: '16:30',
+    subject: 'La suppression de votre compte est programmée',
+    preheader: 'Votre compte sera supprimé le 9 décembre 2026. Vous pouvez encore annuler.',
+    blocks: [
+      H('Suppression programmée le 9 décembre'),
+      P('Comme demandé, votre compte et vos données personnelles seront supprimés définitivement dans ', B(V('30 jours', 'deletion.delay')), '. Jusque-là, une connexion suffit pour annuler.'),
+      ROWS([['Supprimé', 'Profil, préférences, jetons d’API, sessions'], ['Conservé', 'Tâches et documents de l’organisation, attribués à « Ancien membre »']]),
+      BTN('Annuler la suppression', BASE + '/account', 'Compte.dc.html', { to: 'Compte', section: 'profile' }),
+      NOTE('phosphorInfoBold', '', 'Pour récupérer vos données avant la suppression, exportez-les depuis Profil › Préférences.'),
+    ],
+  },
+  {
+    key: 'invite', group: 'org', name: 'Invitation', icon: 'phosphorUserPlusBold', kind: 'org', time: '10:15',
+    subject: 'Hugo Durand vous invite à rejoindre Atelier Nord',
+    preheader: 'Rôle proposé : Membre. L’invitation expire le 16 novembre 2026.',
+    blocks: [
+      { t: 'invite', inv: { initials: 'HD', orgInitials: 'AN', org: 'Atelier Nord', meta: '18 membres · 6 espaces' } },
+      P(B(V('Hugo Durand', 'inviter.name')), ' vous invite à rejoindre l’organisation ', B(V('Atelier Nord', 'org.name')), ' sur Waypoint, avec le rôle ', B(V('Membre', 'invite.role')), '.'),
+      { t: 'quote', who: { initials: 'HD', name: 'Hugo Durand', time: 'message personnel' }, runs: ['Bienvenue ! On lance la refonte de l’onboarding lundi, je t’ai déjà ajoutée à l’espace Produit.'] },
+      BTN('Rejoindre Atelier Nord', BASE + '/invite/5d0b', 'Organisations.dc.html', null),
+      NOTE('phosphorClockBold', '', 'L’invitation expire le 16 novembre 2026. Vous ne connaissez pas Hugo ? Ignorez cet e-mail.'),
+    ],
+  },
+  {
+    key: 'quota', group: 'org', name: 'Stockage presque plein', icon: 'phosphorHardDrivesBold', kind: 'admin', time: '07:00',
+    subject: 'Atelier Nord a utilisé 90 % de son stockage',
+    preheader: '45 Go sur 50 Go. Libérez de l’espace ou augmentez le quota avant d’être bloqué.',
+    blocks: [
+      H('Stockage presque plein'),
+      P('Vous recevez cet e-mail en tant qu’administratrice d’', B(V('Atelier Nord', 'org.name')), '.'),
+      { t: 'meter', label: 'Stockage utilisé', value: '45 Go sur 50 Go · 90 %', pct: 90, fillCls: 'w-[90%]' },
+      ROWS([['Pièces jointes', '31,2 Go'], ['Documents', '8,4 Go'], ['Exports', '5,4 Go']]),
+      P('À 100 %, les membres ne pourront plus ajouter de fichiers. Les tâches et les documents restent modifiables.'),
+      BTN('Gérer les quotas', BASE + '/org/quotas', 'Organisation.dc.html', { to: 'Organisation', section: 'quotas' }),
+    ],
+  },
+  {
+    key: 'assigned', group: 'activity', name: 'Tâche assignée', icon: 'phosphorUserCheckBold', kind: 'activity', time: '11:48',
+    subject: 'Hugo Durand vous a assigné WAY-482',
+    preheader: 'Refondre l’écran d’onboarding · priorité haute · échéance le 14 novembre.',
+    foot: 'Vous recevez cet e-mail car les notifications d’assignation sont activées.',
+    blocks: [
+      P(B(V('Hugo Durand', 'actor.name')), ' vous a assigné une tâche dans ', B(V('Produit › Sprint 24', 'task.list')), '.'),
+      { t: 'task', task: { id: 'WAY-482', list: 'Produit › Sprint 24', title: 'Refondre l’écran d’onboarding', status: 'En cours', dot: 'bg-primary', prio: 'Haute', prioTone: 'text-cornaline', due: 'ven. 14 nov.' } },
+      BTN('Ouvrir la tâche', BASE + '/t/WAY-482', 'App.dc.html', { to: 'App', page: 'mine' }),
+    ],
+  },
+  {
+    key: 'mention', group: 'activity', name: 'Mention', icon: 'phosphorAtBold', kind: 'activity', time: '15:31',
+    subject: 'Léa Robert vous a mentionnée dans WAY-475',
+    preheader: '« @Camille tu peux valider les maquettes avant jeudi ? »',
+    foot: 'Vous recevez cet e-mail car les notifications de mention sont activées.',
+    blocks: [
+      P(B(V('Léa Robert', 'actor.name')), ' vous a mentionnée dans un commentaire sur ', B(V('WAY-475 · Maquettes du tableau de bord', 'task.title')), '.'),
+      { t: 'quote', who: { initials: 'LR', name: 'Léa Robert', time: 'il y a 5 min' }, runs: [{ m: '@Camille' }, ' tu peux valider les maquettes avant jeudi ? J’ai ajouté la variante sombre dans le document.'] },
+      BTN('Répondre', BASE + '/t/WAY-475#c-2291', 'App.dc.html', { to: 'App', inbox: true }),
+      NOTE('phosphorArrowBendUpLeftBold', '', 'Vous pouvez aussi répondre directement à cet e-mail : votre réponse sera publiée en commentaire.'),
+    ],
+  },
+  {
+    key: 'due', group: 'activity', name: 'Rappel d’échéance', icon: 'phosphorAlarmBold', kind: 'activity', time: '17:00',
+    subject: '3 tâches arrivent à échéance demain',
+    preheader: 'WAY-482, WAY-490 et WAY-501 · à rendre le lundi 10 novembre.',
+    foot: 'Rappel envoyé la veille à 17:00 pour les tâches qui vous sont assignées.',
+    blocks: [
+      H('À rendre demain'),
+      P('Ces tâches vous sont assignées et arrivent à échéance le ', B(V('lundi 10 novembre', 'due.date')), '.'),
+      { t: 'tasks', items: [
+        { id: 'WAY-482', title: 'Refondre l’écran d’onboarding', meta: 'Haute', dot: 'bg-primary', metaCls: 'text-cornaline' },
+        { id: 'WAY-490', title: 'Corriger l’export CSV des feuilles de temps', meta: 'Urgente', dot: 'bg-balise', metaCls: 'text-grenat' },
+        { id: 'WAY-501', title: 'Relire la politique de confidentialité', meta: 'Basse', dot: 'bg-track', metaCls: 'text-muted-foreground' },
+      ] },
+      BTN('Voir mes tâches', BASE + '/my-tasks', 'App.dc.html', { to: 'App', page: 'mine' }),
+    ],
+  },
+  {
+    key: 'digest', group: 'activity', name: 'Résumé quotidien', icon: 'phosphorSunHorizonBold', kind: 'activity', time: '08:00',
+    subject: 'Votre résumé du lundi 9 novembre',
+    preheader: '4 tâches terminées, 2 nouvelles assignations et 3 mentions depuis hier.',
+    foot: 'Résumé envoyé à 08:00, du lundi au vendredi.',
+    blocks: [
+      H('Bonjour Camille, voici votre journée'),
+      { t: 'stats', items: [{ v: '4', l: 'tâches terminées' }, { v: '2', l: 'nouvelles assignations' }, { v: '3', l: 'mentions' }] },
+      H2('À faire aujourd’hui'),
+      { t: 'tasks', items: [
+        { id: 'WAY-475', title: 'Valider les maquettes du tableau de bord', meta: 'En retard', dot: 'bg-grenat', metaCls: 'text-destructive' },
+        { id: 'WAY-482', title: 'Refondre l’écran d’onboarding', meta: 'Aujourd’hui', dot: 'bg-primary', metaCls: 'text-muted-foreground' },
+      ] },
+      H2('Dans vos espaces'),
+      { t: 'feed', items: [
+        { initials: 'HD', who: 'Hugo Durand', text: 'a terminé WAY-468 · Migration des pièces jointes', time: '18:12' },
+        { initials: 'LR', who: 'Léa Robert', text: 'a publié le document « Rituels du sprint 24 »', time: '16:40' },
+        { initials: 'SB', who: 'Sami Benali', text: 'a créé le sprint 25 dans Produit', time: '15:05' },
+      ] },
+      BTN('Ouvrir Waypoint', BASE + '/home', 'App.dc.html', { to: 'App', page: 'home' }),
+    ],
+  },
+];
+const GROUPS = [
+  { key: 'account', label: 'Compte et sécurité' },
+  { key: 'org', label: 'Organisation' },
+  { key: 'activity', label: 'Activité' },
+];
+const KINDS = {
+  security: { label: 'Sécurité · toujours envoyé', icon: 'phosphorShieldBold', foot: 'E-mail de sécurité lié à votre compte : il ne peut pas être désactivé.' },
+  org: { label: 'Invitation', icon: 'phosphorEnvelopeSimpleBold', foot: 'Vous recevez cet e-mail car un membre d’Atelier Nord a invité votre adresse.' },
+  admin: { label: 'Administration', icon: 'phosphorCrownSimpleBold', foot: 'Envoyé aux administrateurs de l’organisation. Seuils réglables dans Organisation › Quotas.' },
+  activity: { label: 'Notification · désactivable', icon: 'phosphorBellBold', foot: '' },
+};
+const fold = (x) => String(x).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+
+class Component extends DCLogic {
+  componentDidMount() {
+    try {
+      const t = window.localStorage.getItem('waypoint-theme');
+      if (t === 'dark' || t === 'light') this.setState({ stored: t });
+    } catch (e) {}
+    this.onStorage = (e) => {
+      if (e.key === 'waypoint-theme' && (e.newValue === 'dark' || e.newValue === 'light')) this.setState({ stored: e.newValue, theme: null });
+    };
+    window.addEventListener('storage', this.onStorage);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('storage', this.onStorage);
+    clearTimeout(this.toastT);
+  }
+  componentDidUpdate(prev) {
+    if (prev.theme !== this.props.theme) this.setState({ theme: null });
+    if (prev.modele !== this.props.modele) this.setState({ pick: null });
+  }
+  themeTransition(e, apply) {
+    let reduce = false;
+    try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (err) {}
+    if (reduce || typeof document.startViewTransition !== 'function') { apply(() => {}); return; }
+    const root = document.documentElement;
+    const el = e && e.currentTarget && e.currentTarget.getBoundingClientRect ? e.currentTarget : null;
+    const r = el ? el.getBoundingClientRect() : null;
+    root.style.setProperty('--wp-vt-origin', r ? Math.round(r.left + r.width / 2) + 'px ' + Math.round(r.top + r.height / 2) + 'px' : '50% 100%');
+    root.dataset.wpVt = 'circle-blur';
+    const vt = document.startViewTransition(() => new Promise((resolve) => { apply(resolve); setTimeout(resolve, 80); }));
+    const end = () => { delete root.dataset.wpVt; };
+    vt.finished.then(end, end);
+    vt.ready.catch(() => {});
+  }
+  notify(msg) {
+    clearTimeout(this.toastT);
+    this.setState({ toast: msg });
+    this.toastT = setTimeout(() => this.setState({ toast: '' }), 2600);
+  }
+  renderVals() {
+    const s = this.state || {};
+    const pref = this.props.theme ?? 'mémorisé';
+    const fixed = pref === 'sombre' ? 'dark' : pref === 'clair' ? 'light' : null;
+    const theme = s.theme || fixed || s.stored || 'light';
+    const mailTheme = s.mailTheme || theme;
+    const vars = !!s.vars;
+    const view = s.view || 'preview';
+    const mobile = s.device === 'mobile';
+    const fromProp = MAILS.find((m) => m.name === this.props.modele);
+    const key = s.pick || (fromProp ? fromProp.key : 'welcome');
+    const mail = MAILS.find((m) => m.key === key) || MAILS[0];
+    const query = s.query || '';
+    const q = fold(query.trim());
+
+    // Valeurs : exemple, ou nom de la variable du modèle quand « Variables » est actif
+    const shown = (x) => (x && typeof x === 'object' && 'v' in x ? (vars ? OB + ' ' + x.v + ' ' + CB : x.s) : x);
+    const VAR_CLS = 'rounded bg-primary/10 px-1 font-mono text-[0.85em] font-medium text-primary';
+    const runsOf = (runs) => runs.map((r) => {
+      if (typeof r === 'string') return { text: r, cls: '' };
+      if (r.m) return { text: r.m, cls: 'font-medium text-primary' };
+      const bold = r.b !== undefined;
+      const inner = bold ? r.b : r;
+      const isVar = vars && inner && typeof inner === 'object' && 'v' in inner;
+      return { text: shown(inner), cls: isVar ? VAR_CLS : bold ? 'font-semibold text-foreground' : '' };
+    });
+    const plainRuns = (runs) => runs.map((r) => (typeof r === 'string' ? r : r.m ? r.m : shown(r.b !== undefined ? r.b : r))).join('');
+    const go = (b) => () => { if (b.nav) writeNav(b.nav); };
+    const blocks = mail.blocks.map((b) => ({
+      isH: b.t === 'h', isH2: b.t === 'h2', isP: b.t === 'p', isBtn: b.t === 'btn', isLink: b.t === 'link', isCode: b.t === 'code',
+      isRows: b.t === 'rows', isTask: b.t === 'task', isQuote: b.t === 'quote', isTasks: b.t === 'tasks', isMeter: b.t === 'meter',
+      isStats: b.t === 'stats', isFeed: b.t === 'feed', isInvite: b.t === 'invite', isNote: b.t === 'note', isHr: b.t === 'hr',
+      text: b.t === 'link' ? b.url : b.t === 'code' ? shown(b.code) : b.t === 'meter' ? b.value : b.text || '',
+      codeCls: b.t === 'code' && vars ? 'text-primary text-xl tracking-normal' : '',
+      label: b.label || '',
+      runs: b.runs ? runsOf(b.runs) : [],
+      href: b.href || '',
+      go: go(b),
+      btnCls: b.secondary ? 'border border-input bg-card text-foreground hover:bg-muted' : 'bg-primary text-primary-foreground hover:bg-primary/90',
+      rows: (b.rows || []).map(([k, v]) => ({ k, v: shown(v), cls: vars && v && typeof v === 'object' ? VAR_CLS : '' })),
+      task: b.task || {},
+      who: b.who || {},
+      items: b.items || [],
+      pct: b.pct || 0,
+      fillCls: b.fillCls || '',
+      inv: b.inv || {},
+      icon: b.icon || '',
+      iconTone: b.tone || 'text-muted-foreground',
+    }));
+    const kind = KINDS[mail.kind];
+    const foot = mail.foot || kind.foot;
+    const prefs = mail.kind === 'activity';
+
+    // Version texte brut (multipart/alternative)
+    const lines = [];
+    mail.blocks.forEach((b) => {
+      if (b.t === 'h') lines.push(b.text.toUpperCase(), '');
+      else if (b.t === 'h2') lines.push(b.text, '-'.repeat(b.text.length));
+      else if (b.t === 'p') lines.push(plainRuns(b.runs), '');
+      else if (b.t === 'btn') lines.push(b.label + ' : ' + b.url, '');
+      else if (b.t === 'code') lines.push('    ' + shown(b.code), '    ' + b.label, '');
+      else if (b.t === 'rows') { b.rows.forEach(([k, v]) => lines.push(k + ' : ' + shown(v))); lines.push(''); }
+      else if (b.t === 'task') lines.push(b.task.id + ' · ' + b.task.title, b.task.status + ' · priorité ' + b.task.prio.toLowerCase() + ' · échéance ' + b.task.due, '');
+      else if (b.t === 'quote') lines.push('« ' + plainRuns(b.runs) + ' »', '— ' + b.who.name, '');
+      else if (b.t === 'tasks') { b.items.forEach((t) => lines.push('- ' + t.id + ' · ' + t.title + ' (' + t.meta + ')')); lines.push(''); }
+      else if (b.t === 'meter') lines.push(b.label + ' : ' + b.value, '');
+      else if (b.t === 'stats') lines.push(b.items.map((x) => x.v + ' ' + x.l).join(' · '), '');
+      else if (b.t === 'feed') { b.items.forEach((f) => lines.push('- ' + f.who + ' ' + f.text + ' (' + f.time + ')')); lines.push(''); }
+      else if (b.t === 'invite') lines.push(b.inv.org + ' · ' + b.inv.meta, '');
+      else if (b.t === 'note') lines.push(plainRuns(b.runs), '');
+      else if (b.t === 'hr') lines.push('---', '');
+    });
+    lines.push('--', foot);
+    if (prefs) lines.push('Gérer mes notifications : ' + BASE + '/account/notifications');
+    lines.push('Waypoint · 12 rue de la Charité, 69002 Lyon · Vous recevez cet e-mail en tant que membre d’Atelier Nord');
+    const plain = lines.join('\n').replace(/\n{3,}/g, '\n\n');
+
+    const subject = shown(mail.subject);
+    const subjectLen = mail.subject.length;
+    const preLen = mail.preheader.length;
+    const visible = MAILS.filter((m) => !q || fold(m.name + ' ' + m.subject + ' ' + m.preheader).includes(q));
+    const order = visible.map((m) => m.key);
+    const pickKey = (k) => this.setState({ pick: k });
+    const focusItem = (k) => setTimeout(() => { const el = document.getElementById('mail-' + k); if (el) el.focus(); }, 0);
+    const seg = (on) => (on ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground');
+
+    return {
+      theme,
+      themeLabel: theme === 'dark' ? 'Passer au thème clair' : 'Passer au thème sombre',
+      toggleTheme: (e) => {
+        const next = theme === 'dark' ? 'light' : 'dark';
+        this.themeTransition(e, (done) => this.setState({ theme: next }, done));
+        try { window.localStorage.setItem('waypoint-theme', next); } catch (err) {}
+      },
+      total: MAILS.length,
+      query,
+      hasQuery: query.length > 0,
+      onQuery: (e) => this.setState({ query: e.target.value }),
+      clearQuery: () => this.setState({ query: '' }),
+      queryKey: (e) => {
+        if (e.key === 'Escape') this.setState({ query: '' });
+        if (e.key === 'ArrowDown' && order.length) { e.preventDefault(); pickKey(order[0]); focusItem(order[0]); }
+      },
+      noResult: visible.length === 0,
+      groups: GROUPS.map((g) => {
+        const items = visible.filter((m) => m.group === g.key);
+        return {
+          label: g.label,
+          count: items.length,
+          items: items.map((m) => {
+            const cur = m.key === mail.key;
+            return {
+              id: 'mail-' + m.key,
+              name: m.name,
+              subject: m.subject,
+              icon: m.icon,
+              current: cur ? 'true' : undefined,
+              cls: cur ? 'bg-primary/5' : 'hover:bg-muted',
+              nameCls: cur ? 'font-medium text-primary' : '',
+              iconTone: cur ? 'border-primary/30 text-primary' : 'text-muted-foreground',
+              pick: () => pickKey(m.key),
+              key: (e) => {
+                const i = order.indexOf(m.key);
+                const to = e.key === 'ArrowDown' ? order[(i + 1) % order.length] : e.key === 'ArrowUp' ? order[(i - 1 + order.length) % order.length] : null;
+                if (!to) return;
+                e.preventDefault();
+                pickKey(to);
+                focusItem(to);
+              },
+            };
+          }),
+        };
+      }).filter((g) => g.count > 0),
+      viewOpts: [
+        { key: 'preview', label: 'Aperçu', icon: 'phosphorEyeBold' },
+        { key: 'text', label: 'Texte brut', icon: 'phosphorTextAlignLeftBold' },
+      ].map((o) => ({ ...o, on: view === o.key ? 'true' : 'false', cls: seg(view === o.key), pick: () => this.setState({ view: o.key }) })),
+      deviceOpts: [
+        { key: 'desktop', label: 'Largeur bureau (600 px)', icon: 'phosphorDesktopBold' },
+        { key: 'mobile', label: 'Largeur mobile (375 px)', icon: 'phosphorDeviceMobileBold' },
+      ].map((o) => {
+        const on = (mobile ? 'mobile' : 'desktop') === o.key;
+        return { ...o, on: on ? 'true' : 'false', cls: seg(on), pick: () => this.setState({ device: o.key }) };
+      }),
+      mailThemeOpts: [
+        { key: 'light', label: 'E-mail en thème clair', icon: 'phosphorSunBold' },
+        { key: 'dark', label: 'E-mail en thème sombre', icon: 'phosphorMoonBold' },
+      ].map((o) => ({ ...o, on: mailTheme === o.key ? 'true' : 'false', cls: seg(mailTheme === o.key), pick: () => this.setState({ mailTheme: o.key }) })),
+      varsOn: vars ? 'true' : 'false',
+      varsCls: vars ? 'border-primary/50 bg-primary/5 text-primary' : 'border-border bg-background text-foreground hover:bg-muted',
+      toggleVars: () => this.setState({ vars: !vars }),
+      copyText: () => {
+        try { navigator.clipboard.writeText('Objet : ' + subject + '\n\n' + plain); } catch (e) {}
+        this.notify('Texte de « ' + mail.name + ' » copié');
+      },
+      sendTest: () => this.notify('Test envoyé à camille.martin@ateliernord.fr'),
+      goNotifs: () => writeNav({ to: 'Compte', section: 'notifications' }),
+      unsubscribe: () => this.notify('Lien de désinscription en un clic (List-Unsubscribe)'),
+      isPreview: view === 'preview',
+      isText: view === 'text',
+      mailTheme,
+      widthCls: mobile ? 'max-w-[375px]' : 'max-w-[600px]',
+      cardPad: mobile ? 'p-5' : 'p-8',
+      btnWidth: mobile ? 'w-full' : 'self-start',
+      rowCls: mobile ? 'flex-col gap-0.5' : 'gap-4',
+      dtCls: mobile ? 'text-xs' : 'w-40',
+      plain,
+      mail: {
+        name: mail.name,
+        kindLabel: kind.label,
+        kindIcon: kind.icon,
+        articleLabel: 'Aperçu de l’e-mail « ' + mail.name + ' »',
+        from: mail.kind === 'security' ? 'securite@waypoint.example' : 'notifications@waypoint.example',
+        time: 'lun. 9 nov., ' + mail.time,
+        subjectShown: subject,
+        preheaderShown: mail.preheader,
+        subjectLen,
+        preLen,
+        subjectTone: subjectLen > 60 ? 'text-balise' : '',
+        subjectIcon: subjectLen > 60 ? 'phosphorWarningBold' : 'phosphorCheckBold',
+        preTone: preLen > 90 ? 'text-balise' : '',
+        preIcon: preLen > 90 ? 'phosphorWarningBold' : 'phosphorCheckBold',
+        blocks,
+        foot,
+        prefs,
+      },
+      hasToast: !!s.toast,
+      toast: s.toast || '',
+    };
+  }
+}
+</script>
+</body>
+</html>

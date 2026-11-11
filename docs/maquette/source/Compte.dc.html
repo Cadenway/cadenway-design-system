@@ -1,0 +1,1737 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Mon compte — Waypoint</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="styles/app.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&amp;family=Geist+Mono:wght@400..600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div data-theme="{{theme}}" class="flex h-screen overflow-hidden bg-canvas font-sans text-sm text-foreground antialiased">
+  <nav aria-label="Applications" class="relative z-10 flex w-14 shrink-0 flex-col items-center gap-1 py-2">
+    <a href="App.dc.html" onClick="{{goAppHome}}" aria-label="Atelier Nord, retour à l'application" class="group/rb relative isolate mb-1 inline-flex size-9 items-center justify-center rounded-lg bg-sidebar-primary text-xs font-semibold text-sidebar-primary-foreground transition-all hover:bg-sidebar-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas whitespace-nowrap">AN
+      <span class="pointer-events-none absolute top-1/2 left-full z-50 ml-2 hidden w-max -translate-y-1/2 rounded-md bg-foreground px-2.5 py-1.5 text-xs font-normal text-background shadow-sm group-hover/rb:block dark:border dark:border-border dark:bg-popover dark:text-popover-foreground whitespace-nowrap">Atelier Nord</span>
+    </a>
+    <div class="my-1 h-px w-6 bg-border"></div>
+    <sc-for list="{{railItems}}" as="ri" hint-placeholder-count="6">
+      <a href="App.dc.html" onClick="{{ri.go}}" aria-label="{{ri.aria}}" class="group/rb relative isolate inline-flex size-9 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas {{ri.cls}} whitespace-nowrap">
+        <span class="ng-icon {{ri.icon}} size-[18px]" aria-hidden="true"></span>
+        <sc-if value="{{ri.hasBadge}}" hint-placeholder-val="{{ false }}"><span class="absolute top-0.5 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-foreground px-1 text-[10px] leading-none font-semibold text-background tabular-nums whitespace-nowrap" aria-hidden="true">{{ri.badge}}</span></sc-if>
+        <span class="pointer-events-none absolute top-1/2 left-full z-50 ml-2 hidden w-max -translate-y-1/2 rounded-md bg-foreground px-2.5 py-1.5 text-xs font-normal text-background shadow-sm group-hover/rb:block dark:border dark:border-border dark:bg-popover dark:text-popover-foreground whitespace-nowrap">{{ri.label}}</span>
+      </a>
+    </sc-for>
+    <sc-if value="{{hasRailSpaces}}" hint-placeholder-val="{{ true }}">
+      <div class="my-1 h-px w-6 bg-border"></div>
+      <sc-for list="{{railSpaces}}" as="rs" hint-placeholder-count="2">
+        <a href="App.dc.html" onClick="{{rs.go}}" onContextMenu="{{rs.ctx}}" onKeyDown="{{rs.ctxKey}}" aria-label="{{rs.aria}}" aria-haspopup="menu" aria-expanded="{{rs.menuOpen}}" class="group/rb relative isolate inline-flex size-9 items-center justify-center rounded-lg transition-colors hover:bg-accent aria-expanded:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas whitespace-nowrap">
+          <sc-if value="{{rs.hasIcon}}" hint-placeholder-val="{{ true }}"><span class="ng-icon {{rs.iconCls}} size-[18px] {{rs.tone}}" aria-hidden="true"></span></sc-if>
+          <sc-if value="{{rs.noIcon}}" hint-placeholder-val="{{ false }}"><span class="text-sm font-semibold {{rs.tone}}" aria-hidden="true">{{rs.initial}}</span></sc-if>
+          <span class="pointer-events-none absolute top-1/2 left-full z-50 ml-2 hidden w-max -translate-y-1/2 rounded-md bg-foreground px-2.5 py-1.5 text-xs font-normal text-background shadow-sm group-hover/rb:block dark:border dark:border-border dark:bg-popover dark:text-popover-foreground whitespace-nowrap">{{rs.label}}</span>
+        </a>
+      </sc-for>
+    </sc-if>
+    <div class="flex-1"></div>
+    <a href="App.dc.html" onClick="{{openSearch}}" aria-label="Rechercher (Ctrl K)" class="group/rb relative isolate inline-flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas whitespace-nowrap">
+      <span class="ng-icon phosphorMagnifyingGlassBold size-[18px]" aria-hidden="true"></span>
+      <span class="pointer-events-none absolute top-1/2 left-full z-50 ml-2 hidden w-max -translate-y-1/2 rounded-md bg-foreground px-2.5 py-1.5 text-xs font-normal text-background shadow-sm group-hover/rb:block dark:border dark:border-border dark:bg-popover dark:text-popover-foreground whitespace-nowrap">Rechercher · Ctrl K</span>
+    </a>
+    <button type="button" onClick="{{toggleTheme}}" aria-label="{{themeLabel}}" class="group/rb relative isolate inline-flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas whitespace-nowrap">
+      <span class="ng-icon phosphorMoonBold size-[18px] dark:hidden" aria-hidden="true"></span>
+      <span class="ng-icon phosphorSunBold hidden size-[18px] dark:inline-block" aria-hidden="true"></span>
+      <span class="pointer-events-none absolute top-1/2 left-full z-50 ml-2 hidden w-max -translate-y-1/2 rounded-md bg-foreground px-2.5 py-1.5 text-xs font-normal text-background shadow-sm group-hover/rb:block dark:border dark:border-border dark:bg-popover dark:text-popover-foreground whitespace-nowrap">{{themeLabel}}</span>
+    </button>
+    <span role="img" aria-label="{{me.aria}}" class="group/rb relative isolate mt-1 inline-flex size-8 shrink-0 rounded-full ring-2 ring-foreground/40 ring-offset-2 ring-offset-canvas">
+      <span aria-hidden="true" class="flex size-full items-center justify-center overflow-hidden rounded-full bg-secondary text-xs leading-none font-semibold text-secondary-foreground"><sc-if value="{{hasPhoto}}" hint-placeholder-val="{{ false }}"><img src="{{photo}}" alt="" class="size-full object-cover"></sc-if><sc-if value="{{noPhoto}}" hint-placeholder-val="{{ true }}">CM</sc-if></span>
+      <span class="absolute -right-0.5 -bottom-0.5 flex size-3 items-center justify-center rounded-full ring-2 ring-canvas {{me.dot}}" aria-hidden="true"><sc-if value="{{me.bar}}" hint-placeholder-val="{{ false }}"><span class="h-[2px] w-1.5 rounded-full bg-background"></span></sc-if></span>
+      <span class="pointer-events-none absolute top-1/2 left-full z-50 ml-2 hidden w-max -translate-y-1/2 rounded-md bg-foreground px-2.5 py-1.5 text-xs font-normal text-background shadow-sm group-hover/rb:block dark:border dark:border-border dark:bg-popover dark:text-popover-foreground whitespace-nowrap" aria-hidden="true">{{me.aria}}</span>
+    </span>
+  </nav>
+
+  <div class="mt-2 mr-2 mb-2 flex min-w-0 flex-1 flex-wrap content-start overflow-y-auto rounded-xl border border-border bg-background md:content-stretch md:overflow-hidden">
+    <nav aria-label="Paramètres" class="flex w-full shrink-0 flex-col gap-3 border-sidebar-border bg-sidebar p-2 text-sidebar-foreground md:h-full md:w-60 md:border-r max-md:border-b">
+      <a href="App.dc.html" onClick="{{goAppSpaces}}" class="flex h-8 items-center gap-2 rounded-md px-2 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sidebar-ring"><span class="ng-icon phosphorArrowLeftBold" aria-hidden="true"></span>Retour à l'application</a>
+      <div class="flex flex-col gap-px">
+        <div class="flex h-8 items-center px-2 text-xs font-medium text-muted-foreground">Mon compte</div>
+        <div class="flex flex-row flex-wrap gap-px md:flex-col">
+          <sc-for list="{{sections}}" as="sec" hint-placeholder-count="5">
+            <button type="button" onClick="{{sec.pick}}" aria-current="{{sec.current}}" class="flex h-8 items-center gap-2 rounded-md px-2 text-left text-sm transition-colors hover:bg-sidebar-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sidebar-ring {{sec.cls}}">
+              <span class="ng-icon {{sec.icon}} {{sec.iconTone}}" aria-hidden="true"></span>{{sec.label}}
+            </button>
+          </sc-for>
+        </div>
+      </div>
+      <div class="flex flex-col gap-px">
+        <div class="flex h-8 items-center px-2 text-xs font-medium text-muted-foreground">Organisation · Atelier Nord</div>
+        <div class="flex flex-row flex-wrap gap-px md:flex-col">
+          <sc-for list="{{orgLinks}}" as="ol" hint-placeholder-count="4">
+            <a href="Organisation.dc.html" onClick="{{ol.go}}" class="flex h-8 items-center gap-2 rounded-md px-2 text-sm transition-colors hover:bg-sidebar-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sidebar-ring"><span class="ng-icon {{ol.icon}} text-muted-foreground" aria-hidden="true"></span>{{ol.label}}</a>
+          </sc-for>
+        </div>
+      </div>
+    </nav>
+
+    <main class="min-w-0 flex-[999_1_560px] md:h-full md:overflow-y-auto">
+      <div class="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-6 sm:px-8 sm:py-8">
+        <sc-if value="{{skOn}}" hint-placeholder-val="{{ false }}">
+          <div class="flex flex-col gap-6" role="status" aria-busy="true" aria-label="Chargement de la section">
+            <div class="flex items-start gap-4" aria-hidden="true">
+              <div class="flex min-w-0 flex-1 flex-col gap-2"><span class="wp-sk h-7 w-56"></span><span class="wp-sk h-3 w-3/4"></span></div>
+              <sc-if value="{{skS.action}}" hint-placeholder-val="{{ false }}"><span class="wp-sk h-8 w-32 rounded-lg"></span></sc-if>
+            </div>
+            <sc-if value="{{skS.hasTiles}}" hint-placeholder-val="{{ false }}">
+              <div class="grid grid-cols-1 gap-3 sm:grid-cols-3" aria-hidden="true"><sc-for list="{{skS.tiles}}" as="zst" hint-placeholder-count="3"><div class="flex flex-col gap-2.5 rounded-xl border border-border bg-card p-4"><span class="wp-sk h-3 w-24"></span><span class="wp-sk h-6 w-20"></span><span class="wp-sk h-1.5 w-full rounded-full"></span></div></sc-for></div>
+            </sc-if>
+            <sc-if value="{{skS.toolbar}}" hint-placeholder-val="{{ false }}">
+              <div class="flex flex-wrap items-center gap-2" aria-hidden="true"><span class="wp-sk h-8 w-64 rounded-lg"></span><span class="wp-sk h-8 w-56 rounded-lg"></span><span class="wp-sk h-8 w-40 rounded-lg"></span></div>
+            </sc-if>
+            <sc-if value="{{skS.hasC1}}" hint-placeholder-val="{{ true }}">
+              <section class="flex flex-col gap-4 rounded-xl border border-border bg-card p-4" aria-hidden="true">
+                <div class="flex flex-col gap-2"><span class="wp-sk h-4 w-32"></span><span class="wp-sk h-3 {{skS.w1}}"></span></div>
+                <sc-for list="{{skS.c1}}" as="zc1" hint-placeholder-count="3"><div class="flex items-center gap-4"><div class="flex min-w-0 flex-1 flex-col gap-1.5"><span class="wp-sk h-3 {{zc1.w}}"></span><span class="wp-sk h-2.5 w-1/2"></span></div><span class="wp-sk {{zc1.ctl}}"></span></div></sc-for>
+              </section>
+            </sc-if>
+            <sc-if value="{{skS.hasC2}}" hint-placeholder-val="{{ false }}">
+              <section class="flex flex-col gap-4 rounded-xl border border-border bg-card p-4" aria-hidden="true">
+                <div class="flex flex-col gap-2"><span class="wp-sk h-4 w-32"></span><span class="wp-sk h-3 {{skS.w2}}"></span></div>
+                <sc-for list="{{skS.c2}}" as="zc2" hint-placeholder-count="3"><div class="flex items-center gap-4"><div class="flex min-w-0 flex-1 flex-col gap-1.5"><span class="wp-sk h-3 {{zc2.w}}"></span><span class="wp-sk h-2.5 w-1/2"></span></div><span class="wp-sk {{zc2.ctl}}"></span></div></sc-for>
+              </section>
+            </sc-if>
+            <sc-if value="{{skS.hasC3}}" hint-placeholder-val="{{ false }}">
+              <section class="flex flex-col gap-4 rounded-xl border border-border bg-card p-4" aria-hidden="true">
+                <div class="flex flex-col gap-2"><span class="wp-sk h-4 w-32"></span><span class="wp-sk h-3 {{skS.w3}}"></span></div>
+                <sc-for list="{{skS.c3}}" as="zc3" hint-placeholder-count="3"><div class="flex items-center gap-4"><div class="flex min-w-0 flex-1 flex-col gap-1.5"><span class="wp-sk h-3 {{zc3.w}}"></span><span class="wp-sk h-2.5 w-1/2"></span></div><span class="wp-sk {{zc3.ctl}}"></span></div></sc-for>
+              </section>
+            </sc-if>
+            <sc-if value="{{skS.hasTable}}" hint-placeholder-val="{{ true }}">
+              <div class="overflow-hidden rounded-xl border border-border bg-card" aria-hidden="true">
+                <div class="flex h-10 items-center gap-4 border-b border-border bg-surface-muted px-4"><span class="wp-sk wp-sk-2 h-2.5 w-24"></span><span class="ml-auto wp-sk wp-sk-2 h-2.5 w-16"></span><span class="wp-sk wp-sk-2 h-2.5 w-20"></span></div>
+                <sc-for list="{{skS.table}}" as="ztr" hint-placeholder-count="5">
+                  <div class="flex h-14 items-center gap-3 border-b border-border px-4 last:border-b-0"><span class="wp-sk size-8 rounded-full"></span><div class="flex min-w-0 flex-1 flex-col gap-1.5"><span class="wp-sk h-3 {{ztr.w}}"></span><span class="wp-sk h-2.5 w-40"></span></div><span class="wp-sk h-5 w-16 rounded-full"></span><span class="wp-sk h-3 w-20"></span></div>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{errOn}}" hint-placeholder-val="{{ false }}">
+          <div class="rounded-xl border border-dashed border-border" role="alert">
+            <div class="wp-empty flex min-w-0 flex-col items-center justify-center gap-4 rounded-xl p-6 text-center text-balance">
+              <div class="wp-empty-header flex max-w-sm flex-col items-center gap-2">
+                <span class="wp-empty-media flex size-10 items-center justify-center rounded-lg bg-muted"><span class="ng-icon phosphorWarningCircleBold size-5 text-destructive" aria-hidden="true"></span></span>
+                <h2 class="wp-empty-title text-sm font-medium">Impossible de charger cette section</h2>
+                <p class="wp-empty-description text-sm/relaxed text-muted-foreground">Le serveur n’a pas répondu à temps. Vos réglages ne sont pas perdus : réessayez dans un instant.</p>
+              </div>
+              <div class="wp-empty-content flex flex-wrap justify-center gap-2">
+                <button type="button" onClick="{{errRetry}}" class="relative isolate inline-flex h-8 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-lg px-3 text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background border border-input bg-background hover:bg-accent"><span class="ng-icon phosphorArrowClockwiseBold" aria-hidden="true"></span>Réessayer</button>
+                
+              </div>
+              
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{isProfile}}" hint-placeholder-val="{{ true }}">
+          <header class="flex flex-col gap-1">
+            <h1 class="text-2xl font-semibold tracking-tight">Profil</h1>
+            <p class="text-sm text-muted-foreground">Ces informations sont visibles par les membres de vos organisations.</p>
+          </header>
+
+          <section class="flex flex-col gap-4 rounded-xl border border-border bg-card py-4 text-card-foreground" aria-labelledby="pf-photo">
+            <div class="flex flex-col gap-1 px-4"><h2 id="pf-photo" class="text-base leading-5 font-semibold">Photo</h2><p class="text-sm text-muted-foreground">Carrée, 256 px minimum. Sans photo, vos initiales s'affichent.</p></div>
+            <div class="flex flex-wrap items-center gap-4 px-4">
+              <span class="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-secondary text-lg leading-none font-semibold text-secondary-foreground" aria-hidden="true"><sc-if value="{{hasPhoto}}" hint-placeholder-val="{{ false }}"><img src="{{photo}}" alt="" class="size-full object-cover"></sc-if><sc-if value="{{noPhoto}}" hint-placeholder-val="{{ true }}">CM</sc-if></span>
+              <div class="relative flex items-center gap-2">
+                <input id="pf-photo-file" type="file" accept="image/*" onChange="{{onPhoto}}" class="peer sr-only">
+                <label for="pf-photo-file" class="relative isolate inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-lg border border-input px-2.5 text-sm font-medium transition-all hover:bg-accent peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-background"><span class="ng-icon phosphorUploadSimpleBold" aria-hidden="true"></span>{{photoCta}}</label>
+                <button type="button" onClick="{{removePhoto}}" disabled="{{noPhoto}}" class="relative isolate inline-flex h-8 items-center justify-center overflow-hidden whitespace-nowrap rounded-lg px-3 text-sm font-medium transition-all hover:bg-accent disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Retirer</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="flex flex-col gap-4 rounded-xl border border-border bg-card pt-4 text-card-foreground" aria-labelledby="pf-info">
+            <div class="flex flex-col gap-1 px-4"><h2 id="pf-info" class="text-base leading-5 font-semibold">Informations personnelles</h2></div>
+            <div class="grid grid-cols-1 gap-4 px-4 sm:grid-cols-2">
+              <div class="flex flex-col gap-2">
+                <label for="pf-name" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Nom complet</label>
+                <input id="pf-name" data-field="name" type="text" autocomplete="name" value="{{f.name}}" onChange="{{onField}}" class="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20">
+              </div>
+              <div class="flex flex-col gap-2">
+                <label for="pf-display" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Nom affiché</label>
+                <input id="pf-display" data-field="display" type="text" value="{{f.display}}" onChange="{{onField}}" aria-describedby="pf-display-help" class="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20">
+                <p id="pf-display-help" class="text-xs text-muted-foreground">Utilisé pour les mentions : @{{f.display}}</p>
+              </div>
+              <div class="flex flex-col gap-2 sm:col-span-2">
+                <label for="pf-email" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Adresse e-mail</label>
+                <div class="flex flex-wrap items-center gap-2">
+                  <div role="group" class="relative flex h-8 min-w-0 flex-1 items-center rounded-lg border border-input bg-muted">
+                    <input id="pf-email" type="email" value="{{email}}" readonly class="h-full min-w-0 flex-1 bg-transparent px-2.5 text-sm outline-none">
+                    <span class="flex h-full shrink-0 items-center pe-2.5"><span class="inline-flex items-center gap-1 text-xs font-medium text-jade-text"><span class="ng-icon phosphorCheckCircleFill size-3.5" aria-hidden="true"></span>Vérifiée</span></span>
+                  </div>
+                  <button type="button" onClick="{{openEmail}}" class="relative isolate inline-flex h-8 items-center justify-center overflow-hidden whitespace-nowrap rounded-lg border border-input px-3 text-sm font-medium transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Modifier l'adresse</button>
+                </div>
+              </div>
+              <div class="flex flex-col gap-2">
+                <label for="pf-role" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Poste <span class="font-normal text-muted-foreground">(facultatif)</span></label>
+                <input id="pf-role" data-field="role" type="text" value="{{f.role}}" onChange="{{onField}}" class="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20">
+              </div>
+              <div class="flex flex-col gap-2">
+                <label id="pf-tz-label" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Fuseau horaire</label>
+                <div class="relative {{tzSel.selZ}}">
+                  <sc-if value="{{tzSel.selOpen}}" hint-placeholder-val="{{ false }}">
+                    <button type="button" tabindex="-1" aria-hidden="true" onClick="{{tzSel.selClose}}" class="fixed inset-0 z-40 cursor-default"></button>
+                  </sc-if>
+                  <button type="button" id="pf-tz" role="combobox" aria-haspopup="listbox" aria-expanded="{{tzSel.selOpen}}" aria-controls="pf-tz-list" aria-labelledby="pf-tz-label pf-tz" onClick="{{tzSel.selToggle}}" onKeyDown="{{tzSel.selTriggerKey}}" class="relative z-40 flex h-8 w-full items-center justify-between gap-2 rounded-lg border border-input bg-transparent px-2.5 text-left text-sm transition-colors hover:bg-accent aria-expanded:bg-selected aria-invalid:border-destructive/60 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50">
+                    <span class="flex min-w-0 items-center gap-2 truncate {{tzSel.valueTone}}" data-swap>{{tzSel.valueLabel}}</span>
+                    <span class="ng-icon phosphorCaretDownBold size-4 shrink-0 text-muted-foreground transition-transform duration-300 ease-snap {{tzSel.caretCls}}" aria-hidden="true"></span>
+                  </button>
+                  <sc-if value="{{tzSel.selOpen}}" hint-placeholder-val="{{ false }}">
+                    <div class="absolute top-full left-0 z-50 mt-1 min-w-full menu-shadow">
+                      <div role="listbox" id="pf-tz-list" aria-labelledby="pf-tz-label" onKeyDown="{{selListKey}}" data-select-list class="max-h-72 overflow-y-auto rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-[inset_0_1px_0_0_var(--shadow-edge)] menu-from-tl animate-menu-in motion-reduce:animate-none">
+                        <sc-for list="{{tzSel.options}}" as="tzo" hint-placeholder-count="4">
+                          <button type="button" role="option" aria-selected="{{tzo.on}}" onClick="{{tzo.pick}}" class="flex w-full cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm whitespace-nowrap outline-hidden transition-colors select-none hover:bg-accent focus-visible:bg-selected animate-menu-item {{tzo.stagger}}">
+                            {{tzo.label}}<sc-if value="{{tzo.on}}" hint-placeholder-val="{{ false }}"><span class="ng-icon phosphorCheckBold ml-auto size-4 shrink-0" aria-hidden="true"></span></sc-if>
+                          </button>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </sc-if>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 border-t border-border px-4 py-3">
+              <sc-if value="{{dirty}}" hint-placeholder-val="{{ false }}"><p class="flex items-center gap-1.5 text-xs text-muted-foreground"><span class="size-1.5 rounded-full bg-foreground" aria-hidden="true"></span>Modifications non enregistrées</p></sc-if>
+              <div class="ml-auto flex items-center gap-2">
+                <button type="button" onClick="{{resetProfile}}" disabled="{{clean}}" class="relative isolate inline-flex h-8 items-center justify-center overflow-hidden whitespace-nowrap rounded-lg border border-input px-3 text-sm font-medium transition-all hover:bg-accent disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Annuler</button>
+                <button type="button" onClick="{{saveProfile}}" disabled="{{clean}}" class="relative isolate inline-flex h-8 items-center justify-center overflow-hidden whitespace-nowrap rounded-lg bg-foreground px-3 text-sm font-medium text-background transition-all hover:bg-foreground/90 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Enregistrer</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="flex flex-col gap-4 rounded-xl border border-border bg-card pt-4 text-card-foreground" aria-labelledby="pf-status">
+            <div class="flex flex-col gap-1 px-4"><h2 id="pf-status" class="text-base leading-5 font-semibold">Statut et disponibilité</h2><p class="text-sm text-muted-foreground">Visible à côté de votre nom dans l’organisation, sur tous vos écrans.</p></div>
+            <div role="radiogroup" aria-labelledby="pf-status" onKeyDown="{{radioKey}}" class="grid grid-cols-1 gap-3 px-4 sm:grid-cols-2">
+              <sc-for list="{{userStatusOpts}}" as="us" hint-placeholder-count="4">
+                <button type="button" role="radio" aria-checked="{{us.on}}" data-state="{{us.state}}" onClick="{{us.pick}}" class="flex min-w-0 items-start gap-2.5 rounded-lg border border-border p-3 text-left transition-colors hover:bg-muted data-[state=checked]:border-primary/50 data-[state=checked]:bg-primary/5 data-[state=checked]:hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">
+                  <span class="mt-[5px] flex size-2.5 shrink-0 items-center justify-center rounded-full {{us.dot}}" aria-hidden="true"><sc-if value="{{us.bar}}" hint-placeholder-val="{{ false }}"><span class="h-[1.5px] w-1.5 rounded-full bg-background"></span></sc-if></span>
+                  <span class="flex min-w-0 flex-col gap-0.5"><span class="truncate text-sm leading-5 font-medium">{{us.label}}</span><span class="truncate text-xs text-muted-foreground">{{us.hint}}</span></span>
+                </button>
+              </sc-for>
+            </div>
+            <div class="mx-4 h-px bg-border"></div>
+            <div class="flex flex-col gap-2 px-4">
+              <label for="pf-status-msg" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Message de statut <span class="font-normal text-muted-foreground">(facultatif)</span></label>
+              <div class="flex h-8 items-center gap-2 rounded-lg border border-input px-2.5 transition-[color,box-shadow] focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/20">
+                <div class="relative -ml-1.5 shrink-0" onKeyDown="{{stIconKey}}"><button type="button" onClick="{{stIconToggle}}" aria-haspopup="listbox" aria-expanded="{{stIconOpen}}" aria-label="{{stIconAria}}" title="Choisir l’icône" class="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring {{stIconBtnCls}}"><span class="ng-icon {{stDraftIcon}} size-4" aria-hidden="true"></span></button><sc-if value="{{stIconOpen}}" hint-placeholder-val="{{ false }}"><div class="fixed inset-0 z-40" onClick="{{stIconClose}}" aria-hidden="true"></div><div class="absolute top-full left-0 z-50 mt-2 w-max menu-shadow"><div role="listbox" aria-label="Icône du message" class="grid grid-cols-6 gap-0.5 rounded-lg border border-border bg-popover p-1.5 text-popover-foreground shadow-[inset_0_1px_0_0_var(--shadow-edge)] menu-from-tl animate-menu-in motion-reduce:animate-none"><sc-for list="{{stIconOpts}}" as="ic" hint-placeholder-count="18"><button type="button" role="option" aria-selected="{{ic.on}}" aria-label="{{ic.label}}" title="{{ic.label}}" onClick="{{ic.pick}}" class="inline-flex size-8 items-center justify-center rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring {{ic.cls}}"><span class="ng-icon {{ic.icon}} size-4" aria-hidden="true"></span></button></sc-for></div></div></sc-if></div>
+                <input id="pf-status-msg" type="text" autocomplete="off" maxlength="80" value="{{stDraftMsg}}" onChange="{{onStDraftMsg}}" placeholder="Que faites-vous ?" aria-describedby="pf-status-count" class="h-full min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground">
+                <span id="pf-status-count" class="shrink-0 text-xs whitespace-nowrap text-muted-foreground tabular-nums">{{stDraftCount}}</span>
+              </div>
+            </div>
+            <div class="flex flex-col gap-1 px-4">
+              <p class="text-xs font-medium text-muted-foreground">Suggestions</p>
+              <div class="grid grid-cols-1 gap-px sm:grid-cols-2 sm:gap-x-3">
+                <sc-for list="{{stPresets}}" as="sp0" hint-placeholder-count="5">
+                  <button type="button" onClick="{{sp0.pick}}" aria-pressed="{{sp0.on}}" class="flex h-8 w-full min-w-0 items-center gap-2 rounded-md px-2 text-left text-sm whitespace-nowrap transition-colors hover:bg-muted aria-pressed:bg-primary/5 aria-pressed:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"><span class="ng-icon {{sp0.icon}} size-4 shrink-0 text-muted-foreground" aria-hidden="true"></span><span class="truncate">{{sp0.label}}</span><sc-if value="{{sp0.on}}" hint-placeholder-val="{{ false }}"><span class="ng-icon phosphorCheckBold ml-auto size-4 shrink-0" aria-hidden="true"></span></sc-if></button>
+                </sc-for>
+              </div>
+            </div>
+            <div class="flex flex-col gap-2 px-4">
+              <span id="pf-status-until" class="text-sm leading-none font-medium select-none">Effacer après</span>
+              <div role="radiogroup" aria-labelledby="pf-status-until" onKeyDown="{{radioKey}}" class="flex flex-wrap gap-1.5">
+                <sc-for list="{{stUntil}}" as="su" hint-placeholder-count="5">
+                  <button type="button" role="radio" aria-checked="{{su.on}}" data-state="{{su.state}}" onClick="{{su.pick}}" class="inline-flex h-7 items-center rounded-md border border-border px-2.5 text-xs font-medium whitespace-nowrap transition-colors hover:bg-muted data-[state=checked]:border-primary/50 data-[state=checked]:bg-primary/5 data-[state=checked]:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">{{su.label}}</button>
+                </sc-for>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 border-t border-border px-4 py-3">
+              <sc-if value="{{me.hasMsg}}" hint-placeholder-val="{{ false }}"><p class="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground"><span class="ng-icon {{me.msgIcon}} size-3.5 shrink-0" aria-hidden="true"></span><span class="truncate">{{me.msgSummary}}</span></p></sc-if>
+              <sc-if value="{{stDirty}}" hint-placeholder-val="{{ false }}"><p class="flex items-center gap-1.5 text-xs whitespace-nowrap text-muted-foreground"><span class="size-1.5 rounded-full bg-foreground" aria-hidden="true"></span>Message non enregistré</p></sc-if>
+              <div class="ml-auto flex items-center gap-2">
+                <button type="button" onClick="{{clearStatusMsg}}" disabled="{{stNothing}}" class="relative isolate inline-flex h-8 items-center justify-center overflow-hidden whitespace-nowrap rounded-lg border border-input px-3 text-sm font-medium transition-all hover:bg-accent disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Effacer</button>
+                <button type="button" onClick="{{saveStatusMsg}}" disabled="{{stClean}}" class="relative isolate inline-flex h-8 items-center justify-center overflow-hidden whitespace-nowrap rounded-lg bg-foreground px-3 text-sm font-medium text-background transition-all hover:bg-foreground/90 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Enregistrer</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="flex flex-wrap items-center gap-4 rounded-xl border border-border bg-card p-4 text-card-foreground" aria-labelledby="pf-danger">
+            <div class="flex min-w-0 flex-1 flex-col gap-1"><h2 id="pf-danger" class="text-base leading-5 font-semibold">Supprimer mon compte</h2><p class="text-sm text-muted-foreground">Vos tâches et commentaires restent dans les organisations, attribués à « Ancien membre ».</p></div>
+            <button type="button" onClick="{{openDelete}}" class="relative isolate inline-flex h-8 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-lg bg-destructive px-2.5 text-sm font-medium text-destructive-foreground transition-all hover:bg-grenat-text dark:bg-grenat-soft dark:text-grenat-text dark:hover:bg-grenat-soft/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"><span class="ng-icon phosphorTrashBold" aria-hidden="true"></span>Supprimer le compte</button>
+          </section>
+        </sc-if>
+
+        <sc-if value="{{isSecurity}}" hint-placeholder-val="{{ false }}">
+          <header class="flex flex-col gap-1">
+            <h1 class="text-2xl font-semibold tracking-tight">Sécurité et connexion</h1>
+            <p class="text-sm text-muted-foreground">Mot de passe, vérification en deux étapes, fournisseurs de connexion et appareils.</p>
+          </header>
+
+          <section class="flex flex-wrap items-center gap-4 rounded-xl border border-border bg-card p-4 text-card-foreground" aria-labelledby="sc-pwd">
+            <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-secondary"><span class="ng-icon phosphorPasswordBold" aria-hidden="true"></span></div>
+            <div class="flex min-w-0 flex-1 flex-col gap-0.5"><h2 id="sc-pwd" class="text-base leading-5 font-semibold">Mot de passe</h2><p class="text-sm text-muted-foreground">{{pwWhen}}</p></div>
+            <button type="button" onClick="{{openPassword}}" class="relative isolate inline-flex h-8 items-center justify-center overflow-hidden whitespace-nowrap rounded-lg border border-input px-3 text-sm font-medium transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Modifier le mot de passe</button>
+          </section>
+
+          <section class="flex flex-col gap-4 rounded-xl border border-border bg-card py-4 text-card-foreground" aria-labelledby="sc-mfa">
+            <div class="grid grid-cols-[1fr_auto] items-start gap-x-3 gap-y-1 px-4">
+              <h2 id="sc-mfa" class="flex items-center gap-2 text-base leading-5 font-semibold">Vérification en deux étapes
+                <span class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-md border border-border px-2 py-0.5 text-xs font-medium whitespace-nowrap text-foreground"><span class="ng-icon {{mfaIcon}} size-3 {{mfaTone}}" aria-hidden="true"></span>{{mfaStatus}}</span>
+              </h2>
+              <div class="col-start-2 row-span-2 self-start">
+                <button type="button" onClick="{{toggleMfa}}" class="relative isolate inline-flex h-7 items-center justify-center overflow-hidden whitespace-nowrap rounded-md border border-input px-2.5 text-sm font-medium transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">{{mfaToggleLabel}}</button>
+              </div>
+              <p class="text-sm text-muted-foreground">Exigée par Atelier Nord pour les propriétaires et administrateurs.</p>
+            </div>
+            <sc-if value="{{mfaOn}}" hint-placeholder-val="{{ true }}">
+              <ul class="flex flex-col px-4">
+                <li class="flex flex-wrap items-center gap-3 border-b border-border py-3 first:pt-0">
+                  <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-secondary"><span class="ng-icon phosphorDeviceMobileBold" aria-hidden="true"></span></div>
+                  <div class="flex min-w-0 flex-1 flex-col gap-0.5"><span class="font-medium leading-5">Application d'authentification</span><span class="text-sm text-muted-foreground">Configurée le 3 mars 2026 · méthode principale</span></div>
+                  <button type="button" onClick="{{openSetup}}" class="relative isolate inline-flex h-7 items-center justify-center overflow-hidden whitespace-nowrap rounded-md border border-input px-2.5 text-sm font-medium transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Reconfigurer</button>
+                </li>
+                <li class="flex flex-wrap items-center gap-3 border-b border-border py-3">
+                  <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-secondary"><span class="ng-icon phosphorFingerprintBold" aria-hidden="true"></span></div>
+                  <div class="flex min-w-0 flex-1 flex-col gap-0.5"><span class="font-medium leading-5">Clés de sécurité et biométrie</span><span class="text-sm text-muted-foreground">{{keysLabel}}</span></div>
+                  <button type="button" onClick="{{addKey}}" class="relative isolate inline-flex h-7 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-md border border-input px-2 text-sm font-medium transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"><span class="ng-icon phosphorPlusBold" aria-hidden="true"></span>Ajouter une clé</button>
+                </li>
+                <li class="flex flex-wrap items-center gap-3 py-3 pb-0">
+                  <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-secondary"><span class="ng-icon phosphorLifebuoyBold" aria-hidden="true"></span></div>
+                  <div class="flex min-w-0 flex-1 flex-col gap-0.5"><span class="font-medium leading-5">Codes de secours</span><span class="text-sm text-muted-foreground">{{backupLabel}}</span></div>
+                  <button type="button" onClick="{{openBackup}}" class="relative isolate inline-flex h-7 items-center justify-center overflow-hidden whitespace-nowrap rounded-md border border-input px-2.5 text-sm font-medium transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Générer de nouveaux codes</button>
+                </li>
+              </ul>
+            </sc-if>
+            <sc-if value="{{mfaOff}}" hint-placeholder-val="{{ false }}">
+              <div class="mx-4 flex items-start gap-3 rounded-lg border border-transparent bg-grenat-soft px-4 py-3 text-sm text-grenat-text" role="alert">
+                <span class="ng-icon phosphorWarningCircleFill mt-0.5 size-4 shrink-0" aria-hidden="true"></span>
+                <div class="flex flex-col gap-0.5"><p class="leading-5 font-medium">Votre compte n'est protégé que par un mot de passe.</p><p class="leading-5">Atelier Nord vous demandera la vérification à la prochaine connexion : configurez-la maintenant.</p></div>
+              </div>
+            </sc-if>
+          </section>
+
+          <section class="flex flex-col gap-4 rounded-xl border border-border bg-card py-4 text-card-foreground" aria-labelledby="sc-oauth">
+            <div class="flex flex-col gap-1 px-4"><h2 id="sc-oauth" class="text-base leading-5 font-semibold">Fournisseurs de connexion</h2><p class="text-sm text-muted-foreground">Gardez au moins une méthode : mot de passe ou fournisseur associé.</p></div>
+            <ul class="flex flex-col px-4">
+              <sc-for list="{{providers}}" as="pv" hint-placeholder-count="4">
+                <li class="flex flex-wrap items-center gap-3 border-b border-border py-2.5 first:pt-0 last:border-b-0 last:pb-0">
+                  <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-secondary"><span class="ng-icon {{pv.icon}}" aria-hidden="true"></span></div>
+                  <div class="flex min-w-0 flex-1 flex-col gap-0.5"><span class="font-medium leading-5 truncate">{{pv.name}}</span><span class="truncate text-sm text-muted-foreground">{{pv.detail}}</span></div>
+                  <button type="button" onClick="{{pv.toggle}}" class="relative isolate inline-flex h-7 items-center justify-center overflow-hidden whitespace-nowrap rounded-md px-2.5 text-sm font-medium transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background {{pv.btnCls}}">{{pv.action}}</button>
+                </li>
+              </sc-for>
+            </ul>
+          </section>
+
+          <section class="flex flex-col gap-4 rounded-xl border border-border bg-card py-4 text-card-foreground" aria-labelledby="sc-sessions">
+            <div class="grid grid-cols-[1fr_auto] items-start gap-x-3 gap-y-1 px-4">
+              <h2 id="sc-sessions" class="text-base leading-5 font-semibold">Sessions actives</h2>
+              <div class="col-start-2 row-span-2 self-start">
+                <button type="button" onClick="{{revokeOthers}}" disabled="{{noOthers}}" class="relative isolate inline-flex h-7 items-center justify-center overflow-hidden whitespace-nowrap rounded-md border border-input px-2.5 text-sm font-medium transition-all hover:bg-accent disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Déconnecter les autres</button>
+              </div>
+              <p class="text-sm text-muted-foreground">Une session inactive pendant 12 heures est fermée automatiquement.</p>
+            </div>
+            <ul class="flex flex-col px-4">
+              <sc-for list="{{sessions}}" as="se" hint-placeholder-count="3">
+                <li class="flex flex-wrap items-center gap-3 border-b border-border py-2.5 first:pt-0 last:border-b-0 last:pb-0">
+                  <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-secondary"><span class="ng-icon {{se.icon}}" aria-hidden="true"></span></div>
+                  <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span class="flex items-center gap-2 font-medium leading-5">{{se.device}}<sc-if value="{{se.current}}" hint-placeholder-val="{{ false }}"><span class="inline-flex h-[18px] w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-md border border-transparent bg-secondary px-1.5 text-[11px] leading-none font-medium whitespace-nowrap text-secondary-foreground">Cet appareil</span></sc-if></span>
+                    <span class="truncate text-sm text-muted-foreground">{{se.where}}</span>
+                  </div>
+                  <span class="text-xs text-muted-foreground">{{se.when}}</span>
+                  <sc-if value="{{se.other}}" hint-placeholder-val="{{ true }}">
+                    <button type="button" onClick="{{se.revoke}}" class="relative isolate inline-flex h-7 items-center justify-center overflow-hidden whitespace-nowrap rounded-md px-2.5 text-sm font-medium text-destructive transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Révoquer</button>
+                  </sc-if>
+                </li>
+              </sc-for>
+            </ul>
+          </section>
+        </sc-if>
+
+        <sc-if value="{{isNotifications}}" hint-placeholder-val="{{ false }}">
+          <header class="flex flex-col gap-1">
+            <h1 class="text-2xl font-semibold tracking-tight">Notifications</h1>
+            <p class="text-sm text-muted-foreground">Choisissez ce qui vous est signalé, et par quel canal.</p>
+          </header>
+          <section class="flex flex-col gap-2 rounded-xl border border-border bg-card py-4 text-card-foreground" aria-labelledby="nt-matrix">
+            <div class="px-4"><h2 id="nt-matrix" class="text-base leading-5 font-semibold">Événements</h2></div>
+            <div class="relative w-full overflow-x-auto">
+              <div role="table" aria-label="Notifications par canal" class="wp-cards min-w-[520px]">
+                <div role="row" class="grid h-9 grid-cols-[minmax(0,1fr)_6rem_6rem_6rem] items-center border-b border-border px-4 text-xs font-medium text-muted-foreground">
+                  <span role="columnheader">Événement</span><span role="columnheader" class="text-center whitespace-nowrap">Dans l'app</span><span role="columnheader" class="text-center whitespace-nowrap">E-mail</span><span role="columnheader" class="text-center whitespace-nowrap">Mobile</span>
+                </div>
+                <sc-for list="{{notifRows}}" as="nr" hint-placeholder-count="6">
+                  <div role="row" class="grid min-h-10 grid-cols-[minmax(0,1fr)_6rem_6rem_6rem] items-center border-b border-border px-4 transition-colors last:border-b-0 hover:bg-accent">
+                    <span role="cell" class="flex flex-col py-2"><span class="leading-5">{{nr.label}}</span><span class="text-xs text-muted-foreground">{{nr.hint}}</span></span>
+                    <sc-for list="{{nr.cells}}" as="cell" hint-placeholder-count="3">
+                      <span role="cell" class="flex justify-center">
+                        <button type="button" role="checkbox" aria-checked="{{cell.on}}" data-state="{{cell.state}}" aria-label="{{cell.aria}}" onClick="{{cell.toggle}}" class="grid size-4 place-content-center rounded-[4px] border border-line-control text-background transition-all data-[state=checked]:border-transparent data-[state=checked]:bg-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">
+                          <sc-if value="{{cell.on}}" hint-placeholder-val="{{ false }}"><span class="ng-icon phosphorCheckBold size-3" aria-hidden="true"></span></sc-if>
+                        </button>
+                      </span>
+                    </sc-for>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </section>
+          <section class="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 text-card-foreground" aria-labelledby="nt-digest">
+            <fieldset class="flex min-w-0 flex-col gap-3">
+              <legend id="nt-digest" class="mb-1 text-base font-semibold">Résumé par e-mail</legend>
+              <div role="radiogroup" aria-labelledby="nt-digest" class="grid gap-3">
+                <sc-for list="{{digests}}" as="dg" hint-placeholder-count="4">
+                  <button type="button" role="radio" aria-checked="{{dg.on}}" data-state="{{dg.state}}" onClick="{{dg.pick}}" class="flex items-start gap-2 rounded-md text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">
+                    <span class="mt-0.5 grid size-4 shrink-0 place-content-center rounded-full border border-line-control"><sc-if value="{{dg.on}}" hint-placeholder-val="{{ false }}"><span class="size-2 rounded-full bg-foreground"></span></sc-if></span>
+                    <span class="flex flex-col gap-0.5"><span class="text-sm leading-5 font-medium">{{dg.label}}</span><span class="text-xs text-muted-foreground">{{dg.hint}}</span></span>
+                  </button>
+                </sc-for>
+              </div>
+            </fieldset>
+          </section>
+          <section class="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 text-card-foreground" aria-labelledby="nt-dnd">
+            <div class="flex items-start justify-between gap-4">
+              <div class="grid gap-0.5"><h2 id="nt-dnd" class="text-sm leading-5 font-medium">Ne pas déranger</h2><p class="text-xs text-muted-foreground">Aucune notification mobile de 19:00 à 8:00 ni le week-end. Les mentions urgentes passent quand même.</p></div>
+              <button type="button" role="switch" aria-checked="{{dnd}}" aria-labelledby="nt-dnd" data-state="{{dndState}}" onClick="{{toggleDnd}}" class="inline-flex h-5 w-9 shrink-0 items-center rounded-full p-0.5 transition-colors data-[state=checked]:bg-foreground data-[state=unchecked]:bg-line-control focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background whitespace-nowrap">
+                <span class="block size-4 rounded-full bg-background transition-transform duration-200 ease-snap {{dndKnob}} dark:data-[state=unchecked]:bg-foreground" data-state="{{dndState}}"></span>
+              </button>
+            </div>
+          </section>
+        </sc-if>
+
+        <sc-if value="{{isPrefs}}" hint-placeholder-val="{{ false }}">
+          <header class="flex flex-col gap-1">
+            <h1 class="text-2xl font-semibold tracking-tight">Préférences</h1>
+            <p class="text-sm text-muted-foreground">Apparence, langue et accessibilité. Ces réglages suivent votre compte sur tous vos appareils.</p>
+          </header>
+          <section class="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 text-card-foreground" aria-labelledby="pr-theme">
+            <div class="flex flex-col gap-1"><h2 id="pr-theme" class="text-base leading-5 font-semibold">Thème</h2><p class="text-sm text-muted-foreground">Le thème sombre réduit la luminosité ; la hiérarchie se lit par la clarté des surfaces.</p></div>
+            <div role="radiogroup" aria-labelledby="pr-theme" class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <sc-for list="{{themeCards}}" as="tc" hint-placeholder-count="3">
+                <button type="button" role="radio" aria-checked="{{tc.on}}" data-state="{{tc.state}}" onClick="{{tc.pick}}" class="flex flex-col gap-2 rounded-lg border border-border p-2 text-left transition-colors hover:bg-muted data-[state=checked]:border-primary/50 data-[state=checked]:bg-primary/5 data-[state=checked]:hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">
+                  <span data-theme="{{tc.preview}}" class="flex h-20 gap-1.5 overflow-hidden rounded-md border border-border bg-canvas p-1.5" aria-hidden="true">
+                    <span class="flex w-5 flex-col items-center gap-1 pt-0.5"><span class="size-3 rounded-[3px] bg-sidebar-primary"></span><span class="size-2.5 rounded-[3px] bg-selected"></span><span class="size-2.5 rounded-[3px] bg-stone"></span></span>
+                    <span class="flex flex-1 flex-col gap-1 rounded-[4px] border border-border bg-background p-1.5">
+                      <span class="h-1.5 w-1/2 rounded-full bg-foreground"></span>
+                      <span class="flex items-center gap-1"><span class="size-1.5 rounded-full bg-balise"></span><span class="h-1 w-3/4 rounded-full bg-track"></span></span>
+                      <span class="flex items-center gap-1"><span class="size-1.5 rounded-full bg-jade"></span><span class="h-1 w-2/3 rounded-full bg-track"></span></span>
+                      <span class="mt-auto h-2.5 w-8 self-end rounded-[3px] bg-foreground"></span>
+                    </span>
+                  </span>
+                  <span class="flex items-center gap-2 px-0.5">
+                    <span class="grid size-4 shrink-0 place-content-center rounded-full border border-line-control"><sc-if value="{{tc.on}}" hint-placeholder-val="{{ false }}"><span class="size-2 rounded-full bg-foreground"></span></sc-if></span>
+                    <span class="flex items-center gap-1.5 text-sm font-medium"><span class="ng-icon {{tc.icon}} text-muted-foreground" aria-hidden="true"></span>{{tc.label}}</span>
+                  </span>
+                </button>
+              </sc-for>
+            </div>
+          </section>
+          <section class="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 text-card-foreground" aria-labelledby="pr-region">
+            <h2 id="pr-region" class="text-base leading-5 font-semibold">Langue et région</h2>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div class="flex flex-col gap-2">
+                <label id="pr-lang-label" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Langue</label>
+                <div class="relative {{langSel.selZ}}">
+                  <sc-if value="{{langSel.selOpen}}" hint-placeholder-val="{{ false }}">
+                    <button type="button" tabindex="-1" aria-hidden="true" onClick="{{langSel.selClose}}" class="fixed inset-0 z-40 cursor-default"></button>
+                  </sc-if>
+                  <button type="button" id="pr-lang" role="combobox" aria-haspopup="listbox" aria-expanded="{{langSel.selOpen}}" aria-controls="pr-lang-list" aria-labelledby="pr-lang-label pr-lang" onClick="{{langSel.selToggle}}" onKeyDown="{{langSel.selTriggerKey}}" class="relative z-40 flex h-8 w-full items-center justify-between gap-2 rounded-lg border border-input bg-transparent px-2.5 text-left text-sm transition-colors hover:bg-accent aria-expanded:bg-selected aria-invalid:border-destructive/60 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50">
+                    <span class="flex min-w-0 items-center gap-2 truncate {{langSel.valueTone}}"><sc-if value="{{langSel.hasValueFlag}}" hint-placeholder-val="{{ true }}"><span class="ng-flag {{langSel.valueFlag}}" aria-hidden="true"></span></sc-if><span data-swap>{{langSel.valueLabel}}</span></span>
+                    <span class="ng-icon phosphorCaretDownBold size-4 shrink-0 text-muted-foreground transition-transform duration-300 ease-snap {{langSel.caretCls}}" aria-hidden="true"></span>
+                  </button>
+                  <sc-if value="{{langSel.selOpen}}" hint-placeholder-val="{{ false }}">
+                    <div class="absolute top-full left-0 z-50 mt-1 min-w-full menu-shadow">
+                      <div role="listbox" id="pr-lang-list" aria-labelledby="pr-lang-label" onKeyDown="{{selListKey}}" data-select-list class="max-h-72 overflow-y-auto rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-[inset_0_1px_0_0_var(--shadow-edge)] menu-from-tl animate-menu-in motion-reduce:animate-none">
+                        <sc-for list="{{langSel.options}}" as="lgo" hint-placeholder-count="4">
+                          <button type="button" role="option" aria-selected="{{lgo.on}}" onClick="{{lgo.pick}}" class="flex w-full cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm whitespace-nowrap outline-hidden transition-colors select-none hover:bg-accent focus-visible:bg-selected animate-menu-item {{lgo.stagger}}">
+                            <sc-if value="{{lgo.hasFlag}}" hint-placeholder-val="{{ true }}"><span class="ng-flag {{lgo.flag}}" aria-hidden="true"></span></sc-if>{{lgo.label}}<sc-if value="{{lgo.on}}" hint-placeholder-val="{{ false }}"><span class="ng-icon phosphorCheckBold ml-auto size-4 shrink-0" aria-hidden="true"></span></sc-if>
+                          </button>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </sc-if>
+                </div>
+              </div>
+              <div class="flex flex-col gap-2">
+                <label id="pr-date-label" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Format de date</label>
+                <div class="relative {{dateSel.selZ}}">
+                  <sc-if value="{{dateSel.selOpen}}" hint-placeholder-val="{{ false }}">
+                    <button type="button" tabindex="-1" aria-hidden="true" onClick="{{dateSel.selClose}}" class="fixed inset-0 z-40 cursor-default"></button>
+                  </sc-if>
+                  <button type="button" id="pr-date" role="combobox" aria-haspopup="listbox" aria-expanded="{{dateSel.selOpen}}" aria-controls="pr-date-list" aria-labelledby="pr-date-label pr-date" onClick="{{dateSel.selToggle}}" onKeyDown="{{dateSel.selTriggerKey}}" class="relative z-40 flex h-8 w-full items-center justify-between gap-2 rounded-lg border border-input bg-transparent px-2.5 text-left text-sm transition-colors hover:bg-accent aria-expanded:bg-selected aria-invalid:border-destructive/60 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50">
+                    <span class="flex min-w-0 items-center gap-2 truncate {{dateSel.valueTone}}" data-swap>{{dateSel.valueLabel}}</span>
+                    <span class="ng-icon phosphorCaretDownBold size-4 shrink-0 text-muted-foreground transition-transform duration-300 ease-snap {{dateSel.caretCls}}" aria-hidden="true"></span>
+                  </button>
+                  <sc-if value="{{dateSel.selOpen}}" hint-placeholder-val="{{ false }}">
+                    <div class="absolute top-full left-0 z-50 mt-1 min-w-full menu-shadow">
+                      <div role="listbox" id="pr-date-list" aria-labelledby="pr-date-label" onKeyDown="{{selListKey}}" data-select-list class="max-h-72 overflow-y-auto rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-[inset_0_1px_0_0_var(--shadow-edge)] menu-from-tl animate-menu-in motion-reduce:animate-none">
+                        <sc-for list="{{dateSel.options}}" as="dto" hint-placeholder-count="3">
+                          <button type="button" role="option" aria-selected="{{dto.on}}" onClick="{{dto.pick}}" class="flex w-full cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm whitespace-nowrap outline-hidden transition-colors select-none hover:bg-accent focus-visible:bg-selected animate-menu-item {{dto.stagger}}">
+                            {{dto.label}}<sc-if value="{{dto.on}}" hint-placeholder-val="{{ false }}"><span class="ng-icon phosphorCheckBold ml-auto size-4 shrink-0" aria-hidden="true"></span></sc-if>
+                          </button>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </sc-if>
+                </div>
+              </div>
+              <div class="flex flex-col gap-2">
+                <label id="pr-week-label" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Début de semaine</label>
+                <div class="relative {{weekSel.selZ}}">
+                  <sc-if value="{{weekSel.selOpen}}" hint-placeholder-val="{{ false }}">
+                    <button type="button" tabindex="-1" aria-hidden="true" onClick="{{weekSel.selClose}}" class="fixed inset-0 z-40 cursor-default"></button>
+                  </sc-if>
+                  <button type="button" id="pr-week" role="combobox" aria-haspopup="listbox" aria-expanded="{{weekSel.selOpen}}" aria-controls="pr-week-list" aria-labelledby="pr-week-label pr-week" onClick="{{weekSel.selToggle}}" onKeyDown="{{weekSel.selTriggerKey}}" class="relative z-40 flex h-8 w-full items-center justify-between gap-2 rounded-lg border border-input bg-transparent px-2.5 text-left text-sm transition-colors hover:bg-accent aria-expanded:bg-selected aria-invalid:border-destructive/60 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50">
+                    <span class="flex min-w-0 items-center gap-2 truncate {{weekSel.valueTone}}" data-swap>{{weekSel.valueLabel}}</span>
+                    <span class="ng-icon phosphorCaretDownBold size-4 shrink-0 text-muted-foreground transition-transform duration-300 ease-snap {{weekSel.caretCls}}" aria-hidden="true"></span>
+                  </button>
+                  <sc-if value="{{weekSel.selOpen}}" hint-placeholder-val="{{ false }}">
+                    <div class="absolute top-full left-0 z-50 mt-1 min-w-full menu-shadow">
+                      <div role="listbox" id="pr-week-list" aria-labelledby="pr-week-label" onKeyDown="{{selListKey}}" data-select-list class="max-h-72 overflow-y-auto rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-[inset_0_1px_0_0_var(--shadow-edge)] menu-from-tl animate-menu-in motion-reduce:animate-none">
+                        <sc-for list="{{weekSel.options}}" as="wko" hint-placeholder-count="3">
+                          <button type="button" role="option" aria-selected="{{wko.on}}" onClick="{{wko.pick}}" class="flex w-full cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm whitespace-nowrap outline-hidden transition-colors select-none hover:bg-accent focus-visible:bg-selected animate-menu-item {{wko.stagger}}">
+                            {{wko.label}}<sc-if value="{{wko.on}}" hint-placeholder-val="{{ false }}"><span class="ng-icon phosphorCheckBold ml-auto size-4 shrink-0" aria-hidden="true"></span></sc-if>
+                          </button>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </sc-if>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section class="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 text-card-foreground" aria-labelledby="pr-a11y">
+            <h2 id="pr-a11y" class="text-base leading-5 font-semibold">Affichage et accessibilité</h2>
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div class="grid gap-0.5"><span class="text-sm leading-5 font-medium" id="pr-density">Densité des listes</span><span class="text-xs text-muted-foreground">Hauteur des lignes de la vue Liste et des cartes.</span></div>
+              <div role="radiogroup" aria-labelledby="pr-density" class="flex w-fit items-center">
+                <sc-for list="{{densities}}" as="dn" hint-placeholder-count="3">
+                  <button type="button" role="radio" aria-checked="{{dn.on}}" data-state="{{dn.state}}" onClick="{{dn.pick}}" class="inline-flex h-8 items-center justify-center border border-input px-3 text-sm font-medium text-muted-foreground transition-colors not-first:border-l-0 first:rounded-l-lg last:rounded-r-lg hover:bg-accent data-[state=checked]:bg-selected data-[state=checked]:text-foreground focus-visible:relative focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background whitespace-nowrap">{{dn.label}}</button>
+                </sc-for>
+              </div>
+            </div>
+            <sc-for list="{{switches}}" as="sw" hint-placeholder-count="2">
+              <div class="flex items-start justify-between gap-4 border-t border-border pt-4">
+                <div class="grid gap-0.5"><span class="text-sm leading-5 font-medium" id="{{sw.id}}">{{sw.label}}</span><sc-if value="{{sw.plain}}" hint-placeholder-val="{{ true }}"><span class="text-xs text-muted-foreground">{{sw.hint}}</span></sc-if><sc-if value="{{sw.keys}}" hint-placeholder-val="{{ false }}"><span class="text-xs leading-5 text-muted-foreground"><kbd class="inline-flex h-4 min-w-4 items-center justify-center rounded-[4px] border border-line-strong border-b-2 border-b-line-control bg-background px-[3px] align-middle font-sans text-[9px] leading-none font-medium text-muted-foreground select-none dark:bg-surface-overlay whitespace-nowrap">C</kbd> pour créer une tâche, <kbd class="inline-flex h-4 min-w-4 items-center justify-center rounded-[4px] border border-line-strong border-b-2 border-b-line-control bg-background px-[3px] align-middle font-sans text-[9px] leading-none font-medium text-muted-foreground select-none dark:bg-surface-overlay whitespace-nowrap">G</kbd> puis <kbd class="inline-flex h-4 min-w-4 items-center justify-center rounded-[4px] border border-line-strong border-b-2 border-b-line-control bg-background px-[3px] align-middle font-sans text-[9px] leading-none font-medium text-muted-foreground select-none dark:bg-surface-overlay whitespace-nowrap">I</kbd> pour la boîte de réception.</span></sc-if></div>
+                <button type="button" role="switch" aria-checked="{{sw.on}}" aria-labelledby="{{sw.id}}" data-state="{{sw.state}}" onClick="{{sw.toggle}}" class="inline-flex h-5 w-9 shrink-0 items-center rounded-full p-0.5 transition-colors data-[state=checked]:bg-foreground data-[state=unchecked]:bg-line-control focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background whitespace-nowrap">
+                  <span class="block size-4 rounded-full bg-background transition-transform duration-200 ease-snap {{sw.knob}} dark:data-[state=unchecked]:bg-foreground" data-state="{{sw.state}}"></span>
+                </button>
+              </div>
+            </sc-for>
+          </section>
+        </sc-if>
+
+        <sc-if value="{{isTokens}}" hint-placeholder-val="{{ false }}">
+          <header class="flex flex-wrap items-start gap-4">
+            <div class="flex min-w-0 flex-1 flex-col gap-1">
+              <h1 class="text-2xl font-semibold tracking-tight">Jetons d'API</h1>
+              <p class="text-sm text-muted-foreground">Jetons personnels pour l'API REST et les webhooks. Ils agissent avec vos droits.</p>
+            </div>
+            <button type="button" onClick="{{openToken}}" class="relative isolate inline-flex h-8 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-lg bg-foreground px-2.5 text-sm font-medium text-background transition-all hover:bg-foreground/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"><span class="ng-icon phosphorPlusBold" aria-hidden="true"></span>Créer un jeton</button>
+          </header>
+          <div class="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card px-4 py-3">
+            <span class="ng-icon phosphorPlugsConnectedBold text-muted-foreground" aria-hidden="true"></span>
+            <p class="min-w-0 flex-1 text-sm">Appels d'API d'Atelier Nord ce mois : <span class="font-medium tabular-nums whitespace-nowrap">412 000 / 500 000</span></p>
+            <div role="meter" aria-label="Appels d'API d'Atelier Nord ce mois" aria-valuemin="0" aria-valuemax="500000" aria-valuenow="412000" aria-valuetext="412 000 sur 500 000, 82 %" class="h-1.5 w-32 overflow-hidden rounded-full bg-track"><div class="h-full w-[82%] rounded-full bg-balise"></div></div>
+            <a href="Organisation.dc.html" onClick="{{goQuotas}}" class="rounded-sm text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Voir les quotas</a>
+          </div>
+          <div class="relative w-full overflow-x-auto rounded-lg border border-border">
+            <div role="table" aria-label="Jetons d'accès personnels" class="wp-cards min-w-[640px]">
+              <div role="row" class="grid h-9 grid-cols-[minmax(10rem,1fr)_12rem_7rem_7rem_6rem] items-center border-b border-border px-3 text-xs font-medium text-muted-foreground">
+                <span role="columnheader">Nom</span><span role="columnheader">Portées</span><span role="columnheader">Dernier usage</span><span role="columnheader">Expire</span><span role="columnheader" class="sr-only whitespace-nowrap">Actions</span>
+              </div>
+              <sc-for list="{{tokens}}" as="tk" hint-placeholder-count="3">
+                <div role="row" class="grid min-h-10 grid-cols-[minmax(10rem,1fr)_12rem_7rem_7rem_6rem] items-center border-b border-border px-3 transition-colors last:border-b-0 hover:bg-accent">
+                  <span role="cell" class="flex flex-col py-2"><span class="font-medium leading-5 truncate">{{tk.name}}</span><span class="font-mono text-xs text-muted-foreground">{{tk.prefix}}</span></span>
+                  <span role="cell" class="flex flex-wrap gap-1 py-2"><sc-for list="{{tk.scopes}}" as="sc" hint-placeholder-count="2"><span class="inline-flex h-[18px] w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-md border border-border px-1.5 font-mono text-[11px] leading-none font-medium whitespace-nowrap text-foreground">{{sc.s}}</span></sc-for></span>
+                  <span role="cell" class="text-xs text-muted-foreground">{{tk.used}}</span>
+                  <span role="cell" class="text-xs {{tk.expTone}}">{{tk.expires}}</span>
+                  <span role="cell" class="flex justify-end"><button type="button" onClick="{{tk.revoke}}" class="relative isolate inline-flex h-7 items-center justify-center overflow-hidden whitespace-nowrap rounded-md px-2.5 text-sm font-medium text-destructive transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Révoquer</button></span>
+                </div>
+              </sc-for>
+              <sc-if value="{{noTokens}}" hint-placeholder-val="{{ false }}">
+                <div role="row"><div role="cell" class="flex min-w-0 flex-col items-center justify-center gap-3 rounded-xl p-4 text-center text-balance">
+                  <div class="flex max-w-sm flex-col items-center gap-2">
+                    <div class="flex size-8 items-center justify-center rounded-lg bg-muted"><span class="ng-icon phosphorKeyBold size-4 text-muted-foreground" aria-hidden="true"></span></div>
+                    <p class="text-sm font-medium">Aucun jeton actif</p>
+                    <p class="text-sm/relaxed text-muted-foreground">Créez un jeton pour appeler l'API REST ou recevoir des webhooks.</p>
+                  </div>
+                  <div class="flex flex-wrap justify-center gap-2">
+                    <button type="button" onClick="{{openToken}}" class="relative isolate inline-flex h-7 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-md border border-input px-2 text-sm font-medium transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"><span class="ng-icon phosphorPlusBold" aria-hidden="true"></span>Créer un jeton</button>
+                  </div>
+                </div></div>
+              </sc-if>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </main>
+  </div>
+
+  <sc-if value="{{dialogOpen}}" hint-placeholder-val="{{ false }}">
+    <button type="button" aria-label="Fermer la fenêtre" onClick="{{closeDialog}}" class="fixed inset-0 z-50 cursor-default bg-[#18181b]/35 animate-fade-in motion-reduce:animate-none dark:bg-[#09090b]/70"></button>
+    <div role="{{dialogRole}}" aria-modal="true" aria-labelledby="dlg-title" class="fixed top-1/2 left-1/2 z-50 grid w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl border border-border bg-popover p-6 text-popover-foreground shadow-xl animate-pop-in motion-reduce:animate-none">
+
+      <sc-if value="{{dlgPassword}}" hint-placeholder-val="{{ false }}">
+        <div class="flex flex-col gap-2"><h2 id="dlg-title" class="text-lg leading-none font-semibold">Modifier le mot de passe</h2><p class="text-sm text-muted-foreground">Vos autres sessions resteront ouvertes.</p></div>
+        <div class="flex flex-col gap-4">
+          <div class="flex flex-col gap-2"><label for="pw-current" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Mot de passe actuel</label><input id="pw-current" data-pw="cur" type="password" autocomplete="current-password" onInput="{{onPw}}" class="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20"></div>
+          <div class="flex flex-col gap-2"><label for="pw-new" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Nouveau mot de passe</label><input id="pw-new" data-pw="nw" type="password" autocomplete="new-password" placeholder="12 caractères minimum" aria-describedby="pw-new-help" onInput="{{onPw}}" class="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20"><p id="pw-new-help" class="text-xs text-muted-foreground tabular-nums">{{pwHelp}}</p></div>
+          <div class="flex flex-col gap-2"><label for="pw-confirm" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Confirmer</label><input id="pw-confirm" data-pw="cf" type="password" autocomplete="new-password" aria-invalid="{{pwMismatch}}" onInput="{{onPw}}" class="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none aria-invalid:border-destructive/60 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20">
+            <sc-if value="{{pwMismatch}}" hint-placeholder-val="{{ false }}"><p class="flex items-center gap-1 text-xs font-medium text-destructive"><span class="ng-icon phosphorWarningCircleFill size-3.5" aria-hidden="true"></span>Les deux mots de passe ne correspondent pas.</p></sc-if>
+          </div>
+        </div>
+        <div class="flex justify-end gap-2">
+          <button type="button" onClick="{{closeDialog}}" class="relative isolate inline-flex h-8 items-center justify-center overflow-hidden whitespace-nowrap rounded-lg border border-input px-3 text-sm font-medium transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Annuler</button>
+          <button type="button" onClick="{{savePassword}}" disabled="{{pwBlocked}}" class="relative isolate inline-flex h-8 items-center justify-center overflow-hidden whitespace-nowrap rounded-lg bg-foreground px-3 text-sm font-medium text-background transition-all hover:bg-foreground/90 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Modifier le mot de passe</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{dlgEmail}}" hint-placeholder-val="{{ false }}">
+        <div class="flex flex-col gap-2"><h2 id="dlg-title" class="text-lg leading-none font-semibold">Modifier l'adresse e-mail</h2><p class="text-sm text-muted-foreground">Étape {{emailStepNum}} sur 2</p></div>
+        <ol class="grid grid-cols-2 gap-2" aria-label="Étapes">
+          <sc-for list="{{emailSteps}}" as="es" hint-placeholder-count="2">
+            <li class="flex flex-col gap-1.5"><span class="h-1 rounded-full {{es.bar}}"></span><span class="text-xs {{es.text}} whitespace-nowrap">{{es.label}}</span></li>
+          </sc-for>
+        </ol>
+        <sc-if value="{{emailStep1}}" hint-placeholder-val="{{ true }}">
+          <div class="flex flex-col gap-2">
+            <label for="em-new" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Nouvelle adresse e-mail</label>
+            <input id="em-new" type="email" autocomplete="email" placeholder="prenom.nom@exemple.fr" value="{{emailDraft}}" aria-invalid="{{emailInvalid}}" aria-describedby="em-new-help" onChange="{{onEmailDraft}}" onKeyDown="{{onEmailKey}}" class="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none placeholder:text-muted-foreground aria-invalid:border-destructive/60 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20">
+            <p id="em-new-help" class="text-xs text-muted-foreground">Un code à 6 chiffres y sera envoyé. L'adresse actuelle reste active jusqu'à la confirmation.</p>
+            <sc-if value="{{emailInvalid}}" hint-placeholder-val="{{ false }}"><p role="alert" class="flex items-center gap-1 text-xs font-medium text-destructive"><span class="ng-icon phosphorWarningCircleFill size-3.5" aria-hidden="true"></span>{{emailError}}</p></sc-if>
+          </div>
+        </sc-if>
+        <sc-if value="{{emailStep2}}" hint-placeholder-val="{{ false }}">
+          <div class="flex flex-col gap-2">
+            <label id="em-code-label" for="em-code-0" class="text-sm leading-5 font-medium select-none">Code envoyé à {{emailDraft}}</label>
+            <div role="group" aria-labelledby="em-code-label" data-otp="em-code" onPaste="{{emailOtp.paste}}" class="flex items-center gap-2">
+              <div class="flex items-center">
+                <sc-for list="{{emailOtp.a}}" as="eoa" hint-placeholder-count="3">
+                  <input id="{{eoa.id}}" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="1" aria-label="{{eoa.label}}" onInput="{{eoa.input}}" onKeyDown="{{eoa.key}}" class="relative size-8 border-y border-r border-input bg-transparent text-center text-sm font-medium tabular-nums outline-none transition-[color,box-shadow] first:rounded-l-lg first:border-l last:rounded-r-lg focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">
+                </sc-for>
+              </div>
+              <span class="ng-icon phosphorMinusBold size-4 shrink-0 text-muted-foreground" aria-hidden="true"></span>
+              <div class="flex items-center">
+                <sc-for list="{{emailOtp.b}}" as="eob" hint-placeholder-count="3">
+                  <input id="{{eob.id}}" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="1" aria-label="{{eob.label}}" onInput="{{eob.input}}" onKeyDown="{{eob.key}}" class="relative size-8 border-y border-r border-input bg-transparent text-center text-sm font-medium tabular-nums outline-none transition-[color,box-shadow] first:rounded-l-lg first:border-l last:rounded-r-lg focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">
+                </sc-for>
+              </div>
+            </div>
+            <p class="text-xs text-muted-foreground">Le code est valable 15 minutes. Vérifiez les courriers indésirables.</p>
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <button type="button" onClick="{{resendEmailCode}}" disabled="{{emailResendDisabled}}" class="relative isolate inline-flex h-7 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-md px-2 text-sm font-medium tabular-nums transition-all hover:bg-accent disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"><span class="ng-icon phosphorArrowClockwiseBold" aria-hidden="true"></span>{{emailResendLabel}}</button>
+              <button type="button" onClick="{{emailBack}}" class="relative isolate inline-flex h-7 items-center justify-center overflow-hidden whitespace-nowrap rounded-md px-2 text-sm font-medium text-muted-foreground transition-all hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Changer d'adresse</button>
+            </div>
+          </div>
+        </sc-if>
+        <div class="flex justify-end gap-2">
+          <button type="button" onClick="{{closeDialog}}" class="relative isolate inline-flex h-8 items-center justify-center overflow-hidden whitespace-nowrap rounded-lg border border-input px-3 text-sm font-medium transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Annuler</button>
+          <button type="button" onClick="{{emailNext}}" disabled="{{emailBlocked}}" class="relative isolate inline-flex h-8 items-center justify-center overflow-hidden whitespace-nowrap rounded-lg bg-foreground px-3 text-sm font-medium text-background transition-all hover:bg-foreground/90 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">{{emailCta}}</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{dlgSetup}}" hint-placeholder-val="{{ false }}">
+        <div class="flex flex-col gap-2"><h2 id="dlg-title" class="text-lg leading-none font-semibold">Configurer l'application d'authentification</h2><p class="text-sm text-muted-foreground">Étape {{setupStep}} sur 3</p></div>
+        <ol class="grid grid-cols-3 gap-2" aria-label="Étapes">
+          <sc-for list="{{steps}}" as="sp" hint-placeholder-count="3">
+            <li class="flex flex-col gap-1.5"><span class="h-1 rounded-full {{sp.bar}}"></span><span class="text-xs {{sp.text}} whitespace-nowrap">{{sp.label}}</span></li>
+          </sc-for>
+        </ol>
+        <sc-if value="{{step1}}" hint-placeholder-val="{{ true }}">
+          <div class="flex flex-col items-center gap-3">
+            <div class="flex size-36 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-input bg-muted text-muted-foreground"><span class="ng-icon phosphorQrCodeBold size-10" aria-hidden="true"></span><span class="text-xs">QR code généré</span></div>
+            <p class="text-center text-sm text-muted-foreground">Scannez ce code avec votre application, ou saisissez la clé :</p>
+            <div class="flex items-center gap-2 rounded-md bg-muted px-2.5 py-1.5"><code class="font-mono text-xs tracking-wider">JBSW Y3DP EHPK 3PXP</code><button type="button" onClick="{{copyKey}}" aria-label="Copier la clé" class="relative isolate inline-flex size-6 shrink-0 items-center justify-center overflow-hidden rounded-md text-muted-foreground transition-all hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background whitespace-nowrap"><span class="ng-icon phosphorCopyBold size-3.5" aria-hidden="true"></span></button></div>
+          </div>
+        </sc-if>
+        <sc-if value="{{step2}}" hint-placeholder-val="{{ false }}">
+          <div class="flex flex-col gap-2">
+            <label id="setup-code-label" for="setup-code-0" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Code affiché par l'application</label>
+            <div role="group" aria-labelledby="setup-code-label" data-otp="setup-code" onPaste="{{setupOtp.paste}}" class="flex items-center gap-2">
+              <div class="flex items-center">
+                <sc-for list="{{setupOtp.a}}" as="soa" hint-placeholder-count="3">
+                  <input id="{{soa.id}}" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="1" aria-label="{{soa.label}}" onInput="{{soa.input}}" onKeyDown="{{soa.key}}" class="relative size-8 border-y border-r border-input bg-transparent text-center text-sm font-medium tabular-nums outline-none transition-[color,box-shadow] first:rounded-l-lg first:border-l last:rounded-r-lg focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">
+                </sc-for>
+              </div>
+              <span class="ng-icon phosphorMinusBold size-4 shrink-0 text-muted-foreground" aria-hidden="true"></span>
+              <div class="flex items-center">
+                <sc-for list="{{setupOtp.b}}" as="sob" hint-placeholder-count="3">
+                  <input id="{{sob.id}}" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="1" aria-label="{{sob.label}}" onInput="{{sob.input}}" onKeyDown="{{sob.key}}" class="relative size-8 border-y border-r border-input bg-transparent text-center text-sm font-medium tabular-nums outline-none transition-[color,box-shadow] first:rounded-l-lg first:border-l last:rounded-r-lg focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">
+                </sc-for>
+              </div>
+            </div>
+            <p class="text-xs text-muted-foreground">Le code change toutes les 30 secondes.</p>
+          </div>
+        </sc-if>
+        <sc-if value="{{step3}}" hint-placeholder-val="{{ false }}">
+          <div class="flex flex-col gap-3">
+            <div role="status" class="flex w-full items-start gap-3 rounded-lg border border-border bg-card px-4 py-3 text-sm text-card-foreground"><span class="ng-icon phosphorCheckCircleFill mt-0.5 size-4 shrink-0 text-jade" aria-hidden="true"></span><div class="flex min-w-0 flex-col"><p class="font-medium leading-5">Application configurée</p><p class="leading-5 text-muted-foreground">Conservez ces codes de secours hors ligne : chacun ne sert qu'une fois.</p></div></div>
+            <ul class="grid grid-cols-2 gap-x-4 gap-y-1.5 rounded-lg border border-border p-3 font-mono text-sm tabular-nums">
+              <sc-for list="{{codes}}" as="cd" hint-placeholder-count="10"><li>{{cd.c}}</li></sc-for>
+            </ul>
+          </div>
+        </sc-if>
+        <div class="flex justify-end gap-2">
+          <button type="button" onClick="{{closeDialog}}" class="relative isolate inline-flex h-8 items-center justify-center overflow-hidden whitespace-nowrap rounded-lg border border-input px-3 text-sm font-medium transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">{{setupCancel}}</button>
+          <button type="button" onClick="{{setupNext}}" disabled="{{setupBlocked}}" class="relative isolate inline-flex h-8 items-center justify-center overflow-hidden whitespace-nowrap rounded-lg bg-foreground px-3 text-sm font-medium text-background transition-all hover:bg-foreground/90 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">{{setupCta}}</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{dlgBackup}}" hint-placeholder-val="{{ false }}">
+        <div class="flex flex-col gap-2"><h2 id="dlg-title" class="text-lg leading-none font-semibold">Nouveaux codes de secours</h2><p class="text-sm text-muted-foreground">Les 7 codes précédents ne fonctionnent plus.</p></div>
+        <ul class="grid grid-cols-2 gap-x-4 gap-y-1.5 rounded-lg border border-border p-3 font-mono text-sm tabular-nums">
+          <sc-for list="{{codes}}" as="cd" hint-placeholder-count="10"><li>{{cd.c}}</li></sc-for>
+        </ul>
+        <div class="flex justify-end gap-2">
+          <button type="button" onClick="{{copyCodes}}" class="relative isolate inline-flex h-8 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-lg border border-input px-2.5 text-sm font-medium transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"><span class="ng-icon phosphorCopyBold" aria-hidden="true"></span>Copier</button>
+          <button type="button" onClick="{{closeBackup}}" class="relative isolate inline-flex h-8 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-lg bg-foreground px-2.5 text-sm font-medium text-background transition-all hover:bg-foreground/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"><span class="ng-icon phosphorDownloadSimpleBold" aria-hidden="true"></span>Télécharger et fermer</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{dlgToken}}" hint-placeholder-val="{{ false }}">
+        <sc-if value="{{tokenForm}}" hint-placeholder-val="{{ true }}">
+          <div class="flex flex-col gap-2"><h2 id="dlg-title" class="text-lg leading-none font-semibold">Créer un jeton</h2><p class="text-sm text-muted-foreground">Accordez seulement les portées nécessaires.</p></div>
+          <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-2"><label for="tk-name" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Nom</label><input id="tk-name" type="text" placeholder="Synchronisation GitLab" onInput="{{onTokenName}}" class="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20"></div>
+            <div class="flex flex-col gap-2">
+              <label id="tk-exp-label" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Expiration</label>
+              <div class="relative {{expSel.selZ}}">
+                <sc-if value="{{expSel.selOpen}}" hint-placeholder-val="{{ false }}">
+                  <button type="button" tabindex="-1" aria-hidden="true" onClick="{{expSel.selClose}}" class="fixed inset-0 z-40 cursor-default"></button>
+                </sc-if>
+                <button type="button" id="tk-exp" role="combobox" aria-haspopup="listbox" aria-expanded="{{expSel.selOpen}}" aria-controls="tk-exp-list" aria-labelledby="tk-exp-label tk-exp" onClick="{{expSel.selToggle}}" onKeyDown="{{expSel.selTriggerKey}}" class="relative z-40 flex h-8 w-full items-center justify-between gap-2 rounded-lg border border-input bg-transparent px-2.5 text-left text-sm transition-colors hover:bg-accent aria-expanded:bg-selected aria-invalid:border-destructive/60 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50">
+                  <span class="flex min-w-0 items-center gap-2 truncate {{expSel.valueTone}}" data-swap>{{expSel.valueLabel}}</span>
+                  <span class="ng-icon phosphorCaretDownBold size-4 shrink-0 text-muted-foreground transition-transform duration-300 ease-snap {{expSel.caretCls}}" aria-hidden="true"></span>
+                </button>
+                <sc-if value="{{expSel.selOpen}}" hint-placeholder-val="{{ false }}">
+                  <div class="absolute top-full left-0 z-50 mt-1 min-w-full menu-shadow">
+                    <div role="listbox" id="tk-exp-list" aria-labelledby="tk-exp-label" onKeyDown="{{selListKey}}" data-select-list class="max-h-72 overflow-y-auto rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-[inset_0_1px_0_0_var(--shadow-edge)] menu-from-tl animate-menu-in motion-reduce:animate-none">
+                      <sc-for list="{{expSel.options}}" as="exo" hint-placeholder-count="4">
+                        <button type="button" role="option" aria-selected="{{exo.on}}" onClick="{{exo.pick}}" class="flex w-full cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm whitespace-nowrap outline-hidden transition-colors select-none hover:bg-accent focus-visible:bg-selected animate-menu-item {{exo.stagger}}">
+                          {{exo.label}}<sc-if value="{{exo.on}}" hint-placeholder-val="{{ false }}"><span class="ng-icon phosphorCheckBold ml-auto size-4 shrink-0" aria-hidden="true"></span></sc-if>
+                        </button>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+            <fieldset class="flex min-w-0 flex-col gap-2">
+              <legend class="mb-1 text-sm font-medium">Portées</legend>
+              <sc-for list="{{scopeOptions}}" as="so" hint-placeholder-count="4">
+                <div class="flex items-start gap-2">
+                  <button type="button" role="checkbox" id="{{so.id}}" aria-checked="{{so.on}}" data-state="{{so.state}}" onClick="{{so.toggle}}" class="mt-0.5 grid size-4 shrink-0 place-content-center rounded-[4px] border border-line-control text-background transition-all data-[state=checked]:border-transparent data-[state=checked]:bg-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"><sc-if value="{{so.on}}" hint-placeholder-val="{{ false }}"><span class="ng-icon phosphorCheckBold size-3" aria-hidden="true"></span></sc-if></button>
+                  <label for="{{so.id}}" class="flex flex-col gap-0.5"><span class="font-mono text-xs leading-5">{{so.s}}</span><span class="text-xs text-muted-foreground">{{so.hint}}</span></label>
+                </div>
+              </sc-for>
+            </fieldset>
+          </div>
+          <div class="flex justify-end gap-2">
+            <button type="button" onClick="{{closeDialog}}" class="relative isolate inline-flex h-8 items-center justify-center overflow-hidden whitespace-nowrap rounded-lg border border-input px-3 text-sm font-medium transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Annuler</button>
+            <button type="button" onClick="{{createToken}}" disabled="{{tokenBlocked}}" class="relative isolate inline-flex h-8 items-center justify-center overflow-hidden whitespace-nowrap rounded-lg bg-foreground px-3 text-sm font-medium text-background transition-all hover:bg-foreground/90 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Créer le jeton</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{tokenShown}}" hint-placeholder-val="{{ false }}">
+          <div class="flex flex-col gap-2"><h2 id="dlg-title" class="text-lg leading-none font-semibold">Jeton créé</h2><p class="text-sm text-muted-foreground">Copiez-le maintenant : il ne sera plus affiché.</p></div>
+          <div role="group" class="relative flex h-8 w-full min-w-0 items-center rounded-lg border border-input bg-muted">
+            <input type="text" readonly value="{{tokenSecret}}" aria-label="Jeton" class="h-full min-w-0 flex-1 bg-transparent px-2.5 font-mono text-xs outline-none">
+            <span class="flex h-full shrink-0 items-center pe-1"><button type="button" onClick="{{copyToken}}" aria-label="Copier le jeton" class="relative isolate inline-flex size-6 shrink-0 items-center justify-center overflow-hidden rounded-md text-muted-foreground transition-all hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background whitespace-nowrap"><span class="ng-icon phosphorCopyBold size-3.5" aria-hidden="true"></span></button></span>
+          </div>
+          <div class="flex justify-end"><button type="button" onClick="{{closeDialog}}" class="relative isolate inline-flex h-8 items-center justify-center overflow-hidden whitespace-nowrap rounded-lg bg-foreground px-3 text-sm font-medium text-background transition-all hover:bg-foreground/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">J'ai copié le jeton</button></div>
+        </sc-if>
+      </sc-if>
+
+      <sc-if value="{{dlgDelete}}" hint-placeholder-val="{{ false }}">
+        <div class="flex flex-col gap-2"><h2 id="dlg-title" class="text-lg leading-none font-semibold">Supprimer le compte de Camille Martin ?</h2><p class="text-sm text-muted-foreground">{{deleteDesc}}</p></div>
+        <div class="flex flex-col gap-2"><label for="del-confirm" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Saisissez votre nom, <span class="font-semibold select-all">Camille Martin</span>, pour confirmer</label><input id="del-confirm" type="text" autocomplete="off" onInput="{{onDeleteConfirm}}" class="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 font-mono text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20"></div>
+        <div class="flex justify-end gap-2">
+          <button type="button" onClick="{{closeDialog}}" class="relative isolate inline-flex h-8 items-center justify-center overflow-hidden whitespace-nowrap rounded-lg border border-input px-3 text-sm font-medium transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Annuler</button>
+          <a href="Deconnexion.dc.html" onClick="{{confirmDelete}}" aria-disabled="{{deleteBlocked}}" class="relative isolate inline-flex h-8 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-lg bg-destructive px-2.5 text-sm font-medium text-destructive-foreground transition-all hover:bg-grenat-text aria-disabled:pointer-events-none aria-disabled:opacity-50 dark:bg-grenat-soft dark:text-grenat-text dark:hover:bg-grenat-soft/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"><span class="ng-icon phosphorTrashBold" aria-hidden="true"></span>Supprimer le compte</a>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ctxOpen}}" hint-placeholder-val="{{ false }}">
+    <button type="button" tabindex="-1" aria-hidden="true" onClick="{{ctxClose}}" onContextMenu="{{ctxReopen}}" class="fixed inset-0 z-[60] cursor-default"></button>
+    <div class="fixed z-[61] w-max min-w-56 max-w-sm" onContextMenu="{{ctxEat}}" style="left: {{ctxLeft}}; top: {{ctxTop}}">
+      <div class="menu-shadow">
+        <div role="menu" aria-label="{{ctxHeading}}" data-ctx-root onKeyDown="{{ctxMenuKey}}" class="rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-[inset_0_1px_0_0_var(--shadow-edge)] menu-from-tl animate-menu-in motion-reduce:animate-none">
+          <p class="max-w-80 truncate px-2 py-1.5 text-xs font-medium text-muted-foreground">{{ctxHeading}}</p>
+          <a href="App.dc.html" role="menuitem" data-ctx-item onClick="{{ctxOverview}}" class="relative flex w-full cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm outline-hidden transition-colors select-none hover:bg-accent focus-visible:bg-selected animate-menu-item stagger-0 whitespace-nowrap"><span class="ng-icon phosphorSquaresFourBold size-4 shrink-0 text-muted-foreground" aria-hidden="true"></span>Ouvrir la vue d’ensemble</a>
+          <button type="button" role="menuitem" data-ctx-item onClick="{{ctxUnfav}}" class="relative flex w-full cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm outline-hidden transition-colors select-none hover:bg-accent focus-visible:bg-selected animate-menu-item stagger-1 whitespace-nowrap"><span class="ng-icon phosphorStarFill size-4 shrink-0 text-muted-foreground" aria-hidden="true"></span>Retirer des espaces favoris</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{cfmOpen}}" hint-placeholder-val="{{ false }}">
+    <button type="button" tabindex="-1" aria-label="Annuler" onClick="{{cfmCancel}}" class="fixed inset-0 z-[64] cursor-default bg-[#18181b]/35 animate-fade-in motion-reduce:animate-none dark:bg-[#09090b]/70"></button>
+    <div role="alertdialog" aria-modal="true" aria-labelledby="cfm-title" aria-describedby="cfm-desc" onKeyDown="{{cfmKey}}" class="fixed top-1/2 left-1/2 z-[65] grid w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl border border-border bg-popover p-6 text-popover-foreground shadow-xl animate-pop-in motion-reduce:animate-none max-sm:p-4">
+      <div class="flex items-start gap-3">
+        <span class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-grenat/10 text-destructive" aria-hidden="true"><span class="ng-icon {{cfm.icon}} size-[18px]"></span></span>
+        <div class="flex min-w-0 flex-col gap-1.5"><h2 id="cfm-title" class="text-lg leading-tight font-semibold text-balance">{{cfm.title}}</h2><p id="cfm-desc" class="text-sm text-muted-foreground text-pretty">{{cfm.text}}</p></div>
+      </div>
+      <sc-if value="{{cfm.hasItems}}" hint-placeholder-val="{{ false }}">
+        <ul class="flex max-h-36 flex-col gap-0.5 overflow-y-auto rounded-lg bg-muted px-3 py-2 text-sm">
+          <sc-for list="{{cfm.items}}" as="cfi" hint-placeholder-count="3"><li class="truncate">{{cfi.label}}</li></sc-for>
+          <sc-if value="{{cfm.hasMore}}" hint-placeholder-val="{{ false }}"><li class="text-xs text-muted-foreground">{{cfm.more}}</li></sc-if>
+        </ul>
+      </sc-if>
+      <sc-if value="{{cfm.needsType}}" hint-placeholder-val="{{ false }}">
+        <div class="flex flex-col gap-2">
+          <label for="cfm-type" class="text-sm">Pour confirmer, saisissez <span class="font-semibold select-all">{{cfm.typeName}}</span></label>
+          <input id="cfm-type" type="text" autocomplete="off" spellcheck="false" value="{{cfmTyped}}" onInput="{{onCfmTyped}}" onChange="{{onCfmTyped}}" aria-invalid="{{cfmTypeBad}}" class="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20 aria-invalid:border-destructive/60">
+        </div>
+      </sc-if>
+      <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <button type="button" onClick="{{cfmCancel}}" class="relative isolate inline-flex h-8 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-lg px-3 text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background border border-input bg-background hover:bg-accent">Annuler</button>
+        <button type="button" onClick="{{cfmOk}}" disabled="{{cfmOff}}" class="relative isolate inline-flex h-8 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-lg bg-destructive px-3 text-sm font-medium text-destructive-foreground transition-all hover:bg-grenat-text disabled:pointer-events-none disabled:opacity-50 dark:bg-grenat-soft dark:text-grenat-text dark:hover:bg-grenat-soft/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">{{cfm.cta}}</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{hasToast}}" hint-placeholder-val="{{ false }}">
+    <div role="status" aria-live="polite" class="fixed right-4 bottom-4 z-50 flex w-[356px] max-w-[calc(100%-2rem)] items-start gap-2.5 rounded-lg border border-border bg-popover p-3.5 text-sm text-popover-foreground shadow-lg animate-item-in motion-reduce:animate-none">
+      <span class="ng-icon {{toastIcon}} mt-0.5 size-4 shrink-0 {{toastTone}}" aria-hidden="true"></span>
+      <div class="flex min-w-0 flex-1 flex-col"><p class="font-medium leading-5">{{toastTitle}}</p><p class="leading-5 text-muted-foreground">{{toastDesc}}</p></div>
+      <sc-if value="{{toastHasUndo}}" hint-placeholder-val="{{ false }}">
+        <button type="button" onClick="{{toastUndo}}" class="relative isolate inline-flex h-6 shrink-0 items-center justify-center self-center overflow-hidden whitespace-nowrap rounded-md border border-input px-2 text-xs font-medium transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Annuler</button>
+      </sc-if>
+      <button type="button" onClick="{{closeToast}}" aria-label="Fermer la notification" class="relative isolate inline-flex size-6 shrink-0 items-center justify-center overflow-hidden rounded-md text-muted-foreground transition-all hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background whitespace-nowrap"><span class="ng-icon phosphorXBold size-3.5" aria-hidden="true"></span></button>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["mémorisé","clair","sombre"],"default":"mémorisé"},"section":{"editor":"enum","options":["profil","sécurité","notifications","préférences","jetons d’API"],"default":"profil"},"chargement":{"editor":"enum","options":["simulé","toujours","jamais","erreur"],"default":"simulé"},"$preview":{"width":1440,"height":900}}'>
+const PROFILE = { name: 'Camille Martin', display: 'camille', role: 'Responsable produit', tz: 'Europe/Paris (UTC+1)' };
+const SECTION_KEYS = { 'profil': 'profile', 'sécurité': 'security', 'notifications': 'notifications', 'préférences': 'prefs', 'jetons d’API': 'tokens' };
+const SECTION_IDS = ['profile', 'security', 'notifications', 'prefs', 'tokens'];
+const EMAIL = 'camille.martin@ateliernord.fr';
+const TOKEN_EXPIRES = { '30 jours': 'Dans 30 jours', '90 jours': 'Dans 90 jours', '1 an': 'Dans 1 an', 'Sans expiration': 'Sans expiration' };
+const PREF_LABELS = { lang: 'Langue', date: 'Format de date', week: 'Début de semaine' };
+const TZ_OPTIONS = ['Europe/Paris (UTC+1)', 'Europe/Brussels (UTC+1)', 'America/Montreal (UTC−5)', 'Africa/Casablanca (UTC+1)'].map((v) => [v, v]);
+const PREF_OPTIONS = {
+  lang: ['Français', 'English', 'Deutsch', 'Español'].map((v) => [v, v]),
+  date: ['08/11/2026', '8 nov. 2026', '2026-11-08'].map((v) => [v, v]),
+  week: ['Lundi', 'Dimanche', 'Samedi'].map((v) => [v, v]),
+};
+const EXP_OPTIONS = ['30 jours', '90 jours', '1 an', 'Sans expiration'].map((v) => [v, v]);
+// Espaces (copie d'App.dc.html : SPACE_DEFS, LOOK_COLORS, LOOK_ICONS) ; favoris partagés par localStorage « waypoint-fav-spaces »
+const SPACE_DEFS = [
+  { key: 'produit', initial: 'P', name: 'Produit', prefix: 'WAY', icon: 'rocket', color: 'violet' },
+  { key: 'design', initial: 'D', name: 'Design', prefix: 'DES', icon: 'paint', color: 'orange' },
+  { key: 'marketing', initial: 'M', name: 'Marketing', prefix: 'MKT', icon: 'megaphone', color: 'jaune' },
+  { key: 'ops', initial: 'O', name: 'Opérations', prefix: 'OPS', icon: 'gear', color: 'vert' },
+];
+const SPMAP = Object.fromEntries(SPACE_DEFS.map((x) => [x.key, x]));
+const LOOK_COLORS = [
+  { key: 'gris', tone: 'text-muted-foreground' },
+  { key: 'violet', tone: 'text-amethyste' },
+  { key: 'vert', tone: 'text-jade' },
+  { key: 'jaune', tone: 'text-balise' },
+  { key: 'orange', tone: 'text-cornaline' },
+  { key: 'rouge', tone: 'text-grenat' },
+];
+const LOOK_ICONS = [
+  { key: 'rocket', fill: 'phosphorRocketFill' },
+  { key: 'paint', fill: 'phosphorPaintBrushFill' },
+  { key: 'megaphone', fill: 'phosphorMegaphoneFill' },
+  { key: 'gear', fill: 'phosphorGearFill' },
+];
+const LOOK_CMAP = Object.fromEntries(LOOK_COLORS.map((c) => [c.key, c]));
+const LOOK_IMAP = Object.fromEntries(LOOK_ICONS.map((i) => [i.key, i]));
+const DEFAULT_FAV_SPACES = ['produit', 'design'];
+// Boîte de réception d'App : notifications n1 à n4, lues = localStorage « waypoint-read » (tableau de clés)
+const NOTIF_KEYS = ['n1', 'n2', 'n3', 'n4'];
+// Menu contextuel des espaces de la barre : hauteur estimée (titre + 2 éléments) et largeur minimale, pour rester dans la fenêtre
+const CTX_H = 112;
+const CTX_W = 232;
+// Statut de présence de l'utilisateur (copie d'App.dc.html, partagé par localStorage « waypoint-status »)
+const USER_STATUSES = [
+  { key: 'online', label: 'Actif', hint: 'Vous apparaissez en ligne', dot: 'bg-jade', bar: false },
+  { key: 'dnd', label: 'Ne pas déranger', hint: 'Notifications en pause', dot: 'bg-grenat', bar: true },
+  { key: 'away', label: 'Absent', hint: 'Vous apparaissez absent', dot: 'bg-balise', bar: false },
+  { key: 'invisible', label: 'Invisible', hint: 'Connecté, mais affiché hors ligne', dot: 'bg-ink-muted/50', bar: false },
+  { key: 'offline', label: 'Hors ligne', hint: 'Synchronisation suspendue', dot: 'bg-ink-muted/50', bar: false },
+];
+const USTATUS = Object.fromEntries(USER_STATUSES.map((x) => [x.key, x]));
+const STATUS_PRESETS = [
+  { key: 'meeting', label: 'En réunion', icon: 'phosphorUsersThreeBold' },
+  { key: 'travel', label: 'En déplacement', icon: 'phosphorAirplaneBold' },
+  { key: 'focus', label: 'Concentration', icon: 'phosphorHeadphonesBold' },
+  { key: 'sick', label: 'Malade', icon: 'phosphorThermometerBold' },
+  { key: 'vacation', label: 'En congé', icon: 'phosphorSunHorizonBold' },
+];
+const STATUS_ICONS = [{ icon: 'phosphorChatCircleBold', label: 'Message' }, { icon: 'phosphorUsersThreeBold', label: 'Réunion' }, { icon: 'phosphorAirplaneBold', label: 'Voyage' }, { icon: 'phosphorCarBold', label: 'Trajet' }, { icon: 'phosphorTrainBold', label: 'Train' }, { icon: 'phosphorHouseBold', label: 'Télétravail' }, { icon: 'phosphorHeadphonesBold', label: 'Concentration' }, { icon: 'phosphorCodeBold', label: 'Développement' }, { icon: 'phosphorPencilSimpleBold', label: 'Rédaction' }, { icon: 'phosphorLightbulbBold', label: 'Idée' }, { icon: 'phosphorCalendarBold', label: 'Agenda' }, { icon: 'phosphorCoffeeBold', label: 'Pause' }, { icon: 'phosphorForkKnifeBold', label: 'Repas' }, { icon: 'phosphorBarbellBold', label: 'Sport' }, { icon: 'phosphorBookBold', label: 'Formation' }, { icon: 'phosphorThermometerBold', label: 'Malade' }, { icon: 'phosphorSunHorizonBold', label: 'Congé' }, { icon: 'phosphorMoonBold', label: 'Repos' }];
+const STATUS_UNTIL = [['30', '30 min'], ['60', '1 h'], ['240', '4 h'], ['today', 'Aujourd’hui'], ['never', 'Jamais']];
+const STATUS_DEFAULT = { key: 'online', msg: '', icon: '', until: 'never' };
+const STAGGER = ['stagger-0', 'stagger-1', 'stagger-2', 'stagger-3', 'stagger-4', 'stagger-5', 'stagger-6', 'stagger-7', 'stagger-8'];
+// Lien profond entre écrans : la cible lit « waypoint-nav » au montage (voir componentDidMount).
+const navTo = (target) => () => { try { window.localStorage.setItem('waypoint-nav', JSON.stringify({ ...target, at: Date.now() })); } catch (e) {} };
+const hex = (n) => Array.from({ length: n }, () => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join('');
+
+const LANG_FLAGS = { 'Français': 'flagFr', 'English': 'flagGb', 'Deutsch': 'flagDe', 'Español': 'flagEs' };
+const withFlags = (x) => ({ ...x, hasValueFlag: !!LANG_FLAGS[x.valueLabel], valueFlag: LANG_FLAGS[x.valueLabel] || '', options: x.options.map((o) => ({ ...o, hasFlag: !!LANG_FLAGS[o.value], flag: LANG_FLAGS[o.value] || '' })) });
+// Squelettes de chargement : largeurs variées mais stables, et porte de chargement simulé par écran.
+const SKW = ['w-3/5', 'w-2/5', 'w-1/2', 'w-3/4', 'w-1/3', 'w-2/3', 'w-5/12', 'w-7/12', 'w-4/5'];
+const skw = (i) => SKW[(i * 4 + 1) % SKW.length];
+const skn = (n, f) => Array.from({ length: n }, (_, i) => ({ key: 'sk' + i, ...(f ? f(i) : {}) }));
+// Chaque changement de clé (écran, vue, tâche ouverte) affiche son squelette un court instant ; « toujours » le fige, « jamais » le coupe.
+const loadGate = (self, slot, key, mode, ms, first) => {
+  if (!key) { if (self.ld && self.ld[slot]) self.ld[slot].key = null; return false; }
+  if (mode === 'toujours') return true;
+  if (mode === 'jamais' || (typeof window !== 'undefined' && window.__dcNoLoad)) return false;
+  self.ld = self.ld || {};
+  const g = self.ld[slot] || (self.ld[slot] = {});
+  if (g.key !== key) {
+    const wait = g.key === undefined ? (first || ms) : ms;
+    g.key = key; g.until = Date.now() + wait;
+    clearTimeout(g.timer);
+    g.timer = setTimeout(() => self.setState({ ldTick: Date.now() }), wait + 20);
+  }
+  return Date.now() < g.until;
+};
+const SK_CTL = ['h-9 w-56 rounded-lg', 'h-5 w-9 rounded-full', 'h-8 w-24 rounded-lg'];
+const skSection = ({ action = false, tiles = 0, toolbar = false, cards = [], table = 0, ctl = null }) => ({
+  action, toolbar, hasTiles: tiles > 0, tiles: skn(tiles), hasTable: table > 0,
+  ...Object.fromEntries([0, 1, 2].flatMap((c) => [['hasC' + (c + 1), c < cards.length], ['w' + (c + 1), skw(c + 4)], ['c' + (c + 1), skn(cards[c] || 0, (r) => ({ w: skw(c * 3 + r), ctl: SK_CTL[ctl == null ? (c + r) % 3 : ctl] }))]])),
+  table: skn(table, (r) => ({ w: skw(r + 1) })),
+});
+const SK_SECTIONS = {
+  profile: skSection({ cards: [1, 4] }),
+  security: skSection({ cards: [2, 2], table: 3 }),
+  notifications: skSection({ cards: [5, 3], ctl: 1 }),
+  prefs: skSection({ cards: [4, 3] }),
+  tokens: skSection({ action: true, table: 3 }),
+};
+class Component extends DCLogic {
+  componentDidMount() {
+    try {
+      const t = window.localStorage.getItem('waypoint-theme');
+      if (t === 'dark' || t === 'light') this.setState({ stored: t });
+    } catch (e) {}
+    try {
+      const us = JSON.parse(window.localStorage.getItem('waypoint-status') || 'null');
+      if (us && USTATUS[us.key]) this.setState({ ustatus: us });
+      const fs = JSON.parse(window.localStorage.getItem('waypoint-fav-spaces') || 'null');
+      if (Array.isArray(fs)) this.setState({ favSpaces: fs });
+      const rd = JSON.parse(window.localStorage.getItem('waypoint-read') || 'null');
+      if (Array.isArray(rd)) this.setState({ read: rd });
+    } catch (e) {}
+    this.onStorage = (e) => {
+      if (e.key === 'waypoint-theme' && (e.newValue === 'dark' || e.newValue === 'light')) this.setState({ stored: e.newValue, theme: null });
+      try {
+        if (e.key === 'waypoint-status') { const us = e.newValue ? JSON.parse(e.newValue) : null; this.setState({ ustatus: us && USTATUS[us.key] ? us : null }); }
+        if (e.key === 'waypoint-fav-spaces') { const fs = e.newValue ? JSON.parse(e.newValue) : null; this.setState({ favSpaces: Array.isArray(fs) ? fs : null }); }
+        if (e.key === 'waypoint-read') { const rd = e.newValue ? JSON.parse(e.newValue) : null; this.setState({ read: Array.isArray(rd) ? rd : null }); }
+      } catch (err) {}
+    };
+    window.addEventListener('storage', this.onStorage);
+    try {
+      const raw = window.localStorage.getItem('waypoint-nav');
+      const n = raw ? JSON.parse(raw) : null;
+      const fresh = !!n && Date.now() - n.at < 15000;
+      if (n && n.to === 'Compte' && fresh) {
+        window.localStorage.removeItem('waypoint-nav');
+        if (SECTION_IDS.includes(n.section)) this.setState({ section: n.section });
+      } else if (n && !fresh) window.localStorage.removeItem('waypoint-nav');
+    } catch (e) {}
+    this.onKey = (e) => {
+      // Ctrl K / Cmd K : palette de commandes d'App (sauf pendant une saisie)
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && (e.key === 'k' || e.key === 'K')) {
+        let el = e.target;
+        try { if (!el || !el.tagName) el = document.activeElement; } catch (err) {}
+        const tag = el && el.tagName ? String(el.tagName).toUpperCase() : '';
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || (el && el.isContentEditable)) return;
+        if (e.preventDefault) e.preventDefault();
+        this.openSearch();
+        return;
+      }
+      if (e.key !== 'Escape') return;
+      const st = this.state || {};
+      if (st.ctx) { this.ctxRefocus = true; this.setState({ ctx: null }); return; }
+      // Échap dans un select ouvert (ou déjà traité par lui) ferme le select, pas la fenêtre.
+      if (st.openSelect) { this.setState({ openSelect: null }); return; }
+      if (e.defaultPrevented) return;
+      if (st.dialog) this.closeDialog();
+    };
+    window.addEventListener('keydown', this.onKey);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('storage', this.onStorage);
+    window.removeEventListener('keydown', this.onKey);
+    clearTimeout(this.toastTimer);
+    clearInterval(this.codeTimer);
+    if (this.photoUrl) { try { URL.revokeObjectURL(this.photoUrl); } catch (e) {} }
+  }
+  componentDidUpdate(prev) {
+    setTimeout(() => { this.fixMenus(); this.animateSwaps(); }, 0);
+    if (prev.theme !== this.props.theme) this.setState({ theme: null });
+    if (prev.section !== this.props.section) this.setState({ section: null });
+    const s = this.state || {};
+    // Select : à l'ouverture, focus sur l'option choisie ; à la fermeture par choix ou Échap, focus rendu au déclencheur.
+    if (s.openSelect && s.openSelect !== this.prevSelect) setTimeout(() => {
+      try {
+        const list = document.querySelector('[data-select-list]');
+        const el = list && (list.querySelector('[aria-selected="true"]') || list.querySelector('[role="option"]'));
+        if (el) el.focus();
+      } catch (e) {}
+    }, 0);
+    if (!s.openSelect && this.refocus) {
+      const id = this.refocus; this.refocus = null;
+      setTimeout(() => { try { const t = document.getElementById(id); if (t) t.focus(); } catch (e) {} }, 0);
+    }
+    this.prevSelect = s.openSelect || null;
+    // Menu contextuel : focus sur le premier élément à l'ouverture ; à la fermeture (Échap, clic à côté), focus rendu à l'espace.
+    if (s.ctx && s.ctx !== this.prevCtx) setTimeout(() => { try { const el = document.querySelector('[data-ctx-root] [data-ctx-item]'); if (el) el.focus(); } catch (e) {} }, 0);
+    if (!s.ctx && this.prevCtx && this.ctxRefocus && this.ctxOrigin) {
+      const o = this.ctxOrigin; this.ctxRefocus = false;
+      setTimeout(() => { try { if (o.isConnected !== false) o.focus(); } catch (e) {} }, 0);
+    }
+    this.prevCtx = s.ctx || null;
+  }
+  openSearch() {
+    navTo({ to: 'App', cmd: true })();
+    try { window.location.href = 'App.dc.html'; } catch (e) {}
+  }
+  closeDialog() {
+    clearInterval(this.codeTimer);
+    this.setState({ dialog: null, emailLeft: 0, openSelect: null });
+  }
+  toast(title, desc, error, undo) {
+    clearTimeout(this.toastTimer);
+    this.setState({ toast: { title, desc, error: !!error, undo: typeof undo === 'function' ? undo : null } });
+    this.toastTimer = setTimeout(() => this.setState({ toast: null }), 5000);
+  }
+  copy(text, title, desc) {
+    const fail = () => this.toast('Copie impossible', 'Sélectionnez le texte puis copiez-le avec Ctrl C.', true);
+    try {
+      if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') { fail(); return; }
+      navigator.clipboard.writeText(text).then(() => this.toast(title, desc), fail);
+    } catch (e) { fail(); }
+  }
+  download(name, text) {
+    try {
+      const url = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      return true;
+    } catch (e) { return false; }
+  }
+  startCodeTimer() {
+    clearInterval(this.codeTimer);
+    this.setState({ emailLeft: 30 });
+    this.codeTimer = setInterval(() => {
+      const left = (this.state || {}).emailLeft || 0;
+      if (left <= 1) { clearInterval(this.codeTimer); this.setState({ emailLeft: 0 }); } else this.setState({ emailLeft: left - 1 });
+    }, 1000);
+  }
+  themeTransition(e, apply) {
+    let reduce = false;
+    try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (err) {}
+    if (reduce || typeof document.startViewTransition !== 'function') { apply(() => {}); return; }
+    const root = document.documentElement;
+    const el = e && e.currentTarget && e.currentTarget.getBoundingClientRect ? e.currentTarget : null;
+    const r = el ? el.getBoundingClientRect() : null;
+    root.style.setProperty('--wp-vt-origin', r ? Math.round(r.left + r.width / 2) + 'px ' + Math.round(r.top + r.height / 2) + 'px' : '50% 100%');
+    root.dataset.wpVt = 'circle-blur';
+    const vt = document.startViewTransition(() => new Promise((resolve) => { apply(resolve); setTimeout(resolve, 80); }));
+    const end = () => { delete root.dataset.wpVt; };
+    vt.finished.then(end, end);
+    vt.ready.catch(() => {});
+  }
+  // Rendu avec squelette : la section demandée attend la fin du chargement simulé.
+  renderVals() {
+    const v = this.renderVals0();
+    const s = this.state || {};
+    const raw = this.props.chargement ?? 'simulé';
+    const retried = (s.errRetry || {})[this.navKey];
+    const ld = loadGate(this, 'section', this.navKey + (retried ? '#r' : ''), raw === 'erreur' ? 'simulé' : raw, 420, 700);
+    const failing = raw === 'erreur' && !retried && !ld;
+    const FLAGS = ['isProfile', 'isSecurity', 'isNotifications', 'isPrefs', 'isTokens'];
+    const out = { ...v };
+    FLAGS.forEach((k) => { out[k] = !!v[k] && !ld && !failing; });
+    out.errOn = failing;
+    out.errRetry = () => this.setState({ errRetry: { ...(this.st().errRetry || {}), [this.navKey]: true } });
+    out.skOn = ld;
+    out.skS = SK_SECTIONS[this.navKey] || SK_SECTIONS.profile;
+    const wrap = (fn, o) => () => this.ask({ ...o, onOk: fn });
+    out.sessions = (out.sessions || []).map((x) => ({ ...x, revoke: wrap(x.revoke, { title: 'Déconnecter ' + x.device + ' ?', text: 'Cet appareil devra se reconnecter pour accéder à Waypoint.', cta: 'Déconnecter', icon: 'phosphorSignOutBold' }) }));
+    const ro = out.revokeOthers;
+    out.revokeOthers = wrap(ro, { title: 'Fermer les autres sessions ?', text: 'Tous vos appareils sauf celui-ci seront déconnectés.', cta: 'Fermer les sessions', icon: 'phosphorSignOutBold' });
+    out.tokens = (out.tokens || []).map((t) => ({ ...t, revoke: wrap(t.revoke, { title: 'Révoquer le jeton « ' + t.name + ' » ?', text: 'Les scripts et intégrations qui l’utilisent recevront une erreur 401 immédiatement. Cette action est irréversible.', cta: 'Révoquer le jeton', typeName: t.name, icon: 'phosphorKeyBold' }) }));
+    this.fxConfirm(out);
+    return out;
+  }
+  // Confirmation avant suppression ; pour les suppressions sensibles, il faut saisir le nom exact.
+  ask(opts) {
+    // Banc de test : confirmation automatique (window.__dcAutoConfirm), pour tester les actions elles-mêmes.
+    if (typeof window !== 'undefined' && window.__dcAutoConfirm) { opts.onOk(); return; }
+    this.setState({ confirm: opts, cfmTyped: '' });
+  }
+  fxConfirm(out) {
+    const st = this.state || {};
+    const c = st.confirm || null;
+    const typed = st.cfmTyped || '';
+    const ok = !c || !c.typeName || typed.trim() === c.typeName;
+    const items = (c && c.items) || [];
+    out.cfmOpen = !!c;
+    out.cfm = {
+      title: c ? c.title : '', text: c ? c.text : '', cta: c ? c.cta || 'Supprimer' : '', icon: (c && c.icon) || 'phosphorTrashBold',
+      needsType: !!(c && c.typeName), typeName: (c && c.typeName) || '',
+      hasItems: items.length > 1, items: items.slice(0, 8).map((x, i) => ({ key: 'i' + i, label: x })),
+      hasMore: items.length > 8, more: '+ ' + (items.length - 8) + ' autres',
+    };
+    out.cfmTyped = typed;
+    out.onCfmTyped = (e) => this.setState({ cfmTyped: e.target.value });
+    out.cfmTypeBad = typed && !ok ? 'true' : 'false';
+    out.cfmOff = ok ? undefined : '';
+    const cancel = () => this.setState({ confirm: null, cfmTyped: '' });
+    const go = () => {
+      const s2 = this.state || {};
+      const cc = s2.confirm;
+      if (!cc) return;
+      if (cc.typeName && (s2.cfmTyped || '').trim() !== cc.typeName) return;
+      this.setState({ confirm: null, cfmTyped: '' });
+      cc.onOk();
+    };
+    out.cfmCancel = cancel;
+    out.cfmOk = go;
+    out.cfmKey = (e) => {
+      if (e.key === 'Escape') { e.preventDefault(); cancel(); }
+      else if (e.key === 'Enter' && ok && (!e.target || e.target.tagName !== 'BUTTON')) { e.preventDefault(); go(); }
+    };
+  }
+  // Menus jamais rognés : un menu (.menu-shadow) placé en absolu dans un conteneur qui coupe son contenu
+  // (overflow) est sorti du flux en position fixe, aux mêmes coordonnées, puis recalé dans la fenêtre.
+  // Équivalent du « portail » au niveau du body d'une vraie application.
+  fixMenus() {
+    try {
+      if (typeof document === 'undefined' || !document.querySelectorAll || typeof getComputedStyle !== 'function') return;
+      const W = window.innerWidth || 0;
+      const H = window.innerHeight || 0;
+      const pad = 8;
+      document.querySelectorAll('.menu-shadow').forEach((el) => {
+        if (el.dataset.wpPlaced || getComputedStyle(el).position !== 'absolute') return;
+        el.dataset.wpPlaced = '1';
+        // zone visible : la fenêtre, réduite par chaque conteneur qui coupe (modale, panneau défilant…)
+        let box = { top: 0, left: 0, bottom: H, right: W };
+        let cb = null;
+        let clipped = false;
+        for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) {
+          const cs = getComputedStyle(p);
+          if (!cb && (cs.transform !== 'none' || cs.filter !== 'none' || /paint|layout|strict|content/.test(cs.contain || ''))) cb = p;
+          if (/(auto|scroll|hidden|clip)/.test(cs.overflow + ' ' + cs.overflowX + ' ' + cs.overflowY)) {
+            const r = p.getBoundingClientRect();
+            if (r.width < 40 || r.height < 40) continue;
+            clipped = true;
+            box = { top: Math.max(box.top, r.top), left: Math.max(box.left, r.left), bottom: Math.min(box.bottom, r.bottom), right: Math.min(box.right, r.right) };
+          }
+        }
+        const anchor = el.offsetParent || el.parentElement;
+        if (!anchor) return;
+        const a = anchor.getBoundingClientRect();
+        let m = el.getBoundingClientRect();
+        const inner = el.firstElementChild;
+        const below = box.bottom - a.bottom - pad;
+        const above = a.top - box.top - pad;
+        let down = m.top >= a.top + a.height / 2;
+        const swapOrigin = (from, to) => { if (inner) inner.className = inner.className.replace(new RegExp('\\bmenu-from-' + from + '(l|r)?\\b'), (x, s) => 'menu-from-' + to + (s || '')); };
+        // 1. vertical : s'ouvre du côté où il y a la place
+        if (down && m.bottom > box.bottom - pad && above > below && above >= Math.min(m.height, 120)) {
+          Object.assign(el.style, { top: 'auto', bottom: '100%', marginTop: '0', marginBottom: '4px' });
+          swapOrigin('t', 'b'); down = false;
+        } else if (!down && m.top < box.top + pad && below > above && below >= Math.min(m.height, 120)) {
+          Object.assign(el.style, { bottom: 'auto', top: '100%', marginBottom: '0', marginTop: '4px' });
+          swapOrigin('b', 't'); down = true;
+        }
+        m = el.getBoundingClientRect();
+        // 2. trop haut pour la place restante : hauteur limitée, le contenu défile
+        const room = down ? box.bottom - pad - m.top : m.bottom - (box.top + pad);
+        if (m.height > room && room >= 96 && inner) Object.assign(inner.style, { maxHeight: Math.floor(room) + 'px', overflowY: 'auto' });
+        // 3. horizontal : décalé pour rester dans la zone visible
+        m = el.getBoundingClientRect();
+        let dx = 0;
+        if (m.right > box.right - pad) dx = box.right - pad - m.right;
+        if (m.left + dx < box.left + pad) dx = box.left + pad - m.left;
+        if (dx) el.style.translate = Math.round(dx) + 'px 0';
+        // 4. toujours coupé et aucun ancêtre transformé : on sort le menu en position fixe
+        m = el.getBoundingClientRect();
+        if (!clipped || cb || (m.top >= box.top - 1 && m.bottom <= box.bottom + 1)) return;
+        let top = m.top;
+        if (top + m.height > H - pad) top = Math.max(pad, H - m.height - pad);
+        Object.assign(el.style, { position: 'fixed', left: Math.max(pad, Math.min(m.left, W - m.width - pad)) + 'px', top: top + 'px', right: 'auto', bottom: 'auto', margin: '0', zIndex: '70', width: m.width + 'px', translate: 'none' });
+      });
+    } catch (e) {}
+  }
+  // Libellés des sélecteurs : quand la valeur affichée change, le nouveau libellé glisse en fondu (Web Animations, coupé si mouvement réduit).
+  animateSwaps() {
+    try {
+      if (typeof document === 'undefined' || !document.querySelectorAll) return;
+      const seen = this.swapSeen || (this.swapSeen = new WeakMap());
+      let reduce = false;
+      try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+      document.querySelectorAll('[data-swap]').forEach((el) => {
+        const t = el.textContent;
+        const p = seen.get(el);
+        seen.set(el, t);
+        if (p === undefined || p === t || reduce || !el.animate) return;
+        if (typeof getComputedStyle === 'function' && getComputedStyle(el).display === 'inline') el.style.display = 'inline-block';
+        el.animate([
+          { opacity: 0, transform: 'translateY(6px)', filter: 'blur(3px)' },
+          { opacity: 1, transform: 'translateY(0)', filter: 'blur(0)' },
+        ], { duration: 280, easing: 'cubic-bezier(0.2, 0.9, 0.25, 1)' });
+      });
+    } catch (e) {}
+  }
+  renderVals0() {
+    const s = this.state || {};
+    const pref = this.props.theme ?? 'mémorisé';
+    const fixed = pref === 'sombre' ? 'dark' : pref === 'clair' ? 'light' : null;
+    const theme = s.theme || fixed || s.stored || 'light';
+    const setTheme = (next, choice, e) => {
+      const apply = (done) => this.setState({ theme: next, themeChoice: choice || next }, done);
+      if (next !== theme) this.themeTransition(e, apply); else apply(() => {});
+      try { window.localStorage.setItem('waypoint-theme', next); } catch (e) {}
+    };
+    const section = s.section || SECTION_KEYS[this.props.section ?? 'profil'] || 'profile';
+    this.navKey = section;
+    const f = { ...PROFILE, ...(s.f || {}) };
+    const dirty = !!s.f && Object.keys(s.f).some((k) => s.f[k] !== PROFILE[k]);
+    const dialog = s.dialog || null;
+    const mfaOn = s.mfaOn !== false;
+    const keys = s.keys ?? 2;
+    const setupStep = s.setupStep || 1;
+    const linked = s.linked || { google: true, github: true, microsoft: false, gitlab: false };
+    const revoked = s.revoked || [];
+    const notif = s.notif || { mention: [1, 1, 1], assign: [1, 1, 1], comment: [1, 0, 0], status: [1, 0, 0], due: [1, 1, 1], access: [1, 1, 0], billing: [1, 1, 0] };
+    const digest = s.digest || 'daily';
+    const density = s.density || 'standard';
+    const sw = s.sw || { motion: false, shortcuts: true };
+    const tokensRevoked = s.tokensRevoked || [];
+    const scopes = s.scopes || ['tasks:read'];
+    const choice = s.themeChoice || theme;
+    const email = s.email || EMAIL;
+    const photo = s.photo || null;
+    const pw = s.pw || {};
+    const prefs = s.prefs || { lang: 'Français', date: '08/11/2026', week: 'Lundi' };
+    const emailStep = s.emailStep || 1;
+    const emailDraft = s.emailDraft || '';
+    const emailLeft = s.emailLeft || 0;
+    const tokenExp = s.tokenExp || '30 jours';
+    const created = s.created || [];
+    // Select Waypoint (modèle commun) : un seul ouvert à la fois, clé = id du déclencheur.
+    const sel = (key, value, opts, onPick) => {
+      const open = s.openSelect === key;
+      const cur = opts.find((o) => o[0] === value);
+      return {
+        selOpen: open, selZ: open ? 'z-50' : '', caretCls: open ? 'rotate-180' : '',
+        valueLabel: cur ? cur[1] : 'Choisir…', valueTone: cur ? '' : 'text-muted-foreground',
+        selToggle: () => this.setState({ openSelect: open ? null : key }),
+        selClose: () => this.setState({ openSelect: null }),
+        selTriggerKey: (e) => {
+          if (['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(e.key) && !open) { e.preventDefault(); this.setState({ openSelect: key }); }
+          else if (e.key === 'Escape' && open) { e.preventDefault(); this.setState({ openSelect: null }); }
+        },
+        options: opts.map(([v, label], i) => ({
+          value: v, label, on: v === value, stagger: STAGGER[Math.min(i, 8)],
+          pick: () => { this.refocus = key; this.setState({ openSelect: null }); onPick(v); },
+        })),
+      };
+    };
+    // Input OTP Waypoint : 6 cases (3 + 3), saisie, retour arrière, flèches, collage ; état = chaîne de 6 positions.
+    const otp = (stateKey, idPrefix, onDone) => {
+      const inputsOf = (el) => { const root = el && el.closest ? el.closest('[data-otp]') : null; return root ? Array.from(root.querySelectorAll('input')) : []; };
+      const sync = (ins) => this.setState({ [stateKey]: ins.map((x) => (/^\d$/.test(x.value || '') ? x.value : ' ')).join('') });
+      const slot = (i) => ({
+        id: idPrefix + '-' + i,
+        label: 'Chiffre ' + (i + 1) + ' sur 6',
+        input: (e) => {
+          const el = e.target; const ins = inputsOf(el);
+          el.value = (el.value || '').replace(/\D/g, '').slice(-1);
+          if (el.value && ins[i + 1]) ins[i + 1].focus();
+          sync(ins);
+        },
+        key: (e) => {
+          const ins = inputsOf(e.target);
+          if (e.key === 'Backspace' && !e.target.value && ins[i - 1]) { e.preventDefault(); ins[i - 1].value = ''; ins[i - 1].focus(); sync(ins); }
+          else if (e.key === 'ArrowLeft' && ins[i - 1]) { e.preventDefault(); ins[i - 1].focus(); }
+          else if (e.key === 'ArrowRight' && ins[i + 1]) { e.preventDefault(); ins[i + 1].focus(); }
+          else if (e.key === 'Enter' && /^\d{6}$/.test((this.state || {})[stateKey] || '')) { e.preventDefault(); onDone(); }
+        },
+      });
+      const slots = [0, 1, 2, 3, 4, 5].map(slot);
+      return {
+        a: slots.slice(0, 3), b: slots.slice(3),
+        paste: (e) => {
+          const t = ((e.clipboardData && e.clipboardData.getData('text')) || '').replace(/\D/g, '').slice(0, 6);
+          if (!t) return;
+          e.preventDefault();
+          const ins = inputsOf(e.target);
+          ins.forEach((x, k) => { x.value = t[k] || ''; });
+          const next = ins[Math.min(t.length, 5)];
+          if (next) next.focus();
+          sync(ins);
+        },
+      };
+    };
+    const codeOk = (v) => /^\d{6}$/.test(v || '');
+    const ust = { ...STATUS_DEFAULT, ...(s.ustatus || {}) };
+    const ustDef = (ust.key !== 'offline' && USTATUS[ust.key]) || USTATUS.online; // « Hors ligne » est automatique (déconnexion), jamais choisi
+    const setUst = (patch) => {
+      const next = { ...STATUS_DEFAULT, ...((this.state || {}).ustatus || {}), ...patch };
+      this.setState({ ustatus: next });
+      try { window.localStorage.setItem('waypoint-status', JSON.stringify(next)); } catch (e) {}
+    };
+    const stDraft = s.stDraft || { msg: ust.msg || '', icon: ust.icon || '', until: ust.until || 'never' };
+    const patchDraft = (patch) => {
+      const st = this.state || {};
+      const cur = { ...STATUS_DEFAULT, ...(st.ustatus || {}) };
+      this.setState({ stDraft: { ...(st.stDraft || { msg: cur.msg || '', icon: cur.icon || '', until: cur.until || 'never' }), ...patch } });
+    };
+    const untilLabel = (k) => (STATUS_UNTIL.find((u) => u[0] === k) || [k, ''])[1].toLowerCase();
+    const stDirty = (stDraft.msg || '').trim() !== (ust.msg || '') || ((stDraft.msg || '').trim() ? (stDraft.icon || 'phosphorChatCircleBold') !== (ust.icon || '') || (stDraft.until || 'never') !== (ust.until || 'never') : false);
+    const favSpaces = Array.isArray(s.favSpaces) ? s.favSpaces : DEFAULT_FAV_SPACES;
+    const readKeys = Array.isArray(s.read) ? s.read : [];
+    const unread = NOTIF_KEYS.filter((k) => !readKeys.includes(k)).length;
+    const setFavSpaces = (next) => {
+      this.setState({ favSpaces: next });
+      try { window.localStorage.setItem('waypoint-fav-spaces', JSON.stringify(next)); } catch (e) {}
+    };
+    const curFav = () => { const st = this.state || {}; return Array.isArray(st.favSpaces) ? st.favSpaces : DEFAULT_FAV_SPACES; };
+    // Menu contextuel (clic droit, touche Menu, Maj + F10) des espaces favoris de la barre
+    const ctxOpen = (key) => (e) => {
+      if (e && e.preventDefault) e.preventDefault();
+      if (e && e.stopPropagation) e.stopPropagation();
+      const el = e && e.currentTarget;
+      let x = e && typeof e.clientX === 'number' ? e.clientX : undefined;
+      let y = e && typeof e.clientY === 'number' ? e.clientY : undefined;
+      if ((x === undefined || (x === 0 && y === 0)) && el && el.getBoundingClientRect) { const r = el.getBoundingClientRect(); x = r.right + 4; y = r.top; }
+      let W = 1440; let H = 900;
+      try { W = window.innerWidth || W; H = window.innerHeight || H; } catch (err) {}
+      this.ctxOrigin = el || null;
+      this.setState({ ctx: { key, x: Math.max(8, Math.min(x || 8, W - CTX_W)), y: Math.max(8, Math.min(y || 8, H - CTX_H - 8)) }, openSelect: null });
+    };
+    const cx = s.ctx && SPMAP[s.ctx.key] ? s.ctx : null;
+    const ctxSpace = cx ? SPMAP[cx.key] : null;
+    const ctxVals = {
+      ctxOpen: !!cx,
+      ctxHeading: ctxSpace ? ctxSpace.name : '',
+      ctxLeft: cx ? cx.x + 'px' : '0px', ctxTop: cx ? cx.y + 'px' : '0px',
+      ctxClose: () => { this.ctxRefocus = true; this.setState({ ctx: null }); },
+      ctxEat: (e) => { if (e && e.preventDefault) e.preventDefault(); },
+      ctxReopen: (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        const x = e && e.clientX; const y = e && e.clientY;
+        this.ctxRefocus = false; this.setState({ ctx: null });
+        if (typeof x !== 'number') return;
+        setTimeout(() => {
+          try {
+            const el = document.elementFromPoint(x, y);
+            if (el) el.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: x, clientY: y, button: 2 }));
+          } catch (err) {}
+        }, 40);
+      },
+      ctxMenuKey: (e) => {
+        const box = e.currentTarget;
+        if (!box) return;
+        const items = Array.from(box.querySelectorAll('[data-ctx-item]'));
+        const i = items.indexOf(document.activeElement);
+        const go = (j) => { e.preventDefault(); const el = items[(j + items.length) % items.length]; if (el) el.focus(); };
+        if (e.key === 'ArrowDown') go(i + 1);
+        else if (e.key === 'ArrowUp') go(i < 0 ? items.length - 1 : i - 1);
+        else if (e.key === 'Home') go(0);
+        else if (e.key === 'End') go(items.length - 1);
+        else if (e.key === 'Escape') { e.preventDefault(); this.ctxRefocus = true; this.setState({ ctx: null }); }
+        else if (e.key === 'Tab') { this.ctxRefocus = false; this.setState({ ctx: null }); }
+      },
+      ctxOverview: () => {
+        if (!ctxSpace) return;
+        this.ctxRefocus = false; this.setState({ ctx: null });
+        navTo({ to: 'App', space: ctxSpace.key })();
+      },
+      ctxUnfav: () => {
+        if (!ctxSpace) return;
+        const sp = ctxSpace;
+        const before = curFav();
+        const idx = before.indexOf(sp.key);
+        this.ctxRefocus = false; this.setState({ ctx: null });
+        if (idx < 0) return;
+        setFavSpaces(before.filter((k) => k !== sp.key));
+        this.toast('Retiré des espaces favoris', sp.name + ' n’apparaît plus dans la barre de gauche.', false, () => {
+          const now = curFav();
+          if (now.includes(sp.key)) return;
+          const next = [...now]; next.splice(Math.min(idx, next.length), 0, sp.key);
+          setFavSpaces(next);
+        });
+      },
+    };
+    const statusVals = {
+      me: { key: ustDef.key, dot: ustDef.dot, bar: ustDef.bar, label: ustDef.label, msg: ust.msg || '', hasMsg: !!ust.msg, msgIcon: ust.icon || 'phosphorChatCircleBold',
+        msgSummary: 'Affiché : ' + (ust.msg || '') + (ust.msg && ust.until && ust.until !== 'never' ? ' · effacé après ' + untilLabel(ust.until) : ''),
+        aria: 'Camille Martin, compte courant, statut : ' + ustDef.label + (ust.msg ? ' — ' + ust.msg : ''), isDnd: ust.key === 'dnd' },
+      userStatusOpts: USER_STATUSES.filter((x) => x.key !== 'offline').map((x) => ({ ...x, on: x.key === ustDef.key, state: x.key === ustDef.key ? 'checked' : 'unchecked',
+        pick: () => { if (((this.state || {}).ustatus || STATUS_DEFAULT).key === x.key) return; setUst({ key: x.key }); this.toast('Statut : ' + x.label, x.hint + '.'); } })),
+      stDraftMsg: stDraft.msg || '',
+      onStDraftMsg: (e) => { const st = this.state || {}; const cur = st.stDraft || stDraft; patchDraft({ msg: (e.target.value || '').slice(0, 80), icon: cur.icon || 'phosphorChatCircleBold' }); },
+      stDraftIcon: stDraft.icon || 'phosphorChatCircleBold',
+      stIconOpen: !!s.stIconOpen,
+      stIconToggle: () => this.setState({ stIconOpen: !(this.state || {}).stIconOpen }),
+      stIconClose: () => this.setState({ stIconOpen: false }),
+      stIconKey: (e) => { if (e.key === 'Escape' && (this.state || {}).stIconOpen) { e.preventDefault(); e.stopPropagation(); this.setState({ stIconOpen: false }); } },
+      stIconBtnCls: s.stIconOpen ? 'bg-muted text-foreground' : '',
+      stIconAria: 'Icône du message : ' + ((STATUS_ICONS.find((x) => x.icon === (stDraft.icon || 'phosphorChatCircleBold')) || STATUS_ICONS[0]).label) + '. Changer',
+      stIconOpts: STATUS_ICONS.map((x) => {
+        const on = x.icon === (stDraft.icon || 'phosphorChatCircleBold');
+        return { ...x, on: on ? 'true' : 'false', cls: on ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+          pick: () => { patchDraft({ icon: x.icon }); this.setState({ stIconOpen: false }); } };
+      }),
+      stDraftCount: (stDraft.msg || '').length + ' / 80',
+      stPresets: STATUS_PRESETS.map((x) => ({ ...x, on: stDraft.msg === x.label, pick: () => patchDraft({ msg: x.label, icon: x.icon }) })),
+      stUntil: STATUS_UNTIL.map(([k, label]) => ({ key: k, label, on: (stDraft.until || 'never') === k, state: (stDraft.until || 'never') === k ? 'checked' : 'unchecked', pick: () => patchDraft({ until: k }) })),
+      stDirty, stClean: !stDirty, stNothing: !ust.msg && !(stDraft.msg || '').trim(),
+      saveStatusMsg: () => {
+        const d = (this.state || {}).stDraft || stDraft;
+        const msg = (d.msg || '').trim();
+        setUst({ msg, icon: msg ? (d.icon || 'phosphorChatCircleBold') : '', until: msg ? (d.until || 'never') : 'never' });
+        this.setState({ stDraft: null });
+        if (msg) this.toast('Message de statut défini', msg + (d.until && d.until !== 'never' ? ' · effacé après ' + untilLabel(d.until) : ''));
+        else this.toast('Message de statut effacé', 'Vos collègues ne voient plus de message à côté de votre nom.');
+      },
+      clearStatusMsg: () => {
+        setUst({ msg: '', icon: '', until: 'never' });
+        this.setState({ stDraft: null });
+        this.toast('Message de statut effacé', 'Vos collègues ne voient plus de message à côté de votre nom.');
+      },
+      radioKey: (e) => {
+        const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+        if (!step || !e.currentTarget) return;
+        const items = Array.from(e.currentTarget.querySelectorAll('[role="radio"]'));
+        const i = items.indexOf(document.activeElement);
+        if (i < 0) return;
+        e.preventDefault();
+        const el = items[(i + step + items.length) % items.length];
+        el.focus();
+        el.click();
+      },
+      railSpaces: favSpaces.map((k) => SPMAP[k]).filter(Boolean).map((sp) => {
+        const c = LOOK_CMAP[sp.color] || LOOK_CMAP.gris;
+        const ic = LOOK_IMAP[sp.icon];
+        return { key: sp.key, label: sp.name, aria: 'Espace ' + sp.name, tone: c.tone, hasIcon: !!ic, noIcon: !ic, iconCls: ic ? ic.fill : '', initial: (sp.initial || sp.name[0] || '?').toUpperCase(),
+          go: navTo({ to: 'App', space: sp.key }),
+          ctx: ctxOpen(sp.key), ctxKey: (e) => { if (e && (e.key === 'ContextMenu' || (e.shiftKey && e.key === 'F10'))) ctxOpen(sp.key)(e); },
+          menuOpen: !!cx && cx.key === sp.key };
+      }),
+      hasRailSpaces: favSpaces.some((k) => SPMAP[k]),
+    };
+    const setPref = (k, v) => {
+      this.setState({ prefs: { ...prefs, [k]: v } });
+      this.toast('Préférence enregistrée', PREF_LABELS[k] + ' : ' + v + '. Appliquée sur tous vos appareils.');
+    };
+    const submitEmail = () => {
+      const v = ((this.state || {}).emailDraft || '').trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(v)) { this.setState({ emailError: 'Adresse invalide : vérifiez le format, par exemple prenom.nom@exemple.fr.' }); return; }
+      if (v === email.toLowerCase()) { this.setState({ emailError: 'C’est déjà votre adresse actuelle : saisissez la nouvelle.' }); return; }
+      this.setState({ emailDraft: v, emailStep: 2, emailCode: '', emailError: null });
+      this.startCodeTimer();
+    };
+    const confirmEmail = () => {
+      const v = (this.state || {}).emailDraft || '';
+      clearInterval(this.codeTimer);
+      this.setState({ email: v, dialog: null, emailLeft: 0, emailCode: '' });
+      this.toast('Adresse e-mail modifiée', v + ' est vérifiée et reçoit désormais vos e-mails.');
+    };
+
+    const sectionDefs = [
+      { key: 'profile', label: 'Profil', bold: 'phosphorUserCircleBold', fill: 'phosphorUserCircleFill' },
+      { key: 'security', label: 'Sécurité et connexion', bold: 'phosphorShieldCheckBold', fill: 'phosphorShieldCheckFill' },
+      { key: 'notifications', label: 'Notifications', bold: 'phosphorBellBold', fill: 'phosphorBellFill' },
+      { key: 'prefs', label: 'Préférences', bold: 'phosphorSlidersHorizontalBold', fill: 'phosphorSlidersHorizontalFill' },
+      { key: 'tokens', label: 'Jetons d’API', bold: 'phosphorKeyBold', fill: 'phosphorKeyFill' },
+    ];
+    const sessions = [
+      { id: 's1', device: 'Firefox 132 · Windows 11', where: 'Lyon, France · 192.0.2.14', when: 'Actif maintenant', icon: 'phosphorDesktopBold', current: true },
+      { id: 's2', device: 'Application Waypoint · iPhone 15', where: 'Lyon, France · 198.51.100.7', when: 'Il y a 2 h', icon: 'phosphorDeviceMobileBold', current: false },
+      { id: 's3', device: 'Chrome 131 · macOS 15', where: 'Paris, France · 203.0.113.52', when: 'Hier, 18:40', icon: 'phosphorLaptopBold', current: false },
+      { id: 's4', device: 'Waypoint CLI 2.4', where: 'Serveur d’intégration · 203.0.113.9', when: 'Il y a 3 jours', icon: 'phosphorTerminalWindowBold', current: false },
+    ].filter((x) => !revoked.includes(x.id));
+    const others = sessions.filter((x) => !x.current);
+    const providerDefs = [
+      { key: 'google', name: 'Google', icon: 'svglGoogle', account: 'camille.martin@ateliernord.fr' },
+      { key: 'github', name: 'GitHub', icon: 'svglGithubLight', account: '@cmartin' },
+      { key: 'microsoft', name: 'Microsoft', icon: 'svglMicrosoft', account: '' },
+      { key: 'gitlab', name: 'GitLab', icon: 'svglGitlab', account: '' },
+    ];
+    const notifDefs = [
+      ['mention', 'Mentions', '@camille dans un commentaire ou une description'],
+      ['assign', 'Assignations', 'Une tâche vous est assignée ou retirée'],
+      ['comment', 'Commentaires', 'Sur les tâches que vous suivez'],
+      ['status', 'Changements de statut', 'Sur les tâches que vous suivez'],
+      ['due', 'Échéances', 'La veille et le jour de l’échéance'],
+      ['access', 'Invitations et accès', 'Nouvelle organisation, nouveau rôle'],
+      ['billing', 'Facturation', 'Factures, paiements, quotas (propriétaires)'],
+    ];
+    const channels = ['dans l’app', 'par e-mail', 'sur mobile'];
+    const tokens = [...created, ...[
+      { id: 't1', name: 'Intégration continue GitLab', prefix: 'wp_pat_4c1e…', scopes: ['tasks:read', 'tasks:write'], used: 'Il y a 5 min', expires: '12 janv. 2027', expTone: 'text-muted-foreground' },
+      { id: 't2', name: 'Script d’import Trello', prefix: 'wp_pat_9ab2…', scopes: ['tasks:write'], used: 'Il y a 21 jours', expires: 'Dans 6 jours', expTone: 'text-grenat-text' },
+      { id: 't3', name: 'Tableau de bord Grafana', prefix: 'wp_pat_d07f…', scopes: ['tasks:read', 'members:read'], used: 'Il y a 1 h', expires: 'Sans expiration', expTone: 'text-muted-foreground' },
+    ].filter((t) => !tokensRevoked.includes(t.id))];
+    const codes = ['4F7K-2M9Q', 'H3XP-8D2L', 'Q9TZ-5W1C', 'B6NR-7J4E', 'K2VD-9S8A', 'M8LC-3F6P', 'T5QW-1H7Z', 'R4GY-6B3N', 'C7EJ-2K5U', 'W1PS-8V9D'].map((c) => ({ c }));
+
+    return {
+      ...statusVals,
+      ...ctxVals,
+      theme,
+      themeLabel: theme === 'dark' ? 'Passer au thème clair' : 'Passer au thème sombre',
+      toggleTheme: (e) => setTheme(theme === 'dark' ? 'light' : 'dark', null, e),
+      railItems: [
+        { label: 'Accueil', icon: 'phosphorHouseBold', page: 'home' },
+        { label: 'Boîte de réception', icon: 'phosphorTrayBold', inbox: true },
+        { label: 'Mes tâches', icon: 'phosphorCheckSquareBold', page: 'mine' },
+        { label: 'Espaces', icon: 'phosphorSquaresFourBold', page: 'spaces' },
+        { label: 'Tableaux de bord', icon: 'phosphorChartBarBold', page: 'dash' },
+        { label: 'Documents', icon: 'phosphorFileTextBold', page: 'docs' },
+      ].map((r) => {
+        const badge = r.inbox && ust.key !== 'dnd' && unread > 0 ? unread : 0;
+        return {
+          ...r, hasBadge: !!badge, badge: badge ? String(badge) : '',
+          aria: badge ? r.label + ', ' + badge + (badge > 1 ? ' non lues' : ' non lue') : r.label,
+          cls: 'text-muted-foreground hover:bg-accent hover:text-foreground',
+          go: navTo(r.inbox ? { to: 'App', inbox: true } : { to: 'App', page: r.page }),
+        };
+      }),
+      openSearch: navTo({ to: 'App', cmd: true }),
+      goAppHome: navTo({ to: 'App', page: 'home' }),
+      goAppSpaces: navTo({ to: 'App', page: 'spaces' }),
+      goQuotas: navTo({ to: 'Organisation', section: 'quotas' }),
+      sections: sectionDefs.map((d) => ({
+        label: d.label,
+        icon: d.key === section ? d.fill : d.bold,
+        iconTone: d.key === section ? 'text-primary' : 'text-muted-foreground',
+        cls: d.key === section ? 'bg-primary/5 font-medium text-primary' : '',
+        current: d.key === section ? 'page' : undefined,
+        pick: () => this.setState({ section: d.key, openSelect: null }),
+      })),
+      orgLinks: [
+        { label: 'Général', icon: 'phosphorBuildingsBold', section: 'general' },
+        { label: 'Membres', icon: 'phosphorUsersBold', section: 'members' },
+        { label: 'Facturation', icon: 'phosphorCreditCardBold', section: 'billing' },
+        { label: 'Quotas et usage', icon: 'phosphorGaugeBold', section: 'quotas' },
+      ].map((o) => ({ ...o, go: navTo({ to: 'Organisation', section: o.section }) })),
+      isProfile: section === 'profile', isSecurity: section === 'security', isNotifications: section === 'notifications', isPrefs: section === 'prefs', isTokens: section === 'tokens',
+
+      f, dirty, clean: !dirty,
+      onField: (e) => { const k = e.target.dataset.field; this.setState({ f: { ...((this.state || {}).f || {}), [k]: e.target.value } }); },
+      tzSel: sel('pf-tz', f.tz, TZ_OPTIONS, (v) => this.setState({ f: { ...((this.state || {}).f || {}), tz: v } })),
+      resetProfile: () => this.setState({ f: null }),
+      saveProfile: () => { Object.assign(PROFILE, s.f || {}); this.setState({ f: null }); this.toast('Profil enregistré', 'Vos collègues verront les changements tout de suite.'); },
+      openDelete: () => this.setState({ dialog: 'delete', delOk: false }),
+      onDeleteConfirm: (e) => this.setState({ delOk: e.target.value.trim() === 'Camille Martin' }),
+      deleteBlocked: !s.delOk,
+      confirmDelete: (e) => { if (!(this.state || {}).delOk) e.preventDefault(); },
+      deleteDesc: 'Vous quitterez 3 organisations' + (tokens.length > 1 ? ' et vos ' + tokens.length + ' jetons d’API seront révoqués' : tokens.length === 1 ? ' et votre jeton d’API sera révoqué' : '') + '. Atelier Nord doit d’abord avoir un autre propriétaire.',
+
+      photo: photo || '', hasPhoto: !!photo, noPhoto: !photo,
+      photoCta: photo ? 'Changer de photo' : 'Importer une photo',
+      onPhoto: (e) => {
+        const input = e.target;
+        const file = input.files && input.files[0];
+        if (!file) return;
+        if (!/^image\//.test(file.type || '')) {
+          try { input.value = ''; } catch (err) {}
+          this.toast('Format non pris en charge', 'Choisissez une image PNG, JPEG ou WebP.', true);
+          return;
+        }
+        try {
+          const url = URL.createObjectURL(file);
+          if (this.photoUrl) URL.revokeObjectURL(this.photoUrl);
+          this.photoUrl = url;
+          this.setState({ photo: url });
+          this.toast('Photo mise à jour', file.name + ' est visible par les membres de vos organisations.');
+        } catch (err) {
+          this.toast('Import impossible', 'Votre navigateur n’a pas pu lire ce fichier.', true);
+        }
+        try { input.value = ''; } catch (err) {}
+      },
+      removePhoto: () => {
+        if (this.photoUrl) { try { URL.revokeObjectURL(this.photoUrl); } catch (e) {} this.photoUrl = null; }
+        this.setState({ photo: null });
+        this.toast('Photo retirée', 'Vos initiales s’affichent à la place.');
+      },
+
+      email,
+      dlgEmail: dialog === 'email',
+      openEmail: () => this.setState({ dialog: 'email', emailStep: 1, emailDraft: '', emailError: null, emailCode: '' }),
+      emailStepNum: emailStep,
+      emailStep1: emailStep === 1, emailStep2: emailStep === 2,
+      emailSteps: ['Nouvelle adresse', 'Code de vérification'].map((label, i) => ({ label, bar: i < emailStep ? 'bg-foreground' : 'bg-track', text: i < emailStep ? 'font-medium text-foreground' : 'text-muted-foreground' })),
+      emailDraft,
+      emailInvalid: !!s.emailError,
+      emailError: s.emailError || '',
+      onEmailDraft: (e) => this.setState({ emailDraft: e.target.value, emailError: null }),
+      onEmailKey: (e) => { if (e.key === 'Enter') { e.preventDefault(); if (((this.state || {}).emailDraft || '').trim()) submitEmail(); } },
+      emailOtp: otp('emailCode', 'em-code', confirmEmail),
+      emailResendDisabled: emailLeft > 0,
+      emailResendLabel: emailLeft > 0 ? 'Renvoyer le code dans 0:' + String(emailLeft).padStart(2, '0') : 'Renvoyer le code',
+      resendEmailCode: () => { this.startCodeTimer(); this.toast('Code renvoyé', 'Un nouveau code est parti vers ' + emailDraft + '.'); },
+      emailBack: () => { clearInterval(this.codeTimer); this.setState({ emailStep: 1, emailCode: '', emailLeft: 0 }); },
+      emailBlocked: emailStep === 1 ? !emailDraft.trim() : !codeOk(s.emailCode),
+      emailCta: emailStep === 1 ? 'Envoyer le code' : 'Confirmer l’adresse',
+      emailNext: () => (emailStep === 1 ? submitEmail() : confirmEmail()),
+
+      openPassword: () => this.setState({ dialog: 'password', pw: {} }),
+      onPw: (e) => { const k = e.target.dataset.pw; this.setState({ pw: { ...((this.state || {}).pw || {}), [k]: e.target.value } }); },
+      pwHelp: !(pw.nw || '').length ? '12 caractères minimum.' : pw.nw.length < 12 ? 'Encore ' + (12 - pw.nw.length) + (12 - pw.nw.length > 1 ? ' caractères.' : ' caractère.') : 'Longueur suffisante.',
+      pwMismatch: !!pw.cf && (pw.cf.length >= (pw.nw || '').length ? pw.cf !== pw.nw : !(pw.nw || '').startsWith(pw.cf)),
+      pwBlocked: !pw.cur || (pw.nw || '').length < 12 || pw.cf !== pw.nw,
+      pwWhen: s.pwChanged ? 'Modifié aujourd’hui, 8 novembre 2026.' : 'Modifié le 12 août 2026.',
+      savePassword: () => { this.setState({ dialog: null, pw: {}, pwChanged: true }); this.toast('Mot de passe modifié', 'Un e-mail de confirmation vient de partir vers ' + email + '.'); },
+      mfaOn, mfaOff: !mfaOn,
+      mfaStatus: mfaOn ? 'Activée' : 'Désactivée',
+      mfaIcon: mfaOn ? 'phosphorCheckCircleFill' : 'phosphorProhibitFill',
+      mfaTone: mfaOn ? 'text-jade' : 'text-grenat',
+      mfaToggleLabel: mfaOn ? 'Désactiver' : 'Activer',
+      toggleMfa: () => (mfaOn ? this.setState({ mfaOn: false }) : this.setState({ dialog: 'setup', setupStep: 1, setupCode: '' })),
+      keysLabel: keys + ' clés : YubiKey 5C NFC, Touch ID (MacBook Air)' + (keys > 2 ? ', clé ajoutée' : ''),
+      addKey: () => { this.setState({ keys: keys + 1 }); this.toast('Clé de sécurité ajoutée', 'Elle pourra servir dès la prochaine connexion.'); },
+      backupLabel: (s.newCodes ? 10 : 7) + ' codes inutilisés sur 10',
+      openBackup: () => this.setState({ dialog: 'backup' }),
+      closeBackup: () => {
+        const text = ['Waypoint · codes de secours', 'Compte : ' + email, 'Générés le 8 novembre 2026. Chaque code ne sert qu’une fois.', '', ...codes.map((c) => c.c), ''].join('\r\n');
+        if (this.download('waypoint-codes-de-secours.txt', text)) {
+          this.setState({ dialog: null, newCodes: true });
+          this.toast('Codes de secours enregistrés', 'Fichier waypoint-codes-de-secours.txt téléchargé.');
+        } else this.toast('Téléchargement impossible', 'Copiez les codes et conservez-les hors ligne.', true);
+      },
+      copyCodes: () => this.copy(codes.map((c) => c.c).join('\n'), 'Codes copiés', 'Collez-les dans votre gestionnaire de mots de passe.'),
+      openSetup: () => this.setState({ dialog: 'setup', setupStep: 1, setupCode: '' }),
+      setupStep,
+      step1: setupStep === 1, step2: setupStep === 2, step3: setupStep === 3,
+      steps: ['Scanner', 'Vérifier', 'Codes de secours'].map((label, i) => ({ label, bar: i < setupStep ? 'bg-foreground' : 'bg-track', text: i < setupStep ? 'font-medium text-foreground' : 'text-muted-foreground' })),
+      copyKey: () => this.copy('JBSWY3DPEHPK3PXP', 'Clé copiée', 'Collez-la dans votre application d’authentification.'),
+      setupOtp: otp('setupCode', 'setup-code', () => this.setState({ setupStep: 3 })),
+      setupBlocked: setupStep === 2 && !codeOk(s.setupCode),
+      setupCancel: setupStep === 3 ? 'Fermer' : 'Annuler',
+      setupCta: setupStep === 1 ? 'Continuer' : setupStep === 2 ? 'Vérifier le code' : 'J’ai enregistré mes codes',
+      setupNext: () => {
+        if (setupStep < 3) this.setState({ setupStep: setupStep + 1 });
+        else { this.setState({ dialog: null, mfaOn: true, newCodes: true }); this.toast('Vérification en deux étapes activée', 'Elle vous sera demandée à la prochaine connexion.'); }
+      },
+      codes,
+      providers: providerDefs.map((p) => {
+        const on = !!linked[p.key];
+    return {
+          ...p,
+          detail: on ? 'Associé · ' + p.account : 'Non associé',
+          action: on ? 'Dissocier' : 'Associer',
+          btnCls: on ? 'text-destructive' : 'border border-input',
+          toggle: () => { this.setState({ linked: { ...linked, [p.key]: !on } }); this.toast(on ? p.name + ' dissocié' : p.name + ' associé', on ? 'Vous ne pourrez plus vous connecter avec ce fournisseur.' : 'Vous pouvez maintenant vous connecter avec ' + p.name + '.'); },
+        };
+      }),
+      sessions: sessions.map((x) => ({ ...x, other: !x.current, revoke: () => { this.setState({ revoked: [...revoked, x.id] }); this.toast('Session révoquée', x.device + ' est déconnecté.'); } })),
+      noOthers: others.length === 0,
+      revokeOthers: () => { this.setState({ revoked: [...revoked, ...others.map((x) => x.id)] }); this.toast(others.length + ' sessions fermées', 'Seul cet appareil reste connecté.'); },
+
+      notifRows: notifDefs.map(([key, label, hint]) => ({
+        label, hint,
+        cells: notif[key].map((v, i) => ({
+          on: !!v, state: v ? 'checked' : 'unchecked', aria: label + ' ' + channels[i],
+          toggle: () => this.setState({ notif: { ...notif, [key]: notif[key].map((w, j) => (j === i ? (w ? 0 : 1) : w)) } }),
+        })),
+      })),
+      digests: [
+        { key: 'each', label: 'Chaque notification', hint: 'Un e-mail par événement retenu ci-dessus.' },
+        { key: 'daily', label: 'Résumé quotidien', hint: 'Chaque jour ouvré à 9:00, s’il y a du nouveau.' },
+        { key: 'weekly', label: 'Résumé hebdomadaire', hint: 'Le lundi à 9:00.' },
+        { key: 'never', label: 'Jamais', hint: 'Seulement les e-mails de sécurité.' },
+      ].map((d) => ({ ...d, on: d.key === digest, state: d.key === digest ? 'checked' : 'unchecked', pick: () => this.setState({ digest: d.key }) })),
+      dnd: s.dnd !== false,
+      dndState: s.dnd !== false ? 'checked' : 'unchecked',
+      dndKnob: s.dnd !== false ? 'translate-x-4' : 'translate-x-0',
+      toggleDnd: () => this.setState({ dnd: s.dnd === false }),
+
+      themeCards: [
+        { key: 'light', label: 'Clair', icon: 'phosphorSunBold', preview: 'light' },
+        { key: 'dark', label: 'Sombre', icon: 'phosphorMoonBold', preview: 'dark' },
+        { key: 'system', label: 'Système', icon: 'phosphorMonitorBold', preview: theme },
+      ].map((c) => ({
+        ...c, on: c.key === choice, state: c.key === choice ? 'checked' : 'unchecked',
+        pick: (ev) => {
+          if (c.key === 'system') {
+            let dark = false;
+            try { dark = window.matchMedia('(prefers-color-scheme: dark)').matches; } catch (e) {}
+            setTheme(dark ? 'dark' : 'light', 'system', ev);
+          } else setTheme(c.key, null, ev);
+        },
+      })),
+      densities: [['compact', 'Compacte'], ['standard', 'Standard'], ['comfortable', 'Confortable']].map(([key, label]) => ({ label, on: key === density, state: key === density ? 'checked' : 'unchecked', pick: () => this.setState({ density: key }) })),
+      switches: [
+        { id: 'sw-motion', key: 'motion', label: 'Réduire les animations', hint: 'Désactive les ondes, fondus et glissements, quel que soit le réglage du système.' },
+        { id: 'sw-shortcuts', key: 'shortcuts', label: 'Raccourcis à une touche', hint: 'C pour créer une tâche, G puis I pour la boîte de réception.' },
+      ].map((x) => ({ ...x, on: !!sw[x.key], state: sw[x.key] ? 'checked' : 'unchecked', knob: sw[x.key] ? 'translate-x-4' : 'translate-x-0', keys: x.key === 'shortcuts', plain: x.key !== 'shortcuts', toggle: () => this.setState({ sw: { ...sw, [x.key]: !sw[x.key] } }) })),
+
+      tokens: tokens.map((t) => ({ ...t, scopes: t.scopes.map((x) => ({ s: x })), revoke: () => { this.setState(created.some((c) => c.id === t.id) ? { created: created.filter((c) => c.id !== t.id) } : { tokensRevoked: [...tokensRevoked, t.id] }); this.toast('Jeton révoqué', t.name + ' ne peut plus appeler l’API.'); } })),
+      noTokens: tokens.length === 0,
+      openToken: () => this.setState({ dialog: 'token', tokenStep: 'form', tokenName: '', scopes: ['tasks:read'], tokenExp: '30 jours' }),
+      tokenExp,
+      expSel: sel('tk-exp', tokenExp, EXP_OPTIONS, (v) => this.setState({ tokenExp: v })),
+      tokenSecret: s.tokenSecret || '',
+      tokenForm: (s.tokenStep || 'form') === 'form', tokenShown: s.tokenStep === 'shown',
+      onTokenName: (e) => this.setState({ tokenName: e.target.value }),
+      tokenBlocked: !(s.tokenName || '').trim() || scopes.length === 0,
+      scopeOptions: [
+        ['tasks:read', 'Lire les tâches, listes et espaces'],
+        ['tasks:write', 'Créer et modifier des tâches'],
+        ['members:read', 'Lire les membres de l’organisation'],
+        ['webhooks:manage', 'Créer et supprimer des webhooks'],
+      ].map(([sc, hint], i) => ({ id: 'scope-' + i, s: sc, hint, on: scopes.includes(sc), state: scopes.includes(sc) ? 'checked' : 'unchecked', toggle: () => this.setState({ scopes: scopes.includes(sc) ? scopes.filter((x) => x !== sc) : [...scopes, sc] }) })),
+      createToken: () => {
+        const secret = 'wp_pat_' + hex(24);
+        const token = { id: 'n' + Date.now(), name: (s.tokenName || '').trim(), prefix: secret.slice(0, 11) + '…', scopes: [...scopes], used: 'Jamais', expires: TOKEN_EXPIRES[tokenExp] || 'Dans 30 jours', expTone: 'text-muted-foreground' };
+        this.setState({ tokenStep: 'shown', tokenSecret: secret, created: [token, ...created] });
+      },
+      copyToken: () => this.copy(s.tokenSecret || '', 'Jeton copié', 'Il ne sera plus affiché.'),
+
+      prefs,
+      langSel: withFlags(sel('pr-lang', prefs.lang, PREF_OPTIONS.lang, (v) => setPref('lang', v))),
+      dateSel: sel('pr-date', prefs.date, PREF_OPTIONS.date, (v) => setPref('date', v)),
+      weekSel: sel('pr-week', prefs.week, PREF_OPTIONS.week, (v) => setPref('week', v)),
+      selListKey: (e) => {
+        const opts = Array.from(e.currentTarget.querySelectorAll('[role="option"]'));
+        const i = opts.indexOf(document.activeElement);
+        const go = (j) => { e.preventDefault(); const el = opts[(j + opts.length) % opts.length]; if (el) el.focus(); };
+        if (e.key === 'ArrowDown') go(i + 1); else if (e.key === 'ArrowUp') go(i - 1);
+        else if (e.key === 'Home') go(0); else if (e.key === 'End') go(opts.length - 1);
+        else if (e.key === 'Escape' || e.key === 'Tab') { if (e.key === 'Escape') e.preventDefault(); const k = (this.state || {}).openSelect; this.setState({ openSelect: null }); this.refocus = k; }
+      },
+
+      dialogOpen: !!dialog,
+      dialogRole: dialog === 'delete' ? 'alertdialog' : 'dialog',
+      dlgPassword: dialog === 'password', dlgSetup: dialog === 'setup', dlgBackup: dialog === 'backup', dlgToken: dialog === 'token', dlgDelete: dialog === 'delete',
+      closeDialog: () => this.closeDialog(),
+
+      toastIcon: s.toast && s.toast.error ? 'phosphorWarningCircleFill' : 'phosphorCheckCircleFill',
+      toastTone: s.toast && s.toast.error ? 'text-destructive' : 'text-jade',
+      hasToast: !!s.toast,
+      toastHasUndo: !!(s.toast && s.toast.undo),
+      toastUndo: () => { const u = s.toast && s.toast.undo; clearTimeout(this.toastTimer); this.setState({ toast: null }); if (u) u(); },
+      toastTitle: s.toast ? s.toast.title : '',
+      toastDesc: s.toast ? s.toast.desc : '',
+      closeToast: () => this.setState({ toast: null }),
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Nouveau mot de passe — Waypoint</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="styles/app.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&amp;family=Geist+Mono:wght@400..600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div data-theme="{{theme}}" class="min-h-screen flex flex-col bg-canvas font-sans text-sm text-foreground antialiased">
+  <header class="flex h-14 items-center justify-between gap-4 px-4 sm:px-6">
+    <a href="Main.dc.html" aria-label="Waypoint, page de connexion" class="flex items-center gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas">
+      <svg class="size-6 text-primary" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.4c-3.5-3.3-7-7-7-11.2a7 7 0 0 1 14 0c0 1.8-.6 3.5-1.6 5.1" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="12" cy="10.2" r="3" fill="currentColor"></circle></svg>
+      <span class="text-base font-bold tracking-[-0.035em]">Waypoint</span>
+    </a>
+    <button type="button" onClick="{{toggleTheme}}" aria-label="{{themeLabel}}" class="relative isolate inline-flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-lg text-muted-foreground transition-all hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas whitespace-nowrap">
+      <span class="ng-icon phosphorMoonBold dark:hidden" aria-hidden="true"></span>
+      <span class="ng-icon phosphorSunBold hidden dark:inline-block" aria-hidden="true"></span>
+    </button>
+  </header>
+
+  <main class="flex flex-1 justify-center px-4 py-6 sm:items-center sm:py-10">
+    <div class="flex w-full max-w-[400px] flex-col gap-5">
+      <div class="flex flex-col gap-6 rounded-xl border border-border bg-card p-6 sm:p-8">
+
+        <sc-if value="{{isForm}}" hint-placeholder-val="{{ true }}">
+          <div class="flex flex-col gap-3">
+            <div class="flex size-10 items-center justify-center rounded-lg bg-muted text-muted-foreground"><span class="ng-icon phosphorLockKeyBold size-5" aria-hidden="true"></span></div>
+            <div class="flex flex-col gap-1">
+              <h1 class="text-2xl font-semibold tracking-tight">Choisir un nouveau mot de passe</h1>
+              <p class="text-sm text-muted-foreground">Pour le compte <span class="font-medium text-foreground">camille.martin@ateliernord.fr</span>.</p>
+            </div>
+          </div>
+          <form class="flex flex-col gap-4" onSubmit="{{save}}">
+            <div class="flex flex-col gap-2">
+              <div class="flex h-4 items-center justify-between gap-3"><label for="rp-new" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Nouveau mot de passe</label><span aria-live="polite" aria-hidden="{{strengthHidden}}" class="block h-4 shrink-0 text-right text-xs leading-4 font-medium whitespace-nowrap transition-[color,opacity,translate] duration-300 ease-snap {{strengthTone}} {{strengthShow}}">{{strength}}</span></div>
+              <div role="group" class="relative flex h-9 w-full min-w-0 items-center rounded-lg border border-input transition-[color,box-shadow] focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/20">
+                <input id="rp-new" type="{{pwdType}}" autocomplete="new-password" onInput="{{onPwd}}" aria-describedby="rp-rules" placeholder="12 caractères minimum" class="h-full min-w-0 flex-1 bg-transparent px-3 text-sm outline-none placeholder:text-muted-foreground">
+                <div class="flex h-full shrink-0 items-center pe-1.5">
+                  <button type="button" onClick="{{togglePwd}}" aria-pressed="{{showPwd}}" aria-label="{{pwdLabel}}" class="relative isolate inline-flex size-6 shrink-0 items-center justify-center overflow-hidden rounded-md text-muted-foreground transition-all hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background whitespace-nowrap"><span class="ng-icon {{pwdIcon}} size-3.5" aria-hidden="true"></span></button>
+                </div>
+              </div>
+              <div class="flex items-center">
+                <div class="grid flex-1 grid-cols-4 gap-1" role="meter" aria-label="Robustesse du mot de passe" aria-valuemin="0" aria-valuemax="4" aria-valuenow="{{score}}">
+                  <sc-for list="{{bars}}" as="bar" hint-placeholder-count="4">
+                    <div class="h-1 overflow-hidden rounded-full bg-track"><div class="h-full origin-left rounded-full transition-[transform,background-color] duration-300 ease-snap {{bar.fill}}"></div></div>
+                  </sc-for>
+                </div>
+              </div>
+              <ul id="rp-rules" class="grid grid-cols-1 gap-1 sm:grid-cols-2">
+                <sc-for list="{{rules}}" as="rule" hint-placeholder-count="4">
+                  <li class="flex items-center gap-1.5 text-xs whitespace-nowrap transition-colors duration-300 {{rule.text}}"><svg class="wp-rule size-3.5 shrink-0" data-ok="{{rule.ok}}" viewBox="0 0 16 16" aria-hidden="true"><circle class="wp-rule-ring" cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" pathLength="24"></circle><circle class="wp-rule-fill" cx="8" cy="8" r="7" fill="currentColor"></circle><path class="wp-rule-check" d="M5.2 8.3l1.9 1.9 3.8-4" fill="none" stroke="var(--background)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" pathLength="1"></path></svg><span>{{rule.label}}</span><span class="sr-only">{{rule.sr}}</span></li>
+                </sc-for>
+              </ul>
+              <sc-if value="{{pwdErr}}" hint-placeholder-val="{{ false }}">
+                <p role="alert" class="flex items-center gap-1 text-xs font-medium text-destructive"><span class="ng-icon phosphorWarningCircleFill size-3.5" aria-hidden="true"></span>Choisissez un mot de passe qui respecte les 4 règles.</p>
+              </sc-if>
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="rp-confirm" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Confirmer le mot de passe</label>
+              <input id="rp-confirm" type="{{pwdType}}" autocomplete="new-password" onInput="{{onConfirm}}" aria-invalid="{{confirmInvalid}}" aria-describedby="rp-confirm-help" class="h-9 w-full min-w-0 rounded-lg border border-input bg-transparent px-3 py-1 text-sm outline-none transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20 aria-invalid:border-destructive/60 aria-invalid:focus-visible:ring-destructive/15">
+              <sc-if value="{{mismatch}}" hint-placeholder-val="{{ false }}">
+                <p id="rp-confirm-help" class="flex items-center gap-1 text-xs font-medium text-destructive"><span class="ng-icon phosphorWarningCircleFill size-3.5" aria-hidden="true"></span>Les deux mots de passe diffèrent : saisissez le même.</p>
+              </sc-if>
+              <sc-if value="{{confirmMissing}}" hint-placeholder-val="{{ false }}">
+                <p id="rp-confirm-help" role="alert" class="flex items-center gap-1 text-xs font-medium text-destructive"><span class="ng-icon phosphorWarningCircleFill size-3.5" aria-hidden="true"></span>Saisissez de nouveau le mot de passe pour le confirmer.</p>
+              </sc-if>
+              <sc-if value="{{match}}" hint-placeholder-val="{{ false }}">
+                <p id="rp-confirm-help" class="flex items-center gap-1 text-xs font-medium text-jade-text"><span class="ng-icon phosphorCheckCircleFill size-3.5" aria-hidden="true"></span>Les mots de passe correspondent.</p>
+              </sc-if>
+            </div>
+            <div class="flex items-start gap-2">
+              <button type="button" role="checkbox" id="rp-signout" aria-checked="{{signout}}" data-state="{{signoutState}}" onClick="{{toggleSignout}}" class="mt-0.5 grid size-4 shrink-0 place-content-center rounded-[4px] border border-line-control transition-all data-[state=checked]:border-transparent data-[state=checked]:bg-foreground data-[state=checked]:text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">
+                <sc-if value="{{signout}}" hint-placeholder-val="{{ true }}"><span class="ng-icon phosphorCheckBold size-3" aria-hidden="true"></span></sc-if>
+              </button>
+              <div class="flex flex-col gap-0.5">
+                <label for="rp-signout" class="text-sm leading-5 font-medium select-none">Fermer mes autres sessions</label>
+                <p class="text-xs text-muted-foreground">3 appareils connectés seront déconnectés, sauf celui-ci.</p>
+              </div>
+            </div>
+            <div class="flex flex-col gap-2">
+              <button type="submit" class="relative isolate inline-flex h-9 w-full items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-lg bg-foreground px-4 text-sm font-medium text-background transition-all hover:bg-foreground/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Enregistrer le mot de passe</button>
+              <a href="Main.dc.html" class="relative isolate inline-flex h-9 w-full items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-lg px-3 text-sm font-medium transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"><span class="ng-icon phosphorArrowLeftBold" aria-hidden="true"></span>Retour à la connexion</a>
+            </div>
+          </form>
+        </sc-if>
+
+        <sc-if value="{{isDone}}" hint-placeholder-val="{{ false }}">
+          <div class="flex flex-col items-center gap-3 text-center" aria-live="polite">
+            <div class="flex size-10 items-center justify-center rounded-lg bg-muted"><span class="ng-icon phosphorCheckCircleFill size-5 text-jade" aria-hidden="true"></span></div>
+            <div class="flex flex-col gap-1">
+              <h1 class="text-2xl font-semibold tracking-tight">Mot de passe modifié</h1>
+              <p class="text-sm text-muted-foreground">{{doneSessions}} Un e-mail de confirmation vient de partir vers camille.martin@ateliernord.fr.</p>
+            </div>
+          </div>
+          <a href="Main.dc.html" class="relative isolate inline-flex h-9 w-full items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-lg bg-foreground px-4 text-sm font-medium text-background transition-all hover:bg-foreground/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Se connecter</a>
+        </sc-if>
+
+        <sc-if value="{{isExpired}}" hint-placeholder-val="{{ false }}">
+          <div class="flex flex-col items-center gap-3 text-center">
+            <div class="flex size-10 items-center justify-center rounded-lg bg-muted"><span class="ng-icon phosphorWarningCircleFill size-5 text-destructive" aria-hidden="true"></span></div>
+            <div class="flex flex-col gap-1">
+              <h1 class="text-2xl font-semibold tracking-tight">Ce lien a expiré</h1>
+              <p class="text-sm text-muted-foreground">Un lien de réinitialisation reste valable 30 minutes et ne sert qu'une fois. Demandez-en un nouveau.</p>
+            </div>
+          </div>
+          <div class="flex flex-col gap-2">
+            <a href="MotDePasseOublie.dc.html" class="relative isolate inline-flex h-9 w-full items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-lg bg-foreground px-4 text-sm font-medium text-background transition-all hover:bg-foreground/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Demander un nouveau lien</a>
+            <a href="Main.dc.html" class="relative isolate inline-flex h-9 w-full items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-lg px-3 text-sm font-medium transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"><span class="ng-icon phosphorArrowLeftBold" aria-hidden="true"></span>Retour à la connexion</a>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </main>
+
+  <footer class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 px-6 py-4 text-xs text-muted-foreground">
+    <span>Espace de travail Atelier Nord</span>
+    <a href="Legal.dc.html" onClick="{{goPrivacy}}" class="rounded-sm hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas">Confidentialité</a>
+    <a href="Legal.dc.html" onClick="{{goTerms}}" class="rounded-sm hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas">Conditions d'utilisation</a>
+    <a href="Legal.dc.html" onClick="{{goHelp}}" class="rounded-sm hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas">Aide</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["mémorisé","clair","sombre"],"default":"mémorisé"},"etat":{"editor":"enum","options":["formulaire","succès","lien expiré"],"default":"formulaire"},"$preview":{"width":1280,"height":820}}'>
+// Lien profond entre écrans (protocole commun « waypoint-nav ») ; from = écran d'origine, pour le bouton Retour.
+const writeNav = (to, section) => {
+  try { window.localStorage.setItem('waypoint-nav', JSON.stringify({ to, section, at: Date.now(), from: 'Reinitialisation' })); } catch (e) {}
+};
+class Component extends DCLogic {
+  componentDidMount() {
+    try {
+      const t = window.localStorage.getItem('waypoint-theme');
+      if (t === 'dark' || t === 'light') this.setState({ stored: t });
+    } catch (e) {}
+    this.onStorage = (e) => {
+      if (e.key === 'waypoint-theme' && (e.newValue === 'dark' || e.newValue === 'light')) this.setState({ stored: e.newValue, theme: null });
+    };
+    window.addEventListener('storage', this.onStorage);
+  }
+  componentWillUnmount() { window.removeEventListener('storage', this.onStorage); }
+  componentDidUpdate(prev) {
+    if (prev.theme !== this.props.theme) this.setState({ theme: null });
+    if (prev.etat !== this.props.etat) this.setState({ done: null, tried: false, closedOthers: null });
+  }
+  themeTransition(e, apply) {
+    let reduce = false;
+    try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (err) {}
+    if (reduce || typeof document.startViewTransition !== 'function') { apply(() => {}); return; }
+    const root = document.documentElement;
+    const el = e && e.currentTarget && e.currentTarget.getBoundingClientRect ? e.currentTarget : null;
+    const r = el ? el.getBoundingClientRect() : null;
+    root.style.setProperty('--wp-vt-origin', r ? Math.round(r.left + r.width / 2) + 'px ' + Math.round(r.top + r.height / 2) + 'px' : '50% 100%');
+    root.dataset.wpVt = 'circle-blur';
+    const vt = document.startViewTransition(() => new Promise((resolve) => { apply(resolve); setTimeout(resolve, 80); }));
+    const end = () => { delete root.dataset.wpVt; };
+    vt.finished.then(end, end);
+    vt.ready.catch(() => {});
+  }
+  renderVals() {
+    const s = this.state || {};
+    const pref = this.props.theme ?? 'mémorisé';
+    const fixed = pref === 'sombre' ? 'dark' : pref === 'clair' ? 'light' : null;
+    const theme = s.theme || fixed || s.stored || 'light';
+    const etat = this.props.etat ?? 'formulaire';
+    const done = s.done ?? (etat === 'succès');
+    const expired = !done && etat === 'lien expiré';
+    const pwd = s.pwd || '';
+    const confirm = s.confirm || '';
+    const showPwd = !!s.showPwd;
+    const signout = s.signout !== false;
+    const checks = [
+      { label: '12 caractères minimum', ok: pwd.length >= 12 },
+      { label: 'Majuscules et minuscules', ok: /[a-z]/.test(pwd) && /[A-Z]/.test(pwd) },
+      { label: 'Au moins un chiffre', ok: /\d/.test(pwd) },
+      { label: 'Au moins un symbole', ok: /[^A-Za-z0-9]/.test(pwd) },
+    ];
+    const score = checks.filter((c) => c.ok).length;
+    const levels = ['Trop court', 'Faible', 'Moyen', 'Bon', 'Excellent'];
+    const fillTone = score <= 1 ? 'bg-grenat' : score === 2 ? 'bg-balise' : 'bg-jade';
+    return {
+      theme,
+      themeLabel: theme === 'dark' ? 'Passer au thème clair' : 'Passer au thème sombre',
+      toggleTheme: (e) => {
+        const next = theme === 'dark' ? 'light' : 'dark';
+        this.themeTransition(e, (done) => this.setState({ theme: next }, done));
+        try { window.localStorage.setItem('waypoint-theme', next); } catch (err) {}
+      },
+      goPrivacy: () => writeNav('Legal', 'privacy'),
+      goTerms: () => writeNav('Legal', 'terms'),
+      goHelp: () => writeNav('Legal', 'help'),
+      isForm: !done && !expired,
+      isDone: done,
+      isExpired: expired,
+      save: (e) => {
+        e.preventDefault();
+        if (score < 4 || confirm !== pwd) {
+          this.setState({ tried: true });
+          const el = document.getElementById(score < 4 ? 'rp-new' : 'rp-confirm');
+          if (el) el.focus();
+          return;
+        }
+        this.setState({ done: true, closedOthers: signout });
+      },
+      pwdErr: !!s.tried && score < 4,
+      confirmMissing: !!s.tried && score === 4 && confirm.length === 0,
+      confirmInvalid: (confirm.length > 0 && confirm !== pwd) || (!!s.tried && score === 4 && confirm.length === 0),
+      doneSessions: (s.closedOthers ?? true) ? 'Vos 3 autres sessions ont été fermées.' : 'Vos autres sessions restent ouvertes.',
+      showPwd,
+      pwdType: showPwd ? 'text' : 'password',
+      pwdIcon: showPwd ? 'phosphorEyeSlashBold' : 'phosphorEyeBold',
+      pwdLabel: showPwd ? 'Masquer les mots de passe' : 'Afficher les mots de passe',
+      togglePwd: () => this.setState({ showPwd: !showPwd }),
+      onPwd: (e) => this.setState({ pwd: e.target.value }),
+      onConfirm: (e) => this.setState({ confirm: e.target.value }),
+      mismatch: confirm.length > 0 && confirm !== pwd,
+      match: confirm.length > 0 && confirm === pwd,
+      score,
+      strength: pwd ? levels[score] : levels[0],
+      strengthHidden: pwd ? undefined : 'true',
+      strengthShow: pwd ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1',
+      strengthTone: score <= 1 ? 'text-destructive' : score === 2 ? 'text-muted-foreground' : 'text-jade-text',
+      bars: [0, 1, 2, 3].map((i) => ({
+        fill: (pwd && i < Math.max(score, 1) ? 'scale-x-100 ' : 'scale-x-0 ') + fillTone + ' ' + ['delay-0', 'delay-75', 'delay-150', 'delay-225'][i],
+      })),
+      rules: checks.map((c) => ({
+        label: c.label,
+        ok: c.ok ? 'true' : 'false',
+        sr: c.ok ? ' : respecté' : ' : non respecté',
+        text: c.ok ? 'text-jade-text' : 'text-muted-foreground',
+      })),
+      signout,
+      signoutState: signout ? 'checked' : 'unchecked',
+      toggleSignout: () => this.setState({ signout: !signout }),
+    };
+  }
+}
+</script>
+</body>
+</html>

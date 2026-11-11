@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Organisations — Waypoint</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="styles/app.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&amp;family=Geist+Mono:wght@400..600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div data-theme="{{theme}}" class="min-h-screen flex flex-col bg-canvas font-sans text-sm text-foreground antialiased">
+  <header class="flex h-14 items-center justify-between gap-4 px-4 sm:px-6">
+    <a href="Main.dc.html" aria-label="Waypoint, page de connexion" class="flex items-center gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas">
+      <svg class="size-6 text-primary" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.4c-3.5-3.3-7-7-7-11.2a7 7 0 0 1 14 0c0 1.8-.6 3.5-1.6 5.1" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="12" cy="10.2" r="3" fill="currentColor"></circle></svg>
+      <span class="text-base font-bold tracking-[-0.035em]">Waypoint</span>
+    </a>
+    <div class="flex items-center gap-2">
+      <a href="Deconnexion.dc.html" class="relative isolate inline-flex h-8 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-lg px-2.5 text-sm font-medium text-muted-foreground transition-all hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"><span class="ng-icon phosphorSignOutBold" aria-hidden="true"></span>Se déconnecter</a>
+      <button type="button" onClick="{{toggleTheme}}" aria-label="{{themeLabel}}" class="relative isolate inline-flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-lg text-muted-foreground transition-all hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas whitespace-nowrap">
+        <span class="ng-icon phosphorMoonBold dark:hidden" aria-hidden="true"></span>
+        <span class="ng-icon phosphorSunBold hidden dark:inline-block" aria-hidden="true"></span>
+      </button>
+    </div>
+  </header>
+
+  <main class="flex flex-1 justify-center px-4 py-6 sm:items-center sm:py-10">
+    <div class="flex w-full max-w-[520px] flex-col gap-5">
+
+      <sc-if value="{{isPick}}" hint-placeholder-val="{{ true }}">
+        <div class="flex flex-col gap-6 rounded-xl border border-border bg-card p-6 sm:p-8">
+          <div class="flex flex-col gap-1">
+            <h1 class="text-2xl font-semibold tracking-tight">Choisir une organisation</h1>
+            <p class="text-sm text-muted-foreground">Connecté en tant que <span class="font-medium text-foreground">camille.martin@ateliernord.fr</span>.</p>
+          </div>
+
+          <sc-if value="{{hasInvite}}" hint-placeholder-val="{{ true }}">
+            <div class="flex flex-col gap-2">
+              <p class="text-xs font-medium text-muted-foreground">Invitation en attente</p>
+              <div class="flex flex-wrap items-center gap-3 rounded-lg bg-muted px-3 py-2.5">
+                <span class="flex size-8 shrink-0 items-center justify-center rounded-md bg-sidebar-primary text-xs font-semibold text-sidebar-primary-foreground" aria-hidden="true">CL</span>
+                <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+                  <span class="font-medium leading-5">Coopérative Lumen</span>
+                  <span class="text-xs text-muted-foreground">Inès Robert vous invite comme Membre · expire le 15 nov.</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <button type="button" onClick="{{decline}}" class="relative isolate inline-flex h-7 items-center justify-center overflow-hidden whitespace-nowrap rounded-md px-2.5 text-sm font-medium transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Refuser</button>
+                  <button type="button" onClick="{{accept}}" class="relative isolate inline-flex h-7 items-center justify-center overflow-hidden whitespace-nowrap rounded-md border border-input px-2.5 text-sm font-medium transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Accepter</button>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{isDeclined}}" hint-placeholder-val="{{ false }}">
+            <div role="status" class="flex items-center justify-between gap-2 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground">
+              <span class="min-w-0">Invitation de Coopérative Lumen refusée. Inès Robert pourra vous en envoyer une nouvelle.</span>
+              <button type="button" onClick="{{undoDecline}}" class="relative isolate inline-flex h-6 shrink-0 items-center justify-center gap-1 overflow-hidden whitespace-nowrap rounded-md px-1.5 text-xs font-medium text-foreground transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"><span class="ng-icon phosphorArrowCounterClockwiseBold size-3.5" aria-hidden="true"></span>Annuler</button>
+            </div>
+          </sc-if>
+
+          <div class="flex flex-col gap-2">
+            <p class="text-xs font-medium text-muted-foreground">Vos organisations</p>
+            <ul class="flex flex-col gap-1">
+              <sc-for list="{{orgs}}" as="org" hint-placeholder-count="2">
+                <li>
+                  <a href="App.dc.html" class="group/item flex w-full items-center gap-3 rounded-lg border border-border px-3 py-2.5 text-left text-sm transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">
+                    <span class="flex size-8 shrink-0 items-center justify-center rounded-md bg-sidebar-primary text-xs font-semibold text-sidebar-primary-foreground" aria-hidden="true">{{org.initials}}</span>
+                    <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                      <span class="flex items-center gap-2"><span class="truncate font-medium leading-5">{{org.name}}</span><sc-if value="{{org.isNew}}" hint-placeholder-val="{{ false }}"><span class="inline-flex h-[18px] w-fit shrink-0 items-center justify-center gap-1 overflow-hidden whitespace-nowrap rounded-md border border-transparent bg-secondary px-1.5 text-[11px] leading-none font-medium text-secondary-foreground">Nouveau</span></sc-if></span>
+                      <span class="truncate text-xs text-muted-foreground">{{org.meta}}</span>
+                    </span>
+                    <span class="hidden text-xs text-muted-foreground sm:inline">{{org.last}}</span>
+                    <span class="ng-icon phosphorCaretRightBold text-muted-foreground" aria-hidden="true"></span>
+                  </a>
+                </li>
+              </sc-for>
+            </ul>
+          </div>
+
+          <div class="flex flex-col gap-2 border-t border-border pt-4">
+            <button type="button" onClick="{{goCreate}}" class="relative isolate inline-flex h-9 w-full items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-lg border border-input px-3 text-sm font-medium transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"><span class="ng-icon phosphorPlusBold" aria-hidden="true"></span>Créer une organisation</button>
+            <p class="text-center text-xs text-muted-foreground">Pour rejoindre une organisation existante, demandez une invitation à l'un de ses administrateurs.</p>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{isCreate}}" hint-placeholder-val="{{ false }}">
+        <div class="flex flex-col gap-6 rounded-xl border border-border bg-card p-6 sm:p-8">
+          <div class="flex flex-col gap-3">
+            <button type="button" onClick="{{goPick}}" class="relative isolate -ml-2 inline-flex h-7 w-fit items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-md px-2 text-sm font-medium text-muted-foreground transition-all hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"><span class="ng-icon phosphorArrowLeftBold" aria-hidden="true"></span>Mes organisations</button>
+            <div class="flex flex-col gap-1">
+              <h1 class="text-2xl font-semibold tracking-tight">Créer une organisation</h1>
+              <p class="text-sm text-muted-foreground">Une organisation regroupe vos espaces, membres et facturation. Vous en serez propriétaire.</p>
+            </div>
+          </div>
+
+          <form class="flex flex-col gap-5" onSubmit="{{prevent}}">
+            <div class="flex items-center gap-4">
+              <span class="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-lg text-base font-semibold text-muted-foreground {{logoBox}}">
+                <sc-if value="{{hasLogo}}" hint-placeholder-val="{{ false }}">
+                  <img src="{{logoUrl}}" alt="{{logoAlt}}" class="size-full object-cover">
+                </sc-if>
+                <sc-if value="{{noLogo}}" hint-placeholder-val="{{ true }}">
+                  <span aria-hidden="true">{{draftInitials}}</span>
+                </sc-if>
+              </span>
+              <div class="flex min-w-0 flex-col gap-1.5">
+                <span id="org-logo-label" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Logo</span>
+                <div class="flex flex-wrap items-center gap-2">
+                  <input id="org-logo" type="file" accept="image/*" aria-labelledby="org-logo-label org-logo-btn" aria-describedby="org-logo-help" onChange="{{onLogo}}" class="peer sr-only">
+                  <label id="org-logo-btn" for="org-logo" class="relative isolate inline-flex h-7 cursor-pointer items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-md border border-input px-2 text-sm font-medium transition-all hover:bg-accent peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-background"><span class="ng-icon phosphorUploadSimpleBold" aria-hidden="true"></span>{{logoAction}}</label>
+                  <sc-if value="{{hasLogo}}" hint-placeholder-val="{{ false }}">
+                    <button type="button" onClick="{{removeLogo}}" class="relative isolate inline-flex h-7 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-md px-2 text-sm font-medium transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"><span class="ng-icon phosphorTrashBold" aria-hidden="true"></span>Retirer</button>
+                  </sc-if>
+                  <sc-if value="{{logoHintPlain}}" hint-placeholder-val="{{ true }}">
+                    <span id="org-logo-help" class="text-xs text-muted-foreground">PNG ou SVG carré, 512 px conseillés</span>
+                  </sc-if>
+                  <sc-if value="{{hasLogo}}" hint-placeholder-val="{{ false }}">
+                    <span id="org-logo-help" class="min-w-0 truncate text-xs text-muted-foreground" aria-live="polite">{{logoMeta}}</span>
+                  </sc-if>
+                </div>
+                <sc-if value="{{logoErr}}" hint-placeholder-val="{{ false }}">
+                  <p role="alert" class="flex items-center gap-1 text-xs font-medium text-destructive"><span class="ng-icon phosphorWarningCircleFill size-3.5" aria-hidden="true"></span>{{logoErrText}}</p>
+                </sc-if>
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label for="org-name" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Nom de l'organisation</label>
+              <input id="org-name" type="text" autocomplete="organization" onInput="{{onName}}" placeholder="Studio Nord" class="h-9 w-full min-w-0 rounded-lg border border-input bg-transparent px-3 py-1 text-sm outline-none transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20">
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label for="org-slug" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Adresse</label>
+              <div role="group" class="relative flex h-9 w-full min-w-0 items-center rounded-lg border border-input transition-[color,box-shadow] focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/20">
+                <span class="flex h-full shrink-0 items-center ps-3 text-sm text-muted-foreground" aria-hidden="true">app.waypoint.example/</span>
+                <input id="org-slug" type="text" value="{{slug}}" readonly class="h-full min-w-0 flex-1 bg-transparent pr-3 font-mono text-xs outline-none">
+                <span class="flex h-full shrink-0 items-center pe-3"><sc-if value="{{slugOk}}" hint-placeholder-val="{{ false }}"><span class="flex items-center gap-1 text-xs font-medium text-jade-text"><span class="ng-icon phosphorCheckCircleFill size-3.5" aria-hidden="true"></span>Disponible</span></sc-if></span>
+              </div>
+              <p class="text-xs text-muted-foreground">Générée à partir du nom ; modifiable ensuite dans les réglages.</p>
+            </div>
+
+            <fieldset class="flex min-w-0 flex-col gap-2">
+              <legend class="mb-2 text-sm font-medium">Taille de l'équipe</legend>
+              <div role="radiogroup" aria-label="Taille de l'équipe" class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                <sc-for list="{{sizes}}" as="size" hint-placeholder-count="4">
+                  <button type="button" role="radio" id="{{size.id}}" aria-checked="{{size.checked}}" tabindex="{{size.tab}}" data-state="{{size.state}}" onClick="{{size.pick}}" onKeyDown="{{size.key}}" class="group relative flex flex-col items-start gap-0.5 rounded-lg border border-border p-3 text-left transition-colors hover:bg-muted data-[state=checked]:border-primary/50 data-[state=checked]:bg-primary/5 data-[state=checked]:hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">
+                    <span class="mb-2 flex size-8 items-center justify-center rounded-md border border-border bg-background text-muted-foreground transition-colors group-data-[state=checked]:border-primary/30 group-data-[state=checked]:text-primary" aria-hidden="true"><span class="ng-icon {{size.icon}} size-4"></span></span>
+                    <span class="ng-icon phosphorCheckCircleFill absolute top-3 right-3 size-4 scale-50 text-primary opacity-0 transition-all duration-200 ease-snap group-data-[state=checked]:scale-100 group-data-[state=checked]:opacity-100" aria-hidden="true"></span>
+                    <span class="text-sm font-medium tabular-nums whitespace-nowrap">{{size.label}} <span class="font-normal text-muted-foreground">pers.</span></span>
+                    <span class="text-xs whitespace-nowrap text-muted-foreground">{{size.hint}}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </fieldset>
+
+            <div class="flex flex-col gap-2">
+              <label id="org-use-label" for="org-use" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Usage principal</label>
+              <div class="relative {{useSel.selZ}}">
+                <sc-if value="{{useSel.selOpen}}" hint-placeholder-val="{{ false }}">
+                  <button type="button" tabindex="-1" aria-hidden="true" onClick="{{useSel.selClose}}" class="fixed inset-0 z-40 cursor-default"></button>
+                </sc-if>
+                <button type="button" id="org-use" role="combobox" aria-haspopup="listbox" aria-expanded="{{useSel.selOpen}}" aria-controls="org-use-list" aria-labelledby="org-use-label org-use"
+                  onClick="{{useSel.selToggle}}" onKeyDown="{{useSel.selTriggerKey}}"
+                  class="relative z-40 flex h-9 w-full items-center justify-between gap-2 rounded-lg border border-input bg-transparent px-3 text-left text-sm transition-colors hover:bg-accent aria-expanded:bg-selected focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50">
+                  <span class="flex min-w-0 items-center gap-2 truncate {{useSel.valueTone}}">{{useSel.valueLabel}}</span>
+                  <span class="ng-icon phosphorCaretDownBold size-4 shrink-0 text-muted-foreground transition-transform duration-300 ease-snap {{useSel.caretCls}}" aria-hidden="true"></span>
+                </button>
+                <sc-if value="{{useSel.selOpen}}" hint-placeholder-val="{{ false }}">
+                  <div class="absolute top-full left-0 z-50 mt-1 min-w-full menu-shadow">
+                    <div role="listbox" id="org-use-list" aria-labelledby="org-use-label" onKeyDown="{{selListKey}}" data-select-list
+                      class="max-h-72 overflow-y-auto rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-[inset_0_1px_0_0_var(--shadow-edge)] menu-from-tl animate-menu-in motion-reduce:animate-none">
+                      <sc-for list="{{useSel.options}}" as="o" hint-placeholder-count="5">
+                        <button type="button" role="option" aria-selected="{{o.on}}" onClick="{{o.pick}}"
+                          class="flex w-full cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm whitespace-nowrap outline-hidden transition-colors select-none hover:bg-accent focus-visible:bg-selected animate-menu-item {{o.stagger}}">
+                          {{o.label}}<sc-if value="{{o.on}}" hint-placeholder-val="{{ false }}"><span class="ng-icon phosphorCheckBold ml-auto size-4 shrink-0" aria-hidden="true"></span></sc-if>
+                        </button>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label for="org-invite" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Inviter des collègues <span class="font-normal text-muted-foreground">(facultatif)</span></label>
+              <textarea id="org-invite" rows="2" placeholder="adresse@exemple.fr, autre@exemple.fr" class="flex field-sizing-content min-h-16 max-h-60 w-full resize-none rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20"></textarea>
+              <p class="text-xs text-muted-foreground">Ils recevront un e-mail ; rôle Membre par défaut.</p>
+            </div>
+
+            <div class="flex w-full items-start gap-3 rounded-lg border border-border bg-card px-4 py-3 text-sm text-card-foreground">
+              <span class="ng-icon phosphorInfoBold mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true"></span>
+              <p class="leading-5 text-muted-foreground">Plan Gratuit au départ : 5 membres et 2 Go de stockage. Passez au plan Équipe à tout moment depuis Facturation.</p>
+            </div>
+
+            <a href="App.dc.html" aria-disabled="{{nameMissing}}" onClick="{{guardCreate}}" class="relative isolate inline-flex h-9 w-full items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-lg bg-foreground px-4 text-sm font-medium text-background transition-all hover:bg-foreground/90 aria-disabled:pointer-events-none aria-disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Créer l'organisation</a>
+          </form>
+        </div>
+      </sc-if>
+    </div>
+  </main>
+
+  <footer class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 px-6 py-4 text-xs text-muted-foreground">
+    <span>Espace de travail Atelier Nord</span>
+    <a href="Legal.dc.html" onClick="{{goPrivacy}}" class="rounded-sm hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas">Confidentialité</a>
+    <a href="Legal.dc.html" onClick="{{goTerms}}" class="rounded-sm hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas">Conditions d'utilisation</a>
+    <a href="Legal.dc.html" onClick="{{goHelp}}" class="rounded-sm hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas">Aide</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["mémorisé","clair","sombre"],"default":"mémorisé"},"vue":{"editor":"enum","options":["choisir","créer"],"default":"choisir"},"$preview":{"width":1280,"height":820}}'>
+// Lien profond entre écrans (protocole commun « waypoint-nav ») ; from = écran d'origine, pour le bouton Retour.
+const writeNav = (to, section) => {
+  try { window.localStorage.setItem('waypoint-nav', JSON.stringify({ to, section, at: Date.now(), from: 'Organisations' })); } catch (e) {}
+};
+// Usage principal : mêmes libellés (et valeurs) que l'ancienne liste native, premier choix par défaut.
+const USES = ['Produit et ingénierie', 'Agence et projets clients', 'Marketing et contenus', 'Opérations et support', 'Autre'];
+const STAGGER = ['stagger-0', 'stagger-1', 'stagger-2', 'stagger-3', 'stagger-4', 'stagger-5', 'stagger-6', 'stagger-7', 'stagger-8'];
+class Component extends DCLogic {
+  componentDidMount() {
+    try {
+      const t = window.localStorage.getItem('waypoint-theme');
+      if (t === 'dark' || t === 'light') this.setState({ stored: t });
+    } catch (e) {}
+    this.onStorage = (e) => {
+      if (e.key === 'waypoint-theme' && (e.newValue === 'dark' || e.newValue === 'light')) this.setState({ stored: e.newValue, theme: null });
+    };
+    window.addEventListener('storage', this.onStorage);
+  }
+  componentWillUnmount() { window.removeEventListener('storage', this.onStorage); this.revokeLogo(); }
+  revokeLogo() {
+    const l = (this.state || {}).logo;
+    if (l && l.url) { try { URL.revokeObjectURL(l.url); } catch (e) {} }
+  }
+  componentDidUpdate(prev) {
+    if (prev.theme !== this.props.theme) this.setState({ theme: null });
+    if (prev.vue !== this.props.vue) this.setState({ view: null });
+    const s = this.state || {};
+    if (s.openSelect && s.openSelect !== this.prevSelect) setTimeout(() => {
+      const list = document.querySelector('[data-select-list]');
+      const el = list && (list.querySelector('[aria-selected="true"]') || list.querySelector('[role="option"]'));
+      if (el) el.focus();
+    }, 0);
+    if (!s.openSelect && this.refocus) { const id = this.refocus; this.refocus = null; setTimeout(() => { const t = document.getElementById(id); if (t) t.focus(); }, 0); }
+    this.prevSelect = s.openSelect || null;
+  }
+  st() { return this.state || {}; }
+  themeTransition(e, apply) {
+    let reduce = false;
+    try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (err) {}
+    if (reduce || typeof document.startViewTransition !== 'function') { apply(() => {}); return; }
+    const root = document.documentElement;
+    const el = e && e.currentTarget && e.currentTarget.getBoundingClientRect ? e.currentTarget : null;
+    const r = el ? el.getBoundingClientRect() : null;
+    root.style.setProperty('--wp-vt-origin', r ? Math.round(r.left + r.width / 2) + 'px ' + Math.round(r.top + r.height / 2) + 'px' : '50% 100%');
+    root.dataset.wpVt = 'circle-blur';
+    const vt = document.startViewTransition(() => new Promise((resolve) => { apply(resolve); setTimeout(resolve, 80); }));
+    const end = () => { delete root.dataset.wpVt; };
+    vt.finished.then(end, end);
+    vt.ready.catch(() => {});
+  }
+  renderVals() {
+    const s = this.state || {};
+    const pref = this.props.theme ?? 'mémorisé';
+    const fixed = pref === 'sombre' ? 'dark' : pref === 'clair' ? 'light' : null;
+    const theme = s.theme || fixed || s.stored || 'light';
+    const view = s.view || ((this.props.vue ?? 'choisir') === 'créer' ? 'create' : 'pick');
+    const invite = s.invite || 'pending';
+    const name = s.name || '';
+    const slug = name.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    const initials = name.trim().split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('');
+    const size = s.size || '6–20';
+    const use = s.use || USES[0];
+    const sel = (key, value, opts, onPick) => {
+      const open = s.openSelect === key;
+      const cur = opts.find((o) => o[0] === value);
+      return {
+        selOpen: open, selZ: open ? 'z-50' : '', caretCls: open ? 'rotate-180' : '',
+        valueLabel: cur ? cur[1] : 'Choisir…', valueTone: cur ? '' : 'text-muted-foreground',
+        selToggle: () => this.setState({ openSelect: open ? null : key }),
+        selClose: () => this.setState({ openSelect: null }),
+        selTriggerKey: (e) => {
+          if (['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(e.key) && !open) { e.preventDefault(); this.setState({ openSelect: key }); }
+          if (e.key === 'Escape' && open) { e.preventDefault(); this.setState({ openSelect: null }); }
+        },
+        options: opts.map(([v, label], i) => ({ value: v, label, on: v === value, stagger: STAGGER[Math.min(i, 8)],
+          pick: () => { this.refocus = key; this.setState({ openSelect: null }); onPick(v); } })),
+      };
+    };
+    const logo = s.logo || null;
+    const fmtSize = (n) => n < 1024 ? n + ' octets' : n < 1048576 ? Math.round(n / 1024) + ' Ko' : (n / 1048576).toFixed(1).replace('.', ',') + ' Mo';
+    const orgs = [
+      { initials: 'AN', name: 'Atelier Nord', meta: 'Propriétaire · 18 membres · plan Équipe', last: 'Ouverte hier', isNew: false },
+      { initials: 'SP', name: 'Studio Pivot', meta: 'Membre · 6 membres · plan Gratuit', last: 'Il y a 3 semaines', isNew: false },
+    ];
+    if (invite === 'accepted') orgs.unshift({ initials: 'CL', name: 'Coopérative Lumen', meta: 'Membre · 41 membres · plan Entreprise', last: 'À l’instant', isNew: true });
+    return {
+      theme,
+      themeLabel: theme === 'dark' ? 'Passer au thème clair' : 'Passer au thème sombre',
+      toggleTheme: (e) => {
+        const next = theme === 'dark' ? 'light' : 'dark';
+        this.themeTransition(e, (done) => this.setState({ theme: next }, done));
+        try { window.localStorage.setItem('waypoint-theme', next); } catch (err) {}
+      },
+      goPrivacy: () => writeNav('Legal', 'privacy'),
+      goTerms: () => writeNav('Legal', 'terms'),
+      goHelp: () => writeNav('Legal', 'help'),
+      isPick: view === 'pick',
+      isCreate: view === 'create',
+      goCreate: () => this.setState({ view: 'create' }),
+      goPick: () => this.setState({ view: 'pick', openSelect: null }),
+      use,
+      useSel: sel('org-use', use, USES.map((u) => [u, u]), (v) => this.setState({ use: v })),
+      selListKey: (e) => {
+        if (!e.currentTarget) return;
+        const opts = Array.from(e.currentTarget.querySelectorAll('[role="option"]'));
+        const i = opts.indexOf(document.activeElement);
+        const go = (j) => { e.preventDefault(); const el = opts[(j + opts.length) % opts.length]; if (el) el.focus(); };
+        if (e.key === 'ArrowDown') go(i + 1); else if (e.key === 'ArrowUp') go(i - 1);
+        else if (e.key === 'Home') go(0); else if (e.key === 'End') go(opts.length - 1);
+        else if (e.key === 'Escape' || e.key === 'Tab') { if (e.key === 'Escape') e.preventDefault(); const k = this.st().openSelect; this.refocus = k; this.setState({ openSelect: null }); }
+      },
+      hasInvite: invite === 'pending',
+      accept: () => this.setState({ invite: 'accepted' }),
+      decline: () => this.setState({ invite: 'declined' }),
+      isDeclined: invite === 'declined',
+      undoDecline: () => this.setState({ invite: 'pending' }),
+      hasLogo: !!logo,
+      noLogo: !logo,
+      logoUrl: logo ? logo.url : '',
+      logoAlt: logo ? 'Aperçu du logo : ' + logo.name : '',
+      logoBox: logo ? 'border border-border bg-background' : 'border border-dashed border-input',
+      logoAction: logo ? 'Remplacer' : 'Importer',
+      logoMeta: logo ? logo.name + ' · ' + fmtSize(logo.size) : '',
+      logoHintPlain: !logo,
+      logoErr: !!s.logoErr,
+      logoErrText: 'Ce fichier n’est pas une image : choisissez un PNG, un SVG ou un JPEG.',
+      onLogo: (e) => {
+        const input = e.target;
+        const file = input.files && input.files[0];
+        if (!file) return;
+        if (!/^image\//.test(file.type)) {
+          this.setState({ logoErr: true });
+          input.value = '';
+          return;
+        }
+        let url = '';
+        try { url = URL.createObjectURL(file); } catch (err) {}
+        if (!url) { this.setState({ logoErr: true }); return; }
+        this.revokeLogo();
+        this.setState({ logo: { url, name: file.name, size: file.size }, logoErr: false });
+      },
+      removeLogo: () => {
+        this.revokeLogo();
+        this.setState({ logo: null, logoErr: false });
+        const input = document.getElementById('org-logo');
+        if (input) { input.value = ''; input.focus(); }
+      },
+      guardCreate: (e) => {
+        if (slug.length >= 2) {
+          try { window.localStorage.setItem('waypoint-new-org', JSON.stringify({ name: name.trim(), slug, size, use, at: Date.now() })); } catch (err) {}
+          return;
+        }
+        e.preventDefault();
+        const el = document.getElementById('org-name');
+        if (el) el.focus();
+      },
+      orgs,
+      onName: (e) => this.setState({ name: e.target.value }),
+      slug: slug || 'votre-organisation',
+      slugOk: slug.length > 1,
+      draftInitials: initials || 'Aa',
+      nameMissing: slug.length < 2,
+      sizes: [
+        { label: '1–5', hint: 'Petite équipe', icon: 'phosphorUserBold' },
+        { label: '6–20', hint: 'Équipe', icon: 'phosphorUsersBold' },
+        { label: '21–100', hint: 'Plusieurs équipes', icon: 'phosphorUsersThreeBold' },
+        { label: '100+', hint: 'Entreprise', icon: 'phosphorBuildingsBold' },
+      ].map((o, i, all) => ({
+        ...o,
+        id: 'org-size-' + i,
+        checked: o.label === size,
+        tab: o.label === size ? 0 : -1,
+        state: o.label === size ? 'checked' : 'unchecked',
+        pick: () => this.setState({ size: o.label }),
+        key: (e) => {
+          const last = all.length - 1;
+          const to = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? (i === last ? 0 : i + 1)
+            : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? (i === 0 ? last : i - 1) : -1;
+          if (to < 0) return;
+          e.preventDefault();
+          this.setState({ size: all[to].label });
+          setTimeout(() => { const el = document.getElementById('org-size-' + to); if (el) el.focus(); }, 0);
+        },
+      })),
+      prevent: (e) => e.preventDefault(),
+    };
+  }
+}
+</script>
+</body>
+</html>

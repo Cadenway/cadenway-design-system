@@ -1,0 +1,749 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Confidentialité, conditions et aide — Waypoint</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="styles/app.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&amp;family=Geist+Mono:wght@400..600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div data-theme="{{theme}}" class="min-h-screen flex flex-col bg-canvas font-sans text-sm text-foreground antialiased">
+  <header class="flex h-14 items-center justify-between gap-4 px-4 sm:px-6">
+    <a href="Main.dc.html" aria-label="Waypoint, page de connexion" class="flex items-center gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas">
+      <svg class="size-6 text-primary" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.4c-3.5-3.3-7-7-7-11.2a7 7 0 0 1 14 0c0 1.8-.6 3.5-1.6 5.1" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="12" cy="10.2" r="3" fill="currentColor"></circle></svg>
+      <span class="text-base font-bold tracking-[-0.035em]">Waypoint</span>
+    </a>
+    <div class="flex items-center gap-2">
+      <span class="hidden md:flex items-center gap-1.5 text-xs text-muted-foreground"><span class="ng-icon phosphorGlobeSimpleBold size-3.5" aria-hidden="true"></span>app.waypoint.example</span>
+      <a href="{{backHref}}" class="relative isolate inline-flex h-8 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-lg px-2.5 text-sm font-medium text-muted-foreground transition-all hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"><span class="ng-icon phosphorArrowLeftBold" aria-hidden="true"></span>{{backLabel}}</a>
+      <button type="button" onClick="{{toggleTheme}}" aria-label="{{themeLabel}}" class="relative isolate inline-flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-lg text-muted-foreground transition-all hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas whitespace-nowrap">
+        <span class="ng-icon phosphorMoonBold dark:hidden" aria-hidden="true"></span>
+        <span class="ng-icon phosphorSunBold hidden dark:inline-block" aria-hidden="true"></span>
+      </button>
+    </div>
+  </header>
+
+  <main class="flex flex-1 justify-center px-4 pt-4 pb-10 sm:px-6 sm:pt-6">
+    <div class="flex w-full max-w-5xl flex-col gap-6">
+      <div class="flex flex-col gap-1">
+        <h1 class="text-2xl font-semibold tracking-tight">Confidentialité, conditions et aide</h1>
+        <p class="text-sm text-muted-foreground">Service Waypoint, espace de travail de l’organisation <span class="font-medium text-foreground">Atelier Nord</span>.</p>
+      </div>
+
+      <div class="flex flex-col gap-6 md:flex-row md:items-start md:gap-8">
+        <div class="flex shrink-0 flex-col gap-4 md:sticky md:top-6 md:w-56">
+          <div role="tablist" aria-orientation="vertical" aria-label="Rubriques" class="flex flex-wrap items-stretch gap-x-4 border-b border-border md:flex-col md:flex-nowrap md:gap-0.5 md:border-b-0 md:border-l">
+            <sc-for list="{{tabs}}" as="t" hint-placeholder-count="3">
+              <button type="button" role="tab" id="{{t.tabId}}" aria-selected="{{t.active}}" aria-controls="{{t.panelId}}" data-state="{{t.state}}" onClick="{{t.pick}}" onKeyDown="{{t.key}}" class="relative inline-flex h-9 items-center gap-1.5 rounded-md px-1 text-left text-sm font-medium text-muted-foreground transition-colors hover:text-foreground data-[state=active]:text-foreground after:pointer-events-none after:absolute after:inset-x-0 after:-bottom-px after:h-0.5 after:rounded-full data-[state=active]:after:bg-foreground md:h-8 md:px-3 md:after:inset-y-1 md:after:right-auto md:after:-left-px md:after:h-auto md:after:w-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas disabled:pointer-events-none disabled:opacity-50 whitespace-nowrap">
+                <span class="ng-icon {{t.icon}} size-4 shrink-0 {{t.iconTone}}" aria-hidden="true"></span>{{t.label}}
+              </button>
+            </sc-for>
+          </div>
+          <div class="hidden flex-col gap-1.5 rounded-lg border border-border px-3 py-2.5 text-xs text-muted-foreground md:flex">
+            <span class="flex items-center gap-1.5 font-medium text-foreground"><span class="ng-icon phosphorHardDrivesBold size-3.5" aria-hidden="true"></span>Hébergé en France</span>
+            <span>Comptes, contenus et journaux sont hébergés en France, sur des serveurs exploités pour Waypoint.</span>
+          </div>
+        </div>
+
+        <div class="flex min-w-0 max-w-3xl flex-1 flex-col gap-6">
+
+          <sc-if value="{{isPrivacy}}" hint-placeholder-val="{{ true }}">
+            <article role="tabpanel" id="legal-panel-privacy" aria-labelledby="legal-tab-privacy" class="flex flex-col gap-6 rounded-xl border border-border bg-card p-6 sm:p-8">
+              <header class="flex flex-col gap-1 border-b border-border pb-5">
+                <h2 class="text-lg font-semibold">Politique de confidentialité</h2>
+                <p class="text-sm text-muted-foreground">En vigueur le <span class="rounded-[4px] bg-muted px-1 py-px font-mono text-xs text-foreground">[DATE D'ENTRÉE EN VIGUEUR]</span>. Elle s'applique au service Waypoint et à toutes les organisations qui l'utilisent.</p>
+              </header>
+
+              <div class="flex w-full items-start gap-3 rounded-lg border border-border bg-card px-4 py-3 text-sm text-card-foreground">
+                <span class="ng-icon phosphorHardDrivesBold mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true"></span>
+                <div class="flex flex-col gap-0.5">
+                  <p class="font-medium leading-5">Vos données restent en France</p>
+                  <p class="leading-5 text-muted-foreground">Waypoint est hébergé en France, sur des serveurs exploités pour son compte. Comptes, contenus et journaux y sont stockés ; ils ne sont pas transmis à l'éditeur du logiciel.</p>
+                </div>
+              </div>
+
+              <section class="flex flex-col gap-3" aria-labelledby="pc-controller">
+                <h3 id="pc-controller" class="text-base font-semibold">1. Responsable du traitement</h3>
+                <p>Le responsable du traitement est l’éditeur de Waypoint, qui exploite le service. Pour les contenus de vos espaces, votre organisation est responsable du traitement et Waypoint agit comme sous-traitant.</p>
+                <dl class="grid grid-cols-1 gap-x-4 gap-y-1 rounded-lg border border-border px-4 py-3 sm:grid-cols-[11rem_minmax(0,1fr)] sm:gap-y-2">
+                  <dt class="text-muted-foreground">Raison sociale</dt>
+                  <dd><span class="rounded-[4px] bg-muted px-1 py-px font-mono text-xs">[RAISON SOCIALE]</span></dd>
+                  <dt class="text-muted-foreground">Siège</dt>
+                  <dd><span class="rounded-[4px] bg-muted px-1 py-px font-mono text-xs">[ADRESSE DU SIÈGE]</span></dd>
+                  <dt class="text-muted-foreground">Immatriculation</dt>
+                  <dd><span class="rounded-[4px] bg-muted px-1 py-px font-mono text-xs">[NUMÉRO RCS OU SIREN]</span></dd>
+                  <dt class="text-muted-foreground">Délégué à la protection des données</dt>
+                  <dd><span class="rounded-[4px] bg-muted px-1 py-px font-mono text-xs">[NOM DU DPO]</span> · <span class="rounded-[4px] bg-muted px-1 py-px font-mono text-xs">[E-MAIL DU DPO]</span></dd>
+                </dl>
+              </section>
+
+              <section class="flex flex-col gap-3" aria-labelledby="pc-data">
+                <h3 id="pc-data" class="text-base font-semibold">2. Données traitées</h3>
+                <ul class="list-disc space-y-1.5 pl-5 marker:text-muted-foreground">
+                  <li><span class="font-medium">Compte :</span> nom, adresse e-mail, photo, préférences (langue, thème, notifications), mot de passe conservé uniquement sous forme d'empreinte, méthodes de vérification en deux étapes (application d'authentification, clés de sécurité, codes de secours).</li>
+                  <li><span class="font-medium">Contenu :</span> espaces, listes, tâches, commentaires, pièces jointes et fichiers que vous et vos collègues créez dans les organisations.</li>
+                  <li><span class="font-medium">Journaux :</span> adresse IP, navigateur et appareil, date des connexions, sessions ouvertes, actions sensibles (changement de mot de passe, invitation, modification d'un rôle, suppression).</li>
+                  <li><span class="font-medium">Fournisseur de connexion :</span> si vous passez par Google, GitHub, Microsoft, GitLab ou le SSO de votre entreprise, ce fournisseur nous transmet votre nom et votre adresse e-mail ; il sait aussi que vous vous connectez à cette instance.</li>
+                </ul>
+              </section>
+
+              <section class="flex flex-col gap-3" aria-labelledby="pc-purposes">
+                <h3 id="pc-purposes" class="text-base font-semibold">3. Finalités</h3>
+                <ul class="list-disc space-y-1.5 pl-5 marker:text-muted-foreground">
+                  <li>Vous donner accès au service : authentification, collaboration dans les organisations, notifications que vous avez choisies.</li>
+                  <li>Sécuriser l'instance : vérification en deux étapes, verrouillage temporaire après plusieurs échecs, journal d'audit des organisations.</li>
+                  <li>Envoyer les e-mails de service : codes de connexion, liens de réinitialisation, invitations, confirmations.</li>
+                  <li>Répondre aux demandes que vous adressez à l'administrateur.</li>
+                </ul>
+              </section>
+
+              <section class="flex flex-col gap-3" aria-labelledby="pc-basis">
+                <h3 id="pc-basis" class="text-base font-semibold">4. Bases légales</h3>
+                <ul class="list-disc space-y-1.5 pl-5 marker:text-muted-foreground">
+                  <li><span class="font-medium">Exécution du contrat</span> que forment les conditions d'utilisation : compte, contenu, e-mails de service.</li>
+                  <li><span class="font-medium">Intérêt légitime</span> de Waypoint à protéger le service : journaux, détection des abus.</li>
+                  <li><span class="font-medium">Obligation légale</span> : conservation de certaines données de connexion lorsque la loi l'impose.</li>
+                  <li><span class="font-medium">Consentement</span> : e-mails facultatifs, retirable à tout moment depuis vos préférences de notification.</li>
+                </ul>
+              </section>
+
+              <section class="flex flex-col gap-3" aria-labelledby="pc-retention">
+                <h3 id="pc-retention" class="text-base font-semibold">5. Durées de conservation</h3>
+                <div class="relative w-full overflow-x-auto rounded-lg border border-border">
+                  <table class="w-full caption-bottom text-sm">
+                    <thead>
+                      <tr class="border-b border-border">
+                        <th scope="col" class="h-9 w-44 px-3 text-left align-middle text-xs font-medium whitespace-nowrap text-muted-foreground">Donnée</th>
+                        <th scope="col" class="h-9 px-3 text-left align-middle text-xs font-medium whitespace-nowrap text-muted-foreground">Durée</th>
+                      </tr>
+                    </thead>
+                    <tbody class="[&_tr:last-child]:border-0">
+                      <tr class="border-b border-border"><th scope="row" class="px-3 py-2 text-left align-top font-medium">Compte</th><td class="px-3 py-2 align-top">Tant que le compte est actif, puis <span class="rounded-[4px] bg-muted px-1 py-px font-mono text-xs">[DÉLAI DE SUPPRESSION]</span> après sa clôture.</td></tr>
+                      <tr class="border-b border-border"><th scope="row" class="px-3 py-2 text-left align-top font-medium">Contenu</th><td class="px-3 py-2 align-top">Tant que l'organisation existe. Si vous supprimez votre compte, vos tâches et commentaires restent, attribués à « Ancien membre ».</td></tr>
+                      <tr class="border-b border-border"><th scope="row" class="px-3 py-2 text-left align-top font-medium">Sessions</th><td class="px-3 py-2 align-top">Fermées après 12 heures d'inactivité, ou au bout de 30 jours avec « Rester connecté ».</td></tr>
+                      <tr class="border-b border-border"><th scope="row" class="px-3 py-2 text-left align-top font-medium">Codes et liens</th><td class="px-3 py-2 align-top">Code de connexion : 10 minutes. Lien de réinitialisation : 30 minutes, usage unique.</td></tr>
+                      <tr class="border-b border-border"><th scope="row" class="px-3 py-2 text-left align-top font-medium">Journaux</th><td class="px-3 py-2 align-top"><span class="rounded-[4px] bg-muted px-1 py-px font-mono text-xs">[DURÉE DE CONSERVATION DES JOURNAUX]</span></td></tr>
+                      <tr class="border-b border-border"><th scope="row" class="px-3 py-2 text-left align-top font-medium">Sauvegardes</th><td class="px-3 py-2 align-top"><span class="rounded-[4px] bg-muted px-1 py-px font-mono text-xs">[DURÉE DE CONSERVATION DES SAUVEGARDES]</span></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              <section class="flex flex-col gap-3" aria-labelledby="pc-hosting">
+                <h3 id="pc-hosting" class="text-base font-semibold">6. Hébergement et destinataires</h3>
+                <p>Les données sont hébergées chez <span class="rounded-[4px] bg-muted px-1 py-px font-mono text-xs">[HÉBERGEUR ET PAYS DES SERVEURS]</span>. Elles ne sont ni vendues ni utilisées à des fins publicitaires.</p>
+                <p>Y ont accès : les membres de vos organisations, selon leurs droits ; les administrateurs de votre organisation ; les équipes de Waypoint, pour l'exploitation et l'assistance ; les sous-traitants techniques de Waypoint, dans la limite de leur mission : <span class="rounded-[4px] bg-muted px-1 py-px font-mono text-xs">[LISTE DES SOUS-TRAITANTS]</span>.</p>
+                <p>Transferts hors de l'Union européenne : <span class="rounded-[4px] bg-muted px-1 py-px font-mono text-xs">[TRANSFERTS HORS UE ET GARANTIES]</span>.</p>
+              </section>
+
+              <section class="flex flex-col gap-3" aria-labelledby="pc-rights">
+                <h3 id="pc-rights" class="text-base font-semibold">7. Vos droits</h3>
+                <p>Vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation, d'opposition et de portabilité de vos données, ainsi que du droit de définir des directives sur leur sort après votre décès.</p>
+                <ul class="list-disc space-y-1.5 pl-5 marker:text-muted-foreground">
+                  <li><span class="font-medium">Depuis votre profil :</span> modifier vos informations, fermer vos sessions, supprimer votre compte.</li>
+                  <li><span class="font-medium">Par écrit :</span> à <span class="rounded-[4px] bg-muted px-1 py-px font-mono text-xs">[E-MAIL DU DPO]</span> ou avec le formulaire de l'onglet Aide. Une réponse vous parvient sous un mois au plus.</li>
+                  <li><span class="font-medium">Réclamation :</span> si la réponse ne vous satisfait pas, vous pouvez saisir l'autorité de contrôle, en France la CNIL.</li>
+                </ul>
+              </section>
+
+              <section class="flex flex-col gap-3" aria-labelledby="pc-cookies">
+                <h3 id="pc-cookies" class="text-base font-semibold">8. Cookies et stockage local</h3>
+                <p>Waypoint n'utilise que les cookies nécessaires au service : session, protection des formulaires, « Rester connecté » et appareil de confiance. Le thème clair ou sombre est mémorisé dans le stockage local de votre navigateur. Aucun traceur publicitaire ni de mesure d'audience n'est déposé : c'est pourquoi aucun bandeau de consentement ne s'affiche.</p>
+              </section>
+
+              <section class="flex flex-col gap-3 border-t border-border pt-5" aria-labelledby="pc-contact">
+                <h3 id="pc-contact" class="text-base font-semibold">9. Contact</h3>
+                <p>Pour toute question sur vos données, écrivez au délégué à la protection des données, <span class="rounded-[4px] bg-muted px-1 py-px font-mono text-xs">[E-MAIL DU DPO]</span>, ou à l'administrateur de l'instance.</p>
+                <button type="button" onClick="{{focusForm}}" class="relative isolate inline-flex h-8 w-fit items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-lg border border-input px-2.5 text-sm font-medium transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"><span class="ng-icon phosphorEnvelopeSimpleBold" aria-hidden="true"></span>Contacter l'administrateur</button>
+              </section>
+            </article>
+          </sc-if>
+
+          <sc-if value="{{isTerms}}" hint-placeholder-val="{{ false }}">
+            <article role="tabpanel" id="legal-panel-terms" aria-labelledby="legal-tab-terms" class="flex flex-col gap-6 rounded-xl border border-border bg-card p-6 sm:p-8">
+              <header class="flex flex-col gap-1 border-b border-border pb-5">
+                <h2 class="text-lg font-semibold">Conditions d'utilisation</h2>
+                <p class="text-sm text-muted-foreground">En vigueur le <span class="rounded-[4px] bg-muted px-1 py-px font-mono text-xs text-foreground">[DATE D'ENTRÉE EN VIGUEUR]</span>. Créer un compte ou vous connecter vaut acceptation de ces conditions et de la politique de confidentialité.</p>
+              </header>
+
+              <section class="flex flex-col gap-3" aria-labelledby="cu-purpose">
+                <h3 id="cu-purpose" class="text-base font-semibold">1. Objet</h3>
+                <p>Ces conditions encadrent l'utilisation du service Waypoint, édité par <span class="rounded-[4px] bg-muted px-1 py-px font-mono text-xs">[RAISON SOCIALE]</span> (« Waypoint »). Waypoint est un outil de gestion de projets : espaces, listes, tâches, tableaux, commentaires et fichiers partagés au sein d'organisations.</p>
+              </section>
+
+              <section class="flex flex-col gap-3" aria-labelledby="cu-account">
+                <h3 id="cu-account" class="text-base font-semibold">2. Compte et sécurité</h3>
+                <ul class="list-disc space-y-1.5 pl-5 marker:text-muted-foreground">
+                  <li>Un compte correspond à une seule personne. Vous fournissez des informations exactes et les tenez à jour.</li>
+                  <li>Votre mot de passe reste confidentiel. Il compte au moins 12 caractères, avec majuscules, minuscules, chiffres et symboles.</li>
+                  <li>Activez la vérification en deux étapes (application d'authentification ou clé de sécurité) et gardez vos codes de secours en lieu sûr : chacun ne sert qu'une fois. Une organisation peut l'imposer à ses membres.</li>
+                  <li>Après plusieurs échecs de connexion, le compte est verrouillé 15 minutes.</li>
+                  <li>Signalez sans délai toute utilisation suspecte à l'administrateur, puis fermez vos autres sessions depuis votre profil.</li>
+                </ul>
+              </section>
+
+              <section class="flex flex-col gap-3" aria-labelledby="cu-use">
+                <h3 id="cu-use" class="text-base font-semibold">3. Usage acceptable</h3>
+                <p>Vous vous engagez à ne pas :</p>
+                <ul class="list-disc space-y-1.5 pl-5 marker:text-muted-foreground">
+                  <li>publier de contenu illicite, haineux ou diffamatoire, ni de contenu qui porte atteinte aux droits d'autrui ;</li>
+                  <li>tenter d'accéder aux données d'une organisation dont vous n'êtes pas membre, ou contourner les mesures de sécurité ;</li>
+                  <li>diffuser des logiciels malveillants ou des liens d'hameçonnage ;</li>
+                  <li>surcharger l'instance, par exemple par des appels d'API automatisés au-delà des quotas de votre organisation ;</li>
+                  <li>partager votre compte ou vos jetons d'API.</li>
+                </ul>
+              </section>
+
+              <section class="flex flex-col gap-3" aria-labelledby="cu-content">
+                <h3 id="cu-content" class="text-base font-semibold">4. Propriété des contenus</h3>
+                <p>Vous restez titulaire des droits sur ce que vous publiez. Vous accordez à Waypoint le seul droit de l'héberger, de le sauvegarder et de l'afficher aux personnes autorisées, pour faire fonctionner le service.</p>
+                <p>Les contenus déposés dans une organisation sont visibles par ses membres selon leurs droits. Si vous quittez l'organisation ou supprimez votre compte, vos tâches et commentaires y restent, attribués à « Ancien membre ». Licence du logiciel Waypoint : <span class="rounded-[4px] bg-muted px-1 py-px font-mono text-xs">[LICENCE DU LOGICIEL]</span>.</p>
+              </section>
+
+              <section class="flex flex-col gap-3" aria-labelledby="cu-availability">
+                <h3 id="cu-availability" class="text-base font-semibold">5. Disponibilité</h3>
+                <p>Waypoint assure l'exploitation, les mises à jour et les sauvegardes quotidiennes du service. Waypoint s'efforce de le maintenir disponible sans garantir un fonctionnement ininterrompu ; engagement de disponibilité : <span class="rounded-[4px] bg-muted px-1 py-px font-mono text-xs">[ENGAGEMENT DE DISPONIBILITÉ]</span>. Les maintenances prévues sont annoncées à l'avance par <span class="rounded-[4px] bg-muted px-1 py-px font-mono text-xs">[CANAL D'ANNONCE]</span>.</p>
+              </section>
+
+              <section class="flex flex-col gap-3" aria-labelledby="cu-liability">
+                <h3 id="cu-liability" class="text-base font-semibold">6. Responsabilité</h3>
+                <p>Waypoint met en œuvre des moyens raisonnables pour protéger le service et vos données. Dans les limites prévues par la loi, sa responsabilité ne peut être engagée pour les dommages indirects, ni pour un usage du service contraire à ces conditions. Vous répondez des contenus que vous publiez et de l'usage fait de votre compte.</p>
+              </section>
+
+              <section class="flex flex-col gap-3" aria-labelledby="cu-suspension">
+                <h3 id="cu-suspension" class="text-base font-semibold">7. Suspension et clôture</h3>
+                <p>En cas de manquement à ces conditions, un administrateur peut suspendre un compte ou l'accès à une organisation, après vous en avoir informé, sauf urgence. Vous pouvez clore votre compte à tout moment depuis votre profil.</p>
+              </section>
+
+              <section class="flex flex-col gap-3" aria-labelledby="cu-changes">
+                <h3 id="cu-changes" class="text-base font-semibold">8. Modifications</h3>
+                <p>Waypoint peut faire évoluer ces conditions. Vous en êtes informé par e-mail ou par un bandeau dans l'application au moins <span class="rounded-[4px] bg-muted px-1 py-px font-mono text-xs">[DÉLAI DE PRÉAVIS]</span> avant leur entrée en vigueur ; continuer à utiliser le service vaut acceptation.</p>
+              </section>
+
+              <section class="flex flex-col gap-3" aria-labelledby="cu-law">
+                <h3 id="cu-law" class="text-base font-semibold">9. Droit applicable</h3>
+                <p>Ces conditions sont régies par <span class="rounded-[4px] bg-muted px-1 py-px font-mono text-xs">[DROIT APPLICABLE]</span>. En cas de litige, et après une tentative de résolution amiable, compétence est attribuée à <span class="rounded-[4px] bg-muted px-1 py-px font-mono text-xs">[JURIDICTION COMPÉTENTE]</span>.</p>
+              </section>
+            </article>
+          </sc-if>
+
+          <sc-if value="{{isHelp}}" hint-placeholder-val="{{ false }}">
+            <div role="tabpanel" id="legal-panel-help" aria-labelledby="legal-tab-help" class="flex flex-col gap-6">
+              <section class="flex flex-col gap-4" aria-labelledby="faq-title">
+                <div class="flex flex-col gap-1">
+                  <h2 id="faq-title" class="text-lg font-semibold">Questions fréquentes</h2>
+                  <p class="text-sm text-muted-foreground">Connexion, sécurité et organisations.</p>
+                </div>
+                <div class="flex flex-col gap-2">
+                  <div class="relative w-full">
+                    <span class="ng-icon phosphorMagnifyingGlassBold pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true"></span>
+                    <input id="faq-search" type="search" aria-label="Rechercher dans l'aide" aria-describedby="faq-count" placeholder="Rechercher : SSO, code, session…" autocomplete="off" value="{{query}}" onChange="{{onSearch}}" onKeyDown="{{searchKey}}" class="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent py-1 pr-2.5 pl-8 text-sm outline-none transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20">
+                  </div>
+                  <p id="faq-count" class="text-xs text-muted-foreground tabular-nums whitespace-nowrap" aria-live="polite">{{countLabel}}</p>
+                </div>
+
+                <sc-if value="{{hasResults}}" hint-placeholder-val="{{ true }}">
+                  <ul class="flex flex-col overflow-hidden rounded-xl border border-border bg-card">
+                    <sc-for list="{{faq}}" as="f" hint-placeholder-count="8">
+                      <li data-state="{{f.state}}" class="group/faq border-b border-border last:border-b-0">
+                        <h3>
+                          <button type="button" id="{{f.btnId}}" aria-expanded="{{f.open}}" aria-controls="{{f.panelId}}" onClick="{{f.toggle}}" class="flex w-full items-center gap-3 px-4 py-3 text-left text-base font-medium transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">
+                            <span class="min-w-0 flex-1">{{f.q}}</span>
+                            <span class="ng-icon phosphorCaretDownBold size-4 shrink-0 text-muted-foreground transition-transform duration-300 ease-snap group-data-[state=open]/faq:rotate-180 motion-reduce:transition-none" aria-hidden="true"></span>
+                          </button>
+                        </h3>
+                        <div id="{{f.panelId}}" role="region" aria-labelledby="{{f.btnId}}" class="invisible grid grid-rows-[0fr] opacity-0 transition-[grid-template-rows,opacity,visibility] duration-300 ease-snap group-data-[state=open]/faq:visible group-data-[state=open]/faq:grid-rows-[1fr] group-data-[state=open]/faq:opacity-100 motion-reduce:transition-none">
+                          <div class="min-h-0 overflow-hidden">
+                            <div class="flex flex-col items-start gap-2 px-4 pb-4 text-sm text-muted-foreground">
+                              <sc-for list="{{f.paras}}" as="para" hint-placeholder-count="2">
+                                <p>{{para.text}}</p>
+                              </sc-for>
+                              <sc-if value="{{f.hasLink}}" hint-placeholder-val="{{ false }}">
+                                <a href="{{f.href}}" onClick="{{f.go}}" class="relative isolate -ml-2 inline-flex h-7 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-md px-2 text-sm font-medium text-foreground transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">{{f.linkLabel}}<span class="ng-icon phosphorArrowRightBold size-3.5" aria-hidden="true"></span></a>
+                              </sc-if>
+                              <sc-if value="{{f.hasAction}}" hint-placeholder-val="{{ false }}">
+                                <button type="button" onClick="{{f.act}}" class="relative isolate -ml-2 inline-flex h-7 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-md px-2 text-sm font-medium text-foreground transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"><span class="ng-icon {{f.actionIcon}} size-3.5" aria-hidden="true"></span>{{f.actionLabel}}</button>
+                              </sc-if>
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+                    </sc-for>
+                  </ul>
+                </sc-if>
+
+                <sc-if value="{{noResults}}" hint-placeholder-val="{{ false }}">
+                  <div class="flex min-w-0 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border p-4 text-center text-balance">
+                    <div class="flex max-w-sm flex-col items-center gap-2">
+                      <div class="flex size-8 items-center justify-center rounded-lg bg-muted"><span class="ng-icon phosphorMagnifyingGlassBold size-4 text-muted-foreground" aria-hidden="true"></span></div>
+                      <p class="text-sm font-medium">Aucune question ne correspond à « {{query}} »</p>
+                      <p class="text-sm/relaxed text-muted-foreground">Essayez un autre mot, ou écrivez à l'administrateur avec le formulaire ci-dessous.</p>
+                    </div>
+                    <button type="button" onClick="{{clearSearch}}" class="relative isolate inline-flex h-7 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-md border border-input px-2.5 text-sm font-medium transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Effacer la recherche</button>
+                  </div>
+                </sc-if>
+              </section>
+
+              <section id="contact" class="flex flex-col gap-5 rounded-xl border border-border bg-card p-6" aria-labelledby="contact-title">
+                <div class="flex flex-col gap-1">
+                  <h2 id="contact-title" class="text-lg font-semibold">Contacter l'administrateur</h2>
+                  <p class="text-sm text-muted-foreground">Votre message part vers l’équipe support de Waypoint. Pour une invitation, un rôle ou la facturation d'une organisation, adressez-vous plutôt à ses administrateurs.</p>
+                </div>
+
+                <sc-if value="{{isWriting}}" hint-placeholder-val="{{ true }}">
+                  <form class="flex flex-col gap-4" onSubmit="{{submit}}">
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div class="flex flex-col gap-2">
+                        <label for="contact-email" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Votre adresse e-mail</label>
+                        <input id="contact-email" data-field="email" type="text" inputmode="email" autocomplete="email" spellcheck="false" placeholder="camille.martin@ateliernord.fr" value="{{form.email}}" onChange="{{setField}}" aria-invalid="{{emailErr}}" aria-describedby="contact-email-help" class="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20 aria-invalid:border-destructive/60 aria-invalid:focus-visible:ring-destructive/15">
+                        <sc-if value="{{emailErr}}" hint-placeholder-val="{{ false }}">
+                          <p id="contact-email-help" class="flex items-center gap-1 text-xs font-medium text-destructive"><span class="ng-icon phosphorWarningCircleFill size-3.5" aria-hidden="true"></span>Saisissez une adresse valide, par exemple camille.martin@ateliernord.fr.</p>
+                        </sc-if>
+                        <sc-if value="{{emailHint}}" hint-placeholder-val="{{ true }}">
+                          <p id="contact-email-help" class="text-xs text-muted-foreground">La réponse arrivera à cette adresse.</p>
+                        </sc-if>
+                      </div>
+                      <div class="flex flex-col gap-2">
+                        <label id="contact-subject-label" for="contact-subject" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Sujet</label>
+                        <div class="relative {{subjectSel.selZ}}">
+                          <sc-if value="{{subjectSel.selOpen}}" hint-placeholder-val="{{ false }}">
+                            <button type="button" tabindex="-1" aria-hidden="true" onClick="{{subjectSel.selClose}}" class="fixed inset-0 z-40 cursor-default"></button>
+                          </sc-if>
+                          <button type="button" id="contact-subject" role="combobox" aria-haspopup="listbox" aria-expanded="{{subjectSel.selOpen}}" aria-controls="contact-subject-list" aria-labelledby="contact-subject-label contact-subject" aria-describedby="contact-subject-help"
+                            onClick="{{subjectSel.selToggle}}" onKeyDown="{{subjectSel.selTriggerKey}}" aria-invalid="{{subjectErr}}"
+                            class="relative z-40 flex h-8 w-full items-center justify-between gap-2 rounded-lg border border-input bg-transparent px-2.5 text-left text-sm transition-colors hover:bg-accent aria-expanded:bg-selected aria-invalid:border-destructive/60 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20 aria-invalid:focus-visible:ring-destructive/15 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50">
+                            <span class="flex min-w-0 items-center gap-2 truncate {{subjectSel.valueTone}}">{{subjectSel.valueLabel}}</span>
+                            <span class="ng-icon phosphorCaretDownBold size-4 shrink-0 text-muted-foreground transition-transform duration-300 ease-snap {{subjectSel.caretCls}}" aria-hidden="true"></span>
+                          </button>
+                          <sc-if value="{{subjectSel.selOpen}}" hint-placeholder-val="{{ false }}">
+                            <div class="absolute top-full left-0 z-50 mt-1 min-w-full menu-shadow">
+                              <div role="listbox" id="contact-subject-list" aria-labelledby="contact-subject-label" onKeyDown="{{selListKey}}" data-select-list
+                                class="max-h-72 overflow-y-auto rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-[inset_0_1px_0_0_var(--shadow-edge)] menu-from-tl animate-menu-in motion-reduce:animate-none">
+                                <sc-for list="{{subjectSel.options}}" as="o" hint-placeholder-count="5">
+                                  <button type="button" role="option" aria-selected="{{o.on}}" onClick="{{o.pick}}"
+                                    class="flex w-full cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm whitespace-nowrap outline-hidden transition-colors select-none hover:bg-accent focus-visible:bg-selected animate-menu-item {{o.stagger}}">
+                                    {{o.label}}<sc-if value="{{o.on}}" hint-placeholder-val="{{ false }}"><span class="ng-icon phosphorCheckBold ml-auto size-4 shrink-0" aria-hidden="true"></span></sc-if>
+                                  </button>
+                                </sc-for>
+                              </div>
+                            </div>
+                          </sc-if>
+                        </div>
+                        <sc-if value="{{subjectErr}}" hint-placeholder-val="{{ false }}">
+                          <p id="contact-subject-help" class="flex items-center gap-1 text-xs font-medium text-destructive"><span class="ng-icon phosphorWarningCircleFill size-3.5" aria-hidden="true"></span>Choisissez un sujet.</p>
+                        </sc-if>
+                      </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                      <label for="contact-message" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Message</label>
+                      <textarea id="contact-message" data-field="message" rows="4" maxlength="2000" placeholder="Décrivez ce que vous cherchiez à faire et ce qui s'est passé." value="{{form.message}}" onChange="{{setField}}" aria-invalid="{{messageErr}}" aria-describedby="contact-message-help" class="flex field-sizing-content min-h-24 max-h-60 w-full resize-none rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm outline-none transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20 aria-invalid:border-destructive/60 aria-invalid:focus-visible:ring-destructive/15"></textarea>
+                      <div id="contact-message-help" class="flex justify-between gap-3 text-xs text-muted-foreground">
+                        <sc-if value="{{messageErr}}" hint-placeholder-val="{{ false }}">
+                          <span class="flex items-center gap-1 font-medium text-destructive"><span class="ng-icon phosphorWarningCircleFill size-3.5" aria-hidden="true"></span>Décrivez votre demande en 20 caractères au moins.</span>
+                        </sc-if>
+                        <sc-if value="{{messageHint}}" hint-placeholder-val="{{ true }}">
+                          <span>N'indiquez jamais votre mot de passe ni vos codes de secours.</span>
+                        </sc-if>
+                        <span class="shrink-0 tabular-nums whitespace-nowrap">{{msgCount}}</span>
+                      </div>
+                    </div>
+                    <div class="flex flex-wrap items-center justify-end gap-2 border-t border-border pt-4">
+                      <button type="submit" disabled="{{sending}}" aria-busy="{{sending}}" class="relative isolate inline-flex h-8 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-lg bg-foreground px-2.5 text-sm font-medium text-background transition-all hover:bg-foreground/90 disabled:pointer-events-none disabled:opacity-50 aria-busy:cursor-progress focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">
+                        <sc-if value="{{sending}}" hint-placeholder-val="{{ false }}">
+                          <svg class="size-4 animate-spinner motion-reduce:animate-none" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5" class="opacity-20"></circle><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" pathLength="100" class="animate-spinner-arc"></circle></svg>
+                        </sc-if>
+                        <sc-if value="{{notSending}}" hint-placeholder-val="{{ true }}">
+                          <span class="ng-icon phosphorPaperPlaneTiltBold" aria-hidden="true"></span>
+                        </sc-if>
+                        {{submitLabel}}
+                      </button>
+                    </div>
+                  </form>
+                </sc-if>
+
+                <sc-if value="{{isSent}}" hint-placeholder-val="{{ false }}">
+                  <div role="status" class="flex w-full items-start gap-3 rounded-lg border border-border bg-card px-4 py-3 text-sm text-card-foreground">
+                    <span class="ng-icon phosphorCheckCircleFill mt-0.5 size-4 shrink-0 text-jade" aria-hidden="true"></span>
+                    <div class="flex min-w-0 flex-col gap-0.5">
+                      <p class="font-medium leading-5">Message envoyé</p>
+                      <p class="leading-5 text-muted-foreground">Sujet : {{sentSubject}}. L'équipe support de Waypoint vous répondra à <span class="font-medium text-foreground">{{sentEmail}}</span>.</p>
+                      <div class="mt-2 flex gap-2">
+                        <button type="button" onClick="{{newMessage}}" class="relative isolate inline-flex h-7 items-center justify-center overflow-hidden whitespace-nowrap rounded-md border border-input px-2.5 text-sm font-medium transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Écrire un autre message</button>
+                      </div>
+                    </div>
+                  </div>
+                </sc-if>
+              </section>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 px-6 py-4 text-xs text-muted-foreground">
+    <span>Espace de travail Atelier Nord</span>
+    <sc-for list="{{tabs}}" as="ft" hint-placeholder-count="3">
+      <button type="button" onClick="{{ft.pick}}" aria-current="{{ft.current}}" class="rounded-sm hover:text-foreground aria-[current=true]:font-medium aria-[current=true]:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas">{{ft.label}}</button>
+    </sc-for>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["mémorisé","clair","sombre"],"default":"mémorisé"},"section":{"editor":"enum","options":["confidentialité","conditions","aide"],"default":"confidentialité"},"$preview":{"width":1280,"height":820}}'>
+const SECTIONS = [
+  { key: 'privacy', tweak: 'confidentialité', label: 'Confidentialité', bold: 'phosphorShieldCheckBold', fill: 'phosphorShieldCheckFill' },
+  { key: 'terms', tweak: 'conditions', label: "Conditions d'utilisation", bold: 'phosphorFileTextBold', fill: 'phosphorFileTextFill' },
+  { key: 'help', tweak: 'aide', label: 'Aide', bold: 'phosphorQuestionBold', fill: 'phosphorQuestionFill' },
+];
+// Écran d'origine transmis (facultatif) par le lien profond : libellé et cible du bouton « Retour ».
+const BACK = {
+  Main: { href: 'Main.dc.html', label: 'Retour à la connexion' },
+  Inscription: { href: 'Inscription.dc.html', label: "Retour à l'inscription" },
+  Organisations: { href: 'Organisations.dc.html', label: 'Retour aux organisations' },
+};
+const SUBJECTS = {
+  login: 'Connexion ou mot de passe',
+  mfa: 'Vérification en deux étapes',
+  org: 'Invitation ou organisation',
+  data: 'Données personnelles',
+  other: 'Autre question',
+};
+const FAQ = [
+  {
+    id: 'sso',
+    q: "Comment me connecter avec le SSO de mon entreprise ?",
+    a: [
+      "Sur la page de connexion, choisissez « Continuer avec le SSO de l'entreprise », puis saisissez votre adresse professionnelle. Waypoint vous redirige vers le fournisseur d'identité de votre organisation (SAML 2.0 ou OpenID Connect), puis vous ramène ici une fois identifié.",
+      "Domaines reconnus pour la connexion unique : ateliernord.fr et lumen.coop. Si le vôtre n'y figure pas, l'administrateur de votre organisation doit d'abord prouver la propriété du domaine et configurer le SSO.",
+    ],
+    k: 'saml oidc openid identite domaine entreprise',
+    href: 'Main.dc.html', linkLabel: 'Aller à la connexion',
+  },
+  {
+    id: 'mfa',
+    q: 'Comment fonctionne la vérification en deux étapes ?',
+    a: [
+      "Après le mot de passe, Waypoint demande une deuxième preuve : le code à 6 chiffres de votre application d'authentification (il change toutes les 30 secondes), votre clé de sécurité ou la biométrie de l'appareil, ou l'un de vos codes de secours.",
+      "Plus d'accès à votre téléphone ? Utilisez un code de secours : chacun ne sert qu'une fois. Sans code, demandez une réinitialisation à l'administrateur de votre organisation. Cochez « Faire confiance à cet appareil » pour ne plus être sollicité pendant 30 jours sur ce navigateur.",
+    ],
+    k: 'mfa 2fa totp authentificateur authenticator cle securite yubikey webauthn biometrie code secours telephone perdu',
+  },
+  {
+    id: 'password',
+    q: "J'ai oublié mon mot de passe : que faire ?",
+    a: [
+      "Choisissez « Mot de passe oublié ? » au-dessus du champ du mot de passe et indiquez l'adresse de votre compte. Le lien reçu reste valable 30 minutes et ne fonctionne qu'une fois, depuis le même navigateur.",
+      "Après plusieurs essais infructueux, le compte est verrouillé 15 minutes ; réinitialiser le mot de passe le débloque aussitôt. Si vous vous connectez avec Google ou GitHub, aucun mot de passe n'est nécessaire.",
+    ],
+    k: 'reinitialiser reinitialisation verrouille bloque lien',
+    href: 'MotDePasseOublie.dc.html', linkLabel: 'Réinitialiser mon mot de passe',
+  },
+  {
+    id: 'code',
+    q: 'Comment recevoir un code de connexion par e-mail ?',
+    a: [
+      "Sur la page de connexion, choisissez « Recevoir un code de connexion par e-mail ». Le code à 6 chiffres expire au bout de 10 minutes ; vous pouvez en demander un nouveau après 30 secondes.",
+      "Rien reçu ? Regardez dans les courriers indésirables, puis demandez à l'administrateur d'autoriser l'expéditeur no-reply@waypoint.example.",
+    ],
+    k: 'otp sans mot de passe mail courriel spam indesirables',
+    href: 'Otp.dc.html', linkLabel: 'Recevoir un code de connexion', nav: { to: 'Otp', section: 'login' },
+  },
+  {
+    id: 'join',
+    q: 'Comment rejoindre une organisation ?',
+    a: [
+      "Une organisation se rejoint sur invitation : demandez-la à l'un de ses administrateurs. Ouvrez ensuite le lien de l'e-mail reçu, ou acceptez l'invitation en attente sur l'écran « Choisir une organisation », après votre connexion.",
+      "Une invitation porte une date d'expiration. Depuis ce même écran, vous pouvez aussi créer votre propre organisation.",
+    ],
+    k: 'invitation inviter equipe espace creer',
+    href: 'Organisations.dc.html', linkLabel: 'Voir mes organisations',
+  },
+  {
+    id: 'theme',
+    q: 'Comment passer en thème sombre ?',
+    a: [
+      "Utilisez le bouton lune ou soleil en haut à droite de chaque écran. Votre choix est mémorisé dans ce navigateur et s'applique aussitôt à tous les écrans de Waypoint, y compris dans vos autres onglets.",
+    ],
+    k: 'theme sombre clair dark mode apparence couleur nuit',
+    action: 'theme',
+  },
+  {
+    id: 'sessions',
+    q: 'Comment voir et fermer mes sessions ouvertes ?',
+    a: [
+      "Une session se ferme après 12 heures d'inactivité, ou au bout de 30 jours si vous avez coché « Rester connecté ». Dans votre profil, rubrique Sécurité, la liste des sessions actives montre chaque appareil connecté : fermez-les une à une, ou toutes sauf celle-ci.",
+      "Lorsque vous changez de mot de passe, Waypoint vous propose aussi de fermer vos autres sessions.",
+    ],
+    k: 'session appareil deconnexion deconnecter rester connecte expiree',
+  },
+  {
+    id: 'admin',
+    q: "Comment contacter le support ?",
+    a: [
+      "Écrivez-lui avec le formulaire ci-dessous : votre message part vers l'équipe support de Waypoint, qui vous répond à l'adresse indiquée sous 24 h ouvrées.",
+      "Pour une question propre à une organisation (invitation, rôle, facturation), adressez-vous plutôt à ses propriétaires ou administrateurs.",
+    ],
+    k: 'support assistance contact aide probleme message',
+    action: 'contact',
+  },
+];
+const EMPTY_FORM = { email: '', subject: '', message: '' };
+const STAGGER = ['stagger-0', 'stagger-1', 'stagger-2', 'stagger-3', 'stagger-4', 'stagger-5', 'stagger-6', 'stagger-7', 'stagger-8'];
+const fold = (t) => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const writeNav = (to, section) => {
+  try { window.localStorage.setItem('waypoint-nav', JSON.stringify({ to, section, at: Date.now() })); } catch (e) {}
+};
+
+class Component extends DCLogic {
+  componentDidMount() {
+    try {
+      const t = window.localStorage.getItem('waypoint-theme');
+      if (t === 'dark' || t === 'light') this.setState({ stored: t });
+    } catch (e) {}
+    try {
+      const raw = window.localStorage.getItem('waypoint-nav');
+      const n = raw ? JSON.parse(raw) : null;
+      if (n && n.to === 'Legal') {
+        if (Date.now() - n.at < 15000) {
+          const next = {};
+          if (SECTIONS.some((d) => d.key === n.section)) next.section = n.section;
+          if (BACK[n.from]) next.from = n.from;
+          this.setState(next);
+        }
+        window.localStorage.removeItem('waypoint-nav');
+      }
+    } catch (e) {}
+    this.onStorage = (e) => {
+      if (e.key === 'waypoint-theme' && (e.newValue === 'dark' || e.newValue === 'light')) this.setState({ stored: e.newValue, theme: null });
+    };
+    window.addEventListener('storage', this.onStorage);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('storage', this.onStorage);
+    clearTimeout(this.sendTimer);
+    clearTimeout(this.focusTimer);
+  }
+  componentDidUpdate(prev) {
+    if (prev.theme !== this.props.theme) this.setState({ theme: null });
+    if (prev.section !== this.props.section) this.setState({ section: null });
+    const s = this.state || {};
+    if (s.openSelect && s.openSelect !== this.prevSelect) setTimeout(() => {
+      const list = document.querySelector('[data-select-list]');
+      const el = list && (list.querySelector('[aria-selected="true"]') || list.querySelector('[role="option"]'));
+      if (el) el.focus();
+    }, 0);
+    if (!s.openSelect && this.refocus) { const id = this.refocus; this.refocus = null; setTimeout(() => { const t = document.getElementById(id); if (t) t.focus(); }, 0); }
+    this.prevSelect = s.openSelect || null;
+  }
+  st() { return this.state || {}; }
+  themeTransition(e, apply) {
+    let reduce = false;
+    try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (err) {}
+    if (reduce || typeof document.startViewTransition !== 'function') { apply(() => {}); return; }
+    const root = document.documentElement;
+    const el = e && e.currentTarget && e.currentTarget.getBoundingClientRect ? e.currentTarget : null;
+    const r = el ? el.getBoundingClientRect() : null;
+    root.style.setProperty('--wp-vt-origin', r ? Math.round(r.left + r.width / 2) + 'px ' + Math.round(r.top + r.height / 2) + 'px' : '50% 100%');
+    root.dataset.wpVt = 'circle-blur';
+    const vt = document.startViewTransition(() => new Promise((resolve) => { apply(resolve); setTimeout(resolve, 80); }));
+    const end = () => { delete root.dataset.wpVt; };
+    vt.finished.then(end, end);
+    vt.ready.catch(() => {});
+  }
+  pick(key, focusTab) {
+    this.setState({ section: key, openSelect: null });
+    try { if (window.scrollY > 0) window.scrollTo(0, 0); } catch (e) {}
+    if (focusTab) {
+      clearTimeout(this.focusTimer);
+      this.focusTimer = setTimeout(() => { const el = document.getElementById('legal-tab-' + key); if (el) el.focus(); }, 0);
+    }
+  }
+  focusForm() {
+    this.setState({ section: 'help' });
+    clearTimeout(this.focusTimer);
+    this.focusTimer = setTimeout(() => {
+      const box = document.getElementById('contact');
+      if (box) { try { box.scrollIntoView({ block: 'start' }); } catch (e) {} }
+      const field = document.getElementById('contact-email');
+      if (field) { try { field.focus({ preventScroll: true }); } catch (e) { field.focus(); } }
+    }, 30);
+  }
+  renderVals() {
+    const s = this.state || {};
+    const pref = this.props.theme ?? 'mémorisé';
+    const fixed = pref === 'sombre' ? 'dark' : pref === 'clair' ? 'light' : null;
+    const theme = s.theme || fixed || s.stored || 'light';
+    const themeLabel = theme === 'dark' ? 'Passer au thème clair' : 'Passer au thème sombre';
+    const toggleTheme = (e) => {
+      const next = theme === 'dark' ? 'light' : 'dark';
+      this.themeTransition(e, (done) => this.setState({ theme: next }, done));
+      try { window.localStorage.setItem('waypoint-theme', next); } catch (err) {}
+    };
+    const tweak = this.props.section ?? 'confidentialité';
+    const section = s.section || (SECTIONS.find((d) => d.tweak === tweak) || SECTIONS[0]).key;
+    const back = BACK[s.from] || BACK.Main;
+
+    const query = s.query || '';
+    const terms = fold(query).split(/\s+/).filter(Boolean);
+    const openIds = s.open || {};
+    const hits = FAQ.filter((f) => {
+      if (!terms.length) return true;
+      const hay = fold(f.q + ' ' + f.a.join(' ') + ' ' + f.k);
+      return terms.every((t) => hay.includes(t));
+    });
+
+    const form = s.form || EMPTY_FORM;
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.email.trim());
+    const subjectOk = !!SUBJECTS[form.subject];
+    const messageOk = form.message.trim().length >= 20;
+    const tried = !!s.tried;
+    const sending = !!s.sending;
+    const sent = s.sent || null;
+    const sel = (key, value, opts, placeholder, onPick) => {
+      const open = s.openSelect === key;
+      const cur = opts.find((o) => o[0] === value);
+      return {
+        selOpen: open, selZ: open ? 'z-50' : '', caretCls: open ? 'rotate-180' : '',
+        valueLabel: cur ? cur[1] : placeholder, valueTone: cur ? '' : 'text-muted-foreground',
+        selToggle: () => this.setState({ openSelect: open ? null : key }),
+        selClose: () => this.setState({ openSelect: null }),
+        selTriggerKey: (e) => {
+          if (['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(e.key) && !open) { e.preventDefault(); this.setState({ openSelect: key }); }
+          if (e.key === 'Escape' && open) { e.preventDefault(); this.setState({ openSelect: null }); }
+        },
+        options: opts.map(([v, label], i) => ({ value: v, label, on: v === value, stagger: STAGGER[Math.min(i, 8)],
+          pick: () => { this.refocus = key; this.setState({ openSelect: null }); onPick(v); } })),
+      };
+    };
+
+    return {
+      theme,
+      themeLabel,
+      toggleTheme,
+      backHref: back.href,
+      backLabel: back.label,
+      tabs: SECTIONS.map((d, i) => {
+        const active = d.key === section;
+        return {
+          label: d.label,
+          tabId: 'legal-tab-' + d.key,
+          panelId: 'legal-panel-' + d.key,
+          active,
+          current: active ? 'true' : undefined,
+          state: active ? 'active' : 'inactive',
+          icon: active ? d.fill : d.bold,
+          iconTone: active ? 'text-primary' : '',
+          pick: () => this.pick(d.key, false),
+          key: (e) => {
+            const last = SECTIONS.length - 1;
+            const to = e.key === 'ArrowDown' || e.key === 'ArrowRight' ? (i === last ? 0 : i + 1)
+              : e.key === 'ArrowUp' || e.key === 'ArrowLeft' ? (i === 0 ? last : i - 1)
+              : e.key === 'Home' ? 0 : e.key === 'End' ? last : -1;
+            if (to < 0) return;
+            e.preventDefault();
+            this.pick(SECTIONS[to].key, true);
+          },
+        };
+      }),
+      isPrivacy: section === 'privacy',
+      isTerms: section === 'terms',
+      isHelp: section === 'help',
+      focusForm: () => this.focusForm(),
+
+      query,
+      onSearch: (e) => this.setState({ query: e.target.value }),
+      searchKey: (e) => { if (e.key === 'Escape' && query) { e.preventDefault(); this.setState({ query: '' }); } },
+      clearSearch: () => {
+        this.setState({ query: '' });
+        setTimeout(() => { const el = document.getElementById('faq-search'); if (el) el.focus(); }, 0);
+      },
+      countLabel: terms.length
+        ? (hits.length === 0 ? 'Aucun résultat' : hits.length + (hits.length > 1 ? ' questions' : ' question') + ' sur ' + FAQ.length)
+        : FAQ.length + ' questions',
+      hasResults: hits.length > 0,
+      noResults: hits.length === 0,
+      faq: hits.map((f) => {
+        const open = !!openIds[f.id];
+        return {
+          q: f.q,
+          paras: f.a.map((text) => ({ text })),
+          open,
+          state: open ? 'open' : 'closed',
+          btnId: 'faq-q-' + f.id,
+          panelId: 'faq-a-' + f.id,
+          toggle: () => this.setState({ open: { ...((this.state || {}).open || {}), [f.id]: !open } }),
+          hasLink: !!f.href,
+          href: f.href || 'Main.dc.html',
+          linkLabel: f.linkLabel || '',
+          go: () => { if (f.nav) writeNav(f.nav.to, f.nav.section); },
+          hasAction: !!f.action,
+          actionLabel: f.action === 'theme' ? themeLabel : "Écrire à l'administrateur",
+          actionIcon: f.action === 'theme' ? (theme === 'dark' ? 'phosphorSunBold' : 'phosphorMoonBold') : 'phosphorEnvelopeSimpleBold',
+          act: (e) => { if (f.action === 'theme') toggleTheme(e); else this.focusForm(); },
+        };
+      }),
+
+      form,
+      subjectSel: sel('contact-subject', form.subject, Object.entries(SUBJECTS), 'Choisir un sujet', (v) => {
+        const cur = (this.state || {}).form || EMPTY_FORM;
+        this.setState({ form: { ...cur, subject: v } });
+      }),
+      selListKey: (e) => {
+        if (!e.currentTarget) return;
+        const opts = Array.from(e.currentTarget.querySelectorAll('[role="option"]'));
+        const i = opts.indexOf(document.activeElement);
+        const go = (j) => { e.preventDefault(); const el = opts[(j + opts.length) % opts.length]; if (el) el.focus(); };
+        if (e.key === 'ArrowDown') go(i + 1); else if (e.key === 'ArrowUp') go(i - 1);
+        else if (e.key === 'Home') go(0); else if (e.key === 'End') go(opts.length - 1);
+        else if (e.key === 'Escape' || e.key === 'Tab') { if (e.key === 'Escape') e.preventDefault(); const k = this.st().openSelect; this.refocus = k; this.setState({ openSelect: null }); }
+      },
+      setField: (e) => {
+        const k = e.target.dataset.field;
+        const cur = (this.state || {}).form || EMPTY_FORM;
+        this.setState({ form: { ...cur, [k]: e.target.value } });
+      },
+      emailErr: tried && !emailOk,
+      emailHint: !(tried && !emailOk),
+      subjectErr: tried && !subjectOk,
+      messageErr: tried && !messageOk,
+      messageHint: !(tried && !messageOk),
+      msgCount: form.message.length.toLocaleString('fr-FR') + ' / 2 000',
+      sending,
+      notSending: !sending,
+      submitLabel: sending ? 'Envoi…' : 'Envoyer le message',
+      submit: (e) => {
+        e.preventDefault();
+        if (sending) return;
+        if (s.openSelect) this.setState({ openSelect: null });
+        if (!(emailOk && subjectOk && messageOk)) {
+          this.setState({ tried: true });
+          const id = !emailOk ? 'contact-email' : !subjectOk ? 'contact-subject' : 'contact-message';
+          setTimeout(() => { const el = document.getElementById(id); if (el) el.focus(); }, 0);
+          return;
+        }
+        this.setState({ sending: true });
+        clearTimeout(this.sendTimer);
+        const payload = { email: form.email.trim(), subject: SUBJECTS[form.subject] };
+        this.sendTimer = setTimeout(() => this.setState({ sending: false, sent: payload }), 700);
+      },
+      isWriting: !sent,
+      isSent: !!sent,
+      sentEmail: sent ? sent.email : '',
+      sentSubject: sent ? sent.subject : '',
+      newMessage: () => {
+        this.setState({ sent: null, tried: false, form: null });
+        setTimeout(() => { const el = document.getElementById('contact-email'); if (el) el.focus(); }, 0);
+      },
+    };
+  }
+}
+</script>
+</body>
+</html>

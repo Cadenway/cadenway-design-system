@@ -1,0 +1,27 @@
+{
+  "mcpServers": {
+    "angular": {
+      "command": "npx",
+      "args": [
+        "--no-install",
+        "ng",
+        "mcp",
+        "--read-only"
+      ]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp"
+      ]
+    },
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp"
+      ]
+    }
+  }
+}
