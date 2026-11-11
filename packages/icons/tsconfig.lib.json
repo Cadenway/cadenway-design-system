@@ -1,0 +1,12 @@
+/* Library sources of @waypoint/icons: the development build and the type check. */
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../out-tsc/icons/lib",
+    "declaration": true,
+    "declarationMap": true,
+    "types": []
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["**/*.spec.ts", "**/*.stories.ts"]
+}

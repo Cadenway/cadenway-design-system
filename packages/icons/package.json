@@ -1,0 +1,22 @@
+{
+  "name": "@waypoint/icons",
+  "version": "0.0.0",
+  "description": "The icons Waypoint applications use, registered by provideWaypointIcons().",
+  "license": "UNLICENSED",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "peerDependencies": {
+    "@angular/core": "^22.2.0",
+    "@ng-icons/core": "^36.0.0"
+  },
+  "dependencies": {
+    "@ng-icons/phosphor-icons": "^36.0.0",
+    "tslib": "^2.8.0"
+  },
+  "devDependencies": {
+    "@angular/core": "catalog:",
+    "@ng-icons/core": "catalog:"
+  },
+  "sideEffects": false
+}

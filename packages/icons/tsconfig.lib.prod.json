@@ -1,0 +1,10 @@
+/* Published build of @waypoint/icons: partial compilation, linked by the consumer's Angular. */
+{
+  "extends": "./tsconfig.lib.json",
+  "compilerOptions": {
+    "declarationMap": false
+  },
+  "angularCompilerOptions": {
+    "compilationMode": "partial"
+  }
+}

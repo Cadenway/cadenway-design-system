@@ -1,0 +1,14 @@
+# Generated trees and files owned by a tool.
+dist/
+coverage/
+storybook-static/
+.angular/
+pnpm-lock.yaml
+CHANGELOG.md
+
+# Read-only copy of the mockup: replaced as a whole, never reformatted.
+docs/maquette/
+
+# Agent tooling: .codex mirrors .claude byte for byte, so neither is reformatted.
+.claude/
+.codex/

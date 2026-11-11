@@ -1,0 +1,23 @@
+{
+  "name": "@waypoint/tokens",
+  "version": "0.0.0",
+  "description": "Waypoint design tokens: CSS variables in light and dark, and the Tailwind 4 theme that maps them.",
+  "license": "UNLICENSED",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "files": [
+    "tokens.css",
+    "theme.css",
+    "fonts"
+  ],
+  "exports": {
+    "./tokens.css": "./tokens.css",
+    "./theme.css": "./theme.css",
+    "./fonts/*": "./fonts/*",
+    "./package.json": "./package.json"
+  },
+  "sideEffects": [
+    "*.css"
+  ]
+}

@@ -1,0 +1,17 @@
+/*
+ * @waypoint/tokens: the Tailwind 4 theme of Waypoint.
+ *
+ * What belongs here: the `@theme` variables that map Tailwind utilities (colors, font sizes, radii,
+ * shadows, easings, animations) onto the custom properties of `tokens.css`, so a utility such as
+ * `bg-muted` resolves to a token and follows `data-theme`. No value is written twice: this file
+ * references the tokens, `tokens.css` defines them.
+ *
+ * A consumer stylesheet imports, in this order: `tailwindcss`, `@waypoint/tokens/tokens.css`,
+ * `@waypoint/tokens/theme.css`.
+ *
+ * Structure only for now: the mapping comes with the token values (integration guide, section
+ * "Fondations").
+ */
+
+@theme {
+}

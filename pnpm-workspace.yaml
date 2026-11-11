@@ -1,0 +1,37 @@
+# pnpm settings for this repository. Registry and auth lines stay in .npmrc.
+
+packages:
+  - 'packages/*'
+  - 'apps/*'
+
+# Versions shared by the root tooling, the packages and the Storybook application: one line to
+# change, so two packages never compile against two Angular or Vitest lines.
+#
+# The Angular builders run from the workspace root and, with coverage enabled, resolve the imports
+# of a spec from there: what a library imports is therefore also a root devDependency, through
+# this catalog.
+catalog:
+  '@angular/build': ^22.2.0
+  '@angular/cli': ^22.2.0
+  '@angular/common': ^22.2.0
+  '@angular/compiler': ^22.2.0
+  '@angular/compiler-cli': ^22.2.0
+  '@angular/core': ^22.2.0
+  '@angular/platform-browser': ^22.2.0
+  '@ng-icons/core': ^36.0.0
+  '@ng-icons/phosphor-icons': ^36.0.0
+  '@vitest/coverage-v8': ^5.1.0
+  rxjs: ~7.8.0
+  tslib: ^2.8.0
+  # Angular 22 accepts TypeScript 6.0 only (peer range >=6.0 <6.1).
+  typescript: ~6.0.3
+  vitest: ^5.1.0
+
+# Install scripts are reviewed one by one: pnpm refuses an install that would skip an unlisted one.
+# All four ship their native binary as an optional dependency per platform, so the install script
+# (a rebuild from source as a fallback) is not needed; `ng new` writes the same four lines.
+allowBuilds:
+  '@parcel/watcher': false
+  esbuild: false
+  lmdb: false
+  msgpackr-extract: false
