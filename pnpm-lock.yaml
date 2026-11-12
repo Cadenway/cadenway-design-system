@@ -355,13 +355,13 @@ importers:
       '@vitest/browser-playwright':
         specifier: 'catalog:'
         version: 5.1.0(playwright@1.65.0)(vite@8.3.5(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1(supports-color@8.1.1))(sass-embedded@1.104.1)(sass@1.104.1)(yaml@2.9.1))(vitest@5.1.0)
-      '@waypoint/icons':
+      '@cadenway/icons':
         specifier: workspace:*
         version: link:../../packages/icons
-      '@waypoint/tokens':
+      '@cadenway/tokens':
         specifier: workspace:*
         version: link:../../packages/tokens
-      '@waypoint/ui':
+      '@cadenway/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       playwright:

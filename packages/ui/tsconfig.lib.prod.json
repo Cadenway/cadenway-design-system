@@ -1,4 +1,4 @@
-/* Published build of @waypoint/ui: partial compilation, linked by the consumer's Angular. */
+/* Published build of @cadenway/ui: partial compilation, linked by the consumer's Angular. */
 {
   "extends": "./tsconfig.lib.json",
   "compilerOptions": {

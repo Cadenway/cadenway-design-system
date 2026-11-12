@@ -1,4 +1,4 @@
-# waypoint-design-system: Claude Code instructions
+# cadenway-design-system: Claude Code instructions
 
 > **Source of truth.** This file is the entry point for Claude Code. The normative rules live in
 > [AGENTS.md](AGENTS.md), imported below: read it, do not paraphrase it from memory.
@@ -11,16 +11,16 @@
 
 ## TL;DR for every task
 
-1. Three packages: `@waypoint/tokens` (CSS variables and the Tailwind 4 `@theme`), `@waypoint/icons` (`provideWaypointIcons()`), `@waypoint/ui` (Angular bricks).
+1. Three packages: `@cadenway/tokens` (CSS variables and the Tailwind 4 `@theme`), `@cadenway/icons` (`provideCadenwayIcons()`), `@cadenway/ui` (Angular bricks).
 2. Bricks reproduce the mockup exactly; behaviors (keyboard, ARIA, placement) come from Angular Aria and the CDK, styling stays ours.
-3. Angular 22 conventions: no suffix, `wp-` selectors, signal inputs, outputs and models.
+3. Angular 22 conventions: no suffix, `cw-` selectors, signal inputs, outputs and models.
 4. Every brick has stories for each state, in light and dark, and passes the accessibility checks.
 5. Public API through explicit `public-api.ts` exports; a removal or rename is a major version with a deprecation first.
 6. Changesets describe every change; the release workflow publishes.
 
 ## Boundaries (hard rules)
 
-- No business logic, no API call, no knowledge of tasks beyond the display contracts of `wp-status-icon` and `wp-priority-icon`.
+- No business logic, no API call, no knowledge of tasks beyond the display contracts of `cw-status-icon` and `cw-priority-icon`.
 - Consumers never restyle a brick from outside: variants are inputs.
 - Tokens are the only source of colors, radii, shadows and timings.
 - `docs/maquette/` is a read-only reference.
@@ -28,7 +28,7 @@
 ## Target quality gate
 
 Use the [minimum checks by change](docs/development.md#minimum-checks-by-change) first.
-Run `/wp-quality` without arguments for the full local gate when applicable. Report unavailable
+Run `/cw-quality` without arguments for the full local gate when applicable. Report unavailable
 checks during bootstrap.
 
 ```bash
@@ -44,7 +44,7 @@ pnpm changeset status
 
 ## Tooling: this repository ships its own `.claude/`
 
-Open `waypoint-design-system/` as the workspace root to activate it. The `wp-ds-*` agents, the `/wp-*`
+Open `cadenway-design-system/` as the workspace root to activate it. The `cw-ds-*` agents, the `/cw-*`
 commands, the skills and the hooks are described in [.claude/README.md](.claude/README.md). Two things
 the session listing does not tell you:
 
@@ -57,5 +57,5 @@ the session listing does not tell you:
   registry publishing, and `format.mjs` formats supported files when its formatter is available.
   Apply the repository rules across tools. Resolve a refusal without bypassing the hook.
 
-The sibling repositories (`../waypoint-webapp`, `../waypoint-website`) are read-only references
+The sibling repositories (`../cadenway-webapp`, `../cadenway-website`) are read-only references
 from here; add them to the session (`--add-dir`) when a task needs to read them.

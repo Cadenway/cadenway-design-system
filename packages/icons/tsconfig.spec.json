@@ -1,4 +1,4 @@
-/* Unit tests of @waypoint/icons, run by the Angular unit-test builder (Vitest). */
+/* Unit tests of @cadenway/icons, run by the Angular unit-test builder (Vitest). */
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {

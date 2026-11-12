@@ -1,12 +1,12 @@
-# waypoint-design-system
+# cadenway-design-system
 
-waypoint-design-system is the Angular design system taken from the mockup. It publishes `@waypoint/tokens`, `@waypoint/icons` and `@waypoint/ui` (pnpm monorepo, Changesets) and hosts Storybook as the visual reference. Consumers: waypoint-webapp and waypoint-website.
+cadenway-design-system is the Angular design system taken from the mockup. It publishes `@cadenway/tokens`, `@cadenway/icons` and `@cadenway/ui` (pnpm monorepo, Changesets) and hosts Storybook as the visual reference. Consumers: cadenway-webapp and cadenway-website.
 
 ```text
 packages/
-├─ tokens/   → @waypoint/tokens (tokens.css, theme.css)
-├─ icons/    → @waypoint/icons (provideWaypointIcons)
-└─ ui/       → @waypoint/ui (src/lib/<brick>/, public-api.ts)
+├─ tokens/   → @cadenway/tokens (tokens.css, theme.css)
+├─ icons/    → @cadenway/icons (provideCadenwayIcons)
+└─ ui/       → @cadenway/ui (src/lib/<brick>/, public-api.ts)
 apps/storybook/
 ```
 

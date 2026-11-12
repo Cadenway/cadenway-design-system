@@ -1,4 +1,4 @@
-/* Unit tests of @waypoint/ui, run by the Angular unit-test builder (Vitest). */
+/* Unit tests of @cadenway/ui, run by the Angular unit-test builder (Vitest). */
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {

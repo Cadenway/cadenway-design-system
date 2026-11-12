@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<title>Mon compte — Waypoint</title>
+<title>Mon compte — Cadenway</title>
 <script src="./support.js"></script>
 <link rel="stylesheet" href="styles/app.css">
 </head>
@@ -82,38 +82,38 @@ body{margin:0}
         <sc-if value="{{skOn}}" hint-placeholder-val="{{ false }}">
           <div class="flex flex-col gap-6" role="status" aria-busy="true" aria-label="Chargement de la section">
             <div class="flex items-start gap-4" aria-hidden="true">
-              <div class="flex min-w-0 flex-1 flex-col gap-2"><span class="wp-sk h-7 w-56"></span><span class="wp-sk h-3 w-3/4"></span></div>
-              <sc-if value="{{skS.action}}" hint-placeholder-val="{{ false }}"><span class="wp-sk h-8 w-32 rounded-lg"></span></sc-if>
+              <div class="flex min-w-0 flex-1 flex-col gap-2"><span class="cw-sk h-7 w-56"></span><span class="cw-sk h-3 w-3/4"></span></div>
+              <sc-if value="{{skS.action}}" hint-placeholder-val="{{ false }}"><span class="cw-sk h-8 w-32 rounded-lg"></span></sc-if>
             </div>
             <sc-if value="{{skS.hasTiles}}" hint-placeholder-val="{{ false }}">
-              <div class="grid grid-cols-1 gap-3 sm:grid-cols-3" aria-hidden="true"><sc-for list="{{skS.tiles}}" as="zst" hint-placeholder-count="3"><div class="flex flex-col gap-2.5 rounded-xl border border-border bg-card p-4"><span class="wp-sk h-3 w-24"></span><span class="wp-sk h-6 w-20"></span><span class="wp-sk h-1.5 w-full rounded-full"></span></div></sc-for></div>
+              <div class="grid grid-cols-1 gap-3 sm:grid-cols-3" aria-hidden="true"><sc-for list="{{skS.tiles}}" as="zst" hint-placeholder-count="3"><div class="flex flex-col gap-2.5 rounded-xl border border-border bg-card p-4"><span class="cw-sk h-3 w-24"></span><span class="cw-sk h-6 w-20"></span><span class="cw-sk h-1.5 w-full rounded-full"></span></div></sc-for></div>
             </sc-if>
             <sc-if value="{{skS.toolbar}}" hint-placeholder-val="{{ false }}">
-              <div class="flex flex-wrap items-center gap-2" aria-hidden="true"><span class="wp-sk h-8 w-64 rounded-lg"></span><span class="wp-sk h-8 w-56 rounded-lg"></span><span class="wp-sk h-8 w-40 rounded-lg"></span></div>
+              <div class="flex flex-wrap items-center gap-2" aria-hidden="true"><span class="cw-sk h-8 w-64 rounded-lg"></span><span class="cw-sk h-8 w-56 rounded-lg"></span><span class="cw-sk h-8 w-40 rounded-lg"></span></div>
             </sc-if>
             <sc-if value="{{skS.hasC1}}" hint-placeholder-val="{{ true }}">
               <section class="flex flex-col gap-4 rounded-xl border border-border bg-card p-4" aria-hidden="true">
-                <div class="flex flex-col gap-2"><span class="wp-sk h-4 w-32"></span><span class="wp-sk h-3 {{skS.w1}}"></span></div>
-                <sc-for list="{{skS.c1}}" as="zc1" hint-placeholder-count="3"><div class="flex items-center gap-4"><div class="flex min-w-0 flex-1 flex-col gap-1.5"><span class="wp-sk h-3 {{zc1.w}}"></span><span class="wp-sk h-2.5 w-1/2"></span></div><span class="wp-sk {{zc1.ctl}}"></span></div></sc-for>
+                <div class="flex flex-col gap-2"><span class="cw-sk h-4 w-32"></span><span class="cw-sk h-3 {{skS.w1}}"></span></div>
+                <sc-for list="{{skS.c1}}" as="zc1" hint-placeholder-count="3"><div class="flex items-center gap-4"><div class="flex min-w-0 flex-1 flex-col gap-1.5"><span class="cw-sk h-3 {{zc1.w}}"></span><span class="cw-sk h-2.5 w-1/2"></span></div><span class="cw-sk {{zc1.ctl}}"></span></div></sc-for>
               </section>
             </sc-if>
             <sc-if value="{{skS.hasC2}}" hint-placeholder-val="{{ false }}">
               <section class="flex flex-col gap-4 rounded-xl border border-border bg-card p-4" aria-hidden="true">
-                <div class="flex flex-col gap-2"><span class="wp-sk h-4 w-32"></span><span class="wp-sk h-3 {{skS.w2}}"></span></div>
-                <sc-for list="{{skS.c2}}" as="zc2" hint-placeholder-count="3"><div class="flex items-center gap-4"><div class="flex min-w-0 flex-1 flex-col gap-1.5"><span class="wp-sk h-3 {{zc2.w}}"></span><span class="wp-sk h-2.5 w-1/2"></span></div><span class="wp-sk {{zc2.ctl}}"></span></div></sc-for>
+                <div class="flex flex-col gap-2"><span class="cw-sk h-4 w-32"></span><span class="cw-sk h-3 {{skS.w2}}"></span></div>
+                <sc-for list="{{skS.c2}}" as="zc2" hint-placeholder-count="3"><div class="flex items-center gap-4"><div class="flex min-w-0 flex-1 flex-col gap-1.5"><span class="cw-sk h-3 {{zc2.w}}"></span><span class="cw-sk h-2.5 w-1/2"></span></div><span class="cw-sk {{zc2.ctl}}"></span></div></sc-for>
               </section>
             </sc-if>
             <sc-if value="{{skS.hasC3}}" hint-placeholder-val="{{ false }}">
               <section class="flex flex-col gap-4 rounded-xl border border-border bg-card p-4" aria-hidden="true">
-                <div class="flex flex-col gap-2"><span class="wp-sk h-4 w-32"></span><span class="wp-sk h-3 {{skS.w3}}"></span></div>
-                <sc-for list="{{skS.c3}}" as="zc3" hint-placeholder-count="3"><div class="flex items-center gap-4"><div class="flex min-w-0 flex-1 flex-col gap-1.5"><span class="wp-sk h-3 {{zc3.w}}"></span><span class="wp-sk h-2.5 w-1/2"></span></div><span class="wp-sk {{zc3.ctl}}"></span></div></sc-for>
+                <div class="flex flex-col gap-2"><span class="cw-sk h-4 w-32"></span><span class="cw-sk h-3 {{skS.w3}}"></span></div>
+                <sc-for list="{{skS.c3}}" as="zc3" hint-placeholder-count="3"><div class="flex items-center gap-4"><div class="flex min-w-0 flex-1 flex-col gap-1.5"><span class="cw-sk h-3 {{zc3.w}}"></span><span class="cw-sk h-2.5 w-1/2"></span></div><span class="cw-sk {{zc3.ctl}}"></span></div></sc-for>
               </section>
             </sc-if>
             <sc-if value="{{skS.hasTable}}" hint-placeholder-val="{{ true }}">
               <div class="overflow-hidden rounded-xl border border-border bg-card" aria-hidden="true">
-                <div class="flex h-10 items-center gap-4 border-b border-border bg-surface-muted px-4"><span class="wp-sk wp-sk-2 h-2.5 w-24"></span><span class="ml-auto wp-sk wp-sk-2 h-2.5 w-16"></span><span class="wp-sk wp-sk-2 h-2.5 w-20"></span></div>
+                <div class="flex h-10 items-center gap-4 border-b border-border bg-surface-muted px-4"><span class="cw-sk cw-sk-2 h-2.5 w-24"></span><span class="ml-auto cw-sk cw-sk-2 h-2.5 w-16"></span><span class="cw-sk cw-sk-2 h-2.5 w-20"></span></div>
                 <sc-for list="{{skS.table}}" as="ztr" hint-placeholder-count="5">
-                  <div class="flex h-14 items-center gap-3 border-b border-border px-4 last:border-b-0"><span class="wp-sk size-8 rounded-full"></span><div class="flex min-w-0 flex-1 flex-col gap-1.5"><span class="wp-sk h-3 {{ztr.w}}"></span><span class="wp-sk h-2.5 w-40"></span></div><span class="wp-sk h-5 w-16 rounded-full"></span><span class="wp-sk h-3 w-20"></span></div>
+                  <div class="flex h-14 items-center gap-3 border-b border-border px-4 last:border-b-0"><span class="cw-sk size-8 rounded-full"></span><div class="flex min-w-0 flex-1 flex-col gap-1.5"><span class="cw-sk h-3 {{ztr.w}}"></span><span class="cw-sk h-2.5 w-40"></span></div><span class="cw-sk h-5 w-16 rounded-full"></span><span class="cw-sk h-3 w-20"></span></div>
                 </sc-for>
               </div>
             </sc-if>
@@ -122,13 +122,13 @@ body{margin:0}
 
         <sc-if value="{{errOn}}" hint-placeholder-val="{{ false }}">
           <div class="rounded-xl border border-dashed border-border" role="alert">
-            <div class="wp-empty flex min-w-0 flex-col items-center justify-center gap-4 rounded-xl p-6 text-center text-balance">
-              <div class="wp-empty-header flex max-w-sm flex-col items-center gap-2">
-                <span class="wp-empty-media flex size-10 items-center justify-center rounded-lg bg-muted"><span class="ng-icon phosphorWarningCircleBold size-5 text-destructive" aria-hidden="true"></span></span>
-                <h2 class="wp-empty-title text-sm font-medium">Impossible de charger cette section</h2>
-                <p class="wp-empty-description text-sm/relaxed text-muted-foreground">Le serveur n’a pas répondu à temps. Vos réglages ne sont pas perdus : réessayez dans un instant.</p>
+            <div class="cw-empty flex min-w-0 flex-col items-center justify-center gap-4 rounded-xl p-6 text-center text-balance">
+              <div class="cw-empty-header flex max-w-sm flex-col items-center gap-2">
+                <span class="cw-empty-media flex size-10 items-center justify-center rounded-lg bg-muted"><span class="ng-icon phosphorWarningCircleBold size-5 text-destructive" aria-hidden="true"></span></span>
+                <h2 class="cw-empty-title text-sm font-medium">Impossible de charger cette section</h2>
+                <p class="cw-empty-description text-sm/relaxed text-muted-foreground">Le serveur n’a pas répondu à temps. Vos réglages ne sont pas perdus : réessayez dans un instant.</p>
               </div>
-              <div class="wp-empty-content flex flex-wrap justify-center gap-2">
+              <div class="cw-empty-content flex flex-wrap justify-center gap-2">
                 <button type="button" onClick="{{errRetry}}" class="relative isolate inline-flex h-8 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-lg px-3 text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background border border-input bg-background hover:bg-accent"><span class="ng-icon phosphorArrowClockwiseBold" aria-hidden="true"></span>Réessayer</button>
                 
               </div>
@@ -360,7 +360,7 @@ body{margin:0}
           <section class="flex flex-col gap-2 rounded-xl border border-border bg-card py-4 text-card-foreground" aria-labelledby="nt-matrix">
             <div class="px-4"><h2 id="nt-matrix" class="text-base leading-5 font-semibold">Événements</h2></div>
             <div class="relative w-full overflow-x-auto">
-              <div role="table" aria-label="Notifications par canal" class="wp-cards min-w-[520px]">
+              <div role="table" aria-label="Notifications par canal" class="cw-cards min-w-[520px]">
                 <div role="row" class="grid h-9 grid-cols-[minmax(0,1fr)_6rem_6rem_6rem] items-center border-b border-border px-4 text-xs font-medium text-muted-foreground">
                   <span role="columnheader">Événement</span><span role="columnheader" class="text-center whitespace-nowrap">Dans l'app</span><span role="columnheader" class="text-center whitespace-nowrap">E-mail</span><span role="columnheader" class="text-center whitespace-nowrap">Mobile</span>
                 </div>
@@ -539,7 +539,7 @@ body{margin:0}
             <a href="Organisation.dc.html" onClick="{{goQuotas}}" class="rounded-sm text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Voir les quotas</a>
           </div>
           <div class="relative w-full overflow-x-auto rounded-lg border border-border">
-            <div role="table" aria-label="Jetons d'accès personnels" class="wp-cards min-w-[640px]">
+            <div role="table" aria-label="Jetons d'accès personnels" class="cw-cards min-w-[640px]">
               <div role="row" class="grid h-9 grid-cols-[minmax(10rem,1fr)_12rem_7rem_7rem_6rem] items-center border-b border-border px-3 text-xs font-medium text-muted-foreground">
                 <span role="columnheader">Nom</span><span role="columnheader">Portées</span><span role="columnheader">Dernier usage</span><span role="columnheader">Expire</span><span role="columnheader" class="sr-only whitespace-nowrap">Actions</span>
               </div>
@@ -821,9 +821,9 @@ const PREF_OPTIONS = {
   week: ['Lundi', 'Dimanche', 'Samedi'].map((v) => [v, v]),
 };
 const EXP_OPTIONS = ['30 jours', '90 jours', '1 an', 'Sans expiration'].map((v) => [v, v]);
-// Espaces (copie d'App.dc.html : SPACE_DEFS, LOOK_COLORS, LOOK_ICONS) ; favoris partagés par localStorage « waypoint-fav-spaces »
+// Espaces (copie d'App.dc.html : SPACE_DEFS, LOOK_COLORS, LOOK_ICONS) ; favoris partagés par localStorage « cadenway-fav-spaces »
 const SPACE_DEFS = [
-  { key: 'produit', initial: 'P', name: 'Produit', prefix: 'WAY', icon: 'rocket', color: 'violet' },
+  { key: 'produit', initial: 'P', name: 'Produit', prefix: 'CAD', icon: 'rocket', color: 'violet' },
   { key: 'design', initial: 'D', name: 'Design', prefix: 'DES', icon: 'paint', color: 'orange' },
   { key: 'marketing', initial: 'M', name: 'Marketing', prefix: 'MKT', icon: 'megaphone', color: 'jaune' },
   { key: 'ops', initial: 'O', name: 'Opérations', prefix: 'OPS', icon: 'gear', color: 'vert' },
@@ -846,12 +846,12 @@ const LOOK_ICONS = [
 const LOOK_CMAP = Object.fromEntries(LOOK_COLORS.map((c) => [c.key, c]));
 const LOOK_IMAP = Object.fromEntries(LOOK_ICONS.map((i) => [i.key, i]));
 const DEFAULT_FAV_SPACES = ['produit', 'design'];
-// Boîte de réception d'App : notifications n1 à n4, lues = localStorage « waypoint-read » (tableau de clés)
+// Boîte de réception d'App : notifications n1 à n4, lues = localStorage « cadenway-read » (tableau de clés)
 const NOTIF_KEYS = ['n1', 'n2', 'n3', 'n4'];
 // Menu contextuel des espaces de la barre : hauteur estimée (titre + 2 éléments) et largeur minimale, pour rester dans la fenêtre
 const CTX_H = 112;
 const CTX_W = 232;
-// Statut de présence de l'utilisateur (copie d'App.dc.html, partagé par localStorage « waypoint-status »)
+// Statut de présence de l'utilisateur (copie d'App.dc.html, partagé par localStorage « cadenway-status »)
 const USER_STATUSES = [
   { key: 'online', label: 'Actif', hint: 'Vous apparaissez en ligne', dot: 'bg-jade', bar: false },
   { key: 'dnd', label: 'Ne pas déranger', hint: 'Notifications en pause', dot: 'bg-grenat', bar: true },
@@ -871,8 +871,8 @@ const STATUS_ICONS = [{ icon: 'phosphorChatCircleBold', label: 'Message' }, { ic
 const STATUS_UNTIL = [['30', '30 min'], ['60', '1 h'], ['240', '4 h'], ['today', 'Aujourd’hui'], ['never', 'Jamais']];
 const STATUS_DEFAULT = { key: 'online', msg: '', icon: '', until: 'never' };
 const STAGGER = ['stagger-0', 'stagger-1', 'stagger-2', 'stagger-3', 'stagger-4', 'stagger-5', 'stagger-6', 'stagger-7', 'stagger-8'];
-// Lien profond entre écrans : la cible lit « waypoint-nav » au montage (voir componentDidMount).
-const navTo = (target) => () => { try { window.localStorage.setItem('waypoint-nav', JSON.stringify({ ...target, at: Date.now() })); } catch (e) {} };
+// Lien profond entre écrans : la cible lit « cadenway-nav » au montage (voir componentDidMount).
+const navTo = (target) => () => { try { window.localStorage.setItem('cadenway-nav', JSON.stringify({ ...target, at: Date.now() })); } catch (e) {} };
 const hex = (n) => Array.from({ length: n }, () => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join('');
 
 const LANG_FLAGS = { 'Français': 'flagFr', 'English': 'flagGb', 'Deutsch': 'flagDe', 'Español': 'flagEs' };
@@ -912,34 +912,34 @@ const SK_SECTIONS = {
 class Component extends DCLogic {
   componentDidMount() {
     try {
-      const t = window.localStorage.getItem('waypoint-theme');
+      const t = window.localStorage.getItem('cadenway-theme');
       if (t === 'dark' || t === 'light') this.setState({ stored: t });
     } catch (e) {}
     try {
-      const us = JSON.parse(window.localStorage.getItem('waypoint-status') || 'null');
+      const us = JSON.parse(window.localStorage.getItem('cadenway-status') || 'null');
       if (us && USTATUS[us.key]) this.setState({ ustatus: us });
-      const fs = JSON.parse(window.localStorage.getItem('waypoint-fav-spaces') || 'null');
+      const fs = JSON.parse(window.localStorage.getItem('cadenway-fav-spaces') || 'null');
       if (Array.isArray(fs)) this.setState({ favSpaces: fs });
-      const rd = JSON.parse(window.localStorage.getItem('waypoint-read') || 'null');
+      const rd = JSON.parse(window.localStorage.getItem('cadenway-read') || 'null');
       if (Array.isArray(rd)) this.setState({ read: rd });
     } catch (e) {}
     this.onStorage = (e) => {
-      if (e.key === 'waypoint-theme' && (e.newValue === 'dark' || e.newValue === 'light')) this.setState({ stored: e.newValue, theme: null });
+      if (e.key === 'cadenway-theme' && (e.newValue === 'dark' || e.newValue === 'light')) this.setState({ stored: e.newValue, theme: null });
       try {
-        if (e.key === 'waypoint-status') { const us = e.newValue ? JSON.parse(e.newValue) : null; this.setState({ ustatus: us && USTATUS[us.key] ? us : null }); }
-        if (e.key === 'waypoint-fav-spaces') { const fs = e.newValue ? JSON.parse(e.newValue) : null; this.setState({ favSpaces: Array.isArray(fs) ? fs : null }); }
-        if (e.key === 'waypoint-read') { const rd = e.newValue ? JSON.parse(e.newValue) : null; this.setState({ read: Array.isArray(rd) ? rd : null }); }
+        if (e.key === 'cadenway-status') { const us = e.newValue ? JSON.parse(e.newValue) : null; this.setState({ ustatus: us && USTATUS[us.key] ? us : null }); }
+        if (e.key === 'cadenway-fav-spaces') { const fs = e.newValue ? JSON.parse(e.newValue) : null; this.setState({ favSpaces: Array.isArray(fs) ? fs : null }); }
+        if (e.key === 'cadenway-read') { const rd = e.newValue ? JSON.parse(e.newValue) : null; this.setState({ read: Array.isArray(rd) ? rd : null }); }
       } catch (err) {}
     };
     window.addEventListener('storage', this.onStorage);
     try {
-      const raw = window.localStorage.getItem('waypoint-nav');
+      const raw = window.localStorage.getItem('cadenway-nav');
       const n = raw ? JSON.parse(raw) : null;
       const fresh = !!n && Date.now() - n.at < 15000;
       if (n && n.to === 'Compte' && fresh) {
-        window.localStorage.removeItem('waypoint-nav');
+        window.localStorage.removeItem('cadenway-nav');
         if (SECTION_IDS.includes(n.section)) this.setState({ section: n.section });
-      } else if (n && !fresh) window.localStorage.removeItem('waypoint-nav');
+      } else if (n && !fresh) window.localStorage.removeItem('cadenway-nav');
     } catch (e) {}
     this.onKey = (e) => {
       // Ctrl K / Cmd K : palette de commandes d'App (sauf pendant une saisie)
@@ -1043,10 +1043,10 @@ class Component extends DCLogic {
     const root = document.documentElement;
     const el = e && e.currentTarget && e.currentTarget.getBoundingClientRect ? e.currentTarget : null;
     const r = el ? el.getBoundingClientRect() : null;
-    root.style.setProperty('--wp-vt-origin', r ? Math.round(r.left + r.width / 2) + 'px ' + Math.round(r.top + r.height / 2) + 'px' : '50% 100%');
-    root.dataset.wpVt = 'circle-blur';
+    root.style.setProperty('--cw-vt-origin', r ? Math.round(r.left + r.width / 2) + 'px ' + Math.round(r.top + r.height / 2) + 'px' : '50% 100%');
+    root.dataset.cwVt = 'circle-blur';
     const vt = document.startViewTransition(() => new Promise((resolve) => { apply(resolve); setTimeout(resolve, 80); }));
-    const end = () => { delete root.dataset.wpVt; };
+    const end = () => { delete root.dataset.cwVt; };
     vt.finished.then(end, end);
     vt.ready.catch(() => {});
   }
@@ -1066,7 +1066,7 @@ class Component extends DCLogic {
     out.skOn = ld;
     out.skS = SK_SECTIONS[this.navKey] || SK_SECTIONS.profile;
     const wrap = (fn, o) => () => this.ask({ ...o, onOk: fn });
-    out.sessions = (out.sessions || []).map((x) => ({ ...x, revoke: wrap(x.revoke, { title: 'Déconnecter ' + x.device + ' ?', text: 'Cet appareil devra se reconnecter pour accéder à Waypoint.', cta: 'Déconnecter', icon: 'phosphorSignOutBold' }) }));
+    out.sessions = (out.sessions || []).map((x) => ({ ...x, revoke: wrap(x.revoke, { title: 'Déconnecter ' + x.device + ' ?', text: 'Cet appareil devra se reconnecter pour accéder à Cadenway.', cta: 'Déconnecter', icon: 'phosphorSignOutBold' }) }));
     const ro = out.revokeOthers;
     out.revokeOthers = wrap(ro, { title: 'Fermer les autres sessions ?', text: 'Tous vos appareils sauf celui-ci seront déconnectés.', cta: 'Fermer les sessions', icon: 'phosphorSignOutBold' });
     out.tokens = (out.tokens || []).map((t) => ({ ...t, revoke: wrap(t.revoke, { title: 'Révoquer le jeton « ' + t.name + ' » ?', text: 'Les scripts et intégrations qui l’utilisent recevront une erreur 401 immédiatement. Cette action est irréversible.', cta: 'Révoquer le jeton', typeName: t.name, icon: 'phosphorKeyBold' }) }));
@@ -1122,8 +1122,8 @@ class Component extends DCLogic {
       const H = window.innerHeight || 0;
       const pad = 8;
       document.querySelectorAll('.menu-shadow').forEach((el) => {
-        if (el.dataset.wpPlaced || getComputedStyle(el).position !== 'absolute') return;
-        el.dataset.wpPlaced = '1';
+        if (el.dataset.cwPlaced || getComputedStyle(el).position !== 'absolute') return;
+        el.dataset.cwPlaced = '1';
         // zone visible : la fenêtre, réduite par chaque conteneur qui coupe (modale, panneau défilant…)
         let box = { top: 0, left: 0, bottom: H, right: W };
         let cb = null;
@@ -1202,7 +1202,7 @@ class Component extends DCLogic {
     const setTheme = (next, choice, e) => {
       const apply = (done) => this.setState({ theme: next, themeChoice: choice || next }, done);
       if (next !== theme) this.themeTransition(e, apply); else apply(() => {});
-      try { window.localStorage.setItem('waypoint-theme', next); } catch (e) {}
+      try { window.localStorage.setItem('cadenway-theme', next); } catch (e) {}
     };
     const section = s.section || SECTION_KEYS[this.props.section ?? 'profil'] || 'profile';
     this.navKey = section;
@@ -1230,7 +1230,7 @@ class Component extends DCLogic {
     const emailLeft = s.emailLeft || 0;
     const tokenExp = s.tokenExp || '30 jours';
     const created = s.created || [];
-    // Select Waypoint (modèle commun) : un seul ouvert à la fois, clé = id du déclencheur.
+    // Select Cadenway (modèle commun) : un seul ouvert à la fois, clé = id du déclencheur.
     const sel = (key, value, opts, onPick) => {
       const open = s.openSelect === key;
       const cur = opts.find((o) => o[0] === value);
@@ -1249,7 +1249,7 @@ class Component extends DCLogic {
         })),
       };
     };
-    // Input OTP Waypoint : 6 cases (3 + 3), saisie, retour arrière, flèches, collage ; état = chaîne de 6 positions.
+    // Input OTP Cadenway : 6 cases (3 + 3), saisie, retour arrière, flèches, collage ; état = chaîne de 6 positions.
     const otp = (stateKey, idPrefix, onDone) => {
       const inputsOf = (el) => { const root = el && el.closest ? el.closest('[data-otp]') : null; return root ? Array.from(root.querySelectorAll('input')) : []; };
       const sync = (ins) => this.setState({ [stateKey]: ins.map((x) => (/^\d$/.test(x.value || '') ? x.value : ' ')).join('') });
@@ -1291,7 +1291,7 @@ class Component extends DCLogic {
     const setUst = (patch) => {
       const next = { ...STATUS_DEFAULT, ...((this.state || {}).ustatus || {}), ...patch };
       this.setState({ ustatus: next });
-      try { window.localStorage.setItem('waypoint-status', JSON.stringify(next)); } catch (e) {}
+      try { window.localStorage.setItem('cadenway-status', JSON.stringify(next)); } catch (e) {}
     };
     const stDraft = s.stDraft || { msg: ust.msg || '', icon: ust.icon || '', until: ust.until || 'never' };
     const patchDraft = (patch) => {
@@ -1306,7 +1306,7 @@ class Component extends DCLogic {
     const unread = NOTIF_KEYS.filter((k) => !readKeys.includes(k)).length;
     const setFavSpaces = (next) => {
       this.setState({ favSpaces: next });
-      try { window.localStorage.setItem('waypoint-fav-spaces', JSON.stringify(next)); } catch (e) {}
+      try { window.localStorage.setItem('cadenway-fav-spaces', JSON.stringify(next)); } catch (e) {}
     };
     const curFav = () => { const st = this.state || {}; return Array.isArray(st.favSpaces) ? st.favSpaces : DEFAULT_FAV_SPACES; };
     // Menu contextuel (clic droit, touche Menu, Maj + F10) des espaces favoris de la barre
@@ -1461,9 +1461,9 @@ class Component extends DCLogic {
     ];
     const sessions = [
       { id: 's1', device: 'Firefox 132 · Windows 11', where: 'Lyon, France · 192.0.2.14', when: 'Actif maintenant', icon: 'phosphorDesktopBold', current: true },
-      { id: 's2', device: 'Application Waypoint · iPhone 15', where: 'Lyon, France · 198.51.100.7', when: 'Il y a 2 h', icon: 'phosphorDeviceMobileBold', current: false },
+      { id: 's2', device: 'Application Cadenway · iPhone 15', where: 'Lyon, France · 198.51.100.7', when: 'Il y a 2 h', icon: 'phosphorDeviceMobileBold', current: false },
       { id: 's3', device: 'Chrome 131 · macOS 15', where: 'Paris, France · 203.0.113.52', when: 'Hier, 18:40', icon: 'phosphorLaptopBold', current: false },
-      { id: 's4', device: 'Waypoint CLI 2.4', where: 'Serveur d’intégration · 203.0.113.9', when: 'Il y a 3 jours', icon: 'phosphorTerminalWindowBold', current: false },
+      { id: 's4', device: 'Cadenway CLI 2.4', where: 'Serveur d’intégration · 203.0.113.9', when: 'Il y a 3 jours', icon: 'phosphorTerminalWindowBold', current: false },
     ].filter((x) => !revoked.includes(x.id));
     const others = sessions.filter((x) => !x.current);
     const providerDefs = [
@@ -1483,9 +1483,9 @@ class Component extends DCLogic {
     ];
     const channels = ['dans l’app', 'par e-mail', 'sur mobile'];
     const tokens = [...created, ...[
-      { id: 't1', name: 'Intégration continue GitLab', prefix: 'wp_pat_4c1e…', scopes: ['tasks:read', 'tasks:write'], used: 'Il y a 5 min', expires: '12 janv. 2027', expTone: 'text-muted-foreground' },
-      { id: 't2', name: 'Script d’import Trello', prefix: 'wp_pat_9ab2…', scopes: ['tasks:write'], used: 'Il y a 21 jours', expires: 'Dans 6 jours', expTone: 'text-grenat-text' },
-      { id: 't3', name: 'Tableau de bord Grafana', prefix: 'wp_pat_d07f…', scopes: ['tasks:read', 'members:read'], used: 'Il y a 1 h', expires: 'Sans expiration', expTone: 'text-muted-foreground' },
+      { id: 't1', name: 'Intégration continue GitLab', prefix: 'cw_pat_4c1e…', scopes: ['tasks:read', 'tasks:write'], used: 'Il y a 5 min', expires: '12 janv. 2027', expTone: 'text-muted-foreground' },
+      { id: 't2', name: 'Script d’import Trello', prefix: 'cw_pat_9ab2…', scopes: ['tasks:write'], used: 'Il y a 21 jours', expires: 'Dans 6 jours', expTone: 'text-grenat-text' },
+      { id: 't3', name: 'Tableau de bord Grafana', prefix: 'cw_pat_d07f…', scopes: ['tasks:read', 'members:read'], used: 'Il y a 1 h', expires: 'Sans expiration', expTone: 'text-muted-foreground' },
     ].filter((t) => !tokensRevoked.includes(t.id))];
     const codes = ['4F7K-2M9Q', 'H3XP-8D2L', 'Q9TZ-5W1C', 'B6NR-7J4E', 'K2VD-9S8A', 'M8LC-3F6P', 'T5QW-1H7Z', 'R4GY-6B3N', 'C7EJ-2K5U', 'W1PS-8V9D'].map((c) => ({ c }));
 
@@ -1608,10 +1608,10 @@ class Component extends DCLogic {
       backupLabel: (s.newCodes ? 10 : 7) + ' codes inutilisés sur 10',
       openBackup: () => this.setState({ dialog: 'backup' }),
       closeBackup: () => {
-        const text = ['Waypoint · codes de secours', 'Compte : ' + email, 'Générés le 8 novembre 2026. Chaque code ne sert qu’une fois.', '', ...codes.map((c) => c.c), ''].join('\r\n');
-        if (this.download('waypoint-codes-de-secours.txt', text)) {
+        const text = ['Cadenway · codes de secours', 'Compte : ' + email, 'Générés le 8 novembre 2026. Chaque code ne sert qu’une fois.', '', ...codes.map((c) => c.c), ''].join('\r\n');
+        if (this.download('cadenway-codes-de-secours.txt', text)) {
           this.setState({ dialog: null, newCodes: true });
-          this.toast('Codes de secours enregistrés', 'Fichier waypoint-codes-de-secours.txt téléchargé.');
+          this.toast('Codes de secours enregistrés', 'Fichier cadenway-codes-de-secours.txt téléchargé.');
         } else this.toast('Téléchargement impossible', 'Copiez les codes et conservez-les hors ligne.', true);
       },
       copyCodes: () => this.copy(codes.map((c) => c.c).join('\n'), 'Codes copiés', 'Collez-les dans votre gestionnaire de mots de passe.'),
@@ -1697,7 +1697,7 @@ class Component extends DCLogic {
         ['webhooks:manage', 'Créer et supprimer des webhooks'],
       ].map(([sc, hint], i) => ({ id: 'scope-' + i, s: sc, hint, on: scopes.includes(sc), state: scopes.includes(sc) ? 'checked' : 'unchecked', toggle: () => this.setState({ scopes: scopes.includes(sc) ? scopes.filter((x) => x !== sc) : [...scopes, sc] }) })),
       createToken: () => {
-        const secret = 'wp_pat_' + hex(24);
+        const secret = 'cw_pat_' + hex(24);
         const token = { id: 'n' + Date.now(), name: (s.tokenName || '').trim(), prefix: secret.slice(0, 11) + '…', scopes: [...scopes], used: 'Jamais', expires: TOKEN_EXPIRES[tokenExp] || 'Dans 30 jours', expTone: 'text-muted-foreground' };
         this.setState({ tokenStep: 'shown', tokenSecret: secret, created: [token, ...created] });
       },

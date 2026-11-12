@@ -1,5 +1,5 @@
 /*
- * Public API of @waypoint/ui.
+ * Public API of @cadenway/ui.
  *
  * Each brick of `src/lib/<brick>/` is exported from here by name, one explicit
  * `export { … } from './lib/<brick>/<brick>'` per file: no `export *`, nothing internal, no testing
@@ -7,7 +7,7 @@
  * deprecation in a minor.
  *
  * No brick has been built yet, so the module is empty on purpose: the bricks of
- * .claude/skills/wp-brick-recipes arrive one by one, each with its export line here.
+ * .claude/skills/cw-brick-recipes arrive one by one, each with its export line here.
  */
 
 export {};

@@ -1,4 +1,4 @@
-/* Library sources of @waypoint/icons: the development build and the type check. */
+/* Library sources of @cadenway/icons: the development build and the type check. */
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {

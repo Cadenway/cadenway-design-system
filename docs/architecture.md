@@ -10,13 +10,13 @@ The following architecture is the target recorded in [AGENTS.md](../AGENTS.md). 
 
 ## Purpose and target structure
 
-waypoint-design-system is the Angular design system taken from the mockup. It publishes `@waypoint/tokens`, `@waypoint/icons` and `@waypoint/ui` (pnpm monorepo, Changesets) and hosts Storybook as the visual reference. Consumers: waypoint-webapp and waypoint-website.
+cadenway-design-system is the Angular design system taken from the mockup. It publishes `@cadenway/tokens`, `@cadenway/icons` and `@cadenway/ui` (pnpm monorepo, Changesets) and hosts Storybook as the visual reference. Consumers: cadenway-webapp and cadenway-website.
 
 ```text
 packages/
-├─ tokens/   → @waypoint/tokens (tokens.css, theme.css)
-├─ icons/    → @waypoint/icons (provideWaypointIcons)
-└─ ui/       → @waypoint/ui (src/lib/<brick>/, public-api.ts)
+├─ tokens/   → @cadenway/tokens (tokens.css, theme.css)
+├─ icons/    → @cadenway/icons (provideCadenwayIcons)
+└─ ui/       → @cadenway/ui (src/lib/<brick>/, public-api.ts)
 apps/storybook/
 ```
 
@@ -29,11 +29,11 @@ apps/storybook/
 
 ## Boundaries
 
-- No business logic, no API call, no knowledge of tasks beyond the display contracts of `wp-status-icon` and `wp-priority-icon`.
+- No business logic, no API call, no knowledge of tasks beyond the display contracts of `cw-status-icon` and `cw-priority-icon`.
 - Consumers never restyle a brick from outside: variants are inputs.
 - Tokens are the only source of colors, radii, shadows and timings.
 - `docs/maquette/` is a read-only reference.
 
 ## Cross-repository changes
 
-Each checkout owns its implementation and release. Use published `@waypoint/*` packages instead of sibling source imports or local dependency links. For contract changes, make the contract and generated package available first, then update the producing service, gateways and listeners, and finally the webapp. Each step should remain deployable independently.
+Each checkout owns its implementation and release. Use published `@cadenway/*` packages instead of sibling source imports or local dependency links. For contract changes, make the contract and generated package available first, then update the producing service, gateways and listeners, and finally the webapp. Each step should remain deployable independently.

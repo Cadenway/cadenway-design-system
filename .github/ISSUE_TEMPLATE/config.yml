@@ -1,9 +1,9 @@
-# Issue chooser of waypoint-design-system. Replace <org> with the GitHub organization name once it is chosen.
+# Issue chooser of cadenway-design-system. Replace <org> with the GitHub organization name once it is chosen.
 blank_issues_enabled: false
 contact_links:
   - name: Report a security vulnerability
-    url: https://github.com/<org>/waypoint-design-system/security/advisories/new
+    url: https://github.com/<org>/cadenway-design-system/security/advisories/new
     about: Report it privately, never in a public issue. See .github/SECURITY.md.
   - name: Get help
-    url: https://github.com/<org>/waypoint-design-system/blob/main/.github/SUPPORT.md
+    url: https://github.com/<org>/cadenway-design-system/blob/main/.github/SUPPORT.md
     about: Where to look before opening an issue.

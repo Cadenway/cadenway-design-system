@@ -1,7 +1,7 @@
 {
-  "name": "@waypoint/icons",
+  "name": "@cadenway/icons",
   "version": "0.0.0",
-  "description": "The icons Waypoint applications use, registered by provideWaypointIcons().",
+  "description": "The icons Cadenway applications use, registered by provideCadenwayIcons().",
   "license": "UNLICENSED",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"

@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
- * PreToolUse hook (waypoint-design-system): refuse writes that are never right in this repository.
+ * PreToolUse hook (cadenway-design-system): refuse writes that are never right in this repository.
  * Deny = exit 2 with the reason on stderr; everything else = exit 0.
  *
  * Reads `tool_input.file_path` and the written text (`content`, `new_string`, or the
  * `edits[].new_string` of a MultiEdit) and denies, in this order:
  *
- *  1. Sibling checkouts (`../waypoint-*`): read-only from a waypoint-design-system session.
+ *  1. Sibling checkouts (`../cadenway-*`): read-only from a cadenway-design-system session.
  *  2. Generated trees and build outputs. Edit the source and rebuild.
  *  3. Lockfiles edited by hand (`pnpm-lock.yaml`, `package-lock.json`). Use the package manager.
  *  4. Git internals (`.git/`).
@@ -15,14 +15,14 @@
  *  6. Repository-specific rules (see REPO_RULES).
  *
  * Deliberately conservative: ordinary sources, specs, docs and configuration stay writable. The hook
- * only acts inside a waypoint-design-system checkout (marker: `.claude/.claude-plugin/plugin.json` named
- * waypoint-design-system), so it is inert elsewhere.
+ * only acts inside a cadenway-design-system checkout (marker: `.claude/.claude-plugin/plugin.json` named
+ * cadenway-design-system), so it is inert elsewhere.
  */
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const REPO_NAME = 'waypoint-design-system';
+const REPO_NAME = 'cadenway-design-system';
 
 const GENERATED = [
   [/^(?:.*\/)?node_modules\//, 'an installed dependency'],
@@ -46,7 +46,7 @@ const TOKEN_PATTERNS = [
 
 /** Repository-specific rules: [test(rel, body) => boolean, message]. */
 const REPO_RULES = [
-  [(rel, body) => /^packages\/ui\/src\/lib\/.*\.(ts|html|css)$/.test(rel) && /#[0-9a-fA-F]{6}\b/.test(body), 'colors come from @waypoint/tokens; no hex value inside a brick.'],
+  [(rel, body) => /^packages\/ui\/src\/lib\/.*\.(ts|html|css)$/.test(rel) && /#[0-9a-fA-F]{6}\b/.test(body), 'colors come from @cadenway/tokens; no hex value inside a brick.'],
   [(rel, body) => /public-api\.ts$|(^|\/)index\.ts$/.test(rel) && /^\s*export\s+\*\s+from\s/m.test(body), 'the public API uses explicit named exports, never "export * from".'],
   [(rel, body) => /^\.github\/workflows\/.+\.ya?ml$/.test(rel) && /uses:\s*(?!\.\/|docker:\/\/)[^@\s]+@(?![0-9a-f]{40}\b)/.test(body), 'pin third-party actions to a full commit SHA, with the version in a comment.'],
   [(rel, body) => /^\.github\/workflows\/.+\.ya?ml$/.test(rel) && /pull_request_target/.test(body), 'pull_request_target runs with secrets on untrusted code; use pull_request, or ask the user.'],
@@ -64,7 +64,7 @@ function isRepoRoot(dir) {
   }
 }
 
-/** Walks upward from a path and returns the nearest waypoint-design-system checkout root, or null. */
+/** Walks upward from a path and returns the nearest cadenway-design-system checkout root, or null. */
 export function findRepoRoot(start) {
   let dir = path.resolve(start);
   for (;;) {
@@ -82,16 +82,16 @@ export function writtenText(input) {
   return String(input.content ?? input.new_string ?? '');
 }
 
-/** Refuses writes into a sibling Waypoint checkout. */
+/** Refuses writes into a sibling Cadenway checkout. */
 export function evaluateSibling(root, absolute) {
   const relative = path.relative(path.dirname(root), path.resolve(absolute));
   if (!relative || relative.startsWith('..') || path.isAbsolute(relative)) return null;
   const [folder] = relative.split(/[\\/]/);
   if (folder === path.basename(root)) return null;
-  if (!/^waypoint-[a-z0-9-]+$/i.test(folder)) return null;
+  if (!/^cadenway-[a-z0-9-]+$/i.test(folder)) return null;
   return deny(
     `${relative.replace(/\\/g, '/')} belongs to the sibling checkout ${folder}, which is read-only from a ` +
-      'waypoint-design-system session. Write the need down for its owner (its wp-* agents) and change it in its own session and pull request.',
+      'cadenway-design-system session. Write the need down for its owner (its cw-* agents) and change it in its own session and pull request.',
   );
 }
 

@@ -1,7 +1,7 @@
 {
-  "name": "@waypoint/ui",
+  "name": "@cadenway/ui",
   "version": "0.0.0",
-  "description": "The Angular bricks of the Waypoint design system.",
+  "description": "The Angular bricks of the Cadenway design system.",
   "license": "UNLICENSED",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"

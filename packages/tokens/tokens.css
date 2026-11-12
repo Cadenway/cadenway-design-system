@@ -1,5 +1,5 @@
 /*
- * @waypoint/tokens: the design tokens of the mockup as CSS custom properties.
+ * @cadenway/tokens: the design tokens of the mockup as CSS custom properties.
  *
  * What belongs here (AGENTS.md, "Architectural ownership"): colors in light and dark, typography,
  * radii, shadows, motion variables and keyframes, plus the `@font-face` rules for the files of
@@ -7,7 +7,7 @@
  * variables, they never repeat a value.
  *
  * The theme is selected by `data-theme="light|dark"` on the root element, never by a class
- * (.claude/skills/wp-tokens-and-theme). Semantic tokens are declared once per theme below; tokens
+ * (.claude/skills/cw-tokens-and-theme). Semantic tokens are declared once per theme below; tokens
  * that do not depend on the theme go under `:root`.
  *
  * Structure only for now: no value has been transcribed yet. They come from the integration guide,

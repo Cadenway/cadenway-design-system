@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<title>Sprint 14 — Waypoint</title>
+<title>Sprint 14 — Cadenway</title>
 <script src="./support.js"></script>
 <link rel="stylesheet" href="styles/app.css">
 </head>
@@ -486,13 +486,13 @@ body{margin:0}
         <!-- Squelettes de chargement des vues : même géométrie que le contenu, aria-busy, rien d'interactif. -->
         <sc-if value="{{errView}}" hint-placeholder-val="{{ false }}">
           <div class="flex min-h-0 flex-1 items-center justify-center px-4 pb-6 sm:px-6" role="alert">
-            <div class="wp-empty flex min-w-0 flex-col items-center justify-center gap-4 rounded-xl p-6 text-center text-balance">
-              <div class="wp-empty-header flex max-w-sm flex-col items-center gap-2">
-                <span class="wp-empty-media flex size-10 items-center justify-center rounded-lg bg-muted"><span class="ng-icon phosphorWarningCircleBold size-5 text-destructive" aria-hidden="true"></span></span>
-                <h2 class="wp-empty-title text-sm font-medium">{{errT.title}}</h2>
-                <p class="wp-empty-description text-sm/relaxed text-muted-foreground">{{errT.text}}</p>
+            <div class="cw-empty flex min-w-0 flex-col items-center justify-center gap-4 rounded-xl p-6 text-center text-balance">
+              <div class="cw-empty-header flex max-w-sm flex-col items-center gap-2">
+                <span class="cw-empty-media flex size-10 items-center justify-center rounded-lg bg-muted"><span class="ng-icon phosphorWarningCircleBold size-5 text-destructive" aria-hidden="true"></span></span>
+                <h2 class="cw-empty-title text-sm font-medium">{{errT.title}}</h2>
+                <p class="cw-empty-description text-sm/relaxed text-muted-foreground">{{errT.text}}</p>
               </div>
-              <div class="wp-empty-content flex flex-wrap justify-center gap-2">
+              <div class="cw-empty-content flex flex-wrap justify-center gap-2">
                 <button type="button" onClick="{{errT.retry}}" class="relative isolate inline-flex h-8 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-lg px-3 text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background border border-input bg-background hover:bg-accent"><span class="ng-icon phosphorArrowClockwiseBold" aria-hidden="true"></span>Réessayer</button>
                 <button type="button" onClick="{{errT.status}}" class="relative isolate inline-flex h-8 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-lg px-3 text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background hover:bg-accent">État du service</button>
               </div>
@@ -504,24 +504,24 @@ body{margin:0}
           <div class="min-h-0 flex-1 overflow-hidden px-4 pb-6 sm:px-6" role="status" aria-busy="true" aria-label="Chargement des tâches">
             <div class="overflow-hidden rounded-lg border border-border md:min-w-[880px]" aria-hidden="true">
               <div class="grid h-9 grid-cols-[2.25rem_minmax(0,1fr)_5.5rem] md:grid-cols-[2.5rem_minmax(16rem,1fr)_6.5rem_7.5rem_7rem_10rem_2.5rem] items-center">
-                <span class="flex justify-center"><span class="wp-sk size-4 rounded-[4px]"></span></span>
-                <span class="px-2"><span class="wp-sk h-2.5 w-12"></span></span>
-                <span class="px-2 max-md:hidden"><span class="wp-sk h-2.5 w-14"></span></span>
-                <span class="px-2"><span class="wp-sk h-2.5 w-14"></span></span>
-                <span class="px-2 max-md:hidden"><span class="wp-sk h-2.5 w-12"></span></span>
-                <span class="px-2 max-md:hidden"><span class="wp-sk h-2.5 w-16"></span></span>
+                <span class="flex justify-center"><span class="cw-sk size-4 rounded-[4px]"></span></span>
+                <span class="px-2"><span class="cw-sk h-2.5 w-12"></span></span>
+                <span class="px-2 max-md:hidden"><span class="cw-sk h-2.5 w-14"></span></span>
+                <span class="px-2"><span class="cw-sk h-2.5 w-14"></span></span>
+                <span class="px-2 max-md:hidden"><span class="cw-sk h-2.5 w-12"></span></span>
+                <span class="px-2 max-md:hidden"><span class="cw-sk h-2.5 w-16"></span></span>
                 <span></span>
               </div>
               <sc-for list="{{skGroups}}" as="zsg" hint-placeholder-count="3">
-                <div class="flex h-8 items-center gap-2 border-t border-border bg-muted px-3.5"><span class="wp-sk wp-sk-2 size-3.5 rounded-sm"></span><span class="wp-sk wp-sk-2 size-4 rounded-full"></span><span class="wp-sk wp-sk-2 h-3 {{zsg.w}}"></span><span class="wp-sk wp-sk-2 h-3 w-4"></span></div>
+                <div class="flex h-8 items-center gap-2 border-t border-border bg-muted px-3.5"><span class="cw-sk cw-sk-2 size-3.5 rounded-sm"></span><span class="cw-sk cw-sk-2 size-4 rounded-full"></span><span class="cw-sk cw-sk-2 h-3 {{zsg.w}}"></span><span class="cw-sk cw-sk-2 h-3 w-4"></span></div>
                 <sc-for list="{{zsg.rows}}" as="zsr" hint-placeholder-count="3">
                   <div class="grid h-9 grid-cols-[2.25rem_minmax(0,1fr)_5.5rem] md:grid-cols-[2.5rem_minmax(16rem,1fr)_6.5rem_7.5rem_7rem_10rem_2.5rem] items-center border-t border-border">
-                    <span class="flex justify-center"><span class="wp-sk size-4 rounded-[4px]"></span></span>
-                    <span class="flex min-w-0 items-center gap-2 px-2"><span class="wp-sk size-4 rounded-full"></span><span class="wp-sk h-3 {{zsr.w}}"></span></span>
-                    <span class="flex -space-x-1 px-2 max-md:hidden"><span class="wp-sk size-6 rounded-full ring-2 ring-background"></span><sc-if value="{{zsr.two}}" hint-placeholder-val="{{ true }}"><span class="wp-sk size-6 rounded-full ring-2 ring-background"></span></sc-if></span>
-                    <span class="px-2"><span class="wp-sk h-3 w-16"></span></span>
-                    <span class="px-2 max-md:hidden"><span class="wp-sk h-5 w-16 rounded-full"></span></span>
-                    <span class="flex gap-1 px-2 max-md:hidden"><span class="wp-sk h-5 w-14 rounded-full"></span><sc-if value="{{zsr.two}}" hint-placeholder-val="{{ true }}"><span class="wp-sk h-5 w-10 rounded-full"></span></sc-if></span>
+                    <span class="flex justify-center"><span class="cw-sk size-4 rounded-[4px]"></span></span>
+                    <span class="flex min-w-0 items-center gap-2 px-2"><span class="cw-sk size-4 rounded-full"></span><span class="cw-sk h-3 {{zsr.w}}"></span></span>
+                    <span class="flex -space-x-1 px-2 max-md:hidden"><span class="cw-sk size-6 rounded-full ring-2 ring-background"></span><sc-if value="{{zsr.two}}" hint-placeholder-val="{{ true }}"><span class="cw-sk size-6 rounded-full ring-2 ring-background"></span></sc-if></span>
+                    <span class="px-2"><span class="cw-sk h-3 w-16"></span></span>
+                    <span class="px-2 max-md:hidden"><span class="cw-sk h-5 w-16 rounded-full"></span></span>
+                    <span class="flex gap-1 px-2 max-md:hidden"><span class="cw-sk h-5 w-14 rounded-full"></span><sc-if value="{{zsr.two}}" hint-placeholder-val="{{ true }}"><span class="cw-sk h-5 w-10 rounded-full"></span></sc-if></span>
                     <span></span>
                   </div>
                 </sc-for>
@@ -534,12 +534,12 @@ body{margin:0}
           <div class="flex min-h-0 flex-1 items-stretch gap-2 overflow-hidden px-4 pb-4 sm:px-6" role="status" aria-busy="true" aria-label="Chargement du tableau">
             <sc-for list="{{skCols}}" as="zsc" hint-placeholder-count="4">
               <section class="flex w-72 shrink-0 flex-col gap-2 rounded-xl bg-muted/60 p-2" aria-hidden="true">
-                <div class="flex h-8 items-center gap-2 px-1.5"><span class="wp-sk wp-sk-2 size-4 rounded-full"></span><span class="wp-sk wp-sk-2 h-3 {{zsc.w}}"></span><span class="wp-sk wp-sk-2 h-3 w-4"></span></div>
+                <div class="flex h-8 items-center gap-2 px-1.5"><span class="cw-sk cw-sk-2 size-4 rounded-full"></span><span class="cw-sk cw-sk-2 h-3 {{zsc.w}}"></span><span class="cw-sk cw-sk-2 h-3 w-4"></span></div>
                 <sc-for list="{{zsc.cards}}" as="zsk" hint-placeholder-count="3">
                   <div class="flex flex-col gap-2.5 rounded-lg border border-border bg-card p-3">
-                    <span class="wp-sk h-2.5 w-14"></span>
-                    <span class="wp-sk h-3 {{zsk.w}}"></span>
-                    <div class="flex items-center gap-2"><span class="wp-sk h-5 w-14 rounded-full"></span><span class="wp-sk h-3 w-12"></span><span class="ml-auto wp-sk size-6 rounded-full"></span></div>
+                    <span class="cw-sk h-2.5 w-14"></span>
+                    <span class="cw-sk h-3 {{zsk.w}}"></span>
+                    <div class="flex items-center gap-2"><span class="cw-sk h-5 w-14 rounded-full"></span><span class="cw-sk h-3 w-12"></span><span class="ml-auto cw-sk size-6 rounded-full"></span></div>
                   </div>
                 </sc-for>
               </section>
@@ -549,21 +549,21 @@ body{margin:0}
 
         <sc-if value="{{skCalendar}}" hint-placeholder-val="{{ false }}">
           <div class="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden px-4 pb-6 sm:px-6" role="status" aria-busy="true" aria-label="Chargement du calendrier">
-            <div class="flex h-8 items-center gap-2" aria-hidden="true"><span class="wp-sk h-5 w-36"></span><span class="wp-sk size-8 rounded-lg"></span><span class="wp-sk size-8 rounded-lg"></span><span class="ml-auto wp-sk h-8 w-24 rounded-lg"></span></div>
+            <div class="flex h-8 items-center gap-2" aria-hidden="true"><span class="cw-sk h-5 w-36"></span><span class="cw-sk size-8 rounded-lg"></span><span class="cw-sk size-8 rounded-lg"></span><span class="ml-auto cw-sk h-8 w-24 rounded-lg"></span></div>
             <div class="grid min-w-[720px] grid-cols-7 overflow-hidden rounded-lg border-t border-l border-border" aria-hidden="true">
-              <sc-for list="{{skCalHead}}" as="zch" hint-placeholder-count="7"><div class="flex h-8 items-center border-r border-b border-border px-2"><span class="wp-sk h-2.5 w-8"></span></div></sc-for>
-              <sc-for list="{{skCal}}" as="zcd" hint-placeholder-count="35"><div class="flex min-h-24 min-w-0 flex-col gap-1 border-r border-b border-border p-1.5"><span class="wp-sk h-3 w-4"></span><sc-for list="{{zcd.ev}}" as="zce" hint-placeholder-count="1"><span class="wp-sk h-6 w-full rounded-md"></span></sc-for></div></sc-for>
+              <sc-for list="{{skCalHead}}" as="zch" hint-placeholder-count="7"><div class="flex h-8 items-center border-r border-b border-border px-2"><span class="cw-sk h-2.5 w-8"></span></div></sc-for>
+              <sc-for list="{{skCal}}" as="zcd" hint-placeholder-count="35"><div class="flex min-h-24 min-w-0 flex-col gap-1 border-r border-b border-border p-1.5"><span class="cw-sk h-3 w-4"></span><sc-for list="{{zcd.ev}}" as="zce" hint-placeholder-count="1"><span class="cw-sk h-6 w-full rounded-md"></span></sc-for></div></sc-for>
             </div>
           </div>
         </sc-if>
 
         <sc-if value="{{skGantt}}" hint-placeholder-val="{{ false }}">
           <section class="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden px-4 pb-6 sm:px-6" role="status" aria-busy="true" aria-label="Chargement du diagramme de Gantt">
-            <div class="flex h-8 items-center gap-2" aria-hidden="true"><span class="wp-sk h-5 w-40"></span><span class="ml-auto wp-sk h-8 w-56 rounded-lg"></span></div>
+            <div class="flex h-8 items-center gap-2" aria-hidden="true"><span class="cw-sk h-5 w-40"></span><span class="ml-auto cw-sk h-8 w-56 rounded-lg"></span></div>
             <div class="overflow-hidden rounded-lg border border-border" aria-hidden="true">
-              <div class="flex h-12 border-b border-border"><div class="flex w-72 shrink-0 items-end border-r border-border px-3 pb-2"><span class="wp-sk h-2.5 w-10"></span></div><div class="flex flex-1 items-end justify-between px-4 pb-2"><sc-for list="{{skTicks}}" as="ztk" hint-placeholder-count="10"><span class="wp-sk h-2.5 w-6"></span></sc-for></div></div>
+              <div class="flex h-12 border-b border-border"><div class="flex w-72 shrink-0 items-end border-r border-border px-3 pb-2"><span class="cw-sk h-2.5 w-10"></span></div><div class="flex flex-1 items-end justify-between px-4 pb-2"><sc-for list="{{skTicks}}" as="ztk" hint-placeholder-count="10"><span class="cw-sk h-2.5 w-6"></span></sc-for></div></div>
               <sc-for list="{{skGanttRows}}" as="zgr" hint-placeholder-count="9">
-                <div class="flex h-9 border-b border-border last:border-b-0"><div class="flex w-72 shrink-0 items-center gap-2 border-r border-border px-3"><span class="wp-sk size-4 rounded-full"></span><span class="wp-sk h-3 {{zgr.w}}"></span></div><div class="relative min-w-0 flex-1"><span class="wp-sk absolute top-2 h-5 rounded-md" style="left: {{zgr.left}}; width: {{zgr.width}}"></span></div></div>
+                <div class="flex h-9 border-b border-border last:border-b-0"><div class="flex w-72 shrink-0 items-center gap-2 border-r border-border px-3"><span class="cw-sk size-4 rounded-full"></span><span class="cw-sk h-3 {{zgr.w}}"></span></div><div class="relative min-w-0 flex-1"><span class="cw-sk absolute top-2 h-5 rounded-md" style="left: {{zgr.left}}; width: {{zgr.width}}"></span></div></div>
               </sc-for>
             </div>
           </section>
@@ -571,11 +571,11 @@ body{margin:0}
 
         <sc-if value="{{skWorkload}}" hint-placeholder-val="{{ false }}">
           <section class="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden px-4 pb-6 sm:px-6" role="status" aria-busy="true" aria-label="Chargement de la charge de travail">
-            <div class="flex h-8 items-center gap-2" aria-hidden="true"><span class="wp-sk h-5 w-40"></span><span class="ml-auto wp-sk h-3 w-64"></span></div>
+            <div class="flex h-8 items-center gap-2" aria-hidden="true"><span class="cw-sk h-5 w-40"></span><span class="ml-auto cw-sk h-3 w-64"></span></div>
             <div class="overflow-hidden rounded-lg border border-border" aria-hidden="true">
-              <div class="flex h-12 border-b border-border"><div class="flex w-52 shrink-0 items-end border-r border-border px-3 pb-2"><span class="wp-sk h-2.5 w-16"></span></div><sc-for list="{{skDays}}" as="zdy" hint-placeholder-count="7"><div class="flex w-28 shrink-0 flex-col items-center justify-center gap-1"><span class="wp-sk h-2.5 w-8"></span><span class="wp-sk size-5 rounded-full"></span></div></sc-for></div>
+              <div class="flex h-12 border-b border-border"><div class="flex w-52 shrink-0 items-end border-r border-border px-3 pb-2"><span class="cw-sk h-2.5 w-16"></span></div><sc-for list="{{skDays}}" as="zdy" hint-placeholder-count="7"><div class="flex w-28 shrink-0 flex-col items-center justify-center gap-1"><span class="cw-sk h-2.5 w-8"></span><span class="cw-sk size-5 rounded-full"></span></div></sc-for></div>
               <sc-for list="{{skPeople}}" as="zwp" hint-placeholder-count="4">
-                <div class="flex min-h-16 border-b border-border last:border-b-0"><div class="flex w-52 shrink-0 items-center gap-2 border-r border-border px-3 py-2"><span class="wp-sk size-7 rounded-full"></span><span class="wp-sk h-3 w-24"></span></div><sc-for list="{{zwp.cells}}" as="zwc" hint-placeholder-count="7"><div class="flex w-28 shrink-0 flex-col gap-1 p-1.5"><sc-for list="{{zwc.chips}}" as="zwch" hint-placeholder-count="1"><span class="wp-sk h-5 w-full rounded-md"></span></sc-for></div></sc-for></div>
+                <div class="flex min-h-16 border-b border-border last:border-b-0"><div class="flex w-52 shrink-0 items-center gap-2 border-r border-border px-3 py-2"><span class="cw-sk size-7 rounded-full"></span><span class="cw-sk h-3 w-24"></span></div><sc-for list="{{zwp.cells}}" as="zwc" hint-placeholder-count="7"><div class="flex w-28 shrink-0 flex-col gap-1 p-1.5"><sc-for list="{{zwc.chips}}" as="zwch" hint-placeholder-count="1"><span class="cw-sk h-5 w-full rounded-md"></span></sc-for></div></sc-for></div>
               </sc-for>
             </div>
           </section>
@@ -583,11 +583,11 @@ body{margin:0}
 
         <sc-if value="{{skTable}}" hint-placeholder-val="{{ false }}">
           <section class="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden px-4 pb-6 sm:px-6" role="status" aria-busy="true" aria-label="Chargement de la feuille">
-            <div class="flex h-8 items-center gap-2" aria-hidden="true"><span class="wp-sk h-5 w-28"></span><span class="ml-auto wp-sk h-8 w-28 rounded-lg"></span></div>
+            <div class="flex h-8 items-center gap-2" aria-hidden="true"><span class="cw-sk h-5 w-28"></span><span class="ml-auto cw-sk h-8 w-28 rounded-lg"></span></div>
             <div class="min-w-[1000px] overflow-hidden rounded-lg border border-border" aria-hidden="true">
-              <div class="grid h-9 grid-cols-[minmax(16rem,1fr)_repeat(6,8rem)] items-center border-b border-border bg-surface-muted"><sc-for list="{{skTblHead}}" as="zth" hint-placeholder-count="7"><span class="flex h-full items-center border-r border-border px-2.5 last:border-r-0"><span class="wp-sk wp-sk-2 h-2.5 {{zth.w}}"></span></span></sc-for></div>
+              <div class="grid h-9 grid-cols-[minmax(16rem,1fr)_repeat(6,8rem)] items-center border-b border-border bg-surface-muted"><sc-for list="{{skTblHead}}" as="zth" hint-placeholder-count="7"><span class="flex h-full items-center border-r border-border px-2.5 last:border-r-0"><span class="cw-sk cw-sk-2 h-2.5 {{zth.w}}"></span></span></sc-for></div>
               <sc-for list="{{skTbl}}" as="ztr" hint-placeholder-count="10">
-                <div class="grid h-9 grid-cols-[minmax(16rem,1fr)_repeat(6,8rem)] items-center border-b border-border last:border-b-0"><sc-for list="{{ztr.cells}}" as="ztc" hint-placeholder-count="7"><span class="flex h-full items-center border-r border-border px-2.5 last:border-r-0"><span class="wp-sk h-3 {{ztc.w}}"></span></span></sc-for></div>
+                <div class="grid h-9 grid-cols-[minmax(16rem,1fr)_repeat(6,8rem)] items-center border-b border-border last:border-b-0"><sc-for list="{{ztr.cells}}" as="ztc" hint-placeholder-count="7"><span class="flex h-full items-center border-r border-border px-2.5 last:border-r-0"><span class="cw-sk h-3 {{ztc.w}}"></span></span></sc-for></div>
               </sc-for>
             </div>
           </section>
@@ -596,28 +596,28 @@ body{margin:0}
         <sc-if value="{{skForm}}" hint-placeholder-val="{{ false }}">
           <section class="flex min-h-0 flex-1 gap-4 overflow-hidden px-4 pt-1 pb-6 sm:px-6" role="status" aria-busy="true" aria-label="Chargement du formulaire">
             <div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-canvas" aria-hidden="true">
-              <div class="flex h-10 shrink-0 items-center gap-2 border-b border-border bg-background px-3"><span class="flex items-center gap-1"><span class="size-2 rounded-full bg-track"></span><span class="size-2 rounded-full bg-track"></span><span class="size-2 rounded-full bg-track"></span></span><span class="mx-auto wp-sk h-5 w-64 rounded-md"></span></div>
-              <div class="mx-auto flex w-full max-w-xl flex-col p-6"><div class="flex flex-col gap-5 rounded-xl border border-border bg-card p-6"><div class="flex flex-col gap-2"><span class="wp-sk h-6 w-1/2"></span><span class="wp-sk h-3 w-3/4"></span></div><sc-for list="{{skFields}}" as="zff" hint-placeholder-count="5"><div class="flex flex-col gap-2"><span class="wp-sk h-3 {{zff.w}}"></span><span class="wp-sk {{zff.h}} w-full rounded-lg"></span></div></sc-for><span class="wp-sk h-9 w-32 rounded-lg"></span></div></div>
+              <div class="flex h-10 shrink-0 items-center gap-2 border-b border-border bg-background px-3"><span class="flex items-center gap-1"><span class="size-2 rounded-full bg-track"></span><span class="size-2 rounded-full bg-track"></span><span class="size-2 rounded-full bg-track"></span></span><span class="mx-auto cw-sk h-5 w-64 rounded-md"></span></div>
+              <div class="mx-auto flex w-full max-w-xl flex-col p-6"><div class="flex flex-col gap-5 rounded-xl border border-border bg-card p-6"><div class="flex flex-col gap-2"><span class="cw-sk h-6 w-1/2"></span><span class="cw-sk h-3 w-3/4"></span></div><sc-for list="{{skFields}}" as="zff" hint-placeholder-count="5"><div class="flex flex-col gap-2"><span class="cw-sk h-3 {{zff.w}}"></span><span class="cw-sk {{zff.h}} w-full rounded-lg"></span></div></sc-for><span class="cw-sk h-9 w-32 rounded-lg"></span></div></div>
             </div>
-            <aside class="hidden w-80 shrink-0 flex-col gap-3 rounded-xl border border-border bg-card p-4 lg:flex" aria-hidden="true"><span class="wp-sk h-4 w-24"></span><sc-for list="{{skFields}}" as="zff" hint-placeholder-count="5"><div class="flex items-center gap-2 rounded-lg border border-border p-2.5"><span class="wp-sk size-4"></span><span class="wp-sk h-3 {{zff.w}}"></span><span class="ml-auto wp-sk h-5 w-9 rounded-full"></span></div></sc-for></aside>
+            <aside class="hidden w-80 shrink-0 flex-col gap-3 rounded-xl border border-border bg-card p-4 lg:flex" aria-hidden="true"><span class="cw-sk h-4 w-24"></span><sc-for list="{{skFields}}" as="zff" hint-placeholder-count="5"><div class="flex items-center gap-2 rounded-lg border border-border p-2.5"><span class="cw-sk size-4"></span><span class="cw-sk h-3 {{zff.w}}"></span><span class="ml-auto cw-sk h-5 w-9 rounded-full"></span></div></sc-for></aside>
           </section>
         </sc-if>
 
         <sc-if value="{{skActivity}}" hint-placeholder-val="{{ false }}">
           <section class="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden px-4 pt-1 pb-6 sm:px-6" role="status" aria-busy="true" aria-label="Chargement de l’activité">
-            <div class="flex items-center gap-2" aria-hidden="true"><span class="wp-sk h-8 w-52 rounded-lg"></span><span class="wp-sk h-8 w-72 rounded-lg"></span></div>
-            <div class="flex flex-col gap-5" aria-hidden="true"><sc-for list="{{skAct}}" as="zac" hint-placeholder-count="8"><div class="flex gap-3"><span class="wp-sk size-8 rounded-full"></span><div class="flex min-w-0 flex-1 flex-col gap-2 pt-1"><span class="wp-sk h-3 {{zac.w}}"></span><span class="wp-sk h-2.5 w-24"></span></div></div></sc-for></div>
+            <div class="flex items-center gap-2" aria-hidden="true"><span class="cw-sk h-8 w-52 rounded-lg"></span><span class="cw-sk h-8 w-72 rounded-lg"></span></div>
+            <div class="flex flex-col gap-5" aria-hidden="true"><sc-for list="{{skAct}}" as="zac" hint-placeholder-count="8"><div class="flex gap-3"><span class="cw-sk size-8 rounded-full"></span><div class="flex min-w-0 flex-1 flex-col gap-2 pt-1"><span class="cw-sk h-3 {{zac.w}}"></span><span class="cw-sk h-2.5 w-24"></span></div></div></sc-for></div>
           </section>
         </sc-if>
 
         <sc-if value="{{skTimesheet}}" hint-placeholder-val="{{ false }}">
           <section class="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden px-4 pt-1 pb-6 sm:px-6" role="status" aria-busy="true" aria-label="Chargement de la feuille de temps">
-            <div class="flex items-center gap-2" aria-hidden="true"><span class="wp-sk size-8 rounded-lg"></span><span class="wp-sk size-8 rounded-lg"></span><span class="wp-sk h-5 w-44"></span><span class="ml-auto wp-sk h-8 w-40 rounded-lg"></span></div>
-            <div class="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-hidden="true"><sc-for list="{{skKpi}}" as="zkp" hint-placeholder-count="4"><div class="flex flex-col gap-2 rounded-xl border border-border bg-card p-4"><span class="wp-sk h-3 w-28"></span><span class="wp-sk h-7 w-20"></span><span class="wp-sk h-2.5 w-24"></span></div></sc-for></div>
+            <div class="flex items-center gap-2" aria-hidden="true"><span class="cw-sk size-8 rounded-lg"></span><span class="cw-sk size-8 rounded-lg"></span><span class="cw-sk h-5 w-44"></span><span class="ml-auto cw-sk h-8 w-40 rounded-lg"></span></div>
+            <div class="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-hidden="true"><sc-for list="{{skKpi}}" as="zkp" hint-placeholder-count="4"><div class="flex flex-col gap-2 rounded-xl border border-border bg-card p-4"><span class="cw-sk h-3 w-28"></span><span class="cw-sk h-7 w-20"></span><span class="cw-sk h-2.5 w-24"></span></div></sc-for></div>
             <div class="overflow-hidden rounded-xl border border-border bg-card" aria-hidden="true">
-              <div class="grid h-9 grid-cols-[minmax(15rem,1fr)_repeat(7,4.75rem)_5.5rem] items-center border-b border-border bg-surface-muted px-3"><span class="wp-sk wp-sk-2 h-2.5 w-20"></span><sc-for list="{{skDays}}" as="zdy" hint-placeholder-count="7"><span class="justify-self-end wp-sk wp-sk-2 h-2.5 w-10"></span></sc-for><span class="justify-self-end wp-sk wp-sk-2 h-2.5 w-10"></span></div>
+              <div class="grid h-9 grid-cols-[minmax(15rem,1fr)_repeat(7,4.75rem)_5.5rem] items-center border-b border-border bg-surface-muted px-3"><span class="cw-sk cw-sk-2 h-2.5 w-20"></span><sc-for list="{{skDays}}" as="zdy" hint-placeholder-count="7"><span class="justify-self-end cw-sk cw-sk-2 h-2.5 w-10"></span></sc-for><span class="justify-self-end cw-sk cw-sk-2 h-2.5 w-10"></span></div>
               <sc-for list="{{skTsRows}}" as="ztsr" hint-placeholder-count="8">
-                <div class="grid h-10 grid-cols-[minmax(15rem,1fr)_repeat(7,4.75rem)_5.5rem] items-center border-b border-border px-3 last:border-b-0"><span class="flex items-center gap-2"><sc-if value="{{ztsr.lead}}" hint-placeholder-val="{{ true }}"><span class="wp-sk size-6 rounded-full"></span></sc-if><span class="wp-sk h-3 {{ztsr.w}}"></span></span><sc-for list="{{ztsr.cells}}" as="ztsc" hint-placeholder-count="7"><span class="flex justify-end"><sc-if value="{{ztsc.on}}" hint-placeholder-val="{{ true }}"><span class="wp-sk h-3 w-9"></span></sc-if></span></sc-for><span class="justify-self-end wp-sk h-3 w-12"></span></div>
+                <div class="grid h-10 grid-cols-[minmax(15rem,1fr)_repeat(7,4.75rem)_5.5rem] items-center border-b border-border px-3 last:border-b-0"><span class="flex items-center gap-2"><sc-if value="{{ztsr.lead}}" hint-placeholder-val="{{ true }}"><span class="cw-sk size-6 rounded-full"></span></sc-if><span class="cw-sk h-3 {{ztsr.w}}"></span></span><sc-for list="{{ztsr.cells}}" as="ztsc" hint-placeholder-count="7"><span class="flex justify-end"><sc-if value="{{ztsc.on}}" hint-placeholder-val="{{ true }}"><span class="cw-sk h-3 w-9"></span></sc-if></span></sc-for><span class="justify-self-end cw-sk h-3 w-12"></span></div>
               </sc-for>
             </div>
           </section>
@@ -1481,13 +1481,13 @@ body{margin:0}
 
         <sc-if value="{{errPageLoad}}" hint-placeholder-val="{{ false }}">
           <div class="flex min-h-0 flex-1 items-center justify-center px-4 py-10 sm:px-6" role="alert">
-            <div class="wp-empty flex min-w-0 flex-col items-center justify-center gap-4 rounded-xl p-6 text-center text-balance">
-              <div class="wp-empty-header flex max-w-sm flex-col items-center gap-2">
-                <span class="wp-empty-media flex size-10 items-center justify-center rounded-lg bg-muted"><span class="ng-icon phosphorWarningCircleBold size-5 text-destructive" aria-hidden="true"></span></span>
-                <h2 class="wp-empty-title text-sm font-medium">{{errT.title}}</h2>
-                <p class="wp-empty-description text-sm/relaxed text-muted-foreground">{{errT.text}}</p>
+            <div class="cw-empty flex min-w-0 flex-col items-center justify-center gap-4 rounded-xl p-6 text-center text-balance">
+              <div class="cw-empty-header flex max-w-sm flex-col items-center gap-2">
+                <span class="cw-empty-media flex size-10 items-center justify-center rounded-lg bg-muted"><span class="ng-icon phosphorWarningCircleBold size-5 text-destructive" aria-hidden="true"></span></span>
+                <h2 class="cw-empty-title text-sm font-medium">{{errT.title}}</h2>
+                <p class="cw-empty-description text-sm/relaxed text-muted-foreground">{{errT.text}}</p>
               </div>
-              <div class="wp-empty-content flex flex-wrap justify-center gap-2">
+              <div class="cw-empty-content flex flex-wrap justify-center gap-2">
                 <button type="button" onClick="{{errT.retry}}" class="relative isolate inline-flex h-8 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-lg px-3 text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background border border-input bg-background hover:bg-accent"><span class="ng-icon phosphorArrowClockwiseBold" aria-hidden="true"></span>Réessayer</button>
                 <button type="button" onClick="{{errT.status}}" class="relative isolate inline-flex h-8 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-lg px-3 text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background hover:bg-accent">État du service</button>
               </div>
@@ -1525,41 +1525,41 @@ body{margin:0}
           <div class="min-h-0 flex-1 overflow-hidden" role="status" aria-busy="true" aria-label="{{skPageLabel}}">
             <div class="mx-auto flex w-full flex-col gap-6 px-4 py-6 sm:px-6 {{skP.wrap}}" aria-hidden="true">
               <div class="flex items-end gap-3">
-                <sc-if value="{{skP.badge}}" hint-placeholder-val="{{ false }}"><span class="wp-sk size-10 rounded-lg"></span></sc-if>
-                <div class="flex min-w-0 flex-1 flex-col gap-2"><span class="wp-sk h-3 w-40"></span><span class="wp-sk h-7 w-64"></span></div>
-                <span class="wp-sk h-8 w-32 rounded-lg"></span>
+                <sc-if value="{{skP.badge}}" hint-placeholder-val="{{ false }}"><span class="cw-sk size-10 rounded-lg"></span></sc-if>
+                <div class="flex min-w-0 flex-1 flex-col gap-2"><span class="cw-sk h-3 w-40"></span><span class="cw-sk h-7 w-64"></span></div>
+                <span class="cw-sk h-8 w-32 rounded-lg"></span>
               </div>
-              <sc-if value="{{skP.tabs}}" hint-placeholder-val="{{ false }}"><div class="flex gap-1"><span class="wp-sk h-8 w-32 rounded-lg"></span><span class="wp-sk h-8 w-28 rounded-lg"></span></div></sc-if>
+              <sc-if value="{{skP.tabs}}" hint-placeholder-val="{{ false }}"><div class="flex gap-1"><span class="cw-sk h-8 w-32 rounded-lg"></span><span class="cw-sk h-8 w-28 rounded-lg"></span></div></sc-if>
               <sc-if value="{{skP.stats}}" hint-placeholder-val="{{ true }}">
-                <div class="grid grid-cols-2 divide-x divide-border rounded-xl border border-border bg-card lg:grid-cols-4"><sc-for list="{{skStats}}" as="zss" hint-placeholder-count="4"><div class="flex flex-col gap-2 p-4"><span class="wp-sk h-3 w-24"></span><span class="wp-sk h-7 w-16"></span><span class="wp-sk h-2.5 w-28"></span></div></sc-for></div>
+                <div class="grid grid-cols-2 divide-x divide-border rounded-xl border border-border bg-card lg:grid-cols-4"><sc-for list="{{skStats}}" as="zss" hint-placeholder-count="4"><div class="flex flex-col gap-2 p-4"><span class="cw-sk h-3 w-24"></span><span class="cw-sk h-7 w-16"></span><span class="cw-sk h-2.5 w-28"></span></div></sc-for></div>
               </sc-if>
               <sc-if value="{{skP.cards}}" hint-placeholder-val="{{ false }}">
-                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"><sc-for list="{{skCards}}" as="zcc" hint-placeholder-count="6"><div class="flex flex-col gap-3 rounded-xl border border-border bg-card p-4"><div class="flex items-center gap-2"><span class="wp-sk size-8 rounded-lg"></span><span class="wp-sk h-3.5 {{zcc.w}}"></span></div><span class="wp-sk h-1.5 w-full rounded-full"></span><span class="wp-sk h-2.5 w-24"></span></div></sc-for></div>
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"><sc-for list="{{skCards}}" as="zcc" hint-placeholder-count="6"><div class="flex flex-col gap-3 rounded-xl border border-border bg-card p-4"><div class="flex items-center gap-2"><span class="cw-sk size-8 rounded-lg"></span><span class="cw-sk h-3.5 {{zcc.w}}"></span></div><span class="cw-sk h-1.5 w-full rounded-full"></span><span class="cw-sk h-2.5 w-24"></span></div></sc-for></div>
               </sc-if>
               <sc-if value="{{skP.split}}" hint-placeholder-val="{{ true }}">
                 <div class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
                   <div class="flex min-w-0 flex-col gap-2">
                     <sc-if value="{{skP.chart}}" hint-placeholder-val="{{ false }}">
-                      <div class="flex flex-col gap-4 rounded-xl border border-border bg-card p-4"><span class="wp-sk h-4 w-40"></span><div class="flex h-48 items-end gap-3 border-b border-border"><sc-for list="{{skBars}}" as="zbb" hint-placeholder-count="8"><span class="wp-sk min-w-0 flex-1 rounded-b-none" style="height: {{zbb.h}}"></span></sc-for></div></div>
+                      <div class="flex flex-col gap-4 rounded-xl border border-border bg-card p-4"><span class="cw-sk h-4 w-40"></span><div class="flex h-48 items-end gap-3 border-b border-border"><sc-for list="{{skBars}}" as="zbb" hint-placeholder-count="8"><span class="cw-sk min-w-0 flex-1 rounded-b-none" style="height: {{zbb.h}}"></span></sc-for></div></div>
                     </sc-if>
                     <sc-if value="{{skP.mainRows}}" hint-placeholder-val="{{ true }}">
-                      <span class="wp-sk h-4 w-36"></span>
+                      <span class="cw-sk h-4 w-36"></span>
                       <ul class="flex flex-col overflow-hidden rounded-lg border border-border">
                         <sc-for list="{{skRows}}" as="zrw" hint-placeholder-count="4">
-                          <li class="flex h-11 items-center gap-3 border-b border-border px-3 last:border-b-0"><span class="wp-sk size-4 rounded-full"></span><span class="wp-sk h-2.5 w-14"></span><span class="wp-sk h-3 {{zrw.w}}"></span><span class="ml-auto wp-sk h-5 w-16 rounded-full"></span><span class="wp-sk size-6 rounded-full"></span></li>
+                          <li class="flex h-11 items-center gap-3 border-b border-border px-3 last:border-b-0"><span class="cw-sk size-4 rounded-full"></span><span class="cw-sk h-2.5 w-14"></span><span class="cw-sk h-3 {{zrw.w}}"></span><span class="ml-auto cw-sk h-5 w-16 rounded-full"></span><span class="cw-sk size-6 rounded-full"></span></li>
                         </sc-for>
                       </ul>
                     </sc-if>
                   </div>
-                  <div class="flex flex-col gap-4"><sc-for list="{{skSide}}" as="zsd" hint-placeholder-count="2"><div class="flex flex-col gap-3 rounded-xl border border-border bg-card p-4"><span class="wp-sk h-4 w-28"></span><sc-for list="{{zsd.rows}}" as="zsdr" hint-placeholder-count="3"><div class="flex items-center gap-2"><span class="wp-sk size-6 rounded-full"></span><span class="wp-sk h-3 {{zsdr.w}}"></span></div></sc-for></div></sc-for></div>
+                  <div class="flex flex-col gap-4"><sc-for list="{{skSide}}" as="zsd" hint-placeholder-count="2"><div class="flex flex-col gap-3 rounded-xl border border-border bg-card p-4"><span class="cw-sk h-4 w-28"></span><sc-for list="{{zsd.rows}}" as="zsdr" hint-placeholder-count="3"><div class="flex items-center gap-2"><span class="cw-sk size-6 rounded-full"></span><span class="cw-sk h-3 {{zsdr.w}}"></span></div></sc-for></div></sc-for></div>
                 </div>
               </sc-if>
               <sc-for list="{{skPGroups}}" as="zpg" hint-placeholder-count="0">
                 <section class="flex flex-col gap-2">
-                  <sc-if value="{{zpg.label}}" hint-placeholder-val="{{ true }}"><span class="wp-sk h-3.5 w-28"></span></sc-if>
+                  <sc-if value="{{zpg.label}}" hint-placeholder-val="{{ true }}"><span class="cw-sk h-3.5 w-28"></span></sc-if>
                   <ul class="flex flex-col overflow-hidden rounded-lg border border-border">
                         <sc-for list="{{zpg.rows}}" as="zpr" hint-placeholder-count="4">
-                          <li class="flex h-11 items-center gap-3 border-b border-border px-3 last:border-b-0"><span class="wp-sk size-4 rounded-full"></span><span class="wp-sk h-2.5 w-14"></span><span class="wp-sk h-3 {{zpr.w}}"></span><span class="ml-auto wp-sk h-5 w-16 rounded-full"></span><span class="wp-sk size-6 rounded-full"></span></li>
+                          <li class="flex h-11 items-center gap-3 border-b border-border px-3 last:border-b-0"><span class="cw-sk size-4 rounded-full"></span><span class="cw-sk h-2.5 w-14"></span><span class="cw-sk h-3 {{zpr.w}}"></span><span class="ml-auto cw-sk h-5 w-16 rounded-full"></span><span class="cw-sk size-6 rounded-full"></span></li>
                         </sc-for>
                       </ul>
                 </section>
@@ -1630,7 +1630,7 @@ body{margin:0}
                 </sc-for>
               </ul>
               <sc-if value="{{goalsEmpty}}" hint-placeholder-val="{{ false }}">
-                <div class="wp-empty flex min-w-0 flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-border p-6 text-center text-balance"><div class="flex max-w-sm flex-col items-center gap-2"><span class="flex size-10 items-center justify-center rounded-lg bg-muted"><span class="ng-icon phosphorTargetBold size-5" aria-hidden="true"></span></span><h2 class="text-sm font-medium">Aucun objectif ce trimestre</h2><p class="text-sm/relaxed text-muted-foreground">Fixez un cap à l’équipe et mesurez-le avec des résultats clés.</p></div><button type="button" onClick="{{goalNew}}" class="relative isolate inline-flex h-8 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-lg px-3 text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background border border-input bg-background hover:bg-accent">Créer un objectif</button></div>
+                <div class="cw-empty flex min-w-0 flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-border p-6 text-center text-balance"><div class="flex max-w-sm flex-col items-center gap-2"><span class="flex size-10 items-center justify-center rounded-lg bg-muted"><span class="ng-icon phosphorTargetBold size-5" aria-hidden="true"></span></span><h2 class="text-sm font-medium">Aucun objectif ce trimestre</h2><p class="text-sm/relaxed text-muted-foreground">Fixez un cap à l’équipe et mesurez-le avec des résultats clés.</p></div><button type="button" onClick="{{goalNew}}" class="relative isolate inline-flex h-8 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-lg px-3 text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background border border-input bg-background hover:bg-accent">Créer un objectif</button></div>
               </sc-if>
             </div>
           </div>
@@ -2612,13 +2612,13 @@ body{margin:0}
             </sc-if>
             <sc-if value="{{errDetail}}" hint-placeholder-val="{{ false }}">
               <div class="flex min-h-0 flex-1 items-center justify-center px-4 py-8" role="alert">
-                <div class="wp-empty flex min-w-0 flex-col items-center justify-center gap-4 rounded-xl p-6 text-center text-balance">
-              <div class="wp-empty-header flex max-w-sm flex-col items-center gap-2">
-                <span class="wp-empty-media flex size-10 items-center justify-center rounded-lg bg-muted"><span class="ng-icon phosphorWarningCircleBold size-5 text-destructive" aria-hidden="true"></span></span>
-                <h2 class="wp-empty-title text-sm font-medium">Impossible de charger la tâche</h2>
-                <p class="wp-empty-description text-sm/relaxed text-muted-foreground">Le détail n’a pas pu être récupéré. Le titre et le statut affichés sont ceux de la liste.</p>
+                <div class="cw-empty flex min-w-0 flex-col items-center justify-center gap-4 rounded-xl p-6 text-center text-balance">
+              <div class="cw-empty-header flex max-w-sm flex-col items-center gap-2">
+                <span class="cw-empty-media flex size-10 items-center justify-center rounded-lg bg-muted"><span class="ng-icon phosphorWarningCircleBold size-5 text-destructive" aria-hidden="true"></span></span>
+                <h2 class="cw-empty-title text-sm font-medium">Impossible de charger la tâche</h2>
+                <p class="cw-empty-description text-sm/relaxed text-muted-foreground">Le détail n’a pas pu être récupéré. Le titre et le statut affichés sont ceux de la liste.</p>
               </div>
-              <div class="wp-empty-content flex flex-wrap justify-center gap-2">
+              <div class="cw-empty-content flex flex-wrap justify-center gap-2">
                 <button type="button" onClick="{{errD.retry}}" class="relative isolate inline-flex h-8 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-lg px-3 text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background border border-input bg-background hover:bg-accent"><span class="ng-icon phosphorArrowClockwiseBold" aria-hidden="true"></span>Réessayer</button>
                 
               </div>
@@ -2629,12 +2629,12 @@ body{margin:0}
             <sc-if value="{{skDetail}}" hint-placeholder-val="{{ false }}">
               <div class="flex min-h-0 flex-1 flex-col md:flex-row" role="status" aria-busy="true" aria-label="Chargement de la tâche">
                 <div class="flex min-w-0 flex-1 flex-col gap-6 px-4 py-4" aria-hidden="true">
-                  <div class="flex gap-5 border-b border-border pb-3"><span class="wp-sk h-3 w-14"></span><span class="wp-sk h-3 w-20"></span><span class="wp-sk h-3 w-24"></span><span class="wp-sk h-3 w-16"></span></div>
-                  <div class="flex flex-col gap-2.5"><sc-for list="{{skDesc}}" as="zdl" hint-placeholder-count="6"><span class="wp-sk h-3 {{zdl.w}}"></span></sc-for></div>
-                  <div class="flex flex-col gap-2.5"><span class="wp-sk h-3.5 w-28"></span><sc-for list="{{skCheck}}" as="zdk" hint-placeholder-count="3"><div class="flex items-center gap-2"><span class="wp-sk size-4 rounded-[4px]"></span><span class="wp-sk h-3 {{zdk.w}}"></span></div></sc-for></div>
+                  <div class="flex gap-5 border-b border-border pb-3"><span class="cw-sk h-3 w-14"></span><span class="cw-sk h-3 w-20"></span><span class="cw-sk h-3 w-24"></span><span class="cw-sk h-3 w-16"></span></div>
+                  <div class="flex flex-col gap-2.5"><sc-for list="{{skDesc}}" as="zdl" hint-placeholder-count="6"><span class="cw-sk h-3 {{zdl.w}}"></span></sc-for></div>
+                  <div class="flex flex-col gap-2.5"><span class="cw-sk h-3.5 w-28"></span><sc-for list="{{skCheck}}" as="zdk" hint-placeholder-count="3"><div class="flex items-center gap-2"><span class="cw-sk size-4 rounded-[4px]"></span><span class="cw-sk h-3 {{zdk.w}}"></span></div></sc-for></div>
                 </div>
                 <aside class="flex shrink-0 flex-col gap-1 border-t border-border bg-popover p-3 md:w-96 md:border-t-0 md:border-l" aria-hidden="true">
-                  <sc-for list="{{skProps}}" as="zdp" hint-placeholder-count="11"><div class="flex h-9 items-center gap-3 px-1"><span class="wp-sk h-3 w-24"></span><span class="wp-sk h-6 rounded-md {{zdp.w}}"></span></div></sc-for>
+                  <sc-for list="{{skProps}}" as="zdp" hint-placeholder-count="11"><div class="flex h-9 items-center gap-3 px-1"><span class="cw-sk h-3 w-24"></span><span class="cw-sk h-6 rounded-md {{zdp.w}}"></span></div></sc-for>
                 </aside>
               </div>
             </sc-if>
@@ -2675,7 +2675,7 @@ body{margin:0}
   <sc-if value="{{onbOpen}}" hint-placeholder-val="{{ false }}">
     <div class="fixed inset-0 z-[55] flex items-start justify-center overflow-y-auto bg-canvas px-4 py-8 sm:items-center sm:py-10" role="dialog" aria-modal="true" aria-labelledby="onb-title">
       <div class="flex w-full max-w-xl flex-col gap-6">
-        <div class="flex items-center gap-2"><svg class="size-6 text-primary" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.4c-3.5-3.3-7-7-7-11.2a7 7 0 0 1 14 0c0 1.8-.6 3.5-1.6 5.1" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="12" cy="10.2" r="3" fill="currentColor"></circle></svg><span class="text-base font-bold tracking-[-0.035em]">Waypoint</span><button type="button" onClick="{{onbSkip}}" class="ml-auto rounded-sm text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Configurer plus tard</button></div>
+        <div class="flex items-center gap-2"><svg class="size-6 text-primary" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.4c-3.5-3.3-7-7-7-11.2a7 7 0 0 1 14 0c0 1.8-.6 3.5-1.6 5.1" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="12" cy="10.2" r="3" fill="currentColor"></circle></svg><span class="text-base font-bold tracking-[-0.035em]">Cadenway</span><button type="button" onClick="{{onbSkip}}" class="ml-auto rounded-sm text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Configurer plus tard</button></div>
         <ol class="grid grid-cols-4 gap-2" aria-label="Étapes">
           <sc-for list="{{onbSteps}}" as="os" hint-placeholder-count="4"><li class="flex flex-col gap-1.5" aria-current="{{os.current}}"><span class="h-1 rounded-full transition-colors {{os.cls}}"></span><span class="text-xs font-medium {{os.textCls}}">{{os.label}}</span></li></sc-for>
         </ol>
@@ -3236,7 +3236,7 @@ body{margin:0}
         </div>
         <div class="flex flex-col gap-1.5">
           <label for="cancel-note" class="text-sm font-medium">Précision <span class="font-normal text-muted-foreground">(facultatif)</span></label>
-          <textarea id="cancel-note" rows="2" value="{{cancelNote}}" onInput="{{onCancelNote}}" placeholder="Par exemple : remplacée par WAY-482" class="field-sizing-content max-h-32 min-h-14 w-full resize-none rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20"></textarea>
+          <textarea id="cancel-note" rows="2" value="{{cancelNote}}" onInput="{{onCancelNote}}" placeholder="Par exemple : remplacée par CAD-482" class="field-sizing-content max-h-32 min-h-14 w-full resize-none rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20"></textarea>
         </div>
         <div class="flex justify-end gap-2">
           <button type="button" onClick="{{closeDlg}}" class="relative isolate inline-flex h-8 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-lg border border-input px-2.5 text-sm font-medium transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">Garder la tâche</button>
@@ -3572,11 +3572,11 @@ const parseDur = (txt) => {
 };
 const fmtMin = (m) => { const h = Math.floor(m / 60); const r = m % 60; return h ? h + ' h' + (r ? ' ' + String(r).padStart(2, '0') : '') : r + ' min'; };
 const TIME_LOG = {
-  'WAY-482': [{ who: 'CM', min: 150, at: 'hier, 14:10', day: '2026-11-07', note: 'Maquette et détection du domaine' }, { who: 'IR', min: 95, at: 'hier, 17:30', day: '2026-11-07', note: 'Boutons OAuth' }, { who: 'CM', min: 45, at: 'aujourd’hui, 9:05', day: '2026-11-08', note: '' }],
-  'WAY-479': [{ who: 'HD', min: 80, at: 'aujourd’hui, 8:40', day: '2026-11-08', note: 'Compteur glissant' }, { who: 'HD', min: 120, at: 'mardi, 10:15', day: '2026-11-03', note: 'Étude' }],
-  'WAY-475': [{ who: 'LP', min: 170, at: 'jeudi, 11:00', day: '2026-11-05', note: '' }, { who: 'LP', min: 60, at: 'vendredi, 15:20', day: '2026-11-06', note: 'Champs personnalisés' }],
-  'WAY-483': [{ who: 'HD', min: 90, at: 'mercredi, 14:00', day: '2026-11-04', note: '' }],
-  'WAY-488': [{ who: 'CM', min: 75, at: 'lundi, 16:30', day: '2026-11-02', note: 'Maquette des jauges' }],
+  'CAD-482': [{ who: 'CM', min: 150, at: 'hier, 14:10', day: '2026-11-07', note: 'Maquette et détection du domaine' }, { who: 'IR', min: 95, at: 'hier, 17:30', day: '2026-11-07', note: 'Boutons OAuth' }, { who: 'CM', min: 45, at: 'aujourd’hui, 9:05', day: '2026-11-08', note: '' }],
+  'CAD-479': [{ who: 'HD', min: 80, at: 'aujourd’hui, 8:40', day: '2026-11-08', note: 'Compteur glissant' }, { who: 'HD', min: 120, at: 'mardi, 10:15', day: '2026-11-03', note: 'Étude' }],
+  'CAD-475': [{ who: 'LP', min: 170, at: 'jeudi, 11:00', day: '2026-11-05', note: '' }, { who: 'LP', min: 60, at: 'vendredi, 15:20', day: '2026-11-06', note: 'Champs personnalisés' }],
+  'CAD-483': [{ who: 'HD', min: 90, at: 'mercredi, 14:00', day: '2026-11-04', note: '' }],
+  'CAD-488': [{ who: 'CM', min: 75, at: 'lundi, 16:30', day: '2026-11-02', note: 'Maquette des jauges' }],
 };
 const timeOf = (t) => (t && (t.time || TIME_LOG[t.id])) || [];
 const spentOf = (t) => timeOf(t).reduce((a, e) => a + e.min, 0);
@@ -3589,8 +3589,8 @@ const CANCEL_REASONS = [
 const CANCEL_MAP = Object.fromEntries(CANCEL_REASONS.map((r) => [r.key, r]));
 // Corbeille : éléments supprimés conservés 30 jours
 const TRASH_INIT = [
-  { task: { id: 'WAY-452', name: 'Ancien écran de connexion', status: 'cancelled', people: ['IR'], date: null, priority: 'basse', labels: ['Front'], estimate: '', files: [], desc: 'Remplacé par WAY-482.', subtasks: [], comments: [], list: 'sprint14' }, at: '2026-11-06', by: 'CM' },
-  { task: { id: 'WAY-447', name: 'Export PDF des tableaux de bord (prototype)', status: 'todo', people: ['LP'], date: null, priority: 'moyenne', labels: ['Back'], estimate: '4 h', files: [], desc: '', subtasks: [], comments: [], list: 'backlog' }, at: '2026-10-27', by: 'HD' },
+  { task: { id: 'CAD-452', name: 'Ancien écran de connexion', status: 'cancelled', people: ['IR'], date: null, priority: 'basse', labels: ['Front'], estimate: '', files: [], desc: 'Remplacé par CAD-482.', subtasks: [], comments: [], list: 'sprint14' }, at: '2026-11-06', by: 'CM' },
+  { task: { id: 'CAD-447', name: 'Export PDF des tableaux de bord (prototype)', status: 'todo', people: ['LP'], date: null, priority: 'moyenne', labels: ['Back'], estimate: '4 h', files: [], desc: '', subtasks: [], comments: [], list: 'backlog' }, at: '2026-10-27', by: 'HD' },
 ];
 // Répétition : à la clôture, la prochaine occurrence est créée (comme ClickUp)
 const RECURS = [
@@ -3662,12 +3662,12 @@ const dueInfo = (iso, status) => {
   return { due: short, long, tone, late, bucket };
 };
 const SPACE_DEFS = [
-  { key: 'produit', initial: 'P', name: 'Produit', prefix: 'WAY', icon: 'rocket', color: 'violet', desc: 'Développement de Waypoint : sprints, bugs et feuille de route.' },
+  { key: 'produit', initial: 'P', name: 'Produit', prefix: 'CAD', icon: 'rocket', color: 'violet', desc: 'Développement de Cadenway : sprints, bugs et feuille de route.' },
   { key: 'design', initial: 'D', name: 'Design', prefix: 'DES', icon: 'paint', color: 'orange', desc: 'Système de design et recherche utilisateur.' },
   { key: 'marketing', initial: 'M', name: 'Marketing', prefix: 'MKT', icon: 'megaphone', color: 'jaune', desc: '' },
   { key: 'ops', initial: 'O', name: 'Opérations', prefix: 'OPS', icon: 'gear', color: 'vert', desc: '' },
 ];
-// Apparence des espaces et des listes : choix limités (icône Phosphor + couleur de la palette Waypoint)
+// Apparence des espaces et des listes : choix limités (icône Phosphor + couleur de la palette Cadenway)
 const LOOK_COLORS = [
   { key: 'gris', label: 'Gris', badge: 'border border-border bg-background text-foreground', tone: 'text-muted-foreground', swatch: 'bg-ink-muted' },
   { key: 'violet', label: 'Améthyste', badge: 'border border-border bg-background text-amethyste', tone: 'text-amethyste', swatch: 'bg-amethyste' },
@@ -3718,9 +3718,9 @@ const LIST_DEFS = [
   { id: 'infra', space: 'ops', name: 'Infrastructure' },
 ];
 const ORGS = [
-  { key: 'AN', name: 'Atelier Nord', meta: 'Propriétaire · plan Équipe', host: 'app.waypoint.example/atelier-nord' },
-  { key: 'CL', name: 'Coopérative Lumen', meta: 'Membre · plan Entreprise', host: 'app.waypoint.example/lumen' },
-  { key: 'SP', name: 'Studio Pivot', meta: 'Membre · plan Gratuit', host: 'app.waypoint.example/studio-pivot' },
+  { key: 'AN', name: 'Atelier Nord', meta: 'Propriétaire · plan Équipe', host: 'app.cadenway.example/atelier-nord' },
+  { key: 'CL', name: 'Coopérative Lumen', meta: 'Membre · plan Entreprise', host: 'app.cadenway.example/lumen' },
+  { key: 'SP', name: 'Studio Pivot', meta: 'Membre · plan Gratuit', host: 'app.cadenway.example/studio-pivot' },
 ];
 const VIEW_DEFS = [
   { key: 'list', label: 'Liste', bold: 'phosphorListBulletsBold', fill: 'phosphorListBulletsFill' },
@@ -3779,8 +3779,8 @@ const TBL_COLS = [
   { key: 'client', label: 'Client', w: 172, sort: 'client', custom: true },
 ];
 const TBL_TEXT = ['name', 'estimate', 'points', 'client'];
-const SEED_POINTS = { 'WAY-482': 5, 'WAY-479': 3, 'WAY-475': 2, 'WAY-488': 5, 'WAY-490': 2, 'WAY-491': 3, 'WAY-493': 3, 'WAY-494': 1, 'WAY-470': 3, 'WAY-466': 3, 'WAY-468': 2, 'WAY-471': 2, 'WAY-473': 5, 'WAY-457': 5, 'WAY-497': 1, 'WAY-498': 2, 'WAY-499': 2 };
-const SEED_CLIENT = { 'WAY-482': 'Coopérative Lumen', 'WAY-479': 'Interne', 'WAY-475': 'Studio Pivot', 'WAY-488': 'Atelier Nord', 'WAY-470': 'Coopérative Lumen', 'WAY-490': 'Interne', 'WAY-493': 'Studio Pivot', 'WAY-499': 'Coopérative Lumen', 'WAY-497': 'Studio Pivot' };
+const SEED_POINTS = { 'CAD-482': 5, 'CAD-479': 3, 'CAD-475': 2, 'CAD-488': 5, 'CAD-490': 2, 'CAD-491': 3, 'CAD-493': 3, 'CAD-494': 1, 'CAD-470': 3, 'CAD-466': 3, 'CAD-468': 2, 'CAD-471': 2, 'CAD-473': 5, 'CAD-457': 5, 'CAD-497': 1, 'CAD-498': 2, 'CAD-499': 2 };
+const SEED_CLIENT = { 'CAD-482': 'Coopérative Lumen', 'CAD-479': 'Interne', 'CAD-475': 'Studio Pivot', 'CAD-488': 'Atelier Nord', 'CAD-470': 'Coopérative Lumen', 'CAD-490': 'Interne', 'CAD-493': 'Studio Pivot', 'CAD-499': 'Coopérative Lumen', 'CAD-497': 'Studio Pivot' };
 const ptsOf = (t) => (t.points !== undefined ? t.points : (SEED_POINTS[t.id] ?? null));
 const cliOf = (t) => (t.client !== undefined ? t.client || '' : SEED_CLIENT[t.id] || '');
 // Formulaire de demande : champs proposés (le titre est toujours demandé)
@@ -3799,24 +3799,24 @@ const ACT_KINDS = [
   ['comment', 'Commentaires', 'phosphorChatCircleBold'], ['priority', 'Priorités', 'phosphorCellSignalHighBold'], ['due', 'Échéances', 'phosphorCalendarBlankBold'],
 ];
 const ACT_SEED = [
-  { id: 's1', day: '2026-11-08', time: '9:12', who: 'HD', kind: 'comment', task: 'WAY-482', list: 'sprint14', text: 'Le verrouillage après 5 essais est prêt côté API, branche auth/lockout.' },
-  { id: 's2', day: '2026-11-08', time: '8:40', who: 'HD', kind: 'status', task: 'WAY-479', list: 'sprint14', from: 'todo', to: 'progress' },
-  { id: 's3', day: '2026-11-07', time: '17:05', who: 'CM', kind: 'comment', task: 'WAY-482', list: 'sprint14', text: 'Oui, il concerne les comptes d’entreprise : il mérite sa ligne.' },
-  { id: 's4', day: '2026-11-07', time: '16:30', who: 'IR', kind: 'status', task: 'WAY-473', list: 'sprint14', from: 'review', to: 'done' },
-  { id: 's5', day: '2026-11-07', time: '11:02', who: 'CM', kind: 'assign', task: 'WAY-490', list: 'sprint14', to: 'HD', add: true },
-  { id: 's6', day: '2026-11-07', time: '10:15', who: 'LP', kind: 'status', task: 'WAY-475', list: 'sprint14', from: 'progress', to: 'review' },
-  { id: 's7', day: '2026-11-06', time: '15:48', who: 'LP', kind: 'status', task: 'WAY-471', list: 'sprint14', from: 'review', to: 'done' },
-  { id: 's8', day: '2026-11-06', time: '14:20', who: 'CM', kind: 'priority', task: 'WAY-479', list: 'sprint14', from: 'haute', to: 'urgente' },
-  { id: 's9', day: '2026-11-06', time: '9:30', who: 'CM', kind: 'due', task: 'WAY-488', list: 'sprint14', from: '2026-11-16', to: '2026-11-18' },
-  { id: 's10', day: '2026-11-05', time: '14:02', who: 'CM', kind: 'comment', task: 'WAY-470', list: 'sprint14', text: 'Demande envoyée au propriétaire du compte, réponse attendue lundi.' },
-  { id: 's11', day: '2026-11-05', time: '11:20', who: 'HD', kind: 'status', task: 'WAY-470', list: 'sprint14', from: 'progress', to: 'blocked' },
-  { id: 's12', day: '2026-11-04', time: '16:10', who: 'CM', kind: 'create', task: 'WAY-494', list: 'sprint14' },
-  { id: 's13', day: '2026-11-04', time: '10:05', who: 'IR', kind: 'assign', task: 'WAY-491', list: 'sprint14', to: 'IR', add: true },
-  { id: 's14', day: '2026-11-03', time: '17:45', who: 'HD', kind: 'status', task: 'WAY-466', list: 'sprint14', from: 'review', to: 'done' },
-  { id: 's15', day: '2026-11-03', time: '9:00', who: 'CM', kind: 'create', task: 'WAY-493', list: 'sprint14' },
-  { id: 's16', day: '2026-11-08', time: '10:30', who: 'HD', kind: 'create', task: 'WAY-499', list: 'bugs' },
-  { id: 's17', day: '2026-11-07', time: '15:10', who: 'LP', kind: 'status', task: 'WAY-497', list: 'bugs', from: 'todo', to: 'progress' },
-  { id: 's18', day: '2026-11-06', time: '11:45', who: 'CM', kind: 'assign', task: 'WAY-498', list: 'bugs', to: 'IR', add: true },
+  { id: 's1', day: '2026-11-08', time: '9:12', who: 'HD', kind: 'comment', task: 'CAD-482', list: 'sprint14', text: 'Le verrouillage après 5 essais est prêt côté API, branche auth/lockout.' },
+  { id: 's2', day: '2026-11-08', time: '8:40', who: 'HD', kind: 'status', task: 'CAD-479', list: 'sprint14', from: 'todo', to: 'progress' },
+  { id: 's3', day: '2026-11-07', time: '17:05', who: 'CM', kind: 'comment', task: 'CAD-482', list: 'sprint14', text: 'Oui, il concerne les comptes d’entreprise : il mérite sa ligne.' },
+  { id: 's4', day: '2026-11-07', time: '16:30', who: 'IR', kind: 'status', task: 'CAD-473', list: 'sprint14', from: 'review', to: 'done' },
+  { id: 's5', day: '2026-11-07', time: '11:02', who: 'CM', kind: 'assign', task: 'CAD-490', list: 'sprint14', to: 'HD', add: true },
+  { id: 's6', day: '2026-11-07', time: '10:15', who: 'LP', kind: 'status', task: 'CAD-475', list: 'sprint14', from: 'progress', to: 'review' },
+  { id: 's7', day: '2026-11-06', time: '15:48', who: 'LP', kind: 'status', task: 'CAD-471', list: 'sprint14', from: 'review', to: 'done' },
+  { id: 's8', day: '2026-11-06', time: '14:20', who: 'CM', kind: 'priority', task: 'CAD-479', list: 'sprint14', from: 'haute', to: 'urgente' },
+  { id: 's9', day: '2026-11-06', time: '9:30', who: 'CM', kind: 'due', task: 'CAD-488', list: 'sprint14', from: '2026-11-16', to: '2026-11-18' },
+  { id: 's10', day: '2026-11-05', time: '14:02', who: 'CM', kind: 'comment', task: 'CAD-470', list: 'sprint14', text: 'Demande envoyée au propriétaire du compte, réponse attendue lundi.' },
+  { id: 's11', day: '2026-11-05', time: '11:20', who: 'HD', kind: 'status', task: 'CAD-470', list: 'sprint14', from: 'progress', to: 'blocked' },
+  { id: 's12', day: '2026-11-04', time: '16:10', who: 'CM', kind: 'create', task: 'CAD-494', list: 'sprint14' },
+  { id: 's13', day: '2026-11-04', time: '10:05', who: 'IR', kind: 'assign', task: 'CAD-491', list: 'sprint14', to: 'IR', add: true },
+  { id: 's14', day: '2026-11-03', time: '17:45', who: 'HD', kind: 'status', task: 'CAD-466', list: 'sprint14', from: 'review', to: 'done' },
+  { id: 's15', day: '2026-11-03', time: '9:00', who: 'CM', kind: 'create', task: 'CAD-493', list: 'sprint14' },
+  { id: 's16', day: '2026-11-08', time: '10:30', who: 'HD', kind: 'create', task: 'CAD-499', list: 'bugs' },
+  { id: 's17', day: '2026-11-07', time: '15:10', who: 'LP', kind: 'status', task: 'CAD-497', list: 'bugs', from: 'todo', to: 'progress' },
+  { id: 's18', day: '2026-11-06', time: '11:45', who: 'CM', kind: 'assign', task: 'CAD-498', list: 'bugs', to: 'IR', add: true },
 ];
 // Vues enregistrées : type de vue + filtres + tri + groupement + colonnes masquées, par liste
 const SAVED_INIT = [
@@ -3824,35 +3824,35 @@ const SAVED_INIT = [
 ];
 // Gantt : dates de début du sprint 14 et liens « bloque → est bloquée par »
 const GANTT_START = {
-  'WAY-466': '2026-11-02', 'WAY-468': '2026-11-03', 'WAY-471': '2026-11-04', 'WAY-473': '2026-11-05', 'WAY-470': '2026-11-03',
-  'WAY-479': '2026-11-05', 'WAY-482': '2026-11-06', 'WAY-475': '2026-11-10', 'WAY-488': '2026-11-13', 'WAY-490': '2026-11-16',
-  'WAY-491': '2026-11-17', 'WAY-493': '2026-11-18', 'WAY-494': '2026-11-24', 'WAY-457': '2026-10-28',
+  'CAD-466': '2026-11-02', 'CAD-468': '2026-11-03', 'CAD-471': '2026-11-04', 'CAD-473': '2026-11-05', 'CAD-470': '2026-11-03',
+  'CAD-479': '2026-11-05', 'CAD-482': '2026-11-06', 'CAD-475': '2026-11-10', 'CAD-488': '2026-11-13', 'CAD-490': '2026-11-16',
+  'CAD-491': '2026-11-17', 'CAD-493': '2026-11-18', 'CAD-494': '2026-11-24', 'CAD-457': '2026-10-28',
 };
-const GANTT_DEPS = [['WAY-482', 'WAY-490'], ['WAY-479', 'WAY-493'], ['WAY-475', 'WAY-494'], ['WAY-488', 'WAY-494'], ['WAY-466', 'WAY-479']];
+const GANTT_DEPS = [['CAD-482', 'CAD-490'], ['CAD-479', 'CAD-493'], ['CAD-475', 'CAD-494'], ['CAD-488', 'CAD-494'], ['CAD-466', 'CAD-479']];
 const PAGE_KEYS = ['home', 'mine', 'spaces', 'dash', 'goals', 'docs', 'trash', 'archives'];
 const ALL_LABELS = ['Auth', 'Front', 'Back', 'Sécurité', 'Design', 'Docs', 'Facturation', 'Bug', 'Contenu', 'Recherche'];
 const DOCS_INIT = [
   { id: 'doc-1', title: 'Notes de version 3.1', space: 'produit', author: 'IR', updated: 'Hier, 17:20', body: '# Nouveautés\nLa version 3.1 apporte les limites de tâches en cours sur le tableau et l’export CSV filtré.\n- Vue Tableau : limite configurable par colonne\n- Export CSV qui respecte les filtres et le tri\n- Thème sombre revu, contrastes vérifiés\n# Corrections\n- Le tri par échéance place les tâches sans date en fin de liste\n- Les invitations expirées peuvent être renvoyées\n# Mise à jour\nLes nouveautés arrivent automatiquement, sans interruption de service.' },
-  { id: 'doc-2', title: 'Guide d’intégration de l’API', space: 'ops', author: 'HD', updated: '4 nov.', body: '# Prérequis\n- Un jeton d’API personnel (Profil › Jetons)\n- Les droits Membre sur l’espace visé\n# Premiers appels\nToutes les requêtes passent par https://api.waypoint.example/v1 avec l’en-tête Authorization: Bearer <jeton>.\n# Webhooks\nAbonnez une adresse aux événements task.created et task.updated ; chaque envoi est signé.\n# Limites\n600 requêtes par minute et par jeton ; au-delà, l’API répond 429 avec l’en-tête Retry-After.' },
+  { id: 'doc-2', title: 'Guide d’intégration de l’API', space: 'ops', author: 'HD', updated: '4 nov.', body: '# Prérequis\n- Un jeton d’API personnel (Profil › Jetons)\n- Les droits Membre sur l’espace visé\n# Premiers appels\nToutes les requêtes passent par https://api.cadenway.example/v1 avec l’en-tête Authorization: Bearer <jeton>.\n# Webhooks\nAbonnez une adresse aux événements task.created et task.updated ; chaque envoi est signé.\n# Limites\n600 requêtes par minute et par jeton ; au-delà, l’API répond 429 avec l’en-tête Retry-After.' },
   { id: 'doc-3', title: 'Spécification : quotas d’organisation', space: 'produit', author: 'CM', updated: 'Aujourd’hui, 9:40', body: '# Objectif\nAfficher aux propriétaires la consommation de chaque quota et les prévenir avant blocage.\n# Quotas suivis\n- Sièges\n- Stockage des pièces jointes\n- Appels d’API par mois\n- Exécutions d’automatisations par mois\n# Alertes\nUne alerte part à 80 % et une bannière s’affiche à tous les membres à 95 %. Au-delà de 100 %, le comportement dépend du réglage de dépassement.' },
   { id: 'doc-4', title: 'Compte rendu — revue du sprint 13', space: 'produit', author: 'LP', updated: '31 oct.', body: '# Livré\n- Sélecteur d’organisation après connexion\n- Vérification de l’adresse par code\n# Reporté\n- Webhook de facturation en double, bloqué par l’accès au tableau de bord du prestataire\n# Décisions\nLe sprint 14 se concentre sur l’authentification et les quotas.' },
 ];
 const TASK_META = {
-  'WAY-482': '2026-11-12', 'WAY-479': '2026-11-08', 'WAY-475': '2026-11-14', 'WAY-488': '2026-11-18', 'WAY-490': '2026-11-20',
-  'WAY-491': '2026-11-21', 'WAY-493': '2026-11-22', 'WAY-494': '2026-11-25', 'WAY-470': '2026-11-05', 'WAY-466': '2026-11-03',
-  'WAY-468': '2026-11-04', 'WAY-471': '2026-11-06', 'WAY-473': '2026-11-07', 'WAY-461': null, 'WAY-457': '2026-10-30',
+  'CAD-482': '2026-11-12', 'CAD-479': '2026-11-08', 'CAD-475': '2026-11-14', 'CAD-488': '2026-11-18', 'CAD-490': '2026-11-20',
+  'CAD-491': '2026-11-21', 'CAD-493': '2026-11-22', 'CAD-494': '2026-11-25', 'CAD-470': '2026-11-05', 'CAD-466': '2026-11-03',
+  'CAD-468': '2026-11-04', 'CAD-471': '2026-11-06', 'CAD-473': '2026-11-07', 'CAD-461': null, 'CAD-457': '2026-10-30',
 };
 const mk = (id, list, name, status, people, date, priority, labels, estimate, desc, subtasks) => ({ id, list, name, status, people, date, priority, labels, estimate, desc, subtasks: subtasks || [], comments: [] });
 const EXTRA_TASKS = [
-  mk('WAY-440', 'backlog', 'Import CSV avec correspondance des champs', 'backlog', [], null, 'moyenne', ['Back'], '8 h', 'Associer les colonnes d’un fichier CSV aux champs de Waypoint avant l’import, avec un aperçu des 10 premières lignes.'),
-  mk('WAY-445', 'backlog', 'Champs personnalisés de type formule', 'backlog', [], null, 'basse', ['Back', 'Front'], '13 h', 'Calculer un champ à partir d’autres champs numériques (estimation, temps passé).'),
-  mk('WAY-450', 'backlog', 'Mode hors ligne de l’application mobile', 'todo', ['LP'], null, 'basse', ['Front'], '20 h', 'Consulter et cocher ses tâches sans réseau, synchroniser au retour de la connexion.'),
-  mk('WAY-497', 'bugs', 'Le tri par échéance ignore les tâches sans date', 'progress', ['LP'], '2026-11-10', 'haute', ['Bug', 'Front'], '2 h', 'Les tâches sans échéance doivent aller en fin de liste quel que soit le sens du tri.'),
-  mk('WAY-498', 'bugs', 'Le tableau saute pendant le glisser-déposer sous Safari', 'todo', ['IR'], '2026-11-13', 'moyenne', ['Bug', 'Front'], '3 h', 'Reproduit sur Safari 18 : la colonne cible se redimensionne pendant le survol.'),
-  mk('WAY-499', 'bugs', 'Notifications en double après reconnexion', 'todo', ['HD'], '2026-11-09', 'urgente', ['Bug', 'Back'], '3 h', 'Le client se réabonne au flux sans fermer l’ancienne connexion.'),
-  mk('WAY-420', 'roadmap', 'SSO SAML pour le plan Équipe', 'todo', ['CM', 'HD'], '2026-12-15', 'haute', ['Auth', 'Sécurité'], '40 h', 'Ouvrir le SSO SAML au plan Équipe avec un fournisseur d’identité par organisation.'),
-  mk('WAY-421', 'roadmap', 'Notifications push sur mobile', 'backlog', [], '2027-01-20', 'moyenne', ['Front'], '30 h', 'Notifications des mentions et assignations sur iOS et Android.'),
-  mk('WAY-422', 'roadmap', 'Vue Gantt avec dépendances', 'progress', ['IR', 'LP'], '2026-12-04', 'haute', ['Front'], '60 h', 'Planning avec barres de durée, dépendances bloquantes et jalons.'),
+  mk('CAD-440', 'backlog', 'Import CSV avec correspondance des champs', 'backlog', [], null, 'moyenne', ['Back'], '8 h', 'Associer les colonnes d’un fichier CSV aux champs de Cadenway avant l’import, avec un aperçu des 10 premières lignes.'),
+  mk('CAD-445', 'backlog', 'Champs personnalisés de type formule', 'backlog', [], null, 'basse', ['Back', 'Front'], '13 h', 'Calculer un champ à partir d’autres champs numériques (estimation, temps passé).'),
+  mk('CAD-450', 'backlog', 'Mode hors ligne de l’application mobile', 'todo', ['LP'], null, 'basse', ['Front'], '20 h', 'Consulter et cocher ses tâches sans réseau, synchroniser au retour de la connexion.'),
+  mk('CAD-497', 'bugs', 'Le tri par échéance ignore les tâches sans date', 'progress', ['LP'], '2026-11-10', 'haute', ['Bug', 'Front'], '2 h', 'Les tâches sans échéance doivent aller en fin de liste quel que soit le sens du tri.'),
+  mk('CAD-498', 'bugs', 'Le tableau saute pendant le glisser-déposer sous Safari', 'todo', ['IR'], '2026-11-13', 'moyenne', ['Bug', 'Front'], '3 h', 'Reproduit sur Safari 18 : la colonne cible se redimensionne pendant le survol.'),
+  mk('CAD-499', 'bugs', 'Notifications en double après reconnexion', 'todo', ['HD'], '2026-11-09', 'urgente', ['Bug', 'Back'], '3 h', 'Le client se réabonne au flux sans fermer l’ancienne connexion.'),
+  mk('CAD-420', 'roadmap', 'SSO SAML pour le plan Équipe', 'todo', ['CM', 'HD'], '2026-12-15', 'haute', ['Auth', 'Sécurité'], '40 h', 'Ouvrir le SSO SAML au plan Équipe avec un fournisseur d’identité par organisation.'),
+  mk('CAD-421', 'roadmap', 'Notifications push sur mobile', 'backlog', [], '2027-01-20', 'moyenne', ['Front'], '30 h', 'Notifications des mentions et assignations sur iOS et Android.'),
+  mk('CAD-422', 'roadmap', 'Vue Gantt avec dépendances', 'progress', ['IR', 'LP'], '2026-12-04', 'haute', ['Front'], '60 h', 'Planning avec barres de durée, dépendances bloquantes et jalons.'),
   mk('DES-112', 'ds', 'Jeton de couleur cornaline pour « En revue »', 'review', ['IR'], '2026-11-10', 'moyenne', ['Design'], '2 h', 'Valider l’orange en clair et en sombre, contraste ≥ 3:1 sur toutes les surfaces.'),
   mk('DES-113', 'ds', 'Composant Calendrier : vue semaine', 'progress', ['IR'], '2026-11-16', 'moyenne', ['Design', 'Front'], '6 h', 'Vue semaine avec créneaux horaires et tâches sur la journée entière.'),
   mk('DES-109', 'ds', 'Audit de contraste du thème sombre', 'done', ['IR'], '2026-11-02', 'haute', ['Design'], '4 h', 'Tous les textes au-dessus de 4,5:1, les icônes de statut au-dessus de 3:1.'),
@@ -3861,7 +3861,7 @@ const EXTRA_TASKS = [
   mk('MKT-31', 'launch', 'Page de lancement de la v3', 'progress', ['IR', 'CM'], '2026-11-17', 'haute', ['Contenu', 'Design'], '12 h', 'Page présentant les nouveautés de la v3 et le guide de mise à jour.'),
   mk('MKT-32', 'launch', 'Webinaire de démonstration', 'todo', ['CM'], '2026-11-26', 'moyenne', ['Contenu'], '6 h', 'Démonstration de 30 minutes : vues, quotas, sécurité.'),
   mk('MKT-33', 'launch', 'Article : migrer depuis un autre outil de projet', 'review', ['LP'], '2026-11-12', 'moyenne', ['Contenu'], '4 h', 'Article de blog sur la maîtrise des données et les coûts.'),
-  mk('MKT-40', 'content', 'Guide : premiers pas avec Waypoint', 'todo', ['LP'], '2026-11-24', 'moyenne', ['Contenu', 'Docs'], '8 h', 'De la création de l’organisation à la première liste partagée.'),
+  mk('MKT-40', 'content', 'Guide : premiers pas avec Cadenway', 'todo', ['LP'], '2026-11-24', 'moyenne', ['Contenu', 'Docs'], '8 h', 'De la création de l’organisation à la première liste partagée.'),
   mk('MKT-41', 'content', 'Vidéo : la vue Tableau en 2 minutes', 'backlog', [], null, 'basse', ['Contenu'], '5 h', 'Courte vidéo de démonstration pour la documentation.'),
   mk('OPS-210', 'support', 'Coopérative Lumen : l’export expire avant la fin', 'blocked', ['HD'], '2026-11-06', 'urgente', ['Back'], '3 h', 'Les exports de plus de 20 000 tâches dépassent le délai du proxy. Bloqué : accès aux journaux du serveur client.'),
   mk('OPS-211', 'support', 'Répondre aux demandes du formulaire public', 'todo', ['CM'], '2026-11-08', 'haute', [], '1 h', 'Trier les 7 demandes reçues depuis vendredi.'),
@@ -3881,42 +3881,42 @@ const STAGGER = ['stagger-0', 'stagger-1', 'stagger-2', 'stagger-3', 'stagger-4'
 const MENU_KEYS = ['orgMenu', 'userMenu', 'inboxOpen', 'statusMenu'];
 DOCS_INIT.forEach((d) => { d.body = d.body.replace(/^# /gm, '## '); });
 const TASKS = [
-  { id: 'WAY-482', name: 'Refondre l’écran de connexion SSO', status: 'progress', people: ['CM', 'IR'], due: '12 nov.', dueLong: 'Jeudi 12 novembre', when: 'soon', priority: 'haute', labels: ['Auth', 'Front'], estimate: '8 h',
+  { id: 'CAD-482', name: 'Refondre l’écran de connexion SSO', status: 'progress', people: ['CM', 'IR'], due: '12 nov.', dueLong: 'Jeudi 12 novembre', when: 'soon', priority: 'haute', labels: ['Auth', 'Front'], estimate: '8 h',
     desc: 'Regrouper Google, GitHub, Microsoft, GitLab et le SSO SAML sur un seul écran, avec la détection du domaine de l’adresse saisie. Reprendre les jetons du thème sombre.',
     subtasks: [['Maquette validée par le design', true], ['Détection du domaine SSO', true], ['Boutons des fournisseurs OAuth', true]],
     comments: [['IR', 'Les boutons en deux colonnes passent bien à 320 px. On garde le SSO en pleine largeur ?', 'hier, 16:42'], ['CM', 'Oui, il concerne les comptes d’entreprise : il mérite sa ligne.', 'hier, 17:05'], ['HD', 'Le verrouillage après 5 essais est prêt côté API, branche auth/lockout.', 'aujourd’hui, 9:12']] },
-  { id: 'WAY-479', name: 'Limiter le débit des jetons d’API', status: 'progress', people: ['HD'], due: 'Aujourd’hui', dueLong: 'Aujourd’hui, dimanche 8 novembre', when: 'today', priority: 'urgente', labels: ['Back', 'Sécurité'], estimate: '5 h',
+  { id: 'CAD-479', name: 'Limiter le débit des jetons d’API', status: 'progress', people: ['HD'], due: 'Aujourd’hui', dueLong: 'Aujourd’hui, dimanche 8 novembre', when: 'today', priority: 'urgente', labels: ['Back', 'Sécurité'], estimate: '5 h',
     desc: 'Plafonner chaque jeton personnel à 600 requêtes par minute et renvoyer 429 avec l’en-tête Retry-After. Compter les appels dans le quota mensuel de l’organisation.',
     subtasks: [['Compteur glissant par jeton', true], ['Réponse 429 et Retry-After', false], ['Décompte dans le quota mensuel', false]], comments: [] },
-  { id: 'WAY-475', name: 'Export CSV des tâches filtrées', status: 'review', people: ['LP'], due: '14 nov.', dueLong: 'Samedi 14 novembre', when: 'soon', priority: 'moyenne', labels: ['Back'], estimate: '3 h',
+  { id: 'CAD-475', name: 'Export CSV des tâches filtrées', status: 'review', people: ['LP'], due: '14 nov.', dueLong: 'Samedi 14 novembre', when: 'soon', priority: 'moyenne', labels: ['Back'], estimate: '3 h',
     desc: 'Exporter exactement les lignes visibles de la vue, filtres et tri compris, avec les champs personnalisés en colonnes.',
     subtasks: [['Respect des filtres actifs', true], ['Colonnes des champs personnalisés', true]], comments: [] },
-  { id: 'WAY-488', name: 'Page des quotas de l’organisation', status: 'todo', people: ['CM'], due: '18 nov.', dueLong: 'Mercredi 18 novembre', when: 'later', priority: 'haute', labels: ['Front', 'Facturation'], estimate: '6 h',
+  { id: 'CAD-488', name: 'Page des quotas de l’organisation', status: 'todo', people: ['CM'], due: '18 nov.', dueLong: 'Mercredi 18 novembre', when: 'later', priority: 'haute', labels: ['Front', 'Facturation'], estimate: '6 h',
     desc: 'Afficher sièges, stockage, appels d’API et exécutions d’automatisations avec leurs seuils, et prévenir les propriétaires à 80 % et 95 %.',
     subtasks: [['Historique sur 30 jours', false], ['Lien vers le changement de plan', false]], comments: [] },
-  { id: 'WAY-490', name: 'Régénérer les codes de secours MFA', status: 'todo', people: ['HD', 'CM'], due: '20 nov.', dueLong: 'Vendredi 20 novembre', when: 'later', priority: 'moyenne', labels: ['Sécurité'], estimate: '2 h',
+  { id: 'CAD-490', name: 'Régénérer les codes de secours MFA', status: 'todo', people: ['HD', 'CM'], due: '20 nov.', dueLong: 'Vendredi 20 novembre', when: 'later', priority: 'moyenne', labels: ['Sécurité'], estimate: '2 h',
     desc: 'Permettre de générer un nouveau lot de 10 codes depuis le profil, après confirmation du mot de passe ; l’ancien lot devient invalide.',
     subtasks: [['Confirmation du mot de passe', false], ['Téléchargement en .txt', false]], comments: [] },
-  { id: 'WAY-491', name: 'E-mails transactionnels en thème sombre', status: 'testing', people: ['IR'], due: '21 nov.', dueLong: 'Samedi 21 novembre', when: 'later', priority: 'basse', labels: ['Design'], estimate: '4 h',
+  { id: 'CAD-491', name: 'E-mails transactionnels en thème sombre', status: 'testing', people: ['IR'], due: '21 nov.', dueLong: 'Samedi 21 novembre', when: 'later', priority: 'basse', labels: ['Design'], estimate: '4 h',
     desc: 'Adapter les gabarits d’invitation, de code et de réinitialisation à prefers-color-scheme sans casser Outlook.', subtasks: [], comments: [] },
-  { id: 'WAY-493', name: 'Invitations par lien avec expiration', status: 'triage', people: ['LP'], due: '22 nov.', dueLong: 'Dimanche 22 novembre', when: 'later', priority: 'moyenne', labels: ['Back'], estimate: '5 h',
+  { id: 'CAD-493', name: 'Invitations par lien avec expiration', status: 'triage', people: ['LP'], due: '22 nov.', dueLong: 'Dimanche 22 novembre', when: 'later', priority: 'moyenne', labels: ['Back'], estimate: '5 h',
     desc: 'Lien d’invitation réutilisable, limité à un domaine et à une durée (1, 7 ou 30 jours), révocable depuis la page Membres.',
     subtasks: [['Génération et révocation', false], ['Restriction par domaine', false], ['Expiration configurable', false]], comments: [] },
-  { id: 'WAY-494', name: 'Rédiger la note de version 3.2', status: 'waiting', people: [], due: '25 nov.', dueLong: 'Mercredi 25 novembre', when: 'later', priority: 'basse', labels: ['Docs'], estimate: '2 h',
+  { id: 'CAD-494', name: 'Rédiger la note de version 3.2', status: 'waiting', people: [], due: '25 nov.', dueLong: 'Mercredi 25 novembre', when: 'later', priority: 'basse', labels: ['Docs'], estimate: '2 h',
     desc: 'En attente du gel des fonctionnalités du 21 novembre.', subtasks: [], comments: [] },
-  { id: 'WAY-470', name: 'Webhook de facturation reçu en double', status: 'blocked', people: ['HD'], due: '5 nov.', dueLong: 'Jeudi 5 novembre (en retard)', when: 'late', priority: 'urgente', labels: ['Facturation', 'Bug'], estimate: '3 h',
+  { id: 'CAD-470', name: 'Webhook de facturation reçu en double', status: 'blocked', people: ['HD'], due: '5 nov.', dueLong: 'Jeudi 5 novembre (en retard)', when: 'late', priority: 'urgente', labels: ['Facturation', 'Bug'], estimate: '3 h',
     desc: 'Le prestataire de paiement renvoie l’événement invoice.paid deux fois ; il faut dédoublonner par identifiant d’événement. Bloqué : accès au tableau de bord du prestataire en attente.',
     subtasks: [['Reproduire en environnement de test', true], ['Clé d’idempotence', false], ['Rejouer les événements manqués', false], ['Alerte de supervision', false]],
     comments: [['HD', 'Bloqué tant que nous n’avons pas l’accès en lecture au tableau de bord du prestataire.', 'jeudi, 11:20'], ['CM', 'Demande envoyée au propriétaire du compte, réponse attendue lundi.', 'jeudi, 14:02']] },
-  { id: 'WAY-466', name: 'Rotation des clés de session', status: 'done', people: ['HD'], due: '3 nov.', dueLong: 'Mardi 3 novembre', when: 'past', priority: 'haute', labels: ['Sécurité'], estimate: '4 h', desc: 'Rotation hebdomadaire automatique, sans déconnecter les sessions actives.', subtasks: [], comments: [] },
-  { id: 'WAY-468', name: 'Sélecteur d’organisation après connexion', status: 'done', people: ['CM'], due: '4 nov.', dueLong: 'Mercredi 4 novembre', when: 'past', priority: 'moyenne', labels: ['Front'], estimate: '3 h', desc: 'Liste des organisations, invitations en attente et création d’organisation.', subtasks: [], comments: [] },
-  { id: 'WAY-471', name: 'Vérification de l’adresse par code', status: 'done', people: ['LP'], due: '6 nov.', dueLong: 'Vendredi 6 novembre', when: 'past', priority: 'moyenne', labels: ['Auth'], estimate: '3 h', desc: 'Code à 6 chiffres valable 10 minutes, renvoi limité à une fois toutes les 30 secondes.', subtasks: [], comments: [] },
-  { id: 'WAY-473', name: 'Thème sombre : jetons de couleur', status: 'done', people: ['IR'], due: '7 nov.', dueLong: 'Samedi 7 novembre', when: 'past', priority: 'basse', labels: ['Design'], estimate: '6 h', desc: 'Jetons sombres de surfaces, filets et teintes vives, contrastes vérifiés.', subtasks: [], comments: [] },
-  { id: 'WAY-461', name: 'Recherche plein texte dans les commentaires', status: 'backlog', people: [], due: '—', dueLong: 'Vide', when: 'later', priority: 'basse', labels: ['Back'], estimate: '8 h', desc: 'Indexer commentaires et descriptions pour la recherche Ctrl K. À planifier après la migration de la base.', subtasks: [], comments: [] },
-  { id: 'WAY-457', name: 'Connecteur Slack (première version)', status: 'cancelled', people: ['HD'], due: '30 oct.', dueLong: 'Vendredi 30 octobre', when: 'past', priority: 'moyenne', labels: ['Back'], estimate: '6 h', desc: 'Abandonné : les webhooks sortants couvrent le besoin sans dépendre d’un service tiers.', subtasks: [], comments: [] },
+  { id: 'CAD-466', name: 'Rotation des clés de session', status: 'done', people: ['HD'], due: '3 nov.', dueLong: 'Mardi 3 novembre', when: 'past', priority: 'haute', labels: ['Sécurité'], estimate: '4 h', desc: 'Rotation hebdomadaire automatique, sans déconnecter les sessions actives.', subtasks: [], comments: [] },
+  { id: 'CAD-468', name: 'Sélecteur d’organisation après connexion', status: 'done', people: ['CM'], due: '4 nov.', dueLong: 'Mercredi 4 novembre', when: 'past', priority: 'moyenne', labels: ['Front'], estimate: '3 h', desc: 'Liste des organisations, invitations en attente et création d’organisation.', subtasks: [], comments: [] },
+  { id: 'CAD-471', name: 'Vérification de l’adresse par code', status: 'done', people: ['LP'], due: '6 nov.', dueLong: 'Vendredi 6 novembre', when: 'past', priority: 'moyenne', labels: ['Auth'], estimate: '3 h', desc: 'Code à 6 chiffres valable 10 minutes, renvoi limité à une fois toutes les 30 secondes.', subtasks: [], comments: [] },
+  { id: 'CAD-473', name: 'Thème sombre : jetons de couleur', status: 'done', people: ['IR'], due: '7 nov.', dueLong: 'Samedi 7 novembre', when: 'past', priority: 'basse', labels: ['Design'], estimate: '6 h', desc: 'Jetons sombres de surfaces, filets et teintes vives, contrastes vérifiés.', subtasks: [], comments: [] },
+  { id: 'CAD-461', name: 'Recherche plein texte dans les commentaires', status: 'backlog', people: [], due: '—', dueLong: 'Vide', when: 'later', priority: 'basse', labels: ['Back'], estimate: '8 h', desc: 'Indexer commentaires et descriptions pour la recherche Ctrl K. À planifier après la migration de la base.', subtasks: [], comments: [] },
+  { id: 'CAD-457', name: 'Connecteur Slack (première version)', status: 'cancelled', people: ['HD'], due: '30 oct.', dueLong: 'Vendredi 30 octobre', when: 'past', priority: 'moyenne', labels: ['Back'], estimate: '6 h', desc: 'Abandonné : les webhooks sortants couvrent le besoin sans dépendre d’un service tiers.', subtasks: [], comments: [] },
 ];
-TASKS.forEach((t) => { t.list = t.id === 'WAY-461' ? 'backlog' : 'sprint14'; t.date = TASK_META[t.id] || null; });
-// Sprint 14 : 80 tâches supplémentaires (WAY-500 à WAY-579) pour une liste réaliste d'une centaine de tâches.
+TASKS.forEach((t) => { t.list = t.id === 'CAD-461' ? 'backlog' : 'sprint14'; t.date = TASK_META[t.id] || null; });
+// Sprint 14 : 80 tâches supplémentaires (CAD-500 à CAD-579) pour une liste réaliste d'une centaine de tâches.
 const SPRINT_MORE = [
   ['Bouton « Continuer avec Microsoft »', 'Auth', 'Front'], ['Logo du fournisseur SSO dans le sélecteur', 'Front', 'Design'], ['Message d’erreur si le domaine n’a pas de SSO', 'Auth', 'Front'],
   ['Détection du domaine à la saisie de l’adresse', 'Auth', 'Back'], ['Métadonnées SAML importées par URL', 'Auth', 'Back'], ['Rotation du certificat SAML sans coupure', 'Auth', 'Sécurité'],
@@ -3955,7 +3955,7 @@ SPRINT_MORE.forEach(([name, ...labels], i) => {
   const day = 3 + ((i * 7) % 15);
   const date = i % 6 === 5 ? null : '2026-11-' + String(day).padStart(2, '0');
   const subs = i % 9 === 0 ? [['Spécification relue', true], ['Implémentation', st === 'done'], ['Tests', st === 'done']] : [];
-  EXTRA_TASKS.push(mk('WAY-' + (500 + i), 'sprint14', name, st, SM_PEOPLE[i % SM_PEOPLE.length], date, SM_PRIO[i % SM_PRIO.length], labels, SM_EST[i % SM_EST.length], 'Tâche du Sprint 14 : ' + name.charAt(0).toLowerCase() + name.slice(1) + '.', subs));
+  EXTRA_TASKS.push(mk('CAD-' + (500 + i), 'sprint14', name, st, SM_PEOPLE[i % SM_PEOPLE.length], date, SM_PRIO[i % SM_PRIO.length], labels, SM_EST[i % SM_EST.length], 'Tâche du Sprint 14 : ' + name.charAt(0).toLowerCase() + name.slice(1) + '.', subs));
 });
 TASKS.push(...EXTRA_TASKS);
 // Sous-tâches : de vraies tâches rattachées à une tâche parente (comme ClickUp). La checklist reste dans « subtasks ».
@@ -3967,29 +3967,29 @@ const kid = (id, parent, name, status, people, date, priority, estimate) => ({
   id, parent, name, status, people, date, priority, estimate, labels: [], files: [], comments: [], subtasks: [], when: 'later', milestone: false,
   due: '', dueLong: '', desc: 'Sous-tâche de ' + parent + '.', list: (TASKS.find((t) => t.id === parent) || {}).list || 'sprint14',
 });
-TASKS.forEach((t) => { if (t.id === 'WAY-494') t.recur = 'weekly'; });
+TASKS.forEach((t) => { if (t.id === 'CAD-494') t.recur = 'weekly'; });
 TASKS.push(
-  kid('WAY-483', 'WAY-482', 'Messages d’erreur et verrouillage', 'progress', ['HD'], '2026-11-11', 'haute', '3 h'),
-  kid('WAY-484', 'WAY-482', 'Tests de bout en bout du SSO', 'todo', ['IR'], '2026-11-12', 'moyenne', '2 h'),
-  kid('WAY-485', 'WAY-482', 'Documenter la connexion SSO', 'done', ['LP'], '2026-11-09', 'basse', '1 h'),
-  kid('WAY-489', 'WAY-483', 'Verrouillage après 5 essais', 'todo', ['HD'], '2026-11-11', 'haute', '1 h'),
-  kid('WAY-492', 'WAY-483', 'Message « compte verrouillé »', 'done', ['HD'], '2026-11-10', 'moyenne', '30 min'),
-  kid('WAY-486', 'WAY-488', 'Jauges par quota', 'todo', ['IR'], '2026-11-16', 'haute', '3 h'),
-  kid('WAY-487', 'WAY-488', 'Alertes à 80 % et 95 %', 'todo', ['HD'], '2026-11-18', 'moyenne', '2 h'),
+  kid('CAD-483', 'CAD-482', 'Messages d’erreur et verrouillage', 'progress', ['HD'], '2026-11-11', 'haute', '3 h'),
+  kid('CAD-484', 'CAD-482', 'Tests de bout en bout du SSO', 'todo', ['IR'], '2026-11-12', 'moyenne', '2 h'),
+  kid('CAD-485', 'CAD-482', 'Documenter la connexion SSO', 'done', ['LP'], '2026-11-09', 'basse', '1 h'),
+  kid('CAD-489', 'CAD-483', 'Verrouillage après 5 essais', 'todo', ['HD'], '2026-11-11', 'haute', '1 h'),
+  kid('CAD-492', 'CAD-483', 'Message « compte verrouillé »', 'done', ['HD'], '2026-11-10', 'moyenne', '30 min'),
+  kid('CAD-486', 'CAD-488', 'Jauges par quota', 'todo', ['IR'], '2026-11-16', 'haute', '3 h'),
+  kid('CAD-487', 'CAD-488', 'Alertes à 80 % et 95 %', 'todo', ['HD'], '2026-11-18', 'moyenne', '2 h'),
 );
-// Sous-tâches et sous-sous-tâches supplémentaires (WAY-600 et suivants) : étapes types, statut cohérent avec le parent.
+// Sous-tâches et sous-sous-tâches supplémentaires (CAD-600 et suivants) : étapes types, statut cohérent avec le parent.
 const KID_STEPS = ['Spécifier le comportement attendu', 'Implémenter côté serveur', 'Implémenter l’interface', 'Écrire les tests automatisés', 'Relecture de code', 'Mettre à jour la documentation', 'Vérifier l’accessibilité', 'Tester sur mobile'];
 const GKID_STEPS = ['Cas nominal', 'Cas d’erreur', 'Thème sombre', 'Lecteur d’écran', 'Safari et Firefox', 'Gros volumes de données'];
 (() => {
   let n = 600;
   const kidStatus = (ps, j) => (ps === 'done' || ps === 'cancelled' ? 'done' : ps === 'todo' || ps === 'triage' ? 'todo' : ['done', 'progress', 'todo', 'review'][j % 4]);
-  const parents = ['WAY-479', 'WAY-475', 'WAY-494', 'WAY-491', 'WAY-493', 'WAY-470', ...Array.from({ length: 27 }, (_, i) => 'WAY-' + (500 + i * 3))];
+  const parents = ['CAD-479', 'CAD-475', 'CAD-494', 'CAD-491', 'CAD-493', 'CAD-470', ...Array.from({ length: 27 }, (_, i) => 'CAD-' + (500 + i * 3))];
   parents.forEach((pid, pi) => {
     const pt = TASKS.find((t) => t.id === pid);
     if (!pt) return;
     const count = 2 + (pi % 3);
     for (let j = 0; j < count; j++) {
-      const kidId = 'WAY-' + n++;
+      const kidId = 'CAD-' + n++;
       const ks = kidStatus(pt.status, j + pi);
       const who = pt.people.length ? [pt.people[j % pt.people.length]] : [];
       TASKS.push(kid(kidId, pid, KID_STEPS[(pi + j * 3) % KID_STEPS.length], ks, who, pt.date, pt.priority, ['1 h', '2 h', '30 min', '3 h'][j % 4]));
@@ -3997,7 +3997,7 @@ const GKID_STEPS = ['Cas nominal', 'Cas d’erreur', 'Thème sombre', 'Lecteur d
       if ((pi + j) % 3 === 0) {
         const gc = 1 + ((pi + j) % 3);
         for (let g = 0; g < gc; g++) {
-          TASKS.push(kid('WAY-' + n++, kidId, GKID_STEPS[(pi + j + g) % GKID_STEPS.length], ks === 'done' ? 'done' : ['todo', 'progress', 'done'][(g + j) % 3], who, pt.date, pt.priority, ['30 min', '1 h'][g % 2]));
+          TASKS.push(kid('CAD-' + n++, kidId, GKID_STEPS[(pi + j + g) % GKID_STEPS.length], ks === 'done' ? 'done' : ['todo', 'progress', 'done'][(g + j) % 3], who, pt.date, pt.priority, ['30 min', '1 h'][g % 2]));
         }
       }
     }
@@ -4005,12 +4005,12 @@ const GKID_STEPS = ['Cas nominal', 'Cas d’erreur', 'Thème sombre', 'Lecteur d
 })();
 // Jalons : tâches sans durée qui marquent une date clé (losange dans toutes les vues).
 TASKS.push(
-  { ...mk('WAY-583', 'sprint14', 'Maquettes SSO validées', 'done', ['IR'], '2026-11-05', 'moyenne', ['Design'], '', 'Jalon atteint : maquettes de connexion validées par le design.'), milestone: true },
-  { ...mk('WAY-580', 'sprint14', 'Démo SSO aux clients', 'todo', ['CM'], '2026-11-13', 'haute', ['Auth'], '', 'Jalon : démonstration du SSO à trois clients pilotes. Dépend de la refonte de l’écran de connexion (WAY-482).'), milestone: true },
-  { ...mk('WAY-581', 'sprint14', 'Gel du code', 'todo', ['HD'], '2026-11-16', 'haute', [], '', 'Jalon : plus de nouvelle fonctionnalité sur la branche du sprint, seulement des corrections.'), milestone: true },
-  { ...mk('WAY-582', 'sprint14', 'Fin du Sprint 14', 'todo', ['CM'], '2026-11-17', 'moyenne', [], '', 'Jalon : revue de sprint et démo interne.'), milestone: true },
+  { ...mk('CAD-583', 'sprint14', 'Maquettes SSO validées', 'done', ['IR'], '2026-11-05', 'moyenne', ['Design'], '', 'Jalon atteint : maquettes de connexion validées par le design.'), milestone: true },
+  { ...mk('CAD-580', 'sprint14', 'Démo SSO aux clients', 'todo', ['CM'], '2026-11-13', 'haute', ['Auth'], '', 'Jalon : démonstration du SSO à trois clients pilotes. Dépend de la refonte de l’écran de connexion (CAD-482).'), milestone: true },
+  { ...mk('CAD-581', 'sprint14', 'Gel du code', 'todo', ['HD'], '2026-11-16', 'haute', [], '', 'Jalon : plus de nouvelle fonctionnalité sur la branche du sprint, seulement des corrections.'), milestone: true },
+  { ...mk('CAD-582', 'sprint14', 'Fin du Sprint 14', 'todo', ['CM'], '2026-11-17', 'moyenne', [], '', 'Jalon : revue de sprint et démo interne.'), milestone: true },
 );
-GANTT_DEPS.push(['WAY-482', 'WAY-580'], ['WAY-581', 'WAY-582']);
+GANTT_DEPS.push(['CAD-482', 'CAD-580'], ['CAD-581', 'CAD-582']);
 TASKS.forEach((t) => { t.milestone = !!t.milestone; });
 const estDays = (e) => { const h = parseFloat(String(e || '').replace(',', '.')); return isNaN(h) ? 1 : Math.max(1, Math.min(6, Math.round(h / 3))); };
 TASKS.forEach((t) => { t.start = t.date ? (GANTT_START[t.id] || addDays(t.date, -(estDays(t.estimate) - 1))) : null; });
@@ -4118,7 +4118,7 @@ const toggleMark = (text, start, end, mk) => {
   if (mid.length >= 2 * mk.length && mid.startsWith(mk) && mid.endsWith(mk)) return { text: before + mid.slice(mk.length, -mk.length) + after, start, end: end - 2 * mk.length };
   return { text: before + mk + mid + mk + after, start: start + mk.length, end: end + mk.length };
 };
-// Statut de présence de l'utilisateur (partagé entre écrans par localStorage « waypoint-status »)
+// Statut de présence de l'utilisateur (partagé entre écrans par localStorage « cadenway-status »)
 const USER_STATUSES = [
   { key: 'online', label: 'Actif', hint: 'Vous apparaissez en ligne', dot: 'bg-jade', bar: false },
   { key: 'dnd', label: 'Ne pas déranger', hint: 'Notifications en pause', dot: 'bg-grenat', bar: true },
@@ -4135,7 +4135,7 @@ const STATUS_PRESETS = [
   { key: 'vacation', label: 'En congé', icon: 'phosphorSunHorizonBold' },
 ];
 const SIDEBAR_TIPS = [
-  { key: 'github', icon: 'svglGithubLight', tone: 'text-foreground', title: 'Connecter GitHub', text: 'Liez commits et pull requests aux tâches : citez WAY-482 dans une branche et le statut avance tout seul.', cta: 'Connecter', toast: ['GitHub connecté', 'Les commits qui citent une tâche y apparaîtront.'] },
+  { key: 'github', icon: 'svglGithubLight', tone: 'text-foreground', title: 'Connecter GitHub', text: 'Liez commits et pull requests aux tâches : citez CAD-482 dans une branche et le statut avance tout seul.', cta: 'Connecter', toast: ['GitHub connecté', 'Les commits qui citent une tâche y apparaîtront.'] },
   { key: 'slack', icon: 'svglSlack', tone: '', title: 'Notifications dans Slack', text: 'Recevez mentions et assignations dans Slack, et créez une tâche depuis n’importe quel message.', cta: 'Ajouter à Slack', toast: ['Slack connecté', 'Notifications envoyées dans #produit.'] },
   { key: 'figma', icon: 'svglFigma', tone: '', title: 'Aperçus Figma', text: 'Collez un lien Figma dans une tâche ou un document pour afficher la maquette à jour.', cta: 'Activer', toast: ['Aperçus Figma activés', 'Les liens Figma s’afficheront en aperçu.'] },
   { key: 'invite', icon: 'phosphorUserPlusBold', tone: 'text-primary', title: 'Inviter votre équipe', text: '7 sièges libres sur votre plan Équipe. Invitez des collègues pour leur assigner des tâches.', cta: 'Inviter', href: 'Organisation.dc.html', nav: { to: 'Organisation', section: 'members' } },
@@ -4201,7 +4201,7 @@ const SK_PAGES = {
 // Pages d'erreur : lien cassé, tâche supprimée, espace privé.
 const ERR_PAGES = {
   notfound: { icon: 'phosphorLinkBreakBold', tone: 'text-foreground', code: 'Erreur 404', title: 'Page introuvable', text: 'Le lien est incomplet, ou la page a été déplacée ou supprimée. Vérifiez l’adresse ou cherchez ce que vous vouliez ouvrir.', primary: 'Retour à l’accueil', secondaryLabel: 'Rechercher' },
-  deleted: { icon: 'phosphorTrashBold', tone: 'text-foreground', code: 'Tâche supprimée', title: 'Cette tâche a été supprimée', text: 'WAY-452 « Ancien écran de connexion » a été supprimée par Inès Robert le 6 nov. Elle reste 30 jours dans la corbeille avant d’être effacée.', primary: 'Restaurer la tâche', secondaryLabel: 'Ouvrir la corbeille' },
+  deleted: { icon: 'phosphorTrashBold', tone: 'text-foreground', code: 'Tâche supprimée', title: 'Cette tâche a été supprimée', text: 'CAD-452 « Ancien écran de connexion » a été supprimée par Inès Robert le 6 nov. Elle reste 30 jours dans la corbeille avant d’être effacée.', primary: 'Restaurer la tâche', secondaryLabel: 'Ouvrir la corbeille' },
   forbidden: { icon: 'phosphorLockKeyBold', tone: 'text-foreground', code: 'Accès refusé', title: 'Vous n’avez pas accès à cet espace', text: '« Direction » est un espace privé. Léa Petit, sa propriétaire, peut vous y ajouter.', primary: 'Demander l’accès', secondaryLabel: 'Retour à l’accueil' },
 };
 const ERR_PROP = { 'page introuvable': 'notfound', 'tâche supprimée': 'deleted', 'accès refusé': 'forbidden' };
@@ -4214,10 +4214,10 @@ const REM_PRESETS = [
   { key: 'due', label: 'La veille de l’échéance', when: '', icon: 'phosphorFlagBold' },
 ];
 const REM_INIT = [
-  { id: 'r0', task: 'WAY-479', preset: 'past', when: 'Aujourd’hui, 9 h', note: 'Prévenir le support avant la mise en production', done: false, late: true },
-  { id: 'r1', task: 'WAY-488', preset: 'pm', when: 'Aujourd’hui, 15 h', note: 'Relancer Léa pour les maquettes', done: false },
-  { id: 'r2', task: 'WAY-475', preset: 'tom', when: 'Lun. 9 nov., 9 h', note: '', done: false },
-  { id: 'r3', task: 'WAY-470', preset: 'week', when: 'Lun. 16 nov., 9 h', note: 'Vérifier si le blocage est levé', done: false },
+  { id: 'r0', task: 'CAD-479', preset: 'past', when: 'Aujourd’hui, 9 h', note: 'Prévenir le support avant la mise en production', done: false, late: true },
+  { id: 'r1', task: 'CAD-488', preset: 'pm', when: 'Aujourd’hui, 15 h', note: 'Relancer Léa pour les maquettes', done: false },
+  { id: 'r2', task: 'CAD-475', preset: 'tom', when: 'Lun. 9 nov., 9 h', note: '', done: false },
+  { id: 'r3', task: 'CAD-470', preset: 'week', when: 'Lun. 16 nov., 9 h', note: 'Vérifier si le blocage est levé', done: false },
 ];
 // Pièces jointes : type par extension, aperçu, poids stable dérivé du nom.
 const FILE_KINDS = [
@@ -4231,11 +4231,11 @@ const fileKind = (name) => FILE_KINDS.find((k) => k.re.test(name)) || { kind: 'f
 const fileSize = (name) => { let h = 7; for (const ch of name) h = (h * 31 + ch.charCodeAt(0)) % 99991; return 38 + (h % 4600); };
 const fmtKo = (ko) => (ko >= 1000 ? String((ko / 1000).toFixed(1)).replace('.', ',') + ' Mo' : Math.max(1, Math.round(ko)) + ' Ko');
 const FILES_INIT = {
-  'WAY-482': [['maquette-connexion.png', 'IR', '6 nov.'], ['parcours-sso.pdf', 'CM', '5 nov.'], ['captures-erreurs.zip', 'IR', 'hier'], ['specs-oidc.docx', 'HD', '3 nov.']],
-  'WAY-475': [['export-exemple.csv', 'LP', 'hier']],
+  'CAD-482': [['maquette-connexion.png', 'IR', '6 nov.'], ['parcours-sso.pdf', 'CM', '5 nov.'], ['captures-erreurs.zip', 'IR', 'hier'], ['specs-oidc.docx', 'HD', '3 nov.']],
+  'CAD-475': [['export-exemple.csv', 'LP', 'hier']],
 };
 // Approbations : approbateurs désignés et leur avis.
-const APPR_INIT = { 'WAY-475': { req: 'LP', by: ['CM', 'HD'], votes: { HD: 'ok' }, at: 'hier, 17:20' } };
+const APPR_INIT = { 'CAD-475': { req: 'LP', by: ['CM', 'HD'], votes: { HD: 'ok' }, at: 'hier, 17:20' } };
 TASKS.forEach((t) => {
   if (FILES_INIT[t.id]) t.files = FILES_INIT[t.id].map((f) => f[0]);
   if (APPR_INIT[t.id]) t.approval = APPR_INIT[t.id];
@@ -4247,13 +4247,13 @@ const GOALS_INIT = [
     { id: 'k1', type: 'tasks', label: 'Tâches du Sprint 14 terminées', list: 'sprint14' },
     { id: 'k2', type: 'number', label: 'Organisations clientes connectées en SSO', start: 0, cur: 4, target: 10 },
     { id: 'k3', type: 'bool', label: 'Documentation SSO publiée', done: false },
-    { id: 'k9', type: 'ms', label: 'Jalon « Démo SSO aux clients » atteint', task: 'WAY-580' },
+    { id: 'k9', type: 'ms', label: 'Jalon « Démo SSO aux clients » atteint', task: 'CAD-580' },
   ] },
   { id: 'g2', name: 'Diviser par deux les bugs ouverts', owner: 'HD', due: '15 déc.', space: 'produit', krs: [
     { id: 'k4', type: 'number', label: 'Bugs ouverts', start: 24, cur: 15, target: 12 },
     { id: 'k5', type: 'tasks', label: 'Bugs de la liste Bugs corrigés', list: 'bugs' },
   ] },
-  { id: 'g3', name: 'Faire connaître Waypoint aux PME', owner: 'LP', due: '31 déc.', space: 'marketing', krs: [
+  { id: 'g3', name: 'Faire connaître Cadenway aux PME', owner: 'LP', due: '31 déc.', space: 'marketing', krs: [
     { id: 'k6', type: 'number', label: 'Inscriptions par mois', start: 120, cur: 168, target: 300 },
     { id: 'k7', type: 'number', label: 'Note de satisfaction (NPS)', start: 30, cur: 41, target: 45 },
     { id: 'k8', type: 'bool', label: 'Enquête trimestrielle envoyée', done: true },
@@ -4289,7 +4289,7 @@ const msStatusOf = (st) => (MS_STATUS[st] ? st : 'todo');
 const ARCHIVE_INIT = [
   { kind: 'list', at: '2026-11-03', by: 'CM', count: 14, list: { id: 'sprint13', space: 'produit', name: 'Sprint 13', isSprint: true, start: '2026-10-20', end: '2026-11-02', goal: 'Livrer les invitations par lien.', icon: 'lightning', color: 'violet' } },
   { kind: 'list', at: '2026-10-12', by: 'LP', count: 6, list: { id: 'campagne-rentree', space: 'marketing', name: 'Campagne de rentrée', icon: null, color: 'jaune' } },
-  { kind: 'task', at: '2026-11-05', by: 'HD', task: { id: 'WAY-430', list: 'sprint14', name: 'Ancienne page des tarifs', status: 'done', people: ['HD'], date: null, priority: 'basse', labels: ['Front'], estimate: '2 h', files: [], desc: 'Remplacée par la nouvelle page des quotas.', subtasks: [], comments: [], milestone: false } },
+  { kind: 'task', at: '2026-11-05', by: 'HD', task: { id: 'CAD-430', list: 'sprint14', name: 'Ancienne page des tarifs', status: 'done', people: ['HD'], date: null, priority: 'basse', labels: ['Front'], estimate: '2 h', files: [], desc: 'Remplacée par la nouvelle page des quotas.', subtasks: [], comments: [], milestone: false } },
 ];
 // Rapport de sprint : historique des sprints précédents (points engagés / livrés).
 const SPRINT_HISTORY = [
@@ -4300,15 +4300,15 @@ const SPRINT_HISTORY = [
 ];
 const ptsFromEst = (e) => { const h = parseFloat(String(e || '').replace(',', '.')) * (/min/.test(String(e || '')) ? 1 / 60 : 1); if (isNaN(h)) return 1; return h <= 1 ? 1 : h <= 3 ? 2 : h <= 6 ? 3 : h <= 10 ? 5 : 8; };
 // Intégrations Git (GitHub, GitLab) : mêmes dépôts que Organisation > Intégrations.
-// Une branche, un commit ou une PR qui cite l'identifiant (WAY-482) est lié tout seul ; on peut aussi lier à la main.
+// Une branche, un commit ou une PR qui cite l'identifiant (CAD-482) est lié tout seul ; on peut aussi lier à la main.
 const GIT_HOSTS = {
   github: { label: 'GitHub', logo: 'svglGithubLight', pr: 'PR', prLong: 'pull request', sign: '#', url: 'https://github.com/', prPath: '/pull/' },
   gitlab: { label: 'GitLab', logo: 'svglGitlab', pr: 'MR', prLong: 'merge request', sign: '!', url: 'https://gitlab.ateliernord.fr/', prPath: '/-/merge_requests/' },
 };
 const GIT_ACTORS = { GH: 'GitHub', GL: 'GitLab' };
 const GIT_REPOS = {
-  web: { host: 'github', name: 'atelier-nord/waypoint-web', space: 'produit' },
-  api: { host: 'github', name: 'atelier-nord/waypoint-api', space: 'produit' },
+  web: { host: 'github', name: 'atelier-nord/cadenway-web', space: 'produit' },
+  api: { host: 'github', name: 'atelier-nord/cadenway-api', space: 'produit' },
   tokens: { host: 'github', name: 'atelier-nord/design-tokens', space: 'design' },
   infra: { host: 'gitlab', name: 'nord/infra', space: 'ops' },
 };
@@ -4334,30 +4334,30 @@ const GIT_EVENTS = [
 ];
 const GSMAP = Object.fromEntries(STATUSES.map((x) => [x.key, x]));
 const GIT_INIT = {
-  'WAY-482': [
-    { id: 'g1', kind: 'pr', repo: 'web', num: 214, title: 'feat(auth) : écran de connexion SSO unifié', branch: 'way-482-ecran-connexion-sso', state: 'open', ci: 'run', review: '1 approbation sur 2', author: 'CM', when: 'il y a 2 h', add: 418, del: 132, src: 'auto', via: 'branche',
-      commits: [['c4e1a9f2', 'Boutons OAuth sur deux colonnes sous 480 px', 'CM', 'il y a 2 h'], ['9b20d3e7', 'Détection du domaine à la saisie de l’adresse', 'CM', 'hier'], ['5af7c128', 'WAY-482 : squelette de l’écran SSO', 'IR', 'mardi']] },
+  'CAD-482': [
+    { id: 'g1', kind: 'pr', repo: 'web', num: 214, title: 'feat(auth) : écran de connexion SSO unifié', branch: 'cad-482-ecran-connexion-sso', state: 'open', ci: 'run', review: '1 approbation sur 2', author: 'CM', when: 'il y a 2 h', add: 418, del: 132, src: 'auto', via: 'branche',
+      commits: [['c4e1a9f2', 'Boutons OAuth sur deux colonnes sous 480 px', 'CM', 'il y a 2 h'], ['9b20d3e7', 'Détection du domaine à la saisie de l’adresse', 'CM', 'hier'], ['5af7c128', 'CAD-482 : squelette de l’écran SSO', 'IR', 'mardi']] },
     { id: 'g2', kind: 'pr', repo: 'api', num: 388, title: 'Résolution du fournisseur SSO à partir du domaine', branch: 'ir/sso-domain-lookup', state: 'merged', ci: 'pass', author: 'IR', when: 'hier', add: 96, del: 12, src: 'manual', by: 'IR',
       commits: [['71d0be43', 'Table des domaines vérifiés par organisation', 'IR', 'hier'], ['0e9a6f15', 'Point d’accès /sso/resolve', 'IR', 'hier']] },
   ],
-  'WAY-479': [
-    { id: 'g3', kind: 'branch', repo: 'api', branch: 'way-479-limite-debit-jetons', author: 'HD', when: 'il y a 40 min', src: 'auto', via: 'branche',
+  'CAD-479': [
+    { id: 'g3', kind: 'branch', repo: 'api', branch: 'cad-479-limite-debit-jetons', author: 'HD', when: 'il y a 40 min', src: 'auto', via: 'branche',
       commits: [['e18c0b47', 'Compteur glissant par jeton', 'HD', 'il y a 40 min']] },
   ],
-  'WAY-475': [
-    { id: 'g4', kind: 'pr', repo: 'web', num: 209, title: 'Export CSV : respecter les filtres de la vue (WAY-475)', branch: 'lp/export-csv', state: 'open', ci: 'fail', review: 'Modifications demandées', author: 'LP', when: 'il y a 5 h', add: 203, del: 41, src: 'auto', via: 'titre',
+  'CAD-475': [
+    { id: 'g4', kind: 'pr', repo: 'web', num: 209, title: 'Export CSV : respecter les filtres de la vue (CAD-475)', branch: 'lp/export-csv', state: 'open', ci: 'fail', review: 'Modifications demandées', author: 'LP', when: 'il y a 5 h', add: 203, del: 41, src: 'auto', via: 'titre',
       commits: [['a2c94d10', 'Colonnes des champs personnalisés', 'LP', 'il y a 5 h'], ['3f61e8b2', 'Export des lignes visibles uniquement', 'LP', 'hier']] },
   ],
-  'WAY-473': [
-    { id: 'g5', kind: 'pr', repo: 'tokens', num: 54, title: 'Jetons de couleur du thème sombre', branch: 'way-473-theme-sombre', state: 'merged', ci: 'pass', author: 'IR', when: '7 nov.', add: 156, del: 38, src: 'auto', via: 'commit',
-      commits: [['d84b2e09', 'fixes WAY-473 : contrastes AA en thème sombre', 'IR', '7 nov.']] },
+  'CAD-473': [
+    { id: 'g5', kind: 'pr', repo: 'tokens', num: 54, title: 'Jetons de couleur du thème sombre', branch: 'cad-473-theme-sombre', state: 'merged', ci: 'pass', author: 'IR', when: '7 nov.', add: 156, del: 38, src: 'auto', via: 'commit',
+      commits: [['d84b2e09', 'fixes CAD-473 : contrastes AA en thème sombre', 'IR', '7 nov.']] },
   ],
-  'WAY-470': [
-    { id: 'g6', kind: 'pr', repo: 'api', num: 377, title: 'fix : idempotence du webhook de facturation', branch: 'way-470-webhook-double', state: 'draft', ci: 'fail', author: 'HD', when: '5 nov.', add: 64, del: 9, src: 'auto', via: 'branche',
+  'CAD-470': [
+    { id: 'g6', kind: 'pr', repo: 'api', num: 377, title: 'fix : idempotence du webhook de facturation', branch: 'cad-470-webhook-double', state: 'draft', ci: 'fail', author: 'HD', when: '5 nov.', add: 64, del: 9, src: 'auto', via: 'branche',
       commits: [['6c13fa80', 'Clé d’idempotence sur les événements Stripe', 'HD', '5 nov.']] },
   ],
-  'WAY-466': [
-    { id: 'g7', kind: 'pr', repo: 'infra', num: 31, title: 'Rotation automatique des clés de session (WAY-466)', branch: 'rotation-cles', state: 'merged', ci: 'pass', author: 'HD', when: '3 nov.', add: 88, del: 20, src: 'auto', via: 'titre', commits: [] },
+  'CAD-466': [
+    { id: 'g7', kind: 'pr', repo: 'infra', num: 31, title: 'Rotation automatique des clés de session (CAD-466)', branch: 'rotation-cles', state: 'merged', ci: 'pass', author: 'HD', when: '3 nov.', add: 88, del: 20, src: 'auto', via: 'titre', commits: [] },
   ],
 };
 // PR et MR ouvertes qui ne citent aucune tâche : proposées dans « Lier une PR »
@@ -4385,55 +4385,55 @@ class Component extends DCLogic {
     this.timerTick = setInterval(() => { if ((this.state || {}).timer) this.setState({ tick: Date.now() }); }, 15000);
     if (this.timerTick && this.timerTick.unref) this.timerTick.unref();
     try {
-      const us = JSON.parse(window.localStorage.getItem('waypoint-status') || 'null');
+      const us = JSON.parse(window.localStorage.getItem('cadenway-status') || 'null');
       if (us && USTATUS[us.key]) this.setState({ ustatus: us });
-      const rd = JSON.parse(window.localStorage.getItem('waypoint-read') || 'null');
+      const rd = JSON.parse(window.localStorage.getItem('cadenway-read') || 'null');
       if (Array.isArray(rd)) this.setState({ read: rd });
-      const tg = JSON.parse(window.localStorage.getItem('waypoint-tips') || 'null');
+      const tg = JSON.parse(window.localStorage.getItem('cadenway-tips') || 'null');
       if (Array.isArray(tg)) this.setState({ tipsGone: tg });
-      const fs = JSON.parse(window.localStorage.getItem('waypoint-fav-spaces') || 'null');
+      const fs = JSON.parse(window.localStorage.getItem('cadenway-fav-spaces') || 'null');
       if (Array.isArray(fs)) this.setState({ favSpaces: fs });
     } catch (e) {}
     this.onStatusStorage = (e) => {
       try {
-        if (e.key === 'waypoint-status' && e.newValue) { const us = JSON.parse(e.newValue); if (us && USTATUS[us.key]) this.setState({ ustatus: us }); }
-        if (e.key === 'waypoint-fav-spaces' && e.newValue) this.setState({ favSpaces: JSON.parse(e.newValue) });
+        if (e.key === 'cadenway-status' && e.newValue) { const us = JSON.parse(e.newValue); if (us && USTATUS[us.key]) this.setState({ ustatus: us }); }
+        if (e.key === 'cadenway-fav-spaces' && e.newValue) this.setState({ favSpaces: JSON.parse(e.newValue) });
       } catch (err) {}
     };
     window.addEventListener('storage', this.onStatusStorage);
     setTimeout(() => this.placeTabIndicator(), 0);
     try {
-      const t = window.localStorage.getItem('waypoint-theme');
+      const t = window.localStorage.getItem('cadenway-theme');
       if (t === 'dark' || t === 'light') this.setState({ stored: t });
     } catch (e) {}
     this.onStorage = (e) => {
-      if (e.key === 'waypoint-theme' && (e.newValue === 'dark' || e.newValue === 'light')) this.setState({ stored: e.newValue, theme: null });
+      if (e.key === 'cadenway-theme' && (e.newValue === 'dark' || e.newValue === 'light')) this.setState({ stored: e.newValue, theme: null });
     };
     window.addEventListener('storage', this.onStorage);
     try {
       if (window.matchMedia && window.matchMedia('(max-width: 1023px)').matches) this.setState({ sidebarOpen: false });
     } catch (e) {}
     try {
-      const no = JSON.parse(window.localStorage.getItem('waypoint-new-org') || 'null');
+      const no = JSON.parse(window.localStorage.getItem('cadenway-new-org') || 'null');
       if (no && Date.now() - no.at < 300000) {
         this.setState({ onb: { step: 0, org: no.name || 'Atelier Nord', tpl: { dev: 'dev', marketing: 'mkt', agence: 'agency' }[no.use] || 'dev' } });
-        window.localStorage.removeItem('waypoint-new-org');
+        window.localStorage.removeItem('cadenway-new-org');
       }
     } catch (e) {}
     try {
-      const n = JSON.parse(window.localStorage.getItem('waypoint-nav') || 'null');
+      const n = JSON.parse(window.localStorage.getItem('cadenway-nav') || 'null');
       if (n && n.to === 'App' && Date.now() - n.at < 15000) {
         if (PAGE_KEYS.includes(n.page)) this.setState({ page: n.page });
         if (n.space) this.setState({ page: 'spaces', spaceView: n.space, spacesOpen: { produit: true, [n.space]: true } });
         if (n.cmd) this.setState({ cmdOpen: true, cmdQuery: '' });
         if (n.inbox) this.setState({ inboxOpen: true });
-        window.localStorage.removeItem('waypoint-nav');
+        window.localStorage.removeItem('cadenway-nav');
       }
     } catch (e) {}
   }
   navTo(to, payload) {
     return () => {
-      try { window.localStorage.setItem('waypoint-nav', JSON.stringify({ to, ...payload, at: Date.now() })); } catch (e) {}
+      try { window.localStorage.setItem('cadenway-nav', JSON.stringify({ to, ...payload, at: Date.now() })); } catch (e) {}
     };
   }
   download(name, text, type) {
@@ -4772,10 +4772,10 @@ class Component extends DCLogic {
     const root = document.documentElement;
     const el = e && e.currentTarget && e.currentTarget.getBoundingClientRect ? e.currentTarget : null;
     const r = el ? el.getBoundingClientRect() : null;
-    root.style.setProperty('--wp-vt-origin', r ? Math.round(r.left + r.width / 2) + 'px ' + Math.round(r.top + r.height / 2) + 'px' : '50% 100%');
-    root.dataset.wpVt = 'circle-blur';
+    root.style.setProperty('--cw-vt-origin', r ? Math.round(r.left + r.width / 2) + 'px ' + Math.round(r.top + r.height / 2) + 'px' : '50% 100%');
+    root.dataset.cwVt = 'circle-blur';
     const vt = document.startViewTransition(() => new Promise((resolve) => { apply(resolve); setTimeout(resolve, 80); }));
-    const end = () => { delete root.dataset.wpVt; };
+    const end = () => { delete root.dataset.cwVt; };
     vt.finished.then(end, end);
     vt.ready.catch(() => {});
   }
@@ -4834,7 +4834,7 @@ class Component extends DCLogic {
     out.isErrPage = !!ep;
     const d = ERR_PAGES[(ep && ep.kind) || 'notfound'];
     const asked = !!s.accessAsked;
-    const inTrash = (s.trash || TRASH_INIT).some((x) => x.task.id === 'WAY-452');
+    const inTrash = (s.trash || TRASH_INIT).some((x) => x.task.id === 'CAD-452');
     const leave = () => this.setState({ errPage: null, page: 'home', spaceView: null });
     out.errP = {
       ...d,
@@ -4852,10 +4852,10 @@ class Component extends DCLogic {
           this.showToast('Demande envoyée à Léa Petit', 'Vous serez prévenue dans la boîte de réception dès qu’elle aura répondu.', null);
         } else if (k === 'deleted') {
           const tr = this.st().trash || TRASH_INIT;
-          const it = tr.find((x) => x.task.id === 'WAY-452');
+          const it = tr.find((x) => x.task.id === 'CAD-452');
           if (!it) return;
           this.setState({ trash: tr.filter((x) => x !== it), tasks: [...this.tasks(), it.task], errPage: null, page: 'spaces', spaceView: null, listId: it.task.list, openId: it.task.id });
-          this.showToast('Tâche restaurée', 'WAY-452 est de retour dans « Sprint 14 ».', null);
+          this.showToast('Tâche restaurée', 'CAD-452 est de retour dans « Sprint 14 ».', null);
         } else leave();
       },
       secondary: () => {
@@ -5305,7 +5305,7 @@ class Component extends DCLogic {
       { key: 'invite', label: 'Inviter un membre de l’équipe', on: (ob.invited || 0) > 0 || !!ob.shared, act: () => this.setState({ dialog: 'share', dlgOpen: true, shareEmail: '' }) },
       { key: 'board', label: 'Essayer la vue Tableau', on: !!this.onbBoard, act: () => this.setState({ view: 'board', views: Array.from(new Set([...(this.st().views || ['list', 'board', 'gantt']), 'board'])) }) },
       { key: 'remind', label: 'Programmer un rappel', on: this.reminders().length > (ob.remSeed || 0), act: () => { const id = (this.tasks().find((x) => (ob.lists || []).includes(x.list)) || {}).id; if (id) this.setState({ openId: id, sheetTab: 'details', sheetPop: 'remind' }); } },
-      { key: 'mobile', label: 'Installer l’application mobile', on: !!ob.mobile, act: () => { this.setState({ onb: { ...ob, mobile: true } }); this.showToast('Lien envoyé par e-mail', 'Ouvrez-le sur votre téléphone pour installer Waypoint.', null); } },
+      { key: 'mobile', label: 'Installer l’application mobile', on: !!ob.mobile, act: () => { this.setState({ onb: { ...ob, mobile: true } }); this.showToast('Lien envoyé par e-mail', 'Ouvrez-le sur votre téléphone pour installer Cadenway.', null); } },
     ] : [];
     const doneN = items.filter((x) => x.on).length;
     out.onbCk = !!ck;
@@ -5615,8 +5615,8 @@ class Component extends DCLogic {
       const H = window.innerHeight || 0;
       const pad = 8;
       document.querySelectorAll('.menu-shadow').forEach((el) => {
-        if (el.dataset.wpPlaced || getComputedStyle(el).position !== 'absolute') return;
-        el.dataset.wpPlaced = '1';
+        if (el.dataset.cwPlaced || getComputedStyle(el).position !== 'absolute') return;
+        el.dataset.cwPlaced = '1';
         // zone visible : la fenêtre, réduite par chaque conteneur qui coupe (modale, panneau défilant…)
         let box = { top: 0, left: 0, bottom: H, right: W };
         let cb = null;
@@ -6152,7 +6152,7 @@ class Component extends DCLogic {
       const apply = (done) => this.setState({ theme: next, cmdOpen: false }, done);
       if (next !== theme) this.themeTransition(e, apply); else apply(() => {});
       this.closeMenu(['userMenu']);
-      try { window.localStorage.setItem('waypoint-theme', next); } catch (e) {}
+      try { window.localStorage.setItem('cadenway-theme', next); } catch (e) {}
     };
     const closing = s.closing || [];
     const mstate = (k) => (closing.includes(k) ? 'closed' : 'open');
@@ -6191,7 +6191,7 @@ class Component extends DCLogic {
     const selected = s.selected || [];
     const collapsed = s.collapsed || {};
     const boardCollapsed = s.boardCollapsed || { backlog: true, waiting: true, cancelled: true };
-    const openId = s.openId !== undefined ? s.openId : (this.props.detail ? 'WAY-482' : null);
+    const openId = s.openId !== undefined ? s.openId : (this.props.detail ? 'CAD-482' : null);
     this.navKey = [page, page === 'spaces' ? (spaceView ? 'ov:' + spaceView : listId + ':' + view) : ''].join('|');
     this.openKey = openId;
     const q = (s.query || '').trim().toLowerCase();
@@ -6271,7 +6271,7 @@ class Component extends DCLogic {
         toggleSel: () => this.setState({ selected: sel ? selected.filter((x) => x !== t.id) : [...selected, t.id] }),
         open: () => open(t.id),
         ctx: ctxOpen('task', t.id), ctxKey: ctxKey('task', t.id),
-        rowFx: (s.rowOut || []).includes(t.id) ? 'wp-row-out' : (s.rowIn || []).includes(t.id) ? 'wp-row-in' : '',
+        rowFx: (s.rowOut || []).includes(t.id) ? 'cw-row-out' : (s.rowIn || []).includes(t.id) ? 'cw-row-in' : '',
         people: t.people.map((p) => ({ initials: p, name: PEOPLE[p] })), noPeople: t.people.length === 0,
         due: dI.due, dueTone: dI.tone, dueLate: dI.late,
         priority: t.priority, prWord: pr.word, prTone: pr.tone, bars: bars(t.priority),
@@ -6827,7 +6827,7 @@ class Component extends DCLogic {
     const sheetPop = s.sheetPop || null;
     const toggleSheetPop = (k) => () => this.setState({ sheetPop: this.st().sheetPop === k ? null : k });
 
-    // Select personnalisé (wp-select) : un seul ouvert à la fois, clé = id du déclencheur
+    // Select personnalisé (cw-select) : un seul ouvert à la fois, clé = id du déclencheur
     const sel = (key, value, opts, onPick) => {
       const isOpen = s.openSelect === key;
       const cur = opts.find((o) => o[0] === value);
@@ -6913,7 +6913,7 @@ class Component extends DCLogic {
 
     // Palette
     const cq = (s.cmdQuery || '').trim().toLowerCase();
-    const recent = ['WAY-482', 'WAY-470', 'WAY-488'].map((id) => tasks.find((t) => t.id === id)).filter(Boolean);
+    const recent = ['CAD-482', 'CAD-470', 'CAD-488'].map((id) => tasks.find((t) => t.id === id)).filter(Boolean);
     const cmdAll = [
       { group: 'Suggestions', label: 'Créer une tâche', icon: 'phosphorPlusBold', kbd: 'C', run: () => this.createTask('todo') },
       { group: 'Suggestions', label: view === 'list' ? 'Afficher le tableau' : 'Afficher la liste', icon: view === 'list' ? 'phosphorKanbanBold' : 'phosphorListBulletsBold', kbd: 'V', run: () => this.setState({ view: view === 'list' ? 'board' : 'list', cmdOpen: false }) },
@@ -6944,12 +6944,12 @@ class Component extends DCLogic {
     // Boîte de réception
     const read = s.read || [];
     const notifs = [
-      { key: 'n1', who: 'IR', kind: 'mention', verb: 'vous a mentionnée', quote: '@Camille tu peux relire le parcours SSO avant la démo de jeudi ?', time: '12 min', task: 'WAY-482', text: 'Inès Robert vous a mentionnée dans WAY-482' },
-      { key: 'n2', who: 'HD', kind: 'status', verb: 'a passé la tâche à Bloqué', quote: '', time: '1 h', task: 'WAY-470', text: 'Hugo Dubois a passé WAY-470 à Bloqué' },
-      { key: 'n3', who: 'LP', kind: 'assign', verb: 'vous a assigné une tâche', quote: '', time: 'hier', task: 'WAY-488', text: 'Léa Petit vous a assigné WAY-488' },
-      { key: 'n4', who: 'IR', kind: 'comment', verb: 'a commenté', quote: 'Export prêt en relecture, il manque juste le séparateur point-virgule.', time: 'hier', task: 'WAY-475', text: 'Inès Robert a commenté WAY-475' },
-      { key: 'n7', who: 'LP', kind: 'approval', verb: 'vous demande d’approuver', quote: '', time: '3 h', task: 'WAY-475', text: 'Léa Petit vous demande d’approuver WAY-475' },
-      { key: 'n5', who: 'IR', kind: 'comment', verb: 'a répondu à votre commentaire', quote: 'On garde l’ancien écran en secours jusqu’à la migration.', time: 'lun.', task: 'WAY-452', text: 'Inès Robert a répondu sur WAY-452' },
+      { key: 'n1', who: 'IR', kind: 'mention', verb: 'vous a mentionnée', quote: '@Camille tu peux relire le parcours SSO avant la démo de jeudi ?', time: '12 min', task: 'CAD-482', text: 'Inès Robert vous a mentionnée dans CAD-482' },
+      { key: 'n2', who: 'HD', kind: 'status', verb: 'a passé la tâche à Bloqué', quote: '', time: '1 h', task: 'CAD-470', text: 'Hugo Dubois a passé CAD-470 à Bloqué' },
+      { key: 'n3', who: 'LP', kind: 'assign', verb: 'vous a assigné une tâche', quote: '', time: 'hier', task: 'CAD-488', text: 'Léa Petit vous a assigné CAD-488' },
+      { key: 'n4', who: 'IR', kind: 'comment', verb: 'a commenté', quote: 'Export prêt en relecture, il manque juste le séparateur point-virgule.', time: 'hier', task: 'CAD-475', text: 'Inès Robert a commenté CAD-475' },
+      { key: 'n7', who: 'LP', kind: 'approval', verb: 'vous demande d’approuver', quote: '', time: '3 h', task: 'CAD-475', text: 'Léa Petit vous demande d’approuver CAD-475' },
+      { key: 'n5', who: 'IR', kind: 'comment', verb: 'a répondu à votre commentaire', quote: 'On garde l’ancien écran en secours jusqu’à la migration.', time: 'lun.', task: 'CAD-452', text: 'Inès Robert a répondu sur CAD-452' },
       { key: 'n6', who: 'LP', kind: 'mention', verb: 'vous a mentionnée', quote: '@Camille peux-tu chiffrer la part outillage ?', time: '2 nov.', task: 'DIR-12', text: 'Léa Petit vous a mentionnée dans DIR-12' },
     ];
     const unread = notifs.filter((n) => !read.includes(n.key)).length;
@@ -6990,10 +6990,10 @@ class Component extends DCLogic {
     const setUst = (patch) => {
       const next = { ...(this.st().ustatus || ust), ...patch };
       this.setState({ ustatus: next });
-      try { window.localStorage.setItem('waypoint-status', JSON.stringify(next)); } catch (e) {}
+      try { window.localStorage.setItem('cadenway-status', JSON.stringify(next)); } catch (e) {}
     };
     const favSpaces = s.favSpaces || ['produit', 'design'];
-    const setFavSpaces = (next) => { this.setState({ favSpaces: next }); try { window.localStorage.setItem('waypoint-fav-spaces', JSON.stringify(next)); } catch (e) {} };
+    const setFavSpaces = (next) => { this.setState({ favSpaces: next }); try { window.localStorage.setItem('cadenway-fav-spaces', JSON.stringify(next)); } catch (e) {} };
     const openEditSpace = (sp) => this.setState({ toolPop: null, dialog: 'space', dlgOpen: true, spForm: { mode: 'edit', private: !!sp.private, key: sp.key, name: sp.name, prefix: sp.prefix, prefixTouched: true, desc: sp.desc || '', icon: sp.icon || null, color: sp.color || 'gris' } });
     const spaces = spaceDefs.map((sp) => ({
       ...sp, ...spaceLook(sp),
@@ -7223,7 +7223,7 @@ class Component extends DCLogic {
           ctxSpaceToggle: done(() => this.setState({ spacesOpen: { ...spacesOpen, [sp.key]: !isOpen } })),
           ctxSpaceFavLabel: (s.favSpaces || ['produit', 'design']).includes(sp.key) ? 'Retirer des espaces favoris' : 'Ajouter aux espaces favoris',
           ctxSpaceFavIcon: (s.favSpaces || ['produit', 'design']).includes(sp.key) ? 'phosphorStarFill' : 'phosphorStarBold',
-          ctxSpaceFav: done(() => { const fs = this.st().favSpaces || ['produit', 'design']; const on = fs.includes(sp.key); const next = on ? fs.filter((x) => x !== sp.key) : [...fs, sp.key]; this.setState({ favSpaces: next }); try { window.localStorage.setItem('waypoint-fav-spaces', JSON.stringify(next)); } catch (e) {} this.showToast(on ? 'Retiré des espaces favoris' : 'Ajouté aux espaces favoris', sp.name, null); }),
+          ctxSpaceFav: done(() => { const fs = this.st().favSpaces || ['produit', 'design']; const on = fs.includes(sp.key); const next = on ? fs.filter((x) => x !== sp.key) : [...fs, sp.key]; this.setState({ favSpaces: next }); try { window.localStorage.setItem('cadenway-fav-spaces', JSON.stringify(next)); } catch (e) {} this.showToast(on ? 'Retiré des espaces favoris' : 'Ajouté aux espaces favoris', sp.name, null); }),
         });
       }
       return out;
@@ -8209,7 +8209,7 @@ class Component extends DCLogic {
         const hide = (msg) => {
           const next = [...gone, t.key];
           this.setState({ tipsGone: next, tipIdx: i });
-          try { window.localStorage.setItem('waypoint-tips', JSON.stringify(next)); } catch (e) {}
+          try { window.localStorage.setItem('cadenway-tips', JSON.stringify(next)); } catch (e) {}
           if (msg) this.showToast(msg[0], msg[1], null);
         };
         return {
@@ -8217,14 +8217,14 @@ class Component extends DCLogic {
           pos: (i + 1) + ' / ' + list.length,
           href: t.href || '#',
           go: (e) => {
-            if (t.nav) { try { window.localStorage.setItem('waypoint-nav', JSON.stringify({ ...t.nav, at: Date.now() })); } catch (err) {} return; }
+            if (t.nav) { try { window.localStorage.setItem('cadenway-nav', JSON.stringify({ ...t.nav, at: Date.now() })); } catch (err) {} return; }
             if (e && e.preventDefault) e.preventDefault();
             hide(t.toast);
           },
           dismiss: () => {
             const all = SIDEBAR_TIPS.map((x) => x.key);
             this.setState({ tipsGone: all });
-            try { window.localStorage.setItem('waypoint-tips', JSON.stringify(all)); } catch (e) {}
+            try { window.localStorage.setItem('cadenway-tips', JSON.stringify(all)); } catch (e) {}
           },
           dismissLabel: 'Masquer les suggestions',
           prev: () => this.setState({ tipIdx: i - 1 }),
@@ -8274,9 +8274,9 @@ class Component extends DCLogic {
         textTone: read.includes(n.key) ? 'text-muted-foreground' : 'text-foreground',
         kindIcon: { mention: 'phosphorAtBold', status: 'phosphorArrowsClockwiseBold', assign: 'phosphorUserPlusBold', comment: 'phosphorChatCircleBold', approval: 'phosphorSealCheckBold' }[n.kind] || 'phosphorBellBold',
         kindTone: n.kind === 'mention' ? 'text-primary' : 'text-muted-foreground',
-        open: () => { const nr = [...read, n.key]; this.setState({ read: nr }); try { window.localStorage.setItem('waypoint-read', JSON.stringify(nr)); } catch (e) {} open(n.task); },
+        open: () => { const nr = [...read, n.key]; this.setState({ read: nr }); try { window.localStorage.setItem('cadenway-read', JSON.stringify(nr)); } catch (e) {} open(n.task); },
       })),
-      markAllRead: () => { const nr = notifs.map((n) => n.key); this.setState({ read: nr }); try { window.localStorage.setItem('waypoint-read', JSON.stringify(nr)); } catch (e) {} },
+      markAllRead: () => { const nr = notifs.map((n) => n.key); this.setState({ read: nr }); try { window.localStorage.setItem('cadenway-read', JSON.stringify(nr)); } catch (e) {} },
       unreadCount: String(unread), hasUnread: unread > 0, noUnread: unread === 0,
       inboxSeeAll: () => { this.closeMenu(['inboxOpen']); this.setState({ page: 'home', spaceView: null }); },
 
@@ -8704,7 +8704,7 @@ class Component extends DCLogic {
       })(),
       closeSheet: () => this.setState({ openId: null, statusMenu: false }),
       renameTask: (e) => { const name = e.target.value; this.setTasks(this.tasks().map((t) => (t.id === openId ? { ...t, name } : t))); },
-      copyLink: () => this.showToast('Lien copié', 'app.waypoint.example/atelier-nord/t/' + openId, null),
+      copyLink: () => this.showToast('Lien copié', 'app.cadenway.example/atelier-nord/t/' + openId, null),
       sheetTabs: tabs.map((t) => ({ ...t, hasCount: !!t.count, active: t.key === tab, state: t.key === tab ? 'active' : 'inactive', pick: () => this.setState({ sheetTab: t.key, statusMenu: false }) })),
       tabDetails: tab === 'details', tabSub: tab === 'sub', tabComments: tab === 'comments', tabActivity: tab === 'activity',
       statusMenu: !!s.statusMenu,

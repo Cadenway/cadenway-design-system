@@ -1,7 +1,7 @@
 {
-  "name": "waypoint-design-system",
+  "name": "cadenway-design-system",
   "version": "0.0.0",
-  "description": "Waypoint design system: tokens, icons, Angular bricks and their Storybook.",
+  "description": "Cadenway design system: tokens, icons, Angular bricks and their Storybook.",
   "private": true,
   "license": "UNLICENSED",
   "type": "module",
@@ -11,15 +11,15 @@
   },
   "scripts": {
     "prepare": "git config core.hooksPath .githooks",
-    "storybook": "pnpm --filter @waypoint/storybook run storybook",
-    "storybook:build": "pnpm --filter @waypoint/storybook run storybook:build",
+    "storybook": "pnpm --filter @cadenway/storybook run storybook",
+    "storybook:build": "pnpm --filter @cadenway/storybook run storybook:build",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint .",
     "typecheck": "ngc --noEmit -p packages/icons/tsconfig.lib.json && ngc --noEmit -p packages/icons/tsconfig.spec.json && ngc --noEmit -p packages/ui/tsconfig.lib.json && ngc --noEmit -p packages/ui/tsconfig.spec.json && ngc --noEmit -p apps/storybook/tsconfig.json",
     "test": "ng test --no-watch",
     "test:coverage": "ng test --no-watch --coverage",
-    "test:storybook": "pnpm --filter @waypoint/storybook run test:storybook",
+    "test:storybook": "pnpm --filter @cadenway/storybook run test:storybook",
     "build": "ng build icons && ng build ui",
     "changeset": "changeset",
     "quality": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:coverage && pnpm storybook:build && pnpm test:storybook && pnpm build"

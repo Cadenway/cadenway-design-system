@@ -1,5 +1,5 @@
 name: Bug report
-description: Something in waypoint-design-system does not work as expected.
+description: Something in cadenway-design-system does not work as expected.
 labels: [bug]
 body:
   - type: markdown
@@ -11,9 +11,9 @@ body:
   - type: input
     id: task
     attributes:
-      label: Waypoint task
+      label: Cadenway task
       description: The task id, if one already tracks this bug.
-      placeholder: WAY-482
+      placeholder: CAD-482
 
   - type: textarea
     id: what-happened
@@ -47,9 +47,9 @@ body:
     attributes:
       label: Package
       options:
-        - '@waypoint/tokens'
-        - '@waypoint/icons'
-        - '@waypoint/ui'
+        - '@cadenway/tokens'
+        - '@cadenway/icons'
+        - '@cadenway/ui'
     validations:
       required: true
 

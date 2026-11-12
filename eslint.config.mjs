@@ -34,15 +34,15 @@ export default defineConfig(
       '@typescript-eslint/explicit-function-return-type': ['error', { allowExpressions: true }],
       // Angular components, directives and test hosts are classes that only carry a decorator.
       '@typescript-eslint/no-extraneous-class': ['error', { allowWithDecorator: true }],
-      // Angular 22 conventions: `wp-` selectors, signal inputs, outputs and models. No class
+      // Angular 22 conventions: `cw-` selectors, signal inputs, outputs and models. No class
       // suffix is required (`Button`, not `ButtonComponent`), so the suffix rules stay off.
       '@angular-eslint/component-selector': [
         'error',
-        { type: 'element', prefix: 'wp', style: 'kebab-case' },
+        { type: 'element', prefix: 'cw', style: 'kebab-case' },
       ],
       '@angular-eslint/directive-selector': [
         'error',
-        { type: 'attribute', prefix: 'wp', style: 'camelCase' },
+        { type: 'attribute', prefix: 'cw', style: 'camelCase' },
       ],
       '@angular-eslint/prefer-signals': 'error',
       '@angular-eslint/prefer-signal-model': 'error',
@@ -59,8 +59,8 @@ export default defineConfig(
         {
           patterns: [
             {
-              regex: '\\.\\./waypoint-',
-              message: 'Never import sibling sources: use the published @waypoint/* packages.',
+              regex: '\\.\\./cadenway-',
+              message: 'Never import sibling sources: use the published @cadenway/* packages.',
             },
           ],
         },

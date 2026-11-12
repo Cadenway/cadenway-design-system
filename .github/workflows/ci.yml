@@ -35,7 +35,7 @@ jobs:
       - run: pnpm test:coverage
       - run: pnpm storybook:build
       # The stories run as browser tests in headless Chromium.
-      - run: pnpm --filter @waypoint/storybook exec playwright install --with-deps chromium
+      - run: pnpm --filter @cadenway/storybook exec playwright install --with-deps chromium
       - run: pnpm test:storybook
       - run: pnpm build
 

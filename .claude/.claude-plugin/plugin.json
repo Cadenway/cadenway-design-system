@@ -1,7 +1,7 @@
 {
-  "name": "waypoint-design-system",
+  "name": "cadenway-design-system",
   "version": "0.1.0",
-  "description": "waypoint-design-system tooling: 12 wp-ds-* agents (component, story, theme, icon, test and release builders plus read-only accessibility, motion, design, package and architecture reviewers for the Angular design system, plus a .github maintainer), 13 /wp-* commands, 9 path-scoped rules, 12 skills, and the guard, git-guard and format hooks. The plugin root is this .claude/ folder; the hooks only act inside a waypoint-design-system checkout.",
+  "description": "cadenway-design-system tooling: 12 cw-ds-* agents (component, story, theme, icon, test and release builders plus read-only accessibility, motion, design, package and architecture reviewers for the Angular design system, plus a .github maintainer), 13 /cw-* commands, 9 path-scoped rules, 12 skills, and the guard, git-guard and format hooks. The plugin root is this .claude/ folder; the hooks only act inside a cadenway-design-system checkout.",
   "author": {
     "name": "Valentin FORTIN"
   }

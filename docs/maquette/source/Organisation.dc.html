@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<title>Atelier Nord, réglages de l'organisation — Waypoint</title>
+<title>Atelier Nord, réglages de l'organisation — Cadenway</title>
 <script src="./support.js"></script>
 <link rel="stylesheet" href="styles/app.css">
 </head>
@@ -73,38 +73,38 @@ body{margin:0}
         <sc-if value="{{skOn}}" hint-placeholder-val="{{ false }}">
           <div class="flex flex-col gap-6" role="status" aria-busy="true" aria-label="Chargement de la section">
             <div class="flex items-start gap-4" aria-hidden="true">
-              <div class="flex min-w-0 flex-1 flex-col gap-2"><span class="wp-sk h-7 w-56"></span><span class="wp-sk h-3 w-3/4"></span></div>
-              <sc-if value="{{skS.action}}" hint-placeholder-val="{{ false }}"><span class="wp-sk h-8 w-32 rounded-lg"></span></sc-if>
+              <div class="flex min-w-0 flex-1 flex-col gap-2"><span class="cw-sk h-7 w-56"></span><span class="cw-sk h-3 w-3/4"></span></div>
+              <sc-if value="{{skS.action}}" hint-placeholder-val="{{ false }}"><span class="cw-sk h-8 w-32 rounded-lg"></span></sc-if>
             </div>
             <sc-if value="{{skS.hasTiles}}" hint-placeholder-val="{{ false }}">
-              <div class="grid grid-cols-1 gap-3 sm:grid-cols-3" aria-hidden="true"><sc-for list="{{skS.tiles}}" as="zst" hint-placeholder-count="3"><div class="flex flex-col gap-2.5 rounded-xl border border-border bg-card p-4"><span class="wp-sk h-3 w-24"></span><span class="wp-sk h-6 w-20"></span><span class="wp-sk h-1.5 w-full rounded-full"></span></div></sc-for></div>
+              <div class="grid grid-cols-1 gap-3 sm:grid-cols-3" aria-hidden="true"><sc-for list="{{skS.tiles}}" as="zst" hint-placeholder-count="3"><div class="flex flex-col gap-2.5 rounded-xl border border-border bg-card p-4"><span class="cw-sk h-3 w-24"></span><span class="cw-sk h-6 w-20"></span><span class="cw-sk h-1.5 w-full rounded-full"></span></div></sc-for></div>
             </sc-if>
             <sc-if value="{{skS.toolbar}}" hint-placeholder-val="{{ false }}">
-              <div class="flex flex-wrap items-center gap-2" aria-hidden="true"><span class="wp-sk h-8 w-64 rounded-lg"></span><span class="wp-sk h-8 w-56 rounded-lg"></span><span class="wp-sk h-8 w-40 rounded-lg"></span></div>
+              <div class="flex flex-wrap items-center gap-2" aria-hidden="true"><span class="cw-sk h-8 w-64 rounded-lg"></span><span class="cw-sk h-8 w-56 rounded-lg"></span><span class="cw-sk h-8 w-40 rounded-lg"></span></div>
             </sc-if>
             <sc-if value="{{skS.hasC1}}" hint-placeholder-val="{{ true }}">
               <section class="flex flex-col gap-4 rounded-xl border border-border bg-card p-4" aria-hidden="true">
-                <div class="flex flex-col gap-2"><span class="wp-sk h-4 w-32"></span><span class="wp-sk h-3 {{skS.w1}}"></span></div>
-                <sc-for list="{{skS.c1}}" as="zc1" hint-placeholder-count="3"><div class="flex items-center gap-4"><div class="flex min-w-0 flex-1 flex-col gap-1.5"><span class="wp-sk h-3 {{zc1.w}}"></span><span class="wp-sk h-2.5 w-1/2"></span></div><span class="wp-sk {{zc1.ctl}}"></span></div></sc-for>
+                <div class="flex flex-col gap-2"><span class="cw-sk h-4 w-32"></span><span class="cw-sk h-3 {{skS.w1}}"></span></div>
+                <sc-for list="{{skS.c1}}" as="zc1" hint-placeholder-count="3"><div class="flex items-center gap-4"><div class="flex min-w-0 flex-1 flex-col gap-1.5"><span class="cw-sk h-3 {{zc1.w}}"></span><span class="cw-sk h-2.5 w-1/2"></span></div><span class="cw-sk {{zc1.ctl}}"></span></div></sc-for>
               </section>
             </sc-if>
             <sc-if value="{{skS.hasC2}}" hint-placeholder-val="{{ false }}">
               <section class="flex flex-col gap-4 rounded-xl border border-border bg-card p-4" aria-hidden="true">
-                <div class="flex flex-col gap-2"><span class="wp-sk h-4 w-32"></span><span class="wp-sk h-3 {{skS.w2}}"></span></div>
-                <sc-for list="{{skS.c2}}" as="zc2" hint-placeholder-count="3"><div class="flex items-center gap-4"><div class="flex min-w-0 flex-1 flex-col gap-1.5"><span class="wp-sk h-3 {{zc2.w}}"></span><span class="wp-sk h-2.5 w-1/2"></span></div><span class="wp-sk {{zc2.ctl}}"></span></div></sc-for>
+                <div class="flex flex-col gap-2"><span class="cw-sk h-4 w-32"></span><span class="cw-sk h-3 {{skS.w2}}"></span></div>
+                <sc-for list="{{skS.c2}}" as="zc2" hint-placeholder-count="3"><div class="flex items-center gap-4"><div class="flex min-w-0 flex-1 flex-col gap-1.5"><span class="cw-sk h-3 {{zc2.w}}"></span><span class="cw-sk h-2.5 w-1/2"></span></div><span class="cw-sk {{zc2.ctl}}"></span></div></sc-for>
               </section>
             </sc-if>
             <sc-if value="{{skS.hasC3}}" hint-placeholder-val="{{ false }}">
               <section class="flex flex-col gap-4 rounded-xl border border-border bg-card p-4" aria-hidden="true">
-                <div class="flex flex-col gap-2"><span class="wp-sk h-4 w-32"></span><span class="wp-sk h-3 {{skS.w3}}"></span></div>
-                <sc-for list="{{skS.c3}}" as="zc3" hint-placeholder-count="3"><div class="flex items-center gap-4"><div class="flex min-w-0 flex-1 flex-col gap-1.5"><span class="wp-sk h-3 {{zc3.w}}"></span><span class="wp-sk h-2.5 w-1/2"></span></div><span class="wp-sk {{zc3.ctl}}"></span></div></sc-for>
+                <div class="flex flex-col gap-2"><span class="cw-sk h-4 w-32"></span><span class="cw-sk h-3 {{skS.w3}}"></span></div>
+                <sc-for list="{{skS.c3}}" as="zc3" hint-placeholder-count="3"><div class="flex items-center gap-4"><div class="flex min-w-0 flex-1 flex-col gap-1.5"><span class="cw-sk h-3 {{zc3.w}}"></span><span class="cw-sk h-2.5 w-1/2"></span></div><span class="cw-sk {{zc3.ctl}}"></span></div></sc-for>
               </section>
             </sc-if>
             <sc-if value="{{skS.hasTable}}" hint-placeholder-val="{{ true }}">
               <div class="overflow-hidden rounded-xl border border-border bg-card" aria-hidden="true">
-                <div class="flex h-10 items-center gap-4 border-b border-border bg-surface-muted px-4"><span class="wp-sk wp-sk-2 h-2.5 w-24"></span><span class="ml-auto wp-sk wp-sk-2 h-2.5 w-16"></span><span class="wp-sk wp-sk-2 h-2.5 w-20"></span></div>
+                <div class="flex h-10 items-center gap-4 border-b border-border bg-surface-muted px-4"><span class="cw-sk cw-sk-2 h-2.5 w-24"></span><span class="ml-auto cw-sk cw-sk-2 h-2.5 w-16"></span><span class="cw-sk cw-sk-2 h-2.5 w-20"></span></div>
                 <sc-for list="{{skS.table}}" as="ztr" hint-placeholder-count="5">
-                  <div class="flex h-14 items-center gap-3 border-b border-border px-4 last:border-b-0"><span class="wp-sk size-8 rounded-full"></span><div class="flex min-w-0 flex-1 flex-col gap-1.5"><span class="wp-sk h-3 {{ztr.w}}"></span><span class="wp-sk h-2.5 w-40"></span></div><span class="wp-sk h-5 w-16 rounded-full"></span><span class="wp-sk h-3 w-20"></span></div>
+                  <div class="flex h-14 items-center gap-3 border-b border-border px-4 last:border-b-0"><span class="cw-sk size-8 rounded-full"></span><div class="flex min-w-0 flex-1 flex-col gap-1.5"><span class="cw-sk h-3 {{ztr.w}}"></span><span class="cw-sk h-2.5 w-40"></span></div><span class="cw-sk h-5 w-16 rounded-full"></span><span class="cw-sk h-3 w-20"></span></div>
                 </sc-for>
               </div>
             </sc-if>
@@ -113,13 +113,13 @@ body{margin:0}
 
         <sc-if value="{{errOn}}" hint-placeholder-val="{{ false }}">
           <div class="rounded-xl border border-dashed border-border" role="alert">
-            <div class="wp-empty flex min-w-0 flex-col items-center justify-center gap-4 rounded-xl p-6 text-center text-balance">
-              <div class="wp-empty-header flex max-w-sm flex-col items-center gap-2">
-                <span class="wp-empty-media flex size-10 items-center justify-center rounded-lg bg-muted"><span class="ng-icon phosphorWarningCircleBold size-5 text-destructive" aria-hidden="true"></span></span>
-                <h2 class="wp-empty-title text-sm font-medium">Impossible de charger cette section</h2>
-                <p class="wp-empty-description text-sm/relaxed text-muted-foreground">Le serveur n’a pas répondu à temps. Vos réglages ne sont pas perdus : réessayez dans un instant.</p>
+            <div class="cw-empty flex min-w-0 flex-col items-center justify-center gap-4 rounded-xl p-6 text-center text-balance">
+              <div class="cw-empty-header flex max-w-sm flex-col items-center gap-2">
+                <span class="cw-empty-media flex size-10 items-center justify-center rounded-lg bg-muted"><span class="ng-icon phosphorWarningCircleBold size-5 text-destructive" aria-hidden="true"></span></span>
+                <h2 class="cw-empty-title text-sm font-medium">Impossible de charger cette section</h2>
+                <p class="cw-empty-description text-sm/relaxed text-muted-foreground">Le serveur n’a pas répondu à temps. Vos réglages ne sont pas perdus : réessayez dans un instant.</p>
               </div>
-              <div class="wp-empty-content flex flex-wrap justify-center gap-2">
+              <div class="cw-empty-content flex flex-wrap justify-center gap-2">
                 <button type="button" onClick="{{errRetry}}" class="relative isolate inline-flex h-8 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-lg px-3 text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background border border-input bg-background hover:bg-accent"><span class="ng-icon phosphorArrowClockwiseBold" aria-hidden="true"></span>Réessayer</button>
                 
               </div>
@@ -153,7 +153,7 @@ body{margin:0}
               <div class="flex flex-col gap-2">
                 <label for="g-slug" class="text-sm leading-none font-medium">Adresse</label>
                 <div role="group" class="relative flex h-8 w-full min-w-0 items-center rounded-lg border border-input transition-[color,box-shadow] focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/20">
-                  <label for="g-slug" class="flex h-full shrink-0 cursor-text items-center ps-2.5 text-sm text-muted-foreground" aria-hidden="true">app.waypoint.example/</label>
+                  <label for="g-slug" class="flex h-full shrink-0 cursor-text items-center ps-2.5 text-sm text-muted-foreground" aria-hidden="true">app.cadenway.example/</label>
                   <input id="g-slug" data-field="slug" type="text" value="{{g.slug}}" onChange="{{onField}}" class="h-full min-w-0 flex-1 bg-transparent pr-2.5 font-mono text-xs outline-none">
                 </div>
               </div>
@@ -249,7 +249,7 @@ body{margin:0}
             <p class="ml-auto flex items-center gap-1.5 text-sm text-muted-foreground tabular-nums whitespace-nowrap" aria-live="polite"><span class="size-2 shrink-0 rounded-full bg-jade" aria-hidden="true"></span>{{onlineSummary}}</p>
           </div>
           <div class="relative w-full overflow-x-auto rounded-lg border border-border">
-            <div role="table" aria-label="Membres de l'organisation" class="wp-cards min-w-[720px] {{membersTablePad}}">
+            <div role="table" aria-label="Membres de l'organisation" class="cw-cards min-w-[720px] {{membersTablePad}}">
               <div role="row" class="grid h-9 grid-cols-[minmax(14rem,1fr)_10rem_9rem_8rem_3rem] items-center border-b border-border px-3 text-xs font-medium text-muted-foreground">
                 <span role="columnheader">Membre</span><span role="columnheader">Rôle</span><span role="columnheader">Deux étapes</span><span role="columnheader">Activité</span><span role="columnheader" class="sr-only whitespace-nowrap">Actions</span>
               </div>
@@ -280,7 +280,7 @@ body{margin:0}
           <section class="flex flex-col gap-3" aria-labelledby="m-invites">
             <h2 id="m-invites" class="text-base font-semibold">Invitations en attente <span class="text-sm font-normal text-muted-foreground tabular-nums whitespace-nowrap">{{inviteCount}}</span></h2>
             <div class="relative w-full overflow-x-auto rounded-lg border border-border">
-              <div role="table" aria-label="Invitations en attente" class="wp-cards min-w-[640px]">
+              <div role="table" aria-label="Invitations en attente" class="cw-cards min-w-[640px]">
                 <sc-for list="{{invites}}" as="iv" hint-placeholder-count="3">
                   <div role="row" class="grid min-h-11 grid-cols-[minmax(12rem,1fr)_7rem_9rem_auto] items-center gap-3 border-b border-border px-3 last:border-b-0 hover:bg-accent">
                     <span role="cell" class="flex min-w-0 items-center gap-2.5"><span class="flex size-8 shrink-0 items-center justify-center rounded-full border border-dashed border-input text-muted-foreground" aria-hidden="true"><span class="ng-icon phosphorEnvelopeSimpleBold size-3.5"></span></span><span class="flex min-w-0 flex-col"><span class="truncate leading-5">{{iv.email}}</span><span class="truncate text-xs text-muted-foreground">Invité par {{iv.by}}</span></span></span>
@@ -359,7 +359,7 @@ body{margin:0}
           <section class="flex flex-col gap-3" aria-labelledby="b-invoices">
             <h2 id="b-invoices" class="text-base font-semibold">Factures</h2>
             <div class="relative w-full overflow-x-auto rounded-lg border border-border">
-              <div role="table" aria-label="Factures" class="wp-cards min-w-[600px]">
+              <div role="table" aria-label="Factures" class="cw-cards min-w-[600px]">
                 <div role="row" class="grid h-9 grid-cols-[9rem_minmax(8rem,1fr)_7rem_7rem_3rem] items-center border-b border-border px-3 text-xs font-medium text-muted-foreground">
                   <span role="columnheader">Numéro</span><span role="columnheader">Période</span><span role="columnheader" class="text-right whitespace-nowrap">Montant</span><span role="columnheader">Statut</span><span role="columnheader" class="sr-only whitespace-nowrap">PDF</span>
                 </div>
@@ -493,7 +493,7 @@ body{margin:0}
         <sc-if value="{{isIntegrations}}" hint-placeholder-val="{{ false }}">
           <header class="flex flex-col gap-1">
             <h1 class="text-2xl font-semibold tracking-tight">Intégrations</h1>
-            <p class="text-sm text-muted-foreground">Reliez le code aux tâches : les branches, commits et pull requests qui citent un identifiant comme WAY-482 apparaissent dans la tâche.</p>
+            <p class="text-sm text-muted-foreground">Reliez le code aux tâches : les branches, commits et pull requests qui citent un identifiant comme CAD-482 apparaissent dans la tâche.</p>
           </header>
           <sc-for list="{{intProviders}}" as="ip" hint-placeholder-count="2">
             <section class="flex flex-col rounded-xl border border-border bg-card" aria-labelledby="{{ip.headId}}">
@@ -562,9 +562,9 @@ body{margin:0}
             </div>
             <sc-if value="{{intHasAcc}}" hint-placeholder-val="{{ true }}">
               <div class="relative w-full overflow-x-auto border-t border-border">
-                <div role="table" aria-label="Comptes Git" class="wp-cards min-w-[640px]">
+                <div role="table" aria-label="Comptes Git" class="cw-cards min-w-[640px]">
                   <div role="row" class="grid h-9 grid-cols-[minmax(14rem,1fr)_14rem_10rem] items-center border-b border-border px-4 text-xs font-medium text-muted-foreground">
-                    <span role="columnheader">Compte</span><span role="columnheader">Membre Waypoint</span><span role="columnheader" class="text-right">Activité</span>
+                    <span role="columnheader">Compte</span><span role="columnheader">Membre Cadenway</span><span role="columnheader" class="text-right">Activité</span>
                   </div>
                   <sc-for list="{{intAccounts}}" as="ga" hint-placeholder-count="6">
                     <div role="row" class="grid min-h-11 grid-cols-[minmax(14rem,1fr)_14rem_10rem] items-center border-b border-border px-4 py-1.5 transition-colors last:border-b-0 hover:bg-muted">
@@ -581,7 +581,7 @@ body{margin:0}
           <section class="flex flex-col gap-4 rounded-xl border border-border bg-card p-4" aria-labelledby="int-det">
             <div class="flex flex-col gap-1">
               <h2 id="int-det" class="text-base leading-5 font-semibold">Détection des liens</h2>
-              <p class="text-sm text-muted-foreground">Waypoint lie une branche, un commit ou une pull request qui cite l’identifiant d’une tâche, comme <code class="rounded bg-muted px-1 py-0.5 font-mono text-xs text-foreground">WAY-482</code>. Le lien est gardé ensuite, même si la branche est renommée ou les commits fusionnés.</p>
+              <p class="text-sm text-muted-foreground">Cadenway lie une branche, un commit ou une pull request qui cite l’identifiant d’une tâche, comme <code class="rounded bg-muted px-1 py-0.5 font-mono text-xs text-foreground">CAD-482</code>. Le lien est gardé ensuite, même si la branche est renommée ou les commits fusionnés.</p>
             </div>
             <ul class="grid grid-cols-1 gap-2 md:grid-cols-3">
               <sc-for list="{{intExamples}}" as="ex" hint-placeholder-count="3">
@@ -609,7 +609,7 @@ body{margin:0}
               <button type="button" onClick="{{intSendTest}}" disabled="{{intTestOff}}" class="relative isolate inline-flex h-8 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-lg border border-input px-2.5 text-sm font-medium transition-all hover:bg-accent disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"><span class="ng-icon phosphorPaperPlaneTiltBold size-4 shrink-0" aria-hidden="true"></span>Envoyer un événement de test</button>
             </div>
             <div class="relative w-full overflow-x-auto border-t border-border">
-              <div role="table" aria-label="Livraisons des webhooks" class="wp-cards min-w-[780px]">
+              <div role="table" aria-label="Livraisons des webhooks" class="cw-cards min-w-[780px]">
                 <div role="row" class="grid h-9 grid-cols-[9rem_minmax(13rem,1fr)_minmax(12rem,1fr)_5.5rem_10rem] items-center border-b border-border px-4 text-xs font-medium text-muted-foreground">
                   <span role="columnheader">Date</span><span role="columnheader">Événement</span><span role="columnheader">Dépôt</span><span role="columnheader">Tâche</span><span role="columnheader">Réponse</span>
                 </div>
@@ -636,7 +636,7 @@ body{margin:0}
             <button type="button" onClick="{{exportAudit}}" class="relative isolate inline-flex h-8 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-lg border border-input px-2.5 text-sm font-medium transition-all hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"><span class="ng-icon phosphorDownloadSimpleBold size-4 shrink-0" aria-hidden="true"></span>Exporter (CSV)</button>
           </header>
           <div class="relative w-full overflow-x-auto rounded-lg border border-border">
-            <div role="table" aria-label="Journal d'audit" class="wp-cards min-w-[760px]">
+            <div role="table" aria-label="Journal d'audit" class="cw-cards min-w-[760px]">
               <div role="row" class="grid h-9 grid-cols-[8.5rem_10rem_minmax(14rem,1fr)_8rem] items-center border-b border-border px-3 text-xs font-medium text-muted-foreground">
                 <span role="columnheader">Date</span><span role="columnheader">Auteur</span><span role="columnheader">Action</span><span role="columnheader">Adresse IP</span>
               </div>
@@ -722,7 +722,7 @@ body{margin:0}
         </div>
       </sc-if>
       <sc-if value="{{dlgPayment}}" hint-placeholder-val="{{ false }}">
-        <div class="flex flex-col gap-2 pr-6"><h2 id="odlg-title" class="text-lg leading-none font-semibold">Modifier le moyen de paiement</h2><p class="text-sm text-muted-foreground">La saisie se fait sur la page sécurisée du prestataire de paiement : Waypoint ne voit ni ne conserve jamais les numéros de carte.</p></div>
+        <div class="flex flex-col gap-2 pr-6"><h2 id="odlg-title" class="text-lg leading-none font-semibold">Modifier le moyen de paiement</h2><p class="text-sm text-muted-foreground">La saisie se fait sur la page sécurisée du prestataire de paiement : Cadenway ne voit ni ne conserve jamais les numéros de carte.</p></div>
         <div class="flex items-center gap-3 rounded-lg border border-border px-3 py-2.5">
           <span class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-secondary" aria-hidden="true"><span class="ng-icon phosphorCreditCardBold size-4 shrink-0"></span></span>
           <span class="flex min-w-0 flex-1 flex-col gap-0.5"><span class="font-medium leading-5">Visa •••• 4242</span><span class="text-sm text-muted-foreground">Moyen actuel, prélevé pour la facture du 1er décembre 2026</span></span>
@@ -815,12 +815,12 @@ const SECTIONS = {
 };
 const SECTION_IDS = ['general', 'members', 'billing', 'quotas', 'security', 'integrations', 'audit'];
 // Intégrations GitHub / GitLab : connexion, dépôts par espace, comptes, détection, livraisons des webhooks.
-const INT_SPACES = [['produit', 'Produit', 'WAY'], ['design', 'Design', 'DES'], ['marketing', 'Marketing', 'MKT'], ['ops', 'Opérations', 'OPS']];
+const INT_SPACES = [['produit', 'Produit', 'CAD'], ['design', 'Design', 'DES'], ['marketing', 'Marketing', 'MKT'], ['ops', 'Opérations', 'OPS']];
 const INT_PROVIDERS = [
   { key: 'gh', name: 'GitHub', logo: 'svglGithubLight', owner: 'atelier-nord',
     info: 'Application installée sur l’organisation atelier-nord par Camille Martin le 3 oct. 2026 · accès : dépôts sélectionnés.',
     infoNew: 'Application installée sur l’organisation atelier-nord par Camille Martin à l’instant · accès : dépôts sélectionnés.',
-    off: 'Installez l’application Waypoint sur votre organisation GitHub pour lier branches, commits et pull requests aux tâches.',
+    off: 'Installez l’application Cadenway sur votre organisation GitHub pour lier branches, commits et pull requests aux tâches.',
     config: 'Configurer sur GitHub', configUrl: 'github.com/organizations/atelier-nord/settings/installations', connect: 'Connecter GitHub' },
   { key: 'gl', name: 'GitLab', logo: 'svglGitlab', owner: 'nord',
     info: 'Instance auto-hébergée gitlab.ateliernord.fr · groupe nord · jeton de groupe, connecté par Hugo Dubois le 18 oct. 2026.',
@@ -830,8 +830,8 @@ const INT_PROVIDERS = [
 ];
 const INT_REPOS = {
   gh: [
-    { name: 'atelier-nord/waypoint-web', space: 'produit', act: '214 événements ce mois' },
-    { name: 'atelier-nord/waypoint-api', space: 'produit', act: '96 événements ce mois' },
+    { name: 'atelier-nord/cadenway-web', space: 'produit', act: '214 événements ce mois' },
+    { name: 'atelier-nord/cadenway-api', space: 'produit', act: '96 événements ce mois' },
     { name: 'atelier-nord/design-tokens', space: 'design', act: '12 événements ce mois' },
   ],
   gl: [{ name: 'nord/infra', space: 'ops', act: '41 événements ce mois' }],
@@ -847,21 +847,21 @@ const INT_ACCOUNTS = [
 ];
 const INT_PEOPLE = ['cm', 'ir', 'hd', 'lp'];
 const INT_HOOKS = [
-  { id: 'h1', at: 'Aujourd’hui, 10:42', ev: 'pull_request.opened', host: 'gh', repo: 'atelier-nord/waypoint-web', task: 'WAY-482', code: 200 },
-  { id: 'h2', at: 'Aujourd’hui, 10:41', ev: 'push', host: 'gh', repo: 'atelier-nord/waypoint-web', task: 'WAY-482', code: 200 },
-  { id: 'h3', at: 'Aujourd’hui, 09:58', ev: 'check_suite.completed', host: 'gh', repo: 'atelier-nord/waypoint-api', task: 'WAY-479', code: 500 },
-  { id: 'h4', at: 'Aujourd’hui, 09:12', ev: 'push', host: 'gh', repo: 'atelier-nord/waypoint-api', task: 'WAY-479', code: 200 },
-  { id: 'h5', at: 'Hier, 18:20', ev: 'pull_request.closed', host: 'gh', repo: 'atelier-nord/waypoint-web', task: 'WAY-476', code: 200 },
+  { id: 'h1', at: 'Aujourd’hui, 10:42', ev: 'pull_request.opened', host: 'gh', repo: 'atelier-nord/cadenway-web', task: 'CAD-482', code: 200 },
+  { id: 'h2', at: 'Aujourd’hui, 10:41', ev: 'push', host: 'gh', repo: 'atelier-nord/cadenway-web', task: 'CAD-482', code: 200 },
+  { id: 'h3', at: 'Aujourd’hui, 09:58', ev: 'check_suite.completed', host: 'gh', repo: 'atelier-nord/cadenway-api', task: 'CAD-479', code: 500 },
+  { id: 'h4', at: 'Aujourd’hui, 09:12', ev: 'push', host: 'gh', repo: 'atelier-nord/cadenway-api', task: 'CAD-479', code: 200 },
+  { id: 'h5', at: 'Hier, 18:20', ev: 'pull_request.closed', host: 'gh', repo: 'atelier-nord/cadenway-web', task: 'CAD-476', code: 200 },
   { id: 'h6', at: 'Hier, 17:03', ev: 'merge_request.merge', host: 'gl', repo: 'nord/infra', task: null, code: 200 },
-  { id: 'h7', at: 'Hier, 16:47', ev: 'pull_request_review.submitted', host: 'gh', repo: 'atelier-nord/waypoint-web', task: 'WAY-476', code: 200 },
-  { id: 'h8', at: 'Hier, 11:05', ev: 'create', host: 'gh', repo: 'atelier-nord/waypoint-web', task: 'WAY-482', code: 200 },
+  { id: 'h7', at: 'Hier, 16:47', ev: 'pull_request_review.submitted', host: 'gh', repo: 'atelier-nord/cadenway-web', task: 'CAD-476', code: 200 },
+  { id: 'h8', at: 'Hier, 11:05', ev: 'create', host: 'gh', repo: 'atelier-nord/cadenway-web', task: 'CAD-482', code: 200 },
 ];
 const INT_DET = { closing: true, comment: true, warn: false };
 
 const PAGE_SIZE = 8;
 const DOMAINS = [
-  { name: 'ateliernord.fr', verified: true, record: 'waypoint-verification=3f8a0c6e51' },
-  { name: 'nordstudio.fr', verified: false, record: 'waypoint-verification=9c41e7d2b8' },
+  { name: 'ateliernord.fr', verified: true, record: 'cadenway-verification=3f8a0c6e51' },
+  { name: 'nordstudio.fr', verified: false, record: 'cadenway-verification=9c41e7d2b8' },
 ];
 // Stockage en dixièmes de Go : 712 + 148 + 64 = 924, soit 92,4 Go sur 100 Go.
 const STORAGE = { att: 712, doc: 148, exp: 64 };
@@ -888,8 +888,8 @@ const ROLE_OPTS = [['admin', 'Administrateur'], ['member', 'Membre'], ['guest', 
 const STAGGER = ['stagger-0', 'stagger-1', 'stagger-2', 'stagger-3', 'stagger-4', 'stagger-5', 'stagger-6', 'stagger-7', 'stagger-8'];
 // Clé du select → id du déclencheur (« role:ir » → « role-ir »).
 const selId = (key) => String(key).replace(':', '-');
-// Lien profond entre écrans : la cible lit « waypoint-nav » au montage (voir componentDidMount).
-const navTo = (target) => () => { try { window.localStorage.setItem('waypoint-nav', JSON.stringify({ ...target, at: Date.now() })); } catch (e) {} };
+// Lien profond entre écrans : la cible lit « cadenway-nav » au montage (voir componentDidMount).
+const navTo = (target) => () => { try { window.localStorage.setItem('cadenway-nav', JSON.stringify({ ...target, at: Date.now() })); } catch (e) {} };
 const rand = (n, chars) => Array.from({ length: n }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
 const gb = (tenths) => (tenths / 10).toFixed(1).replace('.', ',');
 const fold = (x) => String(x || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -926,7 +926,7 @@ const INVITES = [
   { id: 'i3', email: 'atelier@nordstudio.fr', role: 'Membre', by: 'Hugo Dubois', expires: 'Expirée le 2 nov.', expired: true },
 ];
 
-// Espaces (mêmes définitions et apparence que App) : la petite barre affiche les favoris (« waypoint-fav-spaces »).
+// Espaces (mêmes définitions et apparence que App) : la petite barre affiche les favoris (« cadenway-fav-spaces »).
 const SPACE_DEFS = [
   { key: 'produit', initial: 'P', name: 'Produit', icon: 'rocket', color: 'violet' },
   { key: 'design', initial: 'D', name: 'Design', icon: 'paint', color: 'orange' },
@@ -951,12 +951,12 @@ const LOOK_CMAP = Object.fromEntries(LOOK_COLORS.map((c) => [c.key, c]));
 const LOOK_IMAP = Object.fromEntries(LOOK_ICONS.map((i) => [i.key, i]));
 const SPMAP = Object.fromEntries(SPACE_DEFS.map((x) => [x.key, x]));
 const DEFAULT_FAV_SPACES = ['produit', 'design'];
-// Notifications d'App (n1…n4) : « waypoint-read » liste celles déjà lues ; le reste s'affiche en pastille sur la Boîte de réception.
+// Notifications d'App (n1…n4) : « cadenway-read » liste celles déjà lues ; le reste s'affiche en pastille sur la Boîte de réception.
 const NOTIF_KEYS = ['n1', 'n2', 'n3', 'n4'];
 // Menu contextuel des espaces de la petite barre : largeur et hauteur réservées pour le garder dans la fenêtre.
 const CTX_W = 232;
 const CTX_H = 112;
-// Statut de présence de l'utilisateur (partagé entre écrans par localStorage « waypoint-status »)
+// Statut de présence de l'utilisateur (partagé entre écrans par localStorage « cadenway-status »)
 const USER_STATUSES = [
   { key: 'online', label: 'Actif', dot: 'bg-jade', bar: false },
   { key: 'dnd', label: 'Ne pas déranger', dot: 'bg-grenat', bar: true },
@@ -1008,34 +1008,34 @@ const SK_SECTIONS = {
 class Component extends DCLogic {
   componentDidMount() {
     try {
-      const t = window.localStorage.getItem('waypoint-theme');
+      const t = window.localStorage.getItem('cadenway-theme');
       if (t === 'dark' || t === 'light') this.setState({ stored: t });
     } catch (e) {}
     try {
-      const us = JSON.parse(window.localStorage.getItem('waypoint-status') || 'null');
+      const us = JSON.parse(window.localStorage.getItem('cadenway-status') || 'null');
       if (us && USTATUS[us.key]) this.setState({ ustatus: us });
-      const fs = JSON.parse(window.localStorage.getItem('waypoint-fav-spaces') || 'null');
+      const fs = JSON.parse(window.localStorage.getItem('cadenway-fav-spaces') || 'null');
       if (Array.isArray(fs)) this.setState({ favSpaces: fs });
-      const rd = JSON.parse(window.localStorage.getItem('waypoint-read') || 'null');
+      const rd = JSON.parse(window.localStorage.getItem('cadenway-read') || 'null');
       if (Array.isArray(rd)) this.setState({ read: rd });
     } catch (e) {}
     this.onStorage = (e) => {
-      if (e.key === 'waypoint-theme' && (e.newValue === 'dark' || e.newValue === 'light')) this.setState({ stored: e.newValue, theme: null });
+      if (e.key === 'cadenway-theme' && (e.newValue === 'dark' || e.newValue === 'light')) this.setState({ stored: e.newValue, theme: null });
       try {
-        if (e.key === 'waypoint-status' && e.newValue) { const us = JSON.parse(e.newValue); if (us && USTATUS[us.key]) this.setState({ ustatus: us }); }
-        if (e.key === 'waypoint-fav-spaces' && e.newValue) { const fs = JSON.parse(e.newValue); if (Array.isArray(fs)) this.setState({ favSpaces: fs }); }
-        if (e.key === 'waypoint-read') { const rd = JSON.parse(e.newValue || '[]'); if (Array.isArray(rd)) this.setState({ read: rd }); }
+        if (e.key === 'cadenway-status' && e.newValue) { const us = JSON.parse(e.newValue); if (us && USTATUS[us.key]) this.setState({ ustatus: us }); }
+        if (e.key === 'cadenway-fav-spaces' && e.newValue) { const fs = JSON.parse(e.newValue); if (Array.isArray(fs)) this.setState({ favSpaces: fs }); }
+        if (e.key === 'cadenway-read') { const rd = JSON.parse(e.newValue || '[]'); if (Array.isArray(rd)) this.setState({ read: rd }); }
       } catch (err) {}
     };
     window.addEventListener('storage', this.onStorage);
     try {
-      const raw = window.localStorage.getItem('waypoint-nav');
+      const raw = window.localStorage.getItem('cadenway-nav');
       const n = raw ? JSON.parse(raw) : null;
       const fresh = !!n && Date.now() - n.at < 15000;
       if (n && n.to === 'Organisation' && fresh) {
-        window.localStorage.removeItem('waypoint-nav');
+        window.localStorage.removeItem('cadenway-nav');
         if (SECTION_IDS.includes(n.section)) this.setState({ section: n.section });
-      } else if (n && !fresh) window.localStorage.removeItem('waypoint-nav');
+      } else if (n && !fresh) window.localStorage.removeItem('cadenway-nav');
     } catch (e) {}
     // Ctrl K / Cmd K (hors champ de saisie) : ouvre la palette de commandes d'App.
     // Échap : le menu contextuel ou un select ouvert se ferme d'abord (la liste a déjà traité l'événement : defaultPrevented), la fenêtre ensuite.
@@ -1144,10 +1144,10 @@ class Component extends DCLogic {
     const root = document.documentElement;
     const el = e && e.currentTarget && e.currentTarget.getBoundingClientRect ? e.currentTarget : null;
     const r = el ? el.getBoundingClientRect() : null;
-    root.style.setProperty('--wp-vt-origin', r ? Math.round(r.left + r.width / 2) + 'px ' + Math.round(r.top + r.height / 2) + 'px' : '50% 100%');
-    root.dataset.wpVt = 'circle-blur';
+    root.style.setProperty('--cw-vt-origin', r ? Math.round(r.left + r.width / 2) + 'px ' + Math.round(r.top + r.height / 2) + 'px' : '50% 100%');
+    root.dataset.cwVt = 'circle-blur';
     const vt = document.startViewTransition(() => new Promise((resolve) => { apply(resolve); setTimeout(resolve, 80); }));
-    const end = () => { delete root.dataset.wpVt; };
+    const end = () => { delete root.dataset.cwVt; };
     vt.finished.then(end, end);
     vt.ready.catch(() => {});
   }
@@ -1272,7 +1272,7 @@ class Component extends DCLogic {
           pick: () => {
             setRepos(p.key, [...curRepos(p.key), { name: n, space: 'produit', act: 'Ajouté à l’instant' }]);
             this.setState({ openSelect: null });
-            this.toast('Dépôt ajouté', n + ' → Produit (WAY). Changez l’espace si besoin.');
+            this.toast('Dépôt ajouté', n + ' → Produit (CAD). Changez l’espace si besoin.');
           },
         })),
         repos: list.map((r) => {
@@ -1331,15 +1331,15 @@ class Component extends DCLogic {
       this.toast(nv ? 'Activé' : 'Désactivé', label + '.');
     };
     out.intExamples = [
-      { key: 'b', icon: 'phosphorGitBranchBold', where: 'Nom de branche', code: 'way-482-ecran-sso', effect: 'Lie la branche et ses commits à WAY-482.' },
-      { key: 'p', icon: 'phosphorGitPullRequestBold', where: 'Titre de pull request', code: 'Refonte de l’écran SSO (WAY-482)', effect: 'Lie la pull request, sans changer le statut.' },
-      { key: 'c', icon: 'phosphorGitCommitBold', where: 'Message de commit', code: 'fixes WAY-482', effect: det.closing ? 'Lie le commit et passe la tâche à Terminé à la fusion.' : 'Lie le commit seulement : mots-clés désactivés.' },
+      { key: 'b', icon: 'phosphorGitBranchBold', where: 'Nom de branche', code: 'cad-482-ecran-sso', effect: 'Lie la branche et ses commits à CAD-482.' },
+      { key: 'p', icon: 'phosphorGitPullRequestBold', where: 'Titre de pull request', code: 'Refonte de l’écran SSO (CAD-482)', effect: 'Lie la pull request, sans changer le statut.' },
+      { key: 'c', icon: 'phosphorGitCommitBold', where: 'Message de commit', code: 'fixes CAD-482', effect: det.closing ? 'Lie le commit et passe la tâche à Terminé à la fusion.' : 'Lie le commit seulement : mots-clés désactivés.' },
     ];
     const sw = (on) => ({ on, state: on ? 'checked' : 'unchecked', knob: on ? 'translate-x-4' : 'translate-x-0' });
     out.intSwitches = [
       { id: 'int-sw-closing', label: 'Les mots-clés de fermeture changent le statut', hint: 'fixes, closes ou resolves suivi d’un identifiant : la tâche passe à Terminé quand la pull request est fusionnée.', ...sw(det.closing), toggle: setDet('closing', 'Mots-clés de fermeture') },
-      { id: 'int-sw-comment', label: 'Commenter les PR liées', hint: 'Le bot « Waypoint » ajoute un commentaire avec le lien, le titre et le statut de la tâche.', ...sw(det.comment), toggle: setDet('comment', 'Commentaire sur les PR liées') },
-      { id: 'int-sw-warn', label: 'Avertir si une PR ne cite aucune tâche', hint: 'Ajoute un check « Waypoint » en avertissement : il ne bloque jamais la fusion.', ...sw(det.warn), toggle: setDet('warn', 'Avertissement sur les PR sans tâche') },
+      { id: 'int-sw-comment', label: 'Commenter les PR liées', hint: 'Le bot « Cadenway » ajoute un commentaire avec le lien, le titre et le statut de la tâche.', ...sw(det.comment), toggle: setDet('comment', 'Commentaire sur les PR liées') },
+      { id: 'int-sw-warn', label: 'Avertir si une PR ne cite aucune tâche', hint: 'Ajoute un check « Cadenway » en avertissement : il ne bloque jamais la fusion.', ...sw(det.warn), toggle: setDet('warn', 'Avertissement sur les PR sans tâche') },
     ];
 
     // webhooks
@@ -1421,8 +1421,8 @@ class Component extends DCLogic {
       const H = window.innerHeight || 0;
       const pad = 8;
       document.querySelectorAll('.menu-shadow').forEach((el) => {
-        if (el.dataset.wpPlaced || getComputedStyle(el).position !== 'absolute') return;
-        el.dataset.wpPlaced = '1';
+        if (el.dataset.cwPlaced || getComputedStyle(el).position !== 'absolute') return;
+        el.dataset.cwPlaced = '1';
         // zone visible : la fenêtre, réduite par chaque conteneur qui coupe (modale, panneau défilant…)
         let box = { top: 0, left: 0, bottom: H, right: W };
         let cb = null;
@@ -1517,7 +1517,7 @@ class Component extends DCLogic {
     const presFilter = s.presFilter || 'all';
     const onlineCount = members.filter(isOn).length;
     const favSpaces = s.favSpaces || DEFAULT_FAV_SPACES;
-    const setFav = (next) => { this.setState({ favSpaces: next }); try { window.localStorage.setItem('waypoint-fav-spaces', JSON.stringify(next)); } catch (e) {} };
+    const setFav = (next) => { this.setState({ favSpaces: next }); try { window.localStorage.setItem('cadenway-fav-spaces', JSON.stringify(next)); } catch (e) {} };
     const read = Array.isArray(s.read) ? s.read : [];
     const unread = NOTIF_KEYS.filter((k) => !read.includes(k)).length;
     // Menu contextuel (clic droit, touche Menu, Maj + F10) sur un espace favori de la petite barre.
@@ -1553,7 +1553,7 @@ class Component extends DCLogic {
     const oldExports = 11 - gone.filter((f) => f.cat === 'exp').length;
     const inviteRole = s.inviteRole || 'member';
     const sessionTtl = s.sessionTtl || '12 heures';
-    const inviteUrl = 'https://app.waypoint.example/rejoindre/' + (s.linkCode || 'an-7Kq2fP');
+    const inviteUrl = 'https://app.cadenway.example/rejoindre/' + (s.linkCode || 'an-7Kq2fP');
     const freeBlocked = seatsUsed > 5 || storageUsed > 20;
     const addDomain = () => {
       const v = ((this.state || {}).domainDraft || '').trim().toLowerCase().replace(/\.$/, '');
@@ -1563,7 +1563,7 @@ class Component extends DCLogic {
       else if (!/^(?=.{4,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(v)) err = 'Format invalide : un domaine s’écrit comme atelier-lyon.fr.';
       else if (domains.some((d) => d.name === v)) err = v + ' figure déjà dans la liste.';
       if (err) { this.setState({ domainError: err }); return; }
-      this.setState({ domains: [...domains, { name: v, verified: false, record: 'waypoint-verification=' + rand(10, '0123456789abcdef') }], dialog: null, domainDraft: '', domainError: null });
+      this.setState({ domains: [...domains, { name: v, verified: false, record: 'cadenway-verification=' + rand(10, '0123456789abcdef') }], dialog: null, domainDraft: '', domainError: null });
       this.toast('Domaine ajouté', 'Ajoutez son enregistrement TXT dans la zone DNS de ' + v + ', puis vérifiez.');
     };
     const seatDraft = s.seatDraft ?? seats;
@@ -1654,12 +1654,12 @@ class Component extends DCLogic {
     const audit = [
       ['8 nov. · 09:12', '2026-11-08 09:12', 'HD', 'Hugo Dubois', 'phosphorKeyBold', '', 'a créé un jeton d’API', '« Intégration continue GitLab »', '203.0.113.9'],
       ['7 nov. · 18:03', '2026-11-07 18:03', 'CM', 'Camille Martin', 'phosphorUserGearBold', '', 'a changé le rôle de Inès Robert', 'Membre → Administratrice', '192.0.2.14'],
-      ['7 nov. · 11:47', '2026-11-07 11:47', 'WP', 'Waypoint', 'phosphorWarningFill', 'text-balise', 'a envoyé une alerte de quota', 'Stockage à 90 %', '—'],
+      ['7 nov. · 11:47', '2026-11-07 11:47', 'WP', 'Cadenway', 'phosphorWarningFill', 'text-balise', 'a envoyé une alerte de quota', 'Stockage à 90 %', '—'],
       ['6 nov. · 16:20', '2026-11-06 16:20', 'IR', 'Inès Robert', 'phosphorUserPlusBold', '', 'a invité', 'marc.roux@ateliernord.fr', '198.51.100.23'],
       ['5 nov. · 10:05', '2026-11-05 10:05', 'CM', 'Camille Martin', 'phosphorShieldCheckBold', '', 'a imposé la vérification en deux étapes', 'Administrateurs', '192.0.2.14'],
       ['4 nov. · 14:31', '2026-11-04 14:31', 'TB', 'Théo Bernard', 'phosphorProhibitFill', 'text-grenat', 'connexion refusée', 'vérification en deux étapes manquante', '203.0.113.77'],
-      ['3 nov. · 08:00', '2026-11-03 08:00', 'WP', 'Waypoint', 'phosphorArrowsClockwiseBold', '', 'a renouvelé le certificat SAML', 'sso.ateliernord.fr', '—'],
-      ['1 nov. · 00:04', '2026-11-01 00:04', 'WP', 'Waypoint', 'phosphorReceiptBold', '', 'a émis la facture', 'FAC-2026-0011', '—'],
+      ['3 nov. · 08:00', '2026-11-03 08:00', 'WP', 'Cadenway', 'phosphorArrowsClockwiseBold', '', 'a renouvelé le certificat SAML', 'sso.ateliernord.fr', '—'],
+      ['1 nov. · 00:04', '2026-11-01 00:04', 'WP', 'Cadenway', 'phosphorReceiptBold', '', 'a émis la facture', 'FAC-2026-0011', '—'],
     ].map(([date, iso, initials, who, icon, tone, action, target, ip]) => ({ date, iso, initials, who, icon, tone: tone || 'text-muted-foreground', action, target, ip }));
     return {
       theme,
@@ -1667,7 +1667,7 @@ class Component extends DCLogic {
       toggleTheme: (e) => {
         const next = theme === 'dark' ? 'light' : 'dark';
         this.themeTransition(e, (done) => this.setState({ theme: next }, done));
-        try { window.localStorage.setItem('waypoint-theme', next); } catch (err) {}
+        try { window.localStorage.setItem('cadenway-theme', next); } catch (err) {}
       },
       railItems: [
         { label: 'Accueil', icon: 'phosphorHouseBold', page: 'home' },
@@ -1957,8 +1957,8 @@ class Component extends DCLogic {
 
       testSso: () => this.toast('Connexion SSO réussie', 'Assertion signée reçue de sso.ateliernord.fr en 412 ms.'),
       spFields: [
-        { id: 's-entity', label: 'Identifiant de l’entité (SP Entity ID)', value: 'https://app.waypoint.example/saml/atelier-nord' },
-        { id: 's-acs', label: 'URL ACS (Assertion Consumer Service)', value: 'https://app.waypoint.example/saml/atelier-nord/acs' },
+        { id: 's-entity', label: 'Identifiant de l’entité (SP Entity ID)', value: 'https://app.cadenway.example/saml/atelier-nord' },
+        { id: 's-acs', label: 'URL ACS (Assertion Consumer Service)', value: 'https://app.cadenway.example/saml/atelier-nord/acs' },
       ].map((f) => ({ ...f, copyLabel: 'Copier : ' + f.label, copy: () => this.copy(f.value, 'Copié', f.value) })),
       policySwitches: [
         { id: 'p-sso', key: 'enforceSso', label: 'Imposer le SSO pour @ateliernord.fr', hint: 'Mot de passe et fournisseurs OAuth désactivés pour ces adresses.' },

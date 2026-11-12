@@ -1,7 +1,7 @@
 ---
-'@waypoint/icons': minor
-'@waypoint/tokens': minor
-'@waypoint/ui': minor
+'@cadenway/icons': minor
+'@cadenway/tokens': minor
+'@cadenway/ui': minor
 ---
 
-Bootstrap the three packages: `@waypoint/tokens` ships the structure of `tokens.css` and `theme.css` without values yet, `@waypoint/icons` exports `provideWaypointIcons()`, and `@waypoint/ui` is an Angular library whose public API is still empty.
+Bootstrap the three packages: `@cadenway/tokens` ships the structure of `tokens.css` and `theme.css` without values yet, `@cadenway/icons` exports `provideCadenwayIcons()`, and `@cadenway/ui` is an Angular library whose public API is still empty.

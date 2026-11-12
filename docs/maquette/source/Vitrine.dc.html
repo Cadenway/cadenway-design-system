@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<title>Waypoint — gestion de projet pour les équipes</title>
+<title>Cadenway — gestion de projet pour les équipes</title>
 <script src="./support.js"></script>
 <link rel="stylesheet" href="styles/app.css">
 </head>
@@ -21,9 +21,9 @@ html{scroll-behavior:smooth}
   <header class="sticky top-0 z-40 border-b transition-[background-color,border-color,box-shadow] duration-300 {{headerCls}}">
     <span class="vt-progress pointer-events-none absolute inset-x-0 -bottom-px h-px bg-primary" aria-hidden="true"></span>
     <div class="mx-auto flex h-16 max-w-6xl items-center gap-6 px-6">
-      <a href="#top" class="flex shrink-0 items-center gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas" aria-label="Waypoint, haut de page">
+      <a href="#top" class="flex shrink-0 items-center gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas" aria-label="Cadenway, haut de page">
         <svg class="size-6 text-primary" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.4c-3.5-3.3-7-7-7-11.2a7 7 0 0 1 14 0c0 1.8-.6 3.5-1.6 5.1" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="12" cy="10.2" r="3" fill="currentColor"></circle></svg>
-        <span class="text-base font-bold tracking-[-0.035em]">Waypoint</span>
+        <span class="text-base font-bold tracking-[-0.035em]">Cadenway</span>
       </a>
       <nav aria-label="Sections" class="hidden items-center gap-1 md:flex">
         <sc-for list="{{navLinks}}" as="l" hint-placeholder-count="5">
@@ -68,7 +68,7 @@ html{scroll-behavior:smooth}
           <span class="vt-in [--d:120ms]">Vos projets avancent.</span>
           <span class="vt-in bg-linear-to-r from-primary to-primary/70 bg-clip-text pb-1 text-transparent [--d:260ms]">Votre équipe aussi.</span>
         </h1>
-        <p class="vt-in mx-auto max-w-2xl text-base leading-7 text-pretty text-muted-foreground [--d:400ms] sm:text-lg">Waypoint réunit tâches, sprints, documents et tableaux de bord dans une seule application. Votre espace est prêt en deux minutes, vos données sont hébergées en France.</p>
+        <p class="vt-in mx-auto max-w-2xl text-base leading-7 text-pretty text-muted-foreground [--d:400ms] sm:text-lg">Cadenway réunit tâches, sprints, documents et tableaux de bord dans une seule application. Votre espace est prêt en deux minutes, vos données sont hébergées en France.</p>
         <div class="vt-in flex flex-wrap items-center justify-center gap-3 [--d:520ms]">
           <a href="Inscription.dc.html" class="group/cta inline-flex h-11 items-center gap-2 rounded-lg bg-primary px-5 text-sm font-medium whitespace-nowrap text-primary-foreground transition-all hover:-translate-y-0.5 hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas">Démarrer gratuitement<span class="ng-icon phosphorArrowRightBold size-4 transition-transform group-hover/cta:translate-x-0.5" aria-hidden="true"></span></a>
           <a href="#migration" class="inline-flex h-11 items-center gap-2 rounded-lg border border-input bg-background px-5 text-sm font-medium whitespace-nowrap transition-all hover:-translate-y-0.5 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"><span class="ng-icon phosphorArrowsLeftRightBold size-4" aria-hidden="true"></span>Importer mes projets</a>
@@ -105,7 +105,7 @@ html{scroll-behavior:smooth}
                 <div class="flex h-11 shrink-0 items-center gap-2 px-2">
                   <span class="flex min-w-0 flex-1 items-center gap-2 rounded-md px-1.5 py-1">
                     <svg class="size-5 shrink-0 text-primary" viewBox="0 0 24 24"><path d="M12 21.4c-3.5-3.3-7-7-7-11.2a7 7 0 0 1 14 0c0 1.8-.6 3.5-1.6 5.1" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="12" cy="10.2" r="3" fill="currentColor"></circle></svg>
-                    <span class="flex min-w-0 flex-col"><span class="truncate text-sm leading-4 font-semibold">Atelier Nord</span><span class="truncate text-xs text-muted-foreground">app.waypoint.example/atelier-nord</span></span>
+                    <span class="flex min-w-0 flex-col"><span class="truncate text-sm leading-4 font-semibold">Atelier Nord</span><span class="truncate text-xs text-muted-foreground">app.cadenway.example/atelier-nord</span></span>
                     <span class="ng-icon phosphorCaretUpDownBold ml-auto size-3.5 text-muted-foreground"></span>
                   </span>
                   <span class="inline-flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground"><span class="ng-icon phosphorSidebarSimpleBold"></span></span>
@@ -235,7 +235,7 @@ html{scroll-behavior:smooth}
                 <sc-if value="{{heroToast}}" hint-placeholder-val="{{ false }}">
                   <div class="absolute bottom-5 left-1/2 z-40 flex -translate-x-1/2 items-center gap-3 rounded-lg border border-border bg-popover py-2 pr-2 pl-3 text-sm whitespace-nowrap text-popover-foreground shadow-lg animate-pop-in">
                     <dc-import name="StatutTache" status="done" dim="4" hint-size="16px,16px"></dc-import>
-                    <span><span class="font-mono text-xs text-muted-foreground">WAY-479</span> passée en <span class="font-medium">Terminé</span></span>
+                    <span><span class="font-mono text-xs text-muted-foreground">CAD-479</span> passée en <span class="font-medium">Terminé</span></span>
                     <span class="inline-flex h-7 items-center rounded-md px-2 text-sm font-medium hover:bg-muted">Annuler</span>
                   </div>
                 </sc-if>
@@ -247,9 +247,9 @@ html{scroll-behavior:smooth}
       </div>
     </section>
 
-    <section data-reveal="logos" data-in="{{rv.logos}}" aria-label="Ils utilisent Waypoint" class="vt-reveal border-y border-border bg-background">
+    <section data-reveal="logos" data-in="{{rv.logos}}" aria-label="Ils utilisent Cadenway" class="vt-reveal border-y border-border bg-background">
       <div class="mx-auto flex max-w-6xl flex-col items-center gap-7 py-10">
-        <p class="px-6 text-xs font-medium whitespace-nowrap text-muted-foreground">Plus de 3 000 équipes organisent leurs projets avec Waypoint</p>
+        <p class="px-6 text-xs font-medium whitespace-nowrap text-muted-foreground">Plus de 3 000 équipes organisent leurs projets avec Cadenway</p>
         <div class="group relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
           <ul class="vt-marquee flex w-max items-center gap-14 pr-14">
             <sc-for list="{{customersLoop}}" as="cu" hint-placeholder-count="12">
@@ -325,7 +325,7 @@ html{scroll-behavior:smooth}
               <sc-for list="{{docTools}}" as="dt" hint-placeholder-count="6"><span class="inline-flex size-7 items-center justify-center rounded-md {{dt.cls}}"><span class="ng-icon {{dt.icon}} size-4"></span></span></sc-for>
             </div>
             <p class="text-base font-semibold">Rituels du sprint 14</p>
-            <p class="text-sm leading-6 text-muted-foreground">Démo vendredi à 11 h. Avant ça, passer <span class="inline-flex items-center gap-1 rounded-md bg-primary/10 px-1.5 align-middle font-mono text-xs text-primary"><dc-import name="StatutTache" status="review" dim="3" hint-size="12px,12px"></dc-import>WAY-482</span> en <span class="font-semibold text-foreground">revue</span><span class="vt-caret ml-0.5 inline-block h-4 w-px translate-y-0.5 bg-foreground"></span></p>
+            <p class="text-sm leading-6 text-muted-foreground">Démo vendredi à 11 h. Avant ça, passer <span class="inline-flex items-center gap-1 rounded-md bg-primary/10 px-1.5 align-middle font-mono text-xs text-primary"><dc-import name="StatutTache" status="review" dim="3" hint-size="12px,12px"></dc-import>CAD-482</span> en <span class="font-semibold text-foreground">revue</span><span class="vt-caret ml-0.5 inline-block h-4 w-px translate-y-0.5 bg-foreground"></span></p>
           </div>
         </article>
 
@@ -429,7 +429,7 @@ html{scroll-behavior:smooth}
           <div class="flex flex-col gap-3">
             <p class="text-sm font-medium text-primary">Migration</p>
             <h2 class="text-3xl leading-tight font-semibold tracking-[-0.03em] text-balance sm:text-4xl">Vos projets vous suivent. En quelques minutes.</h2>
-            <p class="text-base leading-7 text-pretty text-muted-foreground">Connectez votre ancien outil : tâches, statuts, commentaires et pièces jointes arrivent dans Waypoint, rangés comme vous en avez l’habitude.</p>
+            <p class="text-base leading-7 text-pretty text-muted-foreground">Connectez votre ancien outil : tâches, statuts, commentaires et pièces jointes arrivent dans Cadenway, rangés comme vous en avez l’habitude.</p>
           </div>
           <ul class="flex flex-col gap-4">
             <sc-for list="{{hostPoints}}" as="hp" hint-placeholder-count="4">
@@ -477,7 +477,7 @@ html{scroll-behavior:smooth}
 
     <section aria-labelledby="vt-compare-title" class="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-28">
       <div data-reveal="cmpHead" data-in="{{rv.cmpHead}}" class="vt-reveal flex max-w-2xl flex-col gap-3">
-        <p class="text-sm font-medium text-primary">Pourquoi Waypoint</p>
+        <p class="text-sm font-medium text-primary">Pourquoi Cadenway</p>
         <h2 id="vt-compare-title" class="text-3xl leading-tight font-semibold tracking-[-0.03em] text-balance sm:text-4xl">Les mêmes fonctions qu'un outil SaaS, sans ses contraintes.</h2>
       </div>
       <div data-reveal="cmp" data-in="{{rv.cmp}}" class="vt-reveal overflow-x-auto rounded-xl border border-border bg-card [--d:80ms]">
@@ -485,7 +485,7 @@ html{scroll-behavior:smooth}
           <thead>
             <tr class="border-b border-border">
               <th scope="col" class="w-1/3 px-5 py-4 text-xs font-medium text-muted-foreground"><span class="sr-only">Critère</span></th>
-              <th scope="col" class="w-1/3 bg-primary/5 px-5 py-4"><span class="flex items-center gap-2 font-semibold text-primary"><svg class="size-4" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.4c-3.5-3.3-7-7-7-11.2a7 7 0 0 1 14 0c0 1.8-.6 3.5-1.6 5.1" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="12" cy="10.2" r="3" fill="currentColor"></circle></svg>Waypoint</span></th>
+              <th scope="col" class="w-1/3 bg-primary/5 px-5 py-4"><span class="flex items-center gap-2 font-semibold text-primary"><svg class="size-4" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.4c-3.5-3.3-7-7-7-11.2a7 7 0 0 1 14 0c0 1.8-.6 3.5-1.6 5.1" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="12" cy="10.2" r="3" fill="currentColor"></circle></svg>Cadenway</span></th>
               <th scope="col" class="w-1/3 px-5 py-4 font-medium text-muted-foreground">Outil SaaS classique</th>
             </tr>
           </thead>
@@ -574,7 +574,7 @@ html{scroll-behavior:smooth}
         <div data-reveal="faqHead" data-in="{{rv.faqHead}}" class="vt-reveal flex flex-col gap-3">
           <p class="text-sm font-medium text-primary">Questions fréquentes</p>
           <h2 class="text-3xl leading-tight font-semibold tracking-[-0.03em] text-balance">Ce qu'on nous demande le plus souvent.</h2>
-          <p class="text-sm leading-6 text-muted-foreground">Une autre question ? Écrivez à <span class="font-medium text-foreground">bonjour@waypoint.example</span> ou passez sur le forum.</p>
+          <p class="text-sm leading-6 text-muted-foreground">Une autre question ? Écrivez à <span class="font-medium text-foreground">bonjour@cadenway.example</span> ou passez sur le forum.</p>
         </div>
         <div data-reveal="faq" data-in="{{rv.faq}}" class="vt-reveal flex flex-col divide-y divide-border border-y border-border [--d:100ms]">
           <sc-for list="{{faq}}" as="q" hint-placeholder-count="6">
@@ -614,7 +614,7 @@ html{scroll-behavior:smooth}
       <div class="col-span-2 flex flex-col gap-4 md:col-span-1">
         <span class="flex items-center gap-2">
           <svg class="size-6 text-primary" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.4c-3.5-3.3-7-7-7-11.2a7 7 0 0 1 14 0c0 1.8-.6 3.5-1.6 5.1" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="12" cy="10.2" r="3" fill="currentColor"></circle></svg>
-          <span class="text-base font-bold tracking-[-0.035em]">Waypoint</span>
+          <span class="text-base font-bold tracking-[-0.035em]">Cadenway</span>
         </span>
         <p class="max-w-xs text-sm leading-6 text-muted-foreground">Gestion de projet pour les équipes qui livrent. Conçue à Lyon, hébergée en France.</p>
         <form onSubmit="{{subscribe}}" class="flex max-w-sm flex-col gap-1.5" novalidate>
@@ -637,7 +637,7 @@ html{scroll-behavior:smooth}
     </div>
     <div class="border-t border-border">
       <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-5 text-xs text-muted-foreground">
-        <span class="flex items-center gap-3"><span>© 2026 Waypoint.</span><span class="inline-flex items-center gap-1.5 whitespace-nowrap"><span class="size-1.5 rounded-full bg-jade" aria-hidden="true"></span>Tous les services fonctionnent</span></span>
+        <span class="flex items-center gap-3"><span>© 2026 Cadenway.</span><span class="inline-flex items-center gap-1.5 whitespace-nowrap"><span class="size-1.5 rounded-full bg-jade" aria-hidden="true"></span>Tous les services fonctionnent</span></span>
         <span class="flex items-center gap-4">
           <a href="Legal.dc.html" onClick="{{goPrivacy}}" class="rounded-sm hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Confidentialité</a>
           <a href="Legal.dc.html" onClick="{{goTerms}}" class="rounded-sm hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Conditions</a>
@@ -654,9 +654,9 @@ html{scroll-behavior:smooth}
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["mémorisé","clair","sombre"],"default":"mémorisé"},"facturation":{"editor":"enum","options":["mensuelle","annuelle"],"default":"annuelle"},"$preview":{"width":1440,"height":900}}'>
-// Lien profond entre écrans (protocole commun « waypoint-nav »).
+// Lien profond entre écrans (protocole commun « cadenway-nav »).
 const writeNav = (to, section) => {
-  try { window.localStorage.setItem('waypoint-nav', JSON.stringify({ to, section, at: Date.now(), from: 'Vitrine' })); } catch (e) {}
+  try { window.localStorage.setItem('cadenway-nav', JSON.stringify({ to, section, at: Date.now(), from: 'Vitrine' })); } catch (e) {}
 };
 // Zones révélées au défilement (attribut data-reveal du modèle)
 const REVEAL = ['logos', 'featHead', 'feat', 'metrics', 'integText', 'orbit', 'hostText', 'install', 'cmpHead', 'cmp', 'priceHead', 'plans', 'quotes', 'faqHead', 'faq', 'cta'];
@@ -664,19 +664,19 @@ const REVEAL = ['logos', 'featHead', 'feat', 'metrics', 'integText', 'orbit', 'h
 // Aperçu du hero : la liste « Sprint 14 » de l'app, avec ses vraies tâches et ses icônes
 const MOCK_ROWS = {
   progress: [
-    { id: 'WAY-482', name: 'Refondre l’écran de connexion SSO', people: ['CM', 'IR'], due: '12 nov.', dueTone: 'text-muted-foreground', priority: 'haute', prWord: 'Haute', labels: ['Auth', 'Front'], sub: '3/5' },
-    { id: 'WAY-479', name: 'Limiter le débit des jetons d’API', people: ['HD'], due: 'Aujourd’hui', dueTone: 'font-medium text-cornaline', priority: 'urgente', prWord: 'Urgente', labels: ['Back', 'Sécurité'], sub: '1/3', target: true },
+    { id: 'CAD-482', name: 'Refondre l’écran de connexion SSO', people: ['CM', 'IR'], due: '12 nov.', dueTone: 'text-muted-foreground', priority: 'haute', prWord: 'Haute', labels: ['Auth', 'Front'], sub: '3/5' },
+    { id: 'CAD-479', name: 'Limiter le débit des jetons d’API', people: ['HD'], due: 'Aujourd’hui', dueTone: 'font-medium text-cornaline', priority: 'urgente', prWord: 'Urgente', labels: ['Back', 'Sécurité'], sub: '1/3', target: true },
   ],
   review: [
-    { id: 'WAY-475', name: 'Export CSV des tâches filtrées', people: ['LP'], due: '14 nov.', dueTone: 'text-muted-foreground', priority: 'moyenne', prWord: 'Moyenne', labels: ['Back'], sub: '2/2' },
+    { id: 'CAD-475', name: 'Export CSV des tâches filtrées', people: ['LP'], due: '14 nov.', dueTone: 'text-muted-foreground', priority: 'moyenne', prWord: 'Moyenne', labels: ['Back'], sub: '2/2' },
   ],
   todo: [
-    { id: 'WAY-488', name: 'Page des quotas de l’organisation', people: ['CM'], due: '18 nov.', dueTone: 'text-muted-foreground', priority: 'haute', prWord: 'Haute', labels: ['Front', 'Facturation'], sub: '0/4' },
-    { id: 'WAY-490', name: 'Régénérer les codes de secours MFA', people: ['HD', 'CM'], due: '20 nov.', dueTone: 'text-muted-foreground', priority: 'moyenne', prWord: 'Moyenne', labels: ['Sécurité'], sub: '0/2' },
+    { id: 'CAD-488', name: 'Page des quotas de l’organisation', people: ['CM'], due: '18 nov.', dueTone: 'text-muted-foreground', priority: 'haute', prWord: 'Haute', labels: ['Front', 'Facturation'], sub: '0/4' },
+    { id: 'CAD-490', name: 'Régénérer les codes de secours MFA', people: ['HD', 'CM'], due: '20 nov.', dueTone: 'text-muted-foreground', priority: 'moyenne', prWord: 'Moyenne', labels: ['Sécurité'], sub: '0/2' },
   ],
 };
 const MOCK_GROUPS = [['progress', 'En cours'], ['review', 'En revue'], ['todo', 'À faire']];
-// Scénario : le curseur ouvre le menu de statut de WAY-479, choisit Terminé, une notification confirme.
+// Scénario : le curseur ouvre le menu de statut de CAD-479, choisit Terminé, une notification confirme.
 const HERO_SEQ = [[2400, 1], [1100, 2], [900, 3], [700, 4], [3600, 0], [1400, null]];
 const CURSOR = {
   0: 'translate-x-[200px] translate-y-[140px] opacity-0',
@@ -690,13 +690,13 @@ const CURSOR = {
 const DEMO_STATUS = [['todo', 'À faire'], ['progress', 'En cours'], ['review', 'En revue'], ['testing', 'En validation'], ['done', 'Terminé']];
 const DEMO_PRIO = [['basse', 'Basse'], ['moyenne', 'Moyenne'], ['haute', 'Haute'], ['urgente', 'Urgente']];
 const DEMO_TASKS = [
-  { id: 'WAY-482', title: 'Refondre l’écran de connexion SSO', who: 'CM', s: 1, p: 2 },
-  { id: 'WAY-479', title: 'Limiter le débit des jetons d’API', who: 'HD', s: 0, p: 3 },
-  { id: 'WAY-475', title: 'Export CSV des tâches filtrées', who: 'LP', s: 2, p: 1 },
+  { id: 'CAD-482', title: 'Refondre l’écran de connexion SSO', who: 'CM', s: 1, p: 2 },
+  { id: 'CAD-479', title: 'Limiter le débit des jetons d’API', who: 'HD', s: 0, p: 3 },
+  { id: 'CAD-475', title: 'Export CSV des tâches filtrées', who: 'LP', s: 2, p: 1 },
 ];
 const INSTALL = {
   docker: {
-    label: 'Trello', icon: 'phosphorKanbanBold', done: 'Import terminé : 12 tableaux prêts dans Waypoint',
+    label: 'Trello', icon: 'phosphorKanbanBold', done: 'Import terminé : 12 tableaux prêts dans Cadenway',
     lines: [
       ['# Connexion à Trello : atelier-nord', 'c'],
       ['12 tableaux trouvés → espaces et listes', ''],
@@ -707,7 +707,7 @@ const INSTALL = {
     ],
   },
   helm: {
-    label: 'Jira', icon: 'phosphorBugBold', done: 'Import terminé : 3 projets prêts dans Waypoint',
+    label: 'Jira', icon: 'phosphorBugBold', done: 'Import terminé : 3 projets prêts dans Cadenway',
     lines: [
       ['# Connexion à Jira Cloud : ateliernord.atlassian.net', 'c'],
       ['3 projets et 4 sprints trouvés', ''],
@@ -717,7 +717,7 @@ const INSTALL = {
     ],
   },
   binary: {
-    label: 'Fichier CSV', icon: 'phosphorFileCsvBold', done: 'Import terminé : 214 tâches prêtes dans Waypoint',
+    label: 'Fichier CSV', icon: 'phosphorFileCsvBold', done: 'Import terminé : 214 tâches prêtes dans Cadenway',
     lines: [
       ['# export-projets.csv · 214 lignes', 'c'],
       ['Colonnes reconnues : titre, statut, échéance, assigné', ''],
@@ -728,7 +728,7 @@ const INSTALL = {
   },
 };
 const FAQ = [
-  ['Waypoint est-il vraiment gratuit ?', 'Oui, jusqu’à 10 membres et sans limite de durée. Les plans payants ajoutent les membres illimités, le SSO, les rôles avancés et le support prioritaire.'],
+  ['Cadenway est-il vraiment gratuit ?', 'Oui, jusqu’à 10 membres et sans limite de durée. Les plans payants ajoutent les membres illimités, le SSO, les rôles avancés et le support prioritaire.'],
   ['Où sont hébergées mes données ?', 'En France, chez un hébergeur européen, avec des sauvegardes chiffrées chaque jour. Nous ne vendons pas vos données et ne les utilisons pas à des fins publicitaires.'],
   ['Puis-je importer mes projets depuis un autre outil ?', 'Oui : import CSV, et assistants d’import pour Trello, Jira, Asana et ClickUp. Tâches, commentaires, pièces jointes et assignations sont conservés.'],
   ['Puis-je arrêter quand je veux ?', 'Oui, les abonnements sont sans engagement. Vous pouvez exporter toutes vos données en JSON ou CSV à tout moment, même après la résiliation, pendant 30 jours.'],
@@ -737,7 +737,7 @@ const FAQ = [
 ];
 const PRICE = { month: 6, year: 5 };
 const METRICS = [
-  { to: 3000, suffix: '+', label: 'équipes utilisent Waypoint' },
+  { to: 3000, suffix: '+', label: 'équipes utilisent Cadenway' },
   { to: 2, suffix: ' min', label: 'pour créer votre espace' },
   { to: 24, suffix: ' h', label: 'pour une réponse du support' },
   { to: 100, suffix: ' %', label: 'des données hébergées en France' },
@@ -747,11 +747,11 @@ const TYPE_MS = 26;
 class Component extends DCLogic {
   componentDidMount() {
     try {
-      const t = window.localStorage.getItem('waypoint-theme');
+      const t = window.localStorage.getItem('cadenway-theme');
       if (t === 'dark' || t === 'light') this.setState({ stored: t });
     } catch (e) {}
     this.onStorage = (e) => {
-      if (e.key === 'waypoint-theme' && (e.newValue === 'dark' || e.newValue === 'light')) this.setState({ stored: e.newValue, theme: null });
+      if (e.key === 'cadenway-theme' && (e.newValue === 'dark' || e.newValue === 'light')) this.setState({ stored: e.newValue, theme: null });
     };
     window.addEventListener('storage', this.onStorage);
     let reduce = false;
@@ -829,10 +829,10 @@ class Component extends DCLogic {
     const root = document.documentElement;
     const el = e && e.currentTarget && e.currentTarget.getBoundingClientRect ? e.currentTarget : null;
     const r = el ? el.getBoundingClientRect() : null;
-    root.style.setProperty('--wp-vt-origin', r ? Math.round(r.left + r.width / 2) + 'px ' + Math.round(r.top + r.height / 2) + 'px' : '50% 100%');
-    root.dataset.wpVt = 'circle-blur';
+    root.style.setProperty('--cw-vt-origin', r ? Math.round(r.left + r.width / 2) + 'px ' + Math.round(r.top + r.height / 2) + 'px' : '50% 100%');
+    root.dataset.cwVt = 'circle-blur';
     const vt = document.startViewTransition(() => new Promise((resolve) => { apply(resolve); setTimeout(resolve, 80); }));
-    const end = () => { delete root.dataset.wpVt; };
+    const end = () => { delete root.dataset.cwVt; };
     vt.finished.then(end, end);
     vt.ready.catch(() => {});
   }
@@ -899,7 +899,7 @@ class Component extends DCLogic {
       toggleTheme: (e) => {
         const next = theme === 'dark' ? 'light' : 'dark';
         this.themeTransition(e, (done) => this.setState({ theme: next }, done));
-        try { window.localStorage.setItem('waypoint-theme', next); } catch (err) {}
+        try { window.localStorage.setItem('cadenway-theme', next); } catch (err) {}
       },
       headerCls: s.scrolled ? 'border-border bg-canvas/85 shadow-[0_8px_24px_-16px_var(--shadow-ambient)] backdrop-blur-md' : 'border-transparent bg-transparent',
       navLinks: [
@@ -914,7 +914,7 @@ class Component extends DCLogic {
       menuIcon: s.menu ? 'phosphorXBold' : 'phosphorListBold',
       toggleMenu: () => this.setState({ menu: !s.menu }),
       closeMenu: () => this.setState({ menu: false }),
-      showRelease: () => this.notify('Waypoint 1.8 : vue Gantt, formulaires et charge de travail'),
+      showRelease: () => this.notify('Cadenway 1.8 : vue Gantt, formulaires et charge de travail'),
 
       // Aperçu statique fidèle à l'app
       mockRail: [
@@ -999,22 +999,22 @@ class Component extends DCLogic {
       })),
       ganttDays: ['L', 'M', 'M', 'J', 'V', 'L', 'M', 'M', 'J', 'V'].map((l, i) => ({ l, cls: i === 2 ? 'text-primary' : '' })),
       ganttBars: [
-        { label: 'WAY-482 · Connexion SSO', cls: 'col-span-5 col-start-1 bg-primary/15 text-primary', d: '0ms' },
-        { label: 'WAY-479 · Débit API', cls: 'col-span-3 col-start-2 bg-grenat/15 text-grenat', d: '120ms' },
-        { label: 'WAY-475 · Export CSV', cls: 'col-span-4 col-start-4 bg-balise/20 text-foreground', d: '240ms' },
-        { label: 'WAY-488 · Quotas', cls: 'col-span-4 col-start-6 bg-jade/15 text-jade-text', d: '360ms' },
+        { label: 'CAD-482 · Connexion SSO', cls: 'col-span-5 col-start-1 bg-primary/15 text-primary', d: '0ms' },
+        { label: 'CAD-479 · Débit API', cls: 'col-span-3 col-start-2 bg-grenat/15 text-grenat', d: '120ms' },
+        { label: 'CAD-475 · Export CSV', cls: 'col-span-4 col-start-4 bg-balise/20 text-foreground', d: '240ms' },
+        { label: 'CAD-488 · Quotas', cls: 'col-span-4 col-start-6 bg-jade/15 text-jade-text', d: '360ms' },
       ],
       docTools: [
         ['phosphorTextBBold', true], ['phosphorTextItalicBold'], ['phosphorTextUnderlineBold'], ['phosphorCodeBold'], ['phosphorListBulletsBold'], ['phosphorQuotesBold'],
       ].map(([icon, on]) => ({ icon, cls: on ? 'bg-primary/10 text-primary' : 'text-muted-foreground' })),
       inboxItems: [
-        { who: 'LR', icon: 'phosphorAtBold', tone: 'text-primary', title: 'Léa Robert vous a mentionnée', text: 'WAY-475 · « tu peux valider l’export ? »', d: '420ms' },
-        { who: 'HD', icon: 'phosphorUserCheckBold', tone: 'text-jade-text', title: 'Hugo Durand vous a assigné', text: 'WAY-479 · Limiter le débit des jetons', d: '540ms' },
-        { who: 'WP', icon: 'phosphorAlarmBold', tone: 'text-cornaline', title: 'Échéance demain', text: 'WAY-482 · Connexion SSO', d: '660ms' },
+        { who: 'LR', icon: 'phosphorAtBold', tone: 'text-primary', title: 'Léa Robert vous a mentionnée', text: 'CAD-475 · « tu peux valider l’export ? »', d: '420ms' },
+        { who: 'HD', icon: 'phosphorUserCheckBold', tone: 'text-jade-text', title: 'Hugo Durand vous a assigné', text: 'CAD-479 · Limiter le débit des jetons', d: '540ms' },
+        { who: 'WP', icon: 'phosphorAlarmBold', tone: 'text-cornaline', title: 'Échéance demain', text: 'CAD-482 · Connexion SSO', d: '660ms' },
       ],
       paletteQuery: ['c', 'co', 'con', 'conn', 'conne', 'connex'][Math.min(5, step % 9)],
       paletteItems: [
-        { icon: 'phosphorCircleHalfFill', tone: 'text-balise', label: 'Refondre l’écran de connexion SSO', kind: 'WAY-482', cls: 'bg-muted' },
+        { icon: 'phosphorCircleHalfFill', tone: 'text-balise', label: 'Refondre l’écran de connexion SSO', kind: 'CAD-482', cls: 'bg-muted' },
         { icon: 'phosphorFileTextBold', tone: 'text-muted-foreground', label: 'Connexion SSO : décisions', kind: 'Document', cls: '' },
         { icon: 'svglGithubLight', tone: '', label: 'Connecter GitHub', kind: 'Action', cls: '' },
         { icon: 'phosphorGearSixBold', tone: 'text-muted-foreground', label: 'Méthodes de connexion de l’organisation', kind: 'Réglage', cls: '' },
@@ -1110,7 +1110,7 @@ class Component extends DCLogic {
         items: p.items.map((t) => ({ t })),
         cardCls: p.popular ? 'vt-glow border-primary/40 bg-primary/5 lg:-translate-y-2' : 'border-border bg-card',
         btnCls: p.popular ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'border border-input bg-background hover:bg-muted',
-        go: () => { if (p.name === 'Entreprise') this.notify('Formulaire de contact : bonjour@waypoint.example'); },
+        go: () => { if (p.name === 'Entreprise') this.notify('Formulaire de contact : bonjour@cadenway.example'); },
       })),
       quotes: [
         { initials: 'HD', name: 'Hugo Durand', role: 'Responsable produit, Atelier Nord', text: 'On a migré 40 projets en un week-end. Nos clients publics exigeaient un hébergement en France : la question ne se pose plus.' },

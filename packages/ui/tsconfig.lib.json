@@ -1,4 +1,4 @@
-/* Library sources of @waypoint/ui: the development build and the type check. */
+/* Library sources of @cadenway/ui: the development build and the type check. */
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
