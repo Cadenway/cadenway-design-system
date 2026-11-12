@@ -73,7 +73,7 @@ published `@waypoint/*` packages.
 pnpm format:check
 pnpm lint
 pnpm typecheck
-pnpm test -- packages/ui/src/lib/<brick>
+pnpm test --include packages/ui/src/lib/<brick>
 pnpm test:coverage
 pnpm storybook:build
 pnpm test:storybook           # interaction and accessibility checks
