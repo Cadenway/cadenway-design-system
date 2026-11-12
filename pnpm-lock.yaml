@@ -334,6 +334,15 @@ importers:
       '@angular/platform-browser':
         specifier: 'catalog:'
         version: 22.2.5(@angular/animations@22.2.5(@angular/core@22.2.5(@angular/compiler@22.2.5)(rxjs@7.8.2)))(@angular/common@22.2.5(@angular/core@22.2.5(@angular/compiler@22.2.5)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.5(@angular/compiler@22.2.5)(rxjs@7.8.2))
+      '@cadenway/icons':
+        specifier: workspace:*
+        version: link:../../packages/icons
+      '@cadenway/tokens':
+        specifier: workspace:*
+        version: link:../../packages/tokens
+      '@cadenway/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       '@storybook/addon-a11y':
         specifier: 'catalog:'
         version: 10.6.7(storybook@10.6.7(@types/react@19.3.0)(prettier@3.9.10)(react@19.3.1))
@@ -355,15 +364,6 @@ importers:
       '@vitest/browser-playwright':
         specifier: 'catalog:'
         version: 5.1.0(playwright@1.65.0)(vite@8.3.5(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1(supports-color@8.1.1))(sass-embedded@1.104.1)(sass@1.104.1)(yaml@2.9.1))(vitest@5.1.0)
-      '@cadenway/icons':
-        specifier: workspace:*
-        version: link:../../packages/icons
-      '@cadenway/tokens':
-        specifier: workspace:*
-        version: link:../../packages/tokens
-      '@cadenway/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
       playwright:
         specifier: ^1.60.0
         version: 1.65.0
@@ -407,6 +407,8 @@ importers:
       '@ng-icons/core':
         specifier: 'catalog:'
         version: 36.1.0(@angular-devkit/schematics@22.2.6(chokidar@5.0.0))(@angular/common@22.2.5(@angular/core@22.2.5(@angular/compiler@22.2.5)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.5(@angular/compiler@22.2.5)(rxjs@7.8.2))(@schematics/angular@22.2.6(chokidar@5.0.0))(rxjs@7.8.2)
+    linkDirectory: false
+    publishDirectory: dist
 
   packages/tokens: {}
 
@@ -428,6 +430,8 @@ importers:
       storybook:
         specifier: 'catalog:'
         version: 10.6.7(@types/react@19.3.0)(prettier@3.9.10)(react@19.3.1)
+    linkDirectory: false
+    publishDirectory: dist
 
 packages:
 
@@ -518,6 +522,7 @@ packages:
   '@angular/animations@22.2.5':
     resolution: {integrity: sha512-ezoKEndTK4F7qmKfmuUFaBrJ1YKd/YwLFBVCdGWld3jKcIvsm+hB9J6wl8kc+PAg/XWet9L+0ZITAa5+J5U3Fg==}
     engines: {node: ^22.22.3 || ^24.15.0 || >=26.0.0}
+    deprecated: '@angular/animations is deprecated. Use `animate.enter` and `animate.leave` instead. For more information see: https://v22.angular.dev/guide/animations.'
     peerDependencies:
       '@angular/core': 22.2.5
 

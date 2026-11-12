@@ -3,8 +3,15 @@
   "version": "0.0.0",
   "description": "The icons Cadenway applications use, registered by provideCadenwayIcons().",
   "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Cadenway/cadenway-design-system.git",
+    "directory": "packages/icons"
+  },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "registry": "https://npm.pkg.github.com",
+    "directory": "dist",
+    "linkDirectory": false
   },
   "peerDependencies": {
     "@angular/core": "^22.2.0",
