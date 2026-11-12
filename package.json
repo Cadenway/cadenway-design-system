@@ -22,7 +22,8 @@
     "test:storybook": "pnpm --filter @cadenway/storybook run test:storybook",
     "build": "ng build icons && ng build ui",
     "changeset": "changeset",
-    "quality": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:coverage && pnpm storybook:build && pnpm test:storybook && pnpm build"
+    "quality": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:coverage && pnpm storybook:build && pnpm test:storybook && pnpm build",
+    "release": "pnpm build && changeset publish"
   },
   "devDependencies": {
     "@angular/build": "catalog:",
