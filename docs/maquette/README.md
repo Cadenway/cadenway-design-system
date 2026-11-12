@@ -1,6 +1,6 @@
 # Mockup (read-only reference)
 
-`source/` is a copy of the Waypoint interactive mockup (19 artboards, `*.dc.html`) and its compiled
+`source/` is a copy of the Cadenway interactive mockup (19 artboards, `*.dc.html`) and its compiled
 stylesheet (`source/styles/app.css`). It is the reference for screens, states, copy and behaviors.
 The live version is the Design artifact: https://claude.ai/artifact/KYRM7AnsYLiBLBLKy8i4HE
 

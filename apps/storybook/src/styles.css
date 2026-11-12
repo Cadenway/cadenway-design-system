@@ -1,0 +1,10 @@
+/*
+ * Global stylesheet of the Storybook preview, written as a consumer application writes its own:
+ * Tailwind, then the Cadenway tokens, then the Tailwind theme that maps them.
+ */
+@import 'tailwindcss';
+@import '@cadenway/tokens/tokens.css';
+@import '@cadenway/tokens/theme.css';
+
+/* Tailwind scans this application only: the templates of the bricks live in the packages. */
+@source '../../../packages/ui/src';

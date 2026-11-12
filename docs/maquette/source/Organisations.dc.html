@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<title>Organisations — Waypoint</title>
+<title>Organisations — Cadenway</title>
 <script src="./support.js"></script>
 <link rel="stylesheet" href="styles/app.css">
 </head>
@@ -16,9 +16,9 @@ body{margin:0}
 </helmet>
 <div data-theme="{{theme}}" class="min-h-screen flex flex-col bg-canvas font-sans text-sm text-foreground antialiased">
   <header class="flex h-14 items-center justify-between gap-4 px-4 sm:px-6">
-    <a href="Main.dc.html" aria-label="Waypoint, page de connexion" class="flex items-center gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas">
+    <a href="Main.dc.html" aria-label="Cadenway, page de connexion" class="flex items-center gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas">
       <svg class="size-6 text-primary" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.4c-3.5-3.3-7-7-7-11.2a7 7 0 0 1 14 0c0 1.8-.6 3.5-1.6 5.1" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="12" cy="10.2" r="3" fill="currentColor"></circle></svg>
-      <span class="text-base font-bold tracking-[-0.035em]">Waypoint</span>
+      <span class="text-base font-bold tracking-[-0.035em]">Cadenway</span>
     </a>
     <div class="flex items-center gap-2">
       <a href="Deconnexion.dc.html" class="relative isolate inline-flex h-8 items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-lg px-2.5 text-sm font-medium text-muted-foreground transition-all hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"><span class="ng-icon phosphorSignOutBold" aria-hidden="true"></span>Se déconnecter</a>
@@ -137,7 +137,7 @@ body{margin:0}
             <div class="flex flex-col gap-2">
               <label for="org-slug" class="flex items-center gap-2 text-sm leading-none font-medium select-none">Adresse</label>
               <div role="group" class="relative flex h-9 w-full min-w-0 items-center rounded-lg border border-input transition-[color,box-shadow] focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/20">
-                <span class="flex h-full shrink-0 items-center ps-3 text-sm text-muted-foreground" aria-hidden="true">app.waypoint.example/</span>
+                <span class="flex h-full shrink-0 items-center ps-3 text-sm text-muted-foreground" aria-hidden="true">app.cadenway.example/</span>
                 <input id="org-slug" type="text" value="{{slug}}" readonly class="h-full min-w-0 flex-1 bg-transparent pr-3 font-mono text-xs outline-none">
                 <span class="flex h-full shrink-0 items-center pe-3"><sc-if value="{{slugOk}}" hint-placeholder-val="{{ false }}"><span class="flex items-center gap-1 text-xs font-medium text-jade-text"><span class="ng-icon phosphorCheckCircleFill size-3.5" aria-hidden="true"></span>Disponible</span></sc-if></span>
               </div>
@@ -213,9 +213,9 @@ body{margin:0}
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["mémorisé","clair","sombre"],"default":"mémorisé"},"vue":{"editor":"enum","options":["choisir","créer"],"default":"choisir"},"$preview":{"width":1280,"height":820}}'>
-// Lien profond entre écrans (protocole commun « waypoint-nav ») ; from = écran d'origine, pour le bouton Retour.
+// Lien profond entre écrans (protocole commun « cadenway-nav ») ; from = écran d'origine, pour le bouton Retour.
 const writeNav = (to, section) => {
-  try { window.localStorage.setItem('waypoint-nav', JSON.stringify({ to, section, at: Date.now(), from: 'Organisations' })); } catch (e) {}
+  try { window.localStorage.setItem('cadenway-nav', JSON.stringify({ to, section, at: Date.now(), from: 'Organisations' })); } catch (e) {}
 };
 // Usage principal : mêmes libellés (et valeurs) que l'ancienne liste native, premier choix par défaut.
 const USES = ['Produit et ingénierie', 'Agence et projets clients', 'Marketing et contenus', 'Opérations et support', 'Autre'];
@@ -223,11 +223,11 @@ const STAGGER = ['stagger-0', 'stagger-1', 'stagger-2', 'stagger-3', 'stagger-4'
 class Component extends DCLogic {
   componentDidMount() {
     try {
-      const t = window.localStorage.getItem('waypoint-theme');
+      const t = window.localStorage.getItem('cadenway-theme');
       if (t === 'dark' || t === 'light') this.setState({ stored: t });
     } catch (e) {}
     this.onStorage = (e) => {
-      if (e.key === 'waypoint-theme' && (e.newValue === 'dark' || e.newValue === 'light')) this.setState({ stored: e.newValue, theme: null });
+      if (e.key === 'cadenway-theme' && (e.newValue === 'dark' || e.newValue === 'light')) this.setState({ stored: e.newValue, theme: null });
     };
     window.addEventListener('storage', this.onStorage);
   }
@@ -256,10 +256,10 @@ class Component extends DCLogic {
     const root = document.documentElement;
     const el = e && e.currentTarget && e.currentTarget.getBoundingClientRect ? e.currentTarget : null;
     const r = el ? el.getBoundingClientRect() : null;
-    root.style.setProperty('--wp-vt-origin', r ? Math.round(r.left + r.width / 2) + 'px ' + Math.round(r.top + r.height / 2) + 'px' : '50% 100%');
-    root.dataset.wpVt = 'circle-blur';
+    root.style.setProperty('--cw-vt-origin', r ? Math.round(r.left + r.width / 2) + 'px ' + Math.round(r.top + r.height / 2) + 'px' : '50% 100%');
+    root.dataset.cwVt = 'circle-blur';
     const vt = document.startViewTransition(() => new Promise((resolve) => { apply(resolve); setTimeout(resolve, 80); }));
-    const end = () => { delete root.dataset.wpVt; };
+    const end = () => { delete root.dataset.cwVt; };
     vt.finished.then(end, end);
     vt.ready.catch(() => {});
   }
@@ -304,7 +304,7 @@ class Component extends DCLogic {
       toggleTheme: (e) => {
         const next = theme === 'dark' ? 'light' : 'dark';
         this.themeTransition(e, (done) => this.setState({ theme: next }, done));
-        try { window.localStorage.setItem('waypoint-theme', next); } catch (err) {}
+        try { window.localStorage.setItem('cadenway-theme', next); } catch (err) {}
       },
       goPrivacy: () => writeNav('Legal', 'privacy'),
       goTerms: () => writeNav('Legal', 'terms'),
@@ -362,7 +362,7 @@ class Component extends DCLogic {
       },
       guardCreate: (e) => {
         if (slug.length >= 2) {
-          try { window.localStorage.setItem('waypoint-new-org', JSON.stringify({ name: name.trim(), slug, size, use, at: Date.now() })); } catch (err) {}
+          try { window.localStorage.setItem('cadenway-new-org', JSON.stringify({ name: name.trim(), slug, size, use, at: Date.now() })); } catch (err) {}
           return;
         }
         e.preventDefault();

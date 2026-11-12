@@ -1,0 +1,23 @@
+{
+  "name": "@cadenway/ui",
+  "version": "0.0.0",
+  "description": "The Angular bricks of the Cadenway design system.",
+  "license": "UNLICENSED",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "peerDependencies": {
+    "@angular/common": "^22.2.0",
+    "@angular/core": "^22.2.0"
+  },
+  "dependencies": {
+    "tslib": "^2.8.0"
+  },
+  "devDependencies": {
+    "@angular/common": "catalog:",
+    "@angular/core": "catalog:",
+    "@storybook/angular-vite": "catalog:",
+    "storybook": "catalog:"
+  },
+  "sideEffects": false
+}

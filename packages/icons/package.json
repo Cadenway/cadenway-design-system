@@ -1,0 +1,22 @@
+{
+  "name": "@cadenway/icons",
+  "version": "0.0.0",
+  "description": "The icons Cadenway applications use, registered by provideCadenwayIcons().",
+  "license": "UNLICENSED",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "peerDependencies": {
+    "@angular/core": "^22.2.0",
+    "@ng-icons/core": "^36.0.0"
+  },
+  "dependencies": {
+    "@ng-icons/phosphor-icons": "^36.0.0",
+    "tslib": "^2.8.0"
+  },
+  "devDependencies": {
+    "@angular/core": "catalog:",
+    "@ng-icons/core": "catalog:"
+  },
+  "sideEffects": false
+}

@@ -10,7 +10,7 @@ The design system owns tokens, icons, reusable Angular bricks and Storybook. The
 
 ## Tokens And Theme
 
-Source: `wp-tokens-and-theme` ([Claude](../.claude/skills/wp-tokens-and-theme/SKILL.md), [Codex](../.codex/skills/wp-tokens-and-theme/SKILL.md)).
+Source: `cw-tokens-and-theme` ([Claude](../.claude/skills/cw-tokens-and-theme/SKILL.md), [Codex](../.codex/skills/cw-tokens-and-theme/SKILL.md)).
 
 - Theme by `data-theme="light|dark"` on the root, never a class.
 - Text 13 px base; `text-xs` 12/16, `text-sm` 13/20, `text-base` 14/20, `text-lg` 16/24, `text-2xl` 20/28.
@@ -20,28 +20,28 @@ Source: `wp-tokens-and-theme` ([Claude](../.claude/skills/wp-tokens-and-theme/SK
 
 ## Brick Recipes
 
-Source: `wp-brick-recipes` ([Claude](../.claude/skills/wp-brick-recipes/SKILL.md), [Codex](../.codex/skills/wp-brick-recipes/SKILL.md)).
+Source: `cw-brick-recipes` ([Claude](../.claude/skills/cw-brick-recipes/SKILL.md), [Codex](../.codex/skills/cw-brick-recipes/SKILL.md)).
 
 | Brick                                             | API                                                                             | Primitive                          |
 | ------------------------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------- |
-| `button[wpButton]`                                | `variant`: primary, outline, ghost, destructive; `size`: sm (28 px), md (32 px) | —                                  |
-| `wp-split-button`                                 | `label`, `next`, `advance` output, projected menu                               | Aria Menu                          |
-| `wp-select`                                       | `value = model()`, `options`, `placeholder`                                     | Aria Select (Combobox + Listbox)   |
-| `wp-combobox`                                     | `value = model()`, `suggest: (text) => T[]`                                     | Aria Combobox                      |
-| `wp-menu`, `[wpMenuTrigger]`, `[wpContextMenu]`   | items, separators, submenus, checkbox and radio items                           | Aria Menu                          |
-| `wp-popover`                                      | projected content, non-modal dialog                                             | CDK Overlay                        |
-| `wp-dialog`                                       | `size`: md, lg, 2xl; `title`                                                    | CDK Dialog                         |
-| `wp-confirm-dialog`                               | `title`, `text`, `cta`, `items?`, `typeName?`                                   | CDK Dialog (alertdialog)           |
-| `wp-toast`                                        | `title`, `desc`, `undo?`, `openId?`; 6 s                                        | —                                  |
-| `wp-tabs`                                         | `selected = model()`                                                            | Aria Tabs                          |
-| `wp-choice-chips`, `wp-switch`, `wp-checkbox`     | `value`/`checked = model()`; checkbox `indeterminate`                           | Aria Listbox / —                   |
-| `wp-date-picker`                                  | `value = model<string \| null>()`, `shortcuts`                                  | Aria Grid                          |
-| `wp-avatar`, `wp-avatar-stack`                    | `person`, `size`, `presence?`; `max` (5 then "+ n")                             | —                                  |
-| `wp-meter`                                        | `value`, `max`, `segments?`; warning ≥ 80 %, critical ≥ 90 %                    | —                                  |
-| `wp-skeleton`, `wp-empty-state`, `wp-error-panel` | shape; icon, title, text; title, text, code, `retry`                            | —                                  |
-| `wp-block-editor`, `wp-markdown`                  | `value = model<string>()` (Markdown); `source`                                  | Aria Toolbar                       |
-| `wp-status-icon`                                  | `status`, `from?`, `milestone`, `size` (3, 3.5, 4, 5)                           | SVG layers animated between states |
-| `wp-priority-icon`                                | `priority`, `from?`, `size`                                                     | SVG bars                           |
+| `button[cwButton]`                                | `variant`: primary, outline, ghost, destructive; `size`: sm (28 px), md (32 px) | —                                  |
+| `cw-split-button`                                 | `label`, `next`, `advance` output, projected menu                               | Aria Menu                          |
+| `cw-select`                                       | `value = model()`, `options`, `placeholder`                                     | Aria Select (Combobox + Listbox)   |
+| `cw-combobox`                                     | `value = model()`, `suggest: (text) => T[]`                                     | Aria Combobox                      |
+| `cw-menu`, `[cwMenuTrigger]`, `[cwContextMenu]`   | items, separators, submenus, checkbox and radio items                           | Aria Menu                          |
+| `cw-popover`                                      | projected content, non-modal dialog                                             | CDK Overlay                        |
+| `cw-dialog`                                       | `size`: md, lg, 2xl; `title`                                                    | CDK Dialog                         |
+| `cw-confirm-dialog`                               | `title`, `text`, `cta`, `items?`, `typeName?`                                   | CDK Dialog (alertdialog)           |
+| `cw-toast`                                        | `title`, `desc`, `undo?`, `openId?`; 6 s                                        | —                                  |
+| `cw-tabs`                                         | `selected = model()`                                                            | Aria Tabs                          |
+| `cw-choice-chips`, `cw-switch`, `cw-checkbox`     | `value`/`checked = model()`; checkbox `indeterminate`                           | Aria Listbox / —                   |
+| `cw-date-picker`                                  | `value = model<string \| null>()`, `shortcuts`                                  | Aria Grid                          |
+| `cw-avatar`, `cw-avatar-stack`                    | `person`, `size`, `presence?`; `max` (5 then "+ n")                             | —                                  |
+| `cw-meter`                                        | `value`, `max`, `segments?`; warning ≥ 80 %, critical ≥ 90 %                    | —                                  |
+| `cw-skeleton`, `cw-empty-state`, `cw-error-panel` | shape; icon, title, text; title, text, code, `retry`                            | —                                  |
+| `cw-block-editor`, `cw-markdown`                  | `value = model<string>()` (Markdown); `source`                                  | Aria Toolbar                       |
+| `cw-status-icon`                                  | `status`, `from?`, `milestone`, `size` (3, 3.5, 4, 5)                           | SVG layers animated between states |
+| `cw-priority-icon`                                | `priority`, `from?`, `size`                                                     | SVG bars                           |
 
 ## References
 

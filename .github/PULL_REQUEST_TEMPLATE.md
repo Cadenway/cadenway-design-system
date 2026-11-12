@@ -5,9 +5,9 @@ commit on main. See .github/CONTRIBUTING.md.
 
 ## Task
 
-Fixes: WAY-
+Fixes: CAD-
 
-<!-- Use `Refs: WAY-…` instead when this pull request does not complete the task. -->
+<!-- Use `Refs: CAD-…` instead when this pull request does not complete the task. -->
 
 ## Summary
 
@@ -20,7 +20,7 @@ Fixes: WAY-
 - [ ] `pnpm format:check`
 - [ ] `pnpm lint`
 - [ ] `pnpm typecheck`
-- [ ] `pnpm test -- packages/ui/src/lib/<brick>`
+- [ ] `pnpm test --include packages/ui/src/lib/<brick>`
 - [ ] `pnpm test:coverage`
 - [ ] `pnpm storybook:build`
 - [ ] `pnpm test:storybook`

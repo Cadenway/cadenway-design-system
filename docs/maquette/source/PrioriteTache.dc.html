@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<title>Icônes de priorité — Waypoint</title>
+<title>Icônes de priorité — Cadenway</title>
 <script src="./support.js"></script>
 <link rel="stylesheet" href="styles/app.css">
 </head>
@@ -15,26 +15,26 @@ body{margin:0}
 </style>
 </helmet>
 <sc-if value="{{embedded}}" hint-placeholder-val="{{ true }}">
-  <svg viewBox="0 0 16 16" data-priority="{{shown}}" class="wp-prio block shrink-0 {{sizeCls}} {{tone}}" aria-hidden="true">
-    <rect class="wp-prio-bar" x="2.25" y="9" width="2.75" height="4.5" rx="1" fill="currentColor"></rect>
-    <rect class="wp-prio-bar" x="6.625" y="6.25" width="2.75" height="7.25" rx="1" fill="currentColor"></rect>
-    <rect class="wp-prio-bar" x="11" y="3" width="2.75" height="10.5" rx="1" fill="currentColor"></rect>
-    <rect class="wp-prio-disc" x="1.5" y="1.5" width="13" height="13" rx="3.5" fill="currentColor"></rect>
-    <path class="wp-prio-bang" d="M8 4.6v4.1" fill="none" stroke-width="1.75" stroke-linecap="round"></path>
-    <circle class="wp-prio-dot" cx="8" cy="11.35" r="1.05"></circle>
+  <svg viewBox="0 0 16 16" data-priority="{{shown}}" class="cw-prio block shrink-0 {{sizeCls}} {{tone}}" aria-hidden="true">
+    <rect class="cw-prio-bar" x="2.25" y="9" width="2.75" height="4.5" rx="1" fill="currentColor"></rect>
+    <rect class="cw-prio-bar" x="6.625" y="6.25" width="2.75" height="7.25" rx="1" fill="currentColor"></rect>
+    <rect class="cw-prio-bar" x="11" y="3" width="2.75" height="10.5" rx="1" fill="currentColor"></rect>
+    <rect class="cw-prio-disc" x="1.5" y="1.5" width="13" height="13" rx="3.5" fill="currentColor"></rect>
+    <path class="cw-prio-bang" d="M8 4.6v4.1" fill="none" stroke-width="1.75" stroke-linecap="round"></path>
+    <circle class="cw-prio-dot" cx="8" cy="11.35" r="1.05"></circle>
   </svg>
 </sc-if>
 
 <sc-if value="{{standalone}}" hint-placeholder-val="{{ false }}">
   <div data-theme="{{theme}}" class="flex min-h-screen flex-col gap-5 bg-background p-6 font-sans text-sm text-foreground antialiased">
     <div class="flex flex-wrap items-center gap-4">
-      <svg viewBox="0 0 16 16" data-priority="{{demo.key}}" class="wp-prio block size-12 shrink-0 {{demo.tone}}" role="img" aria-label="{{demo.label}}">
-        <rect class="wp-prio-bar" x="2.25" y="9" width="2.75" height="4.5" rx="1" fill="currentColor"></rect>
-        <rect class="wp-prio-bar" x="6.625" y="6.25" width="2.75" height="7.25" rx="1" fill="currentColor"></rect>
-        <rect class="wp-prio-bar" x="11" y="3" width="2.75" height="10.5" rx="1" fill="currentColor"></rect>
-        <rect class="wp-prio-disc" x="1.5" y="1.5" width="13" height="13" rx="3.5" fill="currentColor"></rect>
-        <path class="wp-prio-bang" d="M8 4.6v4.1" fill="none" stroke-width="1.75" stroke-linecap="round"></path>
-        <circle class="wp-prio-dot" cx="8" cy="11.35" r="1.05"></circle>
+      <svg viewBox="0 0 16 16" data-priority="{{demo.key}}" class="cw-prio block size-12 shrink-0 {{demo.tone}}" role="img" aria-label="{{demo.label}}">
+        <rect class="cw-prio-bar" x="2.25" y="9" width="2.75" height="4.5" rx="1" fill="currentColor"></rect>
+        <rect class="cw-prio-bar" x="6.625" y="6.25" width="2.75" height="7.25" rx="1" fill="currentColor"></rect>
+        <rect class="cw-prio-bar" x="11" y="3" width="2.75" height="10.5" rx="1" fill="currentColor"></rect>
+        <rect class="cw-prio-disc" x="1.5" y="1.5" width="13" height="13" rx="3.5" fill="currentColor"></rect>
+        <path class="cw-prio-bang" d="M8 4.6v4.1" fill="none" stroke-width="1.75" stroke-linecap="round"></path>
+        <circle class="cw-prio-dot" cx="8" cy="11.35" r="1.05"></circle>
       </svg>
       <div class="flex min-w-0 flex-1 flex-col gap-1">
         <h1 class="text-base font-semibold">Icônes de priorité animées</h1>
@@ -46,13 +46,13 @@ body{margin:0}
       <sc-for list="{{tiles}}" as="tl" hint-placeholder-count="4">
         <button type="button" role="radio" aria-checked="{{tl.on}}" data-state="{{tl.state}}" onClick="{{tl.pick}}" class="flex flex-col items-start gap-1.5 rounded-lg border border-border p-3 text-left transition-colors hover:bg-muted data-[state=checked]:border-primary/50 data-[state=checked]:bg-primary/5 data-[state=checked]:hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">
           <span class="flex items-center gap-2 text-sm font-medium {{tl.wordTone}}">
-            <svg viewBox="0 0 16 16" data-priority="{{tl.key}}" class="wp-prio block size-4 shrink-0 {{tl.tone}}" aria-hidden="true">
-              <rect class="wp-prio-bar" x="2.25" y="9" width="2.75" height="4.5" rx="1" fill="currentColor"></rect>
-              <rect class="wp-prio-bar" x="6.625" y="6.25" width="2.75" height="7.25" rx="1" fill="currentColor"></rect>
-              <rect class="wp-prio-bar" x="11" y="3" width="2.75" height="10.5" rx="1" fill="currentColor"></rect>
-              <rect class="wp-prio-disc" x="1.5" y="1.5" width="13" height="13" rx="3.5" fill="currentColor"></rect>
-              <path class="wp-prio-bang" d="M8 4.6v4.1" fill="none" stroke-width="1.75" stroke-linecap="round"></path>
-              <circle class="wp-prio-dot" cx="8" cy="11.35" r="1.05"></circle>
+            <svg viewBox="0 0 16 16" data-priority="{{tl.key}}" class="cw-prio block size-4 shrink-0 {{tl.tone}}" aria-hidden="true">
+              <rect class="cw-prio-bar" x="2.25" y="9" width="2.75" height="4.5" rx="1" fill="currentColor"></rect>
+              <rect class="cw-prio-bar" x="6.625" y="6.25" width="2.75" height="7.25" rx="1" fill="currentColor"></rect>
+              <rect class="cw-prio-bar" x="11" y="3" width="2.75" height="10.5" rx="1" fill="currentColor"></rect>
+              <rect class="cw-prio-disc" x="1.5" y="1.5" width="13" height="13" rx="3.5" fill="currentColor"></rect>
+              <path class="cw-prio-bang" d="M8 4.6v4.1" fill="none" stroke-width="1.75" stroke-linecap="round"></path>
+              <circle class="cw-prio-dot" cx="8" cy="11.35" r="1.05"></circle>
             </svg>{{tl.label}}
           </span>
           <span class="text-xs text-muted-foreground">{{tl.hint}}</span>
@@ -82,11 +82,11 @@ class Component extends DCLogic {
     }
     if (p.priority == null) {
       try {
-        const t = window.localStorage.getItem('waypoint-theme');
+        const t = window.localStorage.getItem('cadenway-theme');
         if (t === 'dark' || t === 'light') this.setState({ stored: t });
       } catch (e) {}
       this.onStorage = (e) => {
-        if (e.key === 'waypoint-theme' && (e.newValue === 'dark' || e.newValue === 'light')) this.setState({ stored: e.newValue });
+        if (e.key === 'cadenway-theme' && (e.newValue === 'dark' || e.newValue === 'light')) this.setState({ stored: e.newValue });
       };
       window.addEventListener('storage', this.onStorage);
     }

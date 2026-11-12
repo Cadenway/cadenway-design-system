@@ -1,0 +1,33 @@
+/* Compiler options shared by every project of the workspace; each project extends this file. */
+/* Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "preserve"
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  },
+  /* Solution-style file: editors and ESLint find the project that owns a file through these. */
+  "files": [],
+  "references": [
+    { "path": "./packages/icons/tsconfig.lib.json" },
+    { "path": "./packages/icons/tsconfig.spec.json" },
+    { "path": "./packages/ui/tsconfig.lib.json" },
+    { "path": "./packages/ui/tsconfig.spec.json" },
+    { "path": "./apps/storybook/tsconfig.json" }
+  ]
+}

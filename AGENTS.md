@@ -1,4 +1,4 @@
-# waypoint-design-system: agent instructions
+# cadenway-design-system: agent instructions
 
 These instructions are mandatory for every AI assistant working in this repository, whatever the
 vendor. [CLAUDE.md](CLAUDE.md) imports them for Claude Code. Explicit user instructions take
@@ -18,13 +18,13 @@ and [Codex](.codex/README.md) for agents, skills, commands and hooks.
 
 The structure and workflows below describe the bootstrap target. Check the checkout for available files and commands.
 
-waypoint-design-system is the Angular design system taken from the mockup. It publishes `@waypoint/tokens`, `@waypoint/icons` and `@waypoint/ui` (pnpm monorepo, Changesets) and hosts Storybook as the visual reference. Consumers: waypoint-webapp and waypoint-website.
+cadenway-design-system is the Angular design system taken from the mockup. It publishes `@cadenway/tokens`, `@cadenway/icons` and `@cadenway/ui` (pnpm monorepo, Changesets) and hosts Storybook as the visual reference. Consumers: cadenway-webapp and cadenway-website.
 
 ```text
 packages/
-├─ tokens/   → @waypoint/tokens (tokens.css, theme.css)
-├─ icons/    → @waypoint/icons (provideWaypointIcons)
-└─ ui/       → @waypoint/ui (src/lib/<brick>/, public-api.ts)
+├─ tokens/   → @cadenway/tokens (tokens.css, theme.css)
+├─ icons/    → @cadenway/icons (provideCadenwayIcons)
+└─ ui/       → @cadenway/ui (src/lib/<brick>/, public-api.ts)
 apps/storybook/
 ```
 
@@ -48,14 +48,14 @@ apps/storybook/
 
 ## Boundaries (hard rules)
 
-- No business logic, no API call, no knowledge of tasks beyond the display contracts of `wp-status-icon` and `wp-priority-icon`.
+- No business logic, no API call, no knowledge of tasks beyond the display contracts of `cw-status-icon` and `cw-priority-icon`.
 - Consumers never restyle a brick from outside: variants are inputs.
 - Tokens are the only source of colors, radii, shadows and timings.
 - `docs/maquette/` is a read-only reference.
 
 ## GitHub files (`.github/`)
 
-This repository carries everything GitHub reads from it; Waypoint has no organization `.github`
+This repository carries everything GitHub reads from it; Cadenway has no organization `.github`
 repository and nothing is inherited.
 
 - [`.github/README.md`](.github/README.md) is the repository home page; `CONTRIBUTING.md`,
@@ -67,20 +67,19 @@ repository and nothing is inherited.
 - The parts shared with the other repositories are duplicated on purpose; a change to them is repeated
   in each repository through its own pull request.
 
-
 ## Commands and quality gates
 
 The scripts below are this repository's contract. While the repository is being bootstrapped,
 create them with these exact names; afterwards, use them and never an ad-hoc equivalent. Run the
 narrowest check that covers the change first, then widen:
 
-| Changed | Minimum check |
-| --- | --- |
-| A brick | `pnpm test -- <brick>`, its stories, `pnpm test:storybook` |
-| Tokens | `pnpm build`, the token stories in light and dark |
-| Public API | `pnpm build` and `wp-ds-package-reviewer` |
-| Any change to a package | a changeset (`pnpm changeset`) |
-| Docs or agent instructions only | Scoped formatting and link review |
+| Changed                         | Minimum check                                                     |
+| ------------------------------- | ----------------------------------------------------------------- |
+| A brick                         | `pnpm test --include <brick>`, its stories, `pnpm test:storybook` |
+| Tokens                          | `pnpm build`, the token stories in light and dark                 |
+| Public API                      | `pnpm build` and `cw-ds-package-reviewer`                         |
+| Any change to a package         | a changeset (`pnpm changeset`)                                    |
+| Docs or agent instructions only | Scoped formatting and link review                                 |
 
 Report the commands you actually ran and their results; a check you did not run is reported as not
 run.
@@ -89,7 +88,7 @@ run.
 
 - Trunk-based: work branches come from `main`, named `<type>/<lowercase-kebab-description>` with a
   type among `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`,
-  `revert`; put the Waypoint task id first when there is one (`feat/way-482-sso-screen`). Never an
+  `revert`; put the Cadenway task id first when there is one (`feat/cad-482-sso-screen`). Never an
   agent name as a prefix. Validate with `git check-ref-format --branch <name>`.
 - Commits and PR titles follow Conventional Commits: `type(scope): subject`, English, imperative,
   lowercase subject, no trailing period, at most 100 characters; `!` only for a breaking change.
@@ -102,12 +101,11 @@ run.
 - Never run a registry publish (`npm publish`, `pnpm publish`): the release workflow publishes.
 - Never force-push, and never amend or rebase commits that are already pushed.
 - Never bypass the Git hooks (`--no-verify`, `core.hooksPath` overrides, `ALLOW_MAIN_PUSH=1`,
-  `WP_SKIP_PUSH_CHECKS=1`).
+  `CW_SKIP_PUSH_CHECKS=1`).
 - Never write a token, password or private key anywhere; `.npmrc` keeps `${NODE_AUTH_TOKEN}`. Do
   not read or write secret environment files; new variables are documented in `.env.example`.
 - Never edit generated trees (`dist/`, `node_modules/`, `coverage/`) or lockfiles by hand.
-- Never modify a sibling checkout (`../waypoint-*`) from a task in this repository.
-
+- Never modify a sibling checkout (`../cadenway-*`) from a task in this repository.
 
 The agent hooks enforce most of these mechanically; a refused command is a signal to stop and ask,
 not to find another way around it.
@@ -115,11 +113,11 @@ not to find another way around it.
 ## Agent tooling
 
 - **Claude Code**: [CLAUDE.md](CLAUDE.md) and [.claude/README.md](.claude/README.md): the
-  `wp-ds-*` agents, the `/wp-*` commands (`/wp-quality` runs the whole local gate),
+  `cw-ds-*` agents, the `/cw-*` commands (`/cw-quality` runs the whole local gate),
   path-scoped rules and hooks.
-- **Codex**: [.codex/README.md](.codex/README.md) covers the specialists, `$wp-*` skills, rules and hooks.
-- **Builders** (assigned writes): `wp-ds-component-builder`, `wp-ds-story-writer`, `wp-ds-theme-maintainer`, `wp-ds-icon-maintainer`, `wp-ds-unit-test-writer`, `wp-ds-release-manager`, `wp-ds-github-maintainer`.
-- **Reviewers** (read-only): `wp-ds-a11y-auditor`, `wp-ds-motion-reviewer`, `wp-ds-design-reviewer`, `wp-ds-package-reviewer`, `wp-ds-architecture-reviewer`.
+- **Codex**: [.codex/README.md](.codex/README.md) covers the specialists, `$cw-*` skills, rules and hooks.
+- **Builders** (assigned writes): `cw-ds-component-builder`, `cw-ds-story-writer`, `cw-ds-theme-maintainer`, `cw-ds-icon-maintainer`, `cw-ds-unit-test-writer`, `cw-ds-release-manager`, `cw-ds-github-maintainer`.
+- **Reviewers** (read-only): `cw-ds-a11y-auditor`, `cw-ds-motion-reviewer`, `cw-ds-design-reviewer`, `cw-ds-package-reviewer`, `cw-ds-architecture-reviewer`.
 - Specialists are available, not mandatory. Delegate a bounded responsibility with explicit files and
   checks, assign disjoint files to parallel agents and integrate their results yourself.
 

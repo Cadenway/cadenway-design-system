@@ -1,0 +1,9 @@
+/* Unit tests of @cadenway/icons, run by the Angular unit-test builder (Vitest). */
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../out-tsc/icons/spec",
+    "types": ["vitest/globals"]
+  },
+  "include": ["src/**/*.d.ts", "src/**/*.spec.ts"]
+}

@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<title>Code à usage unique — Waypoint</title>
+<title>Code à usage unique — Cadenway</title>
 <script src="./support.js"></script>
 <link rel="stylesheet" href="styles/app.css">
 </head>
@@ -16,9 +16,9 @@ body{margin:0}
 </helmet>
 <div data-theme="{{theme}}" class="min-h-screen flex flex-col bg-canvas font-sans text-sm text-foreground antialiased">
   <header class="flex h-14 items-center justify-between gap-4 px-4 sm:px-6">
-    <a href="Main.dc.html" aria-label="Waypoint, page de connexion" class="flex items-center gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas">
+    <a href="Main.dc.html" aria-label="Cadenway, page de connexion" class="flex items-center gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas">
       <svg class="size-6 text-primary" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.4c-3.5-3.3-7-7-7-11.2a7 7 0 0 1 14 0c0 1.8-.6 3.5-1.6 5.1" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="12" cy="10.2" r="3" fill="currentColor"></circle></svg>
-      <span class="text-base font-bold tracking-[-0.035em]">Waypoint</span>
+      <span class="text-base font-bold tracking-[-0.035em]">Cadenway</span>
     </a>
     <button type="button" onClick="{{toggleTheme}}" aria-label="{{themeLabel}}" class="relative isolate inline-flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-lg text-muted-foreground transition-all hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas whitespace-nowrap">
       <span class="ng-icon phosphorMoonBold dark:hidden" aria-hidden="true"></span>
@@ -67,7 +67,7 @@ body{margin:0}
           </sc-if>
         </div>
       </div>
-      <p class="text-center text-xs text-muted-foreground">Le code n'arrive pas ? Vérifiez les courriers indésirables, ou <a href="Legal.dc.html" onClick="{{goHelp}}" class="rounded-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas">demandez à l'administrateur</a> d'autoriser l'expéditeur no-reply@waypoint.example dans le filtre de votre messagerie.</p>
+      <p class="text-center text-xs text-muted-foreground">Le code n'arrive pas ? Vérifiez les courriers indésirables, ou <a href="Legal.dc.html" onClick="{{goHelp}}" class="rounded-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas">demandez à l'administrateur</a> d'autoriser l'expéditeur no-reply@cadenway.example dans le filtre de votre messagerie.</p>
     </div>
   </main>
 
@@ -80,27 +80,27 @@ body{margin:0}
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["mémorisé","clair","sombre"],"default":"mémorisé"},"usage":{"editor":"enum","options":["connexion sans mot de passe","vérification de l’adresse"],"default":"vérification de l’adresse"},"erreur":{"editor":"boolean","default":false},"$preview":{"width":1280,"height":820}}'>
-// Lien profond entre écrans (protocole commun « waypoint-nav ») ; from = écran d'origine, pour le bouton Retour.
+// Lien profond entre écrans (protocole commun « cadenway-nav ») ; from = écran d'origine, pour le bouton Retour.
 const writeNav = (to, section) => {
-  try { window.localStorage.setItem('waypoint-nav', JSON.stringify({ to, section, at: Date.now(), from: 'Otp' })); } catch (e) {}
+  try { window.localStorage.setItem('cadenway-nav', JSON.stringify({ to, section, at: Date.now(), from: 'Otp' })); } catch (e) {}
 };
 class Component extends DCLogic {
   componentDidMount() {
     try {
-      const t = window.localStorage.getItem('waypoint-theme');
+      const t = window.localStorage.getItem('cadenway-theme');
       if (t === 'dark' || t === 'light') this.setState({ stored: t });
     } catch (e) {}
     this.onStorage = (e) => {
-      if (e.key === 'waypoint-theme' && (e.newValue === 'dark' || e.newValue === 'light')) this.setState({ stored: e.newValue, theme: null });
+      if (e.key === 'cadenway-theme' && (e.newValue === 'dark' || e.newValue === 'light')) this.setState({ stored: e.newValue, theme: null });
     };
     window.addEventListener('storage', this.onStorage);
     // Lien profond : « login » depuis la connexion (code par e-mail), « signup » depuis l'inscription.
     try {
-      const raw = window.localStorage.getItem('waypoint-nav');
+      const raw = window.localStorage.getItem('cadenway-nav');
       const n = raw ? JSON.parse(raw) : null;
       if (n && n.to === 'Otp') {
         if (Date.now() - n.at < 15000 && (n.section === 'login' || n.section === 'signup')) this.setState({ usage: n.section });
-        window.localStorage.removeItem('waypoint-nav');
+        window.localStorage.removeItem('cadenway-nav');
       }
     } catch (e) {}
     this.setState({ left: 30 });
@@ -127,10 +127,10 @@ class Component extends DCLogic {
     const root = document.documentElement;
     const el = e && e.currentTarget && e.currentTarget.getBoundingClientRect ? e.currentTarget : null;
     const r = el ? el.getBoundingClientRect() : null;
-    root.style.setProperty('--wp-vt-origin', r ? Math.round(r.left + r.width / 2) + 'px ' + Math.round(r.top + r.height / 2) + 'px' : '50% 100%');
-    root.dataset.wpVt = 'circle-blur';
+    root.style.setProperty('--cw-vt-origin', r ? Math.round(r.left + r.width / 2) + 'px ' + Math.round(r.top + r.height / 2) + 'px' : '50% 100%');
+    root.dataset.cwVt = 'circle-blur';
     const vt = document.startViewTransition(() => new Promise((resolve) => { apply(resolve); setTimeout(resolve, 80); }));
-    const end = () => { delete root.dataset.wpVt; };
+    const end = () => { delete root.dataset.cwVt; };
     vt.finished.then(end, end);
     vt.ready.catch(() => {});
   }
@@ -166,7 +166,7 @@ class Component extends DCLogic {
       toggleTheme: (e) => {
         const next = theme === 'dark' ? 'light' : 'dark';
         this.themeTransition(e, (done) => this.setState({ theme: next }, done));
-        try { window.localStorage.setItem('waypoint-theme', next); } catch (err) {}
+        try { window.localStorage.setItem('cadenway-theme', next); } catch (err) {}
       },
       goPrivacy: () => writeNav('Legal', 'privacy'),
       goTerms: () => writeNav('Legal', 'terms'),

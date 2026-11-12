@@ -32,21 +32,21 @@ The scripts below are this repository's contract. While the repository is being 
 create them with these exact names; afterwards, use them and never an ad-hoc equivalent. Run the
 narrowest check that covers the change first, then widen:
 
-| Changed                 | Minimum check                                              |
-| ----------------------- | ---------------------------------------------------------- |
-| A brick                 | `pnpm test -- <brick>`, its stories, `pnpm test:storybook` |
-| Tokens                  | `pnpm build`, the token stories in light and dark          |
-| Public API              | `pnpm build` and `wp-ds-package-reviewer`                  |
-| Any change to a package | a changeset (`pnpm changeset`)                             |
-| Docs or agent instructions only | Scoped formatting and link review |
+| Changed                         | Minimum check                                                     |
+| ------------------------------- | ----------------------------------------------------------------- |
+| A brick                         | `pnpm test --include <brick>`, its stories, `pnpm test:storybook` |
+| Tokens                          | `pnpm build`, the token stories in light and dark                 |
+| Public API                      | `pnpm build` and `cw-ds-package-reviewer`                         |
+| Any change to a package         | a changeset (`pnpm changeset`)                                    |
+| Docs or agent instructions only | Scoped formatting and link review                                 |
 
 Report the commands you actually ran and their results; a check you did not run is reported as not
 run.
 
 ## Planned full check list
 
-The following commands match the planned local gate. Run `/wp-quality` in Claude Code or
-`$wp-quality` in Codex without arguments. Verify CI coverage once workflows exist.
+The following commands match the planned local gate. Run `/cw-quality` in Claude Code or
+`$cw-quality` in Codex without arguments. Verify CI coverage once workflows exist.
 
 ```bash
 pnpm format:check
@@ -63,7 +63,7 @@ pnpm changeset status
 
 - Trunk-based: work branches come from `main`, named `<type>/<lowercase-kebab-description>` with a
   type among `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`,
-  `revert`; put the Waypoint task id first when there is one (`feat/way-482-sso-screen`). Never an
+  `revert`; put the Cadenway task id first when there is one (`feat/cad-482-sso-screen`). Never an
   agent name as a prefix. Validate with `git check-ref-format --branch <name>`.
 - Commits and PR titles follow Conventional Commits: `type(scope): subject`, English, imperative,
   lowercase subject, no trailing period, at most 100 characters; `!` only for a breaking change.
