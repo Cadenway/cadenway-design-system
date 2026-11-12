@@ -10,15 +10,15 @@
     "node": "^24.15.0"
   },
   "scripts": {
-    "prepare": "node scripts/install-git-hooks.mjs",
+    "prepare": "git config core.hooksPath .githooks",
     "storybook": "pnpm --filter @waypoint/storybook run storybook",
     "storybook:build": "pnpm --filter @waypoint/storybook run storybook:build",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint .",
     "typecheck": "ngc --noEmit -p packages/icons/tsconfig.lib.json && ngc --noEmit -p packages/icons/tsconfig.spec.json && ngc --noEmit -p packages/ui/tsconfig.lib.json && ngc --noEmit -p packages/ui/tsconfig.spec.json && ngc --noEmit -p apps/storybook/tsconfig.json",
-    "test": "node scripts/ng-test.mjs",
-    "test:coverage": "node scripts/ng-test.mjs --coverage",
+    "test": "ng test --no-watch",
+    "test:coverage": "ng test --no-watch --coverage",
     "test:storybook": "pnpm --filter @waypoint/storybook run test:storybook",
     "build": "ng build icons && ng build ui",
     "changeset": "changeset",
