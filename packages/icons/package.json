@@ -1,6 +1,6 @@
 {
   "name": "@cadenway/icons",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "The icons Cadenway applications use, registered by provideCadenwayIcons().",
   "license": "UNLICENSED",
   "repository": {
