@@ -1,0 +1,5 @@
+@if (compact()) {
+  <span aria-hidden="true" class="mx-1.5 h-4 w-px shrink-0 bg-border"></span>
+}
+<ng-content select="cw-tabs" />
+<div [class]="endClasses()"><ng-content /></div>

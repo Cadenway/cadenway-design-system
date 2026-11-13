@@ -1,0 +1,15 @@
+<button
+  cwButton
+  variant="ghost"
+  [size]="buttonSize()"
+  [attr.aria-label]="ariaLabel()"
+  [attr.aria-pressed]="favorite()"
+  [attr.data-state]="favorite() ? 'on' : 'off'"
+  (click)="toggle()"
+>
+  <ng-icon
+    aria-hidden="true"
+    [name]="favorite() ? 'phosphorStarFill' : 'phosphorStarBold'"
+    [class]="iconClasses()"
+  />
+</button>
