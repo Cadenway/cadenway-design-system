@@ -1,0 +1,29 @@
+@if (type() === 'bar') {
+  <svg viewBox="0 0 80 28" class="h-7 w-20" focusable="false">
+    @for (bar of bars(); track $index) {
+      <rect
+        [attr.x]="bar.x"
+        [attr.y]="bar.y"
+        width="7"
+        [attr.height]="bar.height"
+        rx="1.5"
+        [class]="bar.last ? 'fill-chart-2' : 'fill-chart-2/40'"
+      />
+    }
+  </svg>
+} @else {
+  <svg viewBox="0 0 80 28" class="h-7 w-20 overflow-visible" focusable="false">
+    @if (end(); as end) {
+      <polygon [attr.points]="area()" class="fill-chart-1/10" />
+      <polyline
+        [attr.points]="polyline()"
+        fill="none"
+        class="stroke-chart-1"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+      <circle [attr.cx]="end.x" [attr.cy]="end.y" r="2.25" class="fill-chart-1" />
+    }
+  </svg>
+}

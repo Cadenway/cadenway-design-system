@@ -1,0 +1,423 @@
+<ng-content select="[cwTimelineToolbar]" />
+@let ax = axis();
+@let nameWidth = nameColumnWidth();
+<!-- The keys bubble from the focusable rows and bars inside the grid (one tab stop, roving). -->
+<!-- eslint-disable-next-line @angular-eslint/template/interactive-supports-focus -->
+<div
+  role="treegrid"
+  class="min-h-0 flex-1 overflow-auto rounded-lg border bg-background"
+  [attr.aria-label]="ariaLabel()"
+  (keydown)="onKeydown($event)"
+  (focusin)="onFocusin($event)"
+  (wheel)="onWheel($event)"
+>
+  <div class="relative min-w-full" [style.width.px]="nameWidth + ax.width">
+    <div role="row" class="sticky top-0 z-30 flex border-b bg-background">
+      <div
+        role="columnheader"
+        class="sticky left-0 z-10 flex h-[60px] shrink-0 items-end border-r bg-background px-3 pb-2 text-xs font-medium text-muted-foreground"
+        [style.width.px]="nameWidth"
+      >
+        {{ nameHeader() }}
+      </div>
+      <div role="columnheader" class="shrink-0" [style.width.px]="ax.width">
+        <div class="relative h-6 border-b">
+          @for (band of ax.bands; track band.key) {
+            <div
+              class="absolute inset-y-0 flex items-center gap-1.5 overflow-hidden px-2 text-xs whitespace-nowrap"
+              [class.border-l]="band.separator"
+              [style.left.px]="band.x"
+              [style.width.px]="band.width"
+            >
+              <span class="font-medium">{{ band.label }}</span>
+              @if (band.sub) {
+                <span class="text-muted-foreground tabular-nums">{{ band.sub }}</span>
+              }
+            </div>
+          }
+        </div>
+        <div class="relative h-9">
+          @for (column of ax.columns; track column.key) {
+            <div
+              [class]="columnCell()"
+              [class.border-l]="column.separator"
+              [class.bg-muted]="column.weekend"
+              [attr.data-weekend]="column.weekend ? '' : null"
+              [attr.aria-current]="column.today ? 'date' : null"
+              [style.left.px]="column.x"
+              [style.width.px]="column.width"
+            >
+              @if (ax.scale === 'day') {
+                <span
+                  [class]="
+                    column.today
+                      ? 'text-[10px] font-semibold text-primary'
+                      : 'text-[10px] text-muted-foreground'
+                  "
+                  >{{ column.label }}</span
+                >
+                <span
+                  [class]="
+                    column.today ? 'text-xs font-semibold text-primary' : 'text-xs font-medium'
+                  "
+                  >{{ column.sub }}</span
+                >
+              } @else {
+                <span [class]="column.today ? 'font-semibold text-primary' : 'font-medium'">{{
+                  column.label
+                }}</span>
+                @if (column.sub) {
+                  <span
+                    [class]="column.today ? 'font-semibold text-primary' : 'text-muted-foreground'"
+                    >{{ column.sub }}</span
+                  >
+                }
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="relative">
+      <div
+        aria-hidden="true"
+        class="pointer-events-none absolute inset-y-0"
+        [style.left.px]="nameWidth"
+        [style.width.px]="ax.width"
+      >
+        @for (column of ax.columns; track column.key) {
+          @if (column.weekend) {
+            <div
+              class="absolute inset-y-0 bg-muted"
+              [style.left.px]="column.x"
+              [style.width.px]="column.width"
+            ></div>
+          }
+          @if (column.separator) {
+            <div class="absolute inset-y-0 w-px bg-border" [style.left.px]="column.x"></div>
+          }
+        }
+      </div>
+      <svg
+        aria-hidden="true"
+        focusable="false"
+        class="pointer-events-none absolute top-0"
+        [style.left.px]="nameWidth"
+        [attr.width]="ax.width"
+        [attr.height]="bodyHeight()"
+        [attr.viewBox]="'0 0 ' + ax.width + ' ' + bodyHeight()"
+      >
+        @if (todayX(); as x) {
+          <line
+            [attr.x1]="x"
+            [attr.x2]="x"
+            y1="0"
+            [attr.y2]="bodyHeight()"
+            class="stroke-primary"
+            stroke-width="1.5"
+          />
+        }
+        @for (dependency of dependencyLines(); track dependency.key) {
+          <path
+            [attr.d]="dependency.line"
+            fill="none"
+            stroke-width="1.25"
+            [class]="dependency.stroke"
+          />
+          <path
+            [attr.d]="dependency.head"
+            fill="none"
+            stroke-width="1.25"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            [class]="dependency.stroke"
+          />
+        }
+      </svg>
+      @if (dragTip(); as tip) {
+        <div
+          aria-hidden="true"
+          class="pointer-events-none absolute z-30 w-max -translate-x-1/2 animate-pop-in rounded-md bg-foreground px-2 py-1 text-xs font-medium text-background tabular-nums shadow-sm motion-reduce:animate-none dark:border dark:bg-popover dark:text-popover-foreground"
+          [style.left.px]="tip.x"
+          [style.top.px]="tip.y"
+        >
+          {{ tip.text }}
+        </div>
+      }
+
+      @for (section of sections(); track section.key) {
+        @if (section.group; as row) {
+          <div
+            role="row"
+            aria-level="1"
+            class="group/row relative flex h-9 border-b outline-hidden"
+            [attr.aria-expanded]="row.expanded"
+            [attr.data-state]="row.expanded ? 'open' : 'closed'"
+            [attr.data-focus-key]="row.key"
+            [attr.tabindex]="tabStop() === row.key ? 0 : -1"
+          >
+            <div role="gridcell" [class]="groupNameCell" [style.width.px]="nameWidth">
+              <button
+                type="button"
+                tabindex="-1"
+                class="relative isolate flex h-6 min-w-0 shrink-0 items-center gap-1.5 overflow-hidden rounded-md px-1.5 text-sm transition-colors hover:bg-accent [&_ng-icon]:[--ng-icon__size:0.875rem]"
+                [attr.aria-expanded]="row.expanded"
+                (click)="toggleGroup(row.group.id)"
+              >
+                <ng-icon
+                  name="phosphorCaretDownBold"
+                  aria-hidden="true"
+                  [class]="
+                    row.expanded
+                      ? 'shrink-0 text-muted-foreground transition-transform duration-300 ease-snap motion-reduce:transition-none'
+                      : 'shrink-0 -rotate-90 text-muted-foreground transition-transform duration-300 ease-snap motion-reduce:transition-none'
+                  "
+                />
+                <span class="truncate font-medium">{{ row.group.label }}</span>
+              </button>
+              <span class="truncate text-xs text-muted-foreground tabular-nums">{{
+                row.meta
+              }}</span>
+            </div>
+            <div role="gridcell" [class]="trackCell" [style.width.px]="ax.width">
+              @if (row.bar; as bar) {
+                <div
+                  aria-hidden="true"
+                  class="absolute top-4 h-1 overflow-hidden bg-track"
+                  [class]="bar.rounding"
+                  [style.left.px]="bar.x"
+                  [style.width.px]="bar.width"
+                >
+                  <span
+                    class="block h-full rounded-full bg-ink-muted"
+                    [style.width.%]="bar.progress"
+                  ></span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+        <div
+          class="grid transition-[grid-template-rows] duration-300 ease-snap motion-reduce:transition-none"
+          [class]="section.expanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
+          [attr.inert]="section.expanded ? null : ''"
+        >
+          <div class="min-h-0 overflow-hidden">
+            @for (row of section.rows; track row.key) {
+              @if (row.kind === 'item') {
+                <div
+                  role="row"
+                  class="group/row relative flex h-9 border-b outline-hidden"
+                  [attr.aria-level]="row.level"
+                  [attr.aria-selected]="row.selected"
+                  [attr.data-focus-key]="row.bar ? null : row.key"
+                  [attr.tabindex]="row.bar ? null : tabStop() === row.key ? 0 : -1"
+                >
+                  <div role="gridcell" [class]="nameCells[row.level]" [style.width.px]="nameWidth">
+                    @if (row.item.status) {
+                      <cw-status-icon [status]="row.item.status" />
+                    }
+                    <span class="min-w-0 flex-1 truncate text-sm" [attr.title]="row.item.name">{{
+                      row.item.name
+                    }}</span>
+                    @if (!row.dates) {
+                      <span class="shrink-0 text-xs text-muted-foreground">{{
+                        undatedLabel()
+                      }}</span>
+                    } @else if (row.item.assignee; as person) {
+                      <cw-avatar size="xs" [name]="person.name" [src]="person.src ?? null" />
+                    }
+                  </div>
+                  <div
+                    role="gridcell"
+                    [class]="trackCell"
+                    [style.width.px]="ax.width"
+                    (pointermove)="onTrackPointerMove($event, row)"
+                    (pointerleave)="scheduleHover.set(null)"
+                  >
+                    @if (row.ghost; as ghost) {
+                      <div
+                        aria-hidden="true"
+                        class="pointer-events-none absolute top-1.5 h-6 rounded-md border-2 border-dashed border-line-control"
+                        [style.left.px]="ghost.x"
+                        [style.width.px]="ghost.width"
+                      ></div>
+                    }
+                    @if (row.bar; as bar) {
+                      <div
+                        role="button"
+                        [class]="bar.classes"
+                        [style.left.px]="bar.x"
+                        [style.width.px]="bar.width"
+                        [attr.tabindex]="tabStop() === row.key ? 0 : -1"
+                        [attr.aria-label]="bar.ariaLabel"
+                        [attr.aria-pressed]="row.selected"
+                        [attr.data-focus-key]="row.key"
+                        [attr.data-bar-id]="row.item.id"
+                        [attr.data-status]="row.item.status ?? null"
+                        [attr.data-late]="bar.late ? '' : null"
+                        [attr.data-conflict]="bar.conflict ? '' : null"
+                        [attr.data-dragging]="bar.dragging ? '' : null"
+                        [attr.data-resizing]="bar.resizing ? '' : null"
+                        (pointerdown)="onBarPointerDown($event, row)"
+                        (pointermove)="onBarPointerMove($event)"
+                        (pointerup)="onBarPointerUp($event, row)"
+                        (pointercancel)="onBarPointerCancel()"
+                        (dblclick)="open.emit(row.item)"
+                      >
+                        @if (bar.progress !== null) {
+                          <span
+                            aria-hidden="true"
+                            class="absolute inset-x-0 bottom-0 h-[3px] bg-current/15"
+                          >
+                            <span
+                              class="block h-full bg-current/60"
+                              [style.width.%]="bar.progress"
+                            ></span>
+                          </span>
+                        }
+                        @if (barDef(); as def) {
+                          <span
+                            aria-hidden="true"
+                            class="relative flex min-w-0 flex-1 items-center gap-1.5 px-2"
+                          >
+                            <ng-container
+                              [ngTemplateOutlet]="def.template"
+                              [ngTemplateOutletContext]="{ $implicit: row.item, width: bar.width }"
+                            />
+                          </span>
+                        } @else {
+                          <span
+                            aria-hidden="true"
+                            class="relative flex min-w-0 items-center gap-1.5 px-2"
+                          >
+                            @if (row.item.status) {
+                              <cw-status-icon [status]="row.item.status" size="3.5" />
+                            }
+                            @if (bar.nameInside) {
+                              <span class="truncate">{{ row.item.name }}</span>
+                            }
+                          </span>
+                          @if (bar.percent) {
+                            <!-- A kept space, so the text of the bar reads « name 60 % » as its accessible name does. -->
+                            &ngsp;
+                            <span
+                              class="relative ml-auto shrink-0 pr-3 whitespace-nowrap tabular-nums"
+                              >{{ bar.percent }}</span
+                            >
+                          }
+                        }
+                        @if (bar.resizable) {
+                          <span
+                            data-edge="start"
+                            aria-hidden="true"
+                            class="absolute inset-y-0 left-0 flex w-2 cursor-ew-resize items-center justify-center opacity-0 group-hover/bar:opacity-100"
+                          >
+                            <span class="h-3 w-[3px] rounded-full bg-muted-foreground"></span>
+                          </span>
+                          <span
+                            data-edge="end"
+                            aria-hidden="true"
+                            class="absolute inset-y-0 right-0 flex w-2 cursor-ew-resize items-center justify-center opacity-0 group-hover/bar:opacity-100"
+                          >
+                            <span class="h-3 w-[3px] rounded-full bg-muted-foreground"></span>
+                          </span>
+                        }
+                      </div>
+                      @if (bar.outside; as outside) {
+                        <span
+                          aria-hidden="true"
+                          [class]="
+                            outside.before
+                              ? 'pointer-events-none absolute top-1.5 flex h-6 -translate-x-full items-center gap-1.5 rounded-sm bg-background px-1 text-xs font-medium whitespace-nowrap'
+                              : 'pointer-events-none absolute top-1.5 flex h-6 items-center gap-1.5 rounded-sm bg-background px-1 text-xs font-medium whitespace-nowrap'
+                          "
+                          [style.left.px]="outside.x"
+                        >
+                          @if (!bar.nameInside) {
+                            <span>{{ row.item.name }}</span>
+                          }
+                          @if (bar.late) {
+                            <span
+                              class="flex items-center gap-1 text-grenat-text [&_ng-icon]:[--ng-icon__size:0.875rem]"
+                            >
+                              <ng-icon name="phosphorWarningCircleFill" />{{ bar.late }}
+                            </span>
+                          }
+                        </span>
+                      }
+                    } @else if (!row.dates && !readonly()) {
+                      <button
+                        type="button"
+                        tabindex="-1"
+                        class="absolute top-1.5 isolate flex h-6 items-center gap-1 overflow-hidden rounded-md border border-dashed border-input bg-background px-2 text-xs font-medium text-muted-foreground opacity-0 transition-colors group-focus-within/row:opacity-100 group-hover/row:opacity-100 hover:text-foreground [&_ng-icon]:[--ng-icon__size:0.875rem]"
+                        [style.left.px]="scheduleX(row)"
+                        (click)="planify(row)"
+                      >
+                        <ng-icon name="phosphorCalendarPlusBold" aria-hidden="true" />{{
+                          scheduleLabel()
+                        }}
+                      </button>
+                    }
+                  </div>
+                </div>
+              } @else if (row.kind === 'milestone') {
+                <div
+                  role="row"
+                  class="group/row relative flex h-9 border-b outline-hidden"
+                  [attr.aria-level]="row.level"
+                  [attr.data-focus-key]="row.key"
+                  [attr.tabindex]="tabStop() === row.key ? 0 : -1"
+                >
+                  <div role="gridcell" [class]="nameCells[row.level]" [style.width.px]="nameWidth">
+                    @if (row.milestone.status) {
+                      <cw-status-icon [status]="row.milestone.status" milestone />
+                    } @else {
+                      <ng-icon
+                        name="phosphorDiamondFill"
+                        aria-hidden="true"
+                        class="shrink-0 text-foreground [--ng-icon__size:1rem]"
+                      />
+                    }
+                    <span class="min-w-0 flex-1 truncate text-sm">{{ row.milestone.label }}</span>
+                    <span class="shrink-0 text-xs text-muted-foreground tabular-nums">{{
+                      row.dateText
+                    }}</span>
+                  </div>
+                  <div role="gridcell" [class]="trackCell" [style.width.px]="ax.width">
+                    @if (row.x !== null) {
+                      <div
+                        role="img"
+                        [attr.aria-label]="row.ariaLabel"
+                        [class]="
+                          row.before
+                            ? 'absolute top-0 flex h-9 -translate-x-full flex-row-reverse items-center gap-1.5'
+                            : 'absolute top-0 flex h-9 items-center gap-1.5'
+                        "
+                        [style.left.px]="row.before ? row.x + 8 : row.x - 8"
+                      >
+                        @if (row.milestone.status) {
+                          <cw-status-icon [status]="row.milestone.status" milestone />
+                        } @else {
+                          <ng-icon
+                            name="phosphorDiamondFill"
+                            aria-hidden="true"
+                            class="shrink-0 text-foreground [--ng-icon__size:1rem]"
+                          />
+                        }
+                        <span class="text-xs font-medium whitespace-nowrap">{{
+                          row.milestone.label
+                        }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>

@@ -1,0 +1,44 @@
+<div class="flex items-center gap-1.5 text-xs text-muted-foreground">
+  <span class="truncate">{{ label() }}</span>
+  @if (refreshing() && !loading()) {
+    <svg cwSpinner size="sm" [label]="refreshingLabel()"></svg>
+  }
+</div>
+@if (loading()) {
+  <div cwSkeleton animation="shimmer" [class]="valueSkeleton()"></div>
+  <div cwSkeleton animation="shimmer" class="mt-1 h-3 w-36 max-w-full rounded-full"></div>
+} @else {
+  <div class="flex items-end justify-between gap-3">
+    <span [class]="valueClasses()">{{ shownValue() }}</span>
+    <ng-content select="cw-stat-sparkline" />
+  </div>
+  @if (hasChange()) {
+    <div class="flex min-w-0 items-center gap-1.5 text-xs">
+      @if (delta()) {
+        <span [class]="deltaClasses()">
+          <ng-icon [name]="icon()" aria-hidden="true" />
+          <span class="sr-only">{{ trendText() }} : </span>{{ delta() }}
+        </span>
+      }
+      @if (comparison()) {
+        <span class="truncate text-muted-foreground">{{ comparison() }}</span>
+      }
+    </div>
+  }
+  @if (goal(); as goal) {
+    <div class="mt-1 grid gap-1.5">
+      <div
+        role="progressbar"
+        class="h-1 overflow-hidden rounded-full bg-track"
+        [attr.aria-label]="label()"
+        aria-valuemin="0"
+        [attr.aria-valuemax]="goal.max"
+        [attr.aria-valuenow]="goal.value"
+        [attr.aria-valuetext]="goalText()"
+      >
+        <div class="h-full rounded-full bg-jade" [style.width.%]="goalPercent()"></div>
+      </div>
+      <span class="text-xs text-muted-foreground">{{ goalText() }}</span>
+    </div>
+  }
+}

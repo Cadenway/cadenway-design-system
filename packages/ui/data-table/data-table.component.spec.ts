@@ -1,0 +1,511 @@
+import { Component, signal } from '@angular/core';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
+
+import { CwCellDef } from './cell/cell.directive';
+import { CwCellEditorDef } from './cell-editor/cell-editor.directive';
+import { CwDataTableColumn } from './data-table-column/data-table-column.component';
+import { CwDataTableEmpty } from './data-table-empty/data-table-empty.directive';
+import { CwDataTable } from './data-table.component';
+import type {
+  CwBulkAction,
+  CwBulkActionEvent,
+  CwCellEditEvent,
+  CwColumnResizeEvent,
+  CwDataTableSelection,
+  CwSort,
+} from './data-table.types';
+
+interface Task {
+  readonly id: string;
+  readonly name: string;
+  readonly status: string;
+  readonly estimate: number;
+}
+
+const TASKS: readonly Task[] = [
+  { id: 'CAD-482', name: "Corriger l'export CSV", status: 'progress', estimate: 3 },
+  { id: 'CAD-479', name: 'Maquetter la vue Calendrier', status: 'progress', estimate: 5 },
+  { id: 'CAD-471', name: 'Migrer les pièces jointes', status: 'blocked', estimate: 8 },
+  { id: 'CAD-488', name: 'Importer les espaces', status: 'todo', estimate: 2 },
+];
+
+const ACTIONS: readonly CwBulkAction[] = [
+  { id: 'status', label: 'Statut', shortcut: 'S' },
+  { id: 'delete', label: 'Supprimer', shortcut: 'Delete', variant: 'destructive' },
+];
+
+@Component({
+  imports: [CwDataTable, CwDataTableColumn, CwCellDef, CwCellEditorDef, CwDataTableEmpty],
+  template: `
+    <cw-data-table
+      ariaLabel="Tâches de Produit"
+      [data]="data()"
+      [groupBy]="groupBy()"
+      [groupLabel]="groupLabel"
+      [(page)]="page"
+      [pageSize]="pageSize()"
+      [loading]="loading()"
+      [bulkActions]="actions"
+      [(sort)]="sort"
+      [(selection)]="selection"
+      [(collapsed)]="collapsed"
+      [(columnWidths)]="widths"
+      [(columnOrder)]="order"
+      [(columnVisibility)]="visibility"
+      (rowOpen)="opened.set($event)"
+      (cellEdit)="edits.push($event)"
+      (bulkAction)="bulk.push($event)"
+      (columnResize)="resizes.push($event)"
+    >
+      <cw-data-table-column key="name" header="Nom" sortable>
+        <ng-template cwCell let-task>
+          <span>{{ task.name }}</span>
+        </ng-template>
+        <ng-template cwCellEditor let-task let-commit="commit">
+          <input
+            aria-label="Nom de la tâche"
+            [value]="task.name"
+            (keydown.enter)="commit($any($event.target).value)"
+          />
+        </ng-template>
+      </cw-data-table-column>
+      <cw-data-table-column key="status" header="Statut" sortable />
+      <cw-data-table-column
+        key="estimate"
+        header="Estimation"
+        align="end"
+        sortable
+        [minWidth]="72"
+      />
+      @if (projectEmpty()) {
+        <p cwDataTableEmpty>Aucun résultat pour « export pdf »</p>
+      }
+    </cw-data-table>
+  `,
+})
+class Host {
+  readonly data = signal<readonly Task[]>(TASKS);
+  readonly groupBy = signal<string | null>(null);
+  readonly page = signal<number | null>(null);
+  readonly pageSize = signal(50);
+  readonly loading = signal(false);
+  readonly projectEmpty = signal(false);
+  readonly sort = signal<readonly CwSort[]>([]);
+  readonly selection = signal<CwDataTableSelection>([]);
+  readonly collapsed = signal<readonly string[]>([]);
+  readonly widths = signal<Readonly<Record<string, number>>>({});
+  readonly order = signal<readonly string[]>([]);
+  readonly visibility = signal<Readonly<Record<string, boolean>>>({});
+  readonly opened = signal<Task | null>(null);
+  readonly edits: CwCellEditEvent<Task>[] = [];
+  readonly bulk: CwBulkActionEvent[] = [];
+  readonly resizes: CwColumnResizeEvent[] = [];
+  readonly actions = ACTIONS;
+  readonly groupLabel = (key: string): string =>
+    ({ progress: 'En cours', blocked: 'Bloqué', todo: 'À faire' })[key] ?? key;
+}
+
+function byRole(root: HTMLElement, role: string, name?: string): HTMLElement[] {
+  return Array.from(root.querySelectorAll<HTMLElement>(`[role="${role}"]`)).filter(
+    (element) =>
+      name === undefined ||
+      element.getAttribute('aria-label') === name ||
+      element.textContent.replace(/\s+/g, ' ').trim() === name,
+  );
+}
+
+function one(root: HTMLElement, role: string, name: string): HTMLElement {
+  const found = byRole(root, role, name).at(0);
+  if (!found) throw new Error(`No ${role} named ${name}`);
+  return found;
+}
+
+function button(root: HTMLElement, name: string): HTMLButtonElement {
+  const found = Array.from(root.querySelectorAll('button')).find((element) => {
+    const label = element.getAttribute('aria-label') ?? element.textContent.replace(/\s+/g, ' ');
+    return label.trim().startsWith(name);
+  });
+  if (!found) throw new Error(`No button named ${name}`);
+  return found;
+}
+
+function dataRows(root: HTMLElement): HTMLElement[] {
+  return byRole(root, 'row').filter((row) => row.hasAttribute('aria-selected'));
+}
+
+function names(root: HTMLElement): string[] {
+  return dataRows(root).map((row) => byRole(row, 'gridcell')[1]?.textContent.trim() ?? '');
+}
+
+function required<V>(value: V | null | undefined): V {
+  if (value === null || value === undefined) throw new Error('Missing element');
+  return value;
+}
+
+function key(target: Element, init: KeyboardEventInit): KeyboardEvent {
+  const event = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, ...init });
+  target.dispatchEvent(event);
+  return event;
+}
+
+describe('CwDataTable', () => {
+  let fixture: ComponentFixture<Host>;
+  let host: HTMLElement;
+  let component: Host;
+
+  beforeEach(async () => {
+    fixture = TestBed.createComponent(Host);
+    component = fixture.componentInstance;
+    host = fixture.nativeElement as HTMLElement;
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+  });
+
+  async function stable(): Promise<void> {
+    await fixture.whenStable();
+  }
+
+  describe('rows and columns', () => {
+    it('renders a named grid with a header and one row per item', () => {
+      const grid = one(host, 'grid', 'Tâches de Produit');
+      expect(grid.getAttribute('aria-multiselectable')).toBe('true');
+      expect(grid.getAttribute('aria-rowcount')).toBe('5');
+      expect(grid.getAttribute('aria-colcount')).toBe('4');
+      expect(byRole(host, 'columnheader').map((th) => th.textContent.trim())).toEqual([
+        '',
+        'Nom',
+        'Statut',
+        'Estimation',
+      ]);
+      expect(names(host)).toEqual(TASKS.map((task) => task.name));
+    });
+
+    it('renders the default cell from the row value', () => {
+      const [first] = dataRows(host);
+      expect(byRole(first, 'gridcell')[3].textContent.trim()).toBe('3');
+    });
+
+    it('hides a column through columnVisibility, never the first one', async () => {
+      component.visibility.set({ status: false, name: false });
+      await stable();
+      expect(byRole(host, 'columnheader').map((th) => th.textContent.trim())).toEqual([
+        '',
+        'Nom',
+        'Estimation',
+      ]);
+    });
+
+    it('follows columnOrder', async () => {
+      component.order.set(['estimate', 'status']);
+      await stable();
+      expect(byRole(host, 'columnheader').map((th) => th.textContent.trim())).toEqual([
+        '',
+        'Nom',
+        'Estimation',
+        'Statut',
+      ]);
+    });
+  });
+
+  describe('sorting', () => {
+    it('cycles ascending, descending, then no sort on click', async () => {
+      const sortButton = (): HTMLButtonElement => button(host, 'Nom');
+      sortButton().click();
+      await stable();
+      expect(component.sort()).toEqual([{ key: 'name', dir: 'asc' }]);
+      expect(
+        one(host, 'columnheader', 'Nom, tri principal croissant').getAttribute('aria-sort'),
+      ).toBe('ascending');
+      expect(names(host)[0]).toBe("Corriger l'export CSV");
+
+      sortButton().click();
+      await stable();
+      expect(component.sort()).toEqual([{ key: 'name', dir: 'desc' }]);
+      expect(names(host)[0]).toBe('Migrer les pièces jointes');
+
+      sortButton().click();
+      await stable();
+      expect(component.sort()).toEqual([]);
+      expect(names(host)).toEqual(TASKS.map((task) => task.name));
+    });
+
+    it('adds a secondary criterion with Shift + click', async () => {
+      button(host, 'Statut').click();
+      await stable();
+      button(host, 'Estimation').dispatchEvent(
+        new MouseEvent('click', { bubbles: true, shiftKey: true }),
+      );
+      await stable();
+      expect(component.sort()).toEqual([
+        { key: 'status', dir: 'asc' },
+        { key: 'estimate', dir: 'asc' },
+      ]);
+      // blocked, progress (3 then 5), todo
+      expect(names(host)).toEqual([
+        'Migrer les pièces jointes',
+        "Corriger l'export CSV",
+        'Maquetter la vue Calendrier',
+        'Importer les espaces',
+      ]);
+      const estimate = byRole(host, 'columnheader').find(
+        (th) => th.dataset['cwCol'] === 'estimate',
+      );
+      expect(estimate?.hasAttribute('aria-sort')).toBe(false);
+      expect(estimate?.textContent).toContain('tri secondaire croissant');
+    });
+  });
+
+  describe('selection', () => {
+    it('ticks a row and reflects it in the header checkbox', async () => {
+      one(host, 'checkbox', 'Sélectionner CAD-479').click();
+      await stable();
+      expect(component.selection()).toEqual(['CAD-479']);
+      expect(dataRows(host)[1].getAttribute('aria-selected')).toBe('true');
+      const all = one(host, 'checkbox', 'Tout sélectionner sur la page');
+      expect(all.getAttribute('aria-checked')).toBe('mixed');
+
+      all.click();
+      await stable();
+      expect([...(component.selection() as string[])].sort()).toEqual(
+        TASKS.map((task) => task.id).sort(),
+      );
+      expect(all.getAttribute('aria-checked')).toBe('true');
+
+      all.click();
+      await stable();
+      expect(component.selection()).toEqual([]);
+    });
+
+    it('selects a range with Shift + click from the anchor', async () => {
+      one(host, 'checkbox', 'Sélectionner CAD-482').click();
+      await stable();
+      one(host, 'checkbox', 'Sélectionner CAD-471').dispatchEvent(
+        new MouseEvent('click', { bubbles: true, cancelable: true, shiftKey: true }),
+      );
+      await stable();
+      expect(component.selection()).toEqual(['CAD-482', 'CAD-479', 'CAD-471']);
+      expect(one(host, 'checkbox', 'Sélectionner CAD-471').getAttribute('aria-checked')).toBe(
+        'true',
+      );
+    });
+  });
+
+  describe('grouping', () => {
+    beforeEach(async () => {
+      component.groupBy.set('status');
+      await stable();
+    });
+
+    it('renders one group row per value with its count', () => {
+      expect(button(host, 'En cours').getAttribute('aria-expanded')).toBe('true');
+      expect(button(host, 'En cours').textContent).toContain('2');
+      expect(button(host, 'Bloqué').textContent).toContain('1');
+      expect(one(host, 'grid', 'Tâches de Produit').getAttribute('aria-rowcount')).toBe('8');
+    });
+
+    it('folds a group on click and with ArrowLeft', async () => {
+      button(host, 'En cours').click();
+      await stable();
+      expect(component.collapsed()).toEqual(['progress']);
+      expect(button(host, 'En cours').getAttribute('aria-expanded')).toBe('false');
+      expect(names(host)).toEqual(['Migrer les pièces jointes', 'Importer les espaces']);
+
+      const blockedCell = required(
+        button(host, 'Bloqué').closest<HTMLElement>('[role="gridcell"]'),
+      );
+      key(blockedCell, { key: 'ArrowLeft' });
+      await stable();
+      expect(component.collapsed()).toEqual(['progress', 'blocked']);
+    });
+  });
+
+  describe('states', () => {
+    it('shows skeleton rows and aria-busy while loading', async () => {
+      component.loading.set(true);
+      await stable();
+      expect(one(host, 'grid', 'Tâches de Produit').getAttribute('aria-busy')).toBe('true');
+      expect(dataRows(host)).toHaveLength(0);
+    });
+
+    it('shows the empty text, or the projected empty content', async () => {
+      component.data.set([]);
+      await stable();
+      expect(one(host, 'status', 'Aucune tâche ne correspond')).toBeTruthy();
+
+      component.projectEmpty.set(true);
+      await stable();
+      expect(host.textContent).toContain('Aucun résultat pour « export pdf »');
+      expect(byRole(host, 'status', 'Aucune tâche ne correspond')).toHaveLength(0);
+    });
+  });
+
+  describe('keyboard', () => {
+    function cell(row: number, column: number): HTMLElement {
+      return byRole(dataRows(host)[row], 'gridcell')[column];
+    }
+
+    it('keeps a single tab stop and moves it with the arrows', async () => {
+      const tabStops = Array.from(host.querySelectorAll<HTMLElement>('[tabindex="0"]'));
+      expect(tabStops).toHaveLength(1);
+      expect(tabStops[0]).toBe(cell(0, 0));
+
+      cell(0, 0).focus();
+      key(cell(0, 0), { key: 'ArrowRight' });
+      expect(document.activeElement).toBe(cell(0, 1));
+      key(cell(0, 1), { key: 'ArrowDown' });
+      expect(document.activeElement).toBe(cell(1, 1));
+      key(cell(1, 1), { key: 'End' });
+      expect(document.activeElement).toBe(cell(1, 3));
+      key(cell(1, 3), { key: 'ArrowUp' });
+      key(cell(0, 3), { key: 'ArrowUp' });
+      expect(document.activeElement?.getAttribute('role')).toBe('columnheader');
+      await stable();
+      // One cell keeps the tab stop; the controls of that header cell (its resize handle) follow it with Tab.
+      const cells = host.querySelectorAll(
+        '[role="gridcell"][tabindex="0"], [role="columnheader"][tabindex="0"]',
+      );
+      expect(cells).toHaveLength(1);
+      expect(one(host, 'separator', 'Largeur de la colonne Estimation').tabIndex).toBe(0);
+    });
+
+    it('ticks the active row with Space and empties the selection with Escape', async () => {
+      cell(2, 2).focus();
+      key(cell(2, 2), { key: ' ' });
+      await stable();
+      expect(component.selection()).toEqual(['CAD-471']);
+      key(cell(2, 2), { key: 'Escape' });
+      await stable();
+      expect(component.selection()).toEqual([]);
+    });
+
+    it('selects the page with Ctrl + A', async () => {
+      key(cell(0, 2), { key: 'a', ctrlKey: true });
+      await stable();
+      expect(component.selection()).toHaveLength(4);
+    });
+
+    it('opens the row with Enter on a cell', () => {
+      key(cell(1, 2), { key: 'Enter' });
+      expect(component.opened()).toBe(TASKS[1]);
+    });
+  });
+
+  describe('editing', () => {
+    function nameCell(row: number): HTMLElement {
+      return byRole(dataRows(host)[row], 'gridcell')[1];
+    }
+
+    it('opens the editor with F2 and emits cellEdit on commit', async () => {
+      key(nameCell(0), { key: 'F2' });
+      await stable();
+      const field = host.querySelector<HTMLInputElement>('input[aria-label="Nom de la tâche"]');
+      expect(field).toBeTruthy();
+      expect(nameCell(0).hasAttribute('data-editing')).toBe(true);
+      expect(document.activeElement).toBe(field);
+
+      required(field).value = 'Exporter en CSV';
+      key(required(field), { key: 'Enter' });
+      await stable();
+      expect(component.edits).toEqual([
+        { row: TASKS[0], key: 'name', value: 'Exporter en CSV', previous: TASKS[0].name },
+      ]);
+      expect(host.querySelector('input[aria-label="Nom de la tâche"]')).toBeNull();
+    });
+
+    it('cancels with Escape', async () => {
+      nameCell(1).dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+      await stable();
+      const field = host.querySelector<HTMLInputElement>('input[aria-label="Nom de la tâche"]');
+      key(required(field), { key: 'Escape' });
+      await stable();
+      expect(host.querySelector('input[aria-label="Nom de la tâche"]')).toBeNull();
+      expect(component.edits).toEqual([]);
+    });
+  });
+
+  describe('bulk bar', () => {
+    it('appears with a selection and emits the actions', async () => {
+      expect(byRole(host, 'toolbar', 'Actions sur la sélection')).toHaveLength(0);
+      one(host, 'checkbox', 'Sélectionner CAD-482').click();
+      one(host, 'checkbox', 'Sélectionner CAD-488').click();
+      await stable();
+      const bar = one(host, 'toolbar', 'Actions sur la sélection');
+      expect(bar.textContent).toContain('2 tâches sélectionnées');
+
+      const status = button(bar, 'Statut');
+      expect(status.getAttribute('aria-keyshortcuts')).toBe('S');
+      status.click();
+      expect(component.bulk).toEqual([
+        { action: 'status', ids: ['CAD-482', 'CAD-488'], trigger: status },
+      ]);
+
+      const cell = byRole(dataRows(host)[0], 'gridcell')[2];
+      key(cell, { key: 'Delete' });
+      expect(component.bulk[1]?.action).toBe('delete');
+
+      button(bar, 'Désélectionner').click();
+      await stable();
+      expect(component.selection()).toEqual([]);
+      expect(byRole(host, 'toolbar', 'Actions sur la sélection')).toHaveLength(0);
+    });
+  });
+
+  describe('columns', () => {
+    it('resizes a column from its handle with the arrows', async () => {
+      const handle = one(host, 'separator', 'Largeur de la colonne Estimation');
+      expect(handle.getAttribute('aria-valuemin')).toBe('72');
+      component.widths.set({ estimate: 100 });
+      await stable();
+      key(handle, { key: 'ArrowRight' });
+      await stable();
+      expect(component.widths()).toEqual({ estimate: 108 });
+      key(handle, { key: 'ArrowLeft', shiftKey: true });
+      await stable();
+      expect(component.widths()).toEqual({ estimate: 76 });
+      key(handle, { key: 'Home' });
+      await stable();
+      expect(component.resizes.at(-1)).toEqual({ key: 'estimate', width: 72 });
+      expect(handle.getAttribute('aria-valuenow')).toBe('72');
+    });
+
+    it('moves a column with Ctrl + Shift + arrows on its header', async () => {
+      const status = byRole(host, 'columnheader').find((th) => th.dataset['cwCol'] === 'status');
+      key(required(status), { key: 'ArrowRight', ctrlKey: true, shiftKey: true });
+      await stable();
+      expect(component.order()).toEqual(['name', 'estimate', 'status']);
+    });
+  });
+
+  describe('pagination', () => {
+    beforeEach(async () => {
+      component.page.set(1);
+      component.pageSize.set(3);
+      await stable();
+    });
+
+    it('shows the page of rows, its range, and moves between pages', async () => {
+      expect(dataRows(host)).toHaveLength(3);
+      const nav = required(host.querySelector<HTMLElement>('nav[aria-label="Pagination"]'));
+      expect(host.textContent).toContain('1–3 sur 4 tâches');
+      expect(host.textContent).toContain('Page 1 sur 2');
+      expect(button(nav, 'Page précédente').disabled).toBe(true);
+
+      button(nav, 'Page suivante').click();
+      await stable();
+      expect(component.page()).toBe(2);
+      expect(names(host)).toEqual(['Importer les espaces']);
+      expect(host.textContent).toContain('4–4 sur 4 tâches');
+      expect(button(nav, 'Page suivante').disabled).toBe(true);
+      expect(dataRows(host)[0].getAttribute('aria-rowindex')).toBe('5');
+    });
+
+    it('offers to select every matching row once the page is ticked', async () => {
+      one(host, 'checkbox', 'Tout sélectionner sur la page').click();
+      await stable();
+      button(host, 'Sélectionner les 4 tâches').click();
+      await stable();
+      expect(component.selection()).toBe('all');
+      expect(host.textContent).toContain('Les 4 tâches sont sélectionnées');
+    });
+  });
+});

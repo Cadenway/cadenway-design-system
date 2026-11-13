@@ -1,0 +1,55 @@
+@if (table.selectedCount() > 0) {
+  <!-- The buttons take the focus; the toolbar moves it between them (roving tab stop). -->
+  <!-- eslint-disable-next-line @angular-eslint/template/interactive-supports-focus -->
+  <div
+    role="toolbar"
+    aria-orientation="horizontal"
+    [attr.aria-label]="label()"
+    class="pointer-events-auto flex max-w-full items-center gap-0.5 overflow-x-auto rounded-lg border bg-popover p-1 text-popover-foreground shadow-lg animate-item-in motion-reduce:animate-none"
+    (keydown)="onKeydown($event)"
+    (focusin)="onFocusin($event)"
+  >
+    <span class="px-2 text-sm font-medium whitespace-nowrap tabular-nums">{{
+      table.copy().selected(table.selectedCount())
+    }}</span>
+    <div
+      role="separator"
+      aria-orientation="vertical"
+      class="mx-1 h-5 w-px shrink-0 bg-border"
+    ></div>
+    @for (action of table.bulkActions(); track action.id) {
+      <button
+        type="button"
+        cwRipple
+        [attr.data-cw-bulk-action]="action.id"
+        [attr.aria-keyshortcuts]="action.shortcut ?? null"
+        [class]="classesOf(action)"
+        (click)="run(action, $event)"
+      >
+        @if (action.icon) {
+          <ng-icon [name]="action.icon" aria-hidden="true" />
+        }
+        {{ action.label }}
+        @if (action.shortcut) {
+          <kbd cwKbd aria-hidden="true">{{ keyLabel(action.shortcut) }}</kbd>
+        }
+      </button>
+    }
+    <ng-content />
+    <div
+      role="separator"
+      aria-orientation="vertical"
+      class="mx-1 h-5 w-px shrink-0 bg-border"
+    ></div>
+    <button
+      type="button"
+      cwRipple
+      aria-keyshortcuts="Escape"
+      [class]="actionClasses"
+      (click)="table.clearSelection()"
+    >
+      {{ table.copy().deselect }}
+      <kbd cwKbd aria-hidden="true">{{ keyLabel('Escape') }}</kbd>
+    </button>
+  </div>
+}
