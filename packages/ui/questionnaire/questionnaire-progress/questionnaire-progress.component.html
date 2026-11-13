@@ -1,0 +1,23 @@
+<div class="flex items-center justify-between gap-3 text-xs leading-4">
+  <span class="font-medium tabular-nums">{{ text() }}</span>
+  @if (questionnaire.title()) {
+    <span class="truncate text-muted-foreground">{{ questionnaire.title() }}</span>
+  }
+</div>
+<div
+  role="progressbar"
+  class="flex gap-1"
+  [attr.aria-label]="ariaLabel()"
+  aria-valuemin="0"
+  [attr.aria-valuemax]="questionnaire.count()"
+  [attr.aria-valuenow]="questionnaire.step()"
+  [attr.aria-valuetext]="text()"
+>
+  @for (answered of segments(); track $index) {
+    <span
+      class="h-1 flex-1 rounded-full transition-colors duration-300 motion-reduce:transition-none"
+      [class.bg-foreground]="answered"
+      [class.bg-track]="!answered"
+    ></span>
+  }
+</div>

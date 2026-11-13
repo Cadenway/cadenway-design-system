@@ -1,0 +1,24 @@
+<button
+  type="button"
+  cwRipple
+  class="relative isolate flex h-7 w-fit items-center gap-2 overflow-hidden rounded-md px-1.5 text-xs transition-colors outline-hidden hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
+  (click)="open.emit()"
+>
+  @if (shown().length > 0) {
+    <span class="flex -space-x-1" aria-hidden="true">
+      @for (name of shown(); track $index) {
+        <cw-avatar size="xs" [name]="name" class="rounded-full ring-2 ring-background" />
+      }
+    </span>
+  }
+  <span class="font-medium">{{ countText() }}</span>
+  @if (lastText()) {
+    <span class="text-muted-foreground">{{ lastText() }}</span>
+  }
+  <ng-icon
+    name="phosphorCaretRightBold"
+    size="0.875rem"
+    class="shrink-0 text-muted-foreground"
+    aria-hidden="true"
+  />
+</button>

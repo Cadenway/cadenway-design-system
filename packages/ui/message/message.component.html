@@ -1,0 +1,179 @@
+<ng-template #rest><ng-content /></ng-template>
+
+@if (isSystem()) {
+  @if (systemIcon(); as notice) {
+    <span class="mt-0.5 flex shrink-0">
+      <ng-icon [name]="notice.name" size="1rem" [class]="notice.color" aria-hidden="true" />
+    </span>
+  }
+  <div class="grid min-w-0 flex-1 gap-0.5">
+    <p
+      class="text-sm leading-5 font-medium"
+      [class.text-foreground]="tone() !== 'error'"
+      [class.text-grenat-text]="tone() === 'error'"
+    >
+      @if (toneWord()) {
+        <span class="sr-only">{{ toneWord() }} : </span>
+      }
+      {{ title() }}
+    </p>
+    <p
+      class="text-xs leading-4 empty:hidden"
+      [class.text-muted-foreground]="tone() !== 'error'"
+      [class.text-grenat-text]="tone() === 'error'"
+    >
+      <ng-container [ngTemplateOutlet]="rest" />
+    </p>
+  </div>
+  @if (action()) {
+    <div class="flex shrink-0 self-center">
+      <button cwButton variant="outline" size="sm" (click)="act()">
+        @if (tone() === 'error') {
+          <ng-icon name="phosphorArrowClockwiseBold" aria-hidden="true" />
+        }
+        {{ action() }}
+      </button>
+    </div>
+  }
+} @else {
+  @if (variant() === 'incoming') {
+    <ng-content select="cw-message-avatar" />
+  }
+  <div
+    class="flex min-w-0 flex-1 flex-col items-start gap-1 group-data-[variant=outgoing]/message:items-end"
+  >
+    @if (showHeader()) {
+      <div
+        class="flex max-w-full min-w-0 items-center gap-1 px-3 text-xs leading-4 text-muted-foreground"
+      >
+        @if (author()) {
+          <span class="truncate font-medium text-foreground">{{ author() }}</span>
+        }
+        @if (author() && timeText()) {
+          <span aria-hidden="true">·</span>
+        }
+        @if (timeText()) {
+          <time [attr.datetime]="iso()">{{ timeText() }}</time>
+        }
+        @if (edited()) {
+          <span aria-hidden="true">·</span>
+          <span>{{ text().edited }}</span>
+        }
+      </div>
+    }
+    <div class="flex w-full min-w-0 flex-col gap-0.5" [class.opacity-60]="status() !== 'sent'">
+      <div
+        class="group/row flex w-full min-w-0 items-center gap-1.5 group-data-[variant=outgoing]/message:flex-row-reverse"
+      >
+        <div
+          class="flex max-w-[80%] min-w-0 flex-col gap-0.5 group-data-[variant=outgoing]/message:items-end"
+        >
+          <ng-content select="cw-bubble, cw-bubble-group" />
+        </div>
+        @if (actions()) {
+          <ng-content select="cw-message-actions" />
+          @if (!customActions()) {
+            <cw-message-actions [ariaLabel]="text().actions">
+              <button
+                cwButton
+                variant="ghost"
+                size="icon-xs"
+                class="text-muted-foreground hover:text-foreground"
+                [attr.aria-label]="text().react"
+                (click)="react.emit()"
+              >
+                <ng-icon name="phosphorSmileyBold" size="1rem" aria-hidden="true" />
+              </button>
+              <button
+                cwButton
+                variant="ghost"
+                size="icon-xs"
+                class="text-muted-foreground hover:text-foreground"
+                [attr.aria-label]="text().reply"
+                (click)="reply.emit()"
+              >
+                <ng-icon name="phosphorArrowBendUpLeftBold" size="1rem" aria-hidden="true" />
+              </button>
+              @if (moreMenu(); as menu) {
+                <button
+                  #moreButton
+                  cwButton
+                  variant="ghost"
+                  size="icon-xs"
+                  class="text-muted-foreground hover:text-foreground"
+                  [attr.aria-label]="text().more"
+                  [cwMenuTriggerFor]="menu"
+                >
+                  <ng-icon name="phosphorDotsThreeBold" size="1rem" aria-hidden="true" />
+                </button>
+              } @else {
+                <button
+                  #moreButton
+                  cwButton
+                  variant="ghost"
+                  size="icon-xs"
+                  class="text-muted-foreground hover:text-foreground"
+                  [attr.aria-label]="text().more"
+                  (click)="more.emit()"
+                >
+                  <ng-icon name="phosphorDotsThreeBold" size="1rem" aria-hidden="true" />
+                </button>
+              }
+            </cw-message-actions>
+          }
+        }
+      </div>
+    </div>
+    <ng-content select="cw-message-note" />
+    @if (!customNote()) {
+      @if (status() === 'failed') {
+        <cw-message-note tone="error" [toneLabels]="toneLabels()">
+          <span>{{ text().failed }}</span>
+          <span aria-hidden="true">·</span>
+          <button
+            type="button"
+            cwRipple
+            class="relative isolate inline-flex items-center overflow-hidden rounded-md font-medium whitespace-nowrap text-primary underline-offset-4 outline-hidden hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            (click)="retry.emit()"
+          >
+            {{ text().retry }}
+          </button>
+          <span aria-hidden="true">·</span>
+          <button
+            type="button"
+            cwRipple
+            class="relative isolate inline-flex items-center overflow-hidden rounded-md font-medium whitespace-nowrap text-muted-foreground underline-offset-4 outline-hidden hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            (click)="remove.emit()"
+          >
+            {{ text().remove }}
+          </button>
+        </cw-message-note>
+      } @else if (title()) {
+        <cw-message-note [tone]="tone()" [toneLabels]="toneLabels()">{{ title() }}</cw-message-note>
+      }
+    }
+    <div class="mt-0.5 grid w-full max-w-[400px] grid-cols-2 gap-2 empty:hidden">
+      <ng-content select="cw-attachment" />
+    </div>
+    <ng-content select="cw-message-thread" />
+    <ng-content select="cw-message-footer" />
+    @if (!customFooter() && variant() === 'outgoing') {
+      <cw-message-footer>
+        @if (status() === 'sending') {
+          <span role="status" class="flex items-center gap-1">
+            <svg cwSpinner size="sm"></svg>{{ text().sending }}
+          </span>
+        } @else {
+          @if (timeText()) {
+            <time [attr.datetime]="iso()">{{ timeText() }}</time>
+          }
+          @if (edited()) {
+            <span aria-hidden="true">·</span>
+            <span>{{ text().edited }}</span>
+          }
+        }
+      </cw-message-footer>
+    }
+    <ng-container [ngTemplateOutlet]="rest" />
+  </div>
+}

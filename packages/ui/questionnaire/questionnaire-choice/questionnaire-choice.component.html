@@ -1,0 +1,67 @@
+<input
+  #control
+  data-choice
+  class="sr-only"
+  [type]="multiple() ? 'checkbox' : 'radio'"
+  [name]="question.groupName"
+  [value]="value()"
+  [checked]="checked()"
+  [disabled]="isDisabled()"
+  [attr.aria-invalid]="question.errorVisible() ? 'true' : null"
+  [attr.aria-describedby]="question.errorVisible() ? question.errorId : null"
+  (change)="changed()"
+  (blur)="question.markTouched()"
+/>
+@if (multiple()) {
+  <span
+    aria-hidden="true"
+    class="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-[4px] border border-line-control text-background transition-colors group-has-checked/choice:border-transparent group-has-checked/choice:bg-foreground motion-reduce:transition-none"
+  >
+    <ng-icon
+      name="phosphorCheckBold"
+      size="0.75rem"
+      class="opacity-0 group-has-checked/choice:opacity-100"
+    />
+  </span>
+} @else {
+  <span
+    aria-hidden="true"
+    class="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border border-line-control"
+  >
+    <span
+      class="size-2 scale-0 rounded-full bg-foreground transition-transform duration-150 group-has-checked/choice:scale-100 motion-reduce:transition-none"
+    ></span>
+  </span>
+}
+<span class="grid min-w-0 flex-1 gap-0.5">
+  <span class="leading-5 font-medium">
+    @if (letter()) {
+      <span class="sr-only">{{ letter() }}, </span>
+    }
+    <ng-content
+  /></span>
+  @if (description()) {
+    <span class="text-xs leading-4 text-muted-foreground">{{ description() }}</span>
+  }
+  @if (other()) {
+    <input
+      cwInput
+      size="sm"
+      class="mt-1.5 hidden group-has-checked/choice:block"
+      [value]="otherText()"
+      [placeholder]="otherPlaceholder()"
+      [attr.aria-label]="otherLabel()"
+      [disabled]="isDisabled()"
+      (input)="typed($event)"
+      (keydown.escape)="escape($event)"
+    />
+  }
+</span>
+@if (letter()) {
+  <kbd
+    cwKbd
+    aria-hidden="true"
+    class="shrink-0 group-has-checked/choice:border-foreground group-has-checked/choice:bg-foreground group-has-checked/choice:text-background"
+    >{{ letter() }}</kbd
+  >
+}

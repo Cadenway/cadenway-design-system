@@ -1,0 +1,103 @@
+<div
+  class="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted"
+  [class.text-muted-foreground]="state() !== 'error'"
+  [class.text-destructive]="state() === 'error'"
+>
+  @switch (state()) {
+    @case ('uploading') {
+      <svg cwSpinner [label]="text().sending"></svg>
+    }
+    @case ('error') {
+      <ng-icon name="phosphorWarningCircleBold" size="1rem" aria-hidden="true" />
+    }
+    @default {
+      <ng-icon [name]="icon()" size="1rem" aria-hidden="true" />
+    }
+  }
+</div>
+<div class="grid min-w-0 flex-1 gap-1">
+  <div class="flex items-center gap-2">
+    <span class="truncate text-sm font-medium">{{ name() }}</span>
+    <span
+      class="ml-auto flex shrink-0 items-center gap-1 text-xs tabular-nums"
+      [class.text-muted-foreground]="state() !== 'error'"
+      [class.text-destructive]="state() === 'error'"
+    >
+      @switch (state()) {
+        @case ('queued') {
+          {{ text().queued }}
+        }
+        @case ('uploading') {
+          {{ progressText() }}
+        }
+        @case ('done') {
+          <ng-icon
+            name="phosphorCheckCircleFill"
+            size="1rem"
+            class="shrink-0 text-jade"
+            aria-hidden="true"
+          />{{ sizeText() }}
+        }
+        @default {
+          {{ sizeText() }}
+        }
+      }
+    </span>
+  </div>
+  @if (state() === 'uploading') {
+    <div
+      role="progressbar"
+      [attr.aria-label]="text().progress + ' ' + name()"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      [attr.aria-valuenow]="percent()"
+      class="h-1 overflow-hidden rounded-full bg-track"
+    >
+      <div
+        class="h-full rounded-full bg-jade transition-[width] duration-300 ease-snap motion-reduce:transition-none"
+        [style.width.%]="percent()"
+      ></div>
+    </div>
+  } @else if (state() === 'queued') {
+    <div class="h-1 rounded-full bg-track"></div>
+  } @else if (state() === 'error' && error()) {
+    <p class="text-xs text-destructive">{{ error() }}</p>
+  }
+</div>
+<div class="flex shrink-0 items-center">
+  @if (state() === 'queued' || state() === 'uploading') {
+    <button
+      cwButton
+      variant="ghost"
+      size="icon-xs"
+      class="text-muted-foreground hover:text-foreground"
+      [attr.aria-label]="text().cancel + ' ' + name()"
+      (click)="cancel.emit()"
+    >
+      <ng-icon name="phosphorXBold" aria-hidden="true" />
+    </button>
+  } @else {
+    @if (state() === 'error' && retryable()) {
+      <button
+        cwButton
+        variant="ghost"
+        size="icon-xs"
+        class="text-muted-foreground hover:text-foreground"
+        [attr.aria-label]="text().retry + ' ' + name()"
+        (click)="retry.emit()"
+      >
+        <ng-icon name="phosphorArrowCounterClockwiseBold" aria-hidden="true" />
+      </button>
+    }
+    <button
+      cwButton
+      variant="ghost"
+      size="icon-xs"
+      class="text-muted-foreground hover:text-foreground"
+      [attr.aria-label]="text().remove + ' ' + name()"
+      (click)="remove.emit()"
+    >
+      <ng-icon name="phosphorXBold" aria-hidden="true" />
+    </button>
+  }
+</div>

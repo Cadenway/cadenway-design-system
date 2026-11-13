@@ -1,0 +1,17 @@
+<ng-content select="legend" />
+<ng-content select="cw-questionnaire-description" />
+<div
+  class="grid gap-2 *:animate-item-in *:motion-reduce:animate-none [&>*:nth-child(1)]:[animation-delay:60ms] [&>*:nth-child(2)]:[animation-delay:90ms] [&>*:nth-child(3)]:[animation-delay:120ms] [&>*:nth-child(4)]:[animation-delay:150ms] [&>*:nth-child(5)]:[animation-delay:180ms] [&>*:nth-child(6)]:[animation-delay:210ms] [&>*:nth-child(7)]:[animation-delay:240ms] [&>*:nth-child(8)]:[animation-delay:270ms] [&>*:nth-child(9)]:[animation-delay:300ms] [&>*:nth-child(10)]:[animation-delay:330ms] [&>*:nth-child(11)]:[animation-delay:360ms] [&>*:nth-child(12)]:[animation-delay:390ms]"
+>
+  <ng-content />
+  @if (errorVisible()) {
+    <p [id]="errorId" class="flex items-center gap-1.5 text-xs leading-4 text-destructive">
+      <ng-icon
+        name="phosphorWarningCircleFill"
+        size="0.875rem"
+        class="shrink-0"
+        aria-hidden="true"
+      />{{ errorText() }}
+    </p>
+  }
+</div>

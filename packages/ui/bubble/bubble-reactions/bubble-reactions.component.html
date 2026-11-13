@@ -1,0 +1,12 @@
+<ng-content />
+@if (addable()) {
+  <button
+    type="button"
+    cwRipple
+    class="relative isolate inline-flex size-6 items-center justify-center overflow-hidden rounded-full border text-muted-foreground transition-colors outline-hidden hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
+    [attr.aria-label]="addLabel()"
+    (click)="add()"
+  >
+    <ng-icon name="phosphorSmileyBold" size="0.875rem" class="shrink-0" aria-hidden="true" />
+  </button>
+}

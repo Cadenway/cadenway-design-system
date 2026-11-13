@@ -1,0 +1,28 @@
+<div [class]="surfaceClasses()">
+  @if (toneIcon(); as icon) {
+    <div
+      class="mb-0.5 flex items-start gap-1.5 font-medium"
+      [class.text-foreground]="tone() !== 'error'"
+      [class.text-grenat-text]="tone() === 'error'"
+    >
+      <span
+        class="flex shrink-0"
+        [class.mt-0.5]="size() === 'default'"
+        [class.mt-px]="size() === 'sm'"
+      >
+        <ng-icon
+          [name]="icon.name"
+          [size]="size() === 'sm' ? '0.875rem' : '1rem'"
+          [class]="icon.color"
+          aria-hidden="true"
+        />
+      </span>
+      <span
+        ><span class="sr-only">{{ toneWord() }} : </span>{{ title() }}</span
+      >
+    </div>
+  }
+  <ng-content select="cw-bubble-quote" />
+  <div [class]="bodyClasses()"><ng-content /></div>
+</div>
+<ng-content select="cw-bubble-reactions" />

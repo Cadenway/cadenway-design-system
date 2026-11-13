@@ -1,0 +1,11 @@
+@if (icon(); as toneIcon) {
+  <span class="mt-px flex shrink-0">
+    <ng-icon [name]="toneIcon.name" size="0.875rem" [class]="toneIcon.color" aria-hidden="true" />
+  </span>
+}
+<span class="flex min-w-0 flex-wrap items-center gap-x-1">
+  @if (toneWord()) {
+    <span class="sr-only">{{ toneWord() }} : </span>
+  }
+  <ng-content />
+</span>
