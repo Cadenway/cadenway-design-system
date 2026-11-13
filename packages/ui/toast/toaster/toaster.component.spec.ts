@@ -18,10 +18,6 @@ class Host {
   readonly expand = signal(false);
 }
 
-function wait(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 describe('CwToaster', () => {
   let fixture: ComponentFixture<Host>;
   let host: Host;
@@ -102,21 +98,29 @@ describe('CwToaster', () => {
   });
 
   it('closes a toast after its duration, paused while the pointer is over the region', async () => {
-    host.duration.set({ default: 40 });
-    await fixture.whenStable();
-    toasts.show('Lien copié');
-    await fixture.whenStable();
+    // Simulated clock: a real 40 ms duration expires before the pause lands on a loaded machine.
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] });
+    try {
+      host.duration.set({ default: 40 });
+      fixture.detectChanges();
+      toasts.show('Lien copié');
+      fixture.detectChanges();
 
-    region().dispatchEvent(new PointerEvent('pointerenter'));
-    await fixture.whenStable();
-    await wait(80);
-    expect(live()).toHaveLength(1);
+      region().dispatchEvent(new PointerEvent('pointerenter'));
+      fixture.detectChanges();
+      await vi.advanceTimersByTimeAsync(80);
+      fixture.detectChanges();
+      expect(live()).toHaveLength(1);
 
-    region().dispatchEvent(new PointerEvent('pointerleave'));
-    await fixture.whenStable();
-    await wait(80);
-    await fixture.whenStable();
-    expect(live()).toEqual([]);
+      region().dispatchEvent(new PointerEvent('pointerleave'));
+      fixture.detectChanges();
+      // The duration, then the exit animation's fallback.
+      await vi.advanceTimersByTimeAsync(80 + 500);
+      fixture.detectChanges();
+      expect(live()).toEqual([]);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('moves the focus into the region on F8, and back where it was on Escape', async () => {
