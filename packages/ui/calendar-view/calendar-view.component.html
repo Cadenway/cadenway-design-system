@@ -1,0 +1,262 @@
+<div class="flex flex-wrap items-center gap-2">
+  <button cwButton variant="outline" (click)="goToday()">{{ texts().today }}</button>
+  <div class="flex items-center">
+    <button
+      cwButton
+      variant="ghost"
+      size="icon"
+      class="text-muted-foreground"
+      [attr.aria-label]="view() === 'month' ? texts().previousMonth : texts().previousWeek"
+      (click)="step(-1)"
+    >
+      <ng-icon name="phosphorCaretLeftBold" aria-hidden="true" />
+    </button>
+    <button
+      cwButton
+      variant="ghost"
+      size="icon"
+      class="text-muted-foreground"
+      [attr.aria-label]="view() === 'month' ? texts().nextMonth : texts().nextWeek"
+      (click)="step(1)"
+    >
+      <ng-icon name="phosphorCaretRightBold" aria-hidden="true" />
+    </button>
+  </div>
+  <div class="text-base font-semibold" aria-live="polite">{{ title() }}</div>
+  <span class="flex-1"></span>
+  @if (unscheduledCount(); as count) {
+    <button cwButton variant="outline" (click)="unscheduledOpen.emit()">
+      <ng-icon name="phosphorCalendarBlankBold" aria-hidden="true" />
+      {{ texts().unscheduled }}
+      <span
+        class="inline-flex h-4 min-w-4 items-center justify-center rounded-sm bg-secondary px-1 text-[11px] leading-none font-semibold text-secondary-foreground tabular-nums"
+        >{{ count }}</span
+      >
+    </button>
+  }
+  <cw-toggle-group
+    variant="outline"
+    [ariaLabel]="texts().views"
+    [value]="view()"
+    (valueChange)="setView($event)"
+  >
+    <button cwToggleGroupItem value="month">{{ texts().month }}</button>
+    <button cwToggleGroupItem value="week">{{ texts().week }}</button>
+  </cw-toggle-group>
+  <ng-content select="[cwCalendarActions]" />
+</div>
+
+<!-- The content of an item frame: the consumer's template, else its name. -->
+<ng-template #itemContent let-entry>
+  @if (itemTemplate(); as template) {
+    <ng-container [ngTemplateOutlet]="template" [ngTemplateOutletContext]="entry.context" />
+  } @else {
+    <span class="min-w-0 truncate">{{ entry.title }}</span>
+  }
+</ng-template>
+
+@for (key of [gridKey()]; track key) {
+  <!-- The grid handles the keys of its cells and their items (one listener, as a roving grid). -->
+  <!-- eslint-disable-next-line @angular-eslint/template/interactive-supports-focus -->
+  <div
+    role="grid"
+    cdkDropListGroup
+    class="overflow-hidden rounded-lg border animate-fade-in motion-reduce:animate-none"
+    [attr.aria-label]="gridLabel()"
+    [cdkDropListGroupDisabled]="readonly()"
+    (keydown)="onGridKeydown($event)"
+  >
+    @if (view() === 'month') {
+      <div role="row" class="border-b">
+        <div [class]="columnsClass()">
+          @for (header of weekHeaders(); track header.key; let last = $last) {
+            <div
+              role="columnheader"
+              class="flex h-8 items-center px-2 text-xs font-medium text-muted-foreground"
+              [class.border-r]="!last"
+            >
+              <abbr class="no-underline" [attr.title]="header.long">{{ header.short }}</abbr>
+            </div>
+          }
+        </div>
+      </div>
+      @for (week of monthWeeks(); track $index) {
+        <div role="row" class="relative">
+          <div [class]="columnsClass()">
+            @for (day of week; track day.key) {
+              <div
+                role="gridcell"
+                cdkDropList
+                cdkDropListSortingDisabled
+                [class]="day.cellClass"
+                [cdkDropListData]="day.drop"
+                [cdkDropListDisabled]="readonly()"
+                [attr.data-cell]="day.key"
+                [attr.tabindex]="day.tabStop ? 0 : -1"
+                [attr.aria-current]="day.today ? 'date' : null"
+                [attr.aria-selected]="day.tabStop"
+                [attr.data-outside]="day.outside ? '' : null"
+                [attr.data-drop-target]="day.target ? '' : null"
+                (cdkDropListDropped)="onDrop($event)"
+                (cdkDropListEntered)="onEnter(day.key)"
+                (focusin)="onCellFocus(day.date, null)"
+              >
+                <!-- The cell is named by its content: the full date first (WCAG 2.5.3, no aria-label). -->
+                <span class="sr-only">{{ day.label }}</span>
+                <cw-calendar-view-day [model]="day" [header]="view() === 'month'" />
+              </div>
+            }
+          </div>
+        </div>
+      }
+    } @else {
+      <div role="row" class="grid grid-cols-[56px_1fr] border-b">
+        <div role="columnheader" class="border-r">
+          <span class="sr-only">{{ texts().hour }}</span>
+        </div>
+        <div [class]="columnsClass()">
+          @for (header of weekHeaders(); track header.key; let first = $first) {
+            <div
+              role="columnheader"
+              class="flex h-8 items-center gap-1 px-2 text-xs"
+              [class.border-l]="!first"
+              [class.font-semibold]="header.today"
+              [class.text-primary]="header.today"
+              [attr.aria-current]="header.today ? 'date' : null"
+            >
+              <abbr
+                class="no-underline"
+                [class.text-muted-foreground]="!header.today"
+                [attr.title]="header.long"
+                >{{ header.short }}</abbr
+              >
+              <span class="tabular-nums" [class.font-medium]="!header.today">{{
+                header.number
+              }}</span>
+            </div>
+          }
+        </div>
+      </div>
+      <div role="row" class="grid grid-cols-[56px_1fr] border-b">
+        <div
+          role="rowheader"
+          class="flex items-start justify-end border-r px-2 pt-1 text-[11px] text-muted-foreground"
+        >
+          {{ texts().allDay }}
+        </div>
+        <div class="relative">
+          <div [class]="columnsClass()">
+            @for (day of allDayRow(); track day.key) {
+              <div
+                role="gridcell"
+                cdkDropList
+                cdkDropListSortingDisabled
+                [class]="day.cellClass"
+                [cdkDropListData]="day.drop"
+                [cdkDropListDisabled]="readonly()"
+                [attr.data-cell]="day.key"
+                [attr.tabindex]="day.tabStop ? 0 : -1"
+                [attr.aria-current]="day.today ? 'date' : null"
+                [attr.aria-selected]="day.tabStop"
+                [attr.data-drop-target]="day.target ? '' : null"
+                (cdkDropListDropped)="onDrop($event)"
+                (cdkDropListEntered)="onEnter(day.key)"
+                (focusin)="onCellFocus(day.date, null)"
+                (dblclick)="createOn(day.date, null, true)"
+              >
+                <!-- The cell is named by its content: the full date first (WCAG 2.5.3, no aria-label). -->
+                <span class="sr-only">{{ day.label }}</span>
+                <cw-calendar-view-day [model]="day" [header]="view() === 'month'" />
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+      @for (row of slotRows(); track row.minutes) {
+        <div role="row" class="grid grid-cols-[56px_1fr]">
+          <div role="rowheader" class="relative border-r">
+            <span [class]="row.label ? hourClass : 'sr-only'">{{ row.time }}</span>
+          </div>
+          <div [class]="columnsClass()">
+            @for (cell of row.cells; track cell.key) {
+              <div
+                role="gridcell"
+                cdkDropList
+                cdkDropListSortingDisabled
+                [class]="cell.cellClass"
+                [cdkDropListData]="cell.drop"
+                [cdkDropListDisabled]="readonly()"
+                [attr.data-cell]="cell.key"
+                [attr.tabindex]="cell.tabStop ? 0 : -1"
+                [attr.aria-selected]="cell.tabStop"
+                [attr.data-drop-target]="cell.target ? '' : null"
+                (cdkDropListDropped)="onDrop($event)"
+                (cdkDropListEntered)="onEnter(cell.key)"
+                (focusin)="onCellFocus(cell.date, row.minutes)"
+                (dblclick)="createOn(cell.date, row.minutes, false)"
+              >
+                <span class="sr-only">{{ cell.label }}</span>
+                @for (block of cell.blocks; track block.id) {
+                  <button
+                    type="button"
+                    cdkDrag
+                    cdkDragPreviewContainer="parent"
+                    [class]="block.classes"
+                    [style.top.px]="block.top"
+                    [style.height.px]="block.height"
+                    [style.animation-delay.ms]="block.delay"
+                    [cdkDragData]="block.id"
+                    [cdkDragDisabled]="readonly()"
+                    [attr.title]="block.title"
+                    [attr.tabindex]="cell.tabStop ? 0 : -1"
+                    (cdkDragStarted)="onDragStart(block.id)"
+                    (cdkDragEnded)="onDragEnd()"
+                    (click)="openItem(block.context)"
+                    (keydown)="onItemKeydown($event, block.id)"
+                  >
+                    <span class="flex w-full min-w-0 items-center gap-1 font-medium">
+                      <ng-container
+                        [ngTemplateOutlet]="itemContent"
+                        [ngTemplateOutletContext]="{ $implicit: block }"
+                      />
+                    </span>
+                    <span class="text-muted-foreground tabular-nums">{{ block.time }}</span>
+                    <div
+                      *cdkDragPlaceholder
+                      class="absolute inset-x-[3px] top-px rounded-md border-2 border-dashed border-line-control"
+                      [style.height.px]="block.height"
+                    ></div>
+                    <div *cdkDragPreview matchSize aria-hidden="true" [class]="classes.preview">
+                      <ng-container
+                        [ngTemplateOutlet]="itemContent"
+                        [ngTemplateOutletContext]="{ $implicit: block }"
+                      />
+                    </div>
+                  </button>
+                }
+                @if (cell.now !== null) {
+                  <!-- The current time on today's column only (sheet, "Heure actuelle"). -->
+                  <svg
+                    aria-hidden="true"
+                    class="pointer-events-none absolute -inset-x-1 z-20 h-2 w-[calc(100%+4px)] overflow-visible"
+                    [style.top.px]="cell.now - 4"
+                  >
+                    <line
+                      x1="4"
+                      x2="100%"
+                      y1="4"
+                      y2="4"
+                      class="stroke-primary"
+                      stroke-width="1.5"
+                    />
+                    <circle cx="4" cy="4" r="3" class="fill-primary" />
+                  </svg>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+    }
+  </div>
+}

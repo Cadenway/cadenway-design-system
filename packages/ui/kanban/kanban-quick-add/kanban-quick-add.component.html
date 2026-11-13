@@ -1,0 +1,18 @@
+<form
+  class="flex flex-col gap-1 rounded-xl border border-input bg-card p-2 transition-[border-color,box-shadow] focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/20 motion-reduce:transition-none"
+  [attr.aria-label]="formLabel()"
+  (submit)="submit($event)"
+  (keydown.escape)="close($event)"
+>
+  <input
+    #field
+    type="text"
+    autocomplete="off"
+    class="h-7 w-full min-w-0 bg-transparent px-1 text-sm font-medium outline-hidden placeholder:text-muted-foreground"
+    [attr.aria-label]="board.texts().quickAddField"
+  />
+  <div class="flex items-center justify-end gap-1.5 pr-1 text-xs text-muted-foreground">
+    <kbd cwKbd size="sm">{{ board.texts().quickAddKey }}</kbd>
+    {{ board.texts().quickAddHint }}
+  </div>
+</form>

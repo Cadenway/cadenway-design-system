@@ -1,0 +1,160 @@
+<!-- The content of an item frame: the consumer's template, else its name. -->
+<ng-template #itemContent let-entry>
+  @if (host.itemTemplate(); as template) {
+    <ng-container [ngTemplateOutlet]="template" [ngTemplateOutletContext]="entry.context" />
+  } @else {
+    <span class="min-w-0 truncate">{{ entry.title }}</span>
+  }
+</ng-template>
+
+@let day = model();
+@if (header()) {
+  <div class="flex h-5 shrink-0 items-center justify-between pl-1">
+    <span aria-hidden="true" [class]="day.numberClass">{{ day.number }}</span>
+    @if (!host.readonly()) {
+      <button
+        type="button"
+        cwRipple
+        [class]="host.classes.add"
+        [attr.tabindex]="day.tabStop ? 0 : -1"
+        [attr.aria-label]="day.createLabel"
+        (click)="host.createOn(day.date, null, true)"
+      >
+        <ng-icon name="phosphorPlusBold" aria-hidden="true" />
+      </button>
+    }
+  </div>
+}
+@for (line of day.spacers; track line) {
+  <div class="h-5 shrink-0" aria-hidden="true"></div>
+}
+@for (pill of day.pills; track pill.id) {
+  <button
+    type="button"
+    cdkDrag
+    cdkDragPreviewContainer="parent"
+    [class]="pill.classes"
+    [style.animation-delay.ms]="pill.delay"
+    [cdkDragData]="pill.id"
+    [cdkDragDisabled]="host.readonly()"
+    [attr.title]="pill.title"
+    [attr.tabindex]="day.tabStop ? 0 : -1"
+    (cdkDragStarted)="host.onDragStart(pill.id)"
+    (cdkDragEnded)="host.onDragEnd()"
+    (click)="host.openItem(pill.context)"
+    (keydown)="host.onItemKeydown($event, pill.id)"
+  >
+    <ng-container
+      [ngTemplateOutlet]="itemContent"
+      [ngTemplateOutletContext]="{ $implicit: pill }"
+    />
+    <div *cdkDragPlaceholder [class]="host.classes.ghost"></div>
+    <div *cdkDragPreview matchSize aria-hidden="true" [class]="host.classes.preview">
+      <ng-container
+        [ngTemplateOutlet]="itemContent"
+        [ngTemplateOutletContext]="{ $implicit: pill }"
+      />
+    </div>
+  </button>
+}
+@for (bar of day.bars; track bar.id) {
+  <button
+    type="button"
+    cdkDrag
+    cdkDragPreviewContainer="parent"
+    [class]="bar.classes"
+    [style.top]="bar.top"
+    [style.left]="bar.left"
+    [style.width]="bar.width"
+    [style.animation-delay.ms]="bar.delay"
+    [cdkDragData]="bar.id"
+    [cdkDragDisabled]="host.readonly()"
+    [attr.title]="bar.title"
+    [attr.aria-label]="bar.title"
+    [attr.tabindex]="day.tabStop ? 0 : -1"
+    (cdkDragStarted)="host.onDragStart(bar.id)"
+    (cdkDragEnded)="host.onDragEnd()"
+    (click)="host.openItem(bar.context)"
+    (keydown)="host.onItemKeydown($event, bar.id)"
+  >
+    <ng-container [ngTemplateOutlet]="itemContent" [ngTemplateOutletContext]="{ $implicit: bar }" />
+    <span class="ml-auto shrink-0 pr-0.5 text-muted-foreground tabular-nums">{{ bar.range }}</span>
+    @if (bar.continues) {
+      <ng-icon
+        name="phosphorCaretRightBold"
+        class="shrink-0 text-muted-foreground"
+        aria-hidden="true"
+      />
+    }
+    <div *cdkDragPlaceholder [class]="host.classes.ghost"></div>
+    <div *cdkDragPreview matchSize aria-hidden="true" [class]="host.classes.preview">
+      <ng-container
+        [ngTemplateOutlet]="itemContent"
+        [ngTemplateOutletContext]="{ $implicit: bar }"
+      />
+    </div>
+  </button>
+}
+@if (day.more; as more) {
+  <button
+    type="button"
+    data-more
+    [class]="host.classes.more"
+    [cwPopoverTrigger]="dayPanel"
+    [attr.tabindex]="day.tabStop ? 0 : -1"
+  >
+    {{ more }}
+  </button>
+  <cw-popover #dayPanel size="sm" [ariaLabel]="day.popoverLabel">
+    <div class="flex items-center justify-between gap-2">
+      <div class="flex items-center gap-1.5 text-sm">
+        <span class="font-medium">{{ day.popoverTitle }}</span>
+        @if (day.today) {
+          <span class="text-xs font-semibold text-primary">{{ host.texts().today }}</span>
+        }
+      </div>
+      <button
+        cwButton
+        cwPopoverClose
+        variant="ghost"
+        size="icon-xs"
+        class="text-muted-foreground"
+        [attr.aria-label]="host.texts().close"
+      >
+        <ng-icon name="phosphorXBold" aria-hidden="true" />
+      </button>
+    </div>
+    <div role="list" class="-mx-2 grid">
+      @for (row of day.all; track row.id) {
+        <div role="listitem" class="min-w-0">
+          <button
+            type="button"
+            cwPopoverClose
+            [class]="host.classes.row"
+            [attr.title]="row.title"
+            (click)="host.openItem(row.context)"
+          >
+            <ng-container
+              [ngTemplateOutlet]="itemContent"
+              [ngTemplateOutletContext]="{ $implicit: row }"
+            />
+          </button>
+        </div>
+      }
+    </div>
+    @if (!host.readonly()) {
+      <div aria-hidden="true" class="-mx-3 h-px bg-border"></div>
+      <div class="-mx-2">
+        <button
+          type="button"
+          cwPopoverClose
+          [class]="host.classes.addRow"
+          (click)="host.createOn(day.date, null, true)"
+        >
+          <ng-icon name="phosphorPlusBold" aria-hidden="true" />
+          {{ day.addLabel }}
+        </button>
+      </div>
+    }
+  </cw-popover>
+}

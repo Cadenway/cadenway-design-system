@@ -1,0 +1,36 @@
+<ng-content select="[cwKanbanToolbar]" />
+<span [id]="instructionsId" hidden>{{ texts().instructions }}</span>
+<div
+  role="region"
+  cdkDropListGroup
+  class="relative flex items-stretch gap-2 overflow-x-auto"
+  [attr.aria-label]="ariaLabel()"
+>
+  @if (swimlanes()) {
+    <div class="relative min-w-fit flex-1">
+      <!-- The canvas bands of the columns run behind the lane headers (Kanban sheet, "Couloir"). -->
+      <div aria-hidden="true" class="absolute inset-0 flex gap-2">
+        @for (column of columnViews(); track column.column.id) {
+          <div
+            class="shrink-0 rounded-xl bg-canvas"
+            [style.width.px]="column.collapsed ? 36 : column.width"
+          ></div>
+        }
+      </div>
+      <div class="relative">
+        <div class="flex gap-2">
+          @for (column of columnViews(); track column.column.id) {
+            <cw-kanban-column [model]="column" headerOnly />
+          }
+        </div>
+        @for (lane of laneViews(); track lane.lane.id) {
+          <cw-kanban-lane [model]="lane" />
+        }
+      </div>
+    </div>
+  } @else {
+    @for (column of columnViews(); track column.column.id) {
+      <cw-kanban-column [model]="column" />
+    }
+  }
+</div>

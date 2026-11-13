@@ -1,0 +1,105 @@
+@let current = cell();
+<div
+  cdkDropList
+  role="list"
+  [class]="listClass()"
+  [attr.aria-label]="current.label"
+  [cdkDropListData]="board.cellData(current)"
+  [cdkDropListDisabled]="board.readonly()"
+  (cdkDropListDropped)="board.onDrop($event)"
+  (cdkDropListEntered)="board.onEnter(current)"
+  (cdkDropListExited)="board.onExit(current)"
+>
+  @for (card of current.cards; track card.id) {
+    <div
+      role="listitem"
+      cdkDrag
+      cdkDragPreviewContainer="parent"
+      [class]="item"
+      [cdkDragData]="card.id"
+      [cdkDragDisabled]="board.readonly()"
+      (cdkDragStarted)="board.onDragStart(card.id, current)"
+      (cdkDragEnded)="board.onDragEnd()"
+    >
+      <article
+        [class]="cardClass(card)"
+        [style.animation-delay.ms]="card.delay"
+        [attr.tabindex]="card.tabStop ? 0 : -1"
+        [attr.aria-label]="card.label"
+        [attr.aria-describedby]="board.instructionsId"
+        [attr.data-kanban-card]="card.id"
+        [attr.data-selected]="card.selected ? '' : null"
+        [attr.data-grabbed]="card.grabbed ? '' : null"
+        [attr.data-dimmed]="card.dimmed ? '' : null"
+        (click)="board.onCardClick($event, card)"
+        (keydown)="board.onCardKeydown($event, card, current)"
+        (focus)="board.onCardFocus(card)"
+      >
+        @if (board.cardTemplate(); as template) {
+          <ng-container
+            [ngTemplateOutlet]="template"
+            [ngTemplateOutletContext]="board.cardContext(card)"
+          />
+        } @else {
+          <span class="min-w-0 truncate text-sm font-medium">{{ card.name }}</span>
+        }
+      </article>
+      <div *cdkDragPlaceholder [class]="board.placeholderClass()"></div>
+      <div *cdkDragPreview matchSize aria-hidden="true" [class]="previewClass()">
+        @if (board.cardTemplate(); as template) {
+          <ng-container
+            [ngTemplateOutlet]="template"
+            [ngTemplateOutletContext]="board.cardContext(card)"
+          />
+        } @else {
+          <span class="min-w-0 truncate text-sm font-medium">{{ card.name }}</span>
+        }
+      </div>
+    </div>
+  }
+</div>
+@if (current.cards.length === 0 && !inLane()) {
+  @if (board.dragging()) {
+    @if (!current.target) {
+      <!-- An empty column gives way to the drop ghost while a card is dragged (sheet, "États"). -->
+      <div aria-hidden="true" [class]="emptyGhost()"></div>
+    }
+  } @else if (!current.quickAdd) {
+    <div
+      class="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-center justify-end gap-3 px-2 pb-5 text-center text-balance"
+    >
+      <div
+        class="flex size-8 items-center justify-center rounded-lg bg-background text-muted-foreground [&_ng-icon]:[--ng-icon__size:1rem]"
+      >
+        <ng-icon name="phosphorTrayBold" aria-hidden="true" />
+      </div>
+      <div class="grid gap-1">
+        @if (board.emptyTemplate(); as template) {
+          <ng-container
+            [ngTemplateOutlet]="template"
+            [ngTemplateOutletContext]="{ $implicit: current.column }"
+          />
+        } @else {
+          <div class="text-sm font-medium">{{ board.texts().emptyTitle }}</div>
+          <p class="text-xs/relaxed text-muted-foreground">{{ board.texts().emptyDescription }}</p>
+        }
+      </div>
+      @if (!board.readonly()) {
+        <button
+          cwButton
+          variant="outline"
+          size="sm"
+          class="pointer-events-auto"
+          [attr.data-kanban-add]="current.column.id"
+          (click)="board.openQuickAdd(current.column.id, null)"
+        >
+          <ng-icon name="phosphorPlusBold" aria-hidden="true" />
+          {{ board.texts().add }}
+        </button>
+      }
+    </div>
+  }
+}
+@if (current.quickAdd) {
+  <cw-kanban-quick-add [cell]="current" />
+}
