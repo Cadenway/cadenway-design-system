@@ -1,7 +1,6 @@
 import { FocusMonitor, _IdGenerator } from '@angular/cdk/a11y';
 import { hasModifierKey } from '@angular/cdk/keycodes';
 import {
-  type ConnectedPosition,
   type FlexibleConnectedPositionStrategy,
   type OverlayRef,
   createFlexibleConnectedPositionStrategy,
@@ -27,7 +26,13 @@ import {
   untracked,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ɵpanelPositions, ɵprefersReducedMotion } from '@cadenway/ui/core';
+import {
+  ɵafterExitAnimation,
+  ɵpanelPositions,
+  ɵplacementOf,
+  ɵprefersReducedMotion,
+  type ɵPlacement,
+} from '@cadenway/ui/core';
 import type { Subscription } from 'rxjs';
 
 import {
@@ -47,26 +52,6 @@ const HOVER_GRACE = 100;
 
 /** Keeps the bubble 8 px away from the viewport edges when it is shifted to stay visible. */
 const VIEWPORT_MARGIN = 8;
-
-interface Placement {
-  readonly side: CwTooltipSide;
-  readonly align: CwTooltipAlign;
-}
-
-/** The side and alignment of a connected position, as the bubble's arrow and data attributes need. */
-function placementOf(position: ConnectedPosition): Placement {
-  if (position.originY === 'bottom' && position.overlayY === 'top') {
-    return { side: 'bottom', align: position.overlayX };
-  }
-  if (position.originY === 'top' && position.overlayY === 'bottom') {
-    return { side: 'top', align: position.overlayX };
-  }
-  const along = { top: 'start', center: 'center', bottom: 'end' } as const;
-  return {
-    side: position.overlayX === 'start' ? 'right' : 'left',
-    align: along[position.overlayY],
-  };
-}
 
 function optionalNumber(value: unknown): number | undefined {
   if (value === null || value === undefined || value === '') return undefined;
@@ -128,7 +113,7 @@ export class CwTooltip implements CoordinatedTooltip {
   private readonly panel = signal<ComponentRef<CwTooltipPanel> | null>(null);
   private readonly state = signal<TooltipState>('closed');
   private readonly animated = signal(true);
-  private readonly placement = signal<Placement>({ side: 'top', align: 'center' });
+  private readonly placement = signal<ɵPlacement>({ side: 'top', align: 'center' });
   private openTimer: ReturnType<typeof setTimeout> | undefined;
   private closeTimer: ReturnType<typeof setTimeout> | undefined;
   private stopClosing: (() => void) | null = null;
@@ -278,7 +263,7 @@ export class CwTooltip implements CoordinatedTooltip {
 
     this.subscriptions.push(
       strategy.positionChanges.subscribe((change) => {
-        this.placement.set(placementOf(change.connectionPair));
+        this.placement.set(ɵplacementOf(change.connectionPair));
       }),
       overlayRef.keydownEvents().subscribe((event) => {
         if (event.key === 'Escape' && !hasModifierKey(event) && this.state() !== 'closed') {
@@ -303,24 +288,14 @@ export class CwTooltip implements CoordinatedTooltip {
 
   private detachAfterAnimation(): void {
     const bubble = this.panel()?.location.nativeElement as HTMLElement | undefined;
-    const view = this.document.defaultView;
-    const name = bubble && view ? view.getComputedStyle(bubble).animationName : '';
-    if (!bubble || !name || name === 'none') {
-      this.detach();
-      return;
-    }
-    const done = (event: Event): void => {
-      if (event.target !== bubble) return;
-      this.stopClosing?.();
-      this.stopClosing = null;
-      if (this.state() === 'closed') this.detach();
-    };
-    bubble.addEventListener('animationend', done);
-    bubble.addEventListener('animationcancel', done);
-    this.stopClosing = () => {
-      bubble.removeEventListener('animationend', done);
-      bubble.removeEventListener('animationcancel', done);
-    };
+    this.stopClosing = ɵafterExitAnimation(
+      bubble,
+      () => {
+        this.stopClosing = null;
+        if (this.state() === 'closed') this.detach();
+      },
+      { endOnCancel: true },
+    );
   }
 
   private release(): void {

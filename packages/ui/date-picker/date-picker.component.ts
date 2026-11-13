@@ -1,18 +1,10 @@
 import { CdkTrapFocus, _IdGenerator } from '@angular/cdk/a11y';
 import {
-  type OverlayRef,
-  createFlexibleConnectedPositionStrategy,
-  createOverlayRef,
-  createRepositionScrollStrategy,
-} from '@angular/cdk/overlay';
-import { TemplatePortal } from '@angular/cdk/portal';
-import {
   afterNextRender,
   booleanAttribute,
   Component,
   computed,
   DestroyRef,
-  DOCUMENT,
   effect,
   ElementRef,
   inject,
@@ -42,7 +34,14 @@ import {
   type CwCalendarSelection,
   type CwDateDisabledFn,
 } from '@cadenway/ui/calendar';
-import { CwRipple, ɵmenuFrom, ɵpanelPositions, ɵprefersReducedMotion } from '@cadenway/ui/core';
+import {
+  CwRipple,
+  ɵConnectedPanel,
+  ɵPanelStack,
+  ɵsameDay,
+  ɵstartOfDay,
+  type ɵStackedPanel,
+} from '@cadenway/ui/core';
 import { CwInput } from '@cadenway/ui/input';
 import { CwInputGroup, CwInputGroupAddon, CwInputGroupButton } from '@cadenway/ui/input-group';
 
@@ -89,14 +88,6 @@ const SHORT_DATE: Intl.DateTimeFormatOptions = {
 };
 
 const TYPED = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
-
-function startOfDay(date: Date): Date {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-}
-
-function sameDay(a: Date, b: Date): boolean {
-  return startOfDay(a).getTime() === startOfDay(b).getTime();
-}
 
 function isRange(value: unknown): value is CwDatePickerRange {
   return (
@@ -155,7 +146,10 @@ function pad(value: number): string {
     CwRipple,
     NgIcon,
   ],
-  providers: [provideIcons({ phosphorCalendarBlankBold, phosphorCheckBold, phosphorClockBold })],
+  providers: [
+    provideIcons({ phosphorCalendarBlankBold, phosphorCheckBold, phosphorClockBold }),
+    ɵConnectedPanel,
+  ],
   host: {
     class: 'inline-flex min-w-0',
     '[attr.id]': 'null',
@@ -226,7 +220,6 @@ export class CwDatePicker implements FormValueControl<CwDatePickerValue>, Contro
 
   private readonly injector = inject(Injector);
   private readonly viewContainer = inject(ViewContainerRef);
-  private readonly document = inject(DOCUMENT);
   private readonly ngControl = inject(NgControl, { optional: true, self: true });
   private readonly panelTemplate = viewChild.required<TemplateRef<unknown>>('panel');
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
@@ -239,12 +232,19 @@ export class CwDatePicker implements FormValueControl<CwDatePickerValue>, Contro
   private readonly calendar = viewChild(CwCalendar);
   private readonly formDisabled = signal(false);
   private readonly accessorTouched = signal(false);
-  private overlayRef: OverlayRef | null = null;
   private focusTriggerOnClose = false;
-  private closeTimer: ReturnType<typeof setTimeout> | null = null;
   private onChange: (value: CwDatePickerValue) => void = () => undefined;
   private onTouched: () => void = () => undefined;
 
+  protected readonly overlay = inject(ɵConnectedPanel);
+  private readonly stack = inject(ɵPanelStack);
+  // This picker as the shared panel stack sees it: another panel opened by the user closes it.
+  private readonly stacked: ɵStackedPanel = {
+    close: () => {
+      this.close(false);
+    },
+    contains: (node) => this.overlay.contains(node),
+  };
   protected readonly panelId = inject(_IdGenerator).getId('cw-date-picker-panel-');
   protected readonly triggerClass = computed(() => `${TRIGGER} ${TRIGGER_SIZES[this.size()]}`);
   protected readonly fieldClass = FIELD;
@@ -256,8 +256,6 @@ export class CwDatePicker implements FormValueControl<CwDatePickerValue>, Contro
   protected readonly maxDay = computed(() => upperBound(this.max()));
   /** The calendar selection while the panel is open: a range waits for its end here. */
   protected readonly draft = signal<CwCalendarSelection>(null);
-  protected readonly closing = signal(false);
-  protected readonly menuFrom = signal<string | null>(null);
   protected readonly timeShown = signal(false);
   protected readonly typed = signal<string | null>(null);
   protected readonly typedInvalid = signal(false);
@@ -328,7 +326,7 @@ export class CwDatePicker implements FormValueControl<CwDatePickerValue>, Contro
       selected:
         preset.date === null
           ? value === null
-          : value instanceof Date && sameDay(value, preset.date),
+          : value instanceof Date && ɵsameDay(value, preset.date),
     }));
   });
 
@@ -350,8 +348,8 @@ export class CwDatePicker implements FormValueControl<CwDatePickerValue>, Contro
     });
 
     inject(DestroyRef).onDestroy(() => {
-      if (this.closeTimer) clearTimeout(this.closeTimer);
-      this.overlayRef?.dispose();
+      this.stack.release(this.stacked);
+      this.overlay.dispose();
     });
   }
 
@@ -389,13 +387,13 @@ export class CwDatePicker implements FormValueControl<CwDatePickerValue>, Contro
 
   protected toggle(): void {
     if (this.open()) this.close(true);
-    else if (!this.isDisabled()) this.open.set(true);
+    else if (!this.isDisabled()) this.openPanel();
   }
 
   protected onTriggerKeydown(event: KeyboardEvent): void {
     if (event.key === 'ArrowDown' && !event.altKey && !this.open() && !this.isDisabled()) {
       event.preventDefault();
-      this.open.set(true);
+      this.openPanel();
     }
   }
 
@@ -403,7 +401,7 @@ export class CwDatePicker implements FormValueControl<CwDatePickerValue>, Contro
     if (event.key === 'Enter') this.commitTyped((event.target as HTMLInputElement).value);
     else if (event.key === 'ArrowDown' && event.altKey && !this.isDisabled()) {
       event.preventDefault();
-      this.open.set(true);
+      this.openPanel();
     }
   }
 
@@ -424,7 +422,7 @@ export class CwDatePicker implements FormValueControl<CwDatePickerValue>, Contro
   protected onCalendarChange(selection: CwCalendarSelection): void {
     if (selection instanceof Date) {
       const previous = this.value();
-      const date = startOfDay(selection);
+      const date = ɵstartOfDay(selection);
       // A time already chosen stays on the new day.
       if (this.withTime() && previous instanceof Date) {
         date.setHours(previous.getHours(), previous.getMinutes());
@@ -442,7 +440,7 @@ export class CwDatePicker implements FormValueControl<CwDatePickerValue>, Contro
   }
 
   protected pickPreset(preset: CwDatePreset): void {
-    this.setValue(preset.date ? startOfDay(preset.date) : null);
+    this.setValue(preset.date ? ɵstartOfDay(preset.date) : null);
     this.close(true);
   }
 
@@ -457,9 +455,7 @@ export class CwDatePicker implements FormValueControl<CwDatePickerValue>, Contro
     afterNextRender(
       {
         write: () => {
-          this.overlayRef?.overlayElement
-            .querySelector<HTMLInputElement>('input[type=time]')
-            ?.focus();
+          this.overlay.pane?.querySelector<HTMLInputElement>('input[type=time]')?.focus();
         },
       },
       { injector: this.injector },
@@ -471,13 +467,9 @@ export class CwDatePicker implements FormValueControl<CwDatePickerValue>, Contro
     if (!text) return;
     const [hours = 0, minutes = 0] = text.split(':').map(Number);
     const value = this.value();
-    const base = value instanceof Date ? new Date(value) : startOfDay(new Date());
+    const base = value instanceof Date ? new Date(value) : ɵstartOfDay(new Date());
     base.setHours(hours, minutes, 0, 0);
     this.setValue(base);
-  }
-
-  protected onPanelAnimationEnd(event: AnimationEvent): void {
-    if (this.closing() && event.target === event.currentTarget) this.finishClose();
   }
 
   private setValue(value: CwDatePickerValue): void {
@@ -513,10 +505,16 @@ export class CwDatePicker implements FormValueControl<CwDatePickerValue>, Contro
     const min = this.minDay();
     const max = this.maxDay();
     return (
-      (!!min && date < startOfDay(min)) ||
-      (!!max && startOfDay(date) > startOfDay(max)) ||
+      (!!min && date < ɵstartOfDay(min)) ||
+      (!!max && ɵstartOfDay(date) > ɵstartOfDay(max)) ||
       (this.disabledDates()?.(date) ?? false)
     );
+  }
+
+  /** Opens the panel from the trigger: the other floating panels the user opened close. */
+  private openPanel(): void {
+    this.stack.open(this.stacked, this.element);
+    this.open.set(true);
   }
 
   private close(focusTrigger: boolean): void {
@@ -525,37 +523,33 @@ export class CwDatePicker implements FormValueControl<CwDatePickerValue>, Contro
   }
 
   private attach(): void {
-    if (this.closeTimer) clearTimeout(this.closeTimer);
-    this.closing.set(false);
-    if (this.overlayRef?.hasAttached()) return;
-    const value = this.value();
-    this.draft.set(isRange(value) ? { start: value.start, end: value.end } : value);
-    this.timeShown.set(value instanceof Date && hasTime(value));
-
+    // Reopened during its closing animation: the panel stays as it was, focus included.
+    const reopened = this.overlay.attached();
+    if (!reopened) {
+      const value = this.value();
+      this.draft.set(isRange(value) ? { start: value.start, end: value.end } : value);
+      this.timeShown.set(value instanceof Date && hasTime(value));
+    }
     const origin = this.element;
-    const strategy = createFlexibleConnectedPositionStrategy(this.injector, origin)
-      .withPositions(ɵpanelPositions('bottom', 'start'))
-      .withViewportMargin(8)
-      .withPush(false);
-    const overlayRef = createOverlayRef(this.injector, {
-      positionStrategy: strategy,
-      scrollStrategy: createRepositionScrollStrategy(this.injector),
+    this.overlay.open({
+      origin,
+      template: this.panelTemplate(),
+      viewContainerRef: this.viewContainer,
+      // The panel joins the CDK overlay container and may shrink to the viewport.
+      inline: false,
+      flexibleDimensions: true,
+      outsideClick: (event) => {
+        // The trigger toggles on its own click.
+        if (!origin.contains(event.target as Node | null)) this.close(false);
+      },
+      keydown: (event) => {
+        if (event.key === 'Escape' && !event.altKey && !event.ctrlKey && !event.metaKey) {
+          event.preventDefault();
+          this.close(true);
+        }
+      },
     });
-    this.overlayRef = overlayRef;
-    strategy.positionChanges.subscribe((change) => {
-      this.menuFrom.set(ɵmenuFrom(change.connectionPair));
-    });
-    overlayRef.keydownEvents().subscribe((event) => {
-      if (event.key === 'Escape' && !event.altKey && !event.ctrlKey && !event.metaKey) {
-        event.preventDefault();
-        this.close(true);
-      }
-    });
-    overlayRef.outsidePointerEvents().subscribe((event) => {
-      // The trigger toggles on its own click.
-      if (!origin.contains(event.target as Node | null)) this.close(false);
-    });
-    overlayRef.attach(new TemplatePortal(this.panelTemplate(), this.viewContainer));
+    if (reopened) return;
 
     // Date Picker sheet, "Clavier": the focus goes to the picked day, else today.
     afterNextRender(
@@ -569,32 +563,14 @@ export class CwDatePicker implements FormValueControl<CwDatePickerValue>, Contro
   }
 
   private beginClose(): void {
-    const overlayRef = this.overlayRef;
-    if (!overlayRef?.hasAttached() || this.closing()) return;
-    const panel = overlayRef.overlayElement.firstElementChild as HTMLElement | null;
-    const animation = panel ? getComputedStyle(panel).animationName : '';
-    // Without a running animation (reduced motion, no stylesheet) the panel goes at once.
-    if (!panel || !animation || animation === 'none' || ɵprefersReducedMotion(this.document)) {
-      this.finishClose();
-      return;
-    }
-    this.closing.set(true);
-    // Safety net if `animationend` never comes (the panel hidden by an ancestor).
-    this.closeTimer = setTimeout(() => {
-      this.finishClose();
-    }, 400);
-  }
-
-  private finishClose(): void {
-    if (this.closeTimer) clearTimeout(this.closeTimer);
-    this.closeTimer = null;
-    this.closing.set(false);
-    this.overlayRef?.dispose();
-    this.overlayRef = null;
-    if (this.focusTriggerOnClose) {
+    this.stack.release(this.stacked);
+    if (!this.overlay.attached()) return;
+    const panel = this.overlay.pane?.firstElementChild as HTMLElement | null | undefined;
+    this.overlay.close(panel, () => {
+      if (!this.focusTriggerOnClose) return;
       this.focusTriggerOnClose = false;
       const target = this.variant() === 'input' ? this.calendarButton() : this.trigger();
       target?.nativeElement.focus();
-    }
+    });
   }
 }

@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { CwButton } from '@cadenway/ui/button';
+import { ɵformatFileSize } from '@cadenway/ui/core';
 import { CwSpinner } from '@cadenway/ui/spinner';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -24,7 +25,7 @@ import {
 } from '@ng-icons/phosphor-icons/bold';
 import { phosphorCheckCircleFill } from '@ng-icons/phosphor-icons/fill';
 
-import { fileIcon, formatFileSize } from '../dropzone.format';
+import { fileIcon } from '../dropzone.format';
 import type { CwDropzoneFileLabels, CwDropzoneFileState } from '../dropzone.types';
 
 const LABELS: CwDropzoneFileLabels = {
@@ -106,9 +107,9 @@ export class CwDropzoneFile {
   protected readonly percent = computed(() =>
     Math.round(Math.min(100, Math.max(0, this.progress()))),
   );
-  protected readonly sizeText = computed(() => formatFileSize(this.size()));
+  protected readonly sizeText = computed(() => ɵformatFileSize(this.size()));
   protected readonly progressText = computed(() => {
-    const sent = formatFileSize((this.size() * this.percent()) / 100);
+    const sent = ɵformatFileSize((this.size() * this.percent()) / 100);
     return `${String(this.percent())} % · ${sent} ${this.text().of} ${this.sizeText()}`;
   });
 

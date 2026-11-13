@@ -1,32 +1,11 @@
 /*
- * Size formatting and type detection of an attachment. Internal to the entry point.
- * `@cadenway/ui/dropzone` holds the same size rule: both belong in `@cadenway/ui/core` once a shared
- * helper can be added there.
+ * Type detection and icons of an attachment. Internal to the entry point; the size wording and the
+ * extension come from `@cadenway/ui/core`.
  */
 
+import { ɵextensionOf } from '@cadenway/ui/core';
+
 import type { CwAttachmentType } from './attachment.types';
-
-const UNITS = ['o', 'Ko', 'Mo', 'Go'] as const;
-const WHOLE = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 });
-const DECIMAL = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 });
-
-/** A byte count in French binary units, as the mockup writes them: « 312 Ko », « 2,4 Mo ». */
-export function formatFileSize(bytes: number): string {
-  let value = Math.max(0, bytes);
-  let unit = 0;
-  while (value >= 1024 && unit < UNITS.length - 1) {
-    value /= 1024;
-    unit += 1;
-  }
-  const format = unit >= 2 ? DECIMAL : WHOLE;
-  return `${format.format(value)} ${UNITS[unit]}`;
-}
-
-/** Lower-case extension of a file name, without the dot; empty when there is none. */
-export function extensionOf(name: string): string {
-  const dot = name.lastIndexOf('.');
-  return dot > 0 ? name.slice(dot + 1).toLowerCase() : '';
-}
 
 const IMAGES = new Set(['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'avif']);
 
@@ -39,7 +18,7 @@ export function detectType(name: string, mimeType: string, href: string): CwAtta
   if (mime.startsWith('image/')) return 'image';
   if (mime === 'application/pdf') return 'pdf';
   if (mime !== '') return 'file';
-  const extension = extensionOf(name);
+  const extension = ɵextensionOf(name);
   if (IMAGES.has(extension)) return 'image';
   if (extension === 'pdf') return 'pdf';
   if (extension === '' && /^https?:\/\//i.test(href)) return 'link';
@@ -61,7 +40,7 @@ export function typeIcon(type: CwAttachmentType, name: string): string {
     case 'link':
       return 'phosphorLinkSimpleBold';
     default:
-      return FILE_ICONS[extensionOf(name)] ?? 'phosphorFileBold';
+      return FILE_ICONS[ɵextensionOf(name)] ?? 'phosphorFileBold';
   }
 }
 

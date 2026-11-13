@@ -33,7 +33,17 @@ import {
 } from '@ng-icons/phosphor-icons/bold';
 
 import { CwButton } from '@cadenway/ui/button';
-import { ɵFOCUS_INSET } from '@cadenway/ui/core';
+import {
+  ɵFOCUS_INSET,
+  ɵaddMonths,
+  ɵdayKey,
+  ɵdaysBetween,
+  ɵsameDay,
+  ɵsameMonth,
+  ɵstartOfDay,
+  ɵstartOfMonth,
+  ɵstartOfWeek,
+} from '@cadenway/ui/core';
 import {
   CwToggleGroup,
   CwToggleGroupItem,
@@ -53,20 +63,7 @@ import {
   type ItemView,
 } from './calendar-view.token';
 import { CW_CALENDAR_VIEW_LABELS } from './calendar-view.constants';
-import {
-  addDays,
-  addMonths,
-  atMinutes,
-  dayKey,
-  daysBetween,
-  formatTime,
-  minutesOf,
-  sameDay,
-  sameMonth,
-  startOfDay,
-  startOfMonth,
-  startOfWeek,
-} from './calendar-view.dates';
+import { addDays, atMinutes, formatTime, minutesOf } from './calendar-view.dates';
 import type {
   CwCalendarCreate,
   CwCalendarItemContext,
@@ -201,7 +198,7 @@ interface WeekHeader {
 }
 
 function cellKey(date: Date, slot: number | null): string {
-  return `${String(dayKey(date))}:${slot === null ? 'day' : String(slot)}`;
+  return `${String(ɵdayKey(date))}:${slot === null ? 'day' : String(slot)}`;
 }
 
 function capitalize(text: string): string {
@@ -356,7 +353,7 @@ export class CwCalendarView<T> implements CalendarViewHost {
   private readonly dragOver = signal<string | null>(null);
 
   protected readonly now = computed(() => this.today() ?? new Date());
-  protected readonly shown = computed(() => startOfDay(this.date() ?? this.now()));
+  protected readonly shown = computed(() => ɵstartOfDay(this.date() ?? this.now()));
 
   private readonly formats = computed(() => {
     const locale = this.locale();
@@ -401,7 +398,7 @@ export class CwCalendarView<T> implements CalendarViewHost {
 
   /** The days of the week of `date`, weekends dropped when hidden. */
   private daysOfWeek(date: Date): Date[] {
-    const first = startOfWeek(date, this.weekStartsOn());
+    const first = ɵstartOfWeek(date, this.weekStartsOn());
     const shown = this.weekdays();
     return Array.from({ length: 7 }, (_, index) => addDays(first, index)).filter((day) =>
       shown.includes(day.getDay()),
@@ -412,8 +409,8 @@ export class CwCalendarView<T> implements CalendarViewHost {
   protected readonly gridKey = computed(() => {
     const shown = this.shown();
     const start =
-      this.view() === 'month' ? startOfMonth(shown) : startOfWeek(shown, this.weekStartsOn());
-    return `${this.view()}:${String(dayKey(start))}`;
+      this.view() === 'month' ? ɵstartOfMonth(shown) : ɵstartOfWeek(shown, this.weekStartsOn());
+    return `${this.view()}:${String(ɵdayKey(start))}`;
   });
 
   protected readonly title = computed(() => {
@@ -423,7 +420,7 @@ export class CwCalendarView<T> implements CalendarViewHost {
     const first = days.at(0) ?? this.shown();
     const last = days.at(-1) ?? first;
     const year = String(last.getFullYear());
-    if (sameMonth(first, last)) {
+    if (ɵsameMonth(first, last)) {
       return `${String(first.getDate())} – ${String(last.getDate())} ${formats.monthShort.format(last)} ${year}`;
     }
     return `${formats.dayShort.format(first)} – ${formats.dayShort.format(last)} ${year}`;
@@ -445,22 +442,22 @@ export class CwCalendarView<T> implements CalendarViewHost {
     const days = this.view() === 'month' ? this.monthDays().flat() : this.daysOfWeek(this.shown());
     const cursor = this.cursor();
     const slots = this.slotMinutesList();
-    if (cursor && days.some((day) => sameDay(day, cursor.date))) {
+    if (cursor && days.some((day) => ɵsameDay(day, cursor.date))) {
       const slot =
         this.view() === 'week' && cursor.slot !== null && slots.includes(cursor.slot)
           ? cursor.slot
           : null;
       return { ...cursor, slot };
     }
-    const today = days.find((day) => sameDay(day, this.now()));
-    const shown = days.find((day) => sameDay(day, this.shown()));
+    const today = days.find((day) => ɵsameDay(day, this.now()));
+    const shown = days.find((day) => ɵsameDay(day, this.shown()));
     const date = shown ?? today ?? days.at(0) ?? this.shown();
-    return { day: dayKey(date), date, slot: null };
+    return { day: ɵdayKey(date), date, slot: null };
   });
 
   private readonly monthDays = computed(() => {
-    const month = startOfMonth(this.shown());
-    const first = startOfWeek(month, this.weekStartsOn());
+    const month = ɵstartOfMonth(this.shown());
+    const first = ɵstartOfWeek(month, this.weekStartsOn());
     return Array.from({ length: WEEKS_SHOWN }, (_, week) =>
       this.daysOfWeek(addDays(first, week * 7)),
     );
@@ -479,11 +476,11 @@ export class CwCalendarView<T> implements CalendarViewHost {
     const days =
       this.view() === 'month' ? (this.monthDays()[0] ?? []) : this.daysOfWeek(this.shown());
     return days.map((day) => ({
-      key: String(dayKey(day)),
+      key: String(ɵdayKey(day)),
       short: formats.weekdayShort.format(day),
       long: formats.weekdayLong.format(day),
       number: String(day.getDate()),
-      today: this.view() === 'week' && sameDay(day, this.now()),
+      today: this.view() === 'week' && ɵsameDay(day, this.now()),
     }));
   });
 
@@ -516,10 +513,10 @@ export class CwCalendarView<T> implements CalendarViewHost {
     let delay = 0;
     for (const entry of this.entries()) {
       if (entry.span.allDay) continue;
-      const day = days.find((candidate) => sameDay(candidate, entry.span.start));
+      const day = days.find((candidate) => ɵsameDay(candidate, entry.span.start));
       if (!day) continue;
       const startMinutes = minutesOf(entry.span.start);
-      const endMinutes = sameDay(entry.span.start, entry.span.end)
+      const endMinutes = ɵsameDay(entry.span.start, entry.span.end)
         ? minutesOf(entry.span.end)
         : 24 * 60;
       const top = Math.min(Math.max(startMinutes, from * 60), to * 60 - step);
@@ -543,7 +540,7 @@ export class CwCalendarView<T> implements CalendarViewHost {
       cells: days.map((day, column): SlotCell => {
         const key = cellKey(day, minutes);
         const nowMinutes = minutesOf(now);
-        const holdsNow = sameDay(day, now) && nowMinutes >= minutes && nowMinutes < minutes + step;
+        const holdsNow = ɵsameDay(day, now) && nowMinutes >= minutes && nowMinutes < minutes + step;
         const top = minutes % 60 === 0 && row > 0 ? ' border-t' : '';
         const left = column > 0 ? ' border-l' : '';
         const tone = target === key ? 'bg-selected' : 'hover:bg-accent';
@@ -551,7 +548,7 @@ export class CwCalendarView<T> implements CalendarViewHost {
           key,
           date: day,
           label: `${formats.full.format(day)}, ${formatTime(minutes)}`,
-          tabStop: dayKey(day) === cursor.day && cursor.slot === minutes,
+          tabStop: ɵdayKey(day) === cursor.day && cursor.slot === minutes,
           target: target === key,
           cellClass: `${SLOT} ${SLOT_HEIGHTS[step]} ${tone}${top}${left}`,
           drop: { date: day, slot: minutes, allDayRow: false },
@@ -583,20 +580,20 @@ export class CwCalendarView<T> implements CalendarViewHost {
   }
 
   protected goToday(): void {
-    const today = startOfDay(this.now());
+    const today = ɵstartOfDay(this.now());
     this.date.set(today);
-    this.cursor.set({ day: dayKey(today), date: today, slot: null });
+    this.cursor.set({ day: ɵdayKey(today), date: today, slot: null });
   }
 
   protected step(direction: number): void {
     const shown = this.shown();
     this.date.set(
-      this.view() === 'month' ? addMonths(shown, direction) : addDays(shown, 7 * direction),
+      this.view() === 'month' ? ɵaddMonths(shown, direction) : addDays(shown, 7 * direction),
     );
   }
 
   protected onCellFocus(date: Date, slot: number | null): void {
-    this.cursor.set({ day: dayKey(date), date, slot });
+    this.cursor.set({ day: ɵdayKey(date), date, slot });
   }
 
   /** Part handler (`CalendarViewHost`), not for consumers. */
@@ -607,7 +604,7 @@ export class CwCalendarView<T> implements CalendarViewHost {
   /** Part handler (`CalendarViewHost`), not for consumers. */
   createOn(date: Date, slot: number | null, allDay: boolean): void {
     if (this.readonly()) return;
-    this.create.emit({ date: slot === null ? startOfDay(date) : atMinutes(date, slot), allDay });
+    this.create.emit({ date: slot === null ? ɵstartOfDay(date) : atMinutes(date, slot), allDay });
   }
 
   /** Part handler (`CalendarViewHost`), not for consumers. */
@@ -676,7 +673,7 @@ export class CwCalendarView<T> implements CalendarViewHost {
       case 'PageDown': {
         const sign = event.key === 'PageUp' ? -1 : 1;
         next = this.at(
-          week ? addDays(cursor.date, 7 * sign) : addMonths(cursor.date, sign),
+          week ? addDays(cursor.date, 7 * sign) : ɵaddMonths(cursor.date, sign),
           cursor.slot,
         );
         break;
@@ -714,7 +711,7 @@ export class CwCalendarView<T> implements CalendarViewHost {
     switch (key.toLowerCase()) {
       case 't':
         this.goToday();
-        this.focusCell(this.at(startOfDay(this.now()), null));
+        this.focusCell(this.at(ɵstartOfDay(this.now()), null));
         return true;
       case 'm':
         this.view.set('month');
@@ -761,10 +758,10 @@ export class CwCalendarView<T> implements CalendarViewHost {
       const begin = atMinutes(to.date, to.slot);
       span = { start: begin, end: new Date(begin.getTime() + duration), allDay: false };
     } else if (to.allDayRow && !allDay) {
-      span = { start: startOfDay(to.date), end: startOfDay(to.date), allDay: true };
+      span = { start: ɵstartOfDay(to.date), end: ɵstartOfDay(to.date), allDay: true };
     } else {
       // Onto a day: the item keeps its times and its number of days.
-      const shift = daysBetween(start, to.date);
+      const shift = ɵdaysBetween(start, to.date);
       span = { start: addDays(start, shift), end: addDays(end, shift), allDay };
     }
     this.moved.update((moved) => new Map(moved).set(entry.id, span));
@@ -803,8 +800,8 @@ export class CwCalendarView<T> implements CalendarViewHost {
   }
 
   private at(date: Date, slot: number | null): Cursor {
-    const day = startOfDay(date);
-    return { day: dayKey(day), date: day, slot };
+    const day = ɵstartOfDay(date);
+    return { day: ɵdayKey(day), date: day, slot };
   }
 
   /** Moves the keyboard to a cell, bringing its month (or week) in, and focuses it once drawn. */
@@ -812,8 +809,8 @@ export class CwCalendarView<T> implements CalendarViewHost {
     this.cursor.set(cursor);
     const visible =
       this.view() === 'month'
-        ? sameMonth(cursor.date, this.shown())
-        : this.daysOfWeek(this.shown()).some((day) => sameDay(day, cursor.date));
+        ? ɵsameMonth(cursor.date, this.shown())
+        : this.daysOfWeek(this.shown()).some((day) => ɵsameDay(day, cursor.date));
     if (!visible) this.date.set(cursor.date);
     const key = cellKey(cursor.date, cursor.slot);
     afterNextRender(
@@ -850,14 +847,14 @@ export class CwCalendarView<T> implements CalendarViewHost {
     const first = days.at(0);
     const last = days.at(-1);
     if (!first || !last) return [];
-    const keys = days.map(dayKey);
+    const keys = days.map(ɵdayKey);
     const bars: { entry: Entry<T>; from: number; to: number; row: number }[] = [];
     const singles = new Map<number, Entry<T>[]>();
     const rowsEnd: number[] = [];
     const barRows = Math.max(0, lines - 1);
     const covering = (entry: Entry<T>): number[] => {
-      const from = dayKey(entry.span.start);
-      const to = dayKey(entry.span.end);
+      const from = ɵdayKey(entry.span.start);
+      const to = ɵdayKey(entry.span.end);
       return keys
         .map((key, index) => (key >= from && key <= to ? index : -1))
         .filter((index) => index >= 0);
@@ -873,10 +870,10 @@ export class CwCalendarView<T> implements CalendarViewHost {
     };
     for (const entry of sorted) {
       if (allDayRow && !entry.span.allDay) continue;
-      const multi = entry.span.allDay && !sameDay(entry.span.start, entry.span.end);
+      const multi = entry.span.allDay && !ɵsameDay(entry.span.start, entry.span.end);
       const columns = multi ? covering(entry) : [];
       if (!multi) {
-        const index = keys.indexOf(dayKey(entry.span.start));
+        const index = keys.indexOf(ɵdayKey(entry.span.start));
         if (index >= 0) addSingle(index, entry);
         continue;
       }
@@ -903,8 +900,8 @@ export class CwCalendarView<T> implements CalendarViewHost {
       const fits = own.length <= available;
       const shownSingles = fits ? own : own.slice(0, Math.max(0, available - 1));
       const hidden = own.length - shownSingles.length;
-      const today = sameDay(date, now);
-      const outside = !allDayRow && !sameMonth(date, month);
+      const today = ɵsameDay(date, now);
+      const outside = !allDayRow && !ɵsameMonth(date, month);
       const all = [...covered.map((bar) => bar.entry), ...own];
       const countText = this.format(all.length > 1 ? texts.countOther : texts.countOne, {
         count: all.length,
@@ -926,7 +923,7 @@ export class CwCalendarView<T> implements CalendarViewHost {
         numberClass: NUMBERS[today ? 'today' : outside ? 'outside' : 'plain'],
         today,
         outside,
-        tabStop: dayKey(date) === cursor.day && cursor.slot === null,
+        tabStop: ɵdayKey(date) === cursor.day && cursor.slot === null,
         target: target === key,
         cellClass: `${allDayRow ? ALL_DAY_CELL : CELL} ${CELL_EDGES[edges]} ${CELL_TONES[tone]}`,
         drop: { date, slot: null, allDayRow },
@@ -938,7 +935,7 @@ export class CwCalendarView<T> implements CalendarViewHost {
           .filter((bar) => bar.from === index)
           .map((bar): BarView => {
             const span = bar.to - bar.from + 1;
-            const continues = dayKey(bar.entry.span.end) > (keys[bar.to] ?? 0);
+            const continues = ɵdayKey(bar.entry.span.end) > (keys[bar.to] ?? 0);
             const base = this.itemView(bar.entry, 'bar', bar.entry.id === grabbed, delay.value++);
             const range = `${formats.dayShort.format(bar.entry.span.start)} – ${formats.dayShort.format(bar.entry.span.end)}`;
             return {

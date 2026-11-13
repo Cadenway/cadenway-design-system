@@ -1,22 +1,17 @@
 import { Dialog, type DialogRef } from '@angular/cdk/dialog';
 import {
-  type Injector,
   type TemplateRef,
   type ViewContainerRef,
   afterNextRender,
+  inject,
+  Injector,
+  Service,
 } from '@angular/core';
-import { ɵprefersReducedMotion } from '@cadenway/ui/core';
 
-/*
- * The CDK Dialog life cycle behind `cw-dialog`'s panel: open a template as a modal (focus trap,
- * scroll block, backdrop, `aria-hidden` on the rest of the page, focus returned on close), play the
- * exit animation before the overlay is disposed, and tell whether an Escape belongs to a popup
- * opened inside the dialog. Internal to the entry point; `@cadenway/ui/alert-dialog` keeps the same
- * copy because entry points only share public API (move it to `core/overlay` as a `ɵ` helper).
- */
+import { ɵafterExitAnimation } from '../motion/exit-animation';
 
-/** Backdrop of every modal (Dialog sheet): it replaces any shadow, fades in and out. */
-export const MODAL_BACKDROP =
+/* Backdrop of every modal (Dialog sheet): it replaces any shadow, fades in and out. */
+const MODAL_BACKDROP =
   'bg-black/30 dark:bg-black/60 animate-fade-in motion-reduce:animate-none data-[state=closed]:animate-fade-out motion-reduce:data-[state=closed]:animate-none';
 
 // A trigger inside the panel whose popup (menu, listbox, combobox, date picker) is open: Escape
@@ -28,8 +23,12 @@ const OPEN_POPUP =
 // overlay is disposed even when `animationend` never comes (tab in the background).
 const EXIT_FALLBACK_MS = 300;
 
-/** What a modal needs to open its panel template. */
-export interface ModalOverlayConfig {
+/**
+ * What `ɵModalOverlay.attach` needs to open a panel template as a modal.
+ *
+ * Shared across the entry points of `@cadenway/ui`; not public API (`ɵ` prefix).
+ */
+export interface ɵModalOverlayConfig {
   readonly role: 'dialog' | 'alertdialog';
   readonly template: TemplateRef<unknown>;
   readonly viewContainerRef: ViewContainerRef;
@@ -45,17 +44,24 @@ export interface ModalOverlayConfig {
   readonly onExternalClose: () => void;
 }
 
-/** One modal at a time per owner: attach, detach with the exit animation, dispose at once. */
-export class ModalOverlay {
+/**
+ * The CDK Dialog life cycle behind the panel of `cw-dialog` and `cw-alert-dialog`: opens a template
+ * as a modal (focus trap, scroll block, backdrop, `aria-hidden` on the rest of the page, focus
+ * returned on close), plays the exit animation before the overlay is disposed, and tells whether an
+ * Escape belongs to a popup opened inside the modal.
+ *
+ * One modal at a time per owner: list it in the owner component's `providers`. The owner decides on
+ * Escape and backdrop clicks; `detach` animates out, `dispose` closes at once (owner destroyed).
+ * Shared across the entry points of `@cadenway/ui`; not public API (`ɵ` prefix).
+ */
+@Service({ autoProvided: false })
+export class ɵModalOverlay {
+  private readonly dialog = inject(Dialog);
+  private readonly injector = inject(Injector);
   private ref: DialogRef | null = null;
   private leaving = false;
 
-  constructor(
-    private readonly dialog: Dialog,
-    private readonly document: Document,
-    private readonly injector: Injector,
-  ) {}
-
+  /** Whether a modal is open, exit animation included. */
   get attached(): boolean {
     return this.ref !== null;
   }
@@ -68,7 +74,8 @@ export class ModalOverlay {
     );
   }
 
-  attach(config: ModalOverlayConfig): void {
+  /** Opens the template as a modal; does nothing while one is open. */
+  attach(config: ɵModalOverlayConfig): void {
     if (this.ref) return;
     const ref = this.dialog.open(config.template, {
       role: config.role,
@@ -122,13 +129,17 @@ export class ModalOverlay {
     ref.overlayRef.backdropElement?.setAttribute('data-state', 'closed');
     afterNextRender(
       () => {
-        this.whenAnimated(this.panel, () => {
-          if (this.ref !== ref) return;
-          this.ref = null;
-          this.leaving = false;
-          ref.close(undefined, focusOrigin ? { focusOrigin } : undefined);
-          done();
-        });
+        ɵafterExitAnimation(
+          this.panel,
+          () => {
+            if (this.ref !== ref) return;
+            this.ref = null;
+            this.leaving = false;
+            ref.close(undefined, focusOrigin ? { focusOrigin } : undefined);
+            done();
+          },
+          { fallback: EXIT_FALLBACK_MS },
+        );
       },
       { injector: this.injector },
     );
@@ -140,27 +151,5 @@ export class ModalOverlay {
     this.ref = null;
     this.leaving = false;
     ref?.close();
-  }
-
-  private whenAnimated(element: HTMLElement | null, done: () => void): void {
-    const view = this.document.defaultView;
-    const name = element && view ? view.getComputedStyle(element).animationName : '';
-    if (!element || !name || name === 'none' || ɵprefersReducedMotion(this.document)) {
-      done();
-      return;
-    }
-    let finished = false;
-    const finish = (): void => {
-      if (finished) return;
-      finished = true;
-      element.removeEventListener('animationend', onEnd);
-      clearTimeout(timer);
-      done();
-    };
-    const onEnd = (event: AnimationEvent): void => {
-      if (event.target === element) finish();
-    };
-    const timer = setTimeout(finish, EXIT_FALLBACK_MS);
-    element.addEventListener('animationend', onEnd);
   }
 }

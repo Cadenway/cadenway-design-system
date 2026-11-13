@@ -30,14 +30,15 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import {
+  ɵafterExitAnimation,
   ɵmenuFrom,
   ɵnavigateList,
+  ɵPanelStack,
   ɵpanelPositions,
-  ɵprefersReducedMotion,
+  type ɵStackedPanel,
 } from '@cadenway/ui/core';
 import type { Subscription } from 'rxjs';
 
-import { MenuStack } from './menu-stack/menu-stack.service';
 import { CW_MENU_ITEM, type MenuItemHandle } from './menu.token';
 import type {
   CwMenuAlign,
@@ -104,7 +105,8 @@ function normalize(text: string): string {
  * (`role="menu"`) renders in a CDK overlay at the body level, placed on `side` and `align` and
  * flipped or shifted to stay visible; its width follows the content (`max-w-sm`), its height is
  * capped to the room left and scrolls. It opens from the trigger's corner (`animate-menu-in`) and
- * closes with `animate-menu-out`, at once under reduced motion. One menu is open at a time.
+ * closes with `animate-menu-out`, at once under reduced motion. One menu is open at a time, and
+ * opening it closes an open select, combobox, popover or date picker unless it sits inside them.
  *
  * Keyboard: ↓ ↑ in a loop skipping disabled items, Home and End, → opens a submenu, ← closes it,
  * Enter and Space activate, a letter highlights the next item starting with it, Escape closes the
@@ -167,7 +169,14 @@ export class CwMenu {
   private readonly viewContainerRef = inject(ViewContainerRef);
   private readonly document = inject(DOCUMENT);
   private readonly directionality = inject(Directionality, { optional: true });
-  private readonly stack = inject(MenuStack);
+  private readonly stack = inject(ɵPanelStack);
+  /* This root menu as the shared panel stack sees it: closed as by an outside click. */
+  private readonly stacked: ɵStackedPanel = {
+    close: () => {
+      this.close();
+    },
+    contains: (node) => this.holds(node),
+  };
   private readonly keyManager = new FocusKeyManager(this.items, this.injector).withWrap();
 
   private overlayRef: OverlayRef | null = null;
@@ -207,7 +216,7 @@ export class CwMenu {
     if (this.overlayRef?.hasAttached()) this.detach();
     const parent = options.parent ?? null;
     if (parent) parent.adoptChild(this);
-    else this.stack.open(this);
+    else this.stack.open(this.stacked, options.trigger);
     // The panel is named by its trigger (`aria-labelledby`), which therefore needs an id.
     options.trigger.id ||= this.ids.getId('cw-menu-trigger-');
     this.state.set({
@@ -456,23 +465,14 @@ export class CwMenu {
     const panel = this.panel;
     if (!this.overlayRef?.hasAttached() || !panel) return;
     panel.setAttribute('data-state', 'closed');
-    let finished = false;
-    const onEnd = (event: AnimationEvent): void => {
-      if (event.target === panel) finish();
-    };
-    const finish = (): void => {
-      if (finished) return;
-      finished = true;
-      panel.removeEventListener('animationend', onEnd);
-      if (this.panel === panel && !this.state()) this.detach();
-    };
-    const animation = this.document.defaultView?.getComputedStyle(panel).animationName ?? '';
-    if (ɵprefersReducedMotion(this.document) || animation === '' || animation === 'none') {
-      finish();
-      return;
-    }
-    panel.addEventListener('animationend', onEnd);
-    setTimeout(finish, CLOSE_FALLBACK);
+    // Detached unless the menu reopened meanwhile (a new panel, or the same one open again).
+    ɵafterExitAnimation(
+      panel,
+      () => {
+        if (this.panel === panel && !this.state()) this.detach();
+      },
+      { fallback: CLOSE_FALLBACK },
+    );
   }
 
   private detach(): void {
@@ -490,6 +490,11 @@ export class CwMenu {
     return !!this.panelElement()?.contains(active) || !!this.child?.containsFocus();
   }
 
+  /** Whether `node` is in this menu's panel or in one of its open submenus. */
+  private holds(node: Node): boolean {
+    return !!this.panelElement()?.contains(node) || !!this.child?.holds(node);
+  }
+
   private root(): CwMenu {
     const parent = this.state()?.parent;
     return parent ? parent.root() : this;
@@ -502,6 +507,6 @@ export class CwMenu {
 
   private release(parent: CwMenu | null): void {
     if (parent?.child === this) parent.child = null;
-    this.stack.release(this);
+    this.stack.release(this.stacked);
   }
 }

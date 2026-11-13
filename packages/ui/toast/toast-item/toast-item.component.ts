@@ -3,7 +3,6 @@ import {
   booleanAttribute,
   Component,
   computed,
-  DOCUMENT,
   effect,
   ElementRef,
   inject,
@@ -12,7 +11,7 @@ import {
   output,
 } from '@angular/core';
 import { CwButton } from '@cadenway/ui/button';
-import { ɵprefersReducedMotion } from '@cadenway/ui/core';
+import { ɵafterExitAnimation } from '@cadenway/ui/core';
 import { CwSpinner } from '@cadenway/ui/spinner';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorXBold } from '@ng-icons/phosphor-icons/bold';
@@ -105,7 +104,6 @@ export class CwToastItem {
   protected readonly closable = computed(() => this.closeButton() || this.toast().closable);
 
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
-  private readonly document = inject(DOCUMENT);
   private readonly injector = inject(Injector);
   private leaving = false;
 
@@ -115,34 +113,16 @@ export class CwToastItem {
       this.leaving = true;
       afterNextRender(
         () => {
-          this.afterExit(() => {
-            this.removed.emit();
-          });
+          ɵafterExitAnimation(
+            this.element,
+            () => {
+              this.removed.emit();
+            },
+            { fallback: EXIT_FALLBACK_MS },
+          );
         },
         { injector: this.injector },
       );
     });
-  }
-
-  private afterExit(done: () => void): void {
-    const view = this.document.defaultView;
-    const name = view ? view.getComputedStyle(this.element).animationName : '';
-    if (!name || name === 'none' || ɵprefersReducedMotion(this.document)) {
-      done();
-      return;
-    }
-    let finished = false;
-    const finish = (): void => {
-      if (finished) return;
-      finished = true;
-      this.element.removeEventListener('animationend', onEnd);
-      clearTimeout(timer);
-      done();
-    };
-    const onEnd = (event: AnimationEvent): void => {
-      if (event.target === this.element) finish();
-    };
-    const timer = setTimeout(finish, EXIT_FALLBACK_MS);
-    this.element.addEventListener('animationend', onEnd);
   }
 }

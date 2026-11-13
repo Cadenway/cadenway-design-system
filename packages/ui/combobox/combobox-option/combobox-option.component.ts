@@ -3,7 +3,9 @@ import { _IdGenerator } from '@angular/cdk/a11y';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorCheckBold } from '@ng-icons/phosphor-icons/bold';
 
-import { OPTION, OPTION_ENTER, enterDelay } from '../combobox.styles';
+import { ɵenterDelay } from '@cadenway/ui/core';
+
+import { OPTION, OPTION_ENTER } from '../combobox.styles';
 import { COMBOBOX_HOST } from '../combobox.token';
 
 /**
@@ -62,7 +64,7 @@ export class CwComboboxOption<T = unknown> {
     this.host.entering() ? `${OPTION} ${OPTION_ENTER}` : OPTION,
   );
   protected readonly delay = computed(() =>
-    enterDelay(this.host.options().indexOf(this as CwComboboxOption)),
+    ɵenterDelay(this.host.options().indexOf(this as CwComboboxOption)),
   );
 
   /** @internal The visible text of the option, which the search matches. */

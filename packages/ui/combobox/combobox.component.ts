@@ -29,7 +29,15 @@ import {
 } from '@angular/cdk/a11y';
 import { type ControlValueAccessor, NgControl } from '@angular/forms';
 import type { FormValueControl } from '@angular/forms/signals';
-import { CwRipple, ɵFOCUS_FIELD, ɵnavigateList } from '@cadenway/ui/core';
+import {
+  CwRipple,
+  ɵConnectedPanel,
+  ɵFOCUS_FIELD,
+  ɵfold,
+  ɵnavigateList,
+  ɵPanelStack,
+  type ɵStackedPanel,
+} from '@cadenway/ui/core';
 import { CwSpinner } from '@cadenway/ui/spinner';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -40,8 +48,7 @@ import {
 
 import { CwComboboxEmpty } from './combobox-empty/combobox-empty.component';
 import { CwComboboxOption } from './combobox-option/combobox-option.component';
-import { ComboboxPanel } from './combobox-panel/combobox-panel.service';
-import { EMPTY, OPTION, fold } from './combobox.styles';
+import { EMPTY, OPTION } from './combobox.styles';
 import { COMBOBOX_HOST, type ComboboxHost } from './combobox.token';
 import type { CwComboboxCompareWith, CwComboboxFilter, CwComboboxSize } from './combobox.types';
 
@@ -71,8 +78,8 @@ function defaultFilter(
   option: { label: string; keywords: readonly string[] },
   query: string,
 ): boolean {
-  const folded = fold(query.trim());
-  return [option.label, ...option.keywords].some((text) => fold(text).includes(folded));
+  const folded = ɵfold(query.trim());
+  return [option.label, ...option.keywords].some((text) => ɵfold(text).includes(folded));
 }
 
 /**
@@ -105,7 +112,7 @@ function defaultFilter(
   imports: [NgIcon, CwRipple, CwSpinner],
   providers: [
     provideIcons({ phosphorCaretUpDownBold, phosphorMagnifyingGlassBold, phosphorPlusBold }),
-    ComboboxPanel,
+    ɵConnectedPanel,
     { provide: COMBOBOX_HOST, useExisting: forwardRef(() => CwCombobox) },
   ],
   host: {
@@ -192,7 +199,15 @@ export class CwCombobox<T = unknown>
   // Space) must not toggle the panel again.
   private keyActed = false;
 
-  protected readonly overlay = inject(ComboboxPanel);
+  protected readonly overlay = inject(ɵConnectedPanel);
+  private readonly stack = inject(ɵPanelStack);
+  // This combobox as the shared panel stack sees it: another panel opened by the user closes it.
+  private readonly stacked: ɵStackedPanel = {
+    close: () => {
+      this.hide(false);
+    },
+    contains: (node) => this.overlay.contains(node),
+  };
   protected readonly listboxId = inject(_IdGenerator).getId('cw-combobox-listbox-');
   protected readonly createId = inject(_IdGenerator).getId('cw-combobox-create-');
   protected readonly listboxLabel = signal<string | null>(null);
@@ -226,9 +241,9 @@ export class CwCombobox<T = unknown>
     this.options().filter((option) => option.visible()),
   );
   protected readonly showCreate = computed(() => {
-    const query = fold(this.query().trim());
+    const query = ɵfold(this.query().trim());
     if (!this.creatable() || query === '' || this.loading()) return false;
-    return !this.options().some((option) => fold(option.label()) === query);
+    return !this.options().some((option) => ɵfold(option.label()) === query);
   });
   private readonly items = computed(() => [
     ...this.visibleOptions().map((option) => this.keyOptionOf(option)),
@@ -271,6 +286,7 @@ export class CwCombobox<T = unknown>
     });
     inject(DestroyRef).onDestroy(() => {
       subscription.unsubscribe();
+      this.stack.release(this.stacked);
       this.overlay.dispose();
     });
 
@@ -498,6 +514,7 @@ export class CwCombobox<T = unknown>
 
   private show(query: string): void {
     if (this.isDisabled()) return;
+    this.stack.open(this.stacked, this.trigger().nativeElement);
     this.entering.set(true);
     this.query.set(query);
     if (query !== '') {
@@ -553,6 +570,7 @@ export class CwCombobox<T = unknown>
   }
 
   private detach(): void {
+    this.stack.release(this.stacked);
     if (!this.overlay.attached()) return;
     this.overlay.close(this.panelElement()?.nativeElement, () => {
       this.keyManager.updateActiveItem(-1);

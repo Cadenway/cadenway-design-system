@@ -13,7 +13,9 @@ import {
 } from '@angular/core';
 import { _IdGenerator } from '@angular/cdk/a11y';
 
-import { MARK, OPTION, OPTION_ENTER, enterDelay, fold } from '../autocomplete.styles';
+import { ɵenterDelay, ɵfold } from '@cadenway/ui/core';
+
+import { MARK, OPTION, OPTION_ENTER } from '../autocomplete.styles';
 import { AUTOCOMPLETE_HOST } from '../autocomplete.token';
 
 /** The text node split to set the typed part in bold, and what was inserted after it. */
@@ -36,8 +38,8 @@ function isLabelText(node: Text, root: HTMLElement): boolean {
 /* Where the typed text starts in `text`, compared without accents nor case; -1 when absent. The
    comparison is made character by character so that the index stays valid in the original. */
 function indexOf(text: string, query: string): number {
-  const chars = Array.from(text, (char) => fold(char));
-  if (chars.some((char) => char.length !== 1)) return fold(text).indexOf(query);
+  const chars = Array.from(text, (char) => ɵfold(char));
+  if (chars.some((char) => char.length !== 1)) return ɵfold(text).indexOf(query);
   return chars.join('').indexOf(query);
 }
 
@@ -94,7 +96,7 @@ export class CwAutocompleteOption<T = unknown> {
     this.host.entering() ? `${OPTION} ${OPTION_ENTER}` : OPTION,
   );
   protected readonly delay = computed(() =>
-    enterDelay(this.host.options().indexOf(this as CwAutocompleteOption)),
+    ɵenterDelay(this.host.options().indexOf(this as CwAutocompleteOption)),
   );
 
   constructor() {
@@ -145,7 +147,7 @@ export class CwAutocompleteOption<T = unknown> {
   private paint(query: string): void {
     this.unpaint();
     this.paintedQuery = query;
-    const folded = fold(query.trim());
+    const folded = ɵfold(query.trim());
     if (folded === '') return;
     const root = this.content().nativeElement;
     const walker = this.document.createTreeWalker(root, NodeFilter.SHOW_TEXT);

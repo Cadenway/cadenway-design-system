@@ -1,7 +1,6 @@
 import { type FocusTrap, FocusTrapFactory, _IdGenerator } from '@angular/cdk/a11y';
 import { hasModifierKey } from '@angular/cdk/keycodes';
 import {
-  type ConnectedPosition,
   type OverlayRef,
   createFlexibleConnectedPositionStrategy,
   createOverlayRef,
@@ -27,7 +26,16 @@ import {
   viewChild,
   ViewContainerRef,
 } from '@angular/core';
-import { ɵmenuFrom, ɵpanelPositions, ɵprefersReducedMotion } from '@cadenway/ui/core';
+import {
+  ɵafterExitAnimation,
+  ɵmenuFrom,
+  ɵPanelStack,
+  ɵpanelPositions,
+  ɵplacementOf,
+  ɵprefersReducedMotion,
+  type ɵPlacement,
+  type ɵStackedPanel,
+} from '@cadenway/ui/core';
 import type { Subscription } from 'rxjs';
 
 import { CwPopoverArrow } from './popover-arrow/popover-arrow.component';
@@ -60,26 +68,6 @@ const ARROW_GAP = 2;
 
 /** Keeps the panel 8 px away from the viewport edges when it is shifted to stay visible. */
 const VIEWPORT_MARGIN = 8;
-
-interface Placement {
-  readonly side: CwPopoverSide;
-  readonly align: CwPopoverAlign;
-}
-
-/** The side and alignment of a connected position, as the arrow and the data attributes need. */
-function placementOf(position: ConnectedPosition): Placement {
-  if (position.originY === 'bottom' && position.overlayY === 'top') {
-    return { side: 'bottom', align: position.overlayX };
-  }
-  if (position.originY === 'top' && position.overlayY === 'bottom') {
-    return { side: 'top', align: position.overlayX };
-  }
-  const along = { top: 'start', center: 'center', bottom: 'end' } as const;
-  return {
-    side: position.overlayX === 'start' ? 'right' : 'left',
-    align: along[position.overlayY],
-  };
-}
 
 /**
  * A non-modal floating panel anchored to a trigger: a setting, a share, a small form without leaving
@@ -129,11 +117,20 @@ export class CwPopover {
   private readonly document = inject(DOCUMENT);
   private readonly viewContainerRef = inject(ViewContainerRef);
   private readonly focusTrapFactory = inject(FocusTrapFactory);
+  private readonly stack = inject(ɵPanelStack);
+  // This popover as the shared panel stack sees it: another panel opened by the user closes it,
+  // unless that panel's trigger sits inside this one (a select in a popover form).
+  private readonly stacked: ɵStackedPanel = {
+    close: () => {
+      this.open.set(false);
+    },
+    contains: (node) => this.panel?.contains(node) ?? false,
+  };
   private readonly template = viewChild.required<TemplateRef<unknown>>('panel');
 
   private readonly origin = signal<HTMLElement | null>(null);
   protected readonly state = signal<'open' | 'closed'>('closed');
-  protected readonly placement = signal<Placement>({ side: 'bottom', align: 'center' });
+  protected readonly placement = signal<ɵPlacement>({ side: 'bottom', align: 'center' });
   protected readonly menuFrom = signal<string | null>(null);
 
   protected readonly panelClasses = computed(() => `${PANEL} ${WIDTHS[this.size()]}`);
@@ -157,6 +154,7 @@ export class CwPopover {
     });
 
     inject(DestroyRef).onDestroy(() => {
+      this.stack.release(this.stacked);
       this.detach();
     });
   }
@@ -168,13 +166,15 @@ export class CwPopover {
 
   /**
    * Opens the panel from `element`, or closes it when it is already open from there. Called by
-   * `[cwPopoverTrigger]` on click (Enter and Space included).
+   * `[cwPopoverTrigger]` on click (Enter and Space included). Opening closes the other floating
+   * panels the user opened (menus, selects, date pickers…), except those holding `element`.
    */
   toggle(element: HTMLElement): void {
     if (this.isOpenFrom(element)) {
       this.open.set(false);
       return;
     }
+    this.stack.open(this.stacked, element);
     this.origin.set(element);
     this.open.set(true);
   }
@@ -251,7 +251,7 @@ export class CwPopover {
 
     this.subscriptions = [
       strategy.positionChanges.subscribe((change) => {
-        this.placement.set(placementOf(change.connectionPair));
+        this.placement.set(ɵplacementOf(change.connectionPair));
         this.menuFrom.set(ɵmenuFrom(change.connectionPair));
       }),
       overlayRef.keydownEvents().subscribe((event) => {
@@ -300,6 +300,7 @@ export class CwPopover {
   }
 
   private hide(): void {
+    this.stack.release(this.stacked);
     const overlayRef = this.overlayRef;
     if (!overlayRef || this.state() === 'closed') return;
     this.state.set('closed');
@@ -328,25 +329,14 @@ export class CwPopover {
   }
 
   private detachAfterAnimation(): void {
-    const panel = this.panel;
-    const view = this.document.defaultView;
-    const name = panel && view ? view.getComputedStyle(panel).animationName : '';
-    if (!panel || !name || name === 'none') {
-      this.detach();
-      return;
-    }
-    const done = (event: Event): void => {
-      if (event.target !== panel) return;
-      this.stopClosing?.();
-      this.stopClosing = null;
-      if (this.state() === 'closed') this.detach();
-    };
-    panel.addEventListener('animationend', done);
-    panel.addEventListener('animationcancel', done);
-    this.stopClosing = () => {
-      panel.removeEventListener('animationend', done);
-      panel.removeEventListener('animationcancel', done);
-    };
+    this.stopClosing = ɵafterExitAnimation(
+      this.panel,
+      () => {
+        this.stopClosing = null;
+        if (this.state() === 'closed') this.detach();
+      },
+      { endOnCancel: true },
+    );
   }
 
   private detach(): void {

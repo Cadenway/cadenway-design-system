@@ -1,6 +1,6 @@
 import type { ConnectedPosition } from '@angular/cdk/overlay';
 
-import type { ɵAlign, ɵSide } from '../core.types';
+import type { ɵAlign, ɵPlacement, ɵSide } from '../core.types';
 
 const GAP = 4;
 
@@ -101,4 +101,25 @@ export function ɵmenuFrom(applied: ConnectedPosition): string {
   return applied.overlayX === 'start'
     ? `inset(0 ${edge} ${edge} 0 round 10px)`
     : `inset(0 0 ${edge} ${edge} round 10px)`;
+}
+
+/**
+ * The side and alignment of a connected position, as an arrow and the `data-side` / `data-align`
+ * hooks need them: give it the position the overlay actually took (`positionChanges`), which may be
+ * a fallback of `ɵpanelPositions`.
+ *
+ * Shared across the entry points of `@cadenway/ui`; not public API (`ɵ` prefix).
+ */
+export function ɵplacementOf(position: ConnectedPosition): ɵPlacement {
+  if (position.originY === 'bottom' && position.overlayY === 'top') {
+    return { side: 'bottom', align: position.overlayX };
+  }
+  if (position.originY === 'top' && position.overlayY === 'bottom') {
+    return { side: 'top', align: position.overlayX };
+  }
+  const along = { top: 'start', center: 'center', bottom: 'end' } as const;
+  return {
+    side: position.overlayX === 'start' ? 'right' : 'left',
+    align: along[position.overlayY],
+  };
 }

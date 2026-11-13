@@ -14,7 +14,8 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorUploadSimpleBold } from '@ng-icons/phosphor-icons/bold';
 import { phosphorWarningCircleFill } from '@ng-icons/phosphor-icons/fill';
 
-import { extensionOf, formatFileSize } from './dropzone.format';
+import { ɵextensionOf, ɵformatFileSize } from '@cadenway/ui/core';
+
 import type {
   CwDropzoneLabels,
   CwDropzoneRejection,
@@ -158,7 +159,7 @@ export class CwDropzone {
     return this.dragRejected() ? 'reject' : 'over';
   });
   protected readonly hintText = computed(
-    () => this.hint() || `${formatFileSize(this.maxSize())} max.`,
+    () => this.hint() || `${ɵformatFileSize(this.maxSize())} max.`,
   );
   // The accessible name starts with the visible text (WCAG 2.5.3, axe label-content-name-mismatch).
   protected readonly browseAria = computed(
@@ -257,7 +258,7 @@ export class CwDropzone {
   private accepts(file: File): boolean {
     const tokens = this.tokens();
     if (tokens.length === 0) return true;
-    const extension = extensionOf(file.name);
+    const extension = ɵextensionOf(file.name);
     return tokens.some((token) =>
       token.startsWith('.') ? token.slice(1) === extension : this.typeMatches(token, file.type),
     );

@@ -64,9 +64,7 @@
     [class]="panelClass"
     [id]="panelId"
     [attr.aria-label]="dialogLabel()"
-    [attr.data-state]="closing() ? 'closed' : 'open'"
-    [style.--menu-from]="menuFrom()"
-    (animationend)="onPanelAnimationEnd($event)"
+    [attr.data-state]="overlay.closing() ? 'closed' : 'open'"
   >
     <div class="flex">
       @if (showPresets()) {

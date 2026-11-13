@@ -3,7 +3,6 @@
     [class]="panelClass"
     [attr.data-state]="closing() ? 'closed' : 'open'"
     [attr.aria-busy]="loading() ? 'true' : null"
-    (animationend)="onPanelAnimationEnd($event)"
   >
     <div class="flex h-11 items-center gap-2 border-b px-3">
       <ng-icon

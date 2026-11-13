@@ -11,7 +11,7 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { CwButton } from '@cadenway/ui/button';
-import { CwRipple } from '@cadenway/ui/core';
+import { CwRipple, ɵextensionOf, ɵformatFileSize } from '@cadenway/ui/core';
 import { CwSpinner } from '@cadenway/ui/spinner';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -28,7 +28,7 @@ import {
 } from '@ng-icons/phosphor-icons/bold';
 import { phosphorWarningCircleFill } from '@ng-icons/phosphor-icons/fill';
 
-import { detectType, domainOf, extensionOf, formatFileSize, typeIcon } from './attachment.format';
+import { detectType, domainOf, typeIcon } from './attachment.format';
 import type {
   CwAttachmentLabels,
   CwAttachmentOrientation,
@@ -174,7 +174,7 @@ export class CwAttachment {
   );
   protected readonly sizeText = computed(() => {
     const bytes = this.fileSize();
-    return bytes === null ? '' : formatFileSize(bytes);
+    return bytes === null ? '' : ɵformatFileSize(bytes);
   });
   protected readonly meta = computed(() => {
     if (this.kind() === 'link') return this.href() ? domainOf(this.href()) : '';
@@ -183,7 +183,7 @@ export class CwAttachment {
         ? this.text().image
         : this.kind() === 'pdf'
           ? 'PDF'
-          : extensionOf(this.name()).toUpperCase() || this.text().file;
+          : ɵextensionOf(this.name()).toUpperCase() || this.text().file;
     return [this.sizeText(), word].filter((part) => part !== '').join(' · ');
   });
   protected readonly chipMeta = computed(() =>

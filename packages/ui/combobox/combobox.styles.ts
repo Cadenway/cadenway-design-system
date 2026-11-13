@@ -13,16 +13,3 @@ export const GROUP_TITLE = 'block px-2 py-1.5 text-xs font-medium text-muted-for
 
 /** The message of a search without result. */
 export const EMPTY = 'block px-2 py-5 text-center text-sm text-muted-foreground';
-
-/** The entrance delay of the row at `index`: 60 ms, then 30 ms more per row, twelve rows at most. */
-export function enterDelay(index: number): number {
-  return 60 + 30 * Math.min(Math.max(index, 0), 11);
-}
-
-/** A text without accents nor case, for the search (Combobox sheet: « sans accents ni casse »). */
-export function fold(text: string): string {
-  return text
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .toLowerCase();
-}

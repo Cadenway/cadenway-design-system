@@ -24,18 +24,18 @@ import {
 } from '@ng-icons/phosphor-icons/bold';
 
 import { CwButton } from '@cadenway/ui/button';
-import { CwRipple } from '@cadenway/ui/core';
-
 import {
-  addDays,
-  addMonths,
-  dayKey,
-  isoWeek,
-  sameDay,
-  sameMonth,
-  startOfDay,
-  startOfMonth,
-} from './calendar.dates';
+  CwRipple,
+  ɵaddDays,
+  ɵaddMonths,
+  ɵdayKey,
+  ɵisoWeek,
+  ɵsameDay,
+  ɵsameMonth,
+  ɵstartOfDay,
+  ɵstartOfMonth,
+} from '@cadenway/ui/core';
+
 import type {
   CwCalendarCaptionLayout,
   CwCalendarMode,
@@ -122,10 +122,10 @@ function upperBound(value: unknown): Date | undefined {
 
 function sameSelection(a: CwCalendarSelection, b: CwCalendarSelection): boolean {
   if (a === b) return true;
-  if (a instanceof Date && b instanceof Date) return sameDay(a, b);
+  if (a instanceof Date && b instanceof Date) return ɵsameDay(a, b);
   if (isRange(a) && isRange(b)) {
-    const ends = a.end === null || b.end === null ? a.end === b.end : sameDay(a.end, b.end);
-    return sameDay(a.start, b.start) && ends;
+    const ends = a.end === null || b.end === null ? a.end === b.end : ɵsameDay(a.end, b.end);
+    return ɵsameDay(a.start, b.start) && ends;
   }
   return false;
 }
@@ -231,15 +231,15 @@ export class CwCalendar implements FormValueControl<CwCalendarSelection>, Contro
   private readonly maxDay = computed(() => upperBound(this.max()));
 
   protected readonly selectClass = SELECT;
-  protected readonly today = signal(startOfDay(new Date()));
+  protected readonly today = signal(ɵstartOfDay(new Date()));
   protected readonly isDisabled = computed(() => this.disabled() || this.formDisabled());
 
   protected readonly shownMonth = computed(() => {
     const month = this.month();
-    if (month) return startOfMonth(month);
+    if (month) return ɵstartOfMonth(month);
     const selection = this.current();
     const anchor = isRange(selection) ? selection.start : selection;
-    return startOfMonth(anchor ?? this.today());
+    return ɵstartOfMonth(anchor ?? this.today());
   });
 
   private readonly formats = computed(() => {
@@ -259,9 +259,9 @@ export class CwCalendar implements FormValueControl<CwCalendarSelection>, Contro
     const formats = this.formats();
     // 2026-11-16 is a Monday: the seven days from the first day of the week.
     const monday = new Date(2026, 10, 16);
-    const first = addDays(monday, this.weekStartsOn() - 1);
+    const first = ɵaddDays(monday, this.weekStartsOn() - 1);
     return Array.from({ length: 7 }, (_, index) => {
-      const date = addDays(first, index);
+      const date = ɵaddDays(first, index);
       // The sheet's two-letter headers (« lu ma me je ve sa di ») from the short names (« lun. »).
       const short = formats.weekdayShort.format(date).replace('.', '').slice(0, 2);
       return { short, long: formats.weekdayLong.format(date) };
@@ -271,29 +271,29 @@ export class CwCalendar implements FormValueControl<CwCalendarSelection>, Contro
   protected readonly weeks = computed<readonly CalendarWeek[]>(() => {
     const month = this.shownMonth();
     const offset = (month.getDay() - this.weekStartsOn() + 7) % 7;
-    const first = addDays(month, -offset);
+    const first = ɵaddDays(month, -offset);
     const selection = this.current();
     const formats = this.formats();
     const today = this.today();
     const range = this.mode() === 'range' && isRange(selection) ? selection : null;
-    const rangeEnd = range?.end && !sameDay(range.start, range.end) ? range.end : null;
+    const rangeEnd = range?.end && !ɵsameDay(range.start, range.end) ? range.end : null;
     const single = this.mode() === 'single' ? (selection instanceof Date ? selection : null) : null;
 
     return Array.from({ length: WEEKS_SHOWN }, (_, week) => {
       const days = Array.from({ length: 7 }, (_, column): CalendarDay => {
-        const date = addDays(first, week * 7 + column);
-        const key = dayKey(date);
-        const outside = !sameMonth(date, month);
+        const date = ɵaddDays(first, week * 7 + column);
+        const key = ɵdayKey(date);
+        const outside = !ɵsameMonth(date, month);
         const hidden = outside && !this.showOutsideDays();
-        const isStart = range !== null && sameDay(date, range.start);
-        const isEnd = rangeEnd !== null && sameDay(date, rangeEnd);
+        const isStart = range !== null && ɵsameDay(date, range.start);
+        const isEnd = rangeEnd !== null && ɵsameDay(date, rangeEnd);
         const inside =
           range !== null &&
           rangeEnd !== null &&
-          key > dayKey(range.start) &&
-          key < dayKey(rangeEnd);
-        const endpoint = (single !== null && sameDay(date, single)) || isStart || isEnd;
-        const isToday = sameDay(date, today);
+          key > ɵdayKey(range.start) &&
+          key < ɵdayKey(rangeEnd);
+        const endpoint = (single !== null && ɵsameDay(date, single)) || isStart || isEnd;
+        const isToday = ɵsameDay(date, today);
         let band: Band = 'none';
         if (!hidden && rangeEnd !== null && (isStart || isEnd || inside)) {
           const left = isStart || column === 0;
@@ -325,7 +325,7 @@ export class CwCalendar implements FormValueControl<CwCalendarSelection>, Contro
         };
       });
       // ISO weeks start on Monday; with a Sunday start the row's Thursday still names the week.
-      return { number: isoWeek(days[4]?.date ?? first), days };
+      return { number: ɵisoWeek(days[4]?.date ?? first), days };
     });
   });
 
@@ -335,7 +335,7 @@ export class CwCalendar implements FormValueControl<CwCalendarSelection>, Contro
       .flatMap((week) => week.days)
       .filter((day) => !day.outside && !day.disabled);
     const find = (date: Date | null): CalendarDay | undefined =>
-      date ? days.find((day) => sameDay(day.date, date)) : undefined;
+      date ? days.find((day) => ɵsameDay(day.date, date)) : undefined;
     const selection = this.current();
     const anchor = isRange(selection) ? selection.start : selection;
     return (find(this.active()) ?? find(anchor) ?? find(this.today()) ?? days.at(0))?.key ?? null;
@@ -343,12 +343,12 @@ export class CwCalendar implements FormValueControl<CwCalendarSelection>, Contro
 
   protected readonly previousDisabled = computed(() => {
     const min = this.minDay();
-    return this.isDisabled() || (!!min && this.shownMonth() <= startOfMonth(min));
+    return this.isDisabled() || (!!min && this.shownMonth() <= ɵstartOfMonth(min));
   });
 
   protected readonly nextDisabled = computed(() => {
     const max = this.maxDay();
-    return this.isDisabled() || (!!max && this.shownMonth() >= startOfMonth(max));
+    return this.isDisabled() || (!!max && this.shownMonth() >= ɵstartOfMonth(max));
   });
 
   protected readonly monthOptions = computed<readonly CaptionOption[]>(() => {
@@ -403,7 +403,7 @@ export class CwCalendar implements FormValueControl<CwCalendarSelection>, Contro
   }
 
   protected showMonth(offset: number): void {
-    this.month.set(addMonths(this.shownMonth(), offset));
+    this.month.set(ɵaddMonths(this.shownMonth(), offset));
   }
 
   protected pickMonth(event: Event): void {
@@ -423,7 +423,7 @@ export class CwCalendar implements FormValueControl<CwCalendarSelection>, Contro
       const selection = this.current();
       const open = isRange(selection) && selection.end === null ? selection : null;
       if (!open) next = { start: day.date, end: null };
-      else if (dayKey(day.date) < dayKey(open.start)) next = { start: day.date, end: open.start };
+      else if (ɵdayKey(day.date) < ɵdayKey(open.start)) next = { start: day.date, end: open.start };
       else next = { start: open.start, end: day.date };
     }
     this.commit(next, true);
@@ -447,35 +447,35 @@ export class CwCalendar implements FormValueControl<CwCalendarSelection>, Contro
     switch (event.key) {
       case 'ArrowLeft':
         step = rtl ? 1 : -1;
-        target = addDays(from, step);
+        target = ɵaddDays(from, step);
         break;
       case 'ArrowRight':
         step = rtl ? -1 : 1;
-        target = addDays(from, step);
+        target = ɵaddDays(from, step);
         break;
       case 'ArrowUp':
         step = -7;
-        target = addDays(from, step);
+        target = ɵaddDays(from, step);
         break;
       case 'ArrowDown':
         step = 7;
-        target = addDays(from, step);
+        target = ɵaddDays(from, step);
         break;
       case 'Home':
         step = 1;
-        target = addDays(from, -startOfWeek);
+        target = ɵaddDays(from, -startOfWeek);
         break;
       case 'End':
         step = -1;
-        target = addDays(from, 6 - startOfWeek);
+        target = ɵaddDays(from, 6 - startOfWeek);
         break;
       case 'PageUp':
         step = 1;
-        target = addMonths(from, event.shiftKey ? -12 : -1);
+        target = ɵaddMonths(from, event.shiftKey ? -12 : -1);
         break;
       case 'PageDown':
         step = -1;
-        target = addMonths(from, event.shiftKey ? 12 : 1);
+        target = ɵaddMonths(from, event.shiftKey ? 12 : 1);
         break;
       default:
         return;
@@ -502,11 +502,11 @@ export class CwCalendar implements FormValueControl<CwCalendarSelection>, Contro
     let candidate = target;
     for (let index = 0; index < 366; index += 1) {
       if (!this.dateDisabled(candidate)) return candidate;
-      const key = dayKey(candidate);
-      if ((min && step < 0 && key < dayKey(min)) || (max && step > 0 && key > dayKey(max))) {
+      const key = ɵdayKey(candidate);
+      if ((min && step < 0 && key < ɵdayKey(min)) || (max && step > 0 && key > ɵdayKey(max))) {
         return null;
       }
-      candidate = addDays(candidate, step);
+      candidate = ɵaddDays(candidate, step);
     }
     return null;
   }
@@ -514,7 +514,7 @@ export class CwCalendar implements FormValueControl<CwCalendarSelection>, Contro
   private outOfBounds(date: Date): boolean {
     const min = this.minDay();
     const max = this.maxDay();
-    return (!!min && dayKey(date) < dayKey(min)) || (!!max && dayKey(date) > dayKey(max));
+    return (!!min && ɵdayKey(date) < ɵdayKey(min)) || (!!max && ɵdayKey(date) > ɵdayKey(max));
   }
 
   private dateDisabled(date: Date): boolean {
@@ -523,11 +523,11 @@ export class CwCalendar implements FormValueControl<CwCalendarSelection>, Contro
 
   private moveFocus(date: Date, focus: boolean): void {
     this.active.set(date);
-    if (!sameMonth(date, this.shownMonth())) this.month.set(startOfMonth(date));
+    if (!ɵsameMonth(date, this.shownMonth())) this.month.set(ɵstartOfMonth(date));
     afterNextRender(
       {
         write: () => {
-          const button = this.dayButton(dayKey(date));
+          const button = this.dayButton(ɵdayKey(date));
           if (
             focus ||
             (button && this.element.contains(this.element.ownerDocument.activeElement))
@@ -546,7 +546,7 @@ export class CwCalendar implements FormValueControl<CwCalendarSelection>, Contro
   }
 
   private commit(next: CwCalendarSelection, fromUser: boolean): void {
-    const value = next instanceof Date ? startOfDay(next) : next;
+    const value = next instanceof Date ? ɵstartOfDay(next) : next;
     this.current.set(value);
     this.selected.set(value);
     this.value.set(value);

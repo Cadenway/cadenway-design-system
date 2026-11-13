@@ -23,11 +23,10 @@ import {
   LiveAnnouncer,
   _IdGenerator,
 } from '@angular/cdk/a11y';
-import { ɵnavigateList } from '@cadenway/ui/core';
+import { ɵConnectedPanel, ɵnavigateList, ɵPanelStack, type ɵStackedPanel } from '@cadenway/ui/core';
 import { CwSpinner } from '@cadenway/ui/spinner';
 
 import { CwAutocompleteOption } from './autocomplete-option/autocomplete-option.component';
-import { AutocompletePanel } from './autocomplete-panel/autocomplete-panel.service';
 import { EMPTY } from './autocomplete.styles';
 import { AUTOCOMPLETE_HOST, type AutocompleteHost } from './autocomplete.token';
 
@@ -61,7 +60,7 @@ interface KeyOption extends Highlightable {
   exportAs: 'cwAutocomplete',
   imports: [CwSpinner],
   providers: [
-    AutocompletePanel,
+    ɵConnectedPanel,
     { provide: AUTOCOMPLETE_HOST, useExisting: forwardRef(() => CwAutocomplete) },
   ],
   host: { class: 'hidden' },
@@ -98,7 +97,15 @@ export class CwAutocomplete<T = unknown> implements AutocompleteHost {
   private readonly keyOptions = new WeakMap<CwAutocompleteOption, KeyOption>();
   private chosen: ((option: CwAutocompleteOption) => void) | null = null;
 
-  protected readonly overlay = inject(AutocompletePanel);
+  protected readonly overlay = inject(ɵConnectedPanel);
+  private readonly stack = inject(ɵPanelStack);
+  // This panel as the shared panel stack sees it: another panel opened by the user closes it.
+  private readonly stacked: ɵStackedPanel = {
+    close: () => {
+      this.hide();
+    },
+    contains: (node) => this.overlay.contains(node),
+  };
   protected readonly panelClass = PANEL;
   protected readonly emptyClass = EMPTY;
   protected readonly typed = signal('');
@@ -134,6 +141,7 @@ export class CwAutocomplete<T = unknown> implements AutocompleteHost {
     });
     inject(DestroyRef).onDestroy(() => {
       subscription.unsubscribe();
+      this.stack.release(this.stacked);
       this.overlay.dispose();
     });
 
@@ -156,6 +164,7 @@ export class CwAutocomplete<T = unknown> implements AutocompleteHost {
   /** @internal Shows the panel against `origin`; `chosen` writes a chosen suggestion into the field. */
   show(origin: HTMLElement, chosen: (option: CwAutocompleteOption) => void): void {
     this.chosen = chosen;
+    this.stack.open(this.stacked, origin);
     if (!this.isOpen()) this.entering.set(true);
     this.isOpen.set(true);
     this.overlay.open({
@@ -173,6 +182,7 @@ export class CwAutocomplete<T = unknown> implements AutocompleteHost {
   hide(): void {
     if (!this.isOpen()) return;
     this.isOpen.set(false);
+    this.stack.release(this.stacked);
     this.overlay.close(this.panelElement()?.nativeElement, () => {
       this.keyManager.updateActiveItem(-1);
       this.active.set(null);

@@ -1,5 +1,4 @@
 import { _IdGenerator } from '@angular/cdk/a11y';
-import { Dialog } from '@angular/cdk/dialog';
 import {
   afterNextRender,
   booleanAttribute,
@@ -7,7 +6,6 @@ import {
   computed,
   contentChild,
   DestroyRef,
-  DOCUMENT,
   effect,
   inject,
   Injector,
@@ -20,7 +18,7 @@ import {
   viewChild,
   ViewContainerRef,
 } from '@angular/core';
-import { ɵFOCUS_INSET } from '@cadenway/ui/core';
+import { ɵFOCUS_INSET, ɵModalOverlay } from '@cadenway/ui/core';
 import { CwInput } from '@cadenway/ui/input';
 
 import { CwAlertDialogDescription } from './alert-dialog-description/alert-dialog-description.directive';
@@ -31,7 +29,6 @@ import type {
   CwAlertDialogSize,
   CwAlertDialogVariant,
 } from './alert-dialog.types';
-import { ModalOverlay } from './modal-overlay';
 
 /* Literal class strings (Alert Dialog sheet and preview of the Design System artifact, mockup
    `App.dc.html` for the item list and the typed confirmation), so Tailwind finds them in the
@@ -83,7 +80,7 @@ const ITEMS = `flex max-h-36 flex-col gap-0.5 overflow-y-auto rounded-lg bg-mute
 @Component({
   selector: 'cw-alert-dialog',
   imports: [CwInput],
-  providers: [{ provide: CW_ALERT_DIALOG, useExisting: CwAlertDialog }],
+  providers: [ɵModalOverlay, { provide: CW_ALERT_DIALOG, useExisting: CwAlertDialog }],
   templateUrl: './alert-dialog.component.html',
 })
 export class CwAlertDialog implements CwAlertDialogContext {
@@ -139,7 +136,7 @@ export class CwAlertDialog implements CwAlertDialogContext {
   private readonly description = contentChild(CwAlertDialogDescription, { descendants: true });
   private readonly viewContainerRef = inject(ViewContainerRef);
   private readonly injector = inject(Injector);
-  private readonly overlay = new ModalOverlay(inject(Dialog), inject(DOCUMENT), this.injector);
+  private readonly overlay = inject(ɵModalOverlay);
   private origin: HTMLElement | null = null;
   private keyboardClose = false;
 

@@ -22,13 +22,21 @@ import {
 import { ActiveDescendantKeyManager, type Highlightable, _IdGenerator } from '@angular/cdk/a11y';
 import { type ControlValueAccessor, NgControl } from '@angular/forms';
 import type { FormValueControl } from '@angular/forms/signals';
-import { CwRipple, CwSwap, ɵFOCUS_FIELD, ɵnavigateList } from '@cadenway/ui/core';
+import {
+  CwRipple,
+  CwSwap,
+  ɵConnectedPanel,
+  ɵFOCUS_FIELD,
+  ɵfold,
+  ɵnavigateList,
+  ɵPanelStack,
+  type ɵStackedPanel,
+} from '@cadenway/ui/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorCaretDownBold } from '@ng-icons/phosphor-icons/bold';
 
 import { CwSelectEmpty } from './select-empty/select-empty.component';
 import { CwSelectOption } from './select-option/select-option.component';
-import { SelectPanel } from './select-panel/select-panel.service';
 import { EMPTY } from './select.styles';
 import { SELECT_HOST, type SelectHost } from './select.token';
 import type { CwSelectCompareWith, CwSelectSize } from './select.types';
@@ -72,13 +80,6 @@ function keyOptionOf(option: CwSelectOption): KeyOption {
   };
 }
 
-function fold(text: string): string {
-  return text
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .toLowerCase();
-}
-
 /**
  * A single-choice drop-down list without search, for 3 to 10 known options: status, priority,
  * destination list (Select sheet of the Design System artifact).
@@ -104,7 +105,7 @@ function fold(text: string): string {
   imports: [NgIcon, CwRipple, CwSwap],
   providers: [
     provideIcons({ phosphorCaretDownBold }),
-    SelectPanel,
+    ɵConnectedPanel,
     { provide: SELECT_HOST, useExisting: forwardRef(() => CwSelect) },
   ],
   host: {
@@ -163,7 +164,15 @@ export class CwSelect<T = unknown>
   // (Enter, Space) must not toggle the panel again.
   private keyActed = false;
 
-  protected readonly overlay = inject(SelectPanel);
+  protected readonly overlay = inject(ɵConnectedPanel);
+  private readonly stack = inject(ɵPanelStack);
+  // This select as the shared panel stack sees it: another panel opened by the user closes it.
+  private readonly stacked: ɵStackedPanel = {
+    close: () => {
+      this.hide();
+    },
+    contains: (node) => this.overlay.contains(node),
+  };
   protected readonly listboxId = inject(_IdGenerator).getId('cw-select-listbox-');
   protected readonly listboxLabel = signal<string | null>(null);
   protected readonly emptyClass = EMPTY;
@@ -206,6 +215,7 @@ export class CwSelect<T = unknown>
     inject(DestroyRef).onDestroy(() => {
       subscription.unsubscribe();
       clearTimeout(this.typedTimer);
+      this.stack.release(this.stacked);
       this.overlay.dispose();
     });
 
@@ -351,6 +361,7 @@ export class CwSelect<T = unknown>
 
   private show(): void {
     if (this.isDisabled()) return;
+    this.stack.open(this.stacked, this.trigger().nativeElement);
     this.open.set(true);
     const selected = this.selectedOption();
     if (selected && !selected.disabled()) this.keyManager.setActiveItem(this.keyOptionOf(selected));
@@ -376,6 +387,7 @@ export class CwSelect<T = unknown>
   }
 
   private detach(): void {
+    this.stack.release(this.stacked);
     if (!this.overlay.attached()) return;
     this.overlay.close(this.panelElement()?.nativeElement, () => {
       this.keyManager.updateActiveItem(-1);
@@ -390,7 +402,7 @@ export class CwSelect<T = unknown>
 
   private typeahead(key: string): void {
     clearTimeout(this.typedTimer);
-    this.typed += fold(key);
+    this.typed += ɵfold(key);
     this.typedTimer = setTimeout(() => {
       this.typed = '';
     }, TYPEAHEAD_MS);
@@ -401,7 +413,7 @@ export class CwSelect<T = unknown>
     const offset = this.typed.length === 1 ? 1 : 0;
     for (let step = 0; step < items.length; step++) {
       const item = items[(start + offset + step) % items.length];
-      if (!item.disabled && fold(item.getLabel()).startsWith(this.typed)) {
+      if (!item.disabled && ɵfold(item.getLabel()).startsWith(this.typed)) {
         this.keyManager.setActiveItem(item);
         return;
       }

@@ -5,7 +5,6 @@ import {
   booleanAttribute,
   Component,
   DestroyRef,
-  DOCUMENT,
   effect,
   inject,
   Injector,
@@ -20,7 +19,7 @@ import {
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorMagnifyingGlassBold } from '@ng-icons/phosphor-icons/bold';
 
-import { ɵprefersReducedMotion } from '@cadenway/ui/core';
+import { ɵafterExitAnimation } from '@cadenway/ui/core';
 import { CwSpinner } from '@cadenway/ui/spinner';
 
 import { cwCommandFuzzyFilter } from '../command.constants';
@@ -79,11 +78,10 @@ export class CwCommandDialog implements CommandHost {
   private readonly dialog = inject(Dialog);
   private readonly injector = inject(Injector);
   private readonly viewContainer = inject(ViewContainerRef);
-  private readonly document = inject(DOCUMENT);
   private readonly state = inject(CommandState);
   private readonly palette = viewChild.required<TemplateRef<unknown>>('palette');
   private dialogRef: DialogRef | null = null;
-  private closeTimer: ReturnType<typeof setTimeout> | null = null;
+  private stopClosing: (() => void) | null = null;
 
   protected readonly closing = signal(false);
   protected readonly panelClass = PANEL;
@@ -100,7 +98,7 @@ export class CwCommandDialog implements CommandHost {
     });
 
     inject(DestroyRef).onDestroy(() => {
-      if (this.closeTimer) clearTimeout(this.closeTimer);
+      this.stopClosing?.();
       this.dialogRef?.close();
     });
   }
@@ -117,12 +115,9 @@ export class CwCommandDialog implements CommandHost {
     this.open.update((open) => !open);
   }
 
-  protected onPanelAnimationEnd(event: AnimationEvent): void {
-    if (this.closing() && event.target === event.currentTarget) this.finishClose();
-  }
-
   private show(): void {
-    if (this.closeTimer) clearTimeout(this.closeTimer);
+    this.stopClosing?.();
+    this.stopClosing = null;
     this.closing.set(false);
     if (this.dialogRef) return;
     // Mockup App.dc.html: the palette opens on an empty search.
@@ -178,25 +173,26 @@ export class CwCommandDialog implements CommandHost {
     const dialogRef = this.dialogRef;
     if (!dialogRef || this.closing()) return;
     const panel = dialogRef.overlayRef.overlayElement.querySelector<HTMLElement>('[data-state]');
-    const animation = panel ? getComputedStyle(panel).animationName : '';
-    // Without a running animation (reduced motion, no stylesheet) the palette goes at once.
-    if (!panel || !animation || animation === 'none' || ɵprefersReducedMotion(this.document)) {
-      this.finishClose();
-      return;
-    }
+    // The panel pops out and the veil fades out. Without an animation (reduced motion, no
+    // stylesheet) the palette goes at once: the closing state is never rendered.
     this.closing.set(true);
+    this.stopClosing = ɵafterExitAnimation(
+      panel,
+      () => {
+        this.finishClose();
+      },
+      // Longest exit of the tokens (`pop-out`, `fade-out`: 180 ms) plus a margin.
+      { fallback: 300 },
+    );
+    if (this.dialogRef !== dialogRef) return;
     const backdrop = dialogRef.overlayRef.backdropElement;
     backdrop?.classList.remove('animate-fade-in');
     backdrop?.classList.add(BACKDROP_OUT);
-    // Safety net if `animationend` never comes.
-    this.closeTimer = setTimeout(() => {
-      this.finishClose();
-    }, 300);
   }
 
   private finishClose(): void {
-    if (this.closeTimer) clearTimeout(this.closeTimer);
-    this.closeTimer = null;
+    this.stopClosing?.();
+    this.stopClosing = null;
     this.dialogRef?.close();
   }
 }

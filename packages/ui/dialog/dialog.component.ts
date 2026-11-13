@@ -1,15 +1,12 @@
 import { _IdGenerator } from '@angular/cdk/a11y';
-import { Dialog } from '@angular/cdk/dialog';
 import {
   booleanAttribute,
   Component,
   computed,
   contentChild,
   DestroyRef,
-  DOCUMENT,
   effect,
   inject,
-  Injector,
   input,
   model,
   output,
@@ -20,14 +17,13 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { CwButton } from '@cadenway/ui/button';
-import { ɵFOCUS_INSET } from '@cadenway/ui/core';
+import { ɵFOCUS_INSET, ɵModalOverlay } from '@cadenway/ui/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorXBold } from '@ng-icons/phosphor-icons/bold';
 
 import { CwDialogDescription } from './dialog-description/dialog-description.directive';
 import { CW_DIALOG, type CwDialogContext } from './dialog.token';
 import type { CwDialogCloseReason, CwDialogSize } from './dialog.types';
-import { ModalOverlay } from './modal-overlay';
 
 /* Literal class strings (Dialog sheet and preview of the Design System artifact), so Tailwind finds
    them in the compiled package. Under 768 px every size fills the screen (integration guide,
@@ -79,7 +75,11 @@ const BODIES = {
 @Component({
   selector: 'cw-dialog',
   imports: [CwButton, NgIcon],
-  providers: [provideIcons({ phosphorXBold }), { provide: CW_DIALOG, useExisting: CwDialog }],
+  providers: [
+    provideIcons({ phosphorXBold }),
+    ɵModalOverlay,
+    { provide: CW_DIALOG, useExisting: CwDialog },
+  ],
   templateUrl: './dialog.component.html',
 })
 export class CwDialog implements CwDialogContext {
@@ -120,7 +120,7 @@ export class CwDialog implements CwDialogContext {
   private readonly template = viewChild.required<TemplateRef<unknown>>('panel');
   private readonly description = contentChild(CwDialogDescription, { descendants: true });
   private readonly viewContainerRef = inject(ViewContainerRef);
-  private readonly overlay = new ModalOverlay(inject(Dialog), inject(DOCUMENT), inject(Injector));
+  private readonly overlay = inject(ɵModalOverlay);
   private reason: CwDialogCloseReason = 'action';
   private origin: HTMLElement | null = null;
 

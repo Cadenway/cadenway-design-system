@@ -15,7 +15,18 @@ import {
   signal,
 } from '@angular/core';
 import { CwAvatar } from '@cadenway/ui/avatar';
-import { ɵnavigateList } from '@cadenway/ui/core';
+import {
+  ɵaddDays,
+  ɵaddMonths,
+  ɵdaysBetween,
+  ɵdaysInMonth,
+  ɵisoWeek,
+  ɵnavigateList,
+  ɵsameDay,
+  ɵstartOfDay,
+  ɵstartOfMonth,
+  ɵstartOfWeek,
+} from '@cadenway/ui/core';
 import { CW_STATUS_LABELS, CwStatusIcon } from '@cadenway/ui/status-icon';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorCalendarPlusBold, phosphorCaretDownBold } from '@ng-icons/phosphor-icons/bold';
@@ -23,21 +34,12 @@ import { phosphorDiamondFill, phosphorWarningCircleFill } from '@ng-icons/phosph
 
 import { CwTimelineBarDef } from './timeline-bar/timeline-bar.directive';
 import {
-  addDays,
-  addMonths,
   dayMonth,
-  daysInMonth,
-  diffDays,
-  firstOfMonth,
-  isoWeek,
   isWeekend,
-  mondayOf,
   monthShort,
   moveText,
   periodText,
   rangeText,
-  sameDay,
-  startOfDay,
   weekdayShort,
   workingDaysBetween,
 } from './timeline.dates';
@@ -249,9 +251,9 @@ function datesOf(item: CwTimelineItem): Dates | null {
   const start = item.start ?? item.end;
   const end = item.end ?? item.start;
   if (!start || !end) return null;
-  const a = startOfDay(start);
-  const b = startOfDay(end);
-  return diffDays(a, b) >= 0 ? { start: a, end: b } : { start: b, end: a };
+  const a = ɵstartOfDay(start);
+  const b = ɵstartOfDay(end);
+  return ɵdaysBetween(a, b) >= 0 ? { start: a, end: b } : { start: b, end: a };
 }
 
 function toneOf(item: CwTimelineItem): Tone {
@@ -271,24 +273,24 @@ function toneOf(item: CwTimelineItem): Tone {
 function rangeFor(scale: CwTimelineScale, anchor: Date): CwTimelineRange {
   switch (scale) {
     case 'day': {
-      const start = mondayOf(anchor);
-      return { start, end: addDays(start, 20) };
+      const start = ɵstartOfWeek(anchor);
+      return { start, end: ɵaddDays(start, 20) };
     }
     case 'week': {
-      const start = addDays(mondayOf(anchor), -14);
-      return { start, end: addDays(start, 12 * 7 - 1) };
+      const start = ɵaddDays(ɵstartOfWeek(anchor), -14);
+      return { start, end: ɵaddDays(start, 12 * 7 - 1) };
     }
     case 'month': {
-      const start = addMonths(firstOfMonth(anchor), -1);
-      return { start, end: addDays(addMonths(start, 6), -1) };
+      const start = ɵaddMonths(ɵstartOfMonth(anchor), -1);
+      return { start, end: ɵaddDays(ɵaddMonths(start, 6), -1) };
     }
   }
 }
 
 /** Shifts a day by one unit of the scale: a day, a week or a month. */
 function shiftByUnit(date: Date, scale: CwTimelineScale, steps: number): Date {
-  if (scale === 'month') return addMonths(date, steps);
-  return addDays(date, scale === 'week' ? steps * 7 : steps);
+  if (scale === 'month') return ɵaddMonths(date, steps);
+  return ɵaddDays(date, scale === 'week' ? steps * 7 : steps);
 }
 
 /** Shifts a range by one page: a week (day scale), four weeks, or a quarter. */
@@ -298,10 +300,10 @@ function shiftByPage(
   steps: number,
 ): CwTimelineRange {
   if (scale === 'month') {
-    return { start: addMonths(range.start, 3 * steps), end: addMonths(range.end, 3 * steps) };
+    return { start: ɵaddMonths(range.start, 3 * steps), end: ɵaddMonths(range.end, 3 * steps) };
   }
   const days = (scale === 'week' ? 28 : 7) * steps;
-  return { start: addDays(range.start, days), end: addDays(range.end, days) };
+  return { start: ɵaddDays(range.start, days), end: ɵaddDays(range.end, days) };
 }
 
 function monthsBetween(from: Date, to: Date): number {
@@ -437,7 +439,7 @@ export class CwTimeline {
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly announcer = inject(LiveAnnouncer);
-  private readonly now = startOfDay(new Date());
+  private readonly now = ɵstartOfDay(new Date());
 
   private readonly drag = signal<Drag | null>(null);
   private readonly activeKey = signal<string | null>(null);
@@ -446,15 +448,15 @@ export class CwTimeline {
 
   protected readonly todayDate = computed(() => {
     const today = this.today();
-    return today ? startOfDay(today) : this.now;
+    return today ? ɵstartOfDay(today) : this.now;
   });
 
   protected readonly effectiveRange = computed<CwTimelineRange>(() => {
     const range = this.range();
     if (!range) return rangeFor(this.scale(), this.todayDate());
-    const start = startOfDay(range.start);
-    const end = startOfDay(range.end);
-    return diffDays(start, end) >= 0 ? { start, end } : { start: end, end: start };
+    const start = ɵstartOfDay(range.start);
+    const end = ɵstartOfDay(range.end);
+    return ɵdaysBetween(start, end) >= 0 ? { start, end } : { start: end, end: start };
   });
 
   protected readonly axis = computed<Axis>(() => {
@@ -493,7 +495,7 @@ export class CwTimeline {
       const before = dates.get(dependency.from);
       const after = dates.get(dependency.to);
       if (!before || !after || found.has(dependency.to)) continue;
-      if (diffDays(after.start, before.end) >= 0) {
+      if (ɵdaysBetween(after.start, before.end) >= 0) {
         found.set(dependency.to, byId.get(dependency.from)?.name ?? dependency.from);
       }
     }
@@ -605,7 +607,8 @@ export class CwTimeline {
       const y1 = from.top + ROW_HEIGHT / 2;
       const x2 = to.bar.x;
       const y2 = to.top + ROW_HEIGHT / 2;
-      const conflict = !!from.dates && !!to.dates && diffDays(to.dates.start, from.dates.end) >= 0;
+      const conflict =
+        !!from.dates && !!to.dates && ɵdaysBetween(to.dates.start, from.dates.end) >= 0;
       return [
         {
           key: `${dependency.from}>${dependency.to}`,
@@ -795,7 +798,7 @@ export class CwTimeline {
   private dayAxis(range: CwTimelineRange, unit: number, today: Date): Axis {
     const weekends = this.showWeekends();
     const columns: Column[] = [];
-    for (let day = range.start; diffDays(day, range.end) >= 0; day = addDays(day, 1)) {
+    for (let day = range.start; ɵdaysBetween(day, range.end) >= 0; day = ɵaddDays(day, 1)) {
       if (!weekends && isWeekend(day)) continue;
       columns.push({
         key: day.toDateString(),
@@ -804,21 +807,21 @@ export class CwTimeline {
         width: unit,
         label: weekdayShort(day),
         sub: String(day.getDate()),
-        today: sameDay(day, today),
+        today: ɵsameDay(day, today),
         weekend: weekends && isWeekend(day),
         separator: columns.length > 0 && day.getDay() === 1,
       });
     }
     const bands: Band[] = [];
     for (const column of columns) {
-      const monday = mondayOf(column.date).toDateString();
+      const monday = ɵstartOfWeek(column.date).toDateString();
       const last = bands.at(-1);
       if (last?.key === monday) {
         bands[bands.length - 1] = {
           ...last,
           width: last.width + column.width,
           sub: periodText(
-            mondayOf(column.date) < range.start ? range.start : mondayOf(column.date),
+            ɵstartOfWeek(column.date) < range.start ? range.start : ɵstartOfWeek(column.date),
             column.date,
           ),
         };
@@ -827,7 +830,7 @@ export class CwTimeline {
           key: monday,
           x: column.x,
           width: column.width,
-          label: TEXTS.week(isoWeek(column.date)),
+          label: TEXTS.week(ɵisoWeek(column.date)),
           sub: periodText(column.date, column.date),
           separator: bands.length > 0,
         });
@@ -835,7 +838,7 @@ export class CwTimeline {
     }
     const start = range.start;
     const xOf = (date: Date): number => {
-      const days = diffDays(start, date);
+      const days = ɵdaysBetween(start, date);
       if (weekends) return days * unit;
       return (
         (days >= 0 ? workingDaysBetween(start, date) : -workingDaysBetween(date, start)) * unit
@@ -854,17 +857,17 @@ export class CwTimeline {
   }
 
   private weekAxis(range: CwTimelineRange, unit: number, today: Date): Axis {
-    const start = mondayOf(range.start);
-    const end = addDays(mondayOf(range.end), 6);
+    const start = ɵstartOfWeek(range.start);
+    const end = ɵaddDays(ɵstartOfWeek(range.end), 6);
     const columns: Column[] = [];
-    for (let monday = start; diffDays(monday, end) >= 0; monday = addDays(monday, 7)) {
-      const offset = diffDays(monday, today);
+    for (let monday = start; ɵdaysBetween(monday, end) >= 0; monday = ɵaddDays(monday, 7)) {
+      const offset = ɵdaysBetween(monday, today);
       columns.push({
         key: monday.toDateString(),
         date: monday,
         x: columns.length * unit,
         width: unit,
-        label: TEXTS.weekShort(isoWeek(monday)),
+        label: TEXTS.weekShort(ɵisoWeek(monday)),
         sub: dayMonth(monday),
         today: offset >= 0 && offset < 7,
         weekend: false,
@@ -872,11 +875,15 @@ export class CwTimeline {
       });
     }
     const width = columns.length * unit;
-    const xOf = (date: Date): number => (diffDays(start, date) / 7) * unit;
+    const xOf = (date: Date): number => (ɵdaysBetween(start, date) / 7) * unit;
     const bands: Band[] = [];
-    for (let month = firstOfMonth(start); diffDays(month, end) >= 0; month = addMonths(month, 1)) {
+    for (
+      let month = ɵstartOfMonth(start);
+      ɵdaysBetween(month, end) >= 0;
+      month = ɵaddMonths(month, 1)
+    ) {
       const x = Math.max(0, xOf(month));
-      const right = Math.min(width, xOf(addMonths(month, 1)));
+      const right = Math.min(width, xOf(ɵaddMonths(month, 1)));
       bands.push({
         key: month.toDateString(),
         x,
@@ -890,10 +897,10 @@ export class CwTimeline {
   }
 
   private monthAxis(range: CwTimelineRange, unit: number, today: Date): Axis {
-    const start = firstOfMonth(range.start);
-    const end = addDays(addMonths(firstOfMonth(range.end), 1), -1);
+    const start = ɵstartOfMonth(range.start);
+    const end = ɵaddDays(ɵaddMonths(ɵstartOfMonth(range.end), 1), -1);
     const columns: Column[] = [];
-    for (let month = start; diffDays(month, end) >= 0; month = addMonths(month, 1)) {
+    for (let month = start; ɵdaysBetween(month, end) >= 0; month = ɵaddMonths(month, 1)) {
       columns.push({
         key: month.toDateString(),
         date: month,
@@ -908,7 +915,7 @@ export class CwTimeline {
     }
     const width = columns.length * unit;
     const xOf = (date: Date): number =>
-      (monthsBetween(start, date) + (date.getDate() - 1) / daysInMonth(date)) * unit;
+      (monthsBetween(start, date) + (date.getDate() - 1) / ɵdaysInMonth(date)) * unit;
     const bands: Band[] = [];
     for (const column of columns) {
       const year = String(column.date.getFullYear());
@@ -938,13 +945,13 @@ export class CwTimeline {
   ): GroupRow {
     const dated = members.map((item) => this.liveDates().get(item.id)).filter((dates) => !!dates);
     const first = group.start
-      ? startOfDay(group.start)
+      ? ɵstartOfDay(group.start)
       : dated
           .map((d) => d.start)
           .sort((a, b) => +a - +b)
           .at(0);
     const last = group.end
-      ? startOfDay(group.end)
+      ? ɵstartOfDay(group.end)
       : dated
           .map((d) => d.end)
           .sort((a, b) => +b - +a)
@@ -959,7 +966,7 @@ export class CwTimeline {
     if (first && last) {
       const axis = this.axis();
       const left = axis.xOf(first);
-      const right = axis.xOf(addDays(last, 1));
+      const right = axis.xOf(ɵaddDays(last, 1));
       const x = Math.max(0, left);
       const end = Math.min(axis.width, right);
       if (end > x) {
@@ -1008,7 +1015,7 @@ export class CwTimeline {
 
   private milestoneRow(mark: CwMilestone, level: 1 | 2, top: number | null): MilestoneRow {
     const axis = this.axis();
-    const date = startOfDay(mark.date);
+    const date = ɵstartOfDay(mark.date);
     const x = axis.xOf(date) + axis.dayWidth / 2;
     const inside = x >= 0 && x <= axis.width;
     return {
@@ -1028,7 +1035,7 @@ export class CwTimeline {
   private span(dates: Dates): { x: number; width: number } | null {
     const axis = this.axis();
     const left = axis.xOf(dates.start);
-    const right = axis.xOf(addDays(dates.end, 1));
+    const right = axis.xOf(ɵaddDays(dates.end, 1));
     const x = Math.max(0, left);
     const end = Math.min(axis.width, right);
     if (end <= 0 || x >= axis.width) return null;
@@ -1048,8 +1055,8 @@ export class CwTimeline {
     const today = this.todayDate();
     const progress = clampProgress(item.progress);
     const lateDays =
-      (item.late ?? (diffDays(dates.end, today) > 0 && progress < 100))
-        ? Math.max(1, diffDays(dates.end, today))
+      (item.late ?? (ɵdaysBetween(dates.end, today) > 0 && progress < 100))
+        ? Math.max(1, ɵdaysBetween(dates.end, today))
         : 0;
     const predecessor = this.conflicts().get(item.id) ?? null;
     const tone = toneOf(item);
@@ -1101,15 +1108,15 @@ export class CwTimeline {
     const { delta } = drag;
     switch (drag.mode) {
       case 'start': {
-        const start = addDays(dates.start, delta);
-        return { start: diffDays(start, dates.end) >= 0 ? start : dates.end, end: dates.end };
+        const start = ɵaddDays(dates.start, delta);
+        return { start: ɵdaysBetween(start, dates.end) >= 0 ? start : dates.end, end: dates.end };
       }
       case 'end': {
-        const end = addDays(dates.end, delta);
-        return { start: dates.start, end: diffDays(dates.start, end) >= 0 ? end : dates.start };
+        const end = ɵaddDays(dates.end, delta);
+        return { start: dates.start, end: ɵdaysBetween(dates.start, end) >= 0 ? end : dates.start };
       }
       case 'move':
-        return { start: addDays(dates.start, delta), end: addDays(dates.end, delta) };
+        return { start: ɵaddDays(dates.start, delta), end: ɵaddDays(dates.end, delta) };
       case 'link':
         return dates;
     }
@@ -1122,7 +1129,7 @@ export class CwTimeline {
         axis.columns[Math.max(0, Math.min(axis.columns.length - 1, Math.floor(x / axis.dayWidth)))];
       return column.date;
     }
-    return addDays(axis.start, Math.max(0, Math.floor(x / axis.dayWidth)));
+    return ɵaddDays(axis.start, Math.max(0, Math.floor(x / axis.dayWidth)));
   }
 
   private keyOf(target: EventTarget | null): string | null {
@@ -1224,10 +1231,10 @@ export class CwTimeline {
     let next: Dates;
     if (event.shiftKey) {
       const end = shiftByUnit(own.end, scale, step);
-      next = { start: own.start, end: diffDays(own.start, end) >= 0 ? end : own.start };
+      next = { start: own.start, end: ɵdaysBetween(own.start, end) >= 0 ? end : own.start };
     } else if (event.altKey) {
       const start = shiftByUnit(own.start, scale, step);
-      next = { start: diffDays(start, own.end) >= 0 ? start : own.end, end: own.end };
+      next = { start: ɵdaysBetween(start, own.end) >= 0 ? start : own.end, end: own.end };
     } else {
       next = { start: shiftByUnit(own.start, scale, step), end: shiftByUnit(own.end, scale, step) };
     }
@@ -1248,7 +1255,8 @@ export class CwTimeline {
   private commit(changes: readonly { item: CwTimelineItem; own: Dates; next: Dates }[]): void {
     const moved = changes.filter(
       (change) =>
-        !sameDay(change.own.start, change.next.start) || !sameDay(change.own.end, change.next.end),
+        !ɵsameDay(change.own.start, change.next.start) ||
+        !ɵsameDay(change.own.end, change.next.end),
     );
     if (moved.length === 0) return;
     const before = new Map<string, Dates>();
@@ -1278,7 +1286,7 @@ export class CwTimeline {
       const overlap = (dates: Map<string, Dates>): number => {
         const from = dates.get(dependency.from);
         const to = dates.get(dependency.to);
-        return from && to ? diffDays(to.start, from.end) + 1 : 0;
+        return from && to ? ɵdaysBetween(to.start, from.end) + 1 : 0;
       };
       const overlapDays = overlap(after);
       if (overlapDays > 0 && overlap(before) <= 0) {
@@ -1309,7 +1317,7 @@ export class CwTimeline {
     const current = this.scale();
     if (scale !== current) {
       const range = this.effectiveRange();
-      const middle = addDays(range.start, Math.floor(diffDays(range.start, range.end) / 2));
+      const middle = ɵaddDays(range.start, Math.floor(ɵdaysBetween(range.start, range.end) / 2));
       this.scale.set(scale);
       this.zoom.set(zoom);
       // Keep the middle of the period in view when the scale changes (mockup `App.dc.html`, `go`).

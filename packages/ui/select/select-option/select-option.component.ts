@@ -3,8 +3,10 @@ import { _IdGenerator } from '@angular/cdk/a11y';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorCheckBold } from '@ng-icons/phosphor-icons/bold';
 
+import { ɵenterDelay } from '@cadenway/ui/core';
+
 import { SELECT_HOST } from '../select.token';
-import { OPTION, OPTION_ENTER, enterDelay } from '../select.styles';
+import { OPTION, OPTION_ENTER } from '../select.styles';
 
 /**
  * A choice of a `cw-select`: a glyph and a word (« En cours »), with the check on the right when it
@@ -50,7 +52,7 @@ export class CwSelectOption<T = unknown> {
   protected readonly selected = computed(() => this.host.isSelected(this.value()));
   protected readonly highlighted = computed(() => this.host.highlighted() === this);
   protected readonly delay = computed(() =>
-    enterDelay(this.host.options().indexOf(this as CwSelectOption)),
+    ɵenterDelay(this.host.options().indexOf(this as CwSelectOption)),
   );
 
   /** @internal The text of the option, for the typeahead and the label animation. */
