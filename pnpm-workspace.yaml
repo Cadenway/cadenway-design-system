@@ -4,6 +4,13 @@ packages:
   - 'packages/*'
   - 'apps/*'
 
+# Supply chain. A version is installable two days (2880 minutes) after its publication, which leaves
+# time for a compromised release to be reported and unpublished; this also binds a `pnpm add` run
+# by an agent. `no-downgrade` refuses a version whose publication evidence (trusted publisher,
+# provenance) is weaker than that of an earlier version of the same package.
+minimumReleaseAge: 2880
+trustPolicy: no-downgrade
+
 # Versions shared by the root tooling, the packages and the Storybook application: one line to
 # change, so two packages never compile against two Angular or Vitest lines.
 #
@@ -11,22 +18,43 @@ packages:
 # of a spec from there: what a library imports is therefore also a root devDependency, through
 # this catalog.
 catalog:
+  # @angular/aria pins @angular/cdk to its own exact version: the two move together.
+  '@angular/aria': ^22.2.0
   '@angular/build': ^22.2.0
+  '@angular/cdk': ^22.2.0
   '@angular/cli': ^22.2.0
   '@angular/common': ^22.2.0
   '@angular/compiler': ^22.2.0
   '@angular/compiler-cli': ^22.2.0
   '@angular/core': ^22.2.0
+  '@angular/forms': ^22.2.0
   '@angular/platform-browser': ^22.2.0
+  # Required peer of @tiptap/suggestion.
+  '@floating-ui/dom': ^1.8.0
+  '@fontsource-variable/geist-mono': ^5.3.0
+  '@fontsource-variable/inter': ^5.3.0
   '@ng-icons/core': ^36.0.0
+  '@ng-icons/flag-icons': ^36.1.0
   '@ng-icons/phosphor-icons': ^36.0.0
+  '@ng-icons/svgl': ^36.1.0
   '@storybook/addon-a11y': ^10.6.0
   '@storybook/addon-docs': ^10.6.0
   '@storybook/addon-vitest': ^10.6.0
   '@storybook/angular-vite': ^10.6.0
+  # The Tiptap packages pin each other to one exact version: one range, one Renovate group.
+  '@tiptap/core': ^3.33.1
+  '@tiptap/extension-list': ^3.33.1
+  '@tiptap/extensions': ^3.33.1
+  '@tiptap/markdown': ^3.33.1
+  '@tiptap/pm': ^3.33.1
+  '@tiptap/starter-kit': ^3.33.1
+  '@tiptap/suggestion': ^3.33.1
   '@vitest/browser': ^5.1.0
   '@vitest/browser-playwright': ^5.1.0
   '@vitest/coverage-v8': ^5.1.0
+  # One major ahead of the `marked` that @tiptap/markdown depends on (^17.0.1): pnpm installs both
+  # until Tiptap moves. The editor is given this instance, so one grammar parses everything.
+  marked: ^18.2.0
   rxjs: ~7.8.0
   storybook: ^10.6.0
   tslib: ^2.8.0

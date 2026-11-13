@@ -22,6 +22,10 @@
     "./fonts/*": "./fonts/*",
     "./package.json": "./package.json"
   },
+  "devDependencies": {
+    "@fontsource-variable/geist-mono": "catalog:",
+    "@fontsource-variable/inter": "catalog:"
+  },
   "sideEffects": [
     "*.css"
   ]

@@ -3,5 +3,16 @@
   "dest": "dist",
   "lib": {
     "entryFile": "src/public-api.ts"
-  }
+  },
+  "allowedNonPeerDependencies": [
+    "@floating-ui/dom",
+    "@tiptap/core",
+    "@tiptap/pm",
+    "@tiptap/starter-kit",
+    "@tiptap/extension-list",
+    "@tiptap/extensions",
+    "@tiptap/suggestion",
+    "@tiptap/markdown",
+    "marked"
+  ]
 }

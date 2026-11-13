@@ -18,7 +18,9 @@
     "@ng-icons/core": "^36.0.0"
   },
   "dependencies": {
+    "@ng-icons/flag-icons": "^36.1.0",
     "@ng-icons/phosphor-icons": "^36.0.0",
+    "@ng-icons/svgl": "^36.1.0",
     "tslib": "^2.8.0"
   },
   "devDependencies": {

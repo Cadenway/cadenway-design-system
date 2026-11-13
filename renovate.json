@@ -16,6 +16,16 @@
       "minimumReleaseAge": null
     },
     {
+      "description": "The Tiptap packages pin each other to one exact version: they are updated together.",
+      "matchPackageNames": ["@tiptap/**"],
+      "groupName": "tiptap"
+    },
+    {
+      "description": "@angular/aria requires @angular/cdk at its own exact version: they are updated together.",
+      "matchPackageNames": ["@angular/cdk", "@angular/aria"],
+      "groupName": "angular cdk and aria"
+    },
+    {
       "description": "TypeScript stays on 6.0 until Angular (compiler-cli, build, ng-packagr) accepts a newer line.",
       "matchPackageNames": ["typescript"],
       "allowedVersions": "<6.1.0"
