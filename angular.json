@@ -36,7 +36,7 @@
     "ui": {
       "projectType": "library",
       "root": "packages/ui",
-      "sourceRoot": "packages/ui/src",
+      "sourceRoot": "packages/ui",
       "prefix": "cw",
       "architect": {
         "build": {
