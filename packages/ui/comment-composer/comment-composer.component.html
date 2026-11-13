@@ -1,0 +1,260 @@
+<div class="flex min-w-0 items-start gap-2.5">
+  @if (author(); as person) {
+    <cw-avatar class="mt-1 shrink-0" size="sm" [name]="person.name" [src]="person.src ?? null" />
+  }
+  <!-- The frame only listens: focus, Échap, pasted and dropped files bubble up from the text and
+       the buttons inside it. -->
+  <!-- eslint-disable-next-line @angular-eslint/template/interactive-supports-focus -->
+  <div
+    #frame
+    [class]="layout()"
+    (focusin)="onFocusIn($event)"
+    (focusout)="onFocusOut($event)"
+    (keydown)="onKeydown($event)"
+    (paste)="onPaste($event)"
+    (dragover)="onDragOver($event)"
+    (drop)="onDrop($event)"
+  >
+    @if (isDisabled()) {
+      <span class="flex min-w-0 flex-1 items-center gap-1.5 px-3 text-sm text-muted-foreground">
+        <ng-icon
+          name="phosphorLockSimpleBold"
+          class="shrink-0"
+          size="0.875rem"
+          aria-hidden="true"
+        />
+        <span class="truncate">{{ disabledText() }}</span>
+      </span>
+    } @else {
+      <cw-block-editor
+        [class]="expanded() ? 'w-full' : 'min-w-0 flex-1 basis-0'"
+        [variant]="expanded() ? 'field' : 'line'"
+        [toolbar]="false"
+        [ariaLabel]="text().editor"
+        [placeholder]="placeholder()"
+        [blockTypes]="commands()"
+        [mentionSearch]="mentionSearch()"
+        [describedBy]="error() ? errorId : null"
+        [invalid]="error() !== null"
+        [touched]="error() !== null"
+        [(value)]="value"
+        (valueChange)="onValueChange($event)"
+        (ctrlEnter)="send()"
+        (touch)="onEditorTouched()"
+      />
+      @if (!expanded()) {
+        <span class="flex shrink-0 items-center gap-0.5 pr-1">
+          <button
+            cwButton
+            variant="ghost"
+            size="icon-sm"
+            [class]="toolStyle"
+            [attr.aria-label]="text().attach"
+            (click)="chooseFiles()"
+          >
+            <ng-icon name="phosphorPaperclipBold" aria-hidden="true" />
+          </button>
+          <button
+            cwButton
+            variant="ghost"
+            size="icon-sm"
+            [class]="toolStyle"
+            [attr.aria-label]="text().send"
+            [disabled]="!canSubmit()"
+            [loading]="sending()"
+            (click)="send()"
+          >
+            <ng-icon name="phosphorPaperPlaneTiltBold" aria-hidden="true" />
+          </button>
+        </span>
+      } @else {
+        @if (attachments().length > 0) {
+          <div class="flex flex-wrap gap-1.5 px-3 pb-2">
+            @for (file of attachments(); track file.id) {
+              <cw-attachment
+                size="sm"
+                [name]="file.name"
+                [mimeType]="file.mimeType ?? ''"
+                [fileSize]="file.fileSize ?? null"
+                [state]="file.state"
+                [progress]="file.progress ?? 0"
+                [href]="file.href ?? ''"
+                [error]="file.error ?? ''"
+                (remove)="removeAttachment(file.id)"
+                (cancel)="removeAttachment(file.id)"
+                (retry)="attachmentRetry.emit(file.id)"
+              />
+            }
+          </div>
+        }
+        <div class="flex items-center gap-2 px-1.5 pb-1.5">
+          <cw-toolbar size="sm" [ariaLabel]="text().toolbar" [overflowLabel]="text().formatting">
+            <button
+              cwButton
+              cwToolbarItem
+              variant="ghost"
+              size="icon-sm"
+              overflowIcon="phosphorTextBBold"
+              [class]="toolStyle"
+              [attr.aria-label]="text().bold"
+              [attr.aria-pressed]="markActive('bold')"
+              (mousedown)="$event.preventDefault()"
+              (click)="toggleMark('bold')"
+            >
+              <ng-icon name="phosphorTextBBold" aria-hidden="true" />
+            </button>
+            <button
+              cwButton
+              cwToolbarItem
+              variant="ghost"
+              size="icon-sm"
+              overflowIcon="phosphorTextItalicBold"
+              [class]="toolStyle"
+              [attr.aria-label]="text().italic"
+              [attr.aria-pressed]="markActive('italic')"
+              (mousedown)="$event.preventDefault()"
+              (click)="toggleMark('italic')"
+            >
+              <ng-icon name="phosphorTextItalicBold" aria-hidden="true" />
+            </button>
+            @if (variant() === 'full') {
+              <button
+                cwButton
+                cwToolbarItem
+                variant="ghost"
+                size="icon-sm"
+                overflowIcon="phosphorLinkSimpleBold"
+                aria-haspopup="dialog"
+                [class]="toolStyle"
+                [attr.aria-label]="text().link"
+                [attr.aria-pressed]="linkActive()"
+                (mousedown)="$event.preventDefault()"
+                (click)="openLink()"
+              >
+                <ng-icon name="phosphorLinkSimpleBold" aria-hidden="true" />
+              </button>
+              <button
+                cwButton
+                cwToolbarItem
+                variant="ghost"
+                size="icon-sm"
+                overflowIcon="phosphorListBulletsBold"
+                [class]="toolStyle"
+                [attr.aria-label]="text().bulletList"
+                [attr.aria-pressed]="bulletActive()"
+                (mousedown)="$event.preventDefault()"
+                (click)="toggleBulletList()"
+              >
+                <ng-icon name="phosphorListBulletsBold" aria-hidden="true" />
+              </button>
+              <button
+                cwButton
+                cwToolbarItem
+                variant="ghost"
+                size="icon-sm"
+                overflowIcon="phosphorCodeBold"
+                [class]="toolStyle"
+                [attr.aria-label]="text().code"
+                [attr.aria-pressed]="markActive('code')"
+                (mousedown)="$event.preventDefault()"
+                (click)="toggleMark('code')"
+              >
+                <ng-icon name="phosphorCodeBold" aria-hidden="true" />
+              </button>
+            }
+            <cw-toolbar-separator />
+            @if (mentionSearch()) {
+              <button
+                cwButton
+                cwToolbarItem
+                pinned
+                variant="ghost"
+                size="icon-sm"
+                [class]="toolStyle"
+                [attr.aria-label]="text().mention"
+                (mousedown)="$event.preventDefault()"
+                (click)="mention()"
+              >
+                <ng-icon name="phosphorAtBold" aria-hidden="true" />
+              </button>
+            }
+            <button
+              cwButton
+              cwToolbarItem
+              pinned
+              variant="ghost"
+              size="icon-sm"
+              [class]="toolStyle"
+              [attr.aria-label]="text().attach"
+              (click)="chooseFiles()"
+            >
+              <ng-icon name="phosphorPaperclipBold" aria-hidden="true" />
+            </button>
+          </cw-toolbar>
+          <span class="ml-auto flex shrink-0 items-center gap-2">
+            @if (mode() === 'edit') {
+              <button cwButton variant="ghost" size="sm" (click)="cancel.emit()">
+                {{ text().cancel }}
+              </button>
+              <button
+                cwButton
+                size="sm"
+                [disabled]="!canSubmit()"
+                [loading]="sending()"
+                (click)="send()"
+              >
+                {{ text().save }}
+              </button>
+            } @else {
+              @if (variant() === 'full') {
+                <p
+                  class="hidden flex-wrap items-center gap-0.5 text-xs text-muted-foreground @min-[420px]:flex"
+                >
+                  @for (key of text().sendKeys; track key) {
+                    <kbd cwKbd>{{ key }}</kbd>
+                  }
+                </p>
+              }
+              <button
+                cwButton
+                size="sm"
+                [disabled]="!canSubmit()"
+                [loading]="sending()"
+                (click)="send()"
+              >
+                <ng-icon name="phosphorPaperPlaneTiltBold" aria-hidden="true" />
+                {{ text().send }}
+              </button>
+            }
+          </span>
+        </div>
+      }
+    }
+  </div>
+</div>
+
+@if (error(); as message) {
+  <div class="mt-1.5 flex flex-wrap items-center gap-x-2" [class.pl-8.5]="author() !== null">
+    <p
+      [id]="errorId"
+      role="alert"
+      class="flex items-start gap-1 text-xs font-medium text-destructive"
+    >
+      <span class="flex h-4 shrink-0 items-center">
+        <ng-icon name="phosphorWarningCircleFill" size="0.875rem" aria-hidden="true" />
+      </span>
+      <span>{{ message }}</span>
+    </p>
+    <button cwButton variant="link" size="xs" (click)="retry.emit()">{{ text().retry }}</button>
+  </div>
+}
+
+<input
+  #fileInput
+  type="file"
+  multiple
+  tabindex="-1"
+  aria-hidden="true"
+  class="sr-only"
+  (change)="onFilesChosen($event)"
+/>
