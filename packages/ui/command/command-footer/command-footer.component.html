@@ -1,0 +1,9 @@
+<ng-content>
+  <span class="flex items-center gap-1.5">
+    <kbd cwKbd>↑</kbd><kbd cwKbd>↓</kbd>{{ navigateLabel() }}
+  </span>
+  <span class="flex items-center gap-1.5"><kbd cwKbd>Entrée</kbd>{{ runLabel() }}</span>
+  @if (closeLabel()) {
+    <span class="ml-auto flex items-center gap-1.5"><kbd cwKbd>Échap</kbd>{{ closeLabel() }}</span>
+  }
+</ng-content>

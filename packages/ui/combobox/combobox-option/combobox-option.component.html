@@ -1,0 +1,10 @@
+<span class="flex min-w-0 items-center gap-2 truncate" data-cw-combobox-label><ng-content /></span>
+@if (disabled()) {
+  <span class="ml-auto flex items-center gap-2 pl-2 text-xs text-muted-foreground">{{
+    disabledLabel()
+  }}</span>
+} @else if (selected()) {
+  <span class="ml-auto flex items-center gap-2 pl-2" aria-hidden="true">
+    <ng-icon name="phosphorCheckBold" />
+  </span>
+}

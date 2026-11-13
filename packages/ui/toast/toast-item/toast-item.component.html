@@ -1,0 +1,28 @@
+@if (toast().tone === 'loading') {
+  <span class="mt-0.5 flex text-muted-foreground"><svg cwSpinner></svg></span>
+} @else if (icon(); as name) {
+  <ng-icon [name]="name" [class]="iconClasses()" size="1rem" aria-hidden="true" />
+}
+<div class="flex min-w-0 flex-1 flex-col gap-0.5">
+  <div class="truncate leading-5 font-medium">{{ toast().title }}</div>
+  @if (toast().description; as description) {
+    <div class="truncate leading-5 text-muted-foreground">{{ description }}</div>
+  }
+</div>
+@if (toast().action; as action) {
+  <div class="flex shrink-0 items-center gap-1.5 self-center">
+    <button cwButton variant="outline" size="xs" (click)="acted.emit()">{{ action.label }}</button>
+  </div>
+}
+@if (closable()) {
+  <button
+    cwButton
+    variant="ghost"
+    size="icon-xs"
+    class="-my-0.5 -mr-1.5 text-muted-foreground hover:text-foreground"
+    [attr.aria-label]="closeLabel()"
+    (click)="dismissed.emit()"
+  >
+    <ng-icon name="phosphorXBold" aria-hidden="true" />
+  </button>
+}

@@ -1,0 +1,8 @@
+@for (part of parts(); track $index) {
+  @if (part.match) {
+    <mark class="bg-transparent font-semibold text-foreground">{{ part.text }}</mark>
+  } @else {
+    <!-- A bare text node: a wrapping element would let the accessible name drop edge spaces. -->
+    <ng-container>{{ part.text }}</ng-container>
+  }
+}

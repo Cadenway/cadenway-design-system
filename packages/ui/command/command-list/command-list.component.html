@@ -1,0 +1,10 @@
+<div
+  role="listbox"
+  [id]="state.listId"
+  [attr.aria-label]="ariaLabel()"
+  [class]="state.entrance() ? entranceClass : ''"
+>
+  <ng-content />
+</div>
+<ng-content select="cw-command-loading" />
+<ng-content select="cw-command-empty" />

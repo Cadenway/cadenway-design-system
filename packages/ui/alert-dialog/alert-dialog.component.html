@@ -1,0 +1,48 @@
+<ng-template #panel>
+  <div
+    [class]="panelClasses()"
+    [attr.data-state]="state()"
+    [attr.data-variant]="variant()"
+    [attr.data-size]="size()"
+    [attr.aria-busy]="pending() ? 'true' : null"
+  >
+    <ng-content select="cw-alert-dialog-media" />
+    <div [class]="headerClasses()">
+      <ng-content select="[cwAlertDialogTitle]" />
+      <ng-content select="[cwAlertDialogDescription]" />
+    </div>
+    <ng-content />
+    @if (items().length > 1) {
+      <ul [class]="itemsClasses" tabindex="0">
+        @for (item of shownItems(); track $index) {
+          <li class="truncate">{{ item }}</li>
+        }
+        @if (moreCount() > 0) {
+          <li class="text-xs text-muted-foreground">{{ moreLabel()(moreCount()) }}</li>
+        }
+      </ul>
+    }
+    @if (confirmText()) {
+      <div class="flex flex-col gap-2 text-start">
+        <label class="text-sm" [for]="inputId">
+          {{ confirmLabel() }} <span class="font-semibold select-all">{{ confirmText() }}</span>
+        </label>
+        <input
+          cwInput
+          type="text"
+          autocomplete="off"
+          spellcheck="false"
+          [id]="inputId"
+          [value]="typed()"
+          [attr.aria-invalid]="mismatch() ? 'true' : null"
+          (input)="onType($event)"
+          (keydown.enter)="onEnter($event)"
+        />
+      </div>
+    }
+    <div [class]="footerClasses()">
+      <ng-content select="[cwAlertDialogCancel]" />
+      <ng-content select="[cwAlertDialogAction]" />
+    </div>
+  </div>
+</ng-template>

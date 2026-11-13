@@ -1,0 +1,15 @@
+@if (arrow()) {
+  <span aria-hidden="true" [class]="arrowClasses()"></span>
+}
+@if (text(); as text) {
+  {{ text }}
+} @else if (template(); as template) {
+  <ng-container [ngTemplateOutlet]="template" />
+}
+@if (shortcut()?.length) {
+  <span class="ml-2 inline-flex items-center gap-0.5 align-middle">
+    @for (key of shortcut(); track $index) {
+      <kbd cwKbd variant="inverse" size="sm">{{ key }}</kbd>
+    }
+  </span>
+}

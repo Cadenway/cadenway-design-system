@@ -1,0 +1,18 @@
+@if (inline()) {
+  <ng-container [ngTemplateOutlet]="panel" />
+}
+<ng-template #panel>
+  <div
+    #panelElement
+    role="menu"
+    [id]="panelId"
+    [attr.aria-label]="ariaLabel() || null"
+    [attr.aria-labelledby]="labelledBy()"
+    [attr.tabindex]="inline() ? 0 : -1"
+    [class]="panelClasses"
+    (keydown)="onKeydown($event)"
+    (contextmenu)="$event.preventDefault()"
+  >
+    <ng-content />
+  </div>
+</ng-template>

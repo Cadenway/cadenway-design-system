@@ -1,0 +1,27 @@
+<ng-template #panelTemplate>
+  <div
+    #panel
+    [class]="panelClass"
+    [style.min-width.px]="overlay.originWidth()"
+    [attr.data-state]="overlay.closing() ? 'closed' : 'open'"
+    (mousedown)="$event.preventDefault()"
+  >
+    @if (loading()) {
+      <div class="flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground">
+        <svg cwSpinner></svg>{{ loadingText() }}
+      </div>
+    } @else if (options().length === 0) {
+      <div [class]="emptyClass">{{ emptyText()(typed()) }}</div>
+    }
+    <div
+      role="listbox"
+      class="block"
+      [hidden]="loading() || options().length === 0"
+      [id]="listboxId"
+      [attr.aria-label]="ariaLabel()"
+      [attr.aria-busy]="loading() ? 'true' : null"
+    >
+      <ng-content />
+    </div>
+  </div>
+</ng-template>
