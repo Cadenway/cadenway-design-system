@@ -13,7 +13,7 @@ import {
 } from '@storybook/angular-vite';
 import { expect, userEvent, within } from 'storybook/test';
 
-import { CwButton } from './button';
+import { CwButton } from './button.component';
 
 /**
  * Button, every state of its sheet in the Design System artifact; each story renders in the light

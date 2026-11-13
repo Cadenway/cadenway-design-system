@@ -1,0 +1,7 @@
+<ng-content />
+@if (overflow().length > 0) {
+  <span [class]="moreClasses()" [attr.title]="hiddenNames()">
+    <span aria-hidden="true">+{{ overflow().length }}</span>
+    <span class="sr-only">{{ othersPrefix() }} {{ hiddenNames() }}</span>
+  </span>
+}

@@ -4,6 +4,7 @@
  * Explicit named exports only (.claude/rules/public-api.md).
  */
 
-export { CwLoadingOverlay } from './loading-overlay';
-export { CwSpinner, CwSpinnerIndicator } from './spinner';
-export type { CwSpinnerSize } from './spinner';
+export { CwLoadingOverlay } from './loading-overlay.directive';
+export { CwSpinner } from './spinner.component';
+export { CwSpinnerIndicator } from './spinner-indicator.component';
+export type { CwSpinnerSize } from './spinner.types';

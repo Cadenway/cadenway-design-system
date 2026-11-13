@@ -1,0 +1,26 @@
+<ng-content />
+<input
+  #field
+  type="text"
+  autocomplete="one-time-code"
+  spellcheck="false"
+  [id]="id()"
+  [value]="value()"
+  [attr.inputmode]="charset() === 'digits' ? 'numeric' : 'text'"
+  [attr.autocapitalize]="charset() === 'digits' ? null : 'characters'"
+  [attr.maxlength]="length()"
+  [attr.aria-label]="ariaLabel() || null"
+  [attr.aria-describedby]="ariaDescribedBy() || null"
+  [attr.aria-invalid]="showInvalid() ? 'true' : null"
+  [attr.aria-required]="required() ? 'true' : null"
+  [disabled]="isDisabled()"
+  (beforeinput)="onBeforeInput($event)"
+  (input)="onInput()"
+  (paste)="onPaste($event)"
+  (focus)="onFocus()"
+  (mouseup)="toEnd()"
+  (keyup)="syncCaret()"
+  (select)="syncCaret()"
+  (blur)="onBlur()"
+  class="absolute inset-0 z-20 size-full cursor-text border-0 bg-transparent p-0 opacity-0 outline-hidden disabled:cursor-not-allowed"
+/>

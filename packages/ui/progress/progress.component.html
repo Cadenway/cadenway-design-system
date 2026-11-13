@@ -1,0 +1,5 @@
+@if (state() === 'indeterminate') {
+  <span [class]="indeterminateClasses()"></span>
+} @else {
+  <span [class]="determinateClasses()" [style.width.%]="percent()"></span>
+}

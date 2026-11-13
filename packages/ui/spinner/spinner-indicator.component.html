@@ -1,0 +1,6 @@
+@if (visible()) {
+  <svg cwSpinner [size]="size()" [label]="showLabel() ? '' : label()"></svg>
+  @if (showLabel()) {
+    <span class="text-sm">{{ label() }}</span>
+  }
+}

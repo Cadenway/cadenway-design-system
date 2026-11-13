@@ -13,6 +13,9 @@ building. The mockup settles behavior and copy.
 ## Conventions every brick follows
 
 - Entry point `@cadenway/ui/<entry>`, folder `packages/ui/<entry>/`; classes `Cw<Name>`.
+- One component, directive or service per file: `<name>.component.ts` + `<name>.component.html`
+  (no inline template), `<name>.directive.ts`, `<name>.service.ts`; exported types in
+  `<entry>.types.ts`, exported constants in `<entry>.constants.ts` (`.claude/rules/bricks.md`).
 - Standalone, OnPush; `input()`, `input.required()`, `model()` for two-way values, `output()`;
   `booleanAttribute` and `numberAttribute`.
 - **No `class` input** (41 sheets list one: drop it; `cwTooltipClass` too). The native `class`

@@ -1,10 +1,6 @@
 import type { ConnectedPosition } from '@angular/cdk/overlay';
 
-/** Side of the trigger a floating panel opens on. */
-export type ɵSide = 'top' | 'right' | 'bottom' | 'left';
-
-/** Alignment of a floating panel along its side. */
-export type ɵAlign = 'start' | 'center' | 'end';
+import type { ɵAlign, ɵSide } from './core.types';
 
 const GAP = 4;
 

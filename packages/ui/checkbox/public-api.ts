@@ -4,4 +4,4 @@
  * Explicit named exports only (.claude/rules/public-api.md).
  */
 
-export { CwCheckbox } from './checkbox';
+export { CwCheckbox } from './checkbox.component';

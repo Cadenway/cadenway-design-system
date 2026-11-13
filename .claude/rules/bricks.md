@@ -6,9 +6,16 @@ paths:
 # Bricks
 
 - One folder per brick, `packages/ui/<brick>/`, which is its secondary entry point
-  `@cadenway/ui/<brick>`: `ng-package.json`, `public-api.ts`, `<brick>.ts`, `<brick>.html`, specs,
-  stories. Selector `cw-<brick>`, or an attribute selector `[cw<Brick>]` for a directive on a native
-  element (`button[cwButton]`); classes `Cw<Brick>`.
+  `@cadenway/ui/<brick>`: `ng-package.json`, `public-api.ts`, `public-api.spec.ts`,
+  `<brick>.stories.ts`, and the files below. Selector `cw-<brick>`, or an attribute selector
+  `[cw<Brick>]` on a native element (`button[cwButton]`); classes `Cw<Brick>`, no suffix.
+- One component, directive or service per file. A component is two files: `<name>.component.ts`
+  (`templateUrl`) and `<name>.component.html`, never an inline template; a directive is
+  `<name>.directive.ts`; a service `<name>.service.ts`. Specs follow the file they test
+  (`<name>.component.spec.ts`).
+- Exported types, interfaces and type aliases live in `<brick>.types.ts`; exported constant data
+  (label maps, key lists) in `<brick>.constants.ts`. Private class-string maps used by one component
+  stay in its file.
 - API, variants, sizes and states come from the brick's sheet in the Design System artifact
   (`project/components/<Name>/README.md`); the mockup settles behavior and copy.
 - Signal API; variants and sizes as inputs; no consumer-specific variant; no `class` input (the

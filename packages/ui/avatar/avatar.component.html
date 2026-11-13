@@ -1,0 +1,27 @@
+<span [class]="group ? disc.stacked : disc.alone">
+  @if (src() && !failed()) {
+    <img
+      alt=""
+      [src]="src()"
+      [class]="loaded() ? 'size-full object-cover' : 'hidden'"
+      (load)="loaded.set(true)"
+      (error)="onImageError($event)"
+    />
+  }
+  @if (!loaded()) {
+    @if (initials()) {
+      <span aria-hidden="true" [class]="initialsClasses()">{{ initials() }}</span>
+    } @else {
+      <span
+        aria-hidden="true"
+        class="flex size-full items-center justify-center bg-secondary text-muted-foreground"
+      >
+        <ng-icon name="phosphorUserBold" [size]="iconSize()" />
+      </span>
+    }
+  }
+</span>
+<span class="sr-only">{{ spoken() }}</span>
+@if (presence()) {
+  <span aria-hidden="true" [class]="dotClasses()"></span>
+}

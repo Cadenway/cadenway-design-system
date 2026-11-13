@@ -1,8 +1,9 @@
 import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vite';
 import { expect, within } from 'storybook/test';
 
-import { CwLoadingOverlay } from './loading-overlay';
-import { CwSpinner, CwSpinnerIndicator } from './spinner';
+import { CwLoadingOverlay } from './loading-overlay.directive';
+import { CwSpinnerIndicator } from './spinner-indicator.component';
+import { CwSpinner } from './spinner.component';
 
 /**
  * Spinner, every state of its sheet in the Design System artifact, in the light and the dark theme.

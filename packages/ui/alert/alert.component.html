@@ -1,0 +1,18 @@
+@if (iconName(); as name) {
+  <ng-icon [name]="name" [class]="iconClasses()" size="1rem" aria-hidden="true" />
+}
+<div [class]="bodyClasses()">
+  <ng-content />
+</div>
+@if (dismissible()) {
+  <button
+    cwButton
+    variant="ghost"
+    size="icon-xs"
+    [class]="closeClasses()"
+    [attr.aria-label]="closeLabel()"
+    (click)="dismiss()"
+  >
+    <ng-icon name="phosphorXBold" aria-hidden="true" />
+  </button>
+}

@@ -12,6 +12,7 @@ describe('@cadenway/ui/core public API', () => {
       'ɵFOCUS_FIELD_WITHIN',
       'ɵFOCUS_INSET',
       'ɵmenuFrom',
+      'ɵnavigateList',
       'ɵpanelPositions',
       'ɵprefersReducedMotion',
     ]);

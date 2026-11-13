@@ -1,0 +1,24 @@
+<svg
+  viewBox="0 0 24 24"
+  [attr.width]="size()"
+  [attr.height]="size()"
+  [attr.role]="decorative() ? null : 'img'"
+  [attr.aria-label]="decorative() ? null : 'Cadenway'"
+  [attr.aria-hidden]="decorative() ? 'true' : null"
+  focusable="false"
+>
+  <svg:path
+    [attr.d]="drawing().path"
+    fill="none"
+    stroke="currentColor"
+    [attr.stroke-width]="drawing().strokeWidth"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <svg:circle
+    cx="12"
+    [attr.cy]="drawing().dotY"
+    [attr.r]="drawing().dotRadius"
+    fill="currentColor"
+  />
+</svg>

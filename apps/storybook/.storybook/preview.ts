@@ -11,14 +11,19 @@ import '../src/styles.css';
 const inBothThemes: Decorator = (storyFn, context) => {
   const story = storyFn();
   if (context.parameters['themes'] === false || story.template === undefined) return story;
-  const scope = (theme: 'light' | 'dark', label: string): string => `
-    <section data-theme="${theme}" aria-label="${label}"
-             class="flex min-w-0 flex-col items-start gap-4 rounded-xl bg-background p-6 text-foreground">
-      ${story.template ?? ''}
-    </section>`;
+  // `@for` gives each copy its own template scope: template references (`#list`) and the bindings
+  // that read them stay inside their theme.
   return {
     ...story,
-    template: `<div class="grid gap-4 lg:grid-cols-2">${scope('light', 'Thème clair')}${scope('dark', 'Thème sombre')}</div>`,
+    template: `
+      <div class="grid gap-4 lg:grid-cols-2">
+        @for (cwTheme of ['light', 'dark']; track cwTheme) {
+          <section [attr.data-theme]="cwTheme" [attr.aria-label]="cwTheme === 'light' ? 'Thème clair' : 'Thème sombre'"
+                   class="flex min-w-0 flex-col items-start gap-4 rounded-xl bg-background p-6 text-foreground">
+            ${story.template ?? ''}
+          </section>
+        }
+      </div>`,
   };
 };
 

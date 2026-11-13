@@ -1,0 +1,101 @@
+@if (label()) {
+  <div class="mb-2 flex items-center justify-between gap-3">
+    <span [id]="labelId" class="flex min-w-0 items-center gap-1.5 text-sm font-medium">{{
+      label()
+    }}</span>
+    @if (loading()) {
+      <span
+        class="inline-block h-3 w-14 animate-pulse rounded bg-secondary align-middle motion-reduce:animate-none"
+        aria-hidden="true"
+      ></span>
+    } @else if (showValue()) {
+      <span class="shrink-0 text-sm text-muted-foreground tabular-nums"
+        >{{ display() }}
+        @if (over() > 0) {
+          · <span class="text-destructive">+{{ overText() }}</span>
+        }
+      </span>
+    }
+  </div>
+}
+
+@if (loading()) {
+  <span [class]="skeletonClasses()" aria-hidden="true"></span>
+} @else {
+  <div [class]="threshold() === undefined ? '' : 'relative'">
+    <div
+      role="meter"
+      [class]="trackClasses()"
+      [attr.aria-labelledby]="label() ? labelId : null"
+      [attr.aria-label]="label() ? null : ariaLabel() || null"
+      [attr.aria-describedby]="note() ? noteId : null"
+      [attr.aria-valuenow]="total() ?? min()"
+      [attr.aria-valuemin]="min()"
+      [attr.aria-valuemax]="max()"
+      [attr.aria-valuetext]="valueText()"
+    >
+      @switch (variant()) {
+        @case ('segmented') {
+          @for (filled of blocks(); track $index) {
+            <span [class]="filled ? segmentFilled() : segmentEmpty"></span>
+          }
+        }
+        @case ('stacked') {
+          @for (part of parts(); track $index) {
+            <span [class]="part.classes" [style.width.%]="part.width"></span>
+          }
+        }
+        @default {
+          @if (over() > 0) {
+            <span [class]="underClasses" [style.width.%]="percent(threshold() ?? 0)"></span>
+            <span [class]="overClasses" [style.width.%]="overWidth()"></span>
+          } @else if (value() !== null) {
+            <span [class]="fillClasses()" [style.width.%]="percent(value() ?? 0)"></span>
+          }
+        }
+      }
+    </div>
+    @if (threshold() !== undefined) {
+      <span
+        class="absolute top-1/2 h-3.5 w-0.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-foreground ring-2 ring-background"
+        [style.left.%]="percent(threshold() ?? 0)"
+        aria-hidden="true"
+      ></span>
+    }
+  </div>
+  @if (threshold() !== undefined) {
+    <div class="relative mt-1.5 h-4 text-xs text-muted-foreground tabular-nums" aria-hidden="true">
+      <span class="absolute left-0">{{ amount(min()) }}</span>
+      <span
+        class="absolute -translate-x-1/2 whitespace-nowrap text-foreground"
+        [style.left.%]="percent(threshold() ?? 0)"
+        >{{ thresholdLabel() }} {{ amount(threshold() ?? 0) }}</span
+      >
+      <span class="absolute right-0">{{ amount(max()) }}</span>
+    </div>
+  }
+  @if (variant() === 'stacked' && showLegend()) {
+    <ul class="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+      @for (part of parts(); track $index) {
+        <li class="flex items-center gap-1.5">
+          <span [class]="part.swatch" aria-hidden="true"></span>{{ part.label }}
+          <span class="text-foreground tabular-nums">{{ amount(part.value) }}</span>
+        </li>
+      }
+      <li class="flex items-center gap-1.5">
+        <span class="size-2 shrink-0 rounded-[3px] bg-track" aria-hidden="true"></span
+        >{{ freeLabel() }}
+        <span class="text-foreground tabular-nums">{{ amount(free()) }}</span>
+      </li>
+    </ul>
+  }
+}
+
+@if (note() && !loading()) {
+  <p [id]="noteId" [class]="noteClasses()">
+    @if (noteIcon(); as icon) {
+      <ng-icon [name]="icon.name" [class]="icon.tone" size="0.875rem" aria-hidden="true" />
+    }
+    {{ note() }}
+  </p>
+}
