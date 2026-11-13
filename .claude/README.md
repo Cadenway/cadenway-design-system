@@ -77,9 +77,9 @@ check that writes files. No agent delegates further.
 
 | File | Subject | Loads for |
 | --- | --- | --- |
-| `bricks.md` | Bricks | `packages/ui/src/lib/**` |
+| `bricks.md` | Bricks | `packages/ui/**` |
 | `tokens.md` | Tokens | `packages/tokens/**` |
-| `public-api.md` | Public API | `packages/**/public-api.ts`, `packages/**/index.ts`, `packages/**/package.json` |
+| `public-api.md` | Public API | `packages/**/public-api.ts`, `packages/**/index.ts`, `packages/**/package.json`, `packages/**/ng-package.json` |
 | `stories.md` | Stories | `apps/storybook/**`, `packages/**/*.stories.ts` |
 | `testing.md` | Tests | `packages/**/*.spec.ts` |
 | `language.md` | Language | always |
@@ -94,9 +94,9 @@ See [skills/](skills/) for the complete inventory, including the technology guid
 | Skill | Use |
 | --- | --- |
 | `cw-context` | What Cadenway is, where the mockup, the integration guide and the repository map live, the product vocabulary (spaces, lists, sprints, tasks, statuses, milestones) and the multi-repository ownership rules. |
-| `cw-brick-recipes` | The API and behavior of each @cadenway/ui brick as the integration guide defines it, with the Angular Aria or CDK primitive underneath. |
-| `cw-tokens-and-theme` | The color, typography, radius and shadow tokens of the mockup in light and dark, and how the Tailwind 4 theme maps them. |
-| `cw-motion-tokens` | The animation timings and easings of the mockup and how reduced motion disables them. |
+| `cw-brick-recipes` | The API of each @cadenway/ui brick as its Design System artifact sheet defines it, its entry point, and the Angular Aria or CDK primitive underneath. |
+| `cw-tokens-and-theme` | The color, typography, radius and shadow tokens of the Design System artifact in light and dark, the mockup's extra hues, and how the Tailwind 4 theme maps them. |
+| `cw-motion-tokens` | The animation timings and easings of the Design System artifact, the mockup animations that carry behavior, and how reduced motion disables them. |
 | `cw-release-flow` | How cadenway-design-system versions and publishes its three packages with Changesets, and the deprecation rule. |
 
 ## Hooks

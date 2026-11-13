@@ -4,9 +4,9 @@
 
 ## Status
 
-At the time this documentation was written, this checkout has no `package.json`, application source tree, or GitHub workflow files. The target architecture, scripts, and workflows in this guide must be created and verified during bootstrap.
+The workspace is bootstrapped: `package.json` scripts, the three package skeletons, Storybook and the CI and release workflows exist. The packages are being filled from the Design System artifact and the mockup: `@cadenway/tokens` and `@cadenway/icons` first, then the `@cadenway/ui` bricks in waves.
 
-The following architecture is the target recorded in [AGENTS.md](../AGENTS.md). Paths and integrations are design boundaries, not evidence that files or services already exist.
+The architecture below is recorded in [AGENTS.md](../AGENTS.md); check the checkout for the bricks that exist so far.
 
 ## Purpose and target structure
 
@@ -16,7 +16,7 @@ cadenway-design-system is the Angular design system taken from the mockup. It pu
 packages/
 ├─ tokens/   → @cadenway/tokens (tokens.css, theme.css)
 ├─ icons/    → @cadenway/icons (provideCadenwayIcons)
-└─ ui/       → @cadenway/ui (src/lib/<brick>/, public-api.ts)
+└─ ui/       → @cadenway/ui (<brick>/ = entry point @cadenway/ui/<brick>, core/)
 apps/storybook/
 ```
 
@@ -24,7 +24,8 @@ apps/storybook/
 
 - `packages/tokens`: colors (light and dark), typography, radii, shadows, motion variables and keyframes.
 - `packages/icons`: the Phosphor, svgl and flag icons the apps use.
-- `packages/ui`: generic bricks and the two business icons; one folder per brick.
+- `packages/ui`: generic bricks and the two business icons; one folder per brick, each its own
+  secondary entry point (`@cadenway/ui/<brick>`), shared helpers in `core/`.
 - `apps/storybook`: stories, interaction tests, accessibility checks.
 
 ## Boundaries

@@ -6,7 +6,7 @@ cadenway-design-system is the Angular design system taken from the mockup. It pu
 packages/
 ├─ tokens/   → @cadenway/tokens (tokens.css, theme.css)
 ├─ icons/    → @cadenway/icons (provideCadenwayIcons)
-└─ ui/       → @cadenway/ui (src/lib/<brick>/, public-api.ts)
+└─ ui/       → @cadenway/ui (<brick>/ = entry point @cadenway/ui/<brick>, core/)
 apps/storybook/
 ```
 
@@ -29,7 +29,7 @@ Run the narrowest check first; CI runs them all on every pull request.
 pnpm format:check
 pnpm lint
 pnpm typecheck
-pnpm test --include packages/ui/src/lib/<brick>
+pnpm test --include packages/ui/<brick>
 pnpm test:coverage
 pnpm storybook:build
 pnpm test:storybook           # interaction and accessibility checks
@@ -50,6 +50,7 @@ This repository is proprietary. See [LICENSE](../LICENSE) for the rights and res
 
 ## References
 
+- [Design System artifact](https://claude.ai/artifact/Xrfx4ccwixnRpFgVYvrCcZ): tokens, Tailwind theme, component sheets (source of truth for values and APIs).
 - [Interactive mockup](https://claude.ai/artifact/KYRM7AnsYLiBLBLKy8i4HE): every screen, state and interaction.
-- [Integration guide](https://claude.ai/artifact/CpJHVCiFfF9j3KbHQ2S1Et): tokens, data shapes, component names.
+- [Integration guide](https://claude.ai/artifact/CpJHVCiFfF9j3KbHQ2S1Et): data shapes, screens, behaviors, Angular mapping.
 - [Repositories and packages](https://claude.ai/artifact/BPinmYxoF3mbK8w9BMB43N): what each repository owns, deployment.

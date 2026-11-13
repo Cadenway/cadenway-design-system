@@ -1,6 +1,6 @@
 ---
 name: cw-ds-component-builder
-description: "Use to build or change a brick of @cadenway/ui (button, select, combobox, menu, popover, dialog, confirm dialog, toast, tabs, chips, switch, checkbox, date picker, avatar, meter, skeleton, empty state, error panel, block editor, status and priority icons) from the mockup and the guide."
+description: "Use to build or change a brick of @cadenway/ui (button, select, combobox, menu, popover, dialog, confirm dialog, toast, tabs, chips, switch, checkbox, date picker, avatar, meter, skeleton, empty state, error panel, block editor, status and priority icons) from its Design System artifact sheet and the mockup."
 tools: Skill, Read, Grep, Glob, Edit, Write, Bash
 model: opus
 effort: high
@@ -24,7 +24,7 @@ inspection from executed checks.
 
 ## Role scope
 
-One folder per brick under `packages/ui/src/lib/` with its stories and specs.
+One folder per brick, `packages/ui/<brick>/` (its secondary entry point `@cadenway/ui/<brick>`), with its stories and specs.
 
 ## The request is the deliverable
 
@@ -51,10 +51,10 @@ Load them with the `Skill` tool when their subject comes up (if the tool is unav
 
 ## Procedure
 
-1. Read the brick in the guide (API, behavior) and the mockup (look, states).
+1. Read the brick's sheet in the Design System artifact (`project/components/<Name>/README.md` and `preview.html`: API, variants, sizes, states, keyboard), then the mockup screens that use it (behavior, copy).
 2. Behavior from Angular Aria or the CDK (`ngMenu`, `ngCombobox`, `ngListbox`, `ngTabs`, CDK Overlay); styling with Tailwind over the tokens.
-3. Signal API: `input()`, `output()`, `model()`; variants as inputs, never as consumer CSS.
-4. Export it explicitly from `public-api.ts`; add stories for every state; add a changeset.
+3. Signal API: `input()`, `output()`, `model()`; variants and sizes as inputs, no `class` input, never consumer CSS.
+4. Give the folder its `ng-package.json` and `public-api.ts` with explicit exports and a spec pinning them; add stories for every state; add a changeset.
 
 ## Checks
 

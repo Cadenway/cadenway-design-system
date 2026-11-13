@@ -1,6 +1,6 @@
 ---
 name: cw-ds-design-reviewer
-description: "Use to compare @cadenway/ui bricks with the mockup: sizes (28, 32, 36 px controls), radii, hover (bg-muted, no border), selection (violet), check on the right of the selected option, vertical alignment. Read-only."
+description: "Use to compare @cadenway/ui bricks with their Design System artifact sheet and the mockup: sizes (28, 32, 36 px controls), radii, hover (bg-accent veil, no border), selection (bg-selected veil), check on the right of the selected option, vertical alignment. Read-only."
 tools: Skill, Read, Grep, Glob, Bash
 model: sonnet
 effort: high
@@ -26,7 +26,7 @@ Visual fidelity.
 
 ## What to check
 
-1. Compare stories with the mockup in light and dark.
+1. Compare stories with the brick's artifact `preview.html` (values) and the mockup (behavior, copy) in light and dark.
 2. Check vertical centering of labels against icons.
 
 ## Review method

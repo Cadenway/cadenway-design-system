@@ -9,7 +9,9 @@ and [Codex](.codex/README.md) for agents, skills, commands and hooks.
 
 ## First read
 
-- The mockup bricks in `docs/maquette/source/` and their section in the [integration guide](https://claude.ai/artifact/CpJHVCiFfF9j3KbHQ2S1Et).
+- The brick's sheet in the [Design System artifact](https://claude.ai/artifact/Xrfx4ccwixnRpFgVYvrCcZ) (`project/components/<Name>/README.md`): it is the source of truth
+  for values, variants and APIs.
+- The mockup screens in `docs/maquette/source/` that use the brick: behavior, states and copy.
 - The existing brick closest to the one you touch, and its stories.
 - `package.json` for versions and scripts once the repository is bootstrapped. Do not restate
   versions elsewhere: a copy goes stale.
@@ -24,7 +26,7 @@ cadenway-design-system is the Angular design system taken from the mockup. It pu
 packages/
 ├─ tokens/   → @cadenway/tokens (tokens.css, theme.css)
 ├─ icons/    → @cadenway/icons (provideCadenwayIcons)
-└─ ui/       → @cadenway/ui (src/lib/<brick>/, public-api.ts)
+└─ ui/       → @cadenway/ui (<brick>/ = entry point @cadenway/ui/<brick>, core/)
 apps/storybook/
 ```
 
@@ -43,7 +45,8 @@ apps/storybook/
 
 - `packages/tokens`: colors (light and dark), typography, radii, shadows, motion variables and keyframes.
 - `packages/icons`: the Phosphor, svgl and flag icons the apps use.
-- `packages/ui`: generic bricks and the two business icons; one folder per brick.
+- `packages/ui`: generic bricks and the two business icons; one folder per brick, each its own
+  secondary entry point (`@cadenway/ui/<brick>`), shared helpers in `core/`.
 - `apps/storybook`: stories, interaction tests, accessibility checks.
 
 ## Boundaries (hard rules)
@@ -135,5 +138,5 @@ not to find another way around it.
 
 ## References
 
-- [Interactive mockup](https://claude.ai/artifact/KYRM7AnsYLiBLBLKy8i4HE), [integration guide](https://claude.ai/artifact/CpJHVCiFfF9j3KbHQ2S1Et) and
+- [Design System artifact](https://claude.ai/artifact/Xrfx4ccwixnRpFgVYvrCcZ), [interactive mockup](https://claude.ai/artifact/KYRM7AnsYLiBLBLKy8i4HE), [integration guide](https://claude.ai/artifact/CpJHVCiFfF9j3KbHQ2S1Et) and
   [repositories and packages](https://claude.ai/artifact/BPinmYxoF3mbK8w9BMB43N) (living documents).

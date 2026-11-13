@@ -1,6 +1,6 @@
 ---
 name: cw-ds-motion-reviewer
-description: "Use to review @cadenway/ui animations against the guide: menu bloom 300 ms with --ease-snap, option stagger 420 ms with --ease-spring, label swap 280 ms, status icon morph, reduced motion. Read-only."
+description: "Use to review @cadenway/ui animations against the Design System artifact: menu-in 300 ms and item-in 340 ms with --ease-snap, ripple 550 ms, label swap 280 ms, status and priority icon morphs, reduced motion. Read-only."
 tools: Skill, Read, Grep, Glob, Bash
 model: sonnet
 effort: medium

@@ -10,39 +10,23 @@ The design system owns tokens, icons, reusable Angular bricks and Storybook. The
 
 ## Tokens And Theme
 
-Source: `cw-tokens-and-theme` ([Claude](../.claude/skills/cw-tokens-and-theme/SKILL.md), [Codex](../.codex/skills/cw-tokens-and-theme/SKILL.md)).
+Source: `cw-tokens-and-theme` ([Claude](../.claude/skills/cw-tokens-and-theme/SKILL.md), [Codex](../.codex/skills/cw-tokens-and-theme/SKILL.md)), taken from the [Design System artifact](https://claude.ai/artifact/Xrfx4ccwixnRpFgVYvrCcZ) (`project/tokens.json` version 17, `project/tailwind/cadenway.css`).
 
 - Theme by `data-theme="light|dark"` on the root, never a class.
 - Text 13 px base; `text-xs` 12/16, `text-sm` 13/20, `text-base` 14/20, `text-lg` 16/24, `text-2xl` 20/28.
-- Radius base 6 px (`rounded-md` 4, `rounded-lg` 6, `rounded-xl` 8); 4 px grid; controls 32 px (28 px dense).
-- Primary action `bg-foreground text-background`; amethyst (`primary`) for choice, focus and links only.
-- Full values: integration guide, section "Fondations".
+- Radius base 6 px (`rounded-sm` 3, `rounded-md` 4, `rounded-lg` 6, `rounded-xl` 8); 4 px grid; controls 32 px (28 px compact).
+- Primary action `bg-foreground text-background`; amethyst (`primary`) as text, icon or focus ring only; hover `bg-accent`, selection `bg-selected`.
+- Plus the mockup's 8 hues (cornaline, indigo, azur, lagon, olive, rose, fuchsia, ardoise), absent from the artifact.
+- The integration guide's color table and the mockup's compiled `app.css` predate tokens version 17: the artifact wins.
 
 ## Brick Recipes
 
-Source: `cw-brick-recipes` ([Claude](../.claude/skills/cw-brick-recipes/SKILL.md), [Codex](../.codex/skills/cw-brick-recipes/SKILL.md)).
+Source: `cw-brick-recipes` ([Claude](../.claude/skills/cw-brick-recipes/SKILL.md), [Codex](../.codex/skills/cw-brick-recipes/SKILL.md)), a summary of each brick's sheet in the Design System artifact (`project/components/<Name>/README.md`).
 
-| Brick                                             | API                                                                             | Primitive                                       |
-| ------------------------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------------------- |
-| `button[cwButton]`                                | `variant`: primary, outline, ghost, destructive; `size`: sm (28 px), md (32 px) | —                                               |
-| `cw-split-button`                                 | `label`, `next`, `advance` output, projected menu                               | Aria Menu                                       |
-| `cw-select`                                       | `value = model()`, `options`, `placeholder`                                     | Aria Select (Combobox + Listbox)                |
-| `cw-combobox`                                     | `value = model()`, `suggest: (text) => T[]`                                     | Aria Combobox                                   |
-| `cw-menu`, `[cwMenuTrigger]`, `[cwContextMenu]`   | items, separators, submenus, checkbox and radio items                           | Aria Menu                                       |
-| `cw-popover`                                      | projected content, non-modal dialog                                             | CDK Overlay                                     |
-| `cw-dialog`                                       | `size`: md, lg, 2xl; `title`                                                    | CDK Dialog                                      |
-| `cw-confirm-dialog`                               | `title`, `text`, `cta`, `items?`, `typeName?`                                   | CDK Dialog (alertdialog)                        |
-| `cw-toast`                                        | `title`, `desc`, `undo?`, `openId?`; 6 s                                        | —                                               |
-| `cw-tabs`                                         | `selected = model()`                                                            | Aria Tabs                                       |
-| `cw-choice-chips`, `cw-switch`, `cw-checkbox`     | `value`/`checked = model()`; checkbox `indeterminate`                           | Aria Listbox / —                                |
-| `cw-date-picker`                                  | `value = model<string \| null>()`, `shortcuts`                                  | Aria Grid                                       |
-| `cw-avatar`, `cw-avatar-stack`                    | `person`, `size`, `presence?`; `max` (5 then "+ n")                             | —                                               |
-| `cw-meter`                                        | `value`, `max`, `segments?`; warning ≥ 80 %, critical ≥ 90 %                    | —                                               |
-| `cw-skeleton`, `cw-empty-state`, `cw-error-panel` | shape; icon, title, text; title, text, code, `retry`                            | —                                               |
-| `cw-block-editor`                                 | `value = model<string>()` (Markdown)                                            | Tiptap engine; Aria Toolbar                     |
-| `cw-markdown`                                     | `source` (Markdown)                                                             | `marked` tokens rendered by an Angular template |
-| `cw-status-icon`                                  | `status`, `from?`, `milestone`, `size` (3, 3.5, 4, 5)                           | SVG layers animated between states              |
-| `cw-priority-icon`                                | `priority`, `from?`, `size`                                                     | SVG bars                                        |
+- One secondary entry point per brick (`@cadenway/ui/button`, `@cadenway/ui/menu`…), folder `packages/ui/<entry>/`; shared helpers in `@cadenway/ui/core`.
+- Variants and sizes are inputs; no `class` input.
+- Scope: the bricks the mockup uses, in six waves (primitives and form controls, overlays and pickers, dialogs and feedback, navigation, data blocks, rich text). Artifact components the mockup does not use are not built until a consumer needs them.
+- Task-specific parts of the sheets (`CwTaskCard`, status and priority badges with other keys, task defaults in Kanban or DataTable) are adapted to the boundary: generic inputs here, task assembly in `cadenway-webapp`.
 
 ### `cw-block-editor`
 
