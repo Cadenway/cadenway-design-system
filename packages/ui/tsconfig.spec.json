@@ -9,6 +9,6 @@
       "@cadenway/ui/components/*": ["./components/*/public-api.ts"]
     }
   },
-  "include": ["src/**/*.d.ts", "**/*.spec.ts"],
+  "include": ["**/*.spec.ts"],
   "exclude": ["node_modules", "dist"]
 }
