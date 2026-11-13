@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { Component, input } from '@angular/core';
 
 import { CwSpinner } from '../spinner.component';
 
@@ -6,7 +6,6 @@ import { CwSpinner } from '../spinner.component';
 @Component({
   selector: 'cw-loading-veil',
   imports: [CwSpinner],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class:
       'absolute inset-0 z-10 grid place-items-center bg-background/70 text-foreground animate-fade-in',

@@ -1,11 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 
 import { CwAlert } from '../alert.component';
 
 /** The title of an alert: names the situation (« Envoi des e-mails interrompu »). */
 @Component({
   selector: 'cw-alert-title',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'classes()',
   },

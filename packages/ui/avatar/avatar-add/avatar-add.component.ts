@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  HostAttributeToken,
-  computed,
-  inject,
-  input,
-} from '@angular/core';
+import { Component, computed, HostAttributeToken, inject, input } from '@angular/core';
 import { CwRipple } from '@cadenway/ui/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorUserBold } from '@ng-icons/phosphor-icons/bold';
@@ -36,7 +29,6 @@ const ADD =
   imports: [NgIcon],
   providers: [provideIcons({ phosphorUserBold })],
   hostDirectives: [CwRipple],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'classes()',
     '[attr.type]': 'type',

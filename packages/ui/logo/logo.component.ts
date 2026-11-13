@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  booleanAttribute,
-  computed,
-  input,
-  numberAttribute,
-} from '@angular/core';
+import { booleanAttribute, Component, computed, input, numberAttribute } from '@angular/core';
 
 import type { CwLogoTone, CwLogoVariant } from './logo.types';
 
@@ -52,7 +45,6 @@ const TONES: Record<CwLogoTone, string> = {
  */
 @Component({
   selector: 'cw-logo',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'classes()',
     '[style.width.px]': 'size()',

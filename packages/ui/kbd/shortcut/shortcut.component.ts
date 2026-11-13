@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DOCUMENT,
-  computed,
-  inject,
-  input,
-} from '@angular/core';
+import { Component, computed, DOCUMENT, inject, input } from '@angular/core';
 
 import { CwKbdGroup } from '../kbd-group/kbd-group.directive';
 import { CwKbd } from '../kbd.directive';
@@ -90,7 +83,6 @@ function isMac(document: Document): boolean {
 @Component({
   selector: 'cw-shortcut',
   imports: [CwKbd, CwKbdGroup],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'inline-flex items-center align-middle',
     '[attr.data-variant]': 'variant()',

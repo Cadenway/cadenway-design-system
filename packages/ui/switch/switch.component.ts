@@ -1,9 +1,8 @@
 import {
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
   booleanAttribute,
+  Component,
   computed,
+  ElementRef,
   inject,
   input,
   model,
@@ -47,7 +46,6 @@ const SIZES: Record<CwSwitchSize, { track: string; thumb: string }> = {
  */
 @Component({
   selector: 'cw-switch',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'inline-flex',
     '[attr.id]': 'null',

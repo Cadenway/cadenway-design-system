@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { Component, input } from '@angular/core';
 
 import { CwKbd } from '@cadenway/ui/kbd';
 
@@ -10,7 +10,6 @@ import { CwKbd } from '@cadenway/ui/kbd';
 @Component({
   selector: 'cw-command-footer',
   imports: [CwKbd],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'flex h-9 items-center gap-4 border-t px-3 text-xs text-muted-foreground',
   },

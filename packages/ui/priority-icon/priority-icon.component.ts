@@ -1,10 +1,9 @@
 import {
-  ChangeDetectionStrategy,
-  Component,
-  DOCUMENT,
-  DestroyRef,
   afterNextRender,
+  Component,
   computed,
+  DestroyRef,
+  DOCUMENT,
   inject,
   input,
   signal,
@@ -50,7 +49,6 @@ function toSize(value: CwPriorityIconSize | number | null | undefined): CwPriori
  */
 @Component({
   selector: 'cw-priority-icon',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './priority-icon.component.css',
   host: {
     '[class]': 'hostClasses()',

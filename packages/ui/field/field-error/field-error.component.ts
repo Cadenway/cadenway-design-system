@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  HostAttributeToken,
-  computed,
-  inject,
-  input,
-} from '@angular/core';
+import { Component, computed, HostAttributeToken, inject, input } from '@angular/core';
 import { _IdGenerator } from '@angular/cdk/a11y';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorWarningCircleFill } from '@ng-icons/phosphor-icons/fill';
@@ -31,7 +24,6 @@ function isErrorList(errors: CwFieldErrors): errors is readonly CwFieldErrorItem
   selector: 'cw-field-error',
   imports: [NgIcon],
   providers: [provideIcons({ phosphorWarningCircleFill })],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[attr.id]': 'id',
     '[class]':

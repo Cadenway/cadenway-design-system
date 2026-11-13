@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  contentChildren,
-  input,
-} from '@angular/core';
+import { Component, computed, contentChildren, input } from '@angular/core';
 
 import type { CwButtonGroupOrientation } from './button-group.types';
 
@@ -35,7 +29,6 @@ const NESTED: Record<CwButtonGroupOrientation, string> = {
  */
 @Component({
   selector: 'cw-button-group',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     role: 'group',
     '[class]': 'classes()',

@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  contentChildren,
-  input,
-  numberAttribute,
-} from '@angular/core';
+import { Component, computed, contentChildren, input, numberAttribute } from '@angular/core';
 
 import { CwAvatar } from '../avatar.component';
 import type { CwAvatarSize } from '../avatar.types';
@@ -36,7 +29,6 @@ const MORE: Record<CwAvatarSize, string> = {
  */
 @Component({
   selector: 'cw-avatar-group',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     role: 'group',
     '[class]': 'classes()',

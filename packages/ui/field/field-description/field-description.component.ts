@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, HostAttributeToken, inject } from '@angular/core';
+import { Component, HostAttributeToken, inject } from '@angular/core';
 import { _IdGenerator } from '@angular/cdk/a11y';
 
 import { FieldContext, registerFieldPart } from '../field-context/field-context.service';
@@ -16,7 +16,6 @@ const PLACES = {
  */
 @Component({
   selector: 'cw-field-description',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[attr.id]': 'id',
     '[class]': 'classes',

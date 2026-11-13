@@ -1,9 +1,8 @@
 import {
-  ChangeDetectionStrategy,
-  Component,
-  HostAttributeToken,
   booleanAttribute,
+  Component,
   computed,
+  HostAttributeToken,
   inject,
   input,
 } from '@angular/core';
@@ -44,7 +43,6 @@ const SELECTABLE_ROLES = new Set(['option', 'gridcell', 'row', 'tab']);
  */
 @Component({
   selector: 'cw-card',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'classes()',
     '[attr.tabindex]': 'interactive() ? 0 : null',

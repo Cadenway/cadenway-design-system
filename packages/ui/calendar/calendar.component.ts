@@ -1,14 +1,13 @@
 import { Directionality } from '@angular/cdk/bidi';
 import {
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  Injector,
   afterNextRender,
   booleanAttribute,
+  Component,
   computed,
   effect,
+  ElementRef,
   inject,
+  Injector,
   input,
   model,
   output,
@@ -153,7 +152,6 @@ function sameSelection(a: CwCalendarSelection, b: CwCalendarSelection): boolean 
   providers: [
     provideIcons({ phosphorCaretDownBold, phosphorCaretLeftBold, phosphorCaretRightBold }),
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'block w-fit p-3',
     '[attr.data-mode]': 'mode()',

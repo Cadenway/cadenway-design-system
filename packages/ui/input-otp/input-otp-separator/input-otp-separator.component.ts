@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorMinusBold } from '@ng-icons/phosphor-icons/bold';
 
@@ -7,7 +7,6 @@ import { phosphorMinusBold } from '@ng-icons/phosphor-icons/bold';
   selector: 'cw-input-otp-separator',
   imports: [NgIcon],
   providers: [provideIcons({ phosphorMinusBold })],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { role: 'separator', class: 'flex text-muted-foreground' },
   templateUrl: './input-otp-separator.component.html',
 })

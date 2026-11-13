@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  computed,
-  inject,
-  input,
-} from '@angular/core';
+import { Component, computed, ElementRef, inject, input } from '@angular/core';
 
 import { CwInputGroup } from '../input-group.component';
 import type { CwInputGroupAddonAlign, CwInputGroupSize } from '../input-group.types';
@@ -52,7 +45,6 @@ const PADDINGS: Record<CwInputGroupSize, Record<'inline-start' | 'inline-end', s
  */
 @Component({
   selector: 'cw-input-group-addon',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'classes()',
     '[attr.data-align]': 'align()',

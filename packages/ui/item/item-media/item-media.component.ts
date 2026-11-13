@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 
 import { CwItem } from '../item.component';
 import type { CwItemMediaVariant, CwItemSize } from '../item.types';
@@ -29,7 +29,6 @@ const MEDIA: Record<CwItemMediaVariant, Record<CwItemSize, string>> = {
  */
 @Component({
   selector: 'cw-item-media',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'classes()',
     '[attr.data-variant]': 'variant()',

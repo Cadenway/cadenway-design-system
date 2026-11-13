@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component } from '@angular/core';
 
 /**
  * The keyboard shortcut of a menu item, pushed to the right in muted text: `F2`, `Ctrl D`,
@@ -10,7 +10,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
  */
 @Component({
   selector: 'cw-menu-shortcut',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'ml-auto pl-4 text-xs text-muted-foreground' },
   templateUrl: './menu-shortcut.component.html',
 })

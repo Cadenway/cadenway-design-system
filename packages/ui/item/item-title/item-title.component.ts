@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 
 import { CwItem } from '../item.component';
 
@@ -8,7 +8,6 @@ import { CwItem } from '../item.component';
  */
 @Component({
   selector: 'cw-item-title',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'flex min-w-0 items-center gap-2 leading-5 font-medium' },
   templateUrl: './item-title.component.html',
 })

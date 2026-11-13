@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  booleanAttribute,
-  computed,
-  input,
-} from '@angular/core';
+import { booleanAttribute, Component, computed, input } from '@angular/core';
 import {
   CW_PRIORITY_LABELS,
   CwPriorityIcon,
@@ -44,7 +38,6 @@ const PRIORITY_IMAGE_LABELS: Record<CwPriorityKey, string> = {
 @Component({
   selector: 'cw-priority-badge',
   imports: [CwPriorityIcon],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'classes()',
     '[attr.role]': 'showLabel() ? null : "img"',

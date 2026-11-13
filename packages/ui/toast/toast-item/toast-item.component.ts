@@ -1,14 +1,13 @@
 import {
-  ChangeDetectionStrategy,
-  Component,
-  DOCUMENT,
-  ElementRef,
-  Injector,
   afterNextRender,
   booleanAttribute,
+  Component,
   computed,
+  DOCUMENT,
   effect,
+  ElementRef,
   inject,
+  Injector,
   input,
   output,
 } from '@angular/core';
@@ -71,7 +70,6 @@ const EXIT_FALLBACK_MS = 300;
       phosphorXBold,
     }),
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'classes()',
     '[attr.role]': 'toast().tone === "error" ? "alert" : "status"',

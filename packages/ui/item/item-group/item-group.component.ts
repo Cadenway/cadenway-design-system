@@ -1,15 +1,14 @@
 import { FocusKeyManager, type FocusableOption } from '@angular/cdk/a11y';
 import {
-  ChangeDetectionStrategy,
-  Component,
-  Injector,
-  type Signal,
   booleanAttribute,
+  Component,
   computed,
   contentChildren,
   inject,
+  Injector,
   input,
   signal,
+  type Signal,
 } from '@angular/core';
 
 import { ɵnavigateList } from '@cadenway/ui/core';
@@ -40,7 +39,6 @@ interface KeyOption extends FocusableOption {
  */
 @Component({
   selector: 'cw-item-group',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: `flex flex-col gap-1 ${STAGGER}`,
     '[attr.role]': 'role()',

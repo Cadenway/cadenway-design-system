@@ -1,10 +1,9 @@
 import {
-  ChangeDetectionStrategy,
+  booleanAttribute,
   Component,
+  computed,
   ElementRef,
   HostAttributeToken,
-  booleanAttribute,
-  computed,
   inject,
   input,
 } from '@angular/core';
@@ -28,7 +27,6 @@ import type { CwBadgeSize, CwBadgeVariant } from './badge.types';
   // its native role, focus and form behavior. The lint rule only knows element selectors.
   // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'span[cwBadge], a[cwBadge], button[cwBadge]',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'classes()',
     '[attr.type]': 'type()',

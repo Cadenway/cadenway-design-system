@@ -1,11 +1,10 @@
 import {
-  forwardRef,
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  HostAttributeToken,
   booleanAttribute,
+  Component,
   computed,
+  ElementRef,
+  forwardRef,
+  HostAttributeToken,
   inject,
   input,
 } from '@angular/core';
@@ -54,7 +53,6 @@ const ITEM_SIZES: Record<CwToggleGroupSize, string> = {
   selector: 'button[cwToggleGroupItem]',
   providers: [{ provide: TOGGLE_GROUP_ITEM, useExisting: forwardRef(() => CwToggleGroupItem) }],
   hostDirectives: [CwRipple],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'classes()',
     '[attr.type]': 'type',

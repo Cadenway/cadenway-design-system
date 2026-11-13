@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component } from '@angular/core';
 
 /**
  * A 1 px rule between the groups of a `cw-menu`, edge to edge; the destructive item sits after one
@@ -6,7 +6,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
  */
 @Component({
   selector: 'cw-menu-separator',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     role: 'separator',
     class: '-mx-1 my-1 block h-px bg-border',

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 
 import { CW_DIALOG } from '../dialog.token';
 
@@ -18,7 +18,6 @@ const CLASSES = {
  */
 @Component({
   selector: 'cw-dialog-footer',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class]': 'classes()' },
   templateUrl: './dialog-footer.component.html',
 })

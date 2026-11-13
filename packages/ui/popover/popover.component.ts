@@ -9,24 +9,23 @@ import {
 } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import {
-  ChangeDetectionStrategy,
-  Component,
-  DOCUMENT,
-  DestroyRef,
-  Injector,
-  TemplateRef,
-  ViewContainerRef,
   afterNextRender,
   booleanAttribute,
+  Component,
   computed,
+  DestroyRef,
+  DOCUMENT,
   effect,
   inject,
+  Injector,
   input,
   model,
   numberAttribute,
   signal,
+  TemplateRef,
   untracked,
   viewChild,
+  ViewContainerRef,
 } from '@angular/core';
 import { ɵmenuFrom, ɵpanelPositions, ɵprefersReducedMotion } from '@cadenway/ui/core';
 import type { Subscription } from 'rxjs';
@@ -98,7 +97,6 @@ function placementOf(position: ConnectedPosition): Placement {
 @Component({
   selector: 'cw-popover',
   imports: [CwPopoverArrow],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'hidden' },
   templateUrl: './popover.component.html',
 })

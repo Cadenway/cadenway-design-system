@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Service } from '@angular/core';
 
 import type { CwMenu } from '../menu.component';
 
@@ -7,7 +7,7 @@ import type { CwMenu } from '../menu.component';
  * "Placement des menus": "Un seul menu ouvert à la fois"). Dropdown and context menus share it.
  * Submenus are not tracked here: each menu closes its own open submenu. Not exported.
  */
-@Injectable({ providedIn: 'root' })
+@Service()
 export class MenuStack {
   private current: CwMenu | null = null;
 

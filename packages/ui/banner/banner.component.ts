@@ -1,15 +1,14 @@
 import {
-  ChangeDetectionStrategy,
-  Component,
-  DOCUMENT,
-  ElementRef,
-  PLATFORM_ID,
   booleanAttribute,
+  Component,
   computed,
+  DOCUMENT,
   effect,
+  ElementRef,
   inject,
   input,
   output,
+  PLATFORM_ID,
   signal,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
@@ -97,7 +96,6 @@ const FOCUSABLE =
       phosphorXBold,
     }),
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'classes()',
     '[attr.role]': 'tone() === "error" ? "alert" : "status"',

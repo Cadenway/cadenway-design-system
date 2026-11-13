@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 import {
   CW_STATUS_LABELS,
   CwStatusIcon,
@@ -22,7 +22,6 @@ const STATUS_ICON_SIZES: Record<CwBadgeSize, CwStatusIconSize> = { default: '3',
 @Component({
   selector: 'cw-status-badge',
   imports: [CwStatusIcon],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'classes()',
     '[attr.data-status]': 'current()',

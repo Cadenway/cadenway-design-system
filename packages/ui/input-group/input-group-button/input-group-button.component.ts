@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { CwButton, type CwButtonSize, type CwButtonVariant } from '@cadenway/ui/button';
 import { CwRipple } from '@cadenway/ui/core';
 import { CwSpinner } from '@cadenway/ui/spinner';
@@ -16,7 +16,6 @@ import { CwSpinner } from '@cadenway/ui/spinner';
   selector: 'button[cwInputGroupButton]',
   imports: [CwSpinner],
   hostDirectives: [CwRipple],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'classes()',
     '[attr.type]': 'type()',

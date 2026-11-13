@@ -1,4 +1,4 @@
-import { DestroyRef, Injectable, inject, signal } from '@angular/core';
+import { DestroyRef, inject, Service, signal } from '@angular/core';
 
 import { CW_TOAST_DURATIONS } from './toast.constants';
 import type {
@@ -30,7 +30,7 @@ interface Timer {
  * shows, and pause while the stack is unfolded (hover, focus, F8) or the window is inactive.
  * Without a toaster on the page, nothing is displayed and dismissed toasts leave at once.
  */
-@Injectable({ providedIn: 'root' })
+@Service()
 export class CwToastService {
   private readonly list = signal<readonly CwToast[]>([]);
   /** The toasts, oldest first, including those playing their exit; read by `cw-toaster`. */

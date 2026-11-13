@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 
 import { CwCard } from '../card.component';
 import { PART_PADDING } from '../card.styles';
@@ -9,7 +9,6 @@ import { PART_PADDING } from '../card.styles';
  */
 @Component({
   selector: 'cw-card-header',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class]': 'classes()' },
   templateUrl: './card-header.component.html',
 })

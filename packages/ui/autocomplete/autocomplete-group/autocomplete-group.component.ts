@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import { _IdGenerator } from '@angular/cdk/a11y';
 
 import { GROUP_TITLE } from '../autocomplete.styles';
@@ -11,7 +11,6 @@ import { GROUP_TITLE } from '../autocomplete.styles';
  */
 @Component({
   selector: 'cw-autocomplete-group',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     role: 'group',
     // The preview's separator: a line edge to edge of the panel above every group but the first.

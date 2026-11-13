@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component } from '@angular/core';
 
 /**
  * A 1 px line between two groups of a `cw-select`, edge to edge of the panel (Select sheet of the
@@ -9,7 +9,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
  */
 @Component({
   selector: 'cw-select-separator',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: '-mx-1 my-1 block h-px bg-border', 'aria-hidden': 'true' },
   templateUrl: './select-separator.component.html',
 })

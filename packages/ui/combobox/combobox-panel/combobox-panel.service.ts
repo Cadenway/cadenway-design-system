@@ -1,11 +1,11 @@
 import {
   DOCUMENT,
-  Injectable,
+  inject,
   Injector,
+  Service,
+  signal,
   type TemplateRef,
   type ViewContainerRef,
-  inject,
-  signal,
 } from '@angular/core';
 import {
   type OverlayRef,
@@ -42,7 +42,7 @@ export interface ComboboxPanelConfig {
  * from the entry point. The same controller serves `cw-select` and `cw-autocomplete`, each in its
  * own entry point, until a shared one lands in `@cadenway/ui/core`.
  */
-@Injectable()
+@Service({ autoProvided: false })
 export class ComboboxPanel {
   private readonly injector = inject(Injector);
   private readonly document = inject(DOCUMENT);

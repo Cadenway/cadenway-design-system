@@ -1,12 +1,11 @@
 import { _IdGenerator } from '@angular/cdk/a11y';
 import {
-  ChangeDetectionStrategy,
-  Component,
-  DOCUMENT,
-  DestroyRef,
   afterNextRender,
   booleanAttribute,
+  Component,
   computed,
+  DestroyRef,
+  DOCUMENT,
   inject,
   input,
   signal,
@@ -59,7 +58,6 @@ function toSize(value: CwStatusIconSize | number | null | undefined): CwStatusIc
  */
 @Component({
   selector: 'cw-status-icon',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './status-icon.component.css',
   host: {
     '[class]': 'hostClasses()',

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component } from '@angular/core';
 
 import { EMPTY } from '../select.styles';
 
@@ -10,7 +10,6 @@ import { EMPTY } from '../select.styles';
  */
 @Component({
   selector: 'cw-select-empty',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: EMPTY },
   templateUrl: './select-empty.component.html',
 })

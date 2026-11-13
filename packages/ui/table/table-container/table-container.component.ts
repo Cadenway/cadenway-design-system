@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  afterRenderEffect,
-  inject,
-  signal,
-} from '@angular/core';
+import { afterRenderEffect, Component, ElementRef, inject, signal } from '@angular/core';
 import { ɵFOCUS_INSET } from '@cadenway/ui/core';
 
 /**
@@ -14,7 +7,6 @@ import { ɵFOCUS_INSET } from '@cadenway/ui/core';
  */
 @Component({
   selector: 'cw-table-container',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'classes',
     '[attr.tabindex]': 'overflowing() ? 0 : null',

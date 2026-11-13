@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 
 import { matchRanges } from '../command.match';
 import { CommandState } from '../command-state/command-state.service';
@@ -15,7 +15,6 @@ interface Part {
  */
 @Component({
   selector: 'cw-command-highlight',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'min-w-0 truncate' },
   templateUrl: './command-highlight.component.html',
 })

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 
 import { CommandState } from '../command-state/command-state.service';
 
@@ -9,7 +9,6 @@ import { CommandState } from '../command-state/command-state.service';
  */
 @Component({
   selector: 'cw-command-separator',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: '-mx-1 my-1 block h-px bg-border',
     'aria-hidden': 'true',

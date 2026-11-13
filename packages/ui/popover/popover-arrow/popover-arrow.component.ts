@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 
 import type { CwPopoverAlign, CwPopoverSide } from '../popover.types';
 
@@ -40,7 +40,6 @@ const ALONG: Record<'horizontal' | 'vertical', Record<CwPopoverAlign, string>> =
  */
 @Component({
   selector: 'cw-popover-arrow',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     'aria-hidden': 'true',
     '[class]': 'classes()',

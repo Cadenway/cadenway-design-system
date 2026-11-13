@@ -1,24 +1,23 @@
 import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  ElementRef,
-  Injector,
-  type TemplateRef,
-  ViewContainerRef,
   afterRenderEffect,
   booleanAttribute,
+  Component,
   computed,
   contentChild,
   contentChildren,
+  DestroyRef,
+  ElementRef,
   forwardRef,
   inject,
+  Injector,
   input,
   model,
   output,
   signal,
+  type TemplateRef,
   untracked,
   viewChild,
+  ViewContainerRef,
 } from '@angular/core';
 import { ActiveDescendantKeyManager, type Highlightable, _IdGenerator } from '@angular/cdk/a11y';
 import { type ControlValueAccessor, NgControl } from '@angular/forms';
@@ -108,7 +107,6 @@ function fold(text: string): string {
     SelectPanel,
     { provide: SELECT_HOST, useExisting: forwardRef(() => CwSelect) },
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'block',
     '[attr.id]': 'null',

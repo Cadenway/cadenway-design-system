@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 
 import { CwMenuItemBase } from '../menu-item-base/menu-item-base.directive';
 import { CwMenuRadioGroup } from '../menu-radio-group/menu-radio-group.component';
@@ -21,7 +21,6 @@ import { CW_MENU_ITEM } from '../menu.token';
     { provide: CW_MENU_ITEM, useExisting: CwMenuItemRadio },
     { provide: CwMenuItemBase, useExisting: CwMenuItemRadio },
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     role: 'menuitemradio',
     class: 'pl-8',

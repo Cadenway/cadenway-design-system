@@ -1,10 +1,9 @@
 import {
-  ChangeDetectionStrategy,
+  booleanAttribute,
   Component,
+  computed,
   DOCUMENT,
   ElementRef,
-  booleanAttribute,
-  computed,
   inject,
   input,
   output,
@@ -85,7 +84,6 @@ const FOCUSABLE =
       phosphorXBold,
     }),
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'classes()',
     '[attr.role]': 'role()',

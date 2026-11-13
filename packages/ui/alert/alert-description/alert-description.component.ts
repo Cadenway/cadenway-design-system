@@ -1,11 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 
 import { CwAlert } from '../alert.component';
 
 /** The description of an alert: what to do; muted, or the error color in a `destructive` alert. */
 @Component({
   selector: 'cw-alert-description',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'classes()',
   },

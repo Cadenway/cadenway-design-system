@@ -1,5 +1,5 @@
 import { _IdGenerator } from '@angular/cdk/a11y';
-import { ChangeDetectionStrategy, Component, booleanAttribute, inject, input } from '@angular/core';
+import { booleanAttribute, Component, inject, input } from '@angular/core';
 
 /**
  * The heading of a part of a `cw-menu`: the object's key (CAD-482), a group's name (Afficher,
@@ -10,7 +10,6 @@ import { ChangeDetectionStrategy, Component, booleanAttribute, inject, input } f
  */
 @Component({
   selector: 'cw-menu-label',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     // Text only: not an item of the menu (preview: `role="presentation"`); its id names its group.
     role: 'presentation',

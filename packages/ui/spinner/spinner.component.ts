@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, booleanAttribute, input } from '@angular/core';
+import { booleanAttribute, Component, input } from '@angular/core';
 
 import type { CwSpinnerSize } from './spinner.types';
 
@@ -25,7 +25,6 @@ const SIZES: Record<CwSpinnerSize, string> = {
   // its native role, focus and form behavior. The lint rule only knows element selectors.
   // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'svg[cwSpinner]',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     viewBox: '0 0 24 24',
     fill: 'none',

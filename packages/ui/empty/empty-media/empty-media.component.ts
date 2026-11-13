@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 
 import { CwEmpty } from '../empty.component';
 import type { CwEmptyMediaTone, CwEmptySize } from '../empty.types';
@@ -19,7 +19,6 @@ const MEDIA_TONES: Record<CwEmptyMediaTone, string> = {
  */
 @Component({
   selector: 'cw-empty-media',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'classes()',
     'aria-hidden': 'true',

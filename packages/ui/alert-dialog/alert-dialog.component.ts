@@ -1,25 +1,24 @@
 import { _IdGenerator } from '@angular/cdk/a11y';
 import { Dialog } from '@angular/cdk/dialog';
 import {
-  ChangeDetectionStrategy,
-  Component,
-  DOCUMENT,
-  DestroyRef,
-  Injector,
-  type TemplateRef,
-  ViewContainerRef,
   afterNextRender,
   booleanAttribute,
+  Component,
   computed,
   contentChild,
+  DestroyRef,
+  DOCUMENT,
   effect,
   inject,
+  Injector,
   input,
   model,
   output,
   signal,
+  type TemplateRef,
   untracked,
   viewChild,
+  ViewContainerRef,
 } from '@angular/core';
 import { ɵFOCUS_INSET } from '@cadenway/ui/core';
 import { CwInput } from '@cadenway/ui/input';
@@ -85,7 +84,6 @@ const ITEMS = `flex max-h-36 flex-col gap-0.5 overflow-y-auto rounded-lg bg-mute
   selector: 'cw-alert-dialog',
   imports: [CwInput],
   providers: [{ provide: CW_ALERT_DIALOG, useExisting: CwAlertDialog }],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './alert-dialog.component.html',
 })
 export class CwAlertDialog implements CwAlertDialogContext {

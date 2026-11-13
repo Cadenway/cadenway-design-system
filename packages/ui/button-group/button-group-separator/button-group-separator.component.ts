@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 
 import { CwButtonGroup } from '../button-group.component';
 import type { CwButtonGroupOrientation } from '../button-group.types';
@@ -20,7 +20,6 @@ const SEPARATOR: Record<CwButtonGroupOrientation, string> = {
  */
 @Component({
   selector: 'cw-button-group-separator',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     role: 'separator',
     '[class]': 'classes()',

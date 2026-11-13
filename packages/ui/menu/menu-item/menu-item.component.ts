@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  booleanAttribute,
-  computed,
-  input,
-  output,
-} from '@angular/core';
+import { booleanAttribute, Component, computed, input, output } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorCaretRightBold, phosphorCheckBold } from '@ng-icons/phosphor-icons/bold';
 
@@ -42,7 +35,6 @@ const VARIANTS: Record<CwMenuItemVariant, string> = {
     { provide: CW_MENU_ITEM, useExisting: CwMenuItem },
     { provide: CwMenuItemBase, useExisting: CwMenuItem },
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     role: 'menuitem',
     '[class]': 'variantClasses()',

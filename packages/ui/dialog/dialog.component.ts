@@ -1,24 +1,23 @@
 import { _IdGenerator } from '@angular/cdk/a11y';
 import { Dialog } from '@angular/cdk/dialog';
 import {
-  ChangeDetectionStrategy,
-  Component,
-  DOCUMENT,
-  DestroyRef,
-  Injector,
-  type TemplateRef,
-  ViewContainerRef,
   booleanAttribute,
+  Component,
   computed,
   contentChild,
+  DestroyRef,
+  DOCUMENT,
   effect,
   inject,
+  Injector,
   input,
   model,
   output,
   signal,
+  type TemplateRef,
   untracked,
   viewChild,
+  ViewContainerRef,
 } from '@angular/core';
 import { CwButton } from '@cadenway/ui/button';
 import { ɵFOCUS_INSET } from '@cadenway/ui/core';
@@ -81,7 +80,6 @@ const BODIES = {
   selector: 'cw-dialog',
   imports: [CwButton, NgIcon],
   providers: [provideIcons({ phosphorXBold }), { provide: CW_DIALOG, useExisting: CwDialog }],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './dialog.component.html',
 })
 export class CwDialog implements CwDialogContext {

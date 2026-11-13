@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  input,
-  numberAttribute,
-} from '@angular/core';
+import { Component, computed, inject, input, numberAttribute } from '@angular/core';
 
 import { CwInputOtp } from '../input-otp.component';
 
@@ -26,7 +19,6 @@ const SLOT_ACTIVE = 'z-10 ring-2 ring-ring ring-offset-2 ring-offset-background'
  */
 @Component({
   selector: 'cw-input-otp-slot',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     'aria-hidden': 'true',
     '[class]': 'classes()',

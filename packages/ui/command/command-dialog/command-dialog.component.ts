@@ -1,22 +1,21 @@
 import { Dialog, type DialogRef } from '@angular/cdk/dialog';
 import { createGlobalPositionStrategy } from '@angular/cdk/overlay';
 import {
-  ChangeDetectionStrategy,
-  Component,
-  DOCUMENT,
-  DestroyRef,
-  Injector,
-  type TemplateRef,
-  ViewContainerRef,
   afterNextRender,
   booleanAttribute,
+  Component,
+  DestroyRef,
+  DOCUMENT,
   effect,
   inject,
+  Injector,
   input,
   model,
   signal,
+  type TemplateRef,
   untracked,
   viewChild,
+  ViewContainerRef,
 } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorMagnifyingGlassBold } from '@ng-icons/phosphor-icons/bold';
@@ -56,7 +55,6 @@ const BACKDROP_OUT = 'animate-fade-out';
   selector: 'cw-command-dialog',
   imports: [CwSpinner, NgIcon],
   providers: [CommandState, provideIcons({ phosphorMagnifyingGlassBold })],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '(document:keydown)': 'onDocumentKeydown($event)',
   },

@@ -1,13 +1,12 @@
 import {
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  Injector,
   booleanAttribute,
+  Component,
   computed,
   contentChildren,
   effect,
+  ElementRef,
   inject,
+  Injector,
   input,
   model,
   output,
@@ -47,7 +46,6 @@ const PREVIOUS = new Set(['ArrowUp', 'ArrowLeft']);
  */
 @Component({
   selector: 'cw-radio-group',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     role: 'radiogroup',
     '[class]': 'orientationClasses()',

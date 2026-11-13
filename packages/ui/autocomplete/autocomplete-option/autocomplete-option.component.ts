@@ -1,12 +1,11 @@
 import {
-  ChangeDetectionStrategy,
-  Component,
-  DOCUMENT,
-  ElementRef,
   afterEveryRender,
   afterRenderEffect,
   booleanAttribute,
+  Component,
   computed,
+  DOCUMENT,
+  ElementRef,
   inject,
   input,
   untracked,
@@ -56,7 +55,6 @@ function indexOf(text: string, query: string): number {
  */
 @Component({
   selector: 'cw-autocomplete-option',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     role: 'option',
     '[id]': 'id',

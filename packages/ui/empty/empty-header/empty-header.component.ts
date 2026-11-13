@@ -1,9 +1,8 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component } from '@angular/core';
 
 /** The text block of an empty state: media, title and description, centered, `max-w-sm`. */
 @Component({
   selector: 'cw-empty-header',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'flex max-w-sm flex-col items-center gap-2' },
   templateUrl: './empty-header.component.html',
 })

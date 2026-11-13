@@ -5,14 +5,14 @@ import {
   _IdGenerator,
 } from '@angular/cdk/a11y';
 import {
-  Injectable,
-  Injector,
-  type ModelSignal,
-  type Signal,
   computed,
   effect,
   inject,
+  Injector,
+  type ModelSignal,
+  Service,
   signal,
+  type Signal,
   untracked,
 } from '@angular/core';
 
@@ -54,7 +54,7 @@ export interface CommandOption extends Highlightable {
  * `ActiveDescendantKeyManager`, driven by `ɵnavigateList`, moves the highlight and the field points
  * at it with `aria-activedescendant` (Command sheet). Not exported from the entry point.
  */
-@Injectable()
+@Service({ autoProvided: false })
 export class CommandState {
   /** Id of the listbox, for the field's `aria-controls`. */
   readonly listId = inject(_IdGenerator).getId('cw-command-list-');

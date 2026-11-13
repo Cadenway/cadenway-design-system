@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, contentChild } from '@angular/core';
+import { Component, contentChild } from '@angular/core';
 
 import { CwMenuLabel } from '../menu-label/menu-label.component';
 
@@ -10,7 +10,6 @@ import { CwMenuLabel } from '../menu-label/menu-label.component';
  */
 @Component({
   selector: 'cw-menu-group',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     role: 'group',
     class: 'block',

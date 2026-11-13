@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 
 import type { CwEmptySize, CwEmptyVariant } from './empty.types';
 
@@ -33,7 +33,6 @@ const SIZES: Record<CwEmptySize, string> = {
  */
 @Component({
   selector: 'cw-empty',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'classes()',
     '[attr.data-variant]': 'variant()',

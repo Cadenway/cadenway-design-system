@@ -1,11 +1,10 @@
 import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  ElementRef,
   afterRenderEffect,
   booleanAttribute,
+  Component,
   computed,
+  DestroyRef,
+  ElementRef,
   inject,
   input,
   output,
@@ -82,7 +81,6 @@ const COMMENT = /^\s*(#|\/\/)/;
   selector: 'cw-code-block',
   imports: [CwButton, NgIcon],
   providers: [provideIcons({ phosphorCheckBold, phosphorCopyBold, phosphorWarningCircleFill })],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'frameClasses()',
     '[attr.data-variant]': 'variant()',

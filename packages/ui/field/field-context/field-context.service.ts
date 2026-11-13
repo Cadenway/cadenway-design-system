@@ -1,11 +1,11 @@
 import {
+  computed,
   DestroyRef,
-  Injectable,
+  inject,
+  Service,
+  signal,
   type Signal,
   type WritableSignal,
-  computed,
-  inject,
-  signal,
 } from '@angular/core';
 
 /** A `label[cwFieldLabel]` registered with its field. */
@@ -20,7 +20,7 @@ export interface FieldLabelRef {
  * that register with it so the field can wire them to its control. Provided by `cw-field`; not
  * exported from the entry point, the consumer never sees it.
  */
-@Injectable()
+@Service({ autoProvided: false })
 export class FieldContext {
   private readonly invalidSource = signal<Signal<boolean>>(signal(false));
   /** Whether the field is in error: the error shows, its id joins `aria-describedby`. */

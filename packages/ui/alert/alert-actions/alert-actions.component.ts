@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 
 import { CwAlert } from '../alert.component';
 
@@ -8,7 +8,6 @@ import { CwAlert } from '../alert.component';
  */
 @Component({
   selector: 'cw-alert-actions',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'classes()',
   },

@@ -1,7 +1,6 @@
 import {
-  ChangeDetectionStrategy,
-  Component,
   booleanAttribute,
+  Component,
   computed,
   inject,
   input,
@@ -79,7 +78,6 @@ function initialsOf(name: string): string {
   selector: 'cw-avatar',
   imports: [NgIcon],
   providers: [provideIcons({ phosphorUserBold })],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'classes()',
     '[attr.title]': 'spoken()',

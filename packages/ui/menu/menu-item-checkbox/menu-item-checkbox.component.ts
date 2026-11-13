@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, model } from '@angular/core';
+import { Component, model } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorCheckBold } from '@ng-icons/phosphor-icons/bold';
 
@@ -24,7 +24,6 @@ import { CW_MENU_ITEM } from '../menu.token';
     { provide: CW_MENU_ITEM, useExisting: CwMenuItemCheckbox },
     { provide: CwMenuItemBase, useExisting: CwMenuItemCheckbox },
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     role: 'menuitemcheckbox',
     class: 'pl-8',

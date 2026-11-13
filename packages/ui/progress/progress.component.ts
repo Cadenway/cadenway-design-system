@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  input,
-  numberAttribute,
-} from '@angular/core';
+import { Component, computed, input, numberAttribute } from '@angular/core';
 
 import type { CwProgressSize, CwProgressState, CwProgressVariant } from './progress.types';
 
@@ -49,7 +43,6 @@ function nullableNumber(value: unknown): number | null {
  */
 @Component({
   selector: 'cw-progress',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     role: 'progressbar',
     '[class]': 'classes()',

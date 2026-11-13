@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 
 import { CwCard } from '../card.component';
 import { PART_PADDING } from '../card.styles';
@@ -6,7 +6,6 @@ import { PART_PADDING } from '../card.styles';
 /** The body of a card, padded like the header and the footer. */
 @Component({
   selector: 'cw-card-content',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class]': 'classes()' },
   templateUrl: './card-content.component.html',
 })

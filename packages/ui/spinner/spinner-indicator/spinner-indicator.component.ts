@@ -1,8 +1,7 @@
 import {
-  ChangeDetectionStrategy,
+  booleanAttribute,
   Component,
   DestroyRef,
-  booleanAttribute,
   effect,
   inject,
   input,
@@ -23,7 +22,6 @@ import type { CwSpinnerSize } from '../spinner.types';
 @Component({
   selector: 'cw-spinner',
   imports: [CwSpinner],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'inline-flex items-center gap-2 text-muted-foreground',
     '[attr.role]': 'visible() ? "status" : null',

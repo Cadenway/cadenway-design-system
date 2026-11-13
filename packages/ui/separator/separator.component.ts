@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, booleanAttribute, input } from '@angular/core';
+import { booleanAttribute, Component, input } from '@angular/core';
 
 import type { CwSeparatorOrientation } from './separator.types';
 
@@ -24,7 +24,6 @@ const ORIENTATIONS: Record<CwSeparatorOrientation, string> = {
  */
 @Component({
   selector: 'cw-separator',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'classes()',
     '[attr.role]': 'decorative() ? "none" : "separator"',

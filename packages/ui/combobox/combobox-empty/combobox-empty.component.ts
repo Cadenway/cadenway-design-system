@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component } from '@angular/core';
 
 import { EMPTY } from '../combobox.styles';
 
@@ -10,7 +10,6 @@ import { EMPTY } from '../combobox.styles';
  */
 @Component({
   selector: 'cw-combobox-empty',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: EMPTY },
   templateUrl: './combobox-empty.component.html',
 })

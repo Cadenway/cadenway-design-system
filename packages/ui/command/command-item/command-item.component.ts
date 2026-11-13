@@ -1,11 +1,10 @@
 import { _IdGenerator } from '@angular/cdk/a11y';
 import {
-  ChangeDetectionStrategy,
+  booleanAttribute,
   Component,
+  computed,
   DestroyRef,
   ElementRef,
-  booleanAttribute,
-  computed,
   inject,
   input,
   output,
@@ -31,7 +30,6 @@ const ITEM =
  */
 @Component({
   selector: 'cw-command-item',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: ITEM,
     role: 'option',

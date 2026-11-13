@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorMagnifyingGlassBold } from '@ng-icons/phosphor-icons/bold';
 
@@ -14,7 +14,6 @@ import { CommandState } from '../command-state/command-state.service';
   selector: 'cw-command-empty',
   imports: [NgIcon],
   providers: [provideIcons({ phosphorMagnifyingGlassBold })],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'flex flex-col items-center gap-2 px-4 py-5 text-center text-sm',
     '[attr.hidden]': 'shown() ? null : ""',

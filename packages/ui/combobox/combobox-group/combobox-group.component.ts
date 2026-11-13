@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  contentChildren,
-  inject,
-  input,
-} from '@angular/core';
+import { Component, computed, contentChildren, inject, input } from '@angular/core';
 import { _IdGenerator } from '@angular/cdk/a11y';
 
 import { CwComboboxOption } from '../combobox-option/combobox-option.component';
@@ -24,7 +17,6 @@ const SHOWN =
  */
 @Component({
   selector: 'cw-combobox-group',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     role: 'group',
     class: SHOWN,

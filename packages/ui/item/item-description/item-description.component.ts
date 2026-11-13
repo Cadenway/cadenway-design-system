@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 
 import { CwItem } from '../item.component';
 import type { CwItemSize } from '../item.types';
@@ -12,7 +12,6 @@ const DESCRIPTIONS: Record<CwItemSize, string> = {
 /** The description of an item, two lines at most (one truncated line in `xs`). */
 @Component({
   selector: 'cw-item-description',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class]': 'classes()' },
   templateUrl: './item-description.component.html',
 })

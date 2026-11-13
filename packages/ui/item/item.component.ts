@@ -1,15 +1,14 @@
 import {
-  forwardRef,
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  type Signal,
-  HostAttributeToken,
   booleanAttribute,
+  Component,
   computed,
+  ElementRef,
+  forwardRef,
+  HostAttributeToken,
   inject,
   input,
   model,
+  type Signal,
 } from '@angular/core';
 import { ɵFOCUS_INSET } from '@cadenway/ui/core';
 
@@ -61,7 +60,6 @@ const DISABLED = 'pointer-events-none opacity-50';
   // activation.
   selector: 'cw-item, a[cwItem], button[cwItem]',
   providers: [{ provide: ITEM_GROUP_ITEM, useExisting: forwardRef(() => CwItem) }],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'classes()',
     '[attr.role]': 'role()',

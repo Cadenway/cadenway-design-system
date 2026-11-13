@@ -1,13 +1,12 @@
 import { CdkDrag, type CdkDragEnd } from '@angular/cdk/drag-drop';
 import {
-  ChangeDetectionStrategy,
-  Component,
-  DOCUMENT,
-  DestroyRef,
-  type ElementRef,
   booleanAttribute,
+  Component,
   computed,
+  DestroyRef,
+  DOCUMENT,
   effect,
+  type ElementRef,
   inject,
   input,
   numberAttribute,
@@ -83,7 +82,6 @@ const SWIPE_RATIO = 0.4;
 @Component({
   selector: 'cw-toaster',
   imports: [CdkDrag, CwToastItem],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '(document:keydown)': 'onDocumentKeydown($event)',
     '(document:visibilitychange)': 'onVisibilityChange()',

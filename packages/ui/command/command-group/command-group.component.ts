@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 
 import { COMMAND_GROUP } from '../command-group.token';
 import { CommandState } from '../command-state/command-state.service';
@@ -12,7 +12,6 @@ import { CommandState } from '../command-state/command-state.service';
 @Component({
   selector: 'cw-command-group',
   providers: [{ provide: COMMAND_GROUP, useExisting: CwCommandGroup }],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'block',
     role: 'group',

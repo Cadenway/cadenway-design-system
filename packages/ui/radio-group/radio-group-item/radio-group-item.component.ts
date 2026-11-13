@@ -1,9 +1,8 @@
 import {
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
   booleanAttribute,
+  Component,
   computed,
+  ElementRef,
   inject,
   input,
   viewChild,
@@ -58,7 +57,6 @@ class RadioOption implements FocusableOption {
   selector: 'cw-radio-group-item',
   imports: [NgTemplateOutlet],
   providers: [{ provide: RADIO_GROUP_ITEM, useExisting: CwRadioGroupItem }],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'hostClasses()',
     '[attr.id]': 'null',

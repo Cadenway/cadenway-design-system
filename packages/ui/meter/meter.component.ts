@@ -1,7 +1,6 @@
 import {
-  ChangeDetectionStrategy,
-  Component,
   booleanAttribute,
+  Component,
   computed,
   inject,
   input,
@@ -107,7 +106,6 @@ function formatNumber(value: number): string {
   providers: [
     provideIcons({ phosphorCheckCircleFill, phosphorWarningCircleFill, phosphorWarningFill }),
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'block',
     '[attr.data-zone]': 'loading() ? null : currentZone()',

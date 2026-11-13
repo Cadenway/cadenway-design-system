@@ -1,13 +1,12 @@
 import {
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  Injector,
   booleanAttribute,
+  Component,
   computed,
   contentChildren,
   effect,
+  ElementRef,
   inject,
+  Injector,
   input,
   model,
   numberAttribute,
@@ -69,7 +68,6 @@ const SPACED: Record<CwToggleGroupOrientation, string> = {
  */
 @Component({
   selector: 'cw-toggle-group',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'classes()',
     '[attr.role]': 'type() === "single" ? "radiogroup" : "group"',

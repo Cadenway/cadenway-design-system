@@ -22,6 +22,14 @@ paths:
   `<brick>.constants.ts` (exported constant data), and internal shared files (`<brick>.styles.ts`
   for class maps used by several declarations, `<name>.token.ts` for injection tokens). A class map
   used by one declaration stays in its file.
+- Angular 22 practices (`node_modules/@angular/cli/src/commands/mcp/resources/best-practices.md`,
+  the resource the Angular MCP serves): no `changeDetection: ChangeDetectionStrategy.OnPush` (the
+  default in v22) and no `standalone: true`; services are `@Service()` (singleton) or
+  `@Service({ autoProvided: false })` (provided by a component), never `@Injectable`; `inject()`,
+  never constructor injection; `input()`, `output()`, `model()`, `computed()`, `linkedSignal()`;
+  `host` object, never `@HostBinding`/`@HostListener`; `class` and `style` bindings, never
+  `ngClass`/`ngStyle`; no `CommonModule`; native control flow; Signal Forms first. Templates stay
+  in their own file (repository rule, over the "inline for small components" advice).
 - API, variants, sizes and states come from the brick's sheet in the Design System artifact
   (`project/components/<Name>/README.md`); the mockup settles behavior and copy.
 - Signal API; variants and sizes as inputs; no consumer-specific variant; no `class` input (the

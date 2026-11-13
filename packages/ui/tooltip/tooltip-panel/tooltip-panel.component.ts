@@ -1,12 +1,5 @@
 import { NgTemplateOutlet } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  TemplateRef,
-  booleanAttribute,
-  computed,
-  input,
-} from '@angular/core';
+import { booleanAttribute, Component, computed, input, TemplateRef } from '@angular/core';
 import { CwKbd } from '@cadenway/ui/kbd';
 
 import type { CwTooltipAlign, CwTooltipContent, CwTooltipSide } from '../tooltip.types';
@@ -62,7 +55,6 @@ const ARROW_ALONG: Record<'horizontal' | 'vertical', Record<CwTooltipAlign, stri
 @Component({
   selector: 'cw-tooltip-panel',
   imports: [CwKbd, NgTemplateOutlet],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     role: 'tooltip',
     '[attr.id]': 'id()',

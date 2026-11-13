@@ -157,5 +157,9 @@ export const Keyboard: Story = {
     await expect(trigger).toHaveAttribute('aria-expanded', 'false');
     await waitFor(() => expect(trigger).toHaveTextContent('En cours'));
     await expect(trigger).toHaveFocus();
+    // The accessibility check runs after the play function: let the label swap (CwSwap, 280 ms
+    // fade) and the panel exit finish, or axe measures the label's contrast mid-fade.
+    // A cancelled animation (its element removed) rejects `finished`: settle, do not fail.
+    await Promise.allSettled(document.getAnimations().map((animation) => animation.finished));
   },
 };

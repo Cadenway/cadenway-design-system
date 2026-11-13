@@ -1,10 +1,9 @@
 import {
-  ChangeDetectionStrategy,
+  booleanAttribute,
   Component,
+  computed,
   ElementRef,
   HostAttributeToken,
-  booleanAttribute,
-  computed,
   inject,
   input,
 } from '@angular/core';
@@ -62,7 +61,6 @@ const SIZES: Record<CwButtonSize, string> = {
   selector: 'button[cwButton], a[cwButton]',
   imports: [CwSpinner],
   hostDirectives: [CwRipple],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'classes()',
     '[attr.type]': 'type()',

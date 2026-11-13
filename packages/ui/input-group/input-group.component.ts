@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  computed,
-  inject,
-  input,
-} from '@angular/core';
+import { Component, computed, ElementRef, inject, input } from '@angular/core';
 import { ɵFOCUS_FIELD_WITHIN } from '@cadenway/ui/core';
 
 import type { CwInputGroupSize } from './input-group.types';
@@ -38,7 +31,6 @@ const SIZES: Record<CwInputGroupSize, string> = {
  */
 @Component({
   selector: 'cw-input-group',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     role: 'group',
     '[class]': 'classes()',

@@ -1,12 +1,11 @@
 import {
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
   afterRenderEffect,
   booleanAttribute,
+  Component,
   computed,
   contentChild,
   effect,
+  ElementRef,
   inject,
   input,
   signal,
@@ -59,7 +58,6 @@ function splitIds(value: string | null): string[] {
  */
 @Component({
   selector: 'cw-field',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [FieldContext],
   host: {
     '[class]': 'classes()',

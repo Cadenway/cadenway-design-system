@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  booleanAttribute,
-  inject,
-  input,
-  model,
-} from '@angular/core';
+import { booleanAttribute, Component, inject, input, model } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorMagnifyingGlassBold } from '@ng-icons/phosphor-icons/bold';
 
@@ -33,7 +26,6 @@ import { type CommandHost, CommandState } from './command-state/command-state.se
   selector: 'cw-command',
   imports: [CwSpinner, NgIcon],
   providers: [CommandState, provideIcons({ phosphorMagnifyingGlassBold })],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class:
       'flex flex-col overflow-hidden rounded-lg border bg-popover text-popover-foreground shadow-md',

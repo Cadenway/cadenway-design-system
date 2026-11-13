@@ -1,11 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 
 import { CwBanner } from '../banner.component';
 
 /** The actions of a banner: one or two `sm` buttons, `ghost` then `outline`. */
 @Component({
   selector: 'cw-banner-actions',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'classes()',
   },

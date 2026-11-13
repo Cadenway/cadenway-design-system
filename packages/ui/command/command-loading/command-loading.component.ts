@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 
 import { CwSpinner } from '@cadenway/ui/spinner';
 
@@ -12,7 +12,6 @@ import { CommandState } from '../command-state/command-state.service';
 @Component({
   selector: 'cw-command-loading',
   imports: [CwSpinner],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'classes()',
     '[attr.hidden]': 'state.loading() ? null : ""',

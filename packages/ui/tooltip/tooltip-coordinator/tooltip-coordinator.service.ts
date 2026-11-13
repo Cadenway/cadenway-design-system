@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Service } from '@angular/core';
 
 /** What the coordinator needs from an open tooltip: a way to close it at once. */
 export interface CoordinatedTooltip {
@@ -11,7 +11,7 @@ export interface CoordinatedTooltip {
  * its delay (Tooltip sheet, "Délais": sweeping a toolbar does not wait at every button). Shared by
  * every `[cwTooltip]` of the application; not exported from the entry point.
  */
-@Injectable({ providedIn: 'root' })
+@Service()
 export class CwTooltipCoordinator {
   private active: CoordinatedTooltip | null = null;
   private closedAt = Number.NEGATIVE_INFINITY;

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component } from '@angular/core';
 
 /**
  * The trailing part of an item: one visible action at most (an `outline` `sm` button, a `ghost`
@@ -6,7 +6,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
  */
 @Component({
   selector: 'cw-item-actions',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'flex shrink-0 items-center gap-2' },
   templateUrl: './item-actions.component.html',
 })

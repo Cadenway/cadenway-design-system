@@ -1,12 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  booleanAttribute,
-  computed,
-  inject,
-  input,
-} from '@angular/core';
+import { booleanAttribute, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { _IdGenerator } from '@angular/cdk/a11y';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorCheckBold } from '@ng-icons/phosphor-icons/bold';
@@ -28,7 +20,6 @@ import { COMBOBOX_HOST } from '../combobox.token';
   selector: 'cw-combobox-option',
   imports: [NgIcon],
   providers: [provideIcons({ phosphorCheckBold })],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     role: 'option',
     '[id]': 'id',

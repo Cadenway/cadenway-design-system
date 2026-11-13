@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import { _IdGenerator } from '@angular/cdk/a11y';
 
 import { GROUP_TITLE } from '../select.styles';
@@ -12,7 +12,6 @@ import { GROUP_TITLE } from '../select.styles';
  */
 @Component({
   selector: 'cw-select-group',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'block',
     role: 'group',

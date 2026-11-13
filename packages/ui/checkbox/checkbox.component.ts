@@ -1,9 +1,8 @@
 import {
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
   booleanAttribute,
+  Component,
   computed,
+  ElementRef,
   inject,
   input,
   model,
@@ -32,7 +31,6 @@ import { phosphorCheckBold, phosphorMinusBold } from '@ng-icons/phosphor-icons/b
   selector: 'cw-checkbox',
   imports: [NgIcon],
   providers: [provideIcons({ phosphorCheckBold, phosphorMinusBold })],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'inline-flex',
     '[attr.id]': 'null',

@@ -1,9 +1,8 @@
 import {
-  ChangeDetectionStrategy,
-  Component,
-  HostAttributeToken,
   booleanAttribute,
+  Component,
   computed,
+  HostAttributeToken,
   inject,
   input,
   model,
@@ -49,7 +48,6 @@ const SIZES: Record<CwToggleSize, string> = {
   // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'button[cwToggle]',
   hostDirectives: [CwRipple],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'classes()',
     '[attr.type]': 'type',

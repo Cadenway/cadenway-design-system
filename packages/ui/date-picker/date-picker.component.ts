@@ -7,25 +7,24 @@ import {
 } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import {
-  ChangeDetectionStrategy,
-  Component,
-  DOCUMENT,
-  DestroyRef,
-  ElementRef,
-  Injector,
-  type TemplateRef,
-  ViewContainerRef,
   afterNextRender,
   booleanAttribute,
+  Component,
   computed,
+  DestroyRef,
+  DOCUMENT,
   effect,
+  ElementRef,
   inject,
+  Injector,
   input,
   model,
   output,
   signal,
+  type TemplateRef,
   untracked,
   viewChild,
+  ViewContainerRef,
 } from '@angular/core';
 import { type ControlValueAccessor, NgControl } from '@angular/forms';
 import type { FormValueControl } from '@angular/forms/signals';
@@ -157,7 +156,6 @@ function pad(value: number): string {
     NgIcon,
   ],
   providers: [provideIcons({ phosphorCalendarBlankBold, phosphorCheckBold, phosphorClockBold })],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'inline-flex min-w-0',
     '[attr.id]': 'null',

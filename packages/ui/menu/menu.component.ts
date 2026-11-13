@@ -13,22 +13,21 @@ import { _getEventTarget } from '@angular/cdk/platform';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { NgTemplateOutlet } from '@angular/common';
 import {
-  ChangeDetectionStrategy,
-  Component,
-  DOCUMENT,
-  DestroyRef,
-  ElementRef,
-  Injector,
-  TemplateRef,
-  ViewContainerRef,
   booleanAttribute,
+  Component,
   computed,
   contentChildren,
+  DestroyRef,
+  DOCUMENT,
+  ElementRef,
   inject,
+  Injector,
   input,
   output,
   signal,
+  TemplateRef,
   viewChild,
+  ViewContainerRef,
 } from '@angular/core';
 import {
   ɵmenuFrom,
@@ -119,7 +118,6 @@ function normalize(text: string): string {
 @Component({
   selector: 'cw-menu',
   imports: [NgTemplateOutlet],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'contents' },
   templateUrl: './menu.component.html',
 })

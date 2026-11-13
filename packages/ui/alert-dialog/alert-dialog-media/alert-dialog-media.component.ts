@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 
 import { CW_ALERT_DIALOG } from '../alert-dialog.token';
 
@@ -23,7 +23,6 @@ const TONES = {
  */
 @Component({
   selector: 'cw-alert-dialog-media',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { 'aria-hidden': 'true', '[class]': 'classes()' },
   templateUrl: './alert-dialog-media.component.html',
 })

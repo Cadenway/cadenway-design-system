@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, contentChild, model } from '@angular/core';
+import { Component, contentChild, model } from '@angular/core';
 
 import { CwMenuLabel } from '../menu-label/menu-label.component';
 
@@ -11,7 +11,6 @@ import { CwMenuLabel } from '../menu-label/menu-label.component';
  */
 @Component({
   selector: 'cw-menu-radio-group',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     role: 'group',
     class: 'block',

@@ -1,9 +1,8 @@
 import {
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
   booleanAttribute,
+  Component,
   computed,
+  ElementRef,
   inject,
   input,
   model,
@@ -47,7 +46,6 @@ function clean(raw: string, charset: CwInputOtpCharset, length: number): string 
  */
 @Component({
   selector: 'cw-input-otp',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class:
       'relative flex w-fit items-center gap-2 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50',

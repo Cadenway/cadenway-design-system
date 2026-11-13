@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 
 import { CommandState } from '../command-state/command-state.service';
 
@@ -15,7 +15,6 @@ const ENTRANCE =
  */
 @Component({
   selector: 'cw-command-list',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'block max-h-[min(400px,60vh)] overflow-y-auto p-1',
   },
