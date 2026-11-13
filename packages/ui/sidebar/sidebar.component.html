@@ -1,0 +1,23 @@
+@if (backdrop()) {
+  <button
+    type="button"
+    tabindex="-1"
+    [attr.aria-label]="closeLabel()"
+    [class]="backdropClasses"
+    (click)="collapse()"
+  ></button>
+}
+<nav
+  [id]="id"
+  [attr.aria-label]="ariaLabel()"
+  [attr.data-state]="state()"
+  [attr.data-collapsible]="collapsible()"
+  [attr.inert]="hidden() ? '' : null"
+  [class]="navClasses()"
+>
+  <div [class]="innerClasses()">
+    <ng-content select="cw-sidebar-header" />
+    <div [class]="bodyClasses()"><ng-content /></div>
+    <ng-content select="cw-sidebar-footer" />
+  </div>
+</nav>

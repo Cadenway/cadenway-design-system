@@ -1,0 +1,121 @@
+<span [class]="fieldClasses">
+  @if (field().icon; as icon) {
+    <ng-icon [name]="icon" aria-hidden="true" />
+  }
+  {{ field().label }}
+</span>
+
+<button
+  #operatorButton
+  type="button"
+  [class]="operatorClasses"
+  [attr.aria-label]="text().operator(operatorLabel())"
+  [cwMenuTriggerFor]="operatorMenu"
+>
+  {{ operatorLabel() }}
+</button>
+<cw-menu #operatorMenu align="start">
+  @for (item of field().operators; track item.value) {
+    <button
+      cwMenuItem
+      [selected]="item.value === filter().operator"
+      (triggered)="setOperator(item)"
+    >
+      {{ item.label }}
+    </button>
+  }
+</cw-menu>
+
+@if (hasValue()) {
+  @switch (kind()) {
+    @case ('date') {
+      <button #valueButton type="button" [class]="valueClasses" [cwPopoverTrigger]="valuePopover">
+        <ng-container [ngTemplateOutlet]="valueContent" />
+      </button>
+      <cw-popover #valuePopover align="start" [ariaLabel]="text().values(field().label)">
+        <cw-calendar [selected]="day()" (selectedChange)="pickDay($event, valuePopover)" />
+      </cw-popover>
+    }
+    @case ('text') {
+      <button #valueButton type="button" [class]="valueClasses" [cwPopoverTrigger]="valuePopover">
+        <ng-container [ngTemplateOutlet]="valueContent" />
+      </button>
+      <cw-popover #valuePopover align="start" size="sm" [ariaLabel]="text().values(field().label)">
+        <input
+          #textField
+          cwInput
+          size="sm"
+          [value]="typed()"
+          [attr.aria-label]="text().values(field().label)"
+          (change)="commitText(textField.value)"
+          (keydown.enter)="applyText(textField, valuePopover, $event)"
+        />
+      </cw-popover>
+    }
+    @default {
+      <button #valueButton type="button" [class]="valueClasses" [cwMenuTriggerFor]="valueMenu">
+        <ng-container [ngTemplateOutlet]="valueContent" />
+      </button>
+      <cw-menu #valueMenu align="start" [ariaLabel]="text().values(field().label)">
+        @for (option of field().options ?? []; track option.value) {
+          <button
+            cwMenuItemCheckbox
+            [checked]="isTicked(option)"
+            (checkedChange)="tick(option, $event)"
+          >
+            <ng-container
+              [ngTemplateOutlet]="optionMedia"
+              [ngTemplateOutletContext]="{ $implicit: option }"
+            />
+            {{ option.label }}
+          </button>
+        }
+      </cw-menu>
+    }
+  }
+}
+
+<button
+  type="button"
+  [class]="removeClasses"
+  [attr.aria-label]="text().remove(field().label)"
+  (click)="removed.emit()"
+  (keydown)="onRemoveKeydown($event)"
+>
+  <ng-icon name="phosphorXBold" aria-hidden="true" />
+</button>
+
+<ng-template #valueContent>
+  @if (valueTemplate(); as custom) {
+    <ng-container
+      [ngTemplateOutlet]="custom"
+      [ngTemplateOutletContext]="{ $implicit: filter(), field: field() }"
+    />
+  } @else {
+    @if (media().length > 0 && (optionTemplate() || media()[0].icon)) {
+      <span
+        aria-hidden="true"
+        [class]="stacked() ? 'flex items-center -space-x-1' : 'flex items-center gap-0.5'"
+      >
+        @for (option of media(); track option.value) {
+          <ng-container
+            [ngTemplateOutlet]="optionMedia"
+            [ngTemplateOutletContext]="{ $implicit: option }"
+          />
+        }
+      </span>
+    }
+    {{ summary() }}
+  }
+</ng-template>
+
+<ng-template #optionMedia let-option>
+  @if (optionTemplate(); as media) {
+    <ng-container
+      [ngTemplateOutlet]="media"
+      [ngTemplateOutletContext]="{ $implicit: option, field: field() }"
+    />
+  } @else if (option.icon) {
+    <ng-icon [name]="option.icon" aria-hidden="true" />
+  }
+</ng-template>

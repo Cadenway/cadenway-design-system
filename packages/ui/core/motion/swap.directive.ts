@@ -7,7 +7,9 @@ import { ɵprefersReducedMotion } from '../a11y/reduced-motion';
  * blur and fades in, in 280 ms on `cubic-bezier(.2, .9, .25, 1)`.
  *
  * Bind the value the label displays: `<span [cwSwap]="selectedLabel()">{{ selectedLabel() }}</span>`.
- * The first value does not animate; nothing animates under `prefers-reduced-motion` (integration
+ * The first meaningful value does not animate: neither the initial one nor the first one that
+ * replaces an empty value (a select whose options register after its first render), so a page
+ * never loads with labels fading in. Nothing animates under `prefers-reduced-motion` (integration
  * guide, "Mouvement": "Libellé d'un sélecteur qui change").
  */
 @Directive({
@@ -19,22 +21,20 @@ export class CwSwap {
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly document = inject(DOCUMENT);
-  private seen = false;
+  private previous: unknown = undefined;
 
   constructor() {
     effect(() => {
-      this.cwSwap();
+      const value = this.cwSwap();
       untracked(() => {
-        this.play();
+        const previous = this.previous;
+        this.previous = value;
+        if (!isEmpty(previous) && previous !== value) this.play();
       });
     });
   }
 
   private play(): void {
-    if (!this.seen) {
-      this.seen = true;
-      return;
-    }
     const element = this.host.nativeElement;
     if (ɵprefersReducedMotion(this.document) || typeof element.animate !== 'function') {
       return;
@@ -47,4 +47,8 @@ export class CwSwap {
       { duration: 280, easing: 'cubic-bezier(.2, .9, .25, 1)' },
     );
   }
+}
+
+function isEmpty(value: unknown): boolean {
+  return value === undefined || value === null || value === '';
 }

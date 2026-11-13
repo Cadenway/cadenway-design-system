@@ -1,0 +1,126 @@
+@if (showRange()) {
+  <span class="text-sm text-muted-foreground tabular-nums">{{ range() }}</span>
+}
+<div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+  @if (hasSizes()) {
+    <div class="flex items-center gap-2">
+      <label class="text-sm text-muted-foreground" [for]="sizeId">{{ text().pageSize }}</label>
+      <cw-select
+        class="w-18 text-foreground tabular-nums"
+        [id]="sizeId"
+        [size]="selectSize()"
+        [value]="pageSize()"
+        (valueChange)="changePageSize($event)"
+      >
+        @for (choice of pageSizes(); track choice) {
+          <cw-select-option [value]="choice">{{ choice }}</cw-select-option>
+        }
+      </cw-select>
+    </div>
+  }
+  @if (compact()) {
+    <span class="text-sm font-medium tabular-nums">{{ status() }}</span>
+  }
+  <nav #nav [attr.aria-label]="ariaLabel()">
+    <ul class="flex items-center gap-1">
+      @if (showFirstLast() && (variant() === 'full' || compact())) {
+        <li>
+          <button
+            cwPaginationLink
+            [size]="size()"
+            [disabled]="current() === 1"
+            [attr.aria-label]="text().first"
+            (click)="goTo(1, $event)"
+          >
+            <ng-icon name="phosphorCaretDoubleLeftBold" aria-hidden="true" />
+          </button>
+        </li>
+      }
+      <li>
+        @if (compact()) {
+          <button
+            cwPaginationLink
+            [size]="size()"
+            [disabled]="current() === 1"
+            [attr.aria-label]="text().previous"
+            (click)="goTo(current() - 1, $event)"
+          >
+            <ng-icon name="phosphorCaretLeftBold" aria-hidden="true" />
+          </button>
+        } @else {
+          <button
+            type="button"
+            cwRipple
+            [class]="steps().previous"
+            [disabled]="current() === 1"
+            (click)="goTo(current() - 1, $event)"
+          >
+            <ng-icon name="phosphorCaretLeftBold" aria-hidden="true" />{{ text().previousText }}
+          </button>
+        }
+      </li>
+      @if (variant() === 'full') {
+        @for (entry of entries(); track entry.key) {
+          <li>
+            @if (entry.page === null) {
+              <cw-pagination-ellipsis [size]="size()" [label]="text().hiddenPages" />
+            } @else {
+              <button
+                cwPaginationLink
+                [size]="size()"
+                [current]="entry.page === current()"
+                [attr.aria-label]="text().page + ' ' + entry.page"
+                (click)="goTo(entry.page, $event)"
+              >
+                {{ entry.page }}
+              </button>
+            }
+          </li>
+        }
+      } @else if (!compact()) {
+        <li>
+          <span class="px-2 text-sm text-muted-foreground tabular-nums"
+            >{{ text().page }} <span class="font-medium text-foreground">{{ current() }}</span>
+            {{ text().of }} {{ pageCount() }}</span
+          >
+        </li>
+      }
+      <li>
+        @if (compact()) {
+          <button
+            cwPaginationLink
+            [size]="size()"
+            [disabled]="current() === pageCount()"
+            [attr.aria-label]="text().next"
+            (click)="goTo(current() + 1, $event)"
+          >
+            <ng-icon name="phosphorCaretRightBold" aria-hidden="true" />
+          </button>
+        } @else {
+          <button
+            type="button"
+            cwRipple
+            [class]="steps().next"
+            [disabled]="current() === pageCount()"
+            (click)="goTo(current() + 1, $event)"
+          >
+            {{ text().nextText }}<ng-icon name="phosphorCaretRightBold" aria-hidden="true" />
+          </button>
+        }
+      </li>
+      @if (showFirstLast() && (variant() === 'full' || compact())) {
+        <li>
+          <button
+            cwPaginationLink
+            [size]="size()"
+            [disabled]="current() === pageCount()"
+            [attr.aria-label]="text().last"
+            (click)="goTo(pageCount(), $event)"
+          >
+            <ng-icon name="phosphorCaretDoubleRightBold" aria-hidden="true" />
+          </button>
+        </li>
+      }
+    </ul>
+  </nav>
+</div>

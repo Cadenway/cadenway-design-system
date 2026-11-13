@@ -1,0 +1,144 @@
+<ng-template #label let-view>
+  <span [class]="view.labelClasses"
+    ><span [id]="view.labelId">{{ view.step.label() }}</span
+    ><span class="sr-only">{{ view.hiddenState }}</span></span
+  >
+  @if (view.step.optional()) {
+    <span class="text-xs text-muted-foreground">{{ text().optional }}</span>
+  }
+</ng-template>
+
+@if (vertical()) {
+  <ol [attr.aria-label]="ariaLabel()" [class]="listClasses()">
+    @for (view of views(); track view.step; let last = $last) {
+      <li
+        class="flex gap-3"
+        [attr.aria-current]="view.index === current() ? 'step' : null"
+        [attr.data-state]="view.state"
+        [attr.data-optional]="view.step.optional() ? '' : null"
+      >
+        <div class="flex w-5 shrink-0 flex-col items-center">
+          <cw-step-indicator [state]="view.state" [number]="view.index + 1" />
+          @if (!last) {
+            <span
+              aria-hidden="true"
+              class="my-1 w-px flex-1 transition-colors motion-reduce:transition-none"
+              [class]="view.crossed ? 'bg-track' : 'bg-border'"
+            ></span>
+          }
+        </div>
+        <div class="grid min-w-0 flex-1 content-start gap-0.5" [class.pb-4]="!last">
+          @if (view.reachable) {
+            <button
+              #stepButton
+              type="button"
+              [class]="verticalButtonClasses"
+              (click)="go(view.index)"
+            >
+              <ng-container
+                [ngTemplateOutlet]="label"
+                [ngTemplateOutletContext]="{ $implicit: view }"
+              />
+            </button>
+          } @else {
+            <div class="flex items-center gap-1.5">
+              <ng-container
+                [ngTemplateOutlet]="label"
+                [ngTemplateOutletContext]="{ $implicit: view }"
+              />
+            </div>
+          }
+          @if (view.step.error()) {
+            <p role="alert" class="text-xs text-destructive">{{ view.step.error() }}</p>
+          } @else if (view.step.description()) {
+            <p class="text-xs text-muted-foreground">{{ view.step.description() }}</p>
+          }
+          @if (view.index === current()) {
+            <div
+              #panel
+              role="group"
+              tabindex="-1"
+              class="mt-2 grid animate-item-in gap-2 outline-hidden empty:hidden motion-reduce:animate-none"
+              [attr.aria-labelledby]="view.labelId"
+            >
+              <ng-container [ngTemplateOutlet]="view.step.panelTemplate() ?? null" />
+            </div>
+          }
+        </div>
+      </li>
+    }
+  </ol>
+} @else {
+  <ol [attr.aria-label]="ariaLabel()" [class]="listClasses()">
+    @for (view of views(); track view.step; let last = $last) {
+      @if (view.reachable) {
+        <li
+          class="flex"
+          [attr.data-state]="view.state"
+          [attr.data-optional]="view.step.optional() ? '' : null"
+        >
+          <button #stepButton type="button" [class]="buttonClasses()" (click)="go(view.index)">
+            <cw-step-indicator
+              [state]="view.state"
+              [number]="view.index + 1"
+              [size]="effectiveSize()"
+            />
+            <ng-container
+              [ngTemplateOutlet]="label"
+              [ngTemplateOutletContext]="{ $implicit: view }"
+            />
+          </button>
+        </li>
+      } @else {
+        <li
+          [class]="rowClasses()"
+          [attr.aria-current]="view.index === current() ? 'step' : null"
+          [attr.data-state]="view.state"
+          [attr.data-optional]="view.step.optional() ? '' : null"
+        >
+          <cw-step-indicator
+            [state]="view.state"
+            [number]="view.index + 1"
+            [size]="effectiveSize()"
+          />
+          <ng-container
+            [ngTemplateOutlet]="label"
+            [ngTemplateOutletContext]="{ $implicit: view }"
+          />
+        </li>
+      }
+      @if (!last) {
+        <li
+          aria-hidden="true"
+          class="h-px max-w-20 min-w-6 flex-1 transition-colors motion-reduce:transition-none"
+          [class]="view.crossed ? 'bg-track' : 'bg-border'"
+        ></li>
+      }
+    }
+  </ol>
+  @for (view of errors(); track view.step) {
+    <p role="alert" class="mt-2 flex items-center gap-1.5 px-1.5 text-sm text-destructive">
+      <ng-icon name="phosphorWarningCircleBold" size="1rem" class="shrink-0" aria-hidden="true" />{{
+        view.step.error()
+      }}
+    </p>
+  }
+  @if (currentView(); as view) {
+    @if (view.state !== 'error') {
+      <p class="mt-2 px-1.5 text-sm text-muted-foreground">
+        {{ position() }}{{ view.step.description() ? ' — ' + view.step.description() : '' }}
+      </p>
+    }
+    @for (shown of [view]; track shown.step) {
+      <div
+        #panel
+        role="group"
+        tabindex="-1"
+        class="mt-4 animate-item-in outline-hidden empty:hidden motion-reduce:animate-none"
+        [attr.aria-labelledby]="shown.labelId"
+      >
+        <ng-container [ngTemplateOutlet]="shown.step.panelTemplate() ?? null" />
+      </div>
+    }
+  }
+}
