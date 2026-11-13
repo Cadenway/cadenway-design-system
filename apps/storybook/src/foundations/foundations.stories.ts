@@ -9,6 +9,8 @@ import { expect } from 'storybook/test';
  */
 const meta: Meta = {
   title: 'Foundations',
+  // The foundations lay out the light and the dark theme themselves.
+  parameters: { themes: false },
 };
 
 export default meta;

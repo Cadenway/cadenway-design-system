@@ -17,7 +17,7 @@ const config: StorybookConfig = {
     '../src/**/*.stories.ts',
     '../../../packages/*/src/**/*.stories.ts',
     // One folder per entry point of @cadenway/ui (`packages/ui/<brick>/`).
-    '../../../packages/ui/*/**/*.stories.ts',
+    '../../../packages/ui/!(node_modules|dist)/**/*.stories.ts',
   ],
   addons: ['@storybook/addon-docs', '@storybook/addon-a11y', '@storybook/addon-vitest'],
   // No usage data leaves a developer machine or CI.

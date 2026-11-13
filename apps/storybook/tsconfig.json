@@ -16,5 +16,6 @@
     "vitest.config.ts",
     "../../packages/*/src/**/*.stories.ts",
     "../../packages/ui/*/**/*.stories.ts"
-  ]
+  ],
+  "exclude": ["../../packages/*/node_modules", "../../packages/*/dist"]
 }

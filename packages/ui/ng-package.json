@@ -13,6 +13,7 @@
     "@tiptap/extensions",
     "@tiptap/suggestion",
     "@tiptap/markdown",
-    "marked"
+    "marked",
+    "@ng-icons/phosphor-icons"
   ]
 }

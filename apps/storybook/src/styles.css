@@ -6,5 +6,5 @@
 @import '@cadenway/tokens/tokens.css';
 @import '@cadenway/tokens/theme.css';
 
-/* Tailwind scans this application only: the templates of the bricks live in the packages. */
-@source '../../../packages/ui/src';
+/* Tailwind scans this application and the sources of the bricks (one folder per entry point). */
+@source '../../../packages/ui';
