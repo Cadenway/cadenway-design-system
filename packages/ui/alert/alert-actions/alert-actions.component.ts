@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 
-import { CwAlert } from '../alert/alert.component';
+import { CwAlert } from '../alert.component';
 
 /**
  * The actions of an alert: one or two `outline` or `ghost` `sm` buttons, under the text, or at the

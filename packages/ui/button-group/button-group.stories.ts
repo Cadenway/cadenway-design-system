@@ -19,7 +19,7 @@ import { expect, userEvent, within } from 'storybook/test';
 
 import { CwButtonGroupSeparator } from './button-group-separator/button-group-separator.component';
 import { CwButtonGroupText } from './button-group-text/button-group-text.component';
-import { CwButtonGroup } from './button-group/button-group.component';
+import { CwButtonGroup } from './button-group.component';
 
 /**
  * Button Group, every state of its sheet in the Design System artifact, in the light and the dark

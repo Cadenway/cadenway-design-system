@@ -1,6 +1,6 @@
 import { InjectionToken } from '@angular/core';
 
-import type { CwItem } from './item/item.component';
+import type { CwItem } from './item.component';
 
 /**
  * The rows of an item group, as the group's content query sees them. Each one provides itself under this token, so the

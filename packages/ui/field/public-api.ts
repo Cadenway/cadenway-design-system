@@ -4,7 +4,7 @@
  * Explicit named exports only (.claude/rules/public-api.md).
  */
 
-export { CwField } from './field/field.component';
+export { CwField } from './field.component';
 export { CwFieldContent } from './field-content/field-content.component';
 export { CwFieldDescription } from './field-description/field-description.component';
 export { CwFieldError } from './field-error/field-error.component';

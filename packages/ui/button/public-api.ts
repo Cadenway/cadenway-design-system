@@ -4,5 +4,5 @@
  * Explicit named exports only (.claude/rules/public-api.md).
  */
 
-export { CwButton } from './button/button.component';
+export { CwButton } from './button.component';
 export type { CwButtonSize, CwButtonVariant } from './button.types';

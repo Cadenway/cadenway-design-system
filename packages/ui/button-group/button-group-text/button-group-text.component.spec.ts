@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { CwButton } from '@cadenway/ui/button';
 
 import { CwButtonGroupText } from './button-group-text.component';
-import { CwButtonGroup } from '../button-group/button-group.component';
+import { CwButtonGroup } from '../button-group.component';
 
 @Component({
   imports: [CwButton, CwButtonGroup, CwButtonGroupText],

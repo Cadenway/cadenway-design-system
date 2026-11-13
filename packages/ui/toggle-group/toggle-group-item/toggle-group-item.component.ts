@@ -12,7 +12,7 @@ import {
 import type { FocusableOption } from '@angular/cdk/a11y';
 import { CwRipple } from '@cadenway/ui/core';
 
-import { CwToggleGroup } from '../toggle-group/toggle-group.component';
+import { CwToggleGroup } from '../toggle-group.component';
 import { TOGGLE_GROUP_ITEM } from '../toggle-group-item.token';
 import type { CwToggleGroupSize, CwToggleGroupVariant } from '../toggle-group.types';
 

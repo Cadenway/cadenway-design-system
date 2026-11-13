@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 
-import { CwItem } from '../item/item.component';
+import { CwItem } from '../item.component';
 import type { CwItemMediaVariant, CwItemSize } from '../item.types';
 
 const MEDIA: Record<CwItemMediaVariant, Record<CwItemSize, string>> = {

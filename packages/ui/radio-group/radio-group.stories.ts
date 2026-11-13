@@ -10,7 +10,7 @@ import {
 import { expect, userEvent, within } from 'storybook/test';
 
 import { CwRadioGroupItem } from './radio-group-item/radio-group-item.component';
-import { CwRadioGroup } from './radio-group/radio-group.component';
+import { CwRadioGroup } from './radio-group.component';
 
 /**
  * Radio Group, every state of its sheet in the Design System artifact, in the light and the dark

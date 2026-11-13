@@ -5,5 +5,5 @@
  */
 
 export { CwBannerActions } from './banner-actions/banner-actions.component';
-export { CwBanner } from './banner/banner.component';
+export { CwBanner } from './banner.component';
 export type { CwBannerPlacement, CwBannerTone } from './banner.types';

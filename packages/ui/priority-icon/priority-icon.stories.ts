@@ -2,7 +2,7 @@ import { CwButton } from '@cadenway/ui/button';
 import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 
-import { CwPriorityIcon } from './priority-icon/priority-icon.component';
+import { CwPriorityIcon } from './priority-icon.component';
 import { CW_PRIORITY_LABELS } from './priority-icon.constants';
 import type { CwPriorityKey } from './priority-icon.types';
 

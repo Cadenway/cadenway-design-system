@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 
-import { CwCard } from '../card/card.component';
+import { CwCard } from '../card.component';
 import { PART_PADDING } from '../card.styles';
 
 /** The body of a card, padded like the header and the footer. */

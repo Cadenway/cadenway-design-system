@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 
 import { CwKbdGroup } from '../kbd-group/kbd-group.directive';
-import { CwKbd } from '../kbd/kbd.directive';
+import { CwKbd } from '../kbd.directive';
 import type { CwKbdSize, CwKbdVariant } from '../kbd.types';
 
 /* French names of the keys, visible (`label`) and spoken (`spoken`): written once here so a later

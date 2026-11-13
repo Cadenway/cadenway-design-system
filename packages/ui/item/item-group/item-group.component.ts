@@ -14,7 +14,7 @@ import {
 
 import { ɵnavigateList } from '@cadenway/ui/core';
 
-import type { CwItem } from '../item/item.component';
+import type { CwItem } from '../item.component';
 import { ITEM_GROUP_ITEM } from '../item.token';
 
 // The group items enter one by one, blurred, 60 ms then 30 ms more per item, twelve at most

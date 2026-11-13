@@ -1,7 +1,7 @@
 import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vite';
 import { expect, userEvent, within } from 'storybook/test';
 
-import { CwMeter } from './meter/meter.component';
+import { CwMeter } from './meter.component';
 import type { CwMeterFormat, CwMeterZone } from './meter.types';
 
 /**

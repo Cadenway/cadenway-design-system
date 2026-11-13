@@ -12,7 +12,7 @@ import { expect, userEvent, within } from 'storybook/test';
 import { CwAlertActions } from './alert-actions/alert-actions.component';
 import { CwAlertDescription } from './alert-description/alert-description.component';
 import { CwAlertTitle } from './alert-title/alert-title.component';
-import { CwAlert } from './alert/alert.component';
+import { CwAlert } from './alert.component';
 
 /**
  * Alert, every state of its sheet in the Design System artifact, in the light and the dark theme.

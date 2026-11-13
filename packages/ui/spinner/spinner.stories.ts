@@ -3,7 +3,7 @@ import { expect, within } from 'storybook/test';
 
 import { CwLoadingOverlay } from './loading-overlay/loading-overlay.directive';
 import { CwSpinnerIndicator } from './spinner-indicator/spinner-indicator.component';
-import { CwSpinner } from './spinner/spinner.component';
+import { CwSpinner } from './spinner.component';
 
 /**
  * Spinner, every state of its sheet in the Design System artifact, in the light and the dark theme.

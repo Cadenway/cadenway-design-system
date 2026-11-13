@@ -5,7 +5,7 @@
  */
 
 export { CwToggleGroupItem } from './toggle-group-item/toggle-group-item.component';
-export { CwToggleGroup } from './toggle-group/toggle-group.component';
+export { CwToggleGroup } from './toggle-group.component';
 export type {
   CwToggleGroupOrientation,
   CwToggleGroupSize,

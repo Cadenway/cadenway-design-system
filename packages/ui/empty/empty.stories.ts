@@ -22,7 +22,7 @@ import { CwEmptyDescription } from './empty-description/empty-description.compon
 import { CwEmptyHeader } from './empty-header/empty-header.component';
 import { CwEmptyMedia } from './empty-media/empty-media.component';
 import { CwEmptyTitle } from './empty-title/empty-title.component';
-import { CwEmpty } from './empty/empty.component';
+import { CwEmpty } from './empty.component';
 
 /**
  * Empty, every state of its sheet in the Design System artifact and the loading error panel of the

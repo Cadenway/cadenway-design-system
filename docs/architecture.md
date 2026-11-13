@@ -16,8 +16,8 @@ cadenway-design-system is the Angular design system taken from the mockup. It pu
 packages/
 ├─ tokens/   → @cadenway/tokens (tokens.css, theme.css)
 ├─ icons/    → @cadenway/icons (provideCadenwayIcons)
-└─ ui/       → @cadenway/ui (<brick>/ = entry point @cadenway/ui/<brick>, one subfolder per
-                component or directive; core/ = a11y, motion, overlay, styles)
+└─ ui/       → @cadenway/ui (<brick>/ = entry point @cadenway/ui/<brick>, main declaration at its
+                root, one subfolder per other one; core/ = a11y, motion, overlay, styles)
 apps/storybook/
 ```
 

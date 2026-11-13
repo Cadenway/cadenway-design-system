@@ -7,7 +7,7 @@ import {
 } from '@storybook/angular-vite';
 import { expect, userEvent, within } from 'storybook/test';
 
-import { CwCodeBlock } from './code-block/code-block.component';
+import { CwCodeBlock } from './code-block.component';
 
 /**
  * Code Block, every state of its sheet in the Design System artifact, in the light and the dark

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 
-import { CwEmpty } from '../empty/empty.component';
+import { CwEmpty } from '../empty.component';
 import type { CwEmptyMediaTone, CwEmptySize } from '../empty.types';
 
 const MEDIA_SIZES: Record<CwEmptySize, string> = {

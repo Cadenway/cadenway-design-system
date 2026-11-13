@@ -13,5 +13,5 @@ export { CwTableFooter } from './table-footer/table-footer.directive';
 export { CwTableHead } from './table-head/table-head.directive';
 export { CwTableHeader } from './table-header/table-header.directive';
 export { CwTableRow } from './table-row/table-row.directive';
-export { CwTable } from './table/table.directive';
+export { CwTable } from './table.directive';
 export type { CwTableAlign, CwTableSize } from './table.types';

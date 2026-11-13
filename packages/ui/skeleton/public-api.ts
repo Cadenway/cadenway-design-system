@@ -4,5 +4,5 @@
  * Explicit named exports only (.claude/rules/public-api.md).
  */
 
-export { CwSkeleton } from './skeleton/skeleton.directive';
+export { CwSkeleton } from './skeleton.directive';
 export type { CwSkeletonAnimation } from './skeleton.types';

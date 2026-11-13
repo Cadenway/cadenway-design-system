@@ -22,7 +22,7 @@ import { CwItemGroup } from './item-group/item-group.component';
 import { CwItemMedia } from './item-media/item-media.component';
 import { CwItemSeparator } from './item-separator/item-separator.component';
 import { CwItemTitle } from './item-title/item-title.component';
-import { CwItem } from './item/item.component';
+import { CwItem } from './item.component';
 
 /**
  * Item, every variant, size and state of its sheet in the Design System artifact, in the light and

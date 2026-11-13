@@ -2,7 +2,7 @@ import { Directive, computed, inject } from '@angular/core';
 
 import { CwTableFooter } from '../table-footer/table-footer.directive';
 import { CwTableHeader } from '../table-header/table-header.directive';
-import { CwTable } from '../table/table.directive';
+import { CwTable } from '../table.directive';
 import type { CwTableSize } from '../table.types';
 
 /* Literal class strings (Table sheet and preview of the Design System artifact), so Tailwind finds

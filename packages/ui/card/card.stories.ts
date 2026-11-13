@@ -9,7 +9,7 @@ import { CwCardDescription } from './card-description/card-description.component
 import { CwCardFooter } from './card-footer/card-footer.component';
 import { CwCardHeader } from './card-header/card-header.component';
 import { CwCardTitle } from './card-title/card-title.component';
-import { CwCard } from './card/card.component';
+import { CwCard } from './card.component';
 
 /**
  * Card, every composition and state of its sheet in the Design System artifact, in the light and

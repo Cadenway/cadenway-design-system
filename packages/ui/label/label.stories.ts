@@ -2,7 +2,7 @@ import { CwCheckbox } from '@cadenway/ui/checkbox';
 import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vite';
 import { expect, userEvent, within } from 'storybook/test';
 
-import { CwLabel } from './label/label.directive';
+import { CwLabel } from './label.directive';
 
 /**
  * Label, every state of its sheet in the Design System artifact, in the light and the dark theme.

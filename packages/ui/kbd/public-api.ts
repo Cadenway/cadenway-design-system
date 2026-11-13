@@ -5,6 +5,6 @@
  */
 
 export { CwKbdGroup } from './kbd-group/kbd-group.directive';
-export { CwKbd } from './kbd/kbd.directive';
+export { CwKbd } from './kbd.directive';
 export type { CwKbdSize, CwKbdVariant } from './kbd.types';
 export { CwShortcut } from './shortcut/shortcut.component';

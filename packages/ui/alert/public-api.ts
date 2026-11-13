@@ -7,5 +7,5 @@
 export { CwAlertActions } from './alert-actions/alert-actions.component';
 export { CwAlertDescription } from './alert-description/alert-description.component';
 export { CwAlertTitle } from './alert-title/alert-title.component';
-export { CwAlert } from './alert/alert.component';
+export { CwAlert } from './alert.component';
 export type { CwAlertSize, CwAlertVariant } from './alert.types';

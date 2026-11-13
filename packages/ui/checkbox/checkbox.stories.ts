@@ -1,7 +1,7 @@
 import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vite';
 import { expect, userEvent, within } from 'storybook/test';
 
-import { CwCheckbox } from './checkbox/checkbox.component';
+import { CwCheckbox } from './checkbox.component';
 
 /**
  * Checkbox, every state of its sheet in the Design System artifact, in the light and the dark theme.

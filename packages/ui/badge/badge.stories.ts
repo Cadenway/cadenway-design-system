@@ -1,7 +1,7 @@
 import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vite';
 import { expect, userEvent, within } from 'storybook/test';
 
-import { CwBadge } from './badge/badge.component';
+import { CwBadge } from './badge.component';
 import { CwPriorityBadge } from './priority-badge/priority-badge.component';
 import { CwStatusBadge } from './status-badge/status-badge.component';
 

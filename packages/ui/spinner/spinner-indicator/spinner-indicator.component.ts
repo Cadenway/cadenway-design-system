@@ -10,7 +10,7 @@ import {
   signal,
 } from '@angular/core';
 
-import { CwSpinner } from '../spinner/spinner.component';
+import { CwSpinner } from '../spinner.component';
 import type { CwSpinnerSize } from '../spinner.types';
 
 /**

@@ -13,7 +13,7 @@ import {
 } from '@storybook/angular-vite';
 import { expect, userEvent, within } from 'storybook/test';
 
-import { CwToggle } from './toggle/toggle.component';
+import { CwToggle } from './toggle.component';
 
 /**
  * Toggle, every state of its sheet in the Design System artifact, in the light and the dark theme.

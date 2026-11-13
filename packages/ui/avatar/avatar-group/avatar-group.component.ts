@@ -7,7 +7,7 @@ import {
   numberAttribute,
 } from '@angular/core';
 
-import { CwAvatar } from '../avatar/avatar.component';
+import { CwAvatar } from '../avatar.component';
 import type { CwAvatarSize } from '../avatar.types';
 
 const GROUP_SPACING: Record<CwAvatarSize, string> = {

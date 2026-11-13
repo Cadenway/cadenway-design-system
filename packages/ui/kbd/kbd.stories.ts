@@ -2,7 +2,7 @@ import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vit
 import { expect, within } from 'storybook/test';
 
 import { CwKbdGroup } from './kbd-group/kbd-group.directive';
-import { CwKbd } from './kbd/kbd.directive';
+import { CwKbd } from './kbd.directive';
 import { CwShortcut } from './shortcut/shortcut.component';
 
 /**

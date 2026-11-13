@@ -4,5 +4,5 @@
  * Explicit named exports only (.claude/rules/public-api.md).
  */
 
-export { CwCodeBlock } from './code-block/code-block.component';
+export { CwCodeBlock } from './code-block.component';
 export type { CwCodeBlockLineKind, CwCodeBlockSize, CwCodeBlockVariant } from './code-block.types';

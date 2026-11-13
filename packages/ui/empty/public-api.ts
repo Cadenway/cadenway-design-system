@@ -9,5 +9,5 @@ export { CwEmptyDescription } from './empty-description/empty-description.compon
 export { CwEmptyHeader } from './empty-header/empty-header.component';
 export { CwEmptyMedia } from './empty-media/empty-media.component';
 export { CwEmptyTitle } from './empty-title/empty-title.component';
-export { CwEmpty } from './empty/empty.component';
+export { CwEmpty } from './empty.component';
 export type { CwEmptyMediaTone, CwEmptySize, CwEmptyVariant } from './empty.types';

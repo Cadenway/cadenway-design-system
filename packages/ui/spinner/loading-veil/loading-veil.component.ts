@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
-import { CwSpinner } from '../spinner/spinner.component';
+import { CwSpinner } from '../spinner.component';
 
 /** The veil drawn over a refreshing area: a translucent background and a centered `lg` spinner. */
 @Component({

@@ -6,5 +6,5 @@
 
 export { CwAvatarAdd } from './avatar-add/avatar-add.component';
 export { CwAvatarGroup } from './avatar-group/avatar-group.component';
-export { CwAvatar } from './avatar/avatar.component';
+export { CwAvatar } from './avatar.component';
 export type { CwAvatarLabels, CwAvatarPresence, CwAvatarSize } from './avatar.types';

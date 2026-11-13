@@ -4,4 +4,4 @@
  * Explicit named exports only (.claude/rules/public-api.md).
  */
 
-export { CwLabel } from './label/label.directive';
+export { CwLabel } from './label.directive';

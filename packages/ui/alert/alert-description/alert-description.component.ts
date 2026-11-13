@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 
-import { CwAlert } from '../alert/alert.component';
+import { CwAlert } from '../alert.component';
 
 /** The description of an alert: what to do; muted, or the error color in a `destructive` alert. */
 @Component({

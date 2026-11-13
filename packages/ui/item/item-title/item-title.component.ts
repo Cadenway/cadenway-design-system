@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 
-import { CwItem } from '../item/item.component';
+import { CwItem } from '../item.component';
 
 /**
  * The title of an item, one truncated line. On an `unread` item it starts with a dot and ends

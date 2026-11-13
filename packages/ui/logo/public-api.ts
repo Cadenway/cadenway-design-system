@@ -4,5 +4,5 @@
  * Explicit named exports only (.claude/rules/public-api.md).
  */
 
-export { CwLogo } from './logo/logo.component';
+export { CwLogo } from './logo.component';
 export type { CwLogoTone, CwLogoVariant } from './logo.types';

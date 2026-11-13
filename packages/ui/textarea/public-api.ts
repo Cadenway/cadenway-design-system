@@ -4,4 +4,4 @@
  * Explicit named exports only (.claude/rules/public-api.md).
  */
 
-export { CwTextarea } from './textarea/textarea.directive';
+export { CwTextarea } from './textarea.directive';

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 
-import { CwItem } from '../item/item.component';
+import { CwItem } from '../item.component';
 import type { CwItemSize } from '../item.types';
 
 const DESCRIPTIONS: Record<CwItemSize, string> = {

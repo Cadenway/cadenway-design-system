@@ -12,5 +12,5 @@ export { CwCardDescription } from './card-description/card-description.component
 export { CwCardFooter } from './card-footer/card-footer.component';
 export { CwCardHeader } from './card-header/card-header.component';
 export { CwCardTitle } from './card-title/card-title.component';
-export { CwCard } from './card/card.component';
+export { CwCard } from './card.component';
 export type { CwCardSize } from './card.types';

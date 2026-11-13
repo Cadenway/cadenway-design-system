@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 
-import { CwAlert } from '../alert/alert.component';
+import { CwAlert } from '../alert.component';
 
 /** The title of an alert: names the situation (« Envoi des e-mails interrompu »). */
 @Component({

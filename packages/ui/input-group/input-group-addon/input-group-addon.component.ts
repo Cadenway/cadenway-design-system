@@ -7,7 +7,7 @@ import {
   input,
 } from '@angular/core';
 
-import { CwInputGroup } from '../input-group/input-group.component';
+import { CwInputGroup } from '../input-group.component';
 import type { CwInputGroupAddonAlign, CwInputGroupSize } from '../input-group.types';
 
 /* Literal class strings (Input Group sheet and preview of the Design System artifact), so Tailwind

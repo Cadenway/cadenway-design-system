@@ -7,5 +7,5 @@
 export { CwInputOtpGroup } from './input-otp-group/input-otp-group.component';
 export { CwInputOtpSeparator } from './input-otp-separator/input-otp-separator.component';
 export { CwInputOtpSlot } from './input-otp-slot/input-otp-slot.component';
-export { CwInputOtp } from './input-otp/input-otp.component';
+export { CwInputOtp } from './input-otp.component';
 export type { CwInputOtpCharset } from './input-otp.types';

@@ -13,8 +13,9 @@ building. The mockup settles behavior and copy.
 ## Conventions every brick follows
 
 - Entry point `@cadenway/ui/<entry>`, folder `packages/ui/<entry>/`; classes `Cw<Name>`.
-- One component, directive or service per file, each in its own subfolder
-  (`<entry>/<name>/<name>.component.{ts,html,spec.ts}`, no inline template); exported types in
+- One component, directive or service per file, no inline template: the main declaration at the
+  entry root (`<entry>/<entry>.component.{ts,html,spec.ts}`), every other one in its own subfolder
+  (`<entry>/<name>/<name>.component.{ts,html,spec.ts}`); exported types in
   `<entry>.types.ts`, exported constants in `<entry>.constants.ts` at the entry root
   (`.claude/rules/bricks.md`).
 - Standalone, OnPush; `input()`, `input.required()`, `model()` for two-way values, `output()`;

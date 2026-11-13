@@ -12,7 +12,7 @@ import { type FocusableOption, _IdGenerator } from '@angular/cdk/a11y';
 import { NgTemplateOutlet } from '@angular/common';
 
 import { RADIO_GROUP_ITEM } from '../radio-group-item.token';
-import { CwRadioGroup } from '../radio-group/radio-group.component';
+import { CwRadioGroup } from '../radio-group.component';
 import type { CwRadioGroupItemVariant } from '../radio-group.types';
 
 /* Literal class strings (Radio Group sheet and preview of the Design System artifact), so Tailwind

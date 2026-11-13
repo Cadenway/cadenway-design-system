@@ -4,6 +4,6 @@
  * Explicit named exports only (.claude/rules/public-api.md).
  */
 
-export { CwPriorityIcon } from './priority-icon/priority-icon.component';
+export { CwPriorityIcon } from './priority-icon.component';
 export { CW_PRIORITY_LABELS } from './priority-icon.constants';
 export type { CwPriorityIconSize, CwPriorityKey } from './priority-icon.types';

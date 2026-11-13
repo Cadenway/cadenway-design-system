@@ -17,7 +17,7 @@ import {
 import { expect, userEvent, within } from 'storybook/test';
 
 import { CwToggleGroupItem } from './toggle-group-item/toggle-group-item.component';
-import { CwToggleGroup } from './toggle-group/toggle-group.component';
+import { CwToggleGroup } from './toggle-group.component';
 
 /**
  * Toggle Group, every state of its sheet in the Design System artifact, in the light and the dark

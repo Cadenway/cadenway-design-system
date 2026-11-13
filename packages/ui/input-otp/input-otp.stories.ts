@@ -11,7 +11,7 @@ import { expect, userEvent, within } from 'storybook/test';
 import { CwInputOtpGroup } from './input-otp-group/input-otp-group.component';
 import { CwInputOtpSeparator } from './input-otp-separator/input-otp-separator.component';
 import { CwInputOtpSlot } from './input-otp-slot/input-otp-slot.component';
-import { CwInputOtp } from './input-otp/input-otp.component';
+import { CwInputOtp } from './input-otp.component';
 
 /**
  * Input OTP, every state of its sheet in the Design System artifact, in the light and the dark

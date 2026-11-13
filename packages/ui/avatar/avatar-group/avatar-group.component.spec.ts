@@ -3,7 +3,7 @@ import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CwAvatarAdd } from '../avatar-add/avatar-add.component';
 import { CwAvatarGroup } from './avatar-group.component';
-import { CwAvatar } from '../avatar/avatar.component';
+import { CwAvatar } from '../avatar.component';
 
 interface Person {
   readonly id: number;

@@ -9,11 +9,12 @@ paths:
   `@cadenway/ui/<brick>`: `ng-package.json`, `public-api.ts`, `public-api.spec.ts`,
   `<brick>.stories.ts`, and the files below. Selector `cw-<brick>`, or an attribute selector
   `[cw<Brick>]` on a native element (`button[cwButton]`); classes `Cw<Brick>`, no suffix.
-- One component, directive or service per file, each in its own subfolder of the entry point:
-  `packages/ui/<brick>/<name>/<name>.component.ts` (`templateUrl`) + `<name>.component.html` (never
-  an inline template) + `<name>.component.spec.ts`; `<name>/<name>.directive.ts`;
-  `<name>/<name>.service.ts`. Import paths stay flat (`@cadenway/ui/<brick>`): the subfolders are
-  internal.
+- One component, directive or service per file. The main declaration of the entry point (named
+  like it) sits at its root: `packages/ui/<brick>/<brick>.component.ts` (`templateUrl`) +
+  `<brick>.component.html` (never an inline template) + `<brick>.component.spec.ts`. Every other
+  declaration has its own subfolder: `<brick>/<name>/<name>.component.{ts,html,spec.ts}`,
+  `<name>/<name>.directive.ts`, `<name>/<name>.service.ts`. Import paths stay flat
+  (`@cadenway/ui/<brick>`): the subfolders are internal.
 - `@cadenway/ui/core` is split by concern: `a11y/`, `motion/`, `overlay/`, `styles/`, plus
   `core.types.ts`.
 - At the root of the entry point: `ng-package.json`, `public-api.ts`, `public-api.spec.ts`,

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 
-import { CwButtonGroup } from '../button-group/button-group.component';
+import { CwButtonGroup } from '../button-group.component';
 import type { CwButtonGroupOrientation } from '../button-group.types';
 
 /* After a `default` button (ink fill), the rule is a light gap; between `outline` buttons, their

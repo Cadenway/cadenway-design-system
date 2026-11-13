@@ -15,7 +15,7 @@ import { CwFieldLegend } from './field-legend/field-legend.directive';
 import { CwFieldSeparator } from './field-separator/field-separator.component';
 import { CwFieldSet } from './field-set/field-set.directive';
 import { CwFieldTitle } from './field-title/field-title.component';
-import { CwField } from './field/field.component';
+import { CwField } from './field.component';
 
 /**
  * Field, every state of its sheet in the Design System artifact, in the light and the dark theme.

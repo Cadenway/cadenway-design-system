@@ -4,5 +4,5 @@
  * Explicit named exports only (.claude/rules/public-api.md).
  */
 
-export { CwInput } from './input/input.directive';
+export { CwInput } from './input.directive';
 export type { CwInputSize } from './input.types';

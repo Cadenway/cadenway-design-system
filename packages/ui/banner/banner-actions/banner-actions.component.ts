@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 
-import { CwBanner } from '../banner/banner.component';
+import { CwBanner } from '../banner.component';
 
 /** The actions of a banner: one or two `sm` buttons, `ghost` then `outline`. */
 @Component({

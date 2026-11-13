@@ -7,7 +7,7 @@ import {
   numberAttribute,
 } from '@angular/core';
 
-import { CwInputOtp } from '../input-otp/input-otp.component';
+import { CwInputOtp } from '../input-otp.component';
 
 /* Literal class strings (Input OTP preview of the Design System artifact). */
 const SLOT_BASE =

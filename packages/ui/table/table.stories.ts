@@ -10,7 +10,7 @@ import { CwTableFooter } from './table-footer/table-footer.directive';
 import { CwTableHead } from './table-head/table-head.directive';
 import { CwTableHeader } from './table-header/table-header.directive';
 import { CwTableRow } from './table-row/table-row.directive';
-import { CwTable } from './table/table.directive';
+import { CwTable } from './table.directive';
 
 /**
  * Table, every state of its sheet in the Design System artifact, in the light and the dark theme.

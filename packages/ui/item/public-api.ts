@@ -11,5 +11,5 @@ export { CwItemGroup } from './item-group/item-group.component';
 export { CwItemMedia } from './item-media/item-media.component';
 export { CwItemSeparator } from './item-separator/item-separator.component';
 export { CwItemTitle } from './item-title/item-title.component';
-export { CwItem } from './item/item.component';
+export { CwItem } from './item.component';
 export type { CwItemMediaVariant, CwItemSize, CwItemVariant } from './item.types';
