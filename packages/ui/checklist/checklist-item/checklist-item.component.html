@@ -1,0 +1,180 @@
+<div [class]="rowClasses" [class.pointer-events-none]="disabled()" [class.opacity-50]="disabled()">
+  @if (canDrag()) {
+    <button
+      #handle
+      type="button"
+      cdkDragHandle
+      [class]="handleClasses"
+      [attr.data-grabbed]="grabbed() ? '' : null"
+      [attr.aria-label]="text().move(label())"
+      [attr.aria-describedby]="helpId"
+      (keydown)="onHandleKeydown($event)"
+      (blur)="onHandleBlur()"
+    >
+      <ng-icon name="phosphorDotsSixVerticalBold" size="0.875rem" aria-hidden="true" />
+    </button>
+  } @else {
+    <span class="size-5 shrink-0" aria-hidden="true"></span>
+  }
+
+  @if (variant() === 'subtasks') {
+    <ng-content select="[cwChecklistItemStatus]" />
+    @if (reference(); as reference) {
+      <span class="w-[4.5rem] shrink-0 font-mono text-xs text-muted-foreground">{{
+        reference
+      }}</span>
+    }
+  } @else {
+    <cw-checkbox
+      [checked]="checked()"
+      [disabled]="disabled()"
+      [ariaLabel]="label()"
+      (checkedChange)="setChecked($event)"
+      (keydown)="onBoxKeydown($event)"
+    />
+  }
+
+  @if (editing()) {
+    <input
+      #field
+      type="text"
+      autocomplete="off"
+      [class]="fieldClasses"
+      [value]="label()"
+      [attr.aria-label]="text().editField"
+      [attr.aria-describedby]="helpId + '-edit'"
+      (input)="onFieldInput($event)"
+      (keydown)="onFieldKeydown($event)"
+      (blur)="onFieldBlur()"
+    />
+  } @else if (href(); as href) {
+    <a
+      [href]="href"
+      [class]="linkClasses"
+      [class.text-muted-foreground]="checked()"
+      [class.line-through]="checked()"
+      >{{ label() }}</a
+    >
+  } @else {
+    <span
+      data-cw-checklist-label
+      class="min-w-0 flex-1 truncate"
+      [class.text-muted-foreground]="checked()"
+      [class.line-through]="checked()"
+      >{{ label() }}</span
+    >
+  }
+
+  @if (!editing()) {
+    <span class="flex shrink-0 items-center gap-2">
+      <ng-content select="[cwChecklistItemMeta]" />
+      @if (dueText()) {
+        <span
+          class="flex items-center gap-1 text-xs font-medium text-muted-foreground"
+          [title]="text().due(dueText())"
+        >
+          <ng-icon name="phosphorCalendarBlankBold" size="0.875rem" aria-hidden="true" />{{
+            dueText()
+          }}
+        </span>
+      }
+      @if (assignee(); as person) {
+        <cw-avatar
+          size="xs"
+          [name]="person.name"
+          [src]="person.src ?? null"
+          [title]="person.name"
+        />
+      }
+    </span>
+    @if (editable()) {
+      <span [class]="revealClasses">
+        <ng-content select="[cwChecklistItemMenu]" />
+        @if (!hasCustomMenu()) {
+          <button
+            cwButton
+            variant="ghost"
+            size="icon-xs"
+            class="text-muted-foreground hover:text-foreground"
+            [cwMenuTriggerFor]="menu"
+            [attr.aria-label]="text().actions(label())"
+          >
+            <ng-icon name="phosphorDotsThreeBold" size="1rem" aria-hidden="true" />
+          </button>
+          <cw-menu #menu align="end">
+            <button cwMenuItem (triggered)="startEdit()">
+              <ng-icon name="phosphorPencilSimpleBold" aria-hidden="true" />{{ text().edit }}
+            </button>
+            @if (!nested) {
+              <button cwMenuItem (triggered)="startAddChild()">
+                <ng-icon name="phosphorPlusBold" aria-hidden="true" />{{ text().addChild }}
+              </button>
+            }
+            @if (convertible()) {
+              <button cwMenuItem (triggered)="convert()">
+                <ng-icon name="phosphorArrowSquareOutBold" aria-hidden="true" />{{ text().convert }}
+              </button>
+            }
+            <cw-menu-separator />
+            <button cwMenuItem variant="destructive" (triggered)="remove()">
+              <ng-icon name="phosphorTrashBold" aria-hidden="true" />{{ text().remove }}
+            </button>
+          </cw-menu>
+        }
+      </span>
+    }
+  }
+</div>
+
+@if (editing()) {
+  <p
+    [id]="helpId + '-edit'"
+    class="flex flex-wrap items-center gap-1 pb-1 pl-[54px] text-xs text-muted-foreground"
+  >
+    <kbd cwKbd>{{ text().enterKey }}</kbd> {{ text().submit }} ·
+    <kbd cwKbd>{{ text().escapeKey }}</kbd> {{ text().cancel }}
+    @if (!nested) {
+      · <kbd cwKbd>{{ text().tabKey }}</kbd> {{ text().nest }}
+    }
+  </p>
+}
+
+<ul class="ml-7" [hidden]="!showGroup()">
+  <ng-content select="cw-checklist-item" />
+  @if (adding()) {
+    <li class="flex min-h-8 min-w-0 items-center gap-2 pr-1 pl-0.5">
+      <span class="flex size-5 shrink-0 items-center justify-center text-muted-foreground">
+        <ng-icon name="phosphorPlusBold" size="0.875rem" aria-hidden="true" />
+      </span>
+      <input
+        #addField
+        type="text"
+        autocomplete="off"
+        [class]="fieldClasses"
+        [attr.aria-label]="text().newItem"
+        (keydown)="onAddKeydown($event)"
+        (blur)="onAddBlur($event)"
+      />
+    </li>
+  }
+</ul>
+
+<ng-template cdkDragPlaceholder>
+  <div
+    aria-hidden="true"
+    class="relative -my-px mr-1 ml-1 h-0.5 rounded-full bg-foreground before:absolute before:top-1/2 before:-left-1 before:size-2 before:-translate-y-1/2 before:rounded-full before:border-2 before:border-foreground before:bg-background"
+  ></div>
+</ng-template>
+<ng-template cdkDragPreview>
+  <div
+    class="flex w-fit cursor-grabbing items-center gap-2 rounded-md border bg-popover px-1 py-1 text-sm text-popover-foreground shadow-lg"
+  >
+    <ng-icon
+      name="phosphorDotsSixVerticalBold"
+      size="0.875rem"
+      class="text-muted-foreground"
+      aria-hidden="true"
+    />
+    <span class="max-w-60 truncate">{{ label() }}</span>
+  </div>
+</ng-template>
