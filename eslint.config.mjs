@@ -54,13 +54,26 @@ export default defineConfig(
           message: 'Use explicit named exports: a barrel hides what a package exposes.',
         },
       ],
+      // The dependency review rejected the packages below: each message names the replacement.
       'no-restricted-imports': [
         'error',
         {
+          paths: [
+            { name: 'axios', message: 'Rejected dependency: use the native fetch.' },
+            { name: 'moment', message: 'Rejected dependency: use Temporal or Intl.' },
+            { name: 'date-fns', message: 'Rejected dependency: use Temporal or Intl.' },
+            { name: 'lodash', message: 'Rejected dependency: use the language built-ins.' },
+            { name: 'qrcode', message: 'Rejected dependency: the applications use `qr`.' },
+            { name: 'uqr', message: 'Rejected dependency: the applications use `qr`.' },
+          ],
           patterns: [
             {
               regex: '\\.\\./cadenway-',
               message: 'Never import sibling sources: use the published @cadenway/* packages.',
+            },
+            {
+              group: ['axios/*', 'moment/*', 'date-fns/*', 'lodash/*', 'qrcode/*', 'uqr/*'],
+              message: 'Rejected dependency: see the rule entry of the package itself.',
             },
           ],
         },
