@@ -18,8 +18,8 @@ import {
 import { LiveAnnouncer, _IdGenerator } from '@angular/cdk/a11y';
 import { type ControlValueAccessor, NgControl } from '@angular/forms';
 import type { FormValueControl } from '@angular/forms/signals';
-import { CwKbd } from '@cadenway/ui/kbd';
-import { CwSpinner } from '@cadenway/ui/spinner';
+import { CwKbd } from '@cadenway/ui/components/kbd';
+import { CwSpinner } from '@cadenway/ui/components/spinner';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorLockSimpleBold, phosphorPencilSimpleBold } from '@ng-icons/phosphor-icons/bold';
 import { phosphorWarningCircleFill } from '@ng-icons/phosphor-icons/fill';

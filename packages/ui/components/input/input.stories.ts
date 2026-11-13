@@ -1,5 +1,10 @@
-import { CwButton } from '@cadenway/ui/button';
-import { CwField, CwFieldDescription, CwFieldError, CwFieldLabel } from '@cadenway/ui/field';
+import { CwButton } from '@cadenway/ui/components/button';
+import {
+  CwField,
+  CwFieldDescription,
+  CwFieldError,
+  CwFieldLabel,
+} from '@cadenway/ui/components/field';
 import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vite';
 import { expect, userEvent, within } from 'storybook/test';
 

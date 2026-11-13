@@ -49,7 +49,7 @@ function toSize(value: CwStatusIconSize | number | null | undefined): CwStatusIc
  * one status to the next (mockup `StatutTache.dc.html`).
  *
  * Decorative: the SVG is `aria-hidden`, so always write the status word next to it
- * (`CW_STATUS_LABELS`, or `cw-status-badge` from `@cadenway/ui/badge`). `status` sets the shape and
+ * (`CW_STATUS_LABELS`, or `cw-status-badge` from `@cadenway/ui/components/badge`). `status` sets the shape and
  * the color; an unknown key falls back to `todo`, as in the mockup. `from` draws a previous status
  * first, then switches to `status` two animation frames after the first render, so a freshly
  * mounted icon (a row that moved group) still plays its morph. `milestone` draws the same layers as

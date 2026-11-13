@@ -27,13 +27,13 @@ import {
   phosphorClockBold,
 } from '@ng-icons/phosphor-icons/bold';
 
-import { CwButton } from '@cadenway/ui/button';
+import { CwButton } from '@cadenway/ui/components/button';
 import {
   CwCalendar,
   type CwCalendarMode,
   type CwCalendarSelection,
   type CwDateDisabledFn,
-} from '@cadenway/ui/calendar';
+} from '@cadenway/ui/components/calendar';
 import {
   CwRipple,
   ɵConnectedPanel,
@@ -42,8 +42,12 @@ import {
   ɵstartOfDay,
   type ɵStackedPanel,
 } from '@cadenway/ui/core';
-import { CwInput } from '@cadenway/ui/input';
-import { CwInputGroup, CwInputGroupAddon, CwInputGroupButton } from '@cadenway/ui/input-group';
+import { CwInput } from '@cadenway/ui/components/input';
+import {
+  CwInputGroup,
+  CwInputGroupAddon,
+  CwInputGroupButton,
+} from '@cadenway/ui/components/input-group';
 
 import type {
   CwDatePickerRange,

@@ -15,7 +15,7 @@
 2. Bricks follow their Design System artifact sheet (API, variants, values) and the mockup (behavior, copy); behaviors (keyboard, ARIA, placement) come from Angular Aria and the CDK, styling stays ours.
 3. Angular 22 conventions: no suffix, `cw-` selectors, signal inputs, outputs and models.
 4. Every brick has stories for each state, in light and dark, and passes the accessibility checks.
-5. One secondary entry point per brick (`@cadenway/ui/<brick>`), explicit `public-api.ts` exports; no `class` input; a removal or rename is a major version with a deprecation first.
+5. One secondary entry point per brick (`@cadenway/ui/components/<brick>`), explicit `public-api.ts` exports; no `class` input; a removal or rename is a major version with a deprecation first.
 6. Changesets describe every change; the release workflow publishes.
 
 ## Boundaries (hard rules)

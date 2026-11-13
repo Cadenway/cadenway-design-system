@@ -24,7 +24,7 @@ inspection from executed checks.
 
 ## Role scope
 
-One folder per brick, `packages/ui/<brick>/` (its secondary entry point `@cadenway/ui/<brick>`), with its stories and specs.
+One folder per brick, `packages/ui/components/<brick>/` (its secondary entry point `@cadenway/ui/components/<brick>`), with its stories and specs.
 
 ## The request is the deliverable
 

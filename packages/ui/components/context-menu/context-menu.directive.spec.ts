@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
-import { CwMenu, CwMenuItem, CwMenuSeparator } from '@cadenway/ui/menu';
+import { CwMenu, CwMenuItem, CwMenuSeparator } from '@cadenway/ui/components/menu';
 
 import { CwContextMenuTriggerFor } from './context-menu.directive';
 

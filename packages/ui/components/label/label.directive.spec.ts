@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { CwCheckbox } from '@cadenway/ui/checkbox';
+import { CwCheckbox } from '@cadenway/ui/components/checkbox';
 
 import { CwLabel } from './label.directive';
 

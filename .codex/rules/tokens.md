@@ -8,6 +8,9 @@ paths:
 - Values come from the Design System artifact, `project/tokens.json` (version 17): light and dark
   under `[data-theme]`, semantic aliases declared once. Plus the 8 mockup hues (cornaline, indigo,
   azur, lagon, olive, rose, fuchsia, ardoise), absent from the artifact.
+- `tokens.css` and `theme.css` are entry files that import the partials of `src/` (`fonts`, `scale`,
+  `light`, `dark`; `theme/colors`, `easing`, `elevation`, `motion`, `base`): edit the partial, keep
+  the public paths `@cadenway/tokens/tokens.css` and `theme.css` stable.
 - `theme.css` only references `tokens.css`: `@theme inline` for colors, `@theme` for the text scale,
   radii, fonts, shadows, easings (`--ease-snap`, `--ease-spring`), animations and keyframes.
 - Animation names of the artifact (`menu-in`, `item-in`, `pop-in`, `fade-in`, `ripple`, `spinner`)

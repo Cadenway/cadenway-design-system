@@ -1,0 +1,51 @@
+/* @cadenway/tokens: the light theme, also the default (imported by tokens.css). */
+
+:root,
+[data-theme='light'] {
+  color-scheme: light;
+
+  /* Surfaces: Tailwind's gray scale, panels and menus in white. */
+  --canvas: #f3f4f6;
+  --surface: #ffffff;
+  --surface-muted: #eff1f4;
+  --surface-overlay: #ffffff;
+  --stone: #e1e4e8;
+
+  /* Veils and rules, translucent gray 900 so they keep the same relief on every surface. */
+  --hover: #1118270a;
+  --selected: #11182717;
+  --focus: #7c3aed;
+  --line: #1118270b;
+  --line-strong: #11182719;
+  --line-control: #11182734;
+  --track: #1118272d;
+
+  /* Shadow colors (the `shadow-*` levels of theme.css combine them). */
+  --shadow-contact: #11182714;
+  --shadow-ambient: #1118270d;
+  --shadow-edge: #ffffff00;
+
+  /* Text. */
+  --ink: #18181b;
+  --ink-muted: #5f616a;
+
+  /* The four vivid hues, each with a fixed role. */
+  --grenat: #d92d33;
+  --grenat-soft: #fde8e8;
+  --grenat-text: #b4232b;
+  --amethyste: #7c3aed;
+  --balise: #f5b000;
+  --jade: #10964a;
+  --jade-soft: #dcf7e5;
+  --jade-text: #0d7a39;
+
+  /* Mockup extension: status "En revue" and priority "Haute" (cornaline), space and label colors. */
+  --cornaline: #ea580c;
+  --indigo: #4f46e5;
+  --azur: #2563eb;
+  --lagon: #0891b2;
+  --olive: #65a30d;
+  --rose: #db2777;
+  --fuchsia: #c026d3;
+  --ardoise: #475569;
+}

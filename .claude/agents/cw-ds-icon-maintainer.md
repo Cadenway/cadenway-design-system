@@ -40,7 +40,8 @@ Read the request, then re-read it against what you are about to do. Everything b
 
 ## Procedure
 
-1. Register only icons a consumer uses; keep the list sorted.
+1. Register only icons a consumer uses, in the file of its family (`src/lib/sets/phosphor-bold.icons.ts`,
+   `phosphor-fill.icons.ts`, `brand.icons.ts`, `flags.icons.ts`); keep each list sorted.
 2. Phosphor `Bold` by default, `Fill` for an active state; the GitHub logo follows `currentColor`.
 
 ## Checks

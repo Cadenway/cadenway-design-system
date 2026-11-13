@@ -1,4 +1,4 @@
-import { CwCheckbox } from '@cadenway/ui/checkbox';
+import { CwCheckbox } from '@cadenway/ui/components/checkbox';
 import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vite';
 import { expect, userEvent, within } from 'storybook/test';
 

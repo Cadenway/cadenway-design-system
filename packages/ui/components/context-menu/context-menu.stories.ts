@@ -9,7 +9,7 @@ import {
   CwMenuSeparator,
   CwMenuShortcut,
   CwMenuTriggerFor,
-} from '@cadenway/ui/menu';
+} from '@cadenway/ui/components/menu';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorArrowSquareOutBold,

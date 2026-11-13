@@ -8,7 +8,10 @@
     "types": [],
     /* The entry points of this package import each other by name (`@cadenway/ui/core`). The build
        (ng-packagr) resolves them itself; the type check, the tests and Storybook use these paths. */
-    "paths": { "@cadenway/ui/*": ["./*/public-api.ts"] }
+    "paths": {
+      "@cadenway/ui/core": ["./core/public-api.ts"],
+      "@cadenway/ui/components/*": ["./components/*/public-api.ts"]
+    }
   },
   "include": ["src/**/*.ts", "*/**/*.ts"],
   "exclude": ["**/*.spec.ts", "**/*.stories.ts", "node_modules", "dist"]

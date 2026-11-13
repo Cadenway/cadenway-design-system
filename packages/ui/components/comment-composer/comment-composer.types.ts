@@ -1,5 +1,5 @@
-import type { CwAttachmentState } from '@cadenway/ui/attachment';
-import type { CwBlockType, CwMentionPerson } from '@cadenway/ui/block-editor';
+import type { CwAttachmentState } from '@cadenway/ui/components/attachment';
+import type { CwBlockType, CwMentionPerson } from '@cadenway/ui/components/block-editor';
 
 /** `full`: complete toolbar, Ctrl Entrée help, avatar; `compact`: one 36 px line that grows on focus. */
 export type CwCommentComposerVariant = 'full' | 'compact';

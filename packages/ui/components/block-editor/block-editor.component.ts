@@ -20,14 +20,19 @@ import {
 } from '@angular/core';
 import { type ControlValueAccessor, NgControl } from '@angular/forms';
 import type { FormValueControl } from '@angular/forms/signals';
-import { CwAvatar } from '@cadenway/ui/avatar';
-import { CwButton } from '@cadenway/ui/button';
+import { CwAvatar } from '@cadenway/ui/components/avatar';
+import { CwButton } from '@cadenway/ui/components/button';
 import { ɵmenuFrom } from '@cadenway/ui/core';
-import { CwInput } from '@cadenway/ui/input';
-import { CwKbd } from '@cadenway/ui/kbd';
-import { CwMenu, CwMenuItemRadio, CwMenuRadioGroup, CwMenuTriggerFor } from '@cadenway/ui/menu';
-import { CwToolbar, CwToolbarItem, CwToolbarSeparator } from '@cadenway/ui/toolbar';
-import { CwTooltip } from '@cadenway/ui/tooltip';
+import { CwInput } from '@cadenway/ui/components/input';
+import { CwKbd } from '@cadenway/ui/components/kbd';
+import {
+  CwMenu,
+  CwMenuItemRadio,
+  CwMenuRadioGroup,
+  CwMenuTriggerFor,
+} from '@cadenway/ui/components/menu';
+import { CwToolbar, CwToolbarItem, CwToolbarSeparator } from '@cadenway/ui/components/toolbar';
+import { CwTooltip } from '@cadenway/ui/components/tooltip';
 import { computePosition, flip, offset, shift } from '@floating-ui/dom';
 import { take } from 'rxjs';
 import { NgIcon, provideIcons } from '@ng-icons/core';

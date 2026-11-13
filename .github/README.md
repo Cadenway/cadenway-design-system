@@ -4,10 +4,13 @@ cadenway-design-system is the Angular design system taken from the mockup. It pu
 
 ```text
 packages/
-├─ tokens/   → @cadenway/tokens (tokens.css, theme.css)
-├─ icons/    → @cadenway/icons (provideCadenwayIcons)
-└─ ui/       → @cadenway/ui (<brick>/ = entry point @cadenway/ui/<brick>, main declaration at its
-                root, one subfolder per other one; core/ = a11y, motion, overlay, styles)
+├─ tokens/   → @cadenway/tokens: tokens.css and theme.css (entry files) importing src/ partials
+│              (fonts, scale, light, dark; theme/ colors, easing, elevation, motion, base), fonts/
+├─ icons/    → @cadenway/icons: provideCadenwayIcons(), one icon family per file in src/lib/sets/
+└─ ui/       → @cadenway/ui
+   ├─ core/          @cadenway/ui/core: shared internals (a11y, dates, format, motion, overlay, styles)
+   └─ components/    @cadenway/ui/components/<brick>: one entry point per brick, its main declaration
+                     at the root of its folder, one subfolder per other declaration
 apps/storybook/
 ```
 
@@ -30,7 +33,7 @@ Run the narrowest check first; CI runs them all on every pull request.
 pnpm format:check
 pnpm lint
 pnpm typecheck
-pnpm test --include packages/ui/<brick>
+pnpm test --include packages/ui/components/<brick>
 pnpm test:coverage
 pnpm storybook:build
 pnpm test:storybook           # interaction and accessibility checks

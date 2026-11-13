@@ -3,7 +3,7 @@ import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { FormField, form } from '@angular/forms/signals';
 
-import type { CwCalendarMode } from '@cadenway/ui/calendar';
+import type { CwCalendarMode } from '@cadenway/ui/components/calendar';
 
 import { CwDatePicker } from './date-picker.component';
 import type { CwDatePickerValue, CwDatePickerVariant, CwDatePreset } from './date-picker.types';

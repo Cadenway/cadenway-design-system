@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import type { CwMentionSearch } from '@cadenway/ui/block-editor';
+import type { CwMentionSearch } from '@cadenway/ui/components/block-editor';
 import { of } from 'rxjs';
 
 import { CwCommentComposer } from './comment-composer.component';

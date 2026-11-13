@@ -13,7 +13,7 @@ import {
 } from '@angular/core';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { Clipboard } from '@angular/cdk/clipboard';
-import { CwButton } from '@cadenway/ui/button';
+import { CwButton } from '@cadenway/ui/components/button';
 import { ɵFOCUS_INSET } from '@cadenway/ui/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorCheckBold, phosphorCopyBold } from '@ng-icons/phosphor-icons/bold';

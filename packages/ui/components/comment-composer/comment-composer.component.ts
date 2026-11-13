@@ -13,12 +13,12 @@ import {
 } from '@angular/core';
 import { type ControlValueAccessor, NgControl } from '@angular/forms';
 import type { FormValueControl } from '@angular/forms/signals';
-import { CwAttachment } from '@cadenway/ui/attachment';
-import { CwAvatar } from '@cadenway/ui/avatar';
-import { CwBlockEditor, type CwMentionSearch } from '@cadenway/ui/block-editor';
-import { CwButton } from '@cadenway/ui/button';
-import { CwKbd } from '@cadenway/ui/kbd';
-import { CwToolbar, CwToolbarItem, CwToolbarSeparator } from '@cadenway/ui/toolbar';
+import { CwAttachment } from '@cadenway/ui/components/attachment';
+import { CwAvatar } from '@cadenway/ui/components/avatar';
+import { CwBlockEditor, type CwMentionSearch } from '@cadenway/ui/components/block-editor';
+import { CwButton } from '@cadenway/ui/components/button';
+import { CwKbd } from '@cadenway/ui/components/kbd';
+import { CwToolbar, CwToolbarItem, CwToolbarSeparator } from '@cadenway/ui/components/toolbar';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorAtBold,

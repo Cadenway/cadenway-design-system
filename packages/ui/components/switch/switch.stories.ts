@@ -4,7 +4,7 @@ import {
   CwFieldDescription,
   CwFieldError,
   CwFieldLabel,
-} from '@cadenway/ui/field';
+} from '@cadenway/ui/components/field';
 import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vite';
 import { expect, userEvent, within } from 'storybook/test';
 

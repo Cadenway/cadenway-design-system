@@ -23,7 +23,7 @@ import {
   phosphorCaretRightBold,
 } from '@ng-icons/phosphor-icons/bold';
 
-import { CwButton } from '@cadenway/ui/button';
+import { CwButton } from '@cadenway/ui/components/button';
 import {
   CwRipple,
   ɵaddDays,

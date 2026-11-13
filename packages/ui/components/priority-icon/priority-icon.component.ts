@@ -41,7 +41,7 @@ function toSize(value: CwPriorityIconSize | number | null | undefined): CwPriori
  * a disc with an exclamation mark for `urgente` (mockup `PrioriteTache.dc.html`).
  *
  * Decorative: the SVG is `aria-hidden`, so always write the priority word next to it
- * (`CW_PRIORITY_LABELS`, or `cw-priority-badge` from `@cadenway/ui/badge`). `priority` sets the
+ * (`CW_PRIORITY_LABELS`, or `cw-priority-badge` from `@cadenway/ui/components/badge`). `priority` sets the
  * shape and the color; an unknown key falls back to `moyenne`, as in the mockup. `from` draws a
  * previous priority first, then switches to `priority` two animation frames after the first render,
  * so a freshly mounted icon still plays its morph. Under `prefers-reduced-motion` every change is

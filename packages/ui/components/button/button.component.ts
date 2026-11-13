@@ -8,7 +8,7 @@ import {
   input,
 } from '@angular/core';
 import { CwRipple } from '@cadenway/ui/core';
-import { CwSpinner } from '@cadenway/ui/spinner';
+import { CwSpinner } from '@cadenway/ui/components/spinner';
 
 import type { CwButtonSize, CwButtonVariant } from './button.types';
 

@@ -1,8 +1,8 @@
 import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 
-import { CwButton } from '@cadenway/ui/button';
-import { CwCalendar } from '@cadenway/ui/calendar';
+import { CwButton } from '@cadenway/ui/components/button';
+import { CwCalendar } from '@cadenway/ui/components/calendar';
 
 import { CwDatePicker } from './date-picker.component';
 import type { CwDatePreset } from './date-picker.types';

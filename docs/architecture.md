@@ -14,10 +14,13 @@ cadenway-design-system is the Angular design system taken from the mockup. It pu
 
 ```text
 packages/
-├─ tokens/   → @cadenway/tokens (tokens.css, theme.css)
-├─ icons/    → @cadenway/icons (provideCadenwayIcons)
-└─ ui/       → @cadenway/ui (<brick>/ = entry point @cadenway/ui/<brick>, main declaration at its
-                root, one subfolder per other one; core/ = a11y, motion, overlay, styles)
+├─ tokens/   → @cadenway/tokens: tokens.css and theme.css (entry files) importing src/ partials
+│              (fonts, scale, light, dark; theme/ colors, easing, elevation, motion, base), fonts/
+├─ icons/    → @cadenway/icons: provideCadenwayIcons(), one icon family per file in src/lib/sets/
+└─ ui/       → @cadenway/ui
+   ├─ core/          @cadenway/ui/core: shared internals (a11y, dates, format, motion, overlay, styles)
+   └─ components/    @cadenway/ui/components/<brick>: one entry point per brick, its main declaration
+                     at the root of its folder, one subfolder per other declaration
 apps/storybook/
 ```
 
@@ -26,7 +29,8 @@ apps/storybook/
 - `packages/tokens`: colors (light and dark), typography, radii, shadows, motion variables and keyframes.
 - `packages/icons`: the Phosphor, svgl and flag icons the apps use.
 - `packages/ui`: generic bricks and the two business icons; one folder per brick, each its own
-  secondary entry point (`@cadenway/ui/<brick>`), shared helpers in `core/`.
+  secondary entry point (`@cadenway/ui/components/<brick>`, folder `packages/ui/components/<brick>/`),
+  shared internals in `core/` (`@cadenway/ui/core`).
 - `apps/storybook`: stories, interaction tests, accessibility checks.
 
 ## Boundaries

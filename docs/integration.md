@@ -23,7 +23,7 @@ Source: `cw-tokens-and-theme` ([Claude](../.claude/skills/cw-tokens-and-theme/SK
 
 Source: `cw-brick-recipes` ([Claude](../.claude/skills/cw-brick-recipes/SKILL.md), [Codex](../.codex/skills/cw-brick-recipes/SKILL.md)), a summary of each brick's sheet in the Design System artifact (`project/components/<Name>/README.md`).
 
-- One secondary entry point per brick (`@cadenway/ui/button`, `@cadenway/ui/menu`…), folder `packages/ui/<entry>/`; shared helpers in `@cadenway/ui/core`.
+- One secondary entry point per brick (`@cadenway/ui/components/button`, `@cadenway/ui/components/menu`…), folder `packages/ui/components/<entry>/`; shared helpers in `@cadenway/ui/core`.
 - Variants and sizes are inputs; no `class` input.
 - Scope: the bricks the mockup uses, in six waves (primitives and form controls, overlays and pickers, dialogs and feedback, navigation, data blocks, rich text). Artifact components the mockup does not use are not built until a consumer needs them.
 - Task-specific parts of the sheets (`CwTaskCard`, status and priority badges with other keys, task defaults in Kanban or DataTable) are adapted to the boundary: generic inputs here, task assembly in `cadenway-webapp`.

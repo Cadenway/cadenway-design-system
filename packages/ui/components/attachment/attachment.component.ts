@@ -10,9 +10,9 @@ import {
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
-import { CwButton } from '@cadenway/ui/button';
+import { CwButton } from '@cadenway/ui/components/button';
 import { CwRipple, ɵextensionOf, ɵformatFileSize } from '@cadenway/ui/core';
-import { CwSpinner } from '@cadenway/ui/spinner';
+import { CwSpinner } from '@cadenway/ui/components/spinner';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorArrowClockwiseBold,

@@ -1,4 +1,4 @@
-import type { CwMentionSearch } from '@cadenway/ui/block-editor';
+import type { CwMentionSearch } from '@cadenway/ui/components/block-editor';
 import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vite';
 import { of } from 'rxjs';
 import { expect, userEvent, waitFor, within } from 'storybook/test';

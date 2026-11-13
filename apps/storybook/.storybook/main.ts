@@ -4,7 +4,7 @@ import type { StorybookConfig } from '@storybook/angular-vite';
  * Storybook configuration of the design system.
  *
  * Stories are read from this application (tooling stories) and from the packages, next to the
- * bricks they document (`packages/ui/<brick>/<brick>.stories.ts`).
+ * bricks they document (`packages/ui/components/<brick>/<brick>.stories.ts`).
  */
 const config: StorybookConfig = {
   framework: {
@@ -16,8 +16,8 @@ const config: StorybookConfig = {
   stories: [
     '../src/**/*.stories.ts',
     '../../../packages/*/src/**/*.stories.ts',
-    // One folder per entry point of @cadenway/ui (`packages/ui/<brick>/`).
-    '../../../packages/ui/!(node_modules|dist)/**/*.stories.ts',
+    // One folder per brick of @cadenway/ui (`packages/ui/components/<brick>/`).
+    '../../../packages/ui/components/*/**/*.stories.ts',
   ],
   addons: ['@storybook/addon-docs', '@storybook/addon-a11y', '@storybook/addon-vitest'],
   // No usage data leaves a developer machine or CI.

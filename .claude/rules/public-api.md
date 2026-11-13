@@ -9,7 +9,7 @@ paths:
 # Public API
 
 - Explicit named exports only; nothing internal, no testing helper.
-- `@cadenway/ui`: one secondary entry point per brick (`@cadenway/ui/<brick>`), each with its own
+- `@cadenway/ui`: one secondary entry point per brick (`@cadenway/ui/components/<brick>`), each with its own
   `public-api.ts` and a spec pinning its exports. Helpers shared across entry points live in
   `@cadenway/ui/core`; those that are not public API carry the `ɵ` prefix.
 - Angular and the CDK are peer dependencies.

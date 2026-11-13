@@ -13,7 +13,7 @@ import {
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { CwRipple, ɵFOCUS } from '@cadenway/ui/core';
-import { CwSkeleton } from '@cadenway/ui/skeleton';
+import { CwSkeleton } from '@cadenway/ui/components/skeleton';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorChartBarBold } from '@ng-icons/phosphor-icons/bold';
 

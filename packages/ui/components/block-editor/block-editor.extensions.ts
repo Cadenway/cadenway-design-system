@@ -4,7 +4,7 @@
  * point.
  */
 
-import { ɵcreateMarked, ɵwriteMention } from '@cadenway/ui/markdown';
+import { ɵcreateMarked, ɵwriteMention } from '@cadenway/ui/components/markdown';
 import {
   type AnyExtension,
   type Editor,
@@ -261,7 +261,7 @@ function cadenwayBehavior(hooks: EditorHooks): AnyExtension {
 /**
  * The extensions of the editor: StarterKit (Link and Underline configured, Bold and Underline
  * following the Cadenway grammar), task lists, placeholder, character count, mentions, the « / »
- * and « @ » menus, and Markdown storage through the `marked` instance of `@cadenway/ui/markdown`.
+ * and « @ » menus, and Markdown storage through the `marked` instance of `@cadenway/ui/components/markdown`.
  */
 export function createExtensions(hooks: EditorHooks): AnyExtension[] {
   return [

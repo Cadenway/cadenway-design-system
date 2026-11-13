@@ -10,7 +10,7 @@ import {
   signal,
 } from '@angular/core';
 import type { OutputRefSubscription } from '@angular/core';
-import type { CwMenu, CwMenuFocus, CwMenuPoint } from '@cadenway/ui/menu';
+import type { CwMenu, CwMenuFocus, CwMenuPoint } from '@cadenway/ui/components/menu';
 
 /* ContextMenu sheet, "Position": the panel's top-left corner sits on the point, flipped up or left
    when there is no room; no arrow. A point has no size, so only the overlay corner changes. */
@@ -36,7 +36,7 @@ function isEditable(target: EventTarget | null): boolean {
 /**
  * Opens a `cw-menu` where the user right-clicks a card, a row, a column header or a space: the
  * same actions as the element's `…` menu, faster (ContextMenu sheet of the Design System
- * artifact). The panel and its items come from `@cadenway/ui/menu`.
+ * artifact). The panel and its items come from `@cadenway/ui/components/menu`.
  *
  * A right click opens the menu with its top-left corner on the pointer (flipped up or left
  * without room); a 500 ms long press does the same on touch screens; Shift + F10 and the Menu key

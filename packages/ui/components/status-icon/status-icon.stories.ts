@@ -1,4 +1,4 @@
-import { CwButton } from '@cadenway/ui/button';
+import { CwButton } from '@cadenway/ui/components/button';
 import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 
