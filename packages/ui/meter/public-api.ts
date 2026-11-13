@@ -4,7 +4,7 @@
  * Explicit named exports only (.claude/rules/public-api.md).
  */
 
-export { CwMeter } from './meter.component';
+export { CwMeter } from './meter/meter.component';
 export type {
   CwMeterFormat,
   CwMeterSeries,

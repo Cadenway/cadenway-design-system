@@ -1,9 +1,9 @@
 import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vite';
 import { expect, userEvent, within } from 'storybook/test';
 
-import { CwAvatarAdd } from './avatar-add.component';
-import { CwAvatarGroup } from './avatar-group.component';
-import { CwAvatar } from './avatar.component';
+import { CwAvatarAdd } from './avatar-add/avatar-add.component';
+import { CwAvatarGroup } from './avatar-group/avatar-group.component';
+import { CwAvatar } from './avatar/avatar.component';
 
 /**
  * Avatar, every state of its sheet in the Design System artifact, in the light and the dark theme.

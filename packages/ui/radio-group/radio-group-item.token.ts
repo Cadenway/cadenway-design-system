@@ -1,6 +1,6 @@
 import { InjectionToken } from '@angular/core';
 
-import type { CwRadioGroupItem } from './radio-group-item.component';
+import type { CwRadioGroupItem } from './radio-group-item/radio-group-item.component';
 
 /**
  * The options of a radio group, as its content query sees them. `cw-radio-group-item` provides

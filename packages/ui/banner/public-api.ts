@@ -4,6 +4,6 @@
  * Explicit named exports only (.claude/rules/public-api.md).
  */
 
-export { CwBannerActions } from './banner-actions.component';
-export { CwBanner } from './banner.component';
+export { CwBannerActions } from './banner-actions/banner-actions.component';
+export { CwBanner } from './banner/banner.component';
 export type { CwBannerPlacement, CwBannerTone } from './banner.types';

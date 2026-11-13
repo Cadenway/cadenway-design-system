@@ -9,7 +9,7 @@ import {
 } from '@storybook/angular-vite';
 import { expect, within } from 'storybook/test';
 
-import { CwProgress } from './progress.component';
+import { CwProgress } from './progress/progress.component';
 
 /**
  * Progress, every state of its sheet in the Design System artifact, in the light and the dark

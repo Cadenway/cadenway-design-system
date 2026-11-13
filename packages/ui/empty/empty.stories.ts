@@ -17,12 +17,12 @@ import {
 } from '@storybook/angular-vite';
 import { expect, within } from 'storybook/test';
 
-import { CwEmptyContent } from './empty-content.component';
-import { CwEmptyDescription } from './empty-description.component';
-import { CwEmptyHeader } from './empty-header.component';
-import { CwEmptyMedia } from './empty-media.component';
-import { CwEmptyTitle } from './empty-title.component';
-import { CwEmpty } from './empty.component';
+import { CwEmptyContent } from './empty-content/empty-content.component';
+import { CwEmptyDescription } from './empty-description/empty-description.component';
+import { CwEmptyHeader } from './empty-header/empty-header.component';
+import { CwEmptyMedia } from './empty-media/empty-media.component';
+import { CwEmptyTitle } from './empty-title/empty-title.component';
+import { CwEmpty } from './empty/empty.component';
 
 /**
  * Empty, every state of its sheet in the Design System artifact and the loading error panel of the

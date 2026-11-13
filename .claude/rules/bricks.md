@@ -9,13 +9,18 @@ paths:
   `@cadenway/ui/<brick>`: `ng-package.json`, `public-api.ts`, `public-api.spec.ts`,
   `<brick>.stories.ts`, and the files below. Selector `cw-<brick>`, or an attribute selector
   `[cw<Brick>]` on a native element (`button[cwButton]`); classes `Cw<Brick>`, no suffix.
-- One component, directive or service per file. A component is two files: `<name>.component.ts`
-  (`templateUrl`) and `<name>.component.html`, never an inline template; a directive is
-  `<name>.directive.ts`; a service `<name>.service.ts`. Specs follow the file they test
-  (`<name>.component.spec.ts`).
-- Exported types, interfaces and type aliases live in `<brick>.types.ts`; exported constant data
-  (label maps, key lists) in `<brick>.constants.ts`. Private class-string maps used by one component
-  stay in its file.
+- One component, directive or service per file, each in its own subfolder of the entry point:
+  `packages/ui/<brick>/<name>/<name>.component.ts` (`templateUrl`) + `<name>.component.html` (never
+  an inline template) + `<name>.component.spec.ts`; `<name>/<name>.directive.ts`;
+  `<name>/<name>.service.ts`. Import paths stay flat (`@cadenway/ui/<brick>`): the subfolders are
+  internal.
+- `@cadenway/ui/core` is split by concern: `a11y/`, `motion/`, `overlay/`, `styles/`, plus
+  `core.types.ts`.
+- At the root of the entry point: `ng-package.json`, `public-api.ts`, `public-api.spec.ts`,
+  `<brick>.stories.ts`, `<brick>.types.ts` (exported types, interfaces, aliases),
+  `<brick>.constants.ts` (exported constant data), and internal shared files (`<brick>.styles.ts`
+  for class maps used by several declarations, `<name>.token.ts` for injection tokens). A class map
+  used by one declaration stays in its file.
 - API, variants, sizes and states come from the brick's sheet in the Design System artifact
   (`project/components/<Name>/README.md`); the mockup settles behavior and copy.
 - Signal API; variants and sizes as inputs; no consumer-specific variant; no `class` input (the

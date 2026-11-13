@@ -4,5 +4,5 @@
  * Explicit named exports only (.claude/rules/public-api.md).
  */
 
-export { CwProgress } from './progress.component';
+export { CwProgress } from './progress/progress.component';
 export type { CwProgressSize, CwProgressState, CwProgressVariant } from './progress.types';

@@ -1,9 +1,9 @@
 import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vite';
 import { expect, within } from 'storybook/test';
 
-import { CwKbdGroup } from './kbd-group.directive';
-import { CwKbd } from './kbd.directive';
-import { CwShortcut } from './shortcut.component';
+import { CwKbdGroup } from './kbd-group/kbd-group.directive';
+import { CwKbd } from './kbd/kbd.directive';
+import { CwShortcut } from './shortcut/shortcut.component';
 
 /**
  * Kbd, every state of its sheet in the Design System artifact, in the light and the dark theme.

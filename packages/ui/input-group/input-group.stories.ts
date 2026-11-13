@@ -19,12 +19,12 @@ import {
 } from '@storybook/angular-vite';
 import { expect, userEvent, within } from 'storybook/test';
 
-import { CwInputGroupAddon } from './input-group-addon.component';
-import { CwInputGroupButton } from './input-group-button.component';
-import { CwInputGroupInput } from './input-group-input.directive';
-import { CwInputGroupText } from './input-group-text.component';
-import { CwInputGroupTextarea } from './input-group-textarea.directive';
-import { CwInputGroup } from './input-group.component';
+import { CwInputGroupAddon } from './input-group-addon/input-group-addon.component';
+import { CwInputGroupButton } from './input-group-button/input-group-button.component';
+import { CwInputGroupInput } from './input-group-input/input-group-input.directive';
+import { CwInputGroupText } from './input-group-text/input-group-text.component';
+import { CwInputGroupTextarea } from './input-group-textarea/input-group-textarea.directive';
+import { CwInputGroup } from './input-group/input-group.component';
 
 /**
  * Input Group, every state of its sheet in the Design System artifact, in the light and the dark

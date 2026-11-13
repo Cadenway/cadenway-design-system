@@ -2,7 +2,7 @@ import { CwButton } from '@cadenway/ui/button';
 import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 
-import { CwStatusIcon } from './status-icon.component';
+import { CwStatusIcon } from './status-icon/status-icon.component';
 import { CW_STATUS_LABELS } from './status-icon.constants';
 import type { CwStatusKey } from './status-icon.types';
 

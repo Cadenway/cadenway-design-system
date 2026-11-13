@@ -1,6 +1,6 @@
 import { InjectionToken } from '@angular/core';
 
-import type { CwToggleGroupItem } from './toggle-group-item.component';
+import type { CwToggleGroupItem } from './toggle-group-item/toggle-group-item.component';
 
 /**
  * The items of a toggle group, as the group's content query sees them. Each one provides itself under this token, so the

@@ -6,16 +6,16 @@ import { CwSwitch } from '@cadenway/ui/switch';
 import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vite';
 import { expect, userEvent, within } from 'storybook/test';
 
-import { CwFieldContent } from './field-content.component';
-import { CwFieldDescription } from './field-description.component';
-import { CwFieldError } from './field-error.component';
-import { CwFieldGroup } from './field-group.component';
-import { CwFieldLabel } from './field-label.directive';
-import { CwFieldLegend } from './field-legend.directive';
-import { CwFieldSeparator } from './field-separator.component';
-import { CwFieldSet } from './field-set.directive';
-import { CwFieldTitle } from './field-title.component';
-import { CwField } from './field.component';
+import { CwFieldContent } from './field-content/field-content.component';
+import { CwFieldDescription } from './field-description/field-description.component';
+import { CwFieldError } from './field-error/field-error.component';
+import { CwFieldGroup } from './field-group/field-group.component';
+import { CwFieldLabel } from './field-label/field-label.directive';
+import { CwFieldLegend } from './field-legend/field-legend.directive';
+import { CwFieldSeparator } from './field-separator/field-separator.component';
+import { CwFieldSet } from './field-set/field-set.directive';
+import { CwFieldTitle } from './field-title/field-title.component';
+import { CwField } from './field/field.component';
 
 /**
  * Field, every state of its sheet in the Design System artifact, in the light and the dark theme.

@@ -1,7 +1,7 @@
 import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vite';
 import { expect, within } from 'storybook/test';
 
-import { CwSkeleton } from './skeleton.directive';
+import { CwSkeleton } from './skeleton/skeleton.directive';
 
 /**
  * Skeleton, every state of its sheet in the Design System artifact, in the light and the dark

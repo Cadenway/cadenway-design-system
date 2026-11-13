@@ -3,13 +3,13 @@ import { CwCheckbox } from '@cadenway/ui/checkbox';
 import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vite';
 import { expect, userEvent, within } from 'storybook/test';
 
-import { CwCardAction } from './card-action.component';
-import { CwCardContent } from './card-content.component';
-import { CwCardDescription } from './card-description.component';
-import { CwCardFooter } from './card-footer.component';
-import { CwCardHeader } from './card-header.component';
-import { CwCardTitle } from './card-title.component';
-import { CwCard } from './card.component';
+import { CwCardAction } from './card-action/card-action.component';
+import { CwCardContent } from './card-content/card-content.component';
+import { CwCardDescription } from './card-description/card-description.component';
+import { CwCardFooter } from './card-footer/card-footer.component';
+import { CwCardHeader } from './card-header/card-header.component';
+import { CwCardTitle } from './card-title/card-title.component';
+import { CwCard } from './card/card.component';
 
 /**
  * Card, every composition and state of its sheet in the Design System artifact, in the light and

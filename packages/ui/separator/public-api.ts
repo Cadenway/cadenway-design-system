@@ -4,5 +4,5 @@
  * Explicit named exports only (.claude/rules/public-api.md).
  */
 
-export { CwSeparator } from './separator.component';
+export { CwSeparator } from './separator/separator.component';
 export type { CwSeparatorOrientation } from './separator.types';

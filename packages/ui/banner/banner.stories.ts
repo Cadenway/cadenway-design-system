@@ -9,8 +9,8 @@ import {
 } from '@storybook/angular-vite';
 import { expect, userEvent, within } from 'storybook/test';
 
-import { CwBannerActions } from './banner-actions.component';
-import { CwBanner } from './banner.component';
+import { CwBannerActions } from './banner-actions/banner-actions.component';
+import { CwBanner } from './banner/banner.component';
 
 /**
  * Banner, every state of its sheet in the Design System artifact, in the light and the dark theme.

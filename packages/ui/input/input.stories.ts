@@ -3,7 +3,7 @@ import { CwField, CwFieldDescription, CwFieldError, CwFieldLabel } from '@cadenw
 import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vite';
 import { expect, userEvent, within } from 'storybook/test';
 
-import { CwInput } from './input.directive';
+import { CwInput } from './input/input.directive';
 
 /**
  * Input, every state of its sheet in the Design System artifact, in the light and the dark theme.

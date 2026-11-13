@@ -15,14 +15,14 @@ import {
 } from '@storybook/angular-vite';
 import { expect, userEvent, within } from 'storybook/test';
 
-import { CwItemActions } from './item-actions.component';
-import { CwItemContent } from './item-content.component';
-import { CwItemDescription } from './item-description.component';
-import { CwItemGroup } from './item-group.component';
-import { CwItemMedia } from './item-media.component';
-import { CwItemSeparator } from './item-separator.component';
-import { CwItemTitle } from './item-title.component';
-import { CwItem } from './item.component';
+import { CwItemActions } from './item-actions/item-actions.component';
+import { CwItemContent } from './item-content/item-content.component';
+import { CwItemDescription } from './item-description/item-description.component';
+import { CwItemGroup } from './item-group/item-group.component';
+import { CwItemMedia } from './item-media/item-media.component';
+import { CwItemSeparator } from './item-separator/item-separator.component';
+import { CwItemTitle } from './item-title/item-title.component';
+import { CwItem } from './item/item.component';
 
 /**
  * Item, every variant, size and state of its sheet in the Design System artifact, in the light and

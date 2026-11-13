@@ -1,7 +1,7 @@
 import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vite';
 import { expect, within } from 'storybook/test';
 
-import { CwLogo } from './logo.component';
+import { CwLogo } from './logo/logo.component';
 
 /**
  * Logo, the mark of its sheet in the Design System artifact, in the light and the dark theme. The

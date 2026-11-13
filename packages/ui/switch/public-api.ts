@@ -4,5 +4,5 @@
  * Explicit named exports only (.claude/rules/public-api.md).
  */
 
-export { CwSwitch } from './switch.component';
+export { CwSwitch } from './switch/switch.component';
 export type { CwSwitchSize } from './switch.types';

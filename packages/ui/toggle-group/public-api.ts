@@ -4,8 +4,8 @@
  * Explicit named exports only (.claude/rules/public-api.md).
  */
 
-export { CwToggleGroupItem } from './toggle-group-item.component';
-export { CwToggleGroup } from './toggle-group.component';
+export { CwToggleGroupItem } from './toggle-group-item/toggle-group-item.component';
+export { CwToggleGroup } from './toggle-group/toggle-group.component';
 export type {
   CwToggleGroupOrientation,
   CwToggleGroupSize,

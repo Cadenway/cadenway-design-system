@@ -4,7 +4,7 @@
  * Explicit named exports only (.claude/rules/public-api.md).
  */
 
-export { CwKbdGroup } from './kbd-group.directive';
-export { CwKbd } from './kbd.directive';
+export { CwKbdGroup } from './kbd-group/kbd-group.directive';
+export { CwKbd } from './kbd/kbd.directive';
 export type { CwKbdSize, CwKbdVariant } from './kbd.types';
-export { CwShortcut } from './shortcut.component';
+export { CwShortcut } from './shortcut/shortcut.component';

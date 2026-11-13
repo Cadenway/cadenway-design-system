@@ -6,11 +6,11 @@
  * "Adaptations to the repository boundaries").
  */
 
-export { CwCardAction } from './card-action.component';
-export { CwCardContent } from './card-content.component';
-export { CwCardDescription } from './card-description.component';
-export { CwCardFooter } from './card-footer.component';
-export { CwCardHeader } from './card-header.component';
-export { CwCardTitle } from './card-title.component';
-export { CwCard } from './card.component';
+export { CwCardAction } from './card-action/card-action.component';
+export { CwCardContent } from './card-content/card-content.component';
+export { CwCardDescription } from './card-description/card-description.component';
+export { CwCardFooter } from './card-footer/card-footer.component';
+export { CwCardHeader } from './card-header/card-header.component';
+export { CwCardTitle } from './card-title/card-title.component';
+export { CwCard } from './card/card.component';
 export type { CwCardSize } from './card.types';

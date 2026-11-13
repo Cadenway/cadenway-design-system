@@ -2,7 +2,7 @@ import { CwField, CwFieldDescription, CwFieldError, CwFieldLabel } from '@cadenw
 import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vite';
 import { expect, userEvent, within } from 'storybook/test';
 
-import { CwTextarea } from './textarea.directive';
+import { CwTextarea } from './textarea/textarea.directive';
 
 /**
  * Textarea, every state of its sheet in the Design System artifact, in the light and the dark theme.

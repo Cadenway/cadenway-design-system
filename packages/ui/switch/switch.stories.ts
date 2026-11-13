@@ -8,7 +8,7 @@ import {
 import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vite';
 import { expect, userEvent, within } from 'storybook/test';
 
-import { CwSwitch } from './switch.component';
+import { CwSwitch } from './switch/switch.component';
 
 /**
  * Switch, every state of its sheet in the Design System artifact, in the light and the dark theme.

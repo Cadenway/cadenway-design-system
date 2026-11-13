@@ -1,16 +1,16 @@
 import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vite';
 import { expect, userEvent, within } from 'storybook/test';
 
-import { CwTableBody } from './table-body.directive';
-import { CwTableCaption } from './table-caption.directive';
-import { CwTableCell } from './table-cell.directive';
-import { CwTableContainer } from './table-container.component';
-import { CwTableEmpty } from './table-empty.directive';
-import { CwTableFooter } from './table-footer.directive';
-import { CwTableHead } from './table-head.directive';
-import { CwTableHeader } from './table-header.directive';
-import { CwTableRow } from './table-row.directive';
-import { CwTable } from './table.directive';
+import { CwTableBody } from './table-body/table-body.directive';
+import { CwTableCaption } from './table-caption/table-caption.directive';
+import { CwTableCell } from './table-cell/table-cell.directive';
+import { CwTableContainer } from './table-container/table-container.component';
+import { CwTableEmpty } from './table-empty/table-empty.directive';
+import { CwTableFooter } from './table-footer/table-footer.directive';
+import { CwTableHead } from './table-head/table-head.directive';
+import { CwTableHeader } from './table-header/table-header.directive';
+import { CwTableRow } from './table-row/table-row.directive';
+import { CwTable } from './table/table.directive';
 
 /**
  * Table, every state of its sheet in the Design System artifact, in the light and the dark theme.
