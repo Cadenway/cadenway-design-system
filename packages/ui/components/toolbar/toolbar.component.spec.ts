@@ -1,5 +1,6 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
+import { vi } from 'vitest';
 
 import { CwToolbarGroup } from './toolbar-group/toolbar-group.component';
 import { CwToolbarItem } from './toolbar-item/toolbar-item.directive';
@@ -239,7 +240,6 @@ describe('CwToolbar overflow', () => {
    */
   const WIDTH: number = 100;
   let callbacks: (() => void)[];
-  let original: unknown;
   let available: number;
   let fixture: ComponentFixture<Host>;
   let host: HTMLElement;
@@ -266,19 +266,20 @@ describe('CwToolbar overflow', () => {
   beforeEach(async () => {
     callbacks = [];
     available = 450;
-    const view: Record<string, unknown> = window as unknown as Record<string, unknown>;
-    original = view['ResizeObserver'];
-    view['ResizeObserver'] = class {
-      public constructor(callback: () => void) {
-        callbacks.push(callback);
-      }
-      public observe(): void {
-        // The test calls the callback itself.
-      }
-      public disconnect(): void {
-        // Nothing to release.
-      }
-    };
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        public constructor(callback: () => void) {
+          callbacks.push(callback);
+        }
+        public observe(): void {
+          // The test calls the callback itself.
+        }
+        public disconnect(): void {
+          // Nothing to release.
+        }
+      },
+    );
 
     fixture = TestBed.createComponent(Host);
     host = fixture.nativeElement as HTMLElement;
@@ -296,8 +297,7 @@ describe('CwToolbar overflow', () => {
   });
 
   afterEach(() => {
-    fixture.destroy();
-    (window as unknown as Record<string, unknown>)['ResizeObserver'] = original;
+    vi.unstubAllGlobals();
   });
 
   /**
