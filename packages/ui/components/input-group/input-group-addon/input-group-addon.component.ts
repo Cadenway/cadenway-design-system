@@ -1,13 +1,35 @@
-import { Component, computed, ElementRef, inject, input } from '@angular/core';
+import {
+  Component,
+  computed,
+  ElementRef,
+  inject,
+  input,
+  type InputSignal,
+  type Signal,
+} from '@angular/core';
 
 import { CwInputGroup } from '../input-group.component';
 import type { CwInputGroupAddonAlign, CwInputGroupSize } from '../input-group.types';
 
-/* Literal class strings (Input Group sheet and preview of the Design System artifact), so Tailwind
-   finds them in the compiled package. */
-const BASE =
+/**
+ * Constant BASE
+ *
+ * @description
+ * Shared layout and text classes for addons.
+ *
+ * @type {string}
+ */
+const BASE: string =
   'flex shrink-0 cursor-text items-center text-muted-foreground select-none [&_ng-icon]:[--ng-icon__size:1rem]';
 
+/**
+ * Constant ALIGNS
+ *
+ * @description
+ * Addon layout classes for each position around the field.
+ *
+ * @type {Record<CwInputGroupAddonAlign, string>}
+ */
 const ALIGNS: Record<CwInputGroupAddonAlign, string> = {
   'inline-start': 'h-full gap-1.5 text-sm',
   'inline-end': 'h-full gap-1.5 text-sm',
@@ -17,8 +39,14 @@ const ALIGNS: Record<CwInputGroupAddonAlign, string> = {
   'block-end': 'h-auto w-full gap-1 px-1.5 pb-1.5 text-sm',
 };
 
-/* Inline padding per group size: text and icons sit 10 px from the border (12 px in `lg`), a button
-   4 px, a key cap 6 px (4 px in `sm`). */
+/**
+ * Constant PADDINGS
+ *
+ * @description
+ * Inline padding classes by group size and addon side.
+ *
+ * @type {Record<CwInputGroupSize, Record<'inline-start' | 'inline-end', string>>}
+ */
 const PADDINGS: Record<CwInputGroupSize, Record<'inline-start' | 'inline-end', string>> = {
   sm: {
     'inline-start': 'ps-2.5 has-[>button]:ps-1',
@@ -35,6 +63,10 @@ const PADDINGS: Record<CwInputGroupSize, Record<'inline-start' | 'inline-end', s
 };
 
 /**
+ * Class CwInputGroupAddon
+ * @class CwInputGroupAddon
+ *
+ * @description
  * A complement of the field in a `cw-input-group`: an icon, a prefix or suffix, a key cap, a
  * counter, a spinner, buttons (Input Group sheet).
  *
@@ -53,25 +85,76 @@ const PADDINGS: Record<CwInputGroupSize, Record<'inline-start' | 'inline-end', s
   templateUrl: './input-group-addon.component.html',
 })
 export class CwInputGroupAddon {
-  /** Position of the addon around the field. */
-  readonly align = input<CwInputGroupAddonAlign>('inline-start');
+  // #region Properties
+  /**
+   * Property align
+   * @readonly
+   *
+   * @description
+   * Position of the addon around the field.
+   *
+   * @type {InputSignal<CwInputGroupAddonAlign>}
+   */
+  public readonly align: InputSignal<CwInputGroupAddonAlign> =
+    input<CwInputGroupAddonAlign>('inline-start');
 
-  private readonly group = inject(CwInputGroup, { optional: true });
-  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  /**
+   * Property group
+   * @readonly
+   *
+   * @description
+   * Optional parent supplying the group size.
+   *
+   * @type {CwInputGroup | null}
+   */
+  private readonly group: CwInputGroup | null = inject(CwInputGroup, { optional: true });
 
-  protected readonly classes = computed(() => {
-    const align = this.align();
-    const size = this.group?.size() ?? 'default';
-    const padding = align === 'inline-start' || align === 'inline-end' ? PADDINGS[size][align] : '';
+  /**
+   * Property element
+   * @readonly
+   *
+   * @description
+   * Native addon host used to locate its field.
+   *
+   * @type {HTMLElement}
+   */
+  private readonly element: HTMLElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+
+  /**
+   * Property classes
+   * @readonly
+   *
+   * @description
+   * Addon layout and padding classes for its position and group size.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly classes: Signal<string> = computed(() => {
+    const align: CwInputGroupAddonAlign = this.align();
+    const size: CwInputGroupSize = this.group?.size() ?? 'default';
+    const padding: string =
+      align === 'inline-start' || align === 'inline-end' ? PADDINGS[size][align] : '';
     return `${BASE} ${ALIGNS[align]} ${padding}`;
   });
+  // #endregion
 
+  // #region Methods
+  /**
+   * Method focusField
+   * @method focusField
+   *
+   * @description
+   * Focuses the field when a noninteractive part of the addon is clicked.
+   *
+   * @param {MouseEvent} event - Click used to determine whether an interactive element was targeted.
+   */
   protected focusField(event: MouseEvent): void {
-    const target = event.target;
+    const target: EventTarget | null = event.target;
     if (target instanceof Element && target.closest('button, a, input, textarea')) return;
     this.element
       .closest('cw-input-group')
       ?.querySelector<HTMLElement>('input:not([type=hidden]), textarea')
       ?.focus();
   }
+  // #endregion
 }

@@ -1,6 +1,12 @@
 import { Directive } from '@angular/core';
 
-/** The footer of a table, for totals: a rule above, a muted background, medium weight. */
+/**
+ * Class CwTableFooter
+ * @class CwTableFooter
+ *
+ * @description
+ * Styles a native table footer for totals with a top rule and muted background.
+ */
 @Directive({
   selector: 'tfoot[cwTableFooter]',
   host: { class: 'border-t bg-muted font-medium' },

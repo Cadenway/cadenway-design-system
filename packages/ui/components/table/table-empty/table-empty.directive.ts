@@ -1,6 +1,10 @@
 import { Directive } from '@angular/core';
 
 /**
+ * Class CwTableEmpty
+ * @class CwTableEmpty
+ *
+ * @description
  * The empty state of a table: one cell spanning the columns (set `colspan`), 64 px high, centered
  * muted text (« Aucune saisie de temps cette semaine. »).
  */

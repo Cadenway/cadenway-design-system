@@ -7,8 +7,13 @@ import { CW_PRIORITY_LABELS } from './priority-icon.constants';
 import type { CwPriorityKey } from './priority-icon.types';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Priority icon, every priority of the mockup (`PrioriteTache.dc.html`), in the light and the dark
  * theme. The icon is decorative: each story writes the French word next to it.
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/PriorityIcon',
@@ -17,13 +22,39 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story configuration for priority icons.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
-/* Mockup `PrioriteTache.dc.html`: the demo cycles from the lowest to the highest priority. */
+/**
+ * Constant ORDER
+ *
+ * @description
+ * Priority order used by the interactive transition example.
+ *
+ * @type {CwPriorityKey[]}
+ */
 const ORDER: CwPriorityKey[] = ['basse', 'moyenne', 'haute', 'urgente'];
 
+/**
+ * Function light
+ *
+ * @description
+ * Selects the light theme copy for interaction checks.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the themed examples.
+ *
+ * @returns {HTMLElement} Light theme section used for interaction checks.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -39,6 +70,23 @@ export const Priorities: Story = {
         <li class="flex items-center gap-2 text-destructive"><cw-priority-icon priority="urgente" />Urgente</li>
       </ul>`,
   }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const low: Element | null = light(canvasElement).querySelector(
+      'cw-priority-icon[data-priority="basse"]',
+    );
+    const urgent: Element | null = light(canvasElement).querySelector(
+      'cw-priority-icon[data-priority="urgente"]',
+    );
+    const bars: NodeListOf<SVGRectElement> | undefined = low?.querySelectorAll('.cw-prio-bar');
+    const bang: SVGElement | null | undefined = urgent?.querySelector('.cw-prio-bang');
+    if (bars?.length !== 3 || !bang) throw new Error('Priority icon layers missing');
+    await waitFor(async () => {
+      await expect(bars).toHaveLength(3);
+      await expect(getComputedStyle(bars[0]).opacity).toBe('1');
+      await expect(getComputedStyle(bars[1]).opacity).toBe('0.22');
+      await expect(getComputedStyle(bang).strokeDashoffset).toBe('0px');
+    });
+  },
 };
 
 /** The four sizes, from 12 px to 20 px. */
@@ -72,9 +120,9 @@ export const FromTransition: Story = {
         </button>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = light(canvasElement);
-    const icon = scope.querySelector('cw-priority-icon');
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: HTMLElement = light(canvasElement);
+    const icon: Element | null = scope.querySelector('cw-priority-icon');
 
     await waitFor(() => expect(icon).toHaveAttribute('data-priority', 'haute'));
     await userEvent.click(within(scope).getByRole('button', { name: 'Priorité suivante' }));

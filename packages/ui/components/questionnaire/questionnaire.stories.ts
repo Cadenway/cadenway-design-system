@@ -10,10 +10,15 @@ import { CwQuestionnaireDone } from './questionnaire-done/questionnaire-done.com
 import { CwQuestionnaireProgress } from './questionnaire-progress/questionnaire-progress.component';
 import { CwQuestionnaireQuestion } from './questionnaire-question/questionnaire-question.component';
 import { CwQuestionnaireTitle } from './questionnaire-title/questionnaire-title.directive';
+import type { CwQuestionnaireSummaryItem } from './questionnaire.types';
 
 /**
- * Questionnaire, every state of its sheet in the Design System artifact, in the light and the dark
- * theme. Copy from the sheet's « Signaler un bug » form.
+ * Constant meta
+ *
+ * @description
+ * Questionnaire states in light and dark themes from the « Signaler un bug » example.
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Questionnaire',
@@ -36,15 +41,41 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration for questionnaire examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Finds the light theme section of the story canvas.
+ *
+ * @param {HTMLElement} canvasElement - Canvas containing the themed examples.
+ * @returns {HTMLElement} Light theme section.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
-const FORM = `
+/**
+ * Constant FORM
+ *
+ * @description
+ * Shared questionnaire markup for the example stories.
+ *
+ * @type {string}
+ */
+const FORM: string = `
   <form cwQuestionnaire class="max-w-sm" title="Signaler un bug" [(step)]="step" [shortcuts]="shortcuts">
     <cw-questionnaire-progress />
     <fieldset cwQuestionnaireQuestion name="type" required [(value)]="type">
@@ -77,7 +108,15 @@ const FORM = `
     </cw-questionnaire-done>
   </form>`;
 
-const SUMMARY = [
+/**
+ * Constant SUMMARY
+ *
+ * @description
+ * Example answers displayed on the confirmation screen.
+ *
+ * @type {CwQuestionnaireSummaryItem[]}
+ */
+const SUMMARY: CwQuestionnaireSummaryItem[] = [
   { label: 'Type', value: 'Nouvelle fonctionnalité' },
   { label: 'Vues', value: 'Liste, Calendrier, Vue Gantt' },
   { label: 'Gravité', value: 'Gênant' },
@@ -126,8 +165,11 @@ export const RequiredError: Story = {
     },
     template: FORM,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options: { name: string | RegExp }) => HTMLElement;
+      getByText: (text: string) => HTMLElement;
+    } = within(light(canvasElement));
     await userEvent.click(scope.getByRole('button', { name: 'Envoyer' }));
     await expect(scope.getByText('Choisissez une réponse pour continuer.')).toBeInTheDocument();
     await expect(scope.getByRole('radio', { name: /Bloquant/ })).toHaveFocus();
@@ -147,8 +189,11 @@ export const Keyboard: Story = {
     },
     template: FORM,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name: string | RegExp }) => HTMLElement;
+      getByText: (text: string) => HTMLElement;
+    } = within(light(canvasElement));
     await userEvent.tab();
     await userEvent.keyboard('b');
     await expect(scope.getByRole('radio', { name: /^B, Nouvelle fonctionnalité/ })).toBeChecked();

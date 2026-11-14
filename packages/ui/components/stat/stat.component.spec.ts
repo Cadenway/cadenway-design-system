@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CwStatGroup } from './stat-group/stat-group.component';
@@ -6,6 +6,12 @@ import { CwStatSparkline } from './stat-sparkline/stat-sparkline.component';
 import { CwStat } from './stat.component';
 import type { CwStatGoal } from './stat.types';
 
+/**
+ * Class Host
+ *
+ * @description
+ * Hosts statistics exercising grouping, loading and goal states.
+ */
 @Component({
   imports: [CwStat, CwStatGroup, CwStatSparkline],
   template: `
@@ -29,15 +35,61 @@ import type { CwStatGoal } from './stat.types';
   `,
 })
 class Host {
-  readonly goal = signal<CwStatGoal | null>({ value: 34, max: 50, unit: 'engagés' });
-  readonly loading = signal(false);
-  readonly refreshing = signal(false);
+  // #region Properties
+  /**
+   * Property goal
+   * @readonly
+   *
+   * @description
+   * Goal displayed by the delivered points statistic.
+   *
+   * @type {WritableSignal<CwStatGoal | null>}
+   */
+  public readonly goal: WritableSignal<CwStatGoal | null> = signal<CwStatGoal | null>({
+    value: 34,
+    max: 50,
+    unit: 'engagés',
+  });
+
+  /**
+   * Property loading
+   * @readonly
+   *
+   * @description
+   * Controls the first-load state.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly loading: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property refreshing
+   * @readonly
+   *
+   * @description
+   * Controls the refresh state.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly refreshing: WritableSignal<boolean> = signal(false);
+  // #endregion
 }
 
+/**
+ * Function stat
+ *
+ * @description
+ * Finds a statistic by its visible label.
+ *
+ * @param {HTMLElement} host - Fixture containing statistics.
+ * @param {string} label - Visible statistic label.
+ *
+ * @returns {HTMLElement} Statistic with the requested label.
+ */
 function stat(host: HTMLElement, label: string): HTMLElement {
-  const found = Array.from(host.querySelectorAll<HTMLElement>('cw-stat')).find((element) =>
-    element.textContent.trim().startsWith(label),
-  );
+  const found: HTMLElement | undefined = Array.from(
+    host.querySelectorAll<HTMLElement>('cw-stat'),
+  ).find((element) => element.textContent.trim().startsWith(label));
   if (!found) throw new Error(`No stat labelled ${label}`);
   return found;
 }
@@ -55,7 +107,7 @@ describe('CwStat', () => {
   });
 
   it('reads the label, the value, then the change with its direction in words', () => {
-    const done = stat(host, 'Terminées cette semaine');
+    const done: HTMLElement = stat(host, 'Terminées cette semaine');
 
     // The template drops the whitespace between elements: the parts follow each other.
     expect(done.textContent.trim()).toMatch(
@@ -66,14 +118,14 @@ describe('CwStat', () => {
   });
 
   it('keeps the sentiment apart from the sign of the change', () => {
-    const late = stat(host, 'En retard');
+    const late: HTMLElement = stat(host, 'En retard');
 
     expect(late.dataset['trend']).toBe('up');
     expect(late.dataset['sentiment']).toBe('negative');
   });
 
   it('formats a numeric value in French and hides the change row without a change', () => {
-    const members = stat(host, 'Membres');
+    const members: HTMLElement = stat(host, 'Membres');
 
     expect(members.textContent.trim()).toMatch(/^Membres\s*1\s250$/);
   });
@@ -84,7 +136,7 @@ describe('CwStat', () => {
   });
 
   it('draws the goal as a progress bar named by the label', () => {
-    const bar = host.querySelector<HTMLElement>('[role="progressbar"]');
+    const bar: HTMLElement | null = host.querySelector<HTMLElement>('[role="progressbar"]');
 
     expect(bar?.getAttribute('aria-label')).toBe('Points livrés');
     expect(bar?.getAttribute('aria-valuenow')).toBe('34');
@@ -95,7 +147,7 @@ describe('CwStat', () => {
   it('marks the first load busy and keeps the real label', async () => {
     component.loading.set(true);
     await fixture.whenStable();
-    const open = stat(host, 'Tâches ouvertes');
+    const open: HTMLElement = stat(host, 'Tâches ouvertes');
 
     expect(open.getAttribute('aria-busy')).toBe('true');
     expect(open.textContent.trim()).toBe('Tâches ouvertes');
@@ -104,7 +156,7 @@ describe('CwStat', () => {
   it('announces a refresh while showing the old value', async () => {
     component.refreshing.set(true);
     await fixture.whenStable();
-    const open = stat(host, 'Tâches ouvertes');
+    const open: HTMLElement = stat(host, 'Tâches ouvertes');
 
     expect(open.querySelector('[role="status"]')?.getAttribute('aria-label')).toBe('Actualisation');
     expect(open.textContent).toContain('18');

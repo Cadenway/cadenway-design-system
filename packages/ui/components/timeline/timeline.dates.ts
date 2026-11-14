@@ -6,67 +6,176 @@
 
 import { ɵaddDays, ɵdaysBetween, ɵsameDay } from '@cadenway/ui/core';
 
-const DAY_MONTH = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short' });
-const MONTH = new Intl.DateTimeFormat('fr-FR', { month: 'short' });
-const WEEKDAY = new Intl.DateTimeFormat('fr-FR', { weekday: 'short' });
+/**
+ * Constant DAY_MONTH
+ *
+ * @description
+ * French day and abbreviated month formatter.
+ *
+ * @type {Intl.DateTimeFormat}
+ */
+const DAY_MONTH: Intl.DateTimeFormat = new Intl.DateTimeFormat('fr-FR', {
+  day: 'numeric',
+  month: 'short',
+});
 
-/** Whether `date` is a Saturday or a Sunday, shaded on the ruler. */
+/**
+ * Constant MONTH
+ *
+ * @description
+ * French abbreviated month formatter.
+ *
+ * @type {Intl.DateTimeFormat}
+ */
+const MONTH: Intl.DateTimeFormat = new Intl.DateTimeFormat('fr-FR', { month: 'short' });
+
+/**
+ * Constant WEEKDAY
+ *
+ * @description
+ * French abbreviated weekday formatter.
+ *
+ * @type {Intl.DateTimeFormat}
+ */
+const WEEKDAY: Intl.DateTimeFormat = new Intl.DateTimeFormat('fr-FR', { weekday: 'short' });
+
+/**
+ * Function isWeekend
+ *
+ * @description
+ * Checks whether a date is a Saturday or Sunday.
+ *
+ * @param {Date} date - Date to inspect.
+ *
+ * @returns {boolean} Whether the date is Saturday or Sunday.
+ */
 export function isWeekend(date: Date): boolean {
-  const day = date.getDay();
+  const day: number = date.getDay();
   return day === 0 || day === 6;
 }
 
-/** Working days (Monday to Friday) from `from` included to `to` excluded. */
+/**
+ * Function workingDaysBetween
+ *
+ * @description
+ * Counts weekdays from the first day inclusive to the last day exclusive.
+ *
+ * @param {Date} from - First day, included.
+ * @param {Date} to - Last day, excluded.
+ *
+ * @returns {number} Number of weekdays in the interval.
+ */
 export function workingDaysBetween(from: Date, to: Date): number {
-  const total = ɵdaysBetween(from, to);
+  const total: number = ɵdaysBetween(from, to);
   if (total <= 0) return 0;
-  const weeks = Math.floor(total / 7);
-  let count = weeks * 5;
-  for (let day = ɵaddDays(from, weeks * 7); ɵdaysBetween(day, to) > 0; day = ɵaddDays(day, 1)) {
+  const weeks: number = Math.floor(total / 7);
+  let count: number = weeks * 5;
+  for (
+    let day: Date = ɵaddDays(from, weeks * 7);
+    ɵdaysBetween(day, to) > 0;
+    day = ɵaddDays(day, 1)
+  ) {
     if (!isWeekend(day)) count += 1;
   }
   return count;
 }
 
-/** « 9 nov. » */
+/**
+ * Function dayMonth
+ *
+ * @description
+ * Formats a day and abbreviated month in French.
+ *
+ * @param {Date} date - Date to format.
+ *
+ * @returns {string} French day and abbreviated month.
+ */
 export function dayMonth(date: Date): string {
   return DAY_MONTH.format(date);
 }
 
-/** « nov. » */
+/**
+ * Function monthShort
+ *
+ * @description
+ * Formats an abbreviated French month.
+ *
+ * @param {Date} date - Date to format.
+ *
+ * @returns {string} Abbreviated French month.
+ */
 export function monthShort(date: Date): string {
   return MONTH.format(date);
 }
 
-/** « lu », the two-letter weekday of the ruler. */
+/**
+ * Function weekdayShort
+ *
+ * @description
+ * Returns the two-letter French weekday used on the ruler.
+ *
+ * @param {Date} date - Date to format.
+ *
+ * @returns {string} Two-letter French weekday.
+ */
 export function weekdayShort(date: Date): string {
   return WEEKDAY.format(date).slice(0, 2);
 }
 
-/** « 9 – 15 nov. », or « 23 nov. – 4 déc. » across two months. */
+/**
+ * Function periodText
+ *
+ * @description
+ * Formats a French date period, including both months when they differ.
+ *
+ * @param {Date} start - First day of the period.
+ * @param {Date} end - Last day of the period.
+ *
+ * @returns {string} French period text.
+ */
 export function periodText(start: Date, end: Date): string {
   if (ɵsameDay(start, end)) return dayMonth(start);
-  const sameMonth =
+  const sameMonth: boolean =
     start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear();
   return sameMonth
     ? `${String(start.getDate())} – ${dayMonth(end)}`
     : `${dayMonth(start)} – ${dayMonth(end)}`;
 }
 
-/** « du 10 au 13 nov. », « du 30 nov. au 2 déc. », or « le 10 nov. » for one day. */
+/**
+ * Function rangeText
+ *
+ * @description
+ * Formats a French date range or a single day.
+ *
+ * @param {Date} start - First day of the range.
+ * @param {Date} end - Last day of the range.
+ *
+ * @returns {string} French date range or single-day text.
+ */
 export function rangeText(start: Date, end: Date): string {
   if (ɵsameDay(start, end)) return `le ${dayMonth(start)}`;
-  const sameMonth =
+  const sameMonth: boolean =
     start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear();
   return sameMonth
     ? `du ${String(start.getDate())} au ${dayMonth(end)}`
     : `du ${dayMonth(start)} au ${dayMonth(end)}`;
 }
 
-/** « 24 → 26 nov. · 3 j », the tooltip of a bar being moved. */
+/**
+ * Function moveText
+ *
+ * @description
+ * Formats the date range and inclusive day count for a moving bar.
+ *
+ * @param {Date} start - First day of the moved bar.
+ * @param {Date} end - Last day of the moved bar.
+ *
+ * @returns {string} Date range and inclusive day count.
+ */
 export function moveText(start: Date, end: Date): string {
-  const sameMonth =
+  const sameMonth: boolean =
     start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear();
-  const from = sameMonth ? String(start.getDate()) : dayMonth(start);
+  const from: string = sameMonth ? String(start.getDate()) : dayMonth(start);
   return `${from} → ${dayMonth(end)} · ${String(ɵdaysBetween(start, end) + 1)} j`;
 }

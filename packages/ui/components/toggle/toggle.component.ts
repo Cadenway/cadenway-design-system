@@ -6,14 +6,24 @@ import {
   inject,
   input,
   model,
+  type InputSignal,
+  type InputSignalWithTransform,
+  type ModelSignal,
+  type Signal,
 } from '@angular/core';
 import { CwRipple } from '@cadenway/ui/core';
 
 import type { CwToggleSize, CwToggleVariant } from './toggle.types';
 
-/* Literal class strings (Toggle sheet and preview of the Design System artifact), so Tailwind finds
-   them in the compiled package. Icons are `ng-icon`: their size goes through `--ng-icon__size`. */
-const BASE =
+/**
+ * Constant BASE
+ *
+ * @description
+ * Literal Toggle sheet classes kept visible to Tailwind, including `ng-icon` sizing and focus states.
+ *
+ * @type {string}
+ */
+const BASE: string =
   'relative isolate overflow-hidden inline-flex items-center justify-center gap-2 text-sm font-medium whitespace-nowrap text-muted-foreground ' +
   'transition-[color,background-color,box-shadow] motion-reduce:transition-none hover:bg-accent hover:text-foreground ' +
   'disabled:pointer-events-none disabled:opacity-50 ' +
@@ -21,11 +31,27 @@ const BASE =
   '[&_ng-icon]:pointer-events-none [&_ng-icon]:shrink-0 [&_ng-icon]:[--ng-icon__size:1rem] ' +
   'outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background';
 
+/**
+ * Constant VARIANTS
+ *
+ * @description
+ * Background and border classes for each toggle appearance.
+ *
+ * @type {Record<CwToggleVariant, string>}
+ */
 const VARIANTS: Record<CwToggleVariant, string> = {
   default: 'bg-transparent',
   outline: 'border border-input bg-transparent',
 };
 
+/**
+ * Constant SIZES
+ *
+ * @description
+ * Dimension and radius classes for each toggle size.
+ *
+ * @type {Record<CwToggleSize, string>}
+ */
 const SIZES: Record<CwToggleSize, string> = {
   sm: 'h-7 min-w-7 rounded-md px-1.5',
   default: 'h-8 min-w-8 rounded-lg px-2',
@@ -33,6 +59,10 @@ const SIZES: Record<CwToggleSize, string> = {
 };
 
 /**
+ * Class CwToggle
+ * @class CwToggle
+ *
+ * @description
  * A two-state button for a display setting that applies at once and stays visible: the "Moi
  * uniquement" quick filter, bold in the editor (Toggle sheet of the Design System artifact).
  *
@@ -43,9 +73,6 @@ const SIZES: Record<CwToggleSize, string> = {
  * a ring or a darker border. Every press draws the ripple (`CwRipple`), except under reduced motion.
  */
 @Component({
-  // A component on a native element (attribute selector), as its sheet requires: the element keeps
-  // its native role, focus and form behavior. The lint rule only knows element selectors.
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'button[cwToggle]',
   hostDirectives: [CwRipple],
   host: {
@@ -61,23 +88,93 @@ const SIZES: Record<CwToggleSize, string> = {
   templateUrl: './toggle.component.html',
 })
 export class CwToggle {
-  /** Whether the toggle is on; `[(pressed)]`, emits `pressedChange` on every flip. */
-  readonly pressed = model(false);
-  /** Look of the toggle. */
-  readonly variant = input<CwToggleVariant>('default');
-  /** Height, minimum width, padding and radius. */
-  readonly size = input<CwToggleSize>('default');
-  /** Disables the toggle (native `disabled`); the pressed state stays readable. */
-  readonly disabled = input(false, { transform: booleanAttribute });
+  // #region Properties
+  /**
+   * Property pressed
+   * @readonly
+   *
+   * @description
+   * Two-way model indicating whether the toggle is on; each flip emits `pressedChange`.
+   *
+   * @type {ModelSignal<boolean>}
+   * @default false
+   */
+  public readonly pressed: ModelSignal<boolean> = model(false);
 
-  // A button without a type would submit its form by accident.
-  protected readonly type = inject(new HostAttributeToken('type'), { optional: true }) ?? 'button';
+  /**
+   * Property variant
+   * @readonly
+   *
+   * @description
+   * Input selecting the toggle's appearance.
+   *
+   * @type {InputSignal<CwToggleVariant>}
+   * @default 'default'
+   */
+  public readonly variant: InputSignal<CwToggleVariant> = input<CwToggleVariant>('default');
 
-  protected readonly classes = computed(
+  /**
+   * Property size
+   * @readonly
+   *
+   * @description
+   * Input selecting height, minimum width, padding and radius.
+   *
+   * @type {InputSignal<CwToggleSize>}
+   * @default 'default'
+   */
+  public readonly size: InputSignal<CwToggleSize> = input<CwToggleSize>('default');
+
+  /**
+   * Property disabled
+   * @readonly
+   *
+   * @description
+   * Input disabling the native button without hiding its pressed state.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   * @default false
+   */
+  public readonly disabled: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property type
+   * @readonly
+   *
+   * @description
+   * Consumer-provided button type, defaulting to `button` to avoid accidental form submission.
+   *
+   * @type {string}
+   */
+  protected readonly type: string =
+    inject(new HostAttributeToken('type'), { optional: true }) ?? 'button';
+
+  /**
+   * Property classes
+   * @readonly
+   *
+   * @description
+   * Computed base, appearance and size classes for the button host.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly classes: Signal<string> = computed(
     () => `${BASE} ${VARIANTS[this.variant()]} ${SIZES[this.size()]}`,
   );
+  // #endregion
 
+  // #region Methods
+  /**
+   * Method toggle
+   * @method toggle
+   *
+   * @description
+   * Flips the pressed model when the native button receives a click.
+   */
   protected toggle(): void {
     this.pressed.set(!this.pressed());
   }
+  // #endregion
 }

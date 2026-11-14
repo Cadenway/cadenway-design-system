@@ -1,6 +1,11 @@
 import { Component } from '@angular/core';
 
-/** The text column of an item: title and description, shrinking before the actions. */
+/**
+ * Component CwItemContent
+ *
+ * @description
+ * The text column of an item: title and description, shrinking before the actions.
+ */
 @Component({
   selector: 'cw-item-content',
   host: { class: 'flex min-w-0 flex-1 flex-col gap-0.5' },

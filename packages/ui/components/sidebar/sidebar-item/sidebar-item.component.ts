@@ -9,6 +9,10 @@ import {
   input,
   signal,
   viewChild,
+  type InputSignalWithTransform,
+  type InputSignal,
+  type WritableSignal,
+  type Signal,
 } from '@angular/core';
 import { ɵFOCUS, ɵFOCUS_INSET } from '@cadenway/ui/core';
 import { CwTooltip } from '@cadenway/ui/components/tooltip';
@@ -16,47 +20,72 @@ import { NgIcon } from '@ng-icons/core';
 
 import { SIDEBAR_ITEM } from '../sidebar-item.token';
 import { SIDEBAR_SPACE } from '../sidebar-space.token';
+import type { CwSidebarSpace } from '../sidebar-space/sidebar-space.component';
 import { CwSidebar } from '../sidebar.component';
 
 /* Literal class strings (Sidebar sheet and preview of the Design System artifact): a row of the
    sidebar with the inset focus ring; current is `bg-selected` and `font-medium`, never a color. */
-const ROW =
+/**
+ * Constant ROW
+ *
+ * @description
+ * Base classes for a sidebar link row.
+ *
+ * @type {string}
+ */
+const ROW: string =
   'relative isolate flex w-full min-w-0 items-center gap-2 overflow-hidden rounded-md px-2 text-left text-sm transition-colors hover:bg-accent ' +
   'data-[active=true]:bg-selected data-[active=true]:font-medium [&_ng-icon]:shrink-0 [&_ng-icon]:[--ng-icon__size:1rem] ' +
   ɵFOCUS_INSET;
 
 // Main items are 32 px; the lists of a space, 28 px.
-const ROW_HEIGHTS = { item: 'h-8', subitem: 'h-7' } as const;
+/**
+ * Constant ROW_HEIGHTS
+ *
+ * @description
+ * Row heights for primary and nested links.
+ *
+ * @type {{ readonly item: "h-8"; readonly subitem: "h-7"; }}
+ */
+const ROW_HEIGHTS: { readonly item: 'h-8'; readonly subitem: 'h-7' } = {
+  item: 'h-8',
+  subitem: 'h-7',
+} as const;
 
 /* The rail's 32 px icon buttons stand alone, so they take the offset focus ring. */
-const RAIL =
+/**
+ * Constant RAIL
+ *
+ * @description
+ * Classes for an icon-only sidebar link.
+ *
+ * @type {string}
+ */
+const RAIL: string =
   'relative isolate flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md transition-colors hover:bg-accent ' +
   'data-[active=true]:bg-selected [&_ng-icon]:shrink-0 [&_ng-icon]:[--ng-icon__size:1rem] ' +
   ɵFOCUS;
 
-/** Phosphor names its two weights `…Bold` and `…Fill`: the current item shows the filled one. */
+/**
+ * Function filled
+ *
+ * @description
+ * Phosphor names its two weights `…Bold` and `…Fill`: the current item shows the filled one.
+ *
+ * @param {string} icon - Bold icon name to convert when applicable.
+ * @returns {string} Fill icon name, or the original name when it has no Bold suffix.
+ */
 function filled(icon: string): string {
   return icon.endsWith('Bold') ? `${icon.slice(0, -'Bold'.length)}Fill` : icon;
 }
 
 /**
- * A link of the sidebar: icon, label, count (Sidebar sheet of the Design System artifact).
+ * Component CwSidebarItem
  *
- * Put it on an `<a>` inside a `cw-sidebar-group` or a `cw-sidebar-space` (where it is a 28 px
- * sub-item); the label is its content. `icon` is an ng-icons name of the Bold weight; the current
- * item shows the Fill weight in `text-primary`: register both (`provideIcons`). `count` is shown
- * muted on the right (open tasks, unread) and read after the label as `countLabel` (« 3 non
- * lus »), or as the number. `active` marks the current page: `data-active="true"`,
- * `aria-current="page"`, `bg-selected` and `font-medium`; bind it to the router
- * (`routerLinkActive`), which `@cadenway/ui` does not depend on. In the icon rail the item is a
- * 32 px icon button named by its label and count, with a tooltip on the right (`tooltip`, by
- * default the label and the count) on hover and keyboard focus; the count becomes a dot. Following
- * the link closes the phone drawer.
+ * @description
+ * A link of the sidebar: icon, label, count (Sidebar sheet of the Design System artifact). Put it on an `<a>` inside a `cw-sidebar-group` or a `cw-sidebar-space` (where it is a 28 px sub-item); the label is its content. `icon` is an ng-icons name of the Bold weight; the current item shows the Fill weight in `text-primary`: register both (`provideIcons`). `count` is shown muted on the right (open tasks, unread) and read after the label as `countLabel` (« 3 non lus »), or as the number. `active` marks the current page: `data-active="true"`, `aria-current="page"`, `bg-selected` and `font-medium`; bind it to the router (`routerLinkActive`), which `@cadenway/ui` does not depend on. In the icon rail the item is a 32 px icon button named by its label and count, with a tooltip on the right (`tooltip`, by default the label and the count) on hover and keyboard focus; the count becomes a dot. Following the link closes the phone drawer.
  */
 @Component({
-  // A component on a native element (attribute selector), as its sheet requires: the link keeps its
-  // native role, focus and navigation. The lint rule only knows element selectors.
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'a[cwSidebarItem]',
   imports: [NgIcon, CwTooltip],
   providers: [{ provide: SIDEBAR_ITEM, useExisting: forwardRef(() => CwSidebarItem) }],
@@ -72,65 +101,258 @@ function filled(icon: string): string {
   templateUrl: './sidebar-item.component.html',
 })
 export class CwSidebarItem {
-  /** Name of the Bold icon (`phosphorTrayBold`); the Fill weight shows when current. */
-  readonly icon = input<string>();
-  /** Number shown on the right; nothing when absent. */
-  readonly count = input<number | null | undefined>(undefined);
-  /** Spoken form of the count, read after the label (« 3 non lus »); the number by default. */
-  readonly countLabel = input<string>();
-  /** Text of the rail's tooltip; the label and the count by default (« Boîte de réception · 3 »). */
-  readonly tooltip = input<string>();
-  /** Whether the link leads to the current page. */
-  readonly active = input(false, { transform: booleanAttribute });
+  // #region Properties
+  /**
+   * Property icon
+   *
+   * @description
+   * Name of the Bold icon (`phosphorTrayBold`); the Fill weight shows when current.
+   *
+   * @type {InputSignal<string | undefined>}
+   * @readonly
+   */
+  public readonly icon: InputSignal<string | undefined> = input<string>();
 
-  protected readonly sidebar = inject(CwSidebar);
-  private readonly space = inject(SIDEBAR_SPACE, { optional: true });
-  private readonly tip = viewChild.required<string, ElementRef<HTMLElement>>('tip', {
+  /**
+   * Property count
+   *
+   * @description
+   * Number shown on the right; nothing when absent.
+   *
+   * @type {InputSignal<number | null | undefined>}
+   * @readonly
+   */
+  public readonly count: InputSignal<number | null | undefined> = input<number | null | undefined>(
+    undefined,
+  );
+
+  /**
+   * Property countLabel
+   *
+   * @description
+   * Spoken form of the count, read after the label (« 3 non lus »); the number by default.
+   *
+   * @type {InputSignal<string | undefined>}
+   * @readonly
+   */
+  public readonly countLabel: InputSignal<string | undefined> = input<string>();
+
+  /**
+   * Property tooltip
+   *
+   * @description
+   * Text of the rail's tooltip; the label and the count by default (« Boîte de réception · 3 »).
+   *
+   * @type {InputSignal<string | undefined>}
+   * @readonly
+   */
+  public readonly tooltip: InputSignal<string | undefined> = input<string>();
+
+  /**
+   * Property active
+   *
+   * @description
+   * Whether the link leads to the current page.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   * @readonly
+   */
+  public readonly active: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property sidebar
+   *
+   * @description
+   * Containing sidebar providing the current layout.
+   *
+   * @type {CwSidebar}
+   * @readonly
+   */
+  protected readonly sidebar: CwSidebar = inject(CwSidebar);
+
+  /**
+   * Property space
+   *
+   * @description
+   * Containing space, or null for a primary link.
+   *
+   * @type {CwSidebarSpace | null}
+   * @readonly
+   */
+  private readonly space: CwSidebarSpace | null = inject(SIDEBAR_SPACE, { optional: true });
+
+  /**
+   * Property tip
+   *
+   * @description
+   * Tooltip layer used to forward focus in the icon rail.
+   *
+   * @type {Signal<ElementRef<HTMLElement>>}
+   * @readonly
+   */
+  private readonly tip: Signal<ElementRef<HTMLElement>> = viewChild.required<
+    string,
+    ElementRef<HTMLElement>
+  >('tip', {
     read: ElementRef,
   });
-  private readonly labelElement = viewChild.required<string, ElementRef<HTMLElement>>('label', {
+
+  /**
+   * Property labelElement
+   *
+   * @description
+   * Projected label element read after rendering.
+   *
+   * @type {Signal<ElementRef<HTMLElement>>}
+   * @readonly
+   */
+  private readonly labelElement: Signal<ElementRef<HTMLElement>> = viewChild.required<
+    string,
+    ElementRef<HTMLElement>
+  >('label', {
     read: ElementRef,
   });
-  // The projected label, read after each render: the rail names the icon and its tooltip with it.
-  private readonly label = signal('');
 
-  protected readonly rail = computed(() => this.sidebar.rail());
-  protected readonly hasCount = computed(() => {
-    const count = this.count();
+  /**
+   * Property label
+   *
+   * @description
+   * Projected link label used for the icon rail and tooltip.
+   *
+   * @type {WritableSignal<string>}
+   * @readonly
+   */
+  private readonly label: WritableSignal<string> = signal('');
+
+  /**
+   * Property rail
+   *
+   * @description
+   * Whether the sidebar currently displays its icon rail.
+   *
+   * @type {Signal<boolean>}
+   * @readonly
+   */
+  protected readonly rail: Signal<boolean> = computed(() => this.sidebar.rail());
+
+  /**
+   * Property hasCount
+   *
+   * @description
+   * Whether a count was supplied.
+   *
+   * @type {Signal<boolean>}
+   * @readonly
+   */
+  protected readonly hasCount: Signal<boolean> = computed(() => {
+    const count: number | null | undefined = this.count();
     return count !== null && count !== undefined;
   });
-  protected readonly spokenCount = computed(() => this.countLabel() ?? String(this.count()));
-  protected readonly iconName = computed(() => {
-    const icon = this.icon();
+
+  /**
+   * Property spokenCount
+   *
+   * @description
+   * Accessible count label, falling back to the number.
+   *
+   * @type {Signal<string>}
+   * @readonly
+   */
+  protected readonly spokenCount: Signal<string> = computed(
+    () => this.countLabel() ?? String(this.count()),
+  );
+
+  /**
+   * Property iconName
+   *
+   * @description
+   * Icon name for the active or inactive link.
+   *
+   * @type {Signal<string | null>}
+   * @readonly
+   */
+  protected readonly iconName: Signal<string | null> = computed(() => {
+    const icon: string | undefined = this.icon();
     if (!icon) return null;
     return this.active() ? filled(icon) : icon;
   });
-  protected readonly iconClasses = computed(() =>
+
+  /**
+   * Property iconClasses
+   *
+   * @description
+   * Icon color classes for the current link state.
+   *
+   * @type {Signal<"text-primary" | "text-muted-foreground">}
+   * @readonly
+   */
+  protected readonly iconClasses: Signal<'text-primary' | 'text-muted-foreground'> = computed(() =>
     this.active() ? 'text-primary' : 'text-muted-foreground',
   );
-  protected readonly tooltipText = computed(() => {
-    const tooltip = this.tooltip();
+
+  /**
+   * Property tooltipText
+   *
+   * @description
+   * Tooltip text from the supplied override or link label and count.
+   *
+   * @type {Signal<string>}
+   * @readonly
+   */
+  protected readonly tooltipText: Signal<string> = computed(() => {
+    const tooltip: string | undefined = this.tooltip();
     if (tooltip !== undefined) return tooltip;
     return this.hasCount() ? `${this.label()} · ${String(this.count())}` : this.label();
   });
-  /* The rail's name comes from `aria-label`, not from the content: the tooltip's bubble is inserted
-     inside the link and must not join its name. */
-  protected readonly railName = computed(() => {
+
+  /**
+   * Property railName
+   *
+   * @description
+   * Accessible rail name excluding the tooltip bubble inserted inside the link.
+   *
+   * @type {Signal<string | null>}
+   * @readonly
+   */
+  protected readonly railName: Signal<string | null> = computed(() => {
     if (!this.rail()) return null;
     return this.hasCount() ? `${this.label()}, ${this.spokenCount()}` : this.label();
   });
-  protected readonly classes = computed(() => {
+
+  /**
+   * Property classes
+   *
+   * @description
+   * Link classes for the current sidebar layout.
+   *
+   * @type {Signal<string>}
+   * @readonly
+   */
+  protected readonly classes: Signal<string> = computed(() => {
     if (this.rail()) return RAIL;
     return `${ROW} ${this.space ? ROW_HEIGHTS.subitem : ROW_HEIGHTS.item}`;
   });
+  // #endregion
 
-  constructor() {
+  // #region Constructor
+  /**
+   * Constructor
+   *
+   * @description
+   * Reads the projected link label after rendering.
+   *
+   * @constructor
+   */
+  public constructor() {
     afterEveryRender({
       read: () => {
         this.label.set(this.labelElement().nativeElement.textContent.trim());
       },
     });
   }
+  // #endregion
 
   /*
    * The tooltip cannot sit on the link itself (a directive on a component's host cannot be bound
@@ -138,7 +360,17 @@ export class CwSidebarItem {
    * keyboard focus opening is the CDK FocusMonitor's: the link's focus and blur are replayed on the
    * layer, which the monitor attributes to the keyboard when a key moved the focus.
    */
+  // #region Methods
+  /**
+   * Method forwardFocus
+   *
+   * @description
+   * Forwards focus or blur to the tooltip layer in the icon rail.
+   *
+   * @param {'focus' | 'blur'} type - Focus event type to forward.
+   */
   protected forwardFocus(type: 'focus' | 'blur'): void {
     if (this.rail()) this.tip().nativeElement.dispatchEvent(new FocusEvent(type));
   }
+  // #endregion
 }

@@ -46,7 +46,6 @@
   <ng-content select="[cwCalendarActions]" />
 </div>
 
-<!-- The content of an item frame: the consumer's template, else its name. -->
 <ng-template #itemContent let-entry>
   @if (itemTemplate(); as template) {
     <ng-container [ngTemplateOutlet]="template" [ngTemplateOutletContext]="entry.context" />
@@ -56,10 +55,9 @@
 </ng-template>
 
 @for (key of [gridKey()]; track key) {
-  <!-- The grid handles the keys of its cells and their items (one listener, as a roving grid). -->
-  <!-- eslint-disable-next-line @angular-eslint/template/interactive-supports-focus -->
   <div
     role="grid"
+    tabindex="-1"
     cdkDropListGroup
     class="overflow-hidden rounded-lg border animate-fade-in motion-reduce:animate-none"
     [attr.aria-label]="gridLabel()"
@@ -101,7 +99,6 @@
                 (cdkDropListEntered)="onEnter(day.key)"
                 (focusin)="onCellFocus(day.date, null)"
               >
-                <!-- The cell is named by its content: the full date first (WCAG 2.5.3, no aria-label). -->
                 <span class="sr-only">{{ day.label }}</span>
                 <cw-calendar-view-day [model]="day" [header]="view() === 'month'" />
               </div>
@@ -164,7 +161,6 @@
                 (focusin)="onCellFocus(day.date, null)"
                 (dblclick)="createOn(day.date, null, true)"
               >
-                <!-- The cell is named by its content: the full date first (WCAG 2.5.3, no aria-label). -->
                 <span class="sr-only">{{ day.label }}</span>
                 <cw-calendar-view-day [model]="day" [header]="view() === 'month'" />
               </div>
@@ -235,7 +231,6 @@
                   </button>
                 }
                 @if (cell.now !== null) {
-                  <!-- The current time on today's column only (sheet, "Heure actuelle"). -->
                   <svg
                     aria-hidden="true"
                     class="pointer-events-none absolute -inset-x-1 z-20 h-2 w-[calc(100%+4px)] overflow-visible"

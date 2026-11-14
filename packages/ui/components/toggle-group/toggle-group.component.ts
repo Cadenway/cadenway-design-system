@@ -12,8 +12,14 @@ import {
   numberAttribute,
   output,
   signal,
+  type InputSignal,
+  type InputSignalWithTransform,
+  type ModelSignal,
+  type OutputEmitterRef,
+  type Signal,
+  type WritableSignal,
 } from '@angular/core';
-import { FocusKeyManager } from '@angular/cdk/a11y';
+import { FocusKeyManager, type FocusableOption } from '@angular/cdk/a11y';
 import { Directionality } from '@angular/cdk/bidi';
 import { type ControlValueAccessor, NgControl } from '@angular/forms';
 import type { FormValueControl } from '@angular/forms/signals';
@@ -31,6 +37,14 @@ import type {
 
 /* Attached items (spacing 0): inner corners cancelled, shared borders merged, the focused item above
    its neighbors so its ring shows whole. `sm` items have `rounded-md` corners. */
+/**
+ * Constant ATTACHED
+ *
+ * @description
+ * Joined-item classes by orientation and size.
+ *
+ * @type {Record<CwToggleGroupOrientation, Record<'sm' | 'other', string>>}
+ */
 const ATTACHED: Record<CwToggleGroupOrientation, Record<'sm' | 'other', string>> = {
   horizontal: {
     sm: 'flex w-fit items-center [&>*]:focus-visible:z-10 [&>*]:rounded-none [&>*:first-child]:rounded-l-md [&>*:last-child]:rounded-r-md [&>*:not(:first-child)]:border-l-0',
@@ -44,12 +58,24 @@ const ATTACHED: Record<CwToggleGroupOrientation, Record<'sm' | 'other', string>>
   },
 };
 
+/**
+ * Constant SPACED
+ *
+ * @description
+ * Spaced-item layout classes by orientation.
+ *
+ * @type {Record<CwToggleGroupOrientation, string>}
+ */
 const SPACED: Record<CwToggleGroupOrientation, string> = {
   horizontal: 'flex w-fit items-center gap-1',
   vertical: 'flex w-fit flex-col gap-1',
 };
 
 /**
+ * Class CwToggleGroup
+ * @class CwToggleGroup
+ *
+ * @description
  * A set of linked toggles for one display setting, single or multiple choice: text formatting,
  * density, grouping (Toggle Group sheet of the Design System artifact).
  *
@@ -83,74 +109,336 @@ const SPACED: Record<CwToggleGroupOrientation, string> = {
   templateUrl: './toggle-group.component.html',
 })
 export class CwToggleGroup implements FormValueControl<CwToggleGroupValue>, ControlValueAccessor {
-  /** Single choice (radio group, the default) or multiple choice. */
-  readonly type = input<CwToggleGroupType>('single');
-  /** Value: `string | null` in single choice, `string[]` in multiple choice; `[(value)]`. */
-  readonly value = model<CwToggleGroupValue>(null);
-  /** Look of every item. */
-  readonly variant = input<CwToggleGroupVariant>('default');
-  /** Height of every item. */
-  readonly size = input<CwToggleGroupSize>('default');
-  /** 0 welds the items together; any other value spaces them by 4 px (`gap-1`). */
-  readonly spacing = input(0, { transform: numberAttribute });
-  /** Direction of the group and of its arrow keys. */
-  readonly orientation = input<CwToggleGroupOrientation>('horizontal');
-  /** Disables every item (Signal Forms binds it from the field). */
-  readonly disabled = input(false, { transform: booleanAttribute });
-  /** Invalid state given by Signal Forms; shown once touched. */
-  readonly invalid = input(false, { transform: booleanAttribute });
-  /** Touched state given by Signal Forms. */
-  readonly touched = input(false, { transform: booleanAttribute });
-  /** Required state given by Signal Forms; `aria-required` in single choice. */
-  readonly required = input(false, { transform: booleanAttribute });
-  /** Accessible name of the group (« Grouper par »). */
-  readonly ariaLabel = input('');
-  /** Emitted when focus leaves the group: Signal Forms marks the field touched. */
-  readonly touch = output();
+  // #region Properties
+  /**
+   * Property type
+   * @readonly
+   *
+   * @description
+   * Single choice (radio group, the default) or multiple choice.
+   *
+   * @type {InputSignal<CwToggleGroupType>}
+   */
+  public readonly type: InputSignal<CwToggleGroupType> = input<CwToggleGroupType>('single');
 
-  private readonly items = contentChildren(TOGGLE_GROUP_ITEM);
-  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
-  private readonly dir = inject(Directionality, { optional: true });
-  private readonly ngControl = inject(NgControl, { optional: true, self: true });
-  private readonly formDisabled = signal(false);
-  private readonly accessorTouched = signal(false);
-  private readonly lastFocused = signal<CwToggleGroupItem | null>(null);
+  /**
+   * Property value
+   * @readonly
+   *
+   * @description
+   * Value: `string | null` in single choice, `string[]` in multiple choice; `[(value)]`.
+   *
+   * @type {ModelSignal<CwToggleGroupValue>}
+   */
+  public readonly value: ModelSignal<CwToggleGroupValue> = model<CwToggleGroupValue>(null);
+
+  /**
+   * Property variant
+   * @readonly
+   *
+   * @description
+   * Look of every item.
+   *
+   * @type {InputSignal<CwToggleGroupVariant>}
+   */
+  public readonly variant: InputSignal<CwToggleGroupVariant> =
+    input<CwToggleGroupVariant>('default');
+
+  /**
+   * Property size
+   * @readonly
+   *
+   * @description
+   * Height of every item.
+   *
+   * @type {InputSignal<CwToggleGroupSize>}
+   */
+  public readonly size: InputSignal<CwToggleGroupSize> = input<CwToggleGroupSize>('default');
+
+  /**
+   * Property spacing
+   * @readonly
+   *
+   * @description
+   * 0 welds the items together; any other value spaces them by 4 px (`gap-1`).
+   *
+   * @type {InputSignalWithTransform<number, unknown>}
+   */
+  public readonly spacing: InputSignalWithTransform<number, unknown> = input(0, {
+    transform: numberAttribute,
+  });
+
+  /**
+   * Property orientation
+   * @readonly
+   *
+   * @description
+   * Direction of the group and of its arrow keys.
+   *
+   * @type {InputSignal<CwToggleGroupOrientation>}
+   */
+  public readonly orientation: InputSignal<CwToggleGroupOrientation> =
+    input<CwToggleGroupOrientation>('horizontal');
+
+  /**
+   * Property disabled
+   * @readonly
+   *
+   * @description
+   * Disables every item (Signal Forms binds it from the field).
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   */
+  public readonly disabled: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property invalid
+   * @readonly
+   *
+   * @description
+   * Invalid state given by Signal Forms; shown once touched.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   */
+  public readonly invalid: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property touched
+   * @readonly
+   *
+   * @description
+   * Touched state given by Signal Forms.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   */
+  public readonly touched: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property required
+   * @readonly
+   *
+   * @description
+   * Required state given by Signal Forms; `aria-required` in single choice.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   */
+  public readonly required: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property ariaLabel
+   * @readonly
+   *
+   * @description
+   * Accessible name of the group (« Grouper par »).
+   *
+   * @type {InputSignal<string>}
+   */
+  public readonly ariaLabel: InputSignal<string> = input('');
+
+  /**
+   * Property touch
+   * @readonly
+   *
+   * @description
+   * Emitted when focus leaves the group: Signal Forms marks the field touched.
+   *
+   * @type {OutputEmitterRef<void>}
+   */
+  public readonly touch: OutputEmitterRef<void> = output();
+
+  /**
+   * Property items
+   * @readonly
+   *
+   * @description
+   * Projected toggle items in content order.
+   *
+   * @type {Signal<readonly CwToggleGroupItem[]>}
+   */
+  private readonly items: Signal<readonly CwToggleGroupItem[]> = contentChildren(TOGGLE_GROUP_ITEM);
+
+  /**
+   * Property host
+   * @readonly
+   *
+   * @description
+   * Native group element used to detect focus leaving.
+   *
+   * @type {HTMLElement}
+   */
+  private readonly host: HTMLElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+
+  /**
+   * Property dir
+   * @readonly
+   *
+   * @description
+   * Optional writing direction for keyboard navigation.
+   *
+   * @type {Directionality | null}
+   */
+  private readonly dir: Directionality | null = inject(Directionality, { optional: true });
+
+  /**
+   * Property ngControl
+   * @readonly
+   *
+   * @description
+   * Optional Angular form control using this value accessor.
+   *
+   * @type {NgControl | null}
+   */
+  private readonly ngControl: NgControl | null = inject(NgControl, { optional: true, self: true });
+
+  /**
+   * Property formDisabled
+   * @readonly
+   *
+   * @description
+   * Disabled state supplied by the form.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  private readonly formDisabled: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property accessorTouched
+   * @readonly
+   *
+   * @description
+   * Whether focus has left the group.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  private readonly accessorTouched: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property lastFocused
+   * @readonly
+   *
+   * @description
+   * Last item focused in the group.
+   *
+   * @type {WritableSignal<CwToggleGroupItem | null>}
+   */
+  private readonly lastFocused: WritableSignal<CwToggleGroupItem | null> =
+    signal<CwToggleGroupItem | null>(null);
+
+  /**
+   * Property onChange
+   *
+   * @description
+   * Registered form value-change callback.
+   *
+   * @type {(value: CwToggleGroupValue) => void}
+   */
   private onChange: (value: CwToggleGroupValue) => void = () => undefined;
+
+  /**
+   * Property onTouched
+   *
+   * @description
+   * Registered form touched callback.
+   *
+   * @type {() => void}
+   */
   private onTouched: () => void = () => undefined;
 
-  private readonly keyManager = new FocusKeyManager(
-    computed(() => this.items().map((item) => item.keyOption)),
-    inject(Injector),
-  )
-    .withWrap()
-    .withHomeAndEnd();
+  /**
+   * Property keyManager
+   * @readonly
+   *
+   * @description
+   * Keyboard focus manager for toggle options.
+   *
+   * @type {FocusKeyManager<FocusableOption>}
+   */
+  private readonly keyManager: FocusKeyManager<FocusableOption> =
+    new FocusKeyManager<FocusableOption>(
+      computed(() => this.items().map((item) => item.keyOption)),
+      inject(Injector),
+    )
+      .withWrap()
+      .withHomeAndEnd();
 
-  /** @internal Whether every item is disabled, by the group input or the form control. */
-  readonly isDisabled = computed(() => this.disabled() || this.formDisabled());
+  /**
+   * Property isDisabled
+   * @readonly
+   *
+   * @description
+   * Whether the group disables all items.
+   *
+   * @type {Signal<boolean>}
+   */
+  public readonly isDisabled: Signal<boolean> = computed(
+    () => this.disabled() || this.formDisabled(),
+  );
 
-  /** @internal The values that are on, whatever the type. */
-  readonly selected = computed<readonly string[]>(() => {
-    const value = this.value();
+  /**
+   * Property selected
+   * @readonly
+   *
+   * @description
+   * Selected item values in either choice mode.
+   *
+   * @type {Signal<readonly string[]>}
+   */
+  public readonly selected: Signal<readonly string[]> = computed<readonly string[]>(() => {
+    const value: CwToggleGroupValue = this.value();
     if (Array.isArray(value)) return value as readonly string[];
     return typeof value === 'string' ? [value] : [];
   });
 
-  /** @internal The single item that takes the Tab stop. */
-  readonly tabStop = computed(() => {
-    const enabled = this.items().filter((item) => !item.isDisabled());
-    const last = this.lastFocused();
+  /**
+   * Property tabStop
+   * @readonly
+   *
+   * @description
+   * Item receiving the roving tab stop.
+   *
+   * @type {Signal<CwToggleGroupItem | null>}
+   */
+  public readonly tabStop: Signal<CwToggleGroupItem | null> = computed(() => {
+    const enabled: CwToggleGroupItem[] = this.items().filter((item) => !item.isDisabled());
+    const last: CwToggleGroupItem | null = this.lastFocused();
     if (last && enabled.includes(last)) return last;
-    const selected = this.selected();
+    const selected: readonly string[] = this.selected();
     return enabled.find((item) => selected.includes(item.value())) ?? enabled.at(0) ?? null;
   });
 
-  protected readonly classes = computed(() => {
-    const orientation = this.orientation();
+  /**
+   * Property classes
+   * @readonly
+   *
+   * @description
+   * Layout classes for orientation, size and spacing.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly classes: Signal<string> = computed(() => {
+    const orientation: CwToggleGroupOrientation = this.orientation();
     if (this.spacing() > 0) return SPACED[orientation];
     return ATTACHED[orientation][this.size() === 'sm' ? 'sm' : 'other'];
   });
+  // #endregion
 
-  constructor() {
+  // #region Constructor
+  /**
+   * Constructor
+   * @constructor
+   *
+   * @description
+   * Registers the form accessor and configures keyboard orientation.
+   */
+  public constructor() {
     // Reactive and template-driven forms: this group is the control's value accessor. Set here
     // rather than through NG_VALUE_ACCESSOR, so the group can read the control's validity.
     if (this.ngControl) this.ngControl.valueAccessor = this;
@@ -165,13 +453,32 @@ export class CwToggleGroup implements FormValueControl<CwToggleGroupValue>, Cont
       }
     });
   }
+  // #endregion
 
-  /** Moves the focus to the Tab stop (Signal Forms calls it to focus the first invalid field). */
-  focus(options?: FocusOptions): void {
+  // #region Methods
+  /**
+   * Method focus
+   * @method focus
+   *
+   * @description
+   * Moves focus to the current tab stop.
+   *
+   * @param {FocusOptions} [options] - Optional browser focus behavior.
+   */
+  public focus(options?: FocusOptions): void {
     this.tabStop()?.focus(options);
   }
 
-  writeValue(value: unknown): void {
+  /**
+   * Method writeValue
+   * @method writeValue
+   *
+   * @description
+   * Updates selected values from a form control.
+   *
+   * @param {unknown} value - Selected value or values supplied by the form control.
+   */
+  public writeValue(value: unknown): void {
     if (Array.isArray(value)) {
       this.value.set(value.filter((entry): entry is string => typeof entry === 'string'));
     } else {
@@ -179,28 +486,63 @@ export class CwToggleGroup implements FormValueControl<CwToggleGroupValue>, Cont
     }
   }
 
-  registerOnChange(fn: (value: CwToggleGroupValue) => void): void {
+  /**
+   * Method registerOnChange
+   * @method registerOnChange
+   *
+   * @description
+   * Registers the form value-change callback.
+   *
+   * @param {(value: CwToggleGroupValue) => void} fn - Callback notified when the selection changes.
+   */
+  public registerOnChange(fn: (value: CwToggleGroupValue) => void): void {
     this.onChange = fn;
   }
 
-  registerOnTouched(fn: () => void): void {
+  /**
+   * Method registerOnTouched
+   * @method registerOnTouched
+   *
+   * @description
+   * Registers the form touched callback.
+   *
+   * @param {() => void} fn - Callback notified when the group is touched.
+   */
+  public registerOnTouched(fn: () => void): void {
     this.onTouched = fn;
   }
 
-  setDisabledState(isDisabled: boolean): void {
+  /**
+   * Method setDisabledState
+   * @method setDisabledState
+   *
+   * @description
+   * Updates the disabled state supplied by the form.
+   *
+   * @param {boolean} isDisabled - Disabled state supplied by the form.
+   */
+  public setDisabledState(isDisabled: boolean): void {
     this.formDisabled.set(isDisabled);
   }
 
-  /** @internal Called by an item on click: selects it (single) or flips it (multiple). */
-  activate(item: CwToggleGroupItem): void {
-    const value = item.value();
+  /**
+   * Method activate
+   * @method activate
+   *
+   * @description
+   * Selects or toggles an item according to the choice mode.
+   *
+   * @param {CwToggleGroupItem} item - Item to select or toggle.
+   */
+  public activate(item: CwToggleGroupItem): void {
+    const value: string = item.value();
     let next: CwToggleGroupValue;
     if (this.type() === 'single') {
       // A radio group keeps its choice: clicking the item that is on leaves it on.
       if (this.value() === value) return;
       next = value;
     } else {
-      const selected = this.selected();
+      const selected: readonly string[] = this.selected();
       next = selected.includes(value)
         ? selected.filter((entry) => entry !== value)
         : [...selected, value];
@@ -209,25 +551,54 @@ export class CwToggleGroup implements FormValueControl<CwToggleGroupValue>, Cont
     this.onChange(next);
   }
 
-  /** @internal Called by an item when it receives the focus. */
-  focused(item: CwToggleGroupItem): void {
+  /**
+   * Method focused
+   * @method focused
+   *
+   * @description
+   * Tracks an item that received focus.
+   *
+   * @param {CwToggleGroupItem} item - Item that received focus.
+   */
+  public focused(item: CwToggleGroupItem): void {
     this.lastFocused.set(item);
     this.keyManager.updateActiveItem(item.keyOption);
   }
 
+  /**
+   * Method onKeydown
+   * @method onKeydown
+   *
+   * @description
+   * Navigates items and selects the focused item in single mode.
+   *
+   * @param {KeyboardEvent} event - Keyboard event from the group.
+   */
   protected onKeydown(event: KeyboardEvent): void {
-    const before = this.keyManager.activeItem;
-    const orientation = this.orientation() === 'vertical' ? 'vertical' : 'horizontal';
+    const before: FocusableOption | null = this.keyManager.activeItem;
+    const orientation: 'horizontal' | 'vertical' =
+      this.orientation() === 'vertical' ? 'vertical' : 'horizontal';
     if (ɵnavigateList(this.keyManager, event, orientation, this.dir?.value === 'rtl')) {
       event.preventDefault();
     }
-    const after = this.keyManager.activeItem;
+    const after: FocusableOption | null = this.keyManager.activeItem;
     if (this.type() !== 'single' || !after || after === before) return;
     // Single choice follows the focus, as a native radio group does (Toggle Group sheet, "Clavier").
-    const item = this.items().find((candidate) => candidate.keyOption === after);
+    const item: CwToggleGroupItem | undefined = this.items().find(
+      (candidate) => candidate.keyOption === after,
+    );
     if (item) this.activate(item);
   }
 
+  /**
+   * Method onFocusOut
+   * @method onFocusOut
+   *
+   * @description
+   * Marks the group touched when focus leaves it.
+   *
+   * @param {FocusEvent} event - Focus event used to detect departure from the group.
+   */
   protected onFocusOut(event: FocusEvent): void {
     if (event.relatedTarget instanceof Node && this.host.contains(event.relatedTarget)) return;
     this.accessorTouched.set(true);
@@ -235,11 +606,21 @@ export class CwToggleGroup implements FormValueControl<CwToggleGroupValue>, Cont
     this.touch.emit();
   }
 
+  /**
+   * Method isInvalid
+   * @method isInvalid
+   *
+   * @description
+   * Determines whether touched invalid state should be shown.
+   *
+   * @returns {boolean} Whether the touched group should display an invalid state.
+   */
   protected isInvalid(): boolean {
     if (this.invalid() && this.touched()) return true;
-    const control = this.ngControl;
+    const control: NgControl | null = this.ngControl;
     return (
       !!control && control.invalid === true && (control.touched === true || this.accessorTouched())
     );
   }
+  // #endregion
 }

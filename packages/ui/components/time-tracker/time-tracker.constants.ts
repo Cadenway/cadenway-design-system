@@ -4,7 +4,14 @@ import type {
   CwTimeTrackerLabels,
 } from './time-tracker.types';
 
-/** Default French texts of `cw-time-tracker` (Time Tracker sheet and preview of the Design System artifact). */
+/**
+ * Constant CW_TIME_TRACKER_LABELS
+ *
+ * @description
+ * Default French texts of `cw-time-tracker` (Time Tracker sheet and preview of the Design System artifact).
+ *
+ * @type {CwTimeTrackerLabels}
+ */
 export const CW_TIME_TRACKER_LABELS: CwTimeTrackerLabels = {
   start: 'Démarrer le minuteur',
   stop: 'Arrêter le minuteur et enregistrer',
@@ -30,7 +37,14 @@ export const CW_TIME_TRACKER_LABELS: CwTimeTrackerLabels = {
   addTime: 'Ajouter du temps',
 };
 
-/** Default French texts of `cw-time-entry-form` (sheet, preview and mockup `App.dc.html`). */
+/**
+ * Constant CW_TIME_ENTRY_FORM_LABELS
+ *
+ * @description
+ * Default French texts of `cw-time-entry-form` (sheet, preview and mockup `App.dc.html`).
+ *
+ * @type {CwTimeEntryFormLabels}
+ */
 export const CW_TIME_ENTRY_FORM_LABELS: CwTimeEntryFormLabels = {
   title: 'Ajouter du temps',
   duration: 'Durée',
@@ -47,7 +61,14 @@ export const CW_TIME_ENTRY_FORM_LABELS: CwTimeEntryFormLabels = {
   submit: 'Ajouter',
 };
 
-/** Default French texts of `cw-time-entry-list` (sheet, preview and mockup `App.dc.html`). */
+/**
+ * Constant CW_TIME_ENTRY_LIST_LABELS
+ *
+ * @description
+ * Default French texts of `cw-time-entry-list` (sheet, preview and mockup `App.dc.html`).
+ *
+ * @type {CwTimeEntryListLabels}
+ */
 export const CW_TIME_ENTRY_LIST_LABELS: CwTimeEntryListLabels = {
   list: 'Entrées de temps',
   person: 'Personne',
@@ -68,7 +89,14 @@ export const CW_TIME_ENTRY_LIST_LABELS: CwTimeEntryListLabels = {
   remove: 'Supprimer',
 };
 
-/** Shortcuts of the entry form, in milliseconds (mockup `App.dc.html`: 15 min, 30 min, 1 h, 2 h). */
+/**
+ * Constant CW_TIME_QUICK_DURATIONS
+ *
+ * @description
+ * Shortcuts of the entry form, in milliseconds (mockup `App.dc.html`: 15 min, 30 min, 1 h, 2 h).
+ *
+ * @type {readonly number[]}
+ */
 export const CW_TIME_QUICK_DURATIONS: readonly number[] = [15, 30, 60, 120].map(
   (minutes) => minutes * 60_000,
 );

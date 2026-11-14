@@ -1,9 +1,16 @@
 import { Component } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { CwCheckbox } from '@cadenway/ui/components/checkbox';
 
 import { CwLabel } from './label.directive';
 
+/**
+ * Class Host
+ * @class Host
+ *
+ * @description
+ * Test host pairing labels with a native input and a checkbox.
+ */
 @Component({
   imports: [CwLabel, CwCheckbox],
   template: `
@@ -19,22 +26,22 @@ class Host {}
 
 describe('CwLabel', () => {
   it('names the control it points at', () => {
-    const fixture = TestBed.createComponent(Host);
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
     fixture.detectChanges();
-    const host = fixture.nativeElement as HTMLElement;
-    const input = host.querySelector<HTMLInputElement>('#space-desc');
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    const input: HTMLInputElement | null = host.querySelector<HTMLInputElement>('#space-desc');
 
     expect(input?.labels?.[0]?.textContent.trim()).toBe('Description (facultatif)');
   });
 
   it('toggles a checkbox when clicked', () => {
-    const fixture = TestBed.createComponent(Host);
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
     fixture.detectChanges();
-    const host = fixture.nativeElement as HTMLElement;
-    const label = Array.from(host.querySelectorAll('label')).find(
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    const label: HTMLLabelElement | undefined = Array.from(host.querySelectorAll('label')).find(
       (element) => element.textContent.trim() === 'Afficher les sous-tâches',
     );
-    const box = host.querySelector('[role="checkbox"]');
+    const box: Element | null = host.querySelector('[role="checkbox"]');
 
     label?.click();
     fixture.detectChanges();

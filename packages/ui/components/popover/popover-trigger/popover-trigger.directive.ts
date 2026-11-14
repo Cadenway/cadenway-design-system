@@ -1,8 +1,20 @@
-import { Directive, ElementRef, computed, effect, inject, input } from '@angular/core';
+import {
+  Directive,
+  ElementRef,
+  computed,
+  effect,
+  inject,
+  input,
+  type InputSignal,
+  type Signal,
+} from '@angular/core';
 
 import type { CwPopover } from '../popover.component';
 
 /**
+ * Directive CwPopoverTrigger
+ *
+ * @description
  * Opens and closes a `cw-popover` from its host, usually an `outline` or `ghost` `cwButton` with a
  * visible name (Popover sheet of the Design System artifact).
  *
@@ -24,20 +36,67 @@ import type { CwPopover } from '../popover.component';
   },
 })
 export class CwPopoverTrigger {
-  /** The panel this element opens. */
-  readonly cwPopoverTrigger = input.required<CwPopover>();
+  // #region Properties
+  /**
+   * Property cwPopoverTrigger
+   * @readonly
+   *
+   * @description
+   * Popover opened by this trigger.
+   *
+   * @type {InputSignal<CwPopover>}
+   */
+  public readonly cwPopoverTrigger: InputSignal<CwPopover> = input.required<CwPopover>();
 
-  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  /**
+   * Property element
+   * @readonly
+   *
+   * @description
+   * Host element anchoring the popover.
+   *
+   * @type {HTMLElement}
+   */
+  private readonly element: HTMLElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
 
-  protected readonly expanded = computed(() => this.cwPopoverTrigger().isOpenFrom(this.element));
+  /**
+   * Property expanded
+   * @readonly
+   *
+   * @description
+   * Whether the popover is open from this trigger.
+   *
+   * @type {Signal<boolean>}
+   */
+  protected readonly expanded: Signal<boolean> = computed(() =>
+    this.cwPopoverTrigger().isOpenFrom(this.element),
+  );
+  // #endregion
 
-  constructor() {
+  // #region Constructor
+  /**
+   * Constructor
+   * @constructor
+   *
+   * @description
+   * Registers this trigger with the popover.
+   */
+  public constructor() {
     effect((onCleanup) => {
       onCleanup(this.cwPopoverTrigger().registerTrigger(this.element));
     });
   }
+  // #endregion
 
+  // #region Methods
+  /**
+   * Method toggle
+   *
+   * @description
+   * Toggles the popover from this trigger.
+   */
   protected toggle(): void {
     this.cwPopoverTrigger().toggle(this.element);
   }
+  // #endregion
 }

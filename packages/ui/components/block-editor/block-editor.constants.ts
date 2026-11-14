@@ -6,8 +6,12 @@ import type {
 } from './block-editor.types';
 
 /**
- * The ten block types of the mockup (App.dc.html, `BLOCK_TYPES`), in its order, with its labels,
- * icons and Markdown hints: the default entries of the « / » menu.
+ * Constant CW_BLOCK_TYPES
+ *
+ * @description
+ * The ten block types of the mockup (App.dc.html, `BLOCK_TYPES`), in its order, with its labels, icons and Markdown hints: the default entries of the « / » menu.
+ *
+ * @type {readonly CwBlockType[]}
  */
 export const CW_BLOCK_TYPES: readonly CwBlockType[] = [
   { kind: 'p', label: 'Texte', icon: 'phosphorTextTBold', hint: '' },
@@ -22,7 +26,14 @@ export const CW_BLOCK_TYPES: readonly CwBlockType[] = [
   { kind: 'hr', label: 'Séparateur', icon: 'phosphorMinusBold', hint: '---' },
 ];
 
-/** The five inline marks of the mockup, in its order: bold, italic, underline, strike, code. */
+/**
+ * Constant CW_INLINE_MARKS
+ *
+ * @description
+ * The five inline marks of the mockup, in its order: bold, italic, underline, strike, code.
+ *
+ * @type {readonly CwInlineMarkButton[]}
+ */
 export const CW_INLINE_MARKS: readonly CwInlineMarkButton[] = [
   { mark: 'bold', label: 'Gras', icon: 'phosphorTextBBold', shortcut: ['Ctrl', 'B'] },
   { mark: 'italic', label: 'Italique', icon: 'phosphorTextItalicBold', shortcut: ['Ctrl', 'I'] },
@@ -41,7 +52,14 @@ export const CW_INLINE_MARKS: readonly CwInlineMarkButton[] = [
   { mark: 'code', label: 'Code', icon: 'phosphorCodeBold', shortcut: ['Ctrl', 'E'] },
 ];
 
-/** The block buttons of the document toolbar (mockup App.dc.html, `blockBtns`). */
+/**
+ * Constant CW_TOOLBAR_BLOCKS
+ *
+ * @description
+ * The block buttons of the document toolbar (mockup App.dc.html, `blockBtns`).
+ *
+ * @type {readonly CwBlockKind[]}
+ */
 export const CW_TOOLBAR_BLOCKS: readonly CwBlockKind[] = [
   'li',
   'ol',
@@ -51,7 +69,14 @@ export const CW_TOOLBAR_BLOCKS: readonly CwBlockKind[] = [
   'hr',
 ];
 
-/** Default French texts of `cw-block-editor` (mockup App.dc.html and CommentComposer sheet). */
+/**
+ * Constant CW_BLOCK_EDITOR_LABELS
+ *
+ * @description
+ * Default French texts of `cw-block-editor` (mockup App.dc.html and CommentComposer sheet).
+ *
+ * @type {CwBlockEditorLabels}
+ */
 export const CW_BLOCK_EDITOR_LABELS: CwBlockEditorLabels = {
   toolbar: 'Mise en forme',
   blockType: 'Type de bloc',

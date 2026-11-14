@@ -30,8 +30,13 @@ import { CwPropertyList } from './property-list.component';
 import { CwPropertyValue } from './property-value/property-value.directive';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Property List, every state of its sheet in the Design System artifact, in the light and the dark
  * theme. Copy and values from the mockup (`App.dc.html`, task panel « Propriétés »).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/PropertyList',
@@ -72,15 +77,42 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story for the property list examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Returns the light-theme story container.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing theme scopes.
+ *
+ * @returns {HTMLElement} Container for the light theme.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
-const PROPERTIES = `
+/**
+ * Constant PROPERTIES
+ *
+ * @description
+ * Shared property controls used in the examples.
+ *
+ * @type {string}
+ */
+const PROPERTIES: string = `
   <cw-property label="Statut" icon="phosphorCircleHalfBold">
     <cw-select cwPropertyValue [(value)]="status" ariaLabel="Statut">
       <cw-select-option value="progress"><cw-status-icon status="progress" />En cours</cw-select-option>
@@ -108,7 +140,24 @@ const PROPERTIES = `
     <cw-inline-edit cwPropertyValue [(value)]="estimate" placeholder="Vide" ariaLabel="Estimation" />
   </cw-property>`;
 
-const PROPS = {
+/**
+ * Constant PROPS
+ *
+ * @description
+ * Initial values for the property list examples.
+ *
+ * @type {typeof PROPS}
+ */
+const PROPS: {
+  status: string;
+  people: string[];
+  priority: string;
+  due: Date;
+  estimate: string;
+  version: string;
+  sprint: string;
+  peopleSummary: (count: number) => string;
+} = {
   status: 'progress',
   people: ['lm', 'kb'],
   priority: 'haute',
@@ -159,9 +208,11 @@ export const EmptyFolded: Story = {
         </cw-property-group>
       </cw-property-list>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const toggle = scope.getByRole('button', { name: /Champs vides/ });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole: (role: string, options: { name: RegExp }) => HTMLElement } = within(
+      light(canvasElement),
+    );
+    const toggle: HTMLElement = scope.getByRole('button', { name: /Champs vides/ });
     await expect(toggle).toHaveAttribute('aria-expanded', 'false');
     await userEvent.click(toggle);
     await expect(toggle).toHaveAttribute('aria-expanded', 'true');
@@ -202,9 +253,11 @@ export const Keyboard: Story = {
     props: { ...PROPS },
     template: `<cw-property-list class="w-96">${PROPERTIES}</cw-property-list>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const status = scope.getByRole('combobox', { name: /^Statut/ });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole: (role: string, options: { name: RegExp }) => HTMLElement } = within(
+      light(canvasElement),
+    );
+    const status: HTMLElement = scope.getByRole('combobox', { name: /^Statut/ });
 
     await userEvent.tab();
     await expect(status).toHaveFocus();

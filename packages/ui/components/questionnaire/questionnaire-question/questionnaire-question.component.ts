@@ -9,6 +9,12 @@ import {
   model,
   output,
   signal,
+  type InputSignalWithTransform,
+  type InputSignal,
+  type ModelSignal,
+  type OutputEmitterRef,
+  type WritableSignal,
+  type Signal,
 } from '@angular/core';
 import { LiveAnnouncer, _IdGenerator } from '@angular/cdk/a11y';
 import { type ControlValueAccessor, NgControl } from '@angular/forms';
@@ -22,6 +28,7 @@ import {
   QUESTIONNAIRE_CHOICE,
   QUESTIONNAIRE_QUESTION,
   type QuestionRef,
+  type QuestionnaireRef,
 } from '../questionnaire.token';
 import type {
   CwQuestionType,
@@ -30,23 +37,12 @@ import type {
 } from '../questionnaire.types';
 
 /**
- * One question of a questionnaire: a `legend`, an optional description, the choices and the error
- * (Questionnaire sheet of the Design System artifact).
+ * Component CwQuestionnaireQuestion
  *
- * Put it on a native `<fieldset>`, with a `legend[cwQuestionnaireTitle]`, an optional
- * `cw-questionnaire-description` and `label[cwQuestionnaireChoice]`s. `type="single"` draws radios
- * (value: the chosen value or `null`), `multiple` checkboxes (value: the ticked values); `[(value)]`
- * is a model, the question is a Signal Forms value control (`[formField]`) and the value accessor of
- * a Reactive or template-driven control. A `required` question without answer shows `errorText`
- * once checked by « Suivant » (or touched and invalid in a form), with `aria-invalid` and
- * `aria-describedby`, announces it and focuses its first choice. Inside a questionnaire only the
- * current question shows; on its own (an assistant question) the letter keys work while the focus
- * is inside it. Its key in the answers is `name`, else the form control name, else its index.
+ * @description
+ * One question of a questionnaire: a `legend`, an optional description, the choices and the error (Questionnaire sheet of the Design System artifact). Put it on a native `<fieldset>`, with a `legend[cwQuestionnaireTitle]`, an optional `cw-questionnaire-description` and `label[cwQuestionnaireChoice]`s. `type="single"` draws radios (value: the chosen value or `null`), `multiple` checkboxes (value: the ticked values); `[(value)]` is a model, the question is a Signal Forms value control (`[formField]`) and the value accessor of a Reactive or template-driven control. A `required` question without answer shows `errorText` once checked by « Suivant » (or touched and invalid in a form), with `aria-invalid` and `aria-describedby`, announces it and focuses its first choice. Inside a questionnaire only the current question shows; on its own (an assistant question) the letter keys work while the focus is inside it. Its key in the answers is `name`, else the form control name, else its index.
  */
 @Component({
-  // A component on a native element (attribute selector), as its sheet requires: the element keeps
-  // its native role, focus and form behavior. The lint rule only knows element selectors.
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'fieldset[cwQuestionnaireQuestion]',
   imports: [NgIcon],
   providers: [
@@ -66,111 +62,446 @@ import type {
 export class CwQuestionnaireQuestion
   implements QuestionRef, FormValueControl<CwQuestionValue>, ControlValueAccessor
 {
-  /** One answer (radios) or several (checkboxes). */
-  readonly type = input<CwQuestionType>('single');
-  /** Blocks « Suivant » without an answer; otherwise « Passer » is offered. */
-  readonly required = input(false, { transform: booleanAttribute });
-  /** Error shown when a required answer is missing. */
-  readonly errorText = input('Choisissez une réponse pour continuer.');
-  /** Key of the question in the answers; Signal Forms binds the field name. */
-  readonly name = input('');
-  /** Letter shortcuts of a question used on its own; inside a questionnaire, the questionnaire's. */
-  readonly shortcuts = input<CwQuestionnaireShortcuts | null>(null);
-  /** Disables every choice (Signal Forms binds it from the field). */
-  readonly disabled = input(false, { transform: booleanAttribute });
-  /** Invalid state given by Signal Forms; shown once touched. */
-  readonly invalid = input(false, { transform: booleanAttribute });
-  /** Touched state given by Signal Forms. */
-  readonly touched = input(false, { transform: booleanAttribute });
-  /** The answer; `[(value)]`. */
-  readonly value = model<CwQuestionValue>(null);
-  /** Emitted when the focus leaves a choice: Signal Forms marks the field touched. */
-  readonly touch = output();
+  // #region Properties
+  /**
+   * Property type
+   *
+   * @description
+   * One answer (radios) or several (checkboxes).
+   *
+   * @type {InputSignal<CwQuestionType>}
+   * @readonly
+   */
+  public readonly type: InputSignal<CwQuestionType> = input<CwQuestionType>('single');
 
-  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
-  private readonly questionnaire = inject(QUESTIONNAIRE, { optional: true });
-  private readonly ngControl = inject(NgControl, { optional: true, self: true });
-  private readonly announcer = inject(LiveAnnouncer);
-  private readonly choices = contentChildren(QUESTIONNAIRE_CHOICE, { descendants: true });
-  private readonly checkedOnce = signal(false);
-  private readonly accessorTouched = signal(false);
-  private readonly formDisabled = signal(false);
+  /**
+   * Property required
+   *
+   * @description
+   * Blocks « Suivant » without an answer; otherwise « Passer » is offered.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   * @readonly
+   */
+  public readonly required: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property errorText
+   *
+   * @description
+   * Error shown when a required answer is missing.
+   *
+   * @type {InputSignal<string>}
+   * @readonly
+   */
+  public readonly errorText: InputSignal<string> = input('Choisissez une réponse pour continuer.');
+
+  /**
+   * Property name
+   *
+   * @description
+   * Key of the question in the answers; Signal Forms binds the field name.
+   *
+   * @type {InputSignal<string>}
+   * @readonly
+   */
+  public readonly name: InputSignal<string> = input('');
+
+  /**
+   * Property shortcuts
+   *
+   * @description
+   * Letter shortcuts of a question used on its own; inside a questionnaire, the questionnaire's.
+   *
+   * @type {InputSignal<CwQuestionnaireShortcuts | null>}
+   * @readonly
+   */
+  public readonly shortcuts: InputSignal<CwQuestionnaireShortcuts | null> =
+    input<CwQuestionnaireShortcuts | null>(null);
+
+  /**
+   * Property disabled
+   *
+   * @description
+   * Disables every choice (Signal Forms binds it from the field).
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   * @readonly
+   */
+  public readonly disabled: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property invalid
+   *
+   * @description
+   * Invalid state given by Signal Forms; shown once touched.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   * @readonly
+   */
+  public readonly invalid: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property touched
+   *
+   * @description
+   * Touched state given by Signal Forms.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   * @readonly
+   */
+  public readonly touched: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property value
+   *
+   * @description
+   * The answer; `[(value)]`.
+   *
+   * @type {ModelSignal<CwQuestionValue>}
+   * @readonly
+   */
+  public readonly value: ModelSignal<CwQuestionValue> = model<CwQuestionValue>(null);
+
+  /**
+   * Property touch
+   *
+   * @description
+   * Emitted when the focus leaves a choice: Signal Forms marks the field touched.
+   *
+   * @type {OutputEmitterRef<void>}
+   * @readonly
+   */
+  public readonly touch: OutputEmitterRef<void> = output();
+
+  /**
+   * Property host
+   *
+   * @description
+   * Question host used for focus and containment checks.
+   *
+   * @type {HTMLElement}
+   * @readonly
+   */
+  private readonly host: HTMLElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+
+  /**
+   * Property questionnaire
+   *
+   * @description
+   * Containing questionnaire that coordinates question state.
+   *
+   * @type {QuestionnaireRef | null}
+   * @readonly
+   */
+  private readonly questionnaire: QuestionnaireRef | null = inject(QUESTIONNAIRE, {
+    optional: true,
+  });
+
+  /**
+   * Property ngControl
+   *
+   * @description
+   * Optional forms control whose value accessor is this question.
+   *
+   * @type {NgControl | null}
+   * @readonly
+   */
+  private readonly ngControl: NgControl | null = inject(NgControl, { optional: true, self: true });
+
+  /**
+   * Property announcer
+   *
+   * @description
+   * Live announcer used for questionnaire feedback.
+   *
+   * @type {LiveAnnouncer}
+   * @readonly
+   */
+  private readonly announcer: LiveAnnouncer = inject(LiveAnnouncer);
+
+  /**
+   * Property choices
+   *
+   * @description
+   * Choice controls belonging to the question.
+   *
+   * @type {Signal<readonly ChoiceRef[]>}
+   * @readonly
+   */
+  private readonly choices: Signal<readonly ChoiceRef[]> = contentChildren(QUESTIONNAIRE_CHOICE, {
+    descendants: true,
+  });
+
+  /**
+   * Property checkedOnce
+   *
+   * @description
+   * Whether validation has been requested.
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  private readonly checkedOnce: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property accessorTouched
+   *
+   * @description
+   * Whether the forms accessor has reported a touch.
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  private readonly accessorTouched: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property formDisabled
+   *
+   * @description
+   * Disabled state supplied by the form control.
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  private readonly formDisabled: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property onChange
+   *
+   * @description
+   * Callback notified when the question value changes.
+   *
+   * @type {(value: CwQuestionValue) => void}
+   */
   private onChange: (value: CwQuestionValue) => void = () => undefined;
+
+  /**
+   * Property onTouched
+   *
+   * @description
+   * Callback notified when the question is touched.
+   *
+   * @type {() => void}
+   */
   private onTouched: () => void = () => undefined;
 
-  /** Shared `name` of the native radios or checkboxes of this question. */
-  readonly groupName = inject(_IdGenerator).getId('cw-questionnaire-question-');
-  /** Id of the error message. */
-  readonly errorId = `${this.groupName}-error`;
+  /**
+   * Property groupName
+   *
+   * @description
+   * Shared `name` of the native radios or checkboxes of this question.
+   *
+   * @type {string}
+   * @readonly
+   */
+  public readonly groupName: string = inject(_IdGenerator).getId('cw-questionnaire-question-');
 
-  private readonly activeShortcuts = computed(
+  /**
+   * Property errorId
+   *
+   * @description
+   * Id of the error message.
+   *
+   * @type {string}
+   * @readonly
+   */
+  public readonly errorId: string = `${this.groupName}-error`;
+
+  /**
+   * Property activeShortcuts
+   *
+   * @description
+   * Shortcut mode inherited from the questionnaire or configured locally.
+   *
+   * @type {Signal<CwQuestionnaireShortcuts>}
+   * @readonly
+   */
+  private readonly activeShortcuts: Signal<CwQuestionnaireShortcuts> = computed(
     () => this.shortcuts() ?? this.questionnaire?.shortcuts() ?? 'letters',
   );
-  /** Whether the question has an answer. */
-  readonly hasAnswer = computed(() => {
-    const value = this.value();
+
+  /**
+   * Property hasAnswer
+   *
+   * @description
+   * Whether the question has an answer.
+   *
+   * @type {Signal<boolean>}
+   * @readonly
+   */
+  public readonly hasAnswer: Signal<boolean> = computed(() => {
+    const value: CwQuestionValue = this.value();
     return Array.isArray(value) ? value.length > 0 : value !== null && value !== '';
   });
-  /** Whether the choices are disabled. */
-  readonly isDisabled = computed(() => this.disabled() || this.formDisabled());
-  /** Whether the error shows. */
-  readonly errorVisible = computed(() => {
+
+  /**
+   * Property isDisabled
+   *
+   * @description
+   * Whether the choices are disabled.
+   *
+   * @type {Signal<boolean>}
+   * @readonly
+   */
+  public readonly isDisabled: Signal<boolean> = computed(
+    () => this.disabled() || this.formDisabled(),
+  );
+
+  /**
+   * Property errorVisible
+   *
+   * @description
+   * Whether the error shows.
+   *
+   * @type {Signal<boolean>}
+   * @readonly
+   */
+  public readonly errorVisible: Signal<boolean> = computed(() => {
     if (this.hasAnswer()) return false;
     if (this.required() && this.checkedOnce()) return true;
     if (this.invalid() && this.touched()) return true;
-    const control = this.ngControl;
+    const control: NgControl | null = this.ngControl;
     return (
       !!control && control.invalid === true && (control.touched === true || this.accessorTouched())
     );
   });
-  protected readonly visible = computed(() => {
-    const questionnaire = this.questionnaire;
+
+  /**
+   * Property visible
+   *
+   * @description
+   * Whether this question is the current questionnaire step.
+   *
+   * @type {Signal<boolean>}
+   * @readonly
+   */
+  protected readonly visible: Signal<boolean> = computed(() => {
+    const questionnaire: QuestionnaireRef | null = this.questionnaire;
     if (!questionnaire) return true;
     return !questionnaire.done() && questionnaire.indexOf(this) === questionnaire.step();
   });
+  // #endregion
 
-  constructor() {
+  // #region Constructor
+  /**
+   * Constructor
+   *
+   * @description
+   * Connects the optional forms control to this question.
+   *
+   * @constructor
+   */
+  public constructor() {
     // Reactive and template-driven forms: this question is the control's value accessor, set here
     // rather than through NG_VALUE_ACCESSOR so it can read the control's validity.
     if (this.ngControl) this.ngControl.valueAccessor = this;
   }
+  // #endregion
 
-  writeValue(value: unknown): void {
+  // #region Methods
+  /**
+   * Method writeValue
+   *
+   * @description
+   * Applies a value supplied by the form control.
+   *
+   * @param {unknown} value - Value supplied by the form control.
+   */
+  public writeValue(value: unknown): void {
     if (Array.isArray(value)) this.value.set(value.filter((item) => typeof item === 'string'));
     else this.value.set(typeof value === 'string' ? value : null);
   }
 
-  registerOnChange(fn: (value: CwQuestionValue) => void): void {
+  /**
+   * Method registerOnChange
+   *
+   * @description
+   * Registers the form value-change callback.
+   *
+   * @param {(value: CwQuestionValue) => void} fn - Callback registered by the form control.
+   */
+  public registerOnChange(fn: (value: CwQuestionValue) => void): void {
     this.onChange = fn;
   }
 
-  registerOnTouched(fn: () => void): void {
+  /**
+   * Method registerOnTouched
+   *
+   * @description
+   * Registers the form touched callback.
+   *
+   * @param {() => void} fn - Callback registered by the form control.
+   */
+  public registerOnTouched(fn: () => void): void {
     this.onTouched = fn;
   }
 
-  setDisabledState(isDisabled: boolean): void {
+  /**
+   * Method setDisabledState
+   *
+   * @description
+   * Updates the disabled state supplied by the form.
+   *
+   * @param {boolean} isDisabled - Disabled state supplied by the form.
+   */
+  public setDisabledState(isDisabled: boolean): void {
     this.formDisabled.set(isDisabled);
   }
 
-  /** Letter of a choice (« A »), or empty without shortcuts or past Z. */
-  letterOf(choice: ChoiceRef): string {
-    const index = this.choices().indexOf(choice);
+  /**
+   * Method letterOf
+   *
+   * @description
+   * Letter of a choice (« A »), or empty without shortcuts or past Z.
+   *
+   * @param {ChoiceRef} choice - Choice involved in the operation.
+   * @returns {string} Shortcut letter, or an empty string when unavailable.
+   */
+  public letterOf(choice: ChoiceRef): string {
+    const index: number = this.choices().indexOf(choice);
     if (this.activeShortcuts() !== 'letters' || index < 0 || index > 25) return '';
     return String.fromCharCode(65 + index);
   }
 
-  /** Whether a choice is part of the answer. */
-  isChecked(choice: ChoiceRef): boolean {
-    const value = this.value();
+  /**
+   * Method isChecked
+   *
+   * @description
+   * Whether a choice is part of the answer.
+   *
+   * @param {ChoiceRef} choice - Choice involved in the operation.
+   * @returns {boolean} Whether the choice is selected.
+   */
+  public isChecked(choice: ChoiceRef): boolean {
+    const value: CwQuestionValue = this.value();
     return Array.isArray(value) ? value.includes(choice.value()) : value === choice.value();
   }
 
-  /** Applies a user change of a choice. */
-  toggle(choice: ChoiceRef, checked: boolean): void {
+  /**
+   * Method toggle
+   *
+   * @description
+   * Applies a user change of a choice.
+   *
+   * @param {ChoiceRef} choice - Choice involved in the operation.
+   * @param {boolean} checked - New checked state of the choice.
+   */
+  public toggle(choice: ChoiceRef, checked: boolean): void {
     if (this.isDisabled() || choice.isDisabled()) return;
     let next: CwQuestionValue;
     if (this.type() === 'multiple') {
-      const current = Array.isArray(this.value()) ? (this.value() as readonly string[]) : [];
+      const current: readonly string[] = Array.isArray(this.value())
+        ? (this.value() as readonly string[])
+        : [];
       next = checked
         ? [...current.filter((item) => item !== choice.value()), choice.value()]
         : current.filter((item) => item !== choice.value());
@@ -181,29 +512,48 @@ export class CwQuestionnaireQuestion
     this.onChange(next);
   }
 
-  /** Marks the question touched for the forms. */
-  markTouched(): void {
+  /**
+   * Method markTouched
+   *
+   * @description
+   * Marks the question touched for the forms.
+   */
+  public markTouched(): void {
     this.accessorTouched.set(true);
     this.onTouched();
     this.touch.emit();
   }
 
-  /** Key of the question in the answers. */
-  key(index: number): string {
-    const controlName = this.ngControl?.name;
+  /**
+   * Method key
+   *
+   * @description
+   * Key of the question in the answers.
+   *
+   * @param {number} index - Question index in the questionnaire.
+   * @returns {string} Question key used in the answers.
+   */
+  public key(index: number): string {
+    const controlName: string | number | null | undefined = this.ngControl?.name;
     return this.name() || (controlName === null ? '' : String(controlName)) || String(index);
   }
 
-  /** The answer, « Autre » replaced by its typed text. */
-  answer(): string | string[] | null {
+  /**
+   * Method answer
+   *
+   * @description
+   * The answer, « Autre » replaced by its typed text.
+   * @returns {string | string[] | null} Answer value, or null when unanswered.
+   */
+  public answer(): string | string[] | null {
     if (!this.hasAnswer()) return null;
-    const replace = (value: string): string => {
-      const choice = this.choices().find((item) => item.value() === value);
+    const replace: (value: string) => string = (value: string): string => {
+      const choice: ChoiceRef | undefined = this.choices().find((item) => item.value() === value);
       return choice?.other() && choice.otherText().trim() !== ''
         ? choice.otherText().trim()
         : value;
     };
-    const value = this.value();
+    const value: CwQuestionValue = this.value();
     if (Array.isArray(value)) {
       // Answers follow the order of the choices, not the order of the clicks.
       return this.choices()
@@ -214,8 +564,14 @@ export class CwQuestionnaireQuestion
     return replace(value as string);
   }
 
-  /** Checks a required answer: shows and announces the error, focuses the first choice. */
-  validate(): boolean {
+  /**
+   * Method validate
+   *
+   * @description
+   * Checks a required answer: shows and announces the error, focuses the first choice.
+   * @returns {boolean} Whether the question has a valid required answer.
+   */
+  public validate(): boolean {
     this.checkedOnce.set(true);
     if (!this.required() || this.hasAnswer()) return true;
     void this.announcer.announce(this.errorText(), 'assertive');
@@ -225,11 +581,19 @@ export class CwQuestionnaireQuestion
     return false;
   }
 
-  /** Picks (single) or toggles (multiple) the choice of a letter key. */
-  pressLetter(key: string): boolean {
+  /**
+   * Method pressLetter
+   *
+   * @description
+   * Picks (single) or toggles (multiple) the choice of a letter key.
+   *
+   * @param {string} key - Letter key used to select a choice.
+   * @returns {boolean} Whether the letter selected or toggled a choice.
+   */
+  public pressLetter(key: string): boolean {
     if (key.length !== 1 || this.activeShortcuts() !== 'letters') return false;
-    const index = key.toUpperCase().charCodeAt(0) - 65;
-    const choice = this.choices().at(index);
+    const index: number = key.toUpperCase().charCodeAt(0) - 65;
+    const choice: ChoiceRef | undefined = this.choices().at(index);
     if (index < 0 || index > 25 || !choice || choice.isDisabled() || this.isDisabled()) {
       return false;
     }
@@ -238,15 +602,28 @@ export class CwQuestionnaireQuestion
     return true;
   }
 
-  /** Moves the focus to the legend, so the question is read first. */
-  focusTitle(): void {
+  /**
+   * Method focusTitle
+   *
+   * @description
+   * Moves the focus to the legend, so the question is read first.
+   */
+  public focusTitle(): void {
     this.host.querySelector<HTMLElement>('legend')?.focus();
   }
 
+  /**
+   * Method keydown
+   *
+   * @description
+   * Handles the keyboard shortcut for a choice.
+   *
+   * @param {KeyboardEvent} event - Browser event associated with the interaction.
+   */
   protected keydown(event: KeyboardEvent): void {
     // Inside a questionnaire the form handles the keys of its current question.
     if (this.questionnaire || event.altKey || event.ctrlKey || event.metaKey) return;
-    const target = event.target as HTMLElement;
+    const target: HTMLElement = event.target as HTMLElement;
     if (
       target.tagName === 'INPUT' &&
       !['radio', 'checkbox'].includes((target as HTMLInputElement).type)
@@ -255,4 +632,5 @@ export class CwQuestionnaireQuestion
     }
     if (this.pressLetter(event.key)) event.preventDefault();
   }
+  // #endregion
 }

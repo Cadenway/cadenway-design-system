@@ -1,10 +1,16 @@
 import { LiveAnnouncer } from '@angular/cdk/a11y';
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CwPaginationLink } from './pagination-link/pagination-link.component';
 import { CwPagination } from './pagination.component';
 
+/**
+ * Class Host
+ *
+ * @description
+ * Hosts full, simple, table and routed pagination examples.
+ */
 @Component({
   imports: [CwPagination, CwPaginationLink],
   template: `
@@ -36,33 +42,132 @@ import { CwPagination } from './pagination.component';
   `,
 })
 class Host {
-  readonly page = signal(6);
-  readonly pageSize = signal(25);
-  readonly total = signal(300);
-  readonly simplePage = signal(1);
-  readonly tablePage = signal(3);
-  readonly tableSize = signal(25);
-  readonly routed = signal(0);
+  // #region Properties
+  /**
+   * Property page
+   * @readonly
+   *
+   * @description
+   * Current page of the full pagination.
+   *
+   * @type {WritableSignal<number>}
+   */
+  public readonly page: WritableSignal<number> = signal(6);
+
+  /**
+   * Property pageSize
+   * @readonly
+   *
+   * @description
+   * Rows per page in the full pagination.
+   *
+   * @type {WritableSignal<number>}
+   */
+  public readonly pageSize: WritableSignal<number> = signal(25);
+
+  /**
+   * Property total
+   * @readonly
+   *
+   * @description
+   * Total rows in the full pagination.
+   *
+   * @type {WritableSignal<number>}
+   */
+  public readonly total: WritableSignal<number> = signal(300);
+
+  /**
+   * Property simplePage
+   * @readonly
+   *
+   * @description
+   * Current page of the simple pagination.
+   *
+   * @type {WritableSignal<number>}
+   */
+  public readonly simplePage: WritableSignal<number> = signal(1);
+
+  /**
+   * Property tablePage
+   * @readonly
+   *
+   * @description
+   * Current page of the table pagination.
+   *
+   * @type {WritableSignal<number>}
+   */
+  public readonly tablePage: WritableSignal<number> = signal(3);
+
+  /**
+   * Property tableSize
+   * @readonly
+   *
+   * @description
+   * Rows per page in the table pagination.
+   *
+   * @type {WritableSignal<number>}
+   */
+  public readonly tableSize: WritableSignal<number> = signal(25);
+
+  /**
+   * Property routed
+   * @readonly
+   *
+   * @description
+   * Number of routed link activations.
+   *
+   * @type {WritableSignal<number>}
+   */
+  public readonly routed: WritableSignal<number> = signal(0);
+  // #endregion
 }
 
+/**
+ * Function navigation
+ *
+ * @description
+ * Finds a navigation element by its accessible name.
+ *
+ * @param {HTMLElement} host - Fixture containing the navigation.
+ * @param {string} name - Accessible name of the navigation.
+ * @returns {HTMLElement} Matching navigation element.
+ */
 function navigation(host: HTMLElement, name: string): HTMLElement {
-  const found = host.querySelector<HTMLElement>(`nav[aria-label="${name}"]`);
+  const found: HTMLElement | null = host.querySelector<HTMLElement>(`nav[aria-label="${name}"]`);
   if (!found) throw new Error(`No navigation named ${name}`);
   return found;
 }
 
+/**
+ * Function button
+ *
+ * @description
+ * Finds a button by accessible name or visible text.
+ *
+ * @param {HTMLElement} container - Element containing the button.
+ * @param {string} name - Accessible name or visible text to find.
+ * @returns {HTMLButtonElement} Matching button.
+ */
 function button(container: HTMLElement, name: string): HTMLButtonElement {
-  const found = Array.from(container.querySelectorAll<HTMLButtonElement>('button')).find(
-    (element) => (element.getAttribute('aria-label') ?? element.textContent.trim()) === name,
-  );
+  const found: HTMLButtonElement | undefined = Array.from(
+    container.querySelectorAll<HTMLButtonElement>('button'),
+  ).find((element) => (element.getAttribute('aria-label') ?? element.textContent.trim()) === name);
   if (!found) throw new Error(`No button named ${name}`);
   return found;
 }
 
-/** What a screen reader lists in the navigation: button names and hidden texts. */
+/**
+ * Function listed
+ *
+ * @description
+ * Returns button names and hidden text in navigation order.
+ *
+ * @param {HTMLElement} nav - Navigation whose items are inspected.
+ * @returns {string[]} Item labels in navigation order.
+ */
 function listed(nav: HTMLElement): string[] {
   return Array.from(nav.querySelectorAll<HTMLElement>('li')).map((li) => {
-    const control = li.querySelector('button');
+    const control: HTMLButtonElement | null = li.querySelector('button');
     return control?.getAttribute('aria-label') ?? li.textContent.trim().replace(/\s+/g, ' ');
   });
 }
@@ -115,7 +220,7 @@ describe('CwPagination', () => {
   });
 
   it('goes to a page and announces it', async () => {
-    const nav = navigation(host, "Journal d'audit");
+    const nav: HTMLElement = navigation(host, "Journal d'audit");
     button(nav, 'Page 7').click();
     await fixture.whenStable();
 
@@ -130,10 +235,10 @@ describe('CwPagination', () => {
   });
 
   it('disables the buttons out of bounds and keeps the focus on a button', async () => {
-    const nav = navigation(host, "Journal d'audit");
+    const nav: HTMLElement = navigation(host, "Journal d'audit");
     component.page.set(11);
     await fixture.whenStable();
-    const next = button(nav, 'Suivant');
+    const next: HTMLButtonElement = button(nav, 'Suivant');
     next.focus();
 
     next.click();
@@ -163,13 +268,13 @@ describe('CwPagination', () => {
     component.total.set(40);
     await fixture.whenStable();
 
-    const nav = navigation(host, "Journal d'audit");
+    const nav: HTMLElement = navigation(host, "Journal d'audit");
     expect(button(nav, 'Page 2').getAttribute('aria-current')).toBe('page');
     expect(button(nav, 'Suivant').disabled).toBe(true);
   });
 
   it('reads « Page 1 sur 3 » between the labelled buttons of the simple variant', async () => {
-    const nav = navigation(host, 'Membres');
+    const nav: HTMLElement = navigation(host, 'Membres');
 
     expect(listed(nav)).toEqual(['Précédent', 'Page 1 sur 3', 'Suivant']);
     expect(button(nav, 'Précédent').disabled).toBe(true);
@@ -180,11 +285,11 @@ describe('CwPagination', () => {
   });
 
   it('shows the range, the page size and the status around the table bar', () => {
-    const bar = host.querySelectorAll<HTMLElement>('cw-pagination')[2];
+    const bar: HTMLElement = host.querySelectorAll<HTMLElement>('cw-pagination')[2];
 
     expect(bar.textContent).toContain('51–75 sur 286');
     expect(bar.textContent).toContain('Page 3 sur 12');
-    const select = bar.querySelector<HTMLElement>('[role="combobox"]');
+    const select: HTMLElement | null = bar.querySelector<HTMLElement>('[role="combobox"]');
     expect(select?.id).toBeTruthy();
     expect(bar.querySelector(`label[for="${select?.id ?? ''}"]`)?.textContent.trim()).toBe(
       'Lignes par page',
@@ -198,12 +303,12 @@ describe('CwPagination', () => {
   });
 
   it('goes back to page 1 when the page size changes', async () => {
-    const bar = host.querySelectorAll<HTMLElement>('cw-pagination')[2];
+    const bar: HTMLElement = host.querySelectorAll<HTMLElement>('cw-pagination')[2];
     bar.querySelector<HTMLElement>('[role="combobox"]')?.click();
     await fixture.whenStable();
-    const option = Array.from(document.querySelectorAll<HTMLElement>('[role="option"]')).find(
-      (element) => element.textContent.trim() === '50',
-    );
+    const option: HTMLElement | undefined = Array.from(
+      document.querySelectorAll<HTMLElement>('[role="option"]'),
+    ).find((element) => element.textContent.trim() === '50');
     option?.click();
     await fixture.whenStable();
 
@@ -214,7 +319,10 @@ describe('CwPagination', () => {
   });
 
   it('disables a routed link through aria-disabled and the tab order', () => {
-    const link = navigation(host, 'Pages routées').querySelector<HTMLAnchorElement>('a');
+    const link: HTMLAnchorElement | null = navigation(
+      host,
+      'Pages routées',
+    ).querySelector<HTMLAnchorElement>('a');
     link?.click();
 
     expect(link?.getAttribute('aria-disabled')).toBe('true');

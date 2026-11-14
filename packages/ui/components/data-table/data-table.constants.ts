@@ -1,9 +1,12 @@
-import type { CwDataTableTexts } from './data-table.types';
+import type { CwDataTableTexts, CwSortDirection } from './data-table.types';
 
 /**
- * The French texts of `cw-data-table`, word for word from the DataTable sheets and the mockup
- * (`App.dc.html`, `Organisation.dc.html`). One place, so a later `@angular/localize` extraction is
- * mechanical; the `texts` input overrides any of them (« membres » instead of « tâches »).
+ * Constant CW_DATA_TABLE_TEXTS
+ *
+ * @description
+ * The French texts of `cw-data-table`, word for word from the DataTable sheets and the mockup (`App.dc.html`, `Organisation.dc.html`). One place, so a later `@angular/localize` extraction is mechanical; the `texts` input overrides any of them (« membres » instead of « tâches »).
+ *
+ * @type {CwDataTableTexts}
  */
 export const CW_DATA_TABLE_TEXTS: CwDataTableTexts = {
   selectAll: 'Tout sélectionner sur la page',
@@ -21,7 +24,10 @@ export const CW_DATA_TABLE_TEXTS: CwDataTableTexts = {
     criteria.length === 0
       ? 'Tri retiré'
       : `Trié par ${criteria
-          .map(({ header, dir }) => `${header}, ${dir === 'asc' ? 'croissant' : 'décroissant'}`)
+          .map(
+            ({ header, dir }: { header: string; dir: CwSortDirection }) =>
+              `${header}, ${dir === 'asc' ? 'croissant' : 'décroissant'}`,
+          )
           .join(', puis par ')}`,
   groupToggled: (label, collapsed) => `Groupe ${label} ${collapsed ? 'replié' : 'déplié'}`,
   groupAdd: (label) => `Ajouter une tâche dans ${label}`,
@@ -37,5 +43,12 @@ export const CW_DATA_TABLE_TEXTS: CwDataTableTexts = {
     total === 0 ? '0 tâche' : `${String(first)}–${String(last)} sur ${String(total)} tâches`,
 };
 
-/** « Lignes par page » choices of the DataTableComplete sheet. */
+/**
+ * Constant CW_DATA_TABLE_PAGE_SIZES
+ *
+ * @description
+ * « Lignes par page » choices of the DataTableComplete sheet.
+ *
+ * @type {readonly number[]}
+ */
 export const CW_DATA_TABLE_PAGE_SIZES: readonly number[] = [25, 50, 100];

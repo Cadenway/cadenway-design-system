@@ -1,15 +1,43 @@
 /* Literal class strings shared by the parts of `cw-select` (Select sheet and preview of the Design
    System artifact), so Tailwind finds them in the compiled package. */
 
-/** A row of the listbox: hover veil, `bg-selected` when highlighted, 50 % when disabled. */
-export const OPTION =
+/**
+ * Constant OPTION
+ *
+ * @description
+ * Classes for a selectable option row.
+ *
+ * @type {string}
+ */
+export const OPTION: string =
   'relative flex cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-hidden select-none transition-colors hover:bg-accent data-highlighted:bg-selected aria-disabled:pointer-events-none aria-disabled:opacity-50 motion-reduce:transition-none [&_ng-icon]:shrink-0 [&_ng-icon]:[--ng-icon__size:1rem]';
 
-/** The entrance of a row when the panel opens; its delay is set per row (60 ms then +30 ms). */
-export const OPTION_ENTER = 'animate-item-in motion-reduce:animate-none';
+/**
+ * Constant OPTION_ENTER
+ *
+ * @description
+ * Entrance animation classes for an option.
+ *
+ * @type {string}
+ */
+export const OPTION_ENTER: string = 'animate-item-in motion-reduce:animate-none';
 
-/** The title of a group of options. */
-export const GROUP_TITLE = 'block px-2 py-1.5 text-xs font-medium text-muted-foreground';
+/**
+ * Constant GROUP_TITLE
+ *
+ * @description
+ * Classes for an option group title.
+ *
+ * @type {string}
+ */
+export const GROUP_TITLE: string = 'block px-2 py-1.5 text-xs font-medium text-muted-foreground';
 
-/** The message of an empty list. */
-export const EMPTY = 'block px-2 py-5 text-center text-sm text-muted-foreground';
+/**
+ * Constant EMPTY
+ *
+ * @description
+ * Classes for an empty select message.
+ *
+ * @type {string}
+ */
+export const EMPTY: string = 'block px-2 py-5 text-center text-sm text-muted-foreground';

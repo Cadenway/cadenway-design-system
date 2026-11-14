@@ -1,7 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { FormField, form, required } from '@angular/forms/signals';
+import { FormField, form, required, type FieldTree } from '@angular/forms/signals';
 
 import { CwQuestionnaire } from './questionnaire.component';
 import { CwQuestionnaireActions } from './questionnaire-actions/questionnaire-actions.component';
@@ -12,12 +12,37 @@ import { CwQuestionnaireQuestion } from './questionnaire-question/questionnaire-
 import { CwQuestionnaireTitle } from './questionnaire-title/questionnaire-title.directive';
 import type { CwQuestionnaireAnswers } from './questionnaire.types';
 
+/**
+ * Function present
+ *
+ * @description
+ * Requires a fixture value and throws when it is absent.
+ *
+ * @param {T | null | undefined} value - Optional fixture value to require.
+ * @returns {T} The value when present.
+ */
 function present<T>(value: T | null | undefined): T {
   if (value === null || value === undefined) throw new Error('Missing element');
   return value;
 }
 
-const PARTS = [
+/**
+ * Constant PARTS
+ *
+ * @description
+ * Questionnaire components used by the complete form fixture.
+ *
+ * @type {typeof PARTS}
+ */
+const PARTS: (
+  | typeof CwQuestionnaire
+  | typeof CwQuestionnaireActions
+  | typeof CwQuestionnaireChoice
+  | typeof CwQuestionnaireDone
+  | typeof CwQuestionnaireProgress
+  | typeof CwQuestionnaireQuestion
+  | typeof CwQuestionnaireTitle
+)[] = [
   CwQuestionnaire,
   CwQuestionnaireActions,
   CwQuestionnaireChoice,
@@ -27,12 +52,27 @@ const PARTS = [
   CwQuestionnaireTitle,
 ];
 
-const QUESTION_PARTS = [CwQuestionnaireChoice, CwQuestionnaireQuestion, CwQuestionnaireTitle];
+/**
+ * Constant QUESTION_PARTS
+ *
+ * @description
+ * Question and choice components used by form-control fixtures.
+ *
+ * @type {typeof QUESTION_PARTS}
+ */
+const QUESTION_PARTS: (
+  typeof CwQuestionnaireChoice | typeof CwQuestionnaireQuestion | typeof CwQuestionnaireTitle
+)[] = [CwQuestionnaireChoice, CwQuestionnaireQuestion, CwQuestionnaireTitle];
 
+/**
+ * Component Host
+ *
+ * @description
+ * Hosts the questionnaire and captures its answers.
+ */
 @Component({
   imports: PARTS,
   template: `
-    <!-- eslint-disable @angular-eslint/template/label-has-associated-control -- the choice renders its native input -->
     <form cwQuestionnaire title="Signaler un bug" [(step)]="step" (submitted)="answers.set($event)">
       <cw-questionnaire-progress />
       <fieldset cwQuestionnaireQuestion name="type" required>
@@ -53,27 +93,89 @@ const QUESTION_PARTS = [CwQuestionnaireChoice, CwQuestionnaireQuestion, CwQuesti
   `,
 })
 class Host {
-  readonly step = signal(0);
-  readonly otherView = signal('');
-  readonly answers = signal<CwQuestionnaireAnswers | null>(null);
+  // #region Properties
+  /**
+   * Property step
+   *
+   * @description
+   * Current questionnaire step controlled by the fixture.
+   *
+   * @type {WritableSignal<number>}
+   * @readonly
+   */
+  public readonly step: WritableSignal<number> = signal(0);
+
+  /**
+   * Property otherView
+   *
+   * @description
+   * Free-form text for the other choice.
+   *
+   * @type {WritableSignal<string>}
+   * @readonly
+   */
+  public readonly otherView: WritableSignal<string> = signal('');
+
+  /**
+   * Property answers
+   *
+   * @description
+   * Submitted answers captured by the fixture.
+   *
+   * @type {WritableSignal<CwQuestionnaireAnswers | null>}
+   * @readonly
+   */
+  public readonly answers: WritableSignal<CwQuestionnaireAnswers | null> =
+    signal<CwQuestionnaireAnswers | null>(null);
+  // #endregion
 }
 
+/**
+ * Function radio
+ *
+ * @description
+ * Finds a choice input by its label.
+ *
+ * @param {HTMLElement} host - Fixture containing the requested control.
+ * @param {string} name - Visible label to match.
+ * @returns {HTMLInputElement} Matching choice input.
+ */
 function radio(host: HTMLElement, name: string): HTMLInputElement {
-  const found = Array.from(
+  const found: HTMLInputElement | undefined = Array.from(
     host.querySelectorAll<HTMLInputElement>('input[type="radio"], input[type="checkbox"]'),
-  ).find((input) => input.closest('label')?.textContent.includes(name));
+  ).find((input: HTMLInputElement) => input.closest('label')?.textContent.includes(name));
   if (!found) throw new Error(`No choice named ${name}`);
   return found;
 }
 
+/**
+ * Function button
+ *
+ * @description
+ * Finds a visible button by its text.
+ *
+ * @param {HTMLElement} host - Fixture containing the requested control.
+ * @param {string} name - Visible label to match.
+ * @returns {HTMLButtonElement} Matching visible button.
+ */
 function button(host: HTMLElement, name: string): HTMLButtonElement {
-  const found = Array.from(host.querySelectorAll('button')).find(
-    (element) => element.textContent.trim() === name && !element.closest('[hidden]'),
+  const found: HTMLButtonElement | undefined = Array.from(host.querySelectorAll('button')).find(
+    (element: HTMLButtonElement) =>
+      element.textContent.trim() === name && !element.closest('[hidden]'),
   );
   if (!found) throw new Error(`No button named ${name}`);
   return found;
 }
 
+/**
+ * Function key
+ *
+ * @description
+ * Dispatches a keyboard event to a fixture element.
+ *
+ * @param {HTMLElement} target - Element receiving the keyboard event.
+ * @param {string} value - Keyboard key to dispatch.
+ */
 function key(target: HTMLElement, value: string): void {
   target.dispatchEvent(
     new KeyboardEvent('keydown', { key: value, bubbles: true, cancelable: true }),
@@ -93,8 +195,8 @@ describe('CwQuestionnaire', () => {
   });
 
   it('shows one question at a time with its progress', () => {
-    const [first, second] = Array.from(host.querySelectorAll('fieldset'));
-    const bar = host.querySelector('[role="progressbar"]');
+    const [first, second]: HTMLFieldSetElement[] = Array.from(host.querySelectorAll('fieldset'));
+    const bar: Element | null = host.querySelector('[role="progressbar"]');
 
     expect(first.hidden).toBe(false);
     expect(second.hidden).toBe(true);
@@ -106,7 +208,7 @@ describe('CwQuestionnaire', () => {
     button(host, 'Suivant').click();
     await fixture.whenStable();
 
-    const fieldset = present(host.querySelector('fieldset'));
+    const fieldset: HTMLFieldSetElement = present(host.querySelector('fieldset'));
     expect(component.step()).toBe(0);
     expect(fieldset.getAttribute('aria-invalid')).toBe('true');
     expect(host.textContent).toContain('Choisissez une réponse pour continuer.');
@@ -159,10 +261,15 @@ describe('CwQuestionnaire', () => {
   });
 
   it('is the value accessor of a reactive control', async () => {
+    /**
+     * Component ReactiveHost
+     *
+     * @description
+     * Hosts a question bound to a reactive form control.
+     */
     @Component({
       imports: [...QUESTION_PARTS, ReactiveFormsModule],
       template: `
-        <!-- eslint-disable @angular-eslint/template/label-has-associated-control -- the choice renders its native input -->
         <fieldset cwQuestionnaireQuestion [formControl]="severity">
           <legend cwQuestionnaireTitle>Quelle gravité ?</legend>
           <label cwQuestionnaireChoice value="blocking">Bloquant</label>
@@ -171,12 +278,25 @@ describe('CwQuestionnaire', () => {
       `,
     })
     class ReactiveHost {
-      readonly severity = new FormControl<string | null>('minor');
+      // #region Properties
+      /**
+       * Property severity
+       *
+       * @description
+       * Reactive form control bound to the question.
+       *
+       * @type {FormControl<string | null>}
+       * @readonly
+       */
+      public readonly severity: FormControl<string | null> = new FormControl<string | null>(
+        'minor',
+      );
+      // #endregion
     }
 
-    const reactive = TestBed.createComponent(ReactiveHost);
+    const reactive: ComponentFixture<ReactiveHost> = TestBed.createComponent(ReactiveHost);
     reactive.autoDetectChanges();
-    const element = reactive.nativeElement as HTMLElement;
+    const element: HTMLElement = reactive.nativeElement as HTMLElement;
     expect(radio(element, 'Mineur').checked).toBe(true);
 
     radio(element, 'Bloquant').click();
@@ -189,10 +309,15 @@ describe('CwQuestionnaire', () => {
   });
 
   it('is a Signal Forms value control', async () => {
+    /**
+     * Component SignalHost
+     *
+     * @description
+     * Hosts a question bound to a Signal Forms field.
+     */
     @Component({
       imports: [...QUESTION_PARTS, FormField],
       template: `
-        <!-- eslint-disable @angular-eslint/template/label-has-associated-control -- the choice renders its native input -->
         <fieldset cwQuestionnaireQuestion type="multiple" [formField]="request.views">
           <legend cwQuestionnaireTitle>Quelles vues ?</legend>
           <label cwQuestionnaireChoice value="list">Liste</label>
@@ -201,15 +326,41 @@ describe('CwQuestionnaire', () => {
       `,
     })
     class SignalHost {
-      readonly model = signal<{ views: readonly string[] }>({ views: ['board'] });
-      readonly request = form(this.model, (path) => {
-        required(path.views);
-      });
+      // #region Properties
+      /**
+       * Property model
+       *
+       * @description
+       * Model containing selected views.
+       *
+       * @type {WritableSignal<{ views: readonly string[]; }>}
+       * @readonly
+       */
+      public readonly model: WritableSignal<{ views: readonly string[] }> = signal<{
+        views: readonly string[];
+      }>({ views: ['board'] });
+
+      /**
+       * Property request
+       *
+       * @description
+       * Signal Forms field tree derived from the model.
+       *
+       * @type {FieldTree<{ views: readonly string[] }>}
+       * @readonly
+       */
+      public readonly request: FieldTree<{ views: readonly string[] }> = form(
+        this.model,
+        (path) => {
+          required(path.views);
+        },
+      );
+      // #endregion
     }
 
-    const signalHost = TestBed.createComponent(SignalHost);
+    const signalHost: ComponentFixture<SignalHost> = TestBed.createComponent(SignalHost);
     signalHost.autoDetectChanges();
-    const element = signalHost.nativeElement as HTMLElement;
+    const element: HTMLElement = signalHost.nativeElement as HTMLElement;
     expect(radio(element, 'Tableau').checked).toBe(true);
 
     radio(element, 'Liste').click();

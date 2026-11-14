@@ -10,41 +10,169 @@ import {
 
 import { ɵafterExitAnimation } from '../motion/exit-animation';
 
-/* Backdrop of every modal (Dialog sheet): it replaces any shadow, fades in and out. */
-const MODAL_BACKDROP =
+/**
+ * Constant MODAL_BACKDROP
+ *
+ * @description
+ * Backdrop classes for modal overlays, including entrance, exit and reduced-motion states.
+ * The Dialog sheet uses this backdrop in place of a shadow.
+ *
+ * @type {string}
+ */
+const MODAL_BACKDROP: string =
   'bg-black/30 dark:bg-black/60 animate-fade-in motion-reduce:animate-none data-[state=closed]:animate-fade-out motion-reduce:data-[state=closed]:animate-none';
 
-// A trigger inside the panel whose popup (menu, listbox, combobox, date picker) is open: Escape
-// closes that popup first (integration guide: one menu open at a time, Escape closes the innermost).
-const OPEN_POPUP =
+/**
+ * Constant OPEN_POPUP
+ *
+ * @description
+ * Selector for an expanded popup trigger inside the modal. The integration guide gives the
+ * innermost open popup precedence when Escape is pressed.
+ *
+ * @type {string}
+ */
+const OPEN_POPUP: string =
   '[aria-expanded="true"][aria-haspopup]:not([aria-haspopup="false"]), [role="combobox"][aria-expanded="true"]';
 
-// Longest exit animation of the tokens (`pop-out` 180 ms, `fade-out` 180 ms) plus a margin: the
-// overlay is disposed even when `animationend` never comes (tab in the background).
-const EXIT_FALLBACK_MS = 300;
+/**
+ * Constant EXIT_FALLBACK_MS
+ *
+ * @description
+ * Timeout in milliseconds after the longest token exit animation plus a margin, so a missing
+ * animation event cannot keep a modal open indefinitely.
+ *
+ * @type {number}
+ */
+const EXIT_FALLBACK_MS: number = 300;
 
 /**
- * What `ɵModalOverlay.attach` needs to open a panel template as a modal.
+ * Interface ɵModalOverlayConfig
+ * @interface ɵModalOverlayConfig
+ *
+ * @description
+ * Configuration required by `ɵModalOverlay.attach` to open a panel template as a modal.
  *
  * Shared across the entry points of `@cadenway/ui`; not public API (`ɵ` prefix).
  */
 export interface ɵModalOverlayConfig {
+  // #region Properties
+  /**
+   * Property role
+   * @readonly
+   *
+   * @description
+   * Accessible role assigned to the modal container.
+   *
+   * @type {'dialog' | 'alertdialog'}
+   */
   readonly role: 'dialog' | 'alertdialog';
+
+  /**
+   * Property template
+   * @readonly
+   *
+   * @description
+   * Panel template rendered within the modal container.
+   *
+   * @type {TemplateRef<unknown>}
+   */
   readonly template: TemplateRef<unknown>;
+
+  /**
+   * Property viewContainerRef
+   * @readonly
+   *
+   * @description
+   * View container of the component that declares the panel template.
+   *
+   * @type {ViewContainerRef}
+   */
   readonly viewContainerRef: ViewContainerRef;
+
+  /**
+   * Property labelledBy
+   * @readonly
+   *
+   * @description
+   * Identifier of the element that provides the modal's accessible name.
+   *
+   * @type {string}
+   */
   readonly labelledBy: string;
+
+  /**
+   * Property describedBy
+   * @readonly
+   *
+   * @description
+   * Identifier of the modal description, or null when no description is associated.
+   *
+   * @type {string | null}
+   */
   readonly describedBy: string | null;
-  /** `first-tabbable`, or a CSS selector of the element focused on open. */
+
+  /**
+   * Property autoFocus
+   * @readonly
+   *
+   * @description
+   * `first-tabbable` or a CSS selector identifying the element focused on open.
+   *
+   * @type {string}
+   */
   readonly autoFocus: string;
-  /** The element focused on close; the element focused before opening when null. */
+
+  /**
+   * Property restoreFocus
+   * @readonly
+   *
+   * @description
+   * Element focused on close, or null to restore the element focused before opening.
+   *
+   * @type {HTMLElement | null}
+   */
   readonly restoreFocus: HTMLElement | null;
+
+  /**
+   * Property onKeydown
+   * @readonly
+   *
+   * @description
+   * Receives keyboard events from the modal so its owner can decide how to handle Escape.
+   *
+   * @type {(event: KeyboardEvent) => void}
+   */
   readonly onKeydown: (event: KeyboardEvent) => void;
+
+  /**
+   * Property onBackdropClick
+   * @readonly
+   *
+   * @description
+   * Notifies the owner of a backdrop click; the owner decides whether to close the modal.
+   *
+   * @type {() => void}
+   */
   readonly onBackdropClick: () => void;
-  /** The overlay was closed from outside (navigation, `Dialog.closeAll`). */
+
+  /**
+   * Property onExternalClose
+   * @readonly
+   *
+   * @description
+   * Notifies the owner when the overlay closes externally, for example during navigation.
+   *
+   * @type {() => void}
+   */
   readonly onExternalClose: () => void;
+  // #endregion
 }
 
 /**
+ * Class ɵModalOverlay
+ * @class ɵModalOverlay
+ *
+ * @description
  * The CDK Dialog life cycle behind the panel of `cw-dialog` and `cw-alert-dialog`: opens a template
  * as a modal (focus trap, scroll block, backdrop, `aria-hidden` on the rest of the page, focus
  * returned on close), plays the exit animation before the overlay is disposed, and tells whether an
@@ -56,28 +184,93 @@ export interface ɵModalOverlayConfig {
  */
 @Service({ autoProvided: false })
 export class ɵModalOverlay {
-  private readonly dialog = inject(Dialog);
-  private readonly injector = inject(Injector);
-  private ref: DialogRef | null = null;
-  private leaving = false;
+  // #region Properties
+  /**
+   * Property dialog
+   * @readonly
+   *
+   * @description
+   * CDK dialog service used to create modal overlays.
+   *
+   * @type {Dialog}
+   */
+  private readonly dialog: Dialog = inject(Dialog);
 
-  /** Whether a modal is open, exit animation included. */
-  get attached(): boolean {
+  /**
+   * Property injector
+   * @readonly
+   *
+   * @description
+   * Injector used to schedule the exit-animation wait after the next render.
+   *
+   * @type {Injector}
+   */
+  private readonly injector: Injector = inject(Injector);
+
+  /**
+   * Property ref
+   *
+   * @description
+   * Current CDK dialog reference, or null when no modal is open.
+   *
+   * @type {DialogRef | null}
+   */
+  private ref: DialogRef | null = null;
+
+  /**
+   * Property leaving
+   *
+   * @description
+   * Whether an exit animation has already been requested for the current modal.
+   *
+   * @type {boolean}
+   * @default false
+   */
+  private leaving: boolean = false;
+
+  /**
+   * Property attached
+   *
+   * @description
+   * Whether a modal is open, including while its exit animation runs.
+   *
+   * @type {boolean}
+   * @returns {boolean} Whether a modal remains attached.
+   */
+  public get attached(): boolean {
     return this.ref !== null;
   }
 
-  /** The panel element: the first element of the CDK dialog container. */
-  get panel(): HTMLElement | null {
+  /**
+   * Property panel
+   *
+   * @description
+   * First element of the CDK dialog container, or null when no such panel is present.
+   *
+   * @type {HTMLElement | null}
+   * @returns {HTMLElement | null} Modal panel, or null when it is absent.
+   */
+  public get panel(): HTMLElement | null {
     return (
       this.ref?.overlayRef.overlayElement.querySelector<HTMLElement>('.cdk-dialog-container > *') ??
       null
     );
   }
+  // #endregion
 
-  /** Opens the template as a modal; does nothing while one is open. */
-  attach(config: ɵModalOverlayConfig): void {
+  // #region Methods
+  /**
+   * Method attach
+   * @method attach
+   *
+   * @description
+   * Opens the configured template as a modal; does nothing while another modal is attached.
+   *
+   * @param {ɵModalOverlayConfig} config - Template, accessibility attributes and owner callbacks.
+   */
+  public attach(config: ɵModalOverlayConfig): void {
     if (this.ref) return;
-    const ref = this.dialog.open(config.template, {
+    const ref: DialogRef = this.dialog.open(config.template, {
       role: config.role,
       ariaModal: true,
       ariaLabelledBy: config.labelledBy,
@@ -105,25 +298,40 @@ export class ɵModalOverlay {
   }
 
   /**
+   * Method escapeBelongsElsewhere
+   * @method escapeBelongsElsewhere
+   *
+   * @description
    * Whether Escape belongs to something else than the modal: a handler already took it, it comes
    * from another overlay (a menu opened from the dialog), or a popup opened inside the panel is
    * still expanded.
+   *
+   * @param {KeyboardEvent} event - Escape key event received by the modal owner.
+   *
+   * @returns {boolean} Whether the modal should leave the event to another handler or popup.
    */
-  escapeBelongsElsewhere(event: KeyboardEvent): boolean {
+  public escapeBelongsElsewhere(event: KeyboardEvent): boolean {
     if (event.defaultPrevented || !this.ref) return true;
-    const pane = this.ref.overlayRef.overlayElement;
-    const target = event.target instanceof Element ? event.target : null;
-    const targetPane = target?.closest('.cdk-overlay-pane');
+    const pane: HTMLElement = this.ref.overlayRef.overlayElement;
+    const target: Element | null = event.target instanceof Element ? event.target : null;
+    const targetPane: Element | null | undefined = target?.closest('.cdk-overlay-pane');
     if (targetPane && targetPane !== pane) return true;
     return pane.querySelector(OPEN_POPUP) !== null;
   }
 
   /**
+   * Method detach
+   * @method detach
+   *
+   * @description
    * Plays the exit animation (the owner has already set `data-state="closed"` on its panel), then
    * disposes the overlay and calls `done`. Immediate under reduced motion or without animation.
+   *
+   * @param {() => void} done - Callback invoked once the overlay is closed.
+   * @param {'keyboard' | 'mouse'} [focusOrigin] - Origin passed to CDK focus restoration when set.
    */
-  detach(done: () => void, focusOrigin?: 'keyboard' | 'mouse'): void {
-    const ref = this.ref;
+  public detach(done: () => void, focusOrigin?: 'keyboard' | 'mouse'): void {
+    const ref: DialogRef | null = this.ref;
     if (!ref || this.leaving) return;
     this.leaving = true;
     ref.overlayRef.backdropElement?.setAttribute('data-state', 'closed');
@@ -145,11 +353,18 @@ export class ɵModalOverlay {
     );
   }
 
-  /** Closes at once, without animation (the owner is destroyed). */
-  dispose(): void {
-    const ref = this.ref;
+  /**
+   * Method dispose
+   * @method dispose
+   *
+   * @description
+   * Closes the current overlay immediately without an animation, such as when its owner is destroyed.
+   */
+  public dispose(): void {
+    const ref: DialogRef | null = this.ref;
     this.ref = null;
     this.leaving = false;
     ref?.close();
   }
+  // #endregion
 }

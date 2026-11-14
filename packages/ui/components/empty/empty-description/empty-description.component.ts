@@ -1,6 +1,12 @@
 import { Component } from '@angular/core';
 
-/** One sentence under the title: why, and the way out. */
+/**
+ * Class CwEmptyDescription
+ * @class CwEmptyDescription
+ *
+ * @description
+ * Presents a sentence under the title explaining the absence and a way forward.
+ */
 @Component({
   selector: 'cw-empty-description',
   host: { class: 'block text-sm/relaxed text-muted-foreground' },

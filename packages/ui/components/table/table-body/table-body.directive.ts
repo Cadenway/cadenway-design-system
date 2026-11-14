@@ -1,6 +1,12 @@
 import { Directive } from '@angular/core';
 
-/** The body of a table: rows separated by rules, none under the last one. */
+/**
+ * Class CwTableBody
+ * @class CwTableBody
+ *
+ * @description
+ * Styles the table body with row separators, omitting the last row's rule.
+ */
 @Directive({
   selector: 'tbody[cwTableBody]',
   host: { class: '[&_tr:last-child]:border-0' },

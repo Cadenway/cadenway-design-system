@@ -1,14 +1,40 @@
-/** Whether one section opens at a time (`single`) or each one on its own (`multiple`). */
+/**
+ * Type CwAccordionType
+ *
+ * @description
+ * Whether one accordion section opens at a time or sections open independently.
+ *
+ * @type {'single' | 'multiple'}
+ */
 export type CwAccordionType = 'single' | 'multiple';
 
-/** Look of an accordion: sections separated by rules (`default`) or framed as one card (`card`). */
+/**
+ * Type CwAccordionVariant
+ *
+ * @description
+ * Accordion appearance: sections separated by rules or framed together as one card.
+ *
+ * @type {'default' | 'card'}
+ */
 export type CwAccordionVariant = 'default' | 'card';
 
 /**
+ * Type CwAccordionValue
+ *
+ * @description
  * The open section(s) of an accordion, by their `value`: one value (or `null`) in `single`, the list
  * of values in `multiple`. Either form is read in both modes; each mode writes its own.
+ *
+ * @type {string | string[] | null}
  */
 export type CwAccordionValue = string | string[] | null;
 
-/** Open or closed, as the `data-state` hook of a section and its parts carries it. */
+/**
+ * Type CwAccordionState
+ *
+ * @description
+ * Open or closed state exposed by an accordion section and its parts through `data-state`.
+ *
+ * @type {'open' | 'closed'}
+ */
 export type CwAccordionState = 'open' | 'closed';

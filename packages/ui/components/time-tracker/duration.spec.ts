@@ -1,6 +1,14 @@
 import { formatDuration, parseDuration } from './duration';
 
-const MINUTE = 60_000;
+/**
+ * Constant MINUTE
+ *
+ * @description
+ * Number of milliseconds in one minute.
+ *
+ * @type {number}
+ */
+const MINUTE: number = 60_000;
 
 describe('parseDuration', () => {
   it.each([

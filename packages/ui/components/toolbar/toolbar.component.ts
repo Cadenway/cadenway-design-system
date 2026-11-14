@@ -17,6 +17,10 @@ import {
   signal,
   untracked,
   viewChild,
+  type InputSignal,
+  type OutputEmitterRef,
+  type Signal,
+  type WritableSignal,
 } from '@angular/core';
 import { ɵnavigateList } from '@cadenway/ui/core';
 
@@ -35,20 +39,53 @@ import type { CwToolbarSize } from './toolbar.types';
    no border, no shadow; 8 px between controls (`sm`: 6 px). `w-full min-w-0`: the bar takes the
    width of its container, never its content's, which is how the overflow measure sees that
    something does not fit. */
+/**
+ * Constant SIZES
+ *
+ * @description
+ * Layout and gap classes for each toolbar size.
+ *
+ * @type {Record<CwToolbarSize, string>}
+ */
 const SIZES: Record<CwToolbarSize, string> = {
   default: 'flex w-full min-w-0 items-center gap-2',
   sm: 'flex w-full min-w-0 items-center gap-1.5',
 };
 
+/**
+ * Function isHidden
+ *
+ * @description
+ * Checks whether an element is hidden by an inline display style.
+ *
+ * @param {Element | null} element - Element to inspect, or null.
+ *
+ * @returns {boolean} Whether an inline style hides the element.
+ */
 function isHidden(element: Element | null): boolean {
   return element instanceof HTMLElement && element.style.display === 'none';
 }
 
+/**
+ * Function inDocumentOrder
+ *
+ * @description
+ * Orders toolbar controls by their position in the document.
+ *
+ * @param {ToolbarItemHandle} a - First toolbar control.
+ * @param {ToolbarItemHandle} b - Second toolbar control.
+ *
+ * @returns {number} Ordering value based on document position.
+ */
 function inDocumentOrder(a: ToolbarItemHandle, b: ToolbarItemHandle): number {
   return a.element.compareDocumentPosition(b.element) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
 }
 
 /**
+ * Class CwToolbar
+ * @class CwToolbar
+ *
+ * @description
  * The row of controls above a view: filters, sort, grouping, view switch, search and the primary
  * action, all of one height (Toolbar sheet of the Design System artifact).
  *
@@ -86,47 +123,292 @@ function inDocumentOrder(a: ToolbarItemHandle, b: ToolbarItemHandle): number {
   templateUrl: './toolbar.component.html',
 })
 export class CwToolbar implements ToolbarHandle {
-  /** Accessible name of the bar (« Vue Liste »). */
-  readonly ariaLabel = input.required<string>();
-  /** Common height: gaps and separators of the bar, size of the « Plus » button. */
-  readonly size = input<CwToolbarSize>('default');
-  /** Accessible name of the « Plus » button and of its menu. */
-  readonly overflowLabel = input('Plus d’options');
-  /** Emitted with the number of controls in the « Plus » menu each time it changes. */
-  readonly overflowChange = output<number>();
+  // #region Properties
+  /**
+   * Property ariaLabel
+   * @readonly
+   *
+   * @description
+   * Accessible name of the bar (« Vue Liste »).
+   *
+   * @type {InputSignal<string>}
+   */
+  public readonly ariaLabel: InputSignal<string> = input.required<string>();
 
-  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
-  private readonly injector = inject(Injector);
-  private readonly document = inject(DOCUMENT);
-  private readonly directionality = inject(Directionality, { optional: true });
+  /**
+   * Property size
+   * @readonly
+   *
+   * @description
+   * Common height: gaps and separators of the bar, size of the « Plus » button.
+   *
+   * @type {InputSignal<CwToolbarSize>}
+   */
+  public readonly size: InputSignal<CwToolbarSize> = input<CwToolbarSize>('default');
 
-  private readonly contentItems = contentChildren(CW_TOOLBAR_ITEM, { descendants: true });
-  private readonly groups = contentChildren(CwToolbarGroup, { descendants: true });
-  private readonly separators = contentChildren(CwToolbarSeparator, { descendants: true });
-  private readonly projectedOverflow = contentChildren(CwToolbarOverflow, { descendants: true });
-  private readonly defaultOverflow = viewChild(CwToolbarOverflow);
+  /**
+   * Property overflowLabel
+   * @readonly
+   *
+   * @description
+   * Accessible name of the « Plus » button and of its menu.
+   *
+   * @type {InputSignal<string>}
+   */
+  public readonly overflowLabel: InputSignal<string> = input('Plus d’options');
 
-  protected readonly needsDefaultOverflow = computed(() => this.projectedOverflow().length === 0);
+  /**
+   * Property overflowChange
+   * @readonly
+   *
+   * @description
+   * Emitted with the number of controls in the « Plus » menu each time it changes.
+   *
+   * @type {OutputEmitterRef<number>}
+   */
+  public readonly overflowChange: OutputEmitterRef<number> = output<number>();
 
-  /** Every control of the arrow navigation, in the order of the bar. */
-  private readonly items = computed(() => {
-    const own = this.defaultOverflow();
+  /**
+   * Property element
+   * @readonly
+   *
+   * @description
+   * Native toolbar element used for measurement.
+   *
+   * @type {HTMLElement}
+   */
+  private readonly element: HTMLElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+
+  /**
+   * Property injector
+   * @readonly
+   *
+   * @description
+   * Injector used to schedule layout after rendering.
+   *
+   * @type {Injector}
+   */
+  private readonly injector: Injector = inject(Injector);
+
+  /**
+   * Property document
+   * @readonly
+   *
+   * @description
+   * Document supplying the current browser view.
+   *
+   * @type {Document}
+   */
+  private readonly document: Document = inject(DOCUMENT);
+
+  /**
+   * Property directionality
+   * @readonly
+   *
+   * @description
+   * Optional writing direction for keyboard navigation.
+   *
+   * @type {Directionality | null}
+   */
+  private readonly directionality: Directionality | null = inject(Directionality, {
+    optional: true,
+  });
+
+  /**
+   * Property contentItems
+   * @readonly
+   *
+   * @description
+   * Projected toolbar controls.
+   *
+   * @type {Signal<readonly ToolbarItemHandle[]>}
+   */
+  private readonly contentItems: Signal<readonly ToolbarItemHandle[]> = contentChildren(
+    CW_TOOLBAR_ITEM,
+    { descendants: true },
+  );
+
+  /**
+   * Property groups
+   * @readonly
+   *
+   * @description
+   * Projected toolbar groups.
+   *
+   * @type {Signal<readonly CwToolbarGroup[]>}
+   */
+  private readonly groups: Signal<readonly CwToolbarGroup[]> = contentChildren(CwToolbarGroup, {
+    descendants: true,
+  });
+
+  /**
+   * Property separators
+   * @readonly
+   *
+   * @description
+   * Projected toolbar separators.
+   *
+   * @type {Signal<readonly CwToolbarSeparator[]>}
+   */
+  private readonly separators: Signal<readonly CwToolbarSeparator[]> = contentChildren(
+    CwToolbarSeparator,
+    { descendants: true },
+  );
+
+  /**
+   * Property projectedOverflow
+   * @readonly
+   *
+   * @description
+   * Overflow controls supplied by the consumer.
+   *
+   * @type {Signal<readonly CwToolbarOverflow[]>}
+   */
+  private readonly projectedOverflow: Signal<readonly CwToolbarOverflow[]> = contentChildren(
+    CwToolbarOverflow,
+    { descendants: true },
+  );
+
+  /**
+   * Property defaultOverflow
+   * @readonly
+   *
+   * @description
+   * Default overflow control rendered when none is projected.
+   *
+   * @type {Signal<CwToolbarOverflow | undefined>}
+   */
+  private readonly defaultOverflow: Signal<CwToolbarOverflow | undefined> =
+    viewChild(CwToolbarOverflow);
+
+  /**
+   * Property needsDefaultOverflow
+   * @readonly
+   *
+   * @description
+   * Whether a default overflow control is needed.
+   *
+   * @type {Signal<boolean>}
+   */
+  protected readonly needsDefaultOverflow: Signal<boolean> = computed(
+    () => this.projectedOverflow().length === 0,
+  );
+
+  /**
+   * Property items
+   * @readonly
+   *
+   * @description
+   * Navigable controls in document order.
+   *
+   * @type {Signal<ToolbarItemHandle[]>}
+   */
+  private readonly items: Signal<ToolbarItemHandle[]> = computed(() => {
+    const own: CwToolbarOverflow | undefined = this.defaultOverflow();
     return [...this.contentItems(), ...(own ? [own] : [])].sort(inDocumentOrder);
   });
 
-  private readonly hiddenItems = signal<readonly ToolbarItemHandle[]>([]);
-  /** The controls in the « Plus » menu, in the order of the bar. Not public API. */
-  readonly overflowItems = this.hiddenItems.asReadonly();
-  protected readonly overflowCount = computed(() => this.hiddenItems().length);
+  /**
+   * Property hiddenItems
+   * @readonly
+   *
+   * @description
+   * Controls currently moved into the overflow menu.
+   *
+   * @type {WritableSignal<readonly ToolbarItemHandle[]>}
+   */
+  private readonly hiddenItems: WritableSignal<readonly ToolbarItemHandle[]> = signal<
+    readonly ToolbarItemHandle[]
+  >([]);
 
-  protected readonly classes = computed(() => SIZES[this.size()]);
+  /**
+   * Property overflowItems
+   * @readonly
+   *
+   * @description
+   * Overflow controls exposed to the menu in toolbar order.
+   *
+   * @type {Signal<readonly ToolbarItemHandle[]>}
+   */
+  public readonly overflowItems: Signal<readonly ToolbarItemHandle[]> =
+    this.hiddenItems.asReadonly();
 
-  private readonly keyManager = new FocusKeyManager(this.items, this.injector).withWrap();
-  private readonly tabStop = signal<ToolbarItemHandle | null>(null);
+  /**
+   * Property overflowCount
+   * @readonly
+   *
+   * @description
+   * Number of overflowed controls.
+   *
+   * @type {Signal<number>}
+   */
+  protected readonly overflowCount: Signal<number> = computed(() => this.hiddenItems().length);
+
+  /**
+   * Property classes
+   * @readonly
+   *
+   * @description
+   * Toolbar layout classes for the selected size.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly classes: Signal<string> = computed(() => SIZES[this.size()]);
+
+  /**
+   * Property keyManager
+   * @readonly
+   *
+   * @description
+   * Keyboard manager for toolbar controls.
+   *
+   * @type {FocusKeyManager<ToolbarItemHandle>}
+   */
+  private readonly keyManager: FocusKeyManager<ToolbarItemHandle> =
+    new FocusKeyManager<ToolbarItemHandle>(this.items, this.injector).withWrap();
+
+  /**
+   * Property tabStop
+   * @readonly
+   *
+   * @description
+   * Last focused control for the roving tab stop.
+   *
+   * @type {WritableSignal<ToolbarItemHandle | null>}
+   */
+  private readonly tabStop: WritableSignal<ToolbarItemHandle | null> =
+    signal<ToolbarItemHandle | null>(null);
+
+  /**
+   * Property observer
+   *
+   * @description
+   * Observer that triggers overflow measurement.
+   *
+   * @type {ResizeObserver | null}
+   */
   private observer: ResizeObserver | null = null;
-  private lastCount = 0;
 
-  constructor() {
+  /**
+   * Property lastCount
+   *
+   * @description
+   * Previously emitted overflow count.
+   *
+   * @type {number}
+   */
+  private lastCount: number = 0;
+  // #endregion
+
+  // #region Constructor
+  /**
+   * Constructor
+   * @constructor
+   *
+   * @description
+   * Installs focus synchronization, resize observation and overflow updates.
+   */
+  public constructor() {
     // Roving tabindex: written after every render, so it wins over a `tabindex` set by the
     // controls' own bindings, and follows the controls that get disabled or hidden.
     afterEveryRender({
@@ -136,7 +418,7 @@ export class CwToolbar implements ToolbarHandle {
     });
 
     afterNextRender(() => {
-      const view = this.document.defaultView;
+      const view: (Window & typeof globalThis) | null = this.document.defaultView;
       if (!view || typeof view.ResizeObserver !== 'function') return;
       this.observer = new view.ResizeObserver(() => {
         this.layout();
@@ -158,7 +440,7 @@ export class CwToolbar implements ToolbarHandle {
     });
 
     effect(() => {
-      const count = this.overflowCount();
+      const count: number = this.overflowCount();
       if (count === this.lastCount) return;
       this.lastCount = count;
       untracked(() => {
@@ -171,9 +453,20 @@ export class CwToolbar implements ToolbarHandle {
       this.keyManager.destroy();
     });
   }
+  // #endregion
 
+  // #region Methods
+  /**
+   * Method onKeydown
+   * @method onKeydown
+   *
+   * @description
+   * Handles arrow navigation among toolbar controls.
+   *
+   * @param {KeyboardEvent} event - Keyboard event from the toolbar.
+   */
   protected onKeydown(event: KeyboardEvent): void {
-    const item = this.itemOf(event.target);
+    const item: ToolbarItemHandle | undefined = this.itemOf(event.target);
     if (!item) return;
     this.keyManager.updateActiveItem(item);
     if (ɵnavigateList(this.keyManager, event, 'horizontal', this.directionality?.value === 'rtl')) {
@@ -181,22 +474,49 @@ export class CwToolbar implements ToolbarHandle {
     }
   }
 
+  /**
+   * Method onFocusIn
+   * @method onFocusIn
+   *
+   * @description
+   * Updates the roving tab stop when a control receives focus.
+   *
+   * @param {FocusEvent} event - Focus event from a toolbar control.
+   */
   protected onFocusIn(event: FocusEvent): void {
-    const item = this.itemOf(event.target);
+    const item: ToolbarItemHandle | undefined = this.itemOf(event.target);
     if (!item) return;
     this.keyManager.updateActiveItem(item);
     this.tabStop.set(item);
     this.syncTabIndex();
   }
 
+  /**
+   * Method itemOf
+   * @method itemOf
+   *
+   * @description
+   * Finds the toolbar control associated with an event target.
+   *
+   * @param {EventTarget | null} target - Event target to match against toolbar controls.
+   *
+   * @returns {ToolbarItemHandle | undefined} Matching control, or undefined when none matches.
+   */
   private itemOf(target: EventTarget | null): ToolbarItemHandle | undefined {
     return this.items().find((item) => item.element === target);
   }
 
+  /**
+   * Method syncTabIndex
+   * @method syncTabIndex
+   *
+   * @description
+   * Maintains a single enabled tab stop among toolbar controls.
+   */
   private syncTabIndex(): void {
-    const items = this.items();
-    const current = this.tabStop();
-    const stop =
+    const items: ToolbarItemHandle[] = this.items();
+    const current: ToolbarItemHandle | null = this.tabStop();
+    const stop: ToolbarItemHandle | null =
       current && items.includes(current) && !current.disabled
         ? current
         : (items.find((item) => !item.disabled) ?? null);
@@ -204,19 +524,24 @@ export class CwToolbar implements ToolbarHandle {
   }
 
   /**
-   * Shows every control, then hides the movable ones from the last while the content is wider
-   * than the bar. Runs synchronously in the observer callback, before the browser paints.
+   * Method layout
+   * @method layout
+   *
+   * @description
+   * Measures the toolbar and moves excess controls into overflow.
    */
   private layout(): void {
-    const items = this.items();
-    const overflow = items.find((item) => item instanceof CwToolbarOverflow);
+    const items: ToolbarItemHandle[] = this.items();
+    const overflow: CwToolbarOverflow | undefined = items.find(
+      (item) => item instanceof CwToolbarOverflow,
+    );
     for (const item of items) item.setOverflowed(false);
     this.syncContainers();
 
-    const movable = items.filter((item) => !item.pinned).reverse();
+    const movable: ToolbarItemHandle[] = items.filter((item) => !item.pinned).reverse();
     const hidden: ToolbarItemHandle[] = [];
     while (this.element.scrollWidth > this.element.clientWidth && hidden.length < movable.length) {
-      const next = movable[hidden.length];
+      const next: ToolbarItemHandle = movable[hidden.length];
       next.setOverflowed(true);
       hidden.push(next);
       overflow?.setOverflowed(true);
@@ -226,11 +551,17 @@ export class CwToolbar implements ToolbarHandle {
     this.syncTabIndex();
   }
 
-  /* Groups left without a visible control hide, then the separators right before a hidden part. */
+  /**
+   * Method syncContainers
+   * @method syncContainers
+   *
+   * @description
+   * Hides empty groups and separators before overflowed controls.
+   */
   private syncContainers(): void {
     for (const group of this.groups()) {
-      const children = Array.from(group.ɵelement.children);
-      const empty = children.length > 0 && children.every((child) => isHidden(child));
+      const children: Element[] = Array.from(group.ɵelement.children);
+      const empty: boolean = children.length > 0 && children.every((child) => isHidden(child));
       if (empty) group.ɵelement.style.setProperty('display', 'none');
       else group.ɵelement.style.removeProperty('display');
     }
@@ -242,4 +573,5 @@ export class CwToolbar implements ToolbarHandle {
       }
     }
   }
+  // #endregion
 }

@@ -1,19 +1,46 @@
 import { Service } from '@angular/core';
 
 /**
+ * Interface ɵStackedPanel
+ * @interface ɵStackedPanel
+ *
+ * @description
  * A floating panel `ɵPanelStack` can close: a menu, a select, a combobox, an autocomplete, a popover
  * or a date picker. Its owner keeps one stable object per panel.
  *
  * Shared across the entry points of `@cadenway/ui`; not public API (`ɵ` prefix).
  */
 export interface ɵStackedPanel {
-  /** Closes the panel as an outside click would: the focus is not moved. */
+  // #region Methods
+  /**
+   * Method close
+   * @method close
+   *
+   * @description
+   * Closes the panel as an outside click would, without moving focus.
+   */
   close(): void;
-  /** Whether `node` is inside the open panel: the trigger of a panel opened from it. */
+
+  /**
+   * Method contains
+   * @method contains
+   *
+   * @description
+   * Determines whether a node, such as a nested panel trigger, is inside this panel.
+   *
+   * @param {Node} node - Node to locate within the panel.
+   *
+   * @returns {boolean} Whether the node is inside the panel.
+   */
   contains(node: Node): boolean;
+  // #endregion
 }
 
 /**
+ * Class ɵPanelStack
+ * @class ɵPanelStack
+ *
+ * @description
  * The floating panels the user opened, so that one is open at a time (integration guide,
  * "Placement des menus": « Un seul menu ouvert à la fois »). Tooltips stay out of it.
  *
@@ -27,10 +54,31 @@ export interface ɵStackedPanel {
  */
 @Service()
 export class ɵPanelStack {
+  // #region Properties
+  /**
+   * Property panels
+   * @readonly
+   *
+   * @description
+   * Panels registered by their owners, in the order they were opened.
+   *
+   * @type {ɵStackedPanel[]}
+   */
   private readonly panels: ɵStackedPanel[] = [];
+  // #endregion
 
-  /** Records `panel` as opened from `origin`, closing the open panels that do not hold `origin`. */
-  open(panel: ɵStackedPanel, origin: Node | null): void {
+  // #region Methods
+  /**
+   * Method open
+   * @method open
+   *
+   * @description
+   * Records a panel as opened and closes registered panels that do not contain its origin.
+   *
+   * @param {ɵStackedPanel} panel - Panel to add to the stack.
+   * @param {Node | null} origin - Trigger inside a parent panel, or null when there is none.
+   */
+  public open(panel: ɵStackedPanel, origin: Node | null): void {
     for (const other of [...this.panels].reverse()) {
       if (other === panel || (origin !== null && other.contains(origin))) continue;
       this.release(other);
@@ -40,9 +88,18 @@ export class ɵPanelStack {
     this.panels.push(panel);
   }
 
-  /** Forgets `panel`; does nothing when it is not in the stack. */
-  release(panel: ɵStackedPanel): void {
-    const index = this.panels.indexOf(panel);
+  /**
+   * Method release
+   * @method release
+   *
+   * @description
+   * Removes a panel from the stack; does nothing when it is not registered.
+   *
+   * @param {ɵStackedPanel} panel - Panel whose registration is released.
+   */
+  public release(panel: ɵStackedPanel): void {
+    const index: number = this.panels.indexOf(panel);
     if (index !== -1) this.panels.splice(index, 1);
   }
+  // #endregion
 }

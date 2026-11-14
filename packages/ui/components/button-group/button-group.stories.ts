@@ -22,9 +22,14 @@ import { CwButtonGroupText } from './button-group-text/button-group-text.compone
 import { CwButtonGroup } from './button-group.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Button Group, every state of its sheet in the Design System artifact, in the light and the dark
  * theme. Copy from the sheet's "Dans Cadenway" section (Liste header, toolbar, Sprint and Calendrier
  * views).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/ButtonGroup',
@@ -50,10 +55,31 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration used for button-group examples and interactions.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Locates the light-theme copy rendered by the shared Storybook preview decorator.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the theme examples.
+ *
+ * @returns {HTMLElement} Element containing the light-theme example.
+ *
+ * @throws {Error} When the expected light-theme scope is missing.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -164,8 +190,10 @@ export const Keyboard: Story = {
         <button cwButton variant="outline" size="icon" aria-label="Sprint suivant"><ng-icon name="phosphorCaretRightBold" /></button>
       </cw-button-group>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole(role: string, options?: { name?: string }): HTMLElement } = within(
+      light(canvasElement),
+    );
 
     await userEvent.tab();
     await expect(scope.getByRole('button', { name: 'Sprint précédent' })).toHaveFocus();

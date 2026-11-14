@@ -11,9 +11,14 @@ import { expect, userEvent, within } from 'storybook/test';
 import { CwInput } from './input.directive';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Input, every state of its sheet in the Design System artifact, in the light and the dark theme.
  * Labels, help and errors come from `cw-field`, which wires the ids. Copy from the sheet and the
  * mockup (`App.dc.html`, `Compte.dc.html`).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Input',
@@ -26,10 +31,31 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration used for input examples and interactions.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Locates the light-theme copy rendered by the shared Storybook preview decorator.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the theme examples.
+ *
+ * @returns {HTMLElement} Element containing the light-theme example.
+ *
+ * @throws {Error} When the expected light-theme scope is missing.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -65,8 +91,8 @@ export const States: Story = {
         </cw-field>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByLabelText(text: string): HTMLElement } = within(light(canvasElement));
 
     await expect(scope.getByLabelText("Adresse d'expédition")).toHaveAttribute(
       'aria-invalid',
@@ -130,8 +156,8 @@ export const Keyboard: Story = {
         <input cwInput placeholder="Sprint 15" />
       </cw-field>`,
   }),
-  play: async ({ canvasElement }) => {
-    const field = within(light(canvasElement)).getByLabelText('Nom de la liste');
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const field: HTMLElement = within(light(canvasElement)).getByLabelText('Nom de la liste');
 
     await userEvent.tab();
     await expect(field).toHaveFocus();

@@ -1,8 +1,15 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CwProgress } from './progress.component';
 
+/**
+ * Class Host
+ * @class Host
+ *
+ * @description
+ * Test host with determinate, mutable and indeterminate progress bars.
+ */
 @Component({
   imports: [CwProgress],
   template: `
@@ -19,14 +26,50 @@ import { CwProgress } from './progress.component';
   `,
 })
 class Host {
-  readonly done = signal(2);
-  readonly sprint = signal<number | null>(68);
+  // #region Properties
+  /**
+   * Property done
+   * @readonly
+   *
+   * @description
+   * Completed subtask count used to test clamping and the complete state.
+   *
+   * @type {WritableSignal<number>}
+   * @default 2
+   */
+  public readonly done: WritableSignal<number> = signal(2);
+
+  /**
+   * Property sprint
+   * @readonly
+   *
+   * @description
+   * Sprint progress amount, which can be set to null to indicate an unknown value.
+   *
+   * @type {WritableSignal<number | null>}
+   * @default 68
+   */
+  public readonly sprint: WritableSignal<number | null> = signal<number | null>(68);
+  // #endregion
 }
 
+/**
+ * Function bar
+ *
+ * @description
+ * Finds a progress bar in the test host by its accessible name.
+ *
+ * @param {HTMLElement} host - Container holding the progress bars.
+ * @param {string} name - Exact aria-label of the desired bar.
+ *
+ * @returns {HTMLElement} First matching progress bar.
+ *
+ * @throws {Error} When no bar has the requested name.
+ */
 function bar(host: HTMLElement, name: string): HTMLElement {
-  const found = Array.from(host.querySelectorAll<HTMLElement>('[role="progressbar"]')).find(
-    (element) => element.getAttribute('aria-label') === name,
-  );
+  const found: HTMLElement | undefined = Array.from(
+    host.querySelectorAll<HTMLElement>('[role="progressbar"]'),
+  ).find((element) => element.getAttribute('aria-label') === name);
   if (!found) throw new Error(`No progress bar named ${name}`);
   return found;
 }
@@ -44,7 +87,7 @@ describe('CwProgress', () => {
   });
 
   it('exposes the range, the value and the given value text', () => {
-    const subtasks = bar(host, 'Sous-tâches terminées');
+    const subtasks: HTMLElement = bar(host, 'Sous-tâches terminées');
 
     expect(subtasks.getAttribute('aria-valuemin')).toBe('0');
     expect(subtasks.getAttribute('aria-valuemax')).toBe('5');
@@ -62,14 +105,14 @@ describe('CwProgress', () => {
   it('is complete at the maximum and clamps an overrun', async () => {
     component.done.set(7);
     await fixture.whenStable();
-    const subtasks = bar(host, 'Sous-tâches terminées');
+    const subtasks: HTMLElement = bar(host, 'Sous-tâches terminées');
 
     expect(subtasks.getAttribute('aria-valuenow')).toBe('5');
     expect(subtasks.dataset['state']).toBe('complete');
   });
 
   it('has no value while indeterminate', async () => {
-    const analysis = bar(host, 'Analyse du fichier');
+    const analysis: HTMLElement = bar(host, 'Analyse du fichier');
     expect(analysis.dataset['state']).toBe('indeterminate');
     expect(analysis.hasAttribute('aria-valuenow')).toBe(false);
     expect(analysis.hasAttribute('aria-valuetext')).toBe(false);

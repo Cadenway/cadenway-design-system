@@ -24,6 +24,10 @@ import {
   numberAttribute,
   signal,
   untracked,
+  type InputSignal,
+  type InputSignalWithTransform,
+  type Signal,
+  type WritableSignal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -41,25 +45,65 @@ import {
 } from './tooltip-coordinator/tooltip-coordinator.service';
 import { TOOLTIP_CONFIG } from './tooltip-config.token';
 import { CwTooltipPanel, type TooltipState } from './tooltip-panel/tooltip-panel.component';
-import type { CwTooltipAlign, CwTooltipContent, CwTooltipSide } from './tooltip.types';
+import type {
+  CwTooltipAlign,
+  CwTooltipConfig,
+  CwTooltipContent,
+  CwTooltipSide,
+} from './tooltip.types';
 
-/** Gap between the trigger and the bubble: 8 px with the arrow, 6 px without (sheet, "Côtés"). */
-const OFFSET = { arrow: 8, plain: 6 } as const;
+/**
+ * Constant OFFSET
+ *
+ * @description
+ * Tooltip gap from the trigger with or without an arrow.
+ *
+ * @type {{ readonly arrow: 8; readonly plain: 6 }}
+ */
+const OFFSET: { readonly arrow: 8; readonly plain: 6 } = { arrow: 8, plain: 6 } as const;
 
 /* Time the pointer gets to cross the gap from the trigger to the bubble: the bubble stays open while
    the pointer is over it (sheet, "Accessibilité"; WCAG 1.4.13). */
-const HOVER_GRACE = 100;
+/**
+ * Constant HOVER_GRACE
+ *
+ * @description
+ * Time allowed to cross the gap before closing.
+ *
+ * @type {number}
+ */
+const HOVER_GRACE: number = 100;
 
-/** Keeps the bubble 8 px away from the viewport edges when it is shifted to stay visible. */
-const VIEWPORT_MARGIN = 8;
+/**
+ * Constant VIEWPORT_MARGIN
+ *
+ * @description
+ * Minimum distance from the viewport edges.
+ *
+ * @type {number}
+ */
+const VIEWPORT_MARGIN: number = 8;
 
+/**
+ * Function optionalNumber
+ *
+ * @description
+ * Converts an optional input into a valid number.
+ *
+ * @param {unknown} value - Input value to convert, including an empty value.
+ *
+ * @returns {number | undefined} Converted number, or undefined for an empty or invalid value.
+ */
 function optionalNumber(value: unknown): number | undefined {
   if (value === null || value === undefined || value === '') return undefined;
-  const number = numberAttribute(value);
+  const number: number = numberAttribute(value);
   return Number.isNaN(number) ? undefined : number;
 }
 
 /**
+ * Directive CwTooltip
+ *
+ * @description
  * Shows a few words about its host on hover and on keyboard focus: the name of an icon button, a
  * full date, a truncated name, an action's shortcut (Tooltip sheet of the Design System artifact).
  *
@@ -82,51 +126,317 @@ function optionalNumber(value: unknown): number | undefined {
   },
 })
 export class CwTooltip implements CoordinatedTooltip {
-  /** Text of the bubble, or a template; empty text shows nothing. */
-  readonly cwTooltip = input.required<CwTooltipContent>();
-  /** Keys shown after the text, one `kbd` each (`['Ctrl', 'K']`). */
-  readonly cwTooltipShortcut = input<readonly string[] | null | undefined>(undefined);
-  /** Side of the trigger; flipped when it lacks room. */
-  readonly cwTooltipSide = input<CwTooltipSide>('top');
-  /** Alignment along the side. */
-  readonly cwTooltipAlign = input<CwTooltipAlign>('center');
-  /** Draws the arrow; without it the bubble sits 6 px from the trigger (dense toolbars). */
-  readonly cwTooltipArrow = input(true, { transform: booleanAttribute });
-  /** Hover delay in ms for this trigger; defaults to the `provideCwTooltip` value (700). */
-  readonly cwTooltipOpenDelay = input<number | undefined, unknown>(undefined, {
+  // #region Properties
+  /**
+   * Property cwTooltip
+   * @readonly
+   *
+   * @description
+   * Text or template displayed in the bubble.
+   *
+   * @type {InputSignal<CwTooltipContent>}
+   */
+  public readonly cwTooltip: InputSignal<CwTooltipContent> = input.required<CwTooltipContent>();
+
+  /**
+   * Property cwTooltipShortcut
+   * @readonly
+   *
+   * @description
+   * Shortcut keys displayed alongside the content.
+   *
+   * @type {InputSignal<readonly string[] | null | undefined>}
+   */
+  public readonly cwTooltipShortcut: InputSignal<readonly string[] | null | undefined> = input<
+    readonly string[] | null | undefined
+  >(undefined);
+
+  /**
+   * Property cwTooltipSide
+   * @readonly
+   *
+   * @description
+   * Preferred side of the trigger.
+   *
+   * @type {InputSignal<CwTooltipSide>}
+   */
+  public readonly cwTooltipSide: InputSignal<CwTooltipSide> = input<CwTooltipSide>('top');
+
+  /**
+   * Property cwTooltipAlign
+   * @readonly
+   *
+   * @description
+   * Preferred alignment along the side.
+   *
+   * @type {InputSignal<CwTooltipAlign>}
+   */
+  public readonly cwTooltipAlign: InputSignal<CwTooltipAlign> = input<CwTooltipAlign>('center');
+
+  /**
+   * Property cwTooltipArrow
+   * @readonly
+   *
+   * @description
+   * Whether to draw an arrow.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   */
+  public readonly cwTooltipArrow: InputSignalWithTransform<boolean, unknown> = input(true, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property cwTooltipOpenDelay
+   * @readonly
+   *
+   * @description
+   * Optional hover delay override in milliseconds.
+   *
+   * @type {InputSignalWithTransform<number | undefined, unknown>}
+   */
+  public readonly cwTooltipOpenDelay: InputSignalWithTransform<number | undefined, unknown> = input<
+    number | undefined,
+    unknown
+  >(undefined, {
     transform: optionalNumber,
   });
-  /** Shows nothing, for instance when the label is already visible. */
-  readonly cwTooltipDisabled = input(false, { transform: booleanAttribute });
 
-  private readonly injector = inject(Injector);
-  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
-  private readonly document = inject(DOCUMENT);
-  private readonly config = inject(TOOLTIP_CONFIG);
-  private readonly coordinator = inject(CwTooltipCoordinator);
-  private readonly focusMonitor = inject(FocusMonitor);
-  private readonly id = inject(_IdGenerator).getId('cw-tooltip-');
-
-  private overlayRef: OverlayRef | null = null;
-  private strategy: FlexibleConnectedPositionStrategy | null = null;
-  private readonly subscriptions: Subscription[] = [];
-  private readonly panel = signal<ComponentRef<CwTooltipPanel> | null>(null);
-  private readonly state = signal<TooltipState>('closed');
-  private readonly animated = signal(true);
-  private readonly placement = signal<ɵPlacement>({ side: 'top', align: 'center' });
-  private openTimer: ReturnType<typeof setTimeout> | undefined;
-  private closeTimer: ReturnType<typeof setTimeout> | undefined;
-  private stopClosing: (() => void) | null = null;
-  private keyboardFocused = false;
-
-  private readonly enabled = computed(() => {
-    const content = this.cwTooltip();
-    return !this.cwTooltipDisabled() && !(typeof content === 'string' && content.trim() === '');
+  /**
+   * Property cwTooltipDisabled
+   * @readonly
+   *
+   * @description
+   * Whether the tooltip is disabled.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   */
+  public readonly cwTooltipDisabled: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
   });
 
-  constructor() {
+  /**
+   * Property injector
+   * @readonly
+   *
+   * @description
+   * Injector used to create and render the overlay.
+   *
+   * @type {Injector}
+   */
+  private readonly injector: Injector = inject(Injector);
+
+  /**
+   * Property element
+   * @readonly
+   *
+   * @description
+   * Tooltip trigger element.
+   *
+   * @type {HTMLElement}
+   */
+  private readonly element: HTMLElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+
+  /**
+   * Property document
+   * @readonly
+   *
+   * @description
+   * Document used to determine motion preferences.
+   *
+   * @type {Document}
+   */
+  private readonly document: Document = inject(DOCUMENT);
+
+  /**
+   * Property config
+   * @readonly
+   *
+   * @description
+   * Configured tooltip delays.
+   *
+   * @type {Required<CwTooltipConfig>}
+   */
+  private readonly config: Required<CwTooltipConfig> = inject(TOOLTIP_CONFIG);
+
+  /**
+   * Property coordinator
+   * @readonly
+   *
+   * @description
+   * Coordinator enforcing a single open tooltip.
+   *
+   * @type {CwTooltipCoordinator}
+   */
+  private readonly coordinator: CwTooltipCoordinator = inject(CwTooltipCoordinator);
+
+  /**
+   * Property focusMonitor
+   * @readonly
+   *
+   * @description
+   * Focus origin monitor for the trigger.
+   *
+   * @type {FocusMonitor}
+   */
+  private readonly focusMonitor: FocusMonitor = inject(FocusMonitor);
+
+  /**
+   * Property id
+   * @readonly
+   *
+   * @description
+   * Identifier referenced by the trigger.
+   *
+   * @type {string}
+   */
+  private readonly id: string = inject(_IdGenerator).getId('cw-tooltip-');
+
+  /**
+   * Property overlayRef
+   *
+   * @description
+   * Overlay containing the tooltip panel.
+   *
+   * @type {OverlayRef | null}
+   */
+  private overlayRef: OverlayRef | null = null;
+
+  /**
+   * Property strategy
+   *
+   * @description
+   * Position strategy for the overlay.
+   *
+   * @type {FlexibleConnectedPositionStrategy | null}
+   */
+  private strategy: FlexibleConnectedPositionStrategy | null = null;
+
+  /**
+   * Property subscriptions
+   * @readonly
+   *
+   * @description
+   * Overlay subscriptions released on destruction.
+   *
+   * @type {Subscription[]}
+   */
+  private readonly subscriptions: Subscription[] = [];
+
+  /**
+   * Property panel
+   * @readonly
+   *
+   * @description
+   * Attached tooltip panel, if present.
+   *
+   * @type {WritableSignal<ComponentRef<CwTooltipPanel> | null>}
+   */
+  private readonly panel: WritableSignal<ComponentRef<CwTooltipPanel> | null> =
+    signal<ComponentRef<CwTooltipPanel> | null>(null);
+
+  /**
+   * Property state
+   * @readonly
+   *
+   * @description
+   * Opening or closing state.
+   *
+   * @type {WritableSignal<TooltipState>}
+   */
+  private readonly state: WritableSignal<TooltipState> = signal<TooltipState>('closed');
+
+  /**
+   * Property animated
+   * @readonly
+   *
+   * @description
+   * Whether to animate the current opening.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  private readonly animated: WritableSignal<boolean> = signal(true);
+
+  /**
+   * Property placement
+   * @readonly
+   *
+   * @description
+   * Actual side and alignment of the panel.
+   *
+   * @type {WritableSignal<ɵPlacement>}
+   */
+  private readonly placement: WritableSignal<ɵPlacement> = signal<ɵPlacement>({
+    side: 'top',
+    align: 'center',
+  });
+
+  /**
+   * Property openTimer
+   *
+   * @description
+   * Pending hover-open timer.
+   *
+   * @type {ReturnType<typeof setTimeout> | undefined}
+   */
+  private openTimer: ReturnType<typeof setTimeout> | undefined;
+
+  /**
+   * Property closeTimer
+   *
+   * @description
+   * Pending hover-close timer.
+   *
+   * @type {ReturnType<typeof setTimeout> | undefined}
+   */
+  private closeTimer: ReturnType<typeof setTimeout> | undefined;
+
+  /**
+   * Property stopClosing
+   *
+   * @description
+   * Cancels a pending exit animation.
+   *
+   * @type {(() => void) | null}
+   */
+  private stopClosing: (() => void) | null = null;
+
+  /**
+   * Property keyboardFocused
+   *
+   * @description
+   * Whether the trigger has keyboard focus.
+   *
+   * @type {boolean}
+   */
+  private keyboardFocused: boolean = false;
+
+  /**
+   * Property enabled
+   * @readonly
+   *
+   * @description
+   * Whether the tooltip has content and is enabled.
+   *
+   * @type {Signal<boolean>}
+   */
+  private readonly enabled: Signal<boolean> = computed(() => {
+    const content: CwTooltipContent = this.cwTooltip();
+    return !this.cwTooltipDisabled() && !(typeof content === 'string' && content.trim() === '');
+  });
+  // #endregion
+
+  // #region Constructor
+  /**
+   * Constructor
+   * @constructor
+   *
+   * @description
+   * Synchronizes the panel and manages focus and destruction.
+   */
+  public constructor() {
     effect(() => {
-      const panel = this.panel();
+      const panel: ComponentRef<CwTooltipPanel> | null = this.panel();
       if (panel) this.sync(panel);
     });
 
@@ -156,15 +466,30 @@ export class CwTooltip implements CoordinatedTooltip {
       this.overlayRef?.dispose();
     });
   }
+  // #endregion
 
-  /** Closes the bubble at once, without its fade; the shared coordinator calls it on replacement. */
-  closeImmediately(): void {
+  // #region Methods
+  /**
+   * Method closeImmediately
+   *
+   * @description
+   * Closes the bubble without an exit animation.
+   */
+  public closeImmediately(): void {
     this.clearTimers();
     if (!this.overlayRef?.hasAttached()) return;
     this.release();
     this.detach();
   }
 
+  /**
+   * Method onPointerEnter
+   *
+   * @description
+   * Schedules or immediately opens the tooltip on hover.
+   *
+   * @param {PointerEvent} event - Pointer event used to ignore touch input.
+   */
   protected onPointerEnter(event: PointerEvent): void {
     // Hover does not exist on touch: a tap is a press, which closes.
     if (event.pointerType === 'touch' || !this.enabled()) return;
@@ -180,15 +505,26 @@ export class CwTooltip implements CoordinatedTooltip {
     }, this.cwTooltipOpenDelay() ?? this.config.openDelay);
   }
 
+  /**
+   * Method onPointerLeave
+   *
+   * @description
+   * Schedules closure when hover ends.
+   */
   protected onPointerLeave(): void {
     clearTimeout(this.openTimer);
     if (!this.keyboardFocused) this.scheduleClose();
   }
 
-  /** Closes the bubble with its fade (pointer leave, blur, press, Escape). */
+  /**
+   * Method hide
+   *
+   * @description
+   * Closes the bubble with its exit animation.
+   */
   protected hide(): void {
     this.clearTimers();
-    const overlayRef = this.overlayRef;
+    const overlayRef: OverlayRef | null = this.overlayRef;
     if (!overlayRef?.hasAttached() || this.state() === 'closed') return;
     this.release();
     if (ɵprefersReducedMotion(this.document)) {
@@ -203,13 +539,22 @@ export class CwTooltip implements CoordinatedTooltip {
     );
   }
 
+  /**
+   * Method show
+   *
+   * @description
+   * Opens or updates the tooltip overlay.
+   *
+   * @param {Exclude<TooltipState, 'closed'>} state - Opening state applied to the panel.
+   * @param {boolean} animated - Whether to play the opening animation.
+   */
   private show(state: Exclude<TooltipState, 'closed'>, animated: boolean): void {
     if (!this.enabled()) return;
     this.clearTimers();
     this.coordinator.claim(this);
     this.describe(true);
 
-    const overlayRef = this.overlayRef ?? this.createOverlay();
+    const overlayRef: OverlayRef = this.overlayRef ?? this.createOverlay();
     if (overlayRef.hasAttached()) {
       // Open, or fading out: keep the bubble and cancel the fade.
       this.stopClosing?.();
@@ -219,15 +564,17 @@ export class CwTooltip implements CoordinatedTooltip {
       return;
     }
 
-    const arrow = this.cwTooltipArrow();
-    const side = this.cwTooltipSide();
-    const align = this.cwTooltipAlign();
+    const arrow: boolean = this.cwTooltipArrow();
+    const side: CwTooltipSide = this.cwTooltipSide();
+    const align: CwTooltipAlign = this.cwTooltipAlign();
     this.strategy?.withPositions(ɵpanelPositions(side, align, arrow ? OFFSET.arrow : OFFSET.plain));
     this.placement.set({ side, align });
     this.animated.set(animated);
     this.state.set(state);
 
-    const panel = overlayRef.attach(new ComponentPortal(CwTooltipPanel, null, this.injector));
+    const panel: ComponentRef<CwTooltipPanel> = overlayRef.attach(
+      new ComponentPortal(CwTooltipPanel, null, this.injector),
+    );
     // Required inputs before the first check; the effect keeps them in sync afterwards. The bubble
     // is rendered at once: its `role="tooltip"` host exists from the attach, and it must never be
     // found (or described by `aria-describedby`) empty until the next application tick.
@@ -236,6 +583,14 @@ export class CwTooltip implements CoordinatedTooltip {
     this.panel.set(panel);
   }
 
+  /**
+   * Method sync
+   *
+   * @description
+   * Synchronizes panel inputs with the trigger state.
+   *
+   * @param {ComponentRef<CwTooltipPanel>} panel - Attached panel whose inputs are synchronized.
+   */
   private sync(panel: ComponentRef<CwTooltipPanel>): void {
     panel.setInput('id', this.id);
     panel.setInput('content', this.cwTooltip());
@@ -247,15 +602,26 @@ export class CwTooltip implements CoordinatedTooltip {
     panel.setInput('animated', this.animated());
   }
 
+  /**
+   * Method createOverlay
+   *
+   * @description
+   * Creates and configures the tooltip overlay.
+   *
+   * @returns {OverlayRef} Configured overlay for the tooltip panel.
+   */
   private createOverlay(): OverlayRef {
     // `inline`: the bubble's host is inserted next to the trigger (as a native popover in the top
     // layer), so it inherits the `data-theme` scope of its trigger.
-    const strategy = createFlexibleConnectedPositionStrategy(this.injector, this.element)
+    const strategy: FlexibleConnectedPositionStrategy = createFlexibleConnectedPositionStrategy(
+      this.injector,
+      this.element,
+    )
       .withFlexibleDimensions(false)
       .withPush(true)
       .withViewportMargin(VIEWPORT_MARGIN)
       .withPopoverLocation('inline');
-    const overlayRef = createOverlayRef(this.injector, {
+    const overlayRef: OverlayRef = createOverlayRef(this.injector, {
       positionStrategy: strategy,
       scrollStrategy: createRepositionScrollStrategy(this.injector),
       disposeOnNavigation: true,
@@ -273,7 +639,7 @@ export class CwTooltip implements CoordinatedTooltip {
       }),
     );
 
-    const pane = overlayRef.overlayElement;
+    const pane: HTMLElement = overlayRef.overlayElement;
     pane.addEventListener('pointerenter', () => {
       clearTimeout(this.closeTimer);
     });
@@ -286,8 +652,15 @@ export class CwTooltip implements CoordinatedTooltip {
     return overlayRef;
   }
 
+  /**
+   * Method detachAfterAnimation
+   *
+   * @description
+   * Detaches the panel after its exit animation.
+   */
   private detachAfterAnimation(): void {
-    const bubble = this.panel()?.location.nativeElement as HTMLElement | undefined;
+    const bubble: HTMLElement | undefined = this.panel()?.location.nativeElement as
+      HTMLElement | undefined;
     this.stopClosing = ɵafterExitAnimation(
       bubble,
       () => {
@@ -298,12 +671,24 @@ export class CwTooltip implements CoordinatedTooltip {
     );
   }
 
+  /**
+   * Method release
+   *
+   * @description
+   * Releases the active tooltip and its accessible description.
+   */
   private release(): void {
     this.describe(false);
     this.state.set('closed');
     this.coordinator.release(this);
   }
 
+  /**
+   * Method detach
+   *
+   * @description
+   * Detaches the overlay and clears its panel.
+   */
   private detach(): void {
     this.stopClosing?.();
     this.stopClosing = null;
@@ -311,6 +696,12 @@ export class CwTooltip implements CoordinatedTooltip {
     this.overlayRef?.detach();
   }
 
+  /**
+   * Method scheduleClose
+   *
+   * @description
+   * Schedules closure after the hover grace period.
+   */
   private scheduleClose(): void {
     clearTimeout(this.closeTimer);
     this.closeTimer = setTimeout(() => {
@@ -318,18 +709,32 @@ export class CwTooltip implements CoordinatedTooltip {
     }, HOVER_GRACE);
   }
 
+  /**
+   * Method clearTimers
+   *
+   * @description
+   * Cancels pending open and close timers.
+   */
   private clearTimers(): void {
     clearTimeout(this.openTimer);
     clearTimeout(this.closeTimer);
   }
 
-  /** Adds or removes the bubble's id in the host's `aria-describedby`, keeping the other ids. */
+  /**
+   * Method describe
+   *
+   * @description
+   * Adds or removes the tooltip identifier from aria-describedby.
+   *
+   * @param {boolean} open - Whether to add or remove the tooltip identifier.
+   */
   private describe(open: boolean): void {
-    const ids = (this.element.getAttribute('aria-describedby') ?? '')
+    const ids: string[] = (this.element.getAttribute('aria-describedby') ?? '')
       .split(/\s+/)
       .filter((id) => id !== '' && id !== this.id);
     if (open) ids.push(this.id);
     if (ids.length > 0) this.element.setAttribute('aria-describedby', ids.join(' '));
     else this.element.removeAttribute('aria-describedby');
   }
+  // #endregion
 }

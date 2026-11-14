@@ -13,6 +13,11 @@ import {
   output,
   signal,
   type TemplateRef,
+  type InputSignal,
+  type InputSignalWithTransform,
+  type OutputEmitterRef,
+  type Signal,
+  type WritableSignal,
   untracked,
   viewChild,
   ViewContainerRef,
@@ -24,6 +29,7 @@ import {
   _IdGenerator,
 } from '@angular/cdk/a11y';
 import { ɵConnectedPanel, ɵnavigateList, ɵPanelStack, type ɵStackedPanel } from '@cadenway/ui/core';
+import type { Subscription } from 'rxjs';
 import { CwSpinner } from '@cadenway/ui/components/spinner';
 
 import { CwAutocompleteOption } from './autocomplete-option/autocomplete-option.component';
@@ -33,15 +39,42 @@ import { AUTOCOMPLETE_HOST, type AutocompleteHost } from './autocomplete.token';
 /* The panel (Autocomplete sheet and preview of the Design System artifact): at least as wide as the
    field, up to `max-w-sm`, scrolled past 320 px. It opens from the field corner (`--menu-from`)
    and closes with `menu-out`. */
-const PANEL =
+/**
+ * Constant PANEL
+ *
+ * @description
+ * Classes for the autocomplete suggestion panel.
+ *
+ * @type {string}
+ */
+const PANEL: string =
   'block max-h-80 max-w-sm overflow-y-auto rounded-lg border bg-popover p-1 text-popover-foreground shadow-md animate-menu-in data-[state=closed]:animate-menu-out motion-reduce:animate-none';
 
-/** The item the CDK key manager moves through: one per suggestion, reading it when asked. */
+/**
+ * Interface KeyOption
+ *
+ * @description
+ * Suggestion adapter for the CDK key manager.
+ */
 interface KeyOption extends Highlightable {
+  // #region Properties
+  /**
+   * Property option
+   * @readonly
+   *
+   * @description
+   * Suggestion represented by this adapter.
+   *
+   * @type {CwAutocompleteOption}
+   */
   readonly option: CwAutocompleteOption;
+  // #endregion
 }
 
 /**
+ * Component CwAutocomplete
+ *
+ * @description
  * The suggestion panel of a text field: mentions after `@` in a comment, the quick search of tasks,
  * a free entry helped by suggestions (Autocomplete sheet of the Design System artifact). The typed
  * text stays valid: nothing is forced.
@@ -67,73 +100,402 @@ interface KeyOption extends Highlightable {
   templateUrl: './autocomplete.component.html',
 })
 export class CwAutocomplete<T = unknown> implements AutocompleteHost {
-  /** Suggestions are loading: the spinner and `loadingText` replace the list. */
-  readonly loading = input(false, { transform: booleanAttribute });
-  /** Text next to the spinner while loading. */
-  readonly loadingText = input('Recherche…');
-  /** Message without suggestion; it receives the typed text. */
-  readonly emptyText = input<(query: string) => string>(
-    (query) => `Aucune suggestion : Entrée garde « ${query} ».`,
-  );
-  /** Sets the typed part of each label in bold. */
-  readonly highlight = input(true, { transform: booleanAttribute });
-  /** Accessible name of the list of suggestions. */
-  readonly ariaLabel = input('Suggestions');
-  /** The announcement of the number of suggestions. */
-  readonly resultsLabel = input<(count: number) => string>((count) =>
-    count === 1 ? '1 suggestion' : `${String(count)} suggestions`,
-  );
-  /** Emits the value of the chosen suggestion. */
-  readonly optionSelected = output<T>();
-  /** Emits the typed text (after the `trigger` character, if any) at each keystroke. */
-  readonly query = output<string>();
+  // #region Properties
+  /**
+   * Property loading
+   * @readonly
+   *
+   * @description
+   * Whether suggestions are loading.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   */
+  public readonly loading: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
 
-  private readonly optionList = contentChildren(CwAutocompleteOption, { descendants: true });
-  private readonly panelElement = viewChild<ElementRef<HTMLElement>>('panel');
-  private readonly panelTemplate = viewChild.required<TemplateRef<unknown>>('panelTemplate');
-  private readonly viewContainerRef = inject(ViewContainerRef);
-  private readonly announcer = inject(LiveAnnouncer);
-  private readonly active = signal<CwAutocompleteOption | null>(null);
-  private readonly keyOptions = new WeakMap<CwAutocompleteOption, KeyOption>();
+  /**
+   * Property loadingText
+   * @readonly
+   *
+   * @description
+   * Text shown while loading.
+   *
+   * @type {InputSignal<string>}
+   */
+  public readonly loadingText: InputSignal<string> = input('Recherche…');
+
+  /**
+   * Property emptyText
+   * @readonly
+   *
+   * @description
+   * Message shown when no suggestions match.
+   *
+   * @type {InputSignal<(query: string) => string>}
+   */
+  public readonly emptyText: InputSignal<(query: string) => string> = input<
+    (query: string) => string
+  >((query) => `Aucune suggestion : Entrée garde « ${query} ».`);
+
+  /**
+   * Property highlight
+   * @readonly
+   *
+   * @description
+   * Whether matching query text is emphasized.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   */
+  public readonly highlight: InputSignalWithTransform<boolean, unknown> = input(true, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property ariaLabel
+   * @readonly
+   *
+   * @description
+   * Accessible name of the suggestion list.
+   *
+   * @type {InputSignal<string>}
+   */
+  public readonly ariaLabel: InputSignal<string> = input('Suggestions');
+
+  /**
+   * Property resultsLabel
+   * @readonly
+   *
+   * @description
+   * Announcement for the number of suggestions.
+   *
+   * @type {InputSignal<(count: number) => string>}
+   */
+  public readonly resultsLabel: InputSignal<(count: number) => string> = input<
+    (count: number) => string
+  >((count) => (count === 1 ? '1 suggestion' : `${String(count)} suggestions`));
+
+  /**
+   * Property optionSelected
+   * @readonly
+   *
+   * @description
+   * Emits the value of the chosen suggestion.
+   *
+   * @type {OutputEmitterRef<T>}
+   */
+  public readonly optionSelected: OutputEmitterRef<T> = output<T>();
+
+  /**
+   * Property query
+   * @readonly
+   *
+   * @description
+   * Emits the query after each keystroke.
+   *
+   * @type {OutputEmitterRef<string>}
+   */
+  public readonly query: OutputEmitterRef<string> = output<string>();
+
+  /**
+   * Property optionList
+   * @readonly
+   *
+   * @description
+   * Projected suggestions in display order.
+   *
+   * @type {Signal<readonly CwAutocompleteOption[]>}
+   */
+  private readonly optionList: Signal<readonly CwAutocompleteOption[]> = contentChildren(
+    CwAutocompleteOption,
+    { descendants: true },
+  );
+
+  /**
+   * Property panelElement
+   * @readonly
+   *
+   * @description
+   * Rendered suggestion panel.
+   *
+   * @type {Signal<ElementRef<HTMLElement> | undefined>}
+   */
+  private readonly panelElement: Signal<ElementRef<HTMLElement> | undefined> =
+    viewChild<ElementRef<HTMLElement>>('panel');
+
+  /**
+   * Property panelTemplate
+   * @readonly
+   *
+   * @description
+   * Template attached to the panel.
+   *
+   * @type {Signal<TemplateRef<unknown>>}
+   */
+  private readonly panelTemplate: Signal<TemplateRef<unknown>> =
+    viewChild.required<TemplateRef<unknown>>('panelTemplate');
+
+  /**
+   * Property viewContainerRef
+   * @readonly
+   *
+   * @description
+   * Container used to attach the panel.
+   *
+   * @type {ViewContainerRef}
+   */
+  private readonly viewContainerRef: ViewContainerRef = inject(ViewContainerRef);
+
+  /**
+   * Property announcer
+   * @readonly
+   *
+   * @description
+   * Announces suggestion and loading states.
+   *
+   * @type {LiveAnnouncer}
+   */
+  private readonly announcer: LiveAnnouncer = inject(LiveAnnouncer);
+
+  /**
+   * Property active
+   * @readonly
+   *
+   * @description
+   * Currently highlighted suggestion.
+   *
+   * @type {WritableSignal<CwAutocompleteOption | null>}
+   */
+  private readonly active: WritableSignal<CwAutocompleteOption | null> =
+    signal<CwAutocompleteOption | null>(null);
+
+  /**
+   * Property keyOptions
+   * @readonly
+   *
+   * @description
+   * Cached keyboard adapters for suggestions.
+   *
+   * @type {WeakMap<CwAutocompleteOption, KeyOption>}
+   */
+  private readonly keyOptions: WeakMap<CwAutocompleteOption, KeyOption> = new WeakMap<
+    CwAutocompleteOption,
+    KeyOption
+  >();
+
+  /**
+   * Property chosen
+   *
+   * @description
+   * Callback writing a chosen suggestion into the field.
+   *
+   * @type {((option: CwAutocompleteOption) => void) | null}
+   */
   private chosen: ((option: CwAutocompleteOption) => void) | null = null;
 
-  protected readonly overlay = inject(ɵConnectedPanel);
-  private readonly stack = inject(ɵPanelStack);
-  // This panel as the shared panel stack sees it: another panel opened by the user closes it.
+  /**
+   * Property overlay
+   * @readonly
+   *
+   * @description
+   * Connected panel hosting suggestions.
+   *
+   * @type {ɵConnectedPanel}
+   */
+  protected readonly overlay: ɵConnectedPanel = inject(ɵConnectedPanel);
+
+  /**
+   * Property stack
+   * @readonly
+   *
+   * @description
+   * Shared stack of floating panels.
+   *
+   * @type {ɵPanelStack}
+   */
+  private readonly stack: ɵPanelStack = inject(ɵPanelStack);
+
+  /**
+   * Property stacked
+   * @readonly
+   *
+   * @description
+   * Panel adapter registered with the stack.
+   *
+   * @type {ɵStackedPanel}
+   */
   private readonly stacked: ɵStackedPanel = {
     close: () => {
       this.hide();
     },
     contains: (node) => this.overlay.contains(node),
   };
-  protected readonly panelClass = PANEL;
-  protected readonly emptyClass = EMPTY;
-  protected readonly typed = signal('');
 
-  /** @internal The id of the listbox, for the field's `aria-controls`. */
-  readonly listboxId = inject(_IdGenerator).getId('cw-autocomplete-listbox-');
-  /** @internal Whether the panel is shown (and not closing). */
-  readonly isOpen = signal(false);
-  /** @internal The suggestions of the panel, in order. */
-  readonly options = computed(() => this.optionList() as readonly CwAutocompleteOption[]);
-  /** @internal The suggestion highlighted by the arrows or the pointer. */
-  readonly highlighted = this.active.asReadonly();
-  /** @internal The id of the highlighted suggestion, for the field's `aria-activedescendant`. */
-  readonly activeId = computed(() => this.active()?.id ?? null);
-  /** @internal The typed text set in bold in the labels. */
-  readonly mark = computed(() => (this.highlight() ? this.typed() : ''));
-  /** @internal Whether the rows play their entrance (at opening, until the next keystroke). */
-  readonly entering = signal(true);
+  /**
+   * Property panelClass
+   * @readonly
+   *
+   * @description
+   * Classes for the suggestion panel.
+   *
+   * @type {string}
+   */
+  protected readonly panelClass: string = PANEL;
 
-  private readonly items = computed(() => this.options().map((option) => this.keyOptionOf(option)));
-  private readonly keyManager = new ActiveDescendantKeyManager<KeyOption>(
-    this.items,
-    inject(Injector),
-  ).skipPredicate((item) => item.disabled === true);
+  /**
+   * Property emptyClass
+   * @readonly
+   *
+   * @description
+   * Classes for the empty message.
+   *
+   * @type {string}
+   */
+  protected readonly emptyClass: string = EMPTY;
 
-  constructor() {
-    const subscription = this.keyManager.change.subscribe(() => {
-      const option = this.keyManager.activeItem?.option ?? null;
+  /**
+   * Property typed
+   * @readonly
+   *
+   * @description
+   * Current query text.
+   *
+   * @type {WritableSignal<string>}
+   */
+  protected readonly typed: WritableSignal<string> = signal('');
+
+  /**
+   * Property listboxId
+   * @readonly
+   *
+   * @description
+   * Identifier of the suggestion listbox.
+   *
+   * @internal
+   *
+   * @type {string}
+   */
+  public readonly listboxId: string = inject(_IdGenerator).getId('cw-autocomplete-listbox-');
+
+  /**
+   * Property isOpen
+   * @readonly
+   *
+   * @description
+   * Whether the panel is open.
+   *
+   * @internal
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly isOpen: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property options
+   * @readonly
+   *
+   * @description
+   * Suggestions in display order.
+   *
+   * @internal
+   *
+   * @type {Signal<readonly CwAutocompleteOption[]>}
+   */
+  public readonly options: Signal<readonly CwAutocompleteOption[]> = computed(() =>
+    this.optionList(),
+  );
+
+  /**
+   * Property highlighted
+   * @readonly
+   *
+   * @description
+   * Currently highlighted suggestion.
+   *
+   * @internal
+   *
+   * @type {Signal<CwAutocompleteOption | null>}
+   */
+  public readonly highlighted: Signal<CwAutocompleteOption | null> = this.active.asReadonly();
+
+  /**
+   * Property activeId
+   * @readonly
+   *
+   * @description
+   * Identifier of the highlighted suggestion.
+   *
+   * @internal
+   *
+   * @type {Signal<string | null>}
+   */
+  public readonly activeId: Signal<string | null> = computed(() => this.active()?.id ?? null);
+
+  /**
+   * Property mark
+   * @readonly
+   *
+   * @description
+   * Query text highlighted in labels.
+   *
+   * @internal
+   *
+   * @type {Signal<string>}
+   */
+  public readonly mark: Signal<string> = computed(() => (this.highlight() ? this.typed() : ''));
+
+  /**
+   * Property entering
+   * @readonly
+   *
+   * @description
+   * Whether suggestion entrance animations play.
+   *
+   * @internal
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly entering: WritableSignal<boolean> = signal(true);
+
+  /**
+   * Property items
+   * @readonly
+   *
+   * @description
+   * Keyboard adapters for current suggestions.
+   *
+   * @type {Signal<KeyOption[]>}
+   */
+  private readonly items: Signal<KeyOption[]> = computed(() =>
+    this.options().map((option) => this.keyOptionOf(option)),
+  );
+
+  /**
+   * Property keyManager
+   * @readonly
+   *
+   * @description
+   * Keyboard manager for the suggestion list.
+   *
+   * @type {ActiveDescendantKeyManager<KeyOption>}
+   */
+  private readonly keyManager: ActiveDescendantKeyManager<KeyOption> =
+    new ActiveDescendantKeyManager<KeyOption>(this.items, inject(Injector)).skipPredicate(
+      (item) => item.disabled === true,
+    );
+  // #endregion
+
+  // #region Constructor
+  /**
+   * Constructor
+   * @constructor
+   *
+   * @description
+   * Connects navigation and announces suggestion updates.
+   */
+  public constructor() {
+    const subscription: Subscription = this.keyManager.change.subscribe(() => {
+      const option: CwAutocompleteOption | null = this.keyManager.activeItem?.option ?? null;
       this.active.set(option);
       if (typeof option?.element.scrollIntoView === 'function') {
         option.element.scrollIntoView({ block: 'nearest' });
@@ -149,8 +511,8 @@ export class CwAutocomplete<T = unknown> implements AutocompleteHost {
     // "Accessibilité").
     effect(() => {
       if (!this.isOpen()) return;
-      const count = this.options().length;
-      const message = this.loading()
+      const count: number = this.options().length;
+      const message: string = this.loading()
         ? this.loadingText()
         : count === 0
           ? this.emptyText()(this.typed())
@@ -160,9 +522,21 @@ export class CwAutocomplete<T = unknown> implements AutocompleteHost {
       });
     });
   }
+  // #endregion
 
-  /** @internal Shows the panel against `origin`; `chosen` writes a chosen suggestion into the field. */
-  show(origin: HTMLElement, chosen: (option: CwAutocompleteOption) => void): void {
+  // #region Methods
+  /**
+   * Method show
+   *
+   * @description
+   * Opens the panel from the input and registers its selection callback.
+   *
+   * @internal
+   *
+   * @param {HTMLElement} origin - Input element anchoring the panel.
+   * @param {(option: CwAutocompleteOption) => void} chosen - Callback writing the selected suggestion to that input.
+   */
+  public show(origin: HTMLElement, chosen: (option: CwAutocompleteOption) => void): void {
     this.chosen = chosen;
     this.stack.open(this.stacked, origin);
     if (!this.isOpen()) this.entering.set(true);
@@ -178,8 +552,15 @@ export class CwAutocomplete<T = unknown> implements AutocompleteHost {
     });
   }
 
-  /** @internal Closes the panel; the typed text stays in the field. */
-  hide(): void {
+  /**
+   * Method hide
+   *
+   * @description
+   * Closes the suggestion panel.
+   *
+   * @internal
+   */
+  public hide(): void {
     if (!this.isOpen()) return;
     this.isOpen.set(false);
     this.stack.release(this.stacked);
@@ -189,8 +570,17 @@ export class CwAutocomplete<T = unknown> implements AutocompleteHost {
     });
   }
 
-  /** @internal Takes the typed text: emits `query`, sets the bold, clears the highlight. */
-  search(text: string): void {
+  /**
+   * Method search
+   *
+   * @description
+   * Updates the query and clears the highlighted suggestion.
+   *
+   * @internal
+   *
+   * @param {string} text - Query text to emit and highlight.
+   */
+  public search(text: string): void {
     if (this.isOpen()) this.entering.set(false);
     this.typed.set(text);
     this.query.emit(text);
@@ -199,8 +589,19 @@ export class CwAutocomplete<T = unknown> implements AutocompleteHost {
     this.active.set(null);
   }
 
-  /** @internal Moves the highlight with ↓ ↑; returns whether the key was handled. */
-  navigate(event: KeyboardEvent): boolean {
+  /**
+   * Method navigate
+   *
+   * @description
+   * Moves the highlighted suggestion with arrow keys.
+   *
+   * @internal
+   *
+   * @param {KeyboardEvent} event - Keyboard event containing an arrow key.
+   *
+   * @returns {boolean} Whether the key was handled as suggestion navigation.
+   */
+  public navigate(event: KeyboardEvent): boolean {
     if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return false;
     if (this.keyManager.activeItemIndex === -1) {
       if (event.key === 'ArrowDown') this.keyManager.setFirstItemActive();
@@ -210,29 +611,66 @@ export class CwAutocomplete<T = unknown> implements AutocompleteHost {
     return ɵnavigateList(this.keyManager, event, 'vertical');
   }
 
-  /** @internal Chooses the highlighted suggestion; returns whether there was one. */
-  chooseActive(): boolean {
-    const option = this.active();
+  /**
+   * Method chooseActive
+   *
+   * @description
+   * Chooses the highlighted suggestion when available.
+   *
+   * @internal
+   *
+   * @returns {boolean} Whether an enabled highlighted suggestion was selected.
+   */
+  public chooseActive(): boolean {
+    const option: CwAutocompleteOption | null = this.active();
     if (!option || option.disabled()) return false;
     this.choose(option);
     return true;
   }
 
-  /** @internal Chooses a suggestion: the field takes its text, `optionSelected` emits its value. */
-  choose(option: CwAutocompleteOption): void {
+  /**
+   * Method choose
+   *
+   * @description
+   * Chooses a suggestion and emits its value.
+   *
+   * @internal
+   *
+   * @param {CwAutocompleteOption} option - Enabled suggestion to choose.
+   */
+  public choose(option: CwAutocompleteOption): void {
     if (option.disabled()) return;
     this.chosen?.(option);
     this.optionSelected.emit(option.value() as T);
     this.hide();
   }
 
-  /** @internal Highlights a suggestion under the pointer. */
-  highlightOption(option: CwAutocompleteOption): void {
+  /**
+   * Method highlightOption
+   *
+   * @description
+   * Highlights a suggestion.
+   *
+   * @internal
+   *
+   * @param {CwAutocompleteOption} option - Suggestion to highlight.
+   */
+  public highlightOption(option: CwAutocompleteOption): void {
     this.keyManager.setActiveItem(this.keyOptionOf(option));
   }
 
+  /**
+   * Method keyOptionOf
+   *
+   * @description
+   * Returns a cached keyboard adapter for a suggestion.
+   *
+   * @param {CwAutocompleteOption} option - Suggestion to adapt for keyboard navigation.
+   *
+   * @returns {KeyOption} Cached keyboard adapter for the suggestion.
+   */
   private keyOptionOf(option: CwAutocompleteOption): KeyOption {
-    let item = this.keyOptions.get(option);
+    let item: KeyOption | undefined = this.keyOptions.get(option);
     if (!item) {
       // The suggestion's signal input `disabled` cannot be the `disabled: boolean` the manager reads.
       item = {
@@ -247,4 +685,5 @@ export class CwAutocomplete<T = unknown> implements AutocompleteHost {
     }
     return item;
   }
+  // #endregion
 }

@@ -1,9 +1,16 @@
-import { Component, signal } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { Component, signal, type WritableSignal } from '@angular/core';
+import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { CwButton } from '@cadenway/ui/components/button';
 
 import { CwButtonGroup } from './button-group.component';
 
+/**
+ * Class Host
+ * @class Host
+ *
+ * @description
+ * Test host containing horizontal and vertical groups of action buttons.
+ */
 @Component({
   imports: [CwButton, CwButtonGroup],
   template: `
@@ -18,11 +25,38 @@ import { CwButtonGroup } from './button-group.component';
   `,
 })
 class Host {
-  readonly created = signal(false);
+  // #region Properties
+  /**
+   * Property created
+   * @readonly
+   *
+   * @description
+   * Records whether the create button received a click.
+   *
+   * @type {WritableSignal<boolean>}
+   * @default false
+   */
+  public readonly created: WritableSignal<boolean> = signal(false);
+  // #endregion
 }
 
+/**
+ * Function group
+ *
+ * @description
+ * Finds a test button group by its accessible name.
+ *
+ * @param {HTMLElement} host - Container holding the groups.
+ * @param {string} name - Exact aria-label to match.
+ *
+ * @returns {HTMLElement} Matching group element.
+ *
+ * @throws {Error} When no group has the requested name.
+ */
 function group(host: HTMLElement, name: string): HTMLElement {
-  const found = host.querySelector<HTMLElement>(`[role="group"][aria-label="${name}"]`);
+  const found: HTMLElement | null = host.querySelector<HTMLElement>(
+    `[role="group"][aria-label="${name}"]`,
+  );
   if (!found) throw new Error(`No group named ${name}`);
   return found;
 }
@@ -32,17 +66,17 @@ describe('CwButtonGroup', () => {
   let component: Host;
 
   beforeEach(() => {
-    const fixture = TestBed.createComponent(Host);
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
     fixture.autoDetectChanges();
     host = fixture.nativeElement as HTMLElement;
     component = fixture.componentInstance;
   });
 
   it('is a named group whose buttons keep their own click and Tab stop', () => {
-    const create = group(host, 'Créer');
-    const button = Array.from(create.querySelectorAll('button')).find(
-      (element) => element.textContent.trim() === 'Créer une tâche',
-    );
+    const create: HTMLElement = group(host, 'Créer');
+    const button: HTMLButtonElement | undefined = Array.from(
+      create.querySelectorAll('button'),
+    ).find((element) => element.textContent.trim() === 'Créer une tâche');
 
     button?.click();
 

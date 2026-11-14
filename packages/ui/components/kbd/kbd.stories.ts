@@ -6,8 +6,13 @@ import { CwKbd } from './kbd.directive';
 import { CwShortcut } from './shortcut/shortcut.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Kbd, every state of its sheet in the Design System artifact, in the light and the dark theme.
  * Copy from the mockup (`App.dc.html`) and the sheet.
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Kbd',
@@ -16,10 +21,31 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration used for keyboard key and shortcut examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Locates the light-theme copy rendered by the shared Storybook preview decorator.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the theme examples.
+ *
+ * @returns {HTMLElement} Element containing the light-theme example.
+ *
+ * @throws {Error} When the expected light-theme scope is missing.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -50,7 +76,7 @@ export const CombinationAndSequence: Story = {
         <span class="text-xs text-muted-foreground">séquence</span>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     await expect(within(light(canvasElement)).getByText('G puis I')).toBeInTheDocument();
   },
 };
@@ -87,7 +113,7 @@ export const InTooltip: Story = {
         Rechercher <cw-shortcut keys="mod+K" variant="inverse" size="sm" />
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     await expect(within(light(canvasElement)).getByText('Contrôle K')).toBeInTheDocument();
   },
 };

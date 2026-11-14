@@ -16,8 +16,13 @@ import { expect, userEvent, within } from 'storybook/test';
 import { CwToggle } from './toggle.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Toggle, every state of its sheet in the Design System artifact, in the light and the dark theme.
  * Copy from the sheet's "Dans Cadenway" section (view toolbar, description editor).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Toggle',
@@ -38,10 +43,31 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration used for toggle examples and interactions.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Locates the light-theme copy rendered by the shared Storybook preview decorator.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the theme examples.
+ *
+ * @returns {HTMLElement} Element containing the light-theme example.
+ *
+ * @throws {Error} When the expected light-theme scope is missing.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -83,8 +109,8 @@ export const Disabled: Story = {
         <button cwToggle variant="outline" disabled [pressed]="true">Masquer les terminées</button>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const hide = within(light(canvasElement)).getByRole('button', {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const hide: HTMLElement = within(light(canvasElement)).getByRole('button', {
       name: 'Masquer les terminées',
     });
 
@@ -102,8 +128,8 @@ export const Keyboard: Story = {
         <button cwToggle size="sm" aria-label="Italique"><ng-icon name="phosphorTextItalicBold" /></button>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const bold = within(light(canvasElement)).getByRole('button', { name: 'Gras' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const bold: HTMLElement = within(light(canvasElement)).getByRole('button', { name: 'Gras' });
 
     await userEvent.tab();
     await expect(bold).toHaveFocus();

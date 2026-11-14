@@ -12,9 +12,14 @@ import { CwCardTitle } from './card-title/card-title.component';
 import { CwCard } from './card.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Card, every composition and state of its sheet in the Design System artifact, in the light and
  * the dark theme. Copy from the mockup (`App.dc.html`, settings). The task card of the board is
  * built by the web application, not here.
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Card',
@@ -37,10 +42,31 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration used for card examples and interactions.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Locates the light-theme copy rendered by the shared Storybook preview decorator.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the theme examples.
+ *
+ * @returns {HTMLElement} Element containing the light-theme example.
+ *
+ * @throws {Error} When the expected light-theme scope is missing.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -112,10 +138,13 @@ export const Interactive: Story = {
         <span class="text-xs text-muted-foreground" role="status">{{ opened }} ouverture(s)</span>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByText(text: string): HTMLElement;
+      getByRole(role: string): HTMLElement;
+    } = within(light(canvasElement));
     await userEvent.tab();
-    const card = scope.getByText('Maquetter la vue Calendrier').closest('cw-card');
+    const card: Element | null = scope.getByText('Maquetter la vue Calendrier').closest('cw-card');
     await expect(card).toHaveFocus();
     await userEvent.keyboard('{Enter}');
     await expect(scope.getByRole('status')).toHaveTextContent('1 ouverture(s)');
@@ -131,8 +160,10 @@ export const Selected: Story = {
         <cw-card role="option" size="sm" interactive selected>Espace Produit</cw-card>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const option = within(light(canvasElement)).getByRole('option', { name: 'Espace Produit' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const option: HTMLElement = within(light(canvasElement)).getByRole('option', {
+      name: 'Espace Produit',
+    });
     await expect(option).toHaveAttribute('aria-selected', 'true');
   },
 };

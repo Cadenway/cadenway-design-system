@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 
 import { CwToastService } from './toast.service';
+import type { CwToastAction } from './toast.types';
 
 // Without a toaster on the page the service still counts durations down and removes the toasts
 // at once when they close; the toaster's own behavior is in `toaster.component.spec.ts`.
@@ -16,12 +17,20 @@ describe('CwToastService', () => {
     vi.useRealTimers();
   });
 
+  /**
+   * Function titles
+   *
+   * @description
+   * Collects the titles of the toast records currently held by the service.
+   *
+   * @returns {string[]} Titles in their current display order.
+   */
   function titles(): string[] {
     return service.toasts().map((toast) => toast.title);
   }
 
   it('shows a toast with its tone and closes it after 6 s, as in the mockup', () => {
-    const id = service.success('Tâche archivée', {
+    const id: string = service.success('Tâche archivée', {
       description: "CAD-466 · Doc d'installation Docker",
     });
 
@@ -42,7 +51,7 @@ describe('CwToastService', () => {
 
   it('keeps an error and a loading toast until they are closed', () => {
     service.error("Impossible d'enregistrer");
-    const id = service.loading('Export de 120 tâches…');
+    const id: string = service.loading('Export de 120 tâches…');
 
     vi.advanceTimersByTime(60_000);
     expect(titles()).toEqual(["Impossible d'enregistrer", 'Export de 120 tâches…']);
@@ -62,17 +71,17 @@ describe('CwToastService', () => {
   });
 
   it('turns undo into an « Annuler » action', () => {
-    const undo = vi.fn();
+    const undo: () => void = vi.fn();
     service.success('Tâche déplacée vers Terminé', { undo });
 
-    const action = service.toasts()[0]?.action;
+    const action: CwToastAction | undefined = service.toasts()[0]?.action;
     expect(action?.label).toBe('Annuler');
     action?.run();
     expect(undo).toHaveBeenCalledOnce();
   });
 
   it('follows a promise in one toast, from loading to success', async () => {
-    const id = service.promise(Promise.resolve(120), {
+    const id: string = service.promise(Promise.resolve(120), {
       loading: 'Export de 120 tâches…',
       success: (count) => `Export prêt : ${String(count)} tâches`,
       error: 'Export interrompu',
@@ -103,7 +112,7 @@ describe('CwToastService', () => {
   });
 
   it('updates a toast in place and restarts its duration on a new tone', () => {
-    const id = service.loading('Synchronisation…');
+    const id: string = service.loading('Synchronisation…');
     vi.advanceTimersByTime(10_000);
 
     service.update(id, { tone: 'info', title: 'Synchronisation reprise' });

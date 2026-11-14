@@ -1,8 +1,12 @@
 import type { CwCalendarViewLabels } from './calendar-view.types';
 
 /**
- * The default texts of the calendar view, word for word from the Calendar View sheet and the mockup
- * (`App.dc.html`, vue Calendrier). A `labels` input overrides any of them.
+ * Constant CW_CALENDAR_VIEW_LABELS
+ *
+ * @description
+ * The default texts of the calendar view, word for word from the Calendar View sheet and the mockup (`App.dc.html`, vue Calendrier). A `labels` input overrides any of them.
+ *
+ * @type {CwCalendarViewLabels}
  */
 export const CW_CALENDAR_VIEW_LABELS: CwCalendarViewLabels = {
   today: 'Aujourd’hui',

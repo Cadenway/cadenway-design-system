@@ -11,8 +11,13 @@ import { expect, userEvent, within } from 'storybook/test';
 import { CwSwitch } from './switch.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Switch, every state of its sheet in the Design System artifact, in the light and the dark theme.
  * Copy from the sheet and the mockup (space notification settings in `App.dc.html`).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Switch',
@@ -25,10 +30,31 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration used for switch examples and interactions.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Locates the light-theme copy rendered by the shared Storybook preview decorator.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the theme examples.
+ *
+ * @returns {HTMLElement} Element containing the light-theme example.
+ *
+ * @throws {Error} When the expected light-theme scope is missing.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -105,8 +131,8 @@ export const Settings: Story = {
         </cw-field>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const sync = within(light(canvasElement)).getByRole('switch', {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const sync: HTMLElement = within(light(canvasElement)).getByRole('switch', {
       name: 'Synchroniser le calendrier',
     });
 
@@ -120,8 +146,8 @@ export const Keyboard: Story = {
   render: () => ({
     template: `<cw-switch ariaLabel="Notifications par e-mail" />`,
   }),
-  play: async ({ canvasElement }) => {
-    const mail = within(light(canvasElement)).getByRole('switch', {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const mail: HTMLElement = within(light(canvasElement)).getByRole('switch', {
       name: 'Notifications par e-mail',
     });
 

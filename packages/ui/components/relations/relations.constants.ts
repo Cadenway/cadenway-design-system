@@ -1,9 +1,14 @@
 import type { CwRelationsLabels } from './relations.types';
 
 /**
+ * Constant CW_RELATIONS_LABELS
+ *
+ * @description
  * The default French texts of `cw-relations` and `cw-relation-picker` (Relations sheet and preview
  * of the Design System artifact, mockup `App.dc.html`); the `labels` input overrides any of them.
  * The relation types themselves are the consumer's (`types`).
+ *
+ * @type {CwRelationsLabels}
  */
 export const CW_RELATIONS_LABELS: CwRelationsLabels = {
   title: 'Relations',

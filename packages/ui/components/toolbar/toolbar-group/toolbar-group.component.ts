@@ -1,6 +1,10 @@
-import { Component, ElementRef, inject, input } from '@angular/core';
+import { Component, ElementRef, inject, input, type InputSignal } from '@angular/core';
 
 /**
+ * Class CwToolbarGroup
+ * @class CwToolbarGroup
+ *
+ * @description
  * A family of controls of a `cw-toolbar`, such as Filtrer, Trier, Grouper (Toolbar sheet of the
  * Design System artifact): `role="group"` named by `ariaLabel`, 4 px between its controls.
  *
@@ -16,9 +20,28 @@ import { Component, ElementRef, inject, input } from '@angular/core';
   templateUrl: './toolbar-group.component.html',
 })
 export class CwToolbarGroup {
-  /** Accessible name of the group (« Affichage »). */
-  readonly ariaLabel = input('');
+  // #region Properties
+  /**
+   * Property ariaLabel
+   * @readonly
+   *
+   * @description
+   * Accessible name of the group.
+   *
+   * @type {InputSignal<string>}
+   */
+  public readonly ariaLabel: InputSignal<string> = input('');
 
-  /** The group element; the toolbar hides it when it is empty. Not public API. */
-  readonly ɵelement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  /**
+   * Property ɵelement
+   * @readonly
+   *
+   * @description
+   * Group element hidden by the toolbar when empty.
+   * @internal
+   *
+   * @type {HTMLElement}
+   */
+  public readonly ɵelement: HTMLElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  // #endregion
 }

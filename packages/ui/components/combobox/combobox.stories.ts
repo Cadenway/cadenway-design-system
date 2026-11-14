@@ -9,9 +9,14 @@ import { CwComboboxOption } from './combobox-option/combobox-option.component';
 import { CwCombobox } from './combobox.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Combobox, every state of its sheet in the Design System artifact, in the light and the dark
  * theme. The panel is a native popover inserted next to its trigger, so it takes the theme of its
  * scope. Copy from the sheet's preview (assignees, labels, invitation).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Combobox',
@@ -33,15 +38,42 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story for combobox examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Returns the light-theme story container.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing theme scopes.
+ *
+ * @returns {HTMLElement} Container for the light theme.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
-const PEOPLE = `
+/**
+ * Constant PEOPLE
+ *
+ * @description
+ * People options used in the examples.
+ *
+ * @type {string}
+ */
+const PEOPLE: string = `
   <cw-combobox-group label="Équipe Produit">
     <cw-combobox-option value="lea" [keywords]="['lea.martin@cadenway.fr']"><cw-avatar name="Léa Martin" size="xs" /> Léa Martin</cw-combobox-option>
     <cw-combobox-option value="karim"><cw-avatar name="Karim Benali" size="xs" /> Karim Benali</cw-combobox-option>
@@ -52,12 +84,30 @@ const PEOPLE = `
     <cw-combobox-option value="samuel" disabled><cw-avatar name="Samuel Roux" size="xs" /> Samuel Roux</cw-combobox-option>
   </cw-combobox-group>`;
 
-const LABELS = `
+/**
+ * Constant LABELS
+ *
+ * @description
+ * Label options used in the examples.
+ *
+ * @type {string}
+ */
+const LABELS: string = `
   <cw-combobox-option value="web">Mobile web</cw-combobox-option>
   <cw-combobox-option value="app">Application mobile</cw-combobox-option>
   <cw-combobox-option value="api">API publique</cw-combobox-option>`;
 
-const people = (count: number): string => `${String(count)} personnes`;
+/**
+ * Function people
+ *
+ * @description
+ * Formats the number of selected people.
+ *
+ * @param {number} count - Number of selected people.
+ *
+ * @returns {string} French summary displayed in the trigger.
+ */
+const people: (count: number) => string = (count: number): string => `${String(count)} personnes`;
 
 /** Closed: empty, one value, several values, disabled, and in error inside a field. */
 export const States: Story = {
@@ -126,10 +176,10 @@ export const NoResultInvite: Story = {
                      searchPlaceholder="Rechercher une personne…" ariaLabel="Assignés">${PEOPLE}</cw-combobox>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     await userEvent.click(within(light(canvasElement)).getByRole('combobox', { name: 'Assignés' }));
     await userEvent.keyboard('zoé');
-    const listbox = within(document.body).getByRole('listbox', { name: 'Assignés' });
+    const listbox: HTMLElement = within(document.body).getByRole('listbox', { name: 'Assignés' });
     // The panel fades in for 300 ms (`animate-menu-in`): it starts at opacity 0.
     await waitFor(() =>
       expect(
@@ -150,12 +200,12 @@ export const SearchAndCreate: Story = {
                      searchPlaceholder="Rechercher une étiquette…" ariaLabel="Étiquettes">${LABELS}</cw-combobox>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     await userEvent.click(
       within(light(canvasElement)).getByRole('combobox', { name: 'Étiquettes' }),
     );
     await userEvent.keyboard('mobile');
-    const listbox = within(document.body).getByRole('listbox', { name: 'Étiquettes' });
+    const listbox: HTMLElement = within(document.body).getByRole('listbox', { name: 'Étiquettes' });
     await expect(within(listbox).getAllByRole('option')).toHaveLength(3);
     // The panel fades in for 300 ms (`animate-menu-in`): it starts at opacity 0.
     await waitFor(() =>
@@ -174,22 +224,26 @@ export const Keyboard: Story = {
         <cw-combobox placeholder="Choisir une personne" searchPlaceholder="Rechercher une personne…" ariaLabel="Responsable">${PEOPLE}</cw-combobox>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const trigger = within(light(canvasElement)).getByRole('combobox', { name: 'Responsable' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const trigger: HTMLElement = within(light(canvasElement)).getByRole('combobox', {
+      name: 'Responsable',
+    });
     await userEvent.click(trigger);
     await userEvent.keyboard('{Escape}');
     await expect(trigger).toHaveAttribute('aria-expanded', 'false');
     await expect(trigger).toHaveFocus();
 
     await userEvent.keyboard('{ArrowDown}');
-    const search = within(document.body).getByRole('combobox', {
+    const search: HTMLElement = within(document.body).getByRole('combobox', {
       name: 'Rechercher une personne…',
     });
     await waitFor(() => expect(search).toHaveFocus());
 
     await userEvent.keyboard('ines');
-    const listbox = within(document.body).getByRole('listbox', { name: 'Responsable' });
-    const ines = within(listbox).getByRole('option', { name: /Inès Duval/ });
+    const listbox: HTMLElement = within(document.body).getByRole('listbox', {
+      name: 'Responsable',
+    });
+    const ines: HTMLElement = within(listbox).getByRole('option', { name: /Inès Duval/ });
     await expect(search).toHaveAttribute('aria-activedescendant', ines.id);
 
     await userEvent.keyboard('{Enter}');

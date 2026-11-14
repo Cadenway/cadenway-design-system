@@ -7,6 +7,7 @@
 import { ɵcreateMarked, ɵwriteMention } from '@cadenway/ui/components/markdown';
 import {
   type AnyExtension,
+  type ChainedCommands,
   type Editor,
   Extension,
   type Mark,
@@ -27,58 +28,276 @@ import { Suggestion, type SuggestionKeyDownProps, type SuggestionProps } from '@
 
 import type { CwBlockKind, CwBlockType, CwMentionPerson } from './block-editor.types';
 
-/** The callbacks of a suggestion menu, given by the component that draws it. */
+/**
+ * Interface SuggestionRenderer
+ *
+ * @description
+ * The callbacks of a suggestion menu, given by the component that draws it.
+ */
 export interface SuggestionRenderer<I> {
+  // #region Methods
+  /**
+   * Method start
+   *
+   * @description
+   * Opens the suggestion menu.
+   *
+   * @param {SuggestionProps<I, I>} props - Suggestion state or keyboard event.
+   */
   start(props: SuggestionProps<I, I>): void;
+
+  /**
+   * Method update
+   *
+   * @description
+   * Updates the suggestion menu.
+   *
+   * @param {SuggestionProps<I, I>} props - Suggestion state or keyboard event.
+   */
   update(props: SuggestionProps<I, I>): void;
+
+  /**
+   * Method keyDown
+   *
+   * @description
+   * Handles a key event in the suggestion menu.
+   *
+   * @param {SuggestionKeyDownProps} props - Suggestion state or keyboard event.
+   * @returns {boolean} Whether the key event was handled.
+   */
   keyDown(props: SuggestionKeyDownProps): boolean;
+
+  /**
+   * Method exit
+   *
+   * @description
+   * Closes the suggestion menu.
+   */
   exit(): void;
+  // #endregion
 }
 
-/** What the extensions ask of the component. */
+/**
+ * Interface EditorHooks
+ *
+ * @description
+ * What the extensions ask of the component.
+ */
 export interface EditorHooks {
-  /** Placeholder of an empty node; `alone` when it is the only block of the document. */
+  // #region Methods
+  /**
+   * Method placeholder
+   *
+   * @description
+   * Placeholder of an empty node; `alone` when it is the only block of the document.
+   *
+   * @param {ProseMirrorNode} node - Document node to inspect.
+   * @param {boolean} alone - Whether the node is the only document block.
+   * @returns {string} Placeholder for the node.
+   */
   placeholder(node: ProseMirrorNode, alone: boolean): string;
-  /** Name of a task box from its text and state. */
+
+  /**
+   * Method checkboxLabel
+   *
+   * @description
+   * Name of a task box from its text and state.
+   *
+   * @param {string} text - Task text.
+   * @param {boolean} checked - Whether the task is checked.
+   * @returns {string} Accessible task checkbox label.
+   */
   checkboxLabel(text: string, checked: boolean): string;
-  /** Maximum number of characters, read when the editor starts. */
+  // #endregion
+  // #region Properties
+  /**
+   * Property maxLength
+   *
+   * @description
+   * Maximum number of characters, read when the editor starts.
+   *
+   * @type {number | null}
+   */
   maxLength: number | null;
-  /** The « / » entries matching a query; empty disables the menu. */
+  // #endregion
+  // #region Methods
+  /**
+   * Method blockItems
+   *
+   * @description
+   * The « / » entries matching a query; empty disables the menu.
+   *
+   * @param {string} query - Query used to filter suggestions.
+   * @returns {CwBlockType[]} Block types matching the query.
+   */
   blockItems(query: string): CwBlockType[];
+
+  /**
+   * Method blocksEnabled
+   *
+   * @description
+   * Checks whether block suggestions are enabled.
+   * @returns {boolean} Whether block suggestions are enabled.
+   */
   blocksEnabled(): boolean;
+  // #endregion
+  // #region Properties
+  /**
+   * Property blockMenu
+   *
+   * @description
+   * Renderer for block suggestions.
+   *
+   * @type {SuggestionRenderer<CwBlockType>}
+   */
   blockMenu: SuggestionRenderer<CwBlockType>;
-  /** The people matching a query. */
+  // #endregion
+  // #region Methods
+  /**
+   * Method mentionItems
+   *
+   * @description
+   * The people matching a query.
+   *
+   * @param {string} query - Query used to filter suggestions.
+   * @param {AbortSignal} signal - Signal used to cancel the search.
+   * @returns {Promise<CwMentionPerson[]>} Promise resolving to matching people.
+   */
   mentionItems(query: string, signal: AbortSignal): Promise<CwMentionPerson[]>;
+
+  /**
+   * Method mentionsEnabled
+   *
+   * @description
+   * Checks whether mention suggestions are enabled.
+   * @returns {boolean} Whether mention suggestions are enabled.
+   */
   mentionsEnabled(): boolean;
+  // #endregion
+  // #region Properties
+  /**
+   * Property mentionMenu
+   *
+   * @description
+   * Renderer for mention suggestions.
+   *
+   * @type {SuggestionRenderer<CwMentionPerson>}
+   */
   mentionMenu: SuggestionRenderer<CwMentionPerson>;
-  /** Ctrl + Entrée (⌘ + Entrée). */
+  // #endregion
+  // #region Methods
+  /**
+   * Method submit
+   *
+   * @description
+   * Ctrl + Entrée (⌘ + Entrée).
+   */
   submit(): void;
-  /** Ctrl + K. */
+
+  /**
+   * Method link
+   *
+   * @description
+   * Ctrl + K.
+   */
   link(): void;
+  // #endregion
 }
 
 /* Bold is `**text**` only, `__text__` is underline (cw-brick-recipes, the shared `__underline__`
    rule). Tiptap's Bold also takes `__`: its input and paste rules are replaced by the star ones and
    Underline gets the underscore ones. Patterns of @tiptap/extension-bold. */
-const STAR_INPUT = /(?:^|\s)(\*\*(?!\s+\*\*)((?:[^*]+))\*\*(?!\s+\*\*))$/;
-const STAR_PASTE = /(?:^|\s)(\*\*(?!\s+\*\*)((?:[^*]+))\*\*(?!\s+\*\*))/g;
-const UNDERSCORE_INPUT = /(?:^|\s)(__(?!\s+__)((?:[^_]+))__(?!\s+__))$/;
-const UNDERSCORE_PASTE = /(?:^|\s)(__(?!\s+__)((?:[^_]+))__(?!\s+__))/g;
+/**
+ * Constant STAR_INPUT
+ *
+ * @description
+ * Input pattern for bold text.
+ *
+ * @type {RegExp}
+ */
+const STAR_INPUT: RegExp = /(?:^|\s)(\*\*(?!\s+\*\*)((?:[^*]+))\*\*(?!\s+\*\*))$/;
+/**
+ * Constant STAR_PASTE
+ *
+ * @description
+ * Paste pattern for bold text.
+ *
+ * @type {RegExp}
+ */
+const STAR_PASTE: RegExp = /(?:^|\s)(\*\*(?!\s+\*\*)((?:[^*]+))\*\*(?!\s+\*\*))/g;
+/**
+ * Constant UNDERSCORE_INPUT
+ *
+ * @description
+ * Input pattern for underlined text.
+ *
+ * @type {RegExp}
+ */
+const UNDERSCORE_INPUT: RegExp = /(?:^|\s)(__(?!\s+__)((?:[^_]+))__(?!\s+__))$/;
+/**
+ * Constant UNDERSCORE_PASTE
+ *
+ * @description
+ * Paste pattern for underlined text.
+ *
+ * @type {RegExp}
+ */
+const UNDERSCORE_PASTE: RegExp = /(?:^|\s)(__(?!\s+__)((?:[^_]+))__(?!\s+__))/g;
 
 /* Mockup App.dc.html: links accept http(s), mailto and tel addresses, or a relative one. */
-const SAFE_LINK = /^(?:https?:|mailto:|tel:|\/|#|\?)/i;
+/**
+ * Constant SAFE_LINK
+ *
+ * @description
+ * Allowed explicit link schemes and relative prefixes.
+ *
+ * @type {RegExp}
+ */
+const SAFE_LINK: RegExp = /^(?:https?:|mailto:|tel:|\/|#|\?)/i;
 
+/**
+ * Function isSafeLink
+ *
+ * @description
+ * Checks whether a link uses an allowed scheme or relative address.
+ *
+ * @param {string} url - Link address to validate.
+ * @returns {boolean} Whether the link is allowed.
+ */
 function isSafeLink(url: string): boolean {
-  const compact = url.trim();
+  const compact: string = url.trim();
   return SAFE_LINK.test(compact) || !/^[a-z][a-z0-9+.-]*:/i.test(compact);
 }
 
 /* The mention chip of the CommentComposer sheet (anatomy 4): neutral, never colored. */
-const MENTION_CLASSES =
+/**
+ * Constant MENTION_CLASSES
+ *
+ * @description
+ * Classes applied to an inserted mention.
+ *
+ * @type {string}
+ */
+const MENTION_CLASSES: string =
   'rounded-sm bg-secondary px-1 py-px font-medium whitespace-nowrap text-secondary-foreground';
 /* The token being typed while its menu is open (CommentComposer sheet, anatomy 5). */
-const TOKEN_CLASSES = 'rounded-sm bg-selected px-0.5';
+/**
+ * Constant TOKEN_CLASSES
+ *
+ * @description
+ * Classes applied to a suggestion token.
+ *
+ * @type {string}
+ */
+const TOKEN_CLASSES: string = 'rounded-sm bg-selected px-0.5';
 
+/**
+ * Function cadenwayKit
+ *
+ * @description
+ * Configures the base editor kit and Markdown mark rules.
+ * @returns {AnyExtension} Configured base editor extension.
+ */
 function cadenwayKit(): AnyExtension {
   return StarterKit.configure({
     link: {
@@ -130,7 +349,15 @@ function cadenwayKit(): AnyExtension {
 }
 
 /* A mention: an atom inline node, stored as `@[label](id)` (the shared grammar of cw-markdown). */
-const Mention = Node.create({
+/**
+ * Constant Mention
+ *
+ * @description
+ * Tiptap node for an inline Markdown mention.
+ *
+ * @type {Node<any, any>}
+ */
+const Mention: Node = Node.create({
   name: 'mention',
   group: 'inline',
   inline: true,
@@ -156,7 +383,13 @@ const Mention = Node.create({
     return [{ tag: 'span[data-mention]' }];
   },
 
-  renderHTML({ node, HTMLAttributes }) {
+  renderHTML({
+    node,
+    HTMLAttributes,
+  }: {
+    node: ProseMirrorNode;
+    HTMLAttributes: Record<string, unknown>;
+  }) {
     return [
       'span',
       mergeAttributes(HTMLAttributes, { 'data-mention': '', class: MENTION_CLASSES }),
@@ -164,7 +397,7 @@ const Mention = Node.create({
     ];
   },
 
-  renderText({ node }) {
+  renderText({ node }: { node: ProseMirrorNode }) {
     return `@${String(node.attrs['label'])}`;
   },
 
@@ -178,7 +411,31 @@ const Mention = Node.create({
     ɵwriteMention(String(node.attrs?.['id'] ?? ''), String(node.attrs?.['label'] ?? '')),
 });
 
-function renderer<I>(target: SuggestionRenderer<I>) {
+/**
+ * Type SuggestionRenderFactory
+ *
+ * @description
+ * Factory for Tiptap suggestion lifecycle callbacks.
+ *
+ * @type {() => { onStart: (props: SuggestionProps<I, I>) => void; onUpdate: (props: SuggestionProps<I, I>) => void; onKeyDown: (props: SuggestionKeyDownProps) => boolean; onExit: () => void }}
+ */
+type SuggestionRenderFactory<I> = () => {
+  onStart: (props: SuggestionProps<I, I>) => void;
+  onUpdate: (props: SuggestionProps<I, I>) => void;
+  onKeyDown: (props: SuggestionKeyDownProps) => boolean;
+  onExit: () => void;
+};
+
+/**
+ * Function renderer
+ *
+ * @description
+ * Adapts suggestion callbacks to the Tiptap renderer.
+ *
+ * @param {SuggestionRenderer<I>} target - Suggestion menu callbacks to adapt.
+ * @returns {SuggestionRenderFactory<I>} Factory for the suggestion renderer callbacks.
+ */
+function renderer<I>(target: SuggestionRenderer<I>): SuggestionRenderFactory<I> {
   return () => ({
     onStart: (props: SuggestionProps<I, I>) => {
       target.start(props);
@@ -192,9 +449,17 @@ function renderer<I>(target: SuggestionRenderer<I>) {
     },
   });
 }
-
 /* The « / » and « @ » menus, and the shortcuts of the mockup that Tiptap does not bind. A high
    priority puts their key handling before the block keymaps (Enter splits a block otherwise). */
+/**
+ * Function cadenwayBehavior
+ *
+ * @description
+ * Configures suggestion menus and editor keyboard shortcuts.
+ *
+ * @param {EditorHooks} hooks - Callbacks and settings supplied by the editor.
+ * @returns {AnyExtension} Configured behavior extension.
+ */
 function cadenwayBehavior(hooks: EditorHooks): AnyExtension {
   return Extension.create({
     name: 'cadenwayBehavior',
@@ -225,9 +490,18 @@ function cadenwayBehavior(hooks: EditorHooks): AnyExtension {
           startOfLine: true,
           decorationClass: TOKEN_CLASSES,
           floatingUi: { strategy: 'fixed' },
-          allow: ({ editor }) => hooks.blocksEnabled() && !editor.isActive('codeBlock'),
-          items: ({ query }) => hooks.blockItems(query),
-          command: ({ editor, range, props }) => {
+          allow: ({ editor }: { editor: Editor }) =>
+            hooks.blocksEnabled() && !editor.isActive('codeBlock'),
+          items: ({ query }: { query: string }) => hooks.blockItems(query),
+          command: ({
+            editor,
+            range,
+            props,
+          }: {
+            editor: Editor;
+            range: Range;
+            props: CwBlockType;
+          }) => {
             applyBlock(editor, props.kind, range);
           },
           render: renderer(hooks.blockMenu),
@@ -239,9 +513,19 @@ function cadenwayBehavior(hooks: EditorHooks): AnyExtension {
           decorationClass: TOKEN_CLASSES,
           floatingUi: { strategy: 'fixed' },
           debounce: 120,
-          allow: ({ editor }) => hooks.mentionsEnabled() && !editor.isActive('codeBlock'),
-          items: ({ query, signal }) => hooks.mentionItems(query, signal),
-          command: ({ editor, range, props }) => {
+          allow: ({ editor }: { editor: Editor }) =>
+            hooks.mentionsEnabled() && !editor.isActive('codeBlock'),
+          items: ({ query, signal }: { query: string; signal: AbortSignal }) =>
+            hooks.mentionItems(query, signal),
+          command: ({
+            editor,
+            range,
+            props,
+          }: {
+            editor: Editor;
+            range: Range;
+            props: CwMentionPerson;
+          }) => {
             editor
               .chain()
               .focus()
@@ -259,9 +543,13 @@ function cadenwayBehavior(hooks: EditorHooks): AnyExtension {
 }
 
 /**
- * The extensions of the editor: StarterKit (Link and Underline configured, Bold and Underline
- * following the Cadenway grammar), task lists, placeholder, character count, mentions, the « / »
- * and « @ » menus, and Markdown storage through the `marked` instance of `@cadenway/ui/components/markdown`.
+ * Function createExtensions
+ *
+ * @description
+ * The extensions of the editor: StarterKit (Link and Underline configured, Bold and Underline following the Cadenway grammar), task lists, placeholder, character count, mentions, the « / » and « @ » menus, and Markdown storage through the `marked` instance of `@cadenway/ui/components/markdown`.
+ *
+ * @param {EditorHooks} hooks - Callbacks and settings supplied by the editor.
+ * @returns {AnyExtension[]} Extensions used by the editor.
  */
 export function createExtensions(hooks: EditorHooks): AnyExtension[] {
   return [
@@ -273,7 +561,8 @@ export function createExtensions(hooks: EditorHooks): AnyExtension[] {
     }),
     Placeholder.configure({
       showOnlyCurrent: true,
-      placeholder: ({ editor, node }) => hooks.placeholder(node, editor.isEmpty),
+      placeholder: ({ editor, node }: { editor: Editor; node: ProseMirrorNode }) =>
+        hooks.placeholder(node, editor.isEmpty),
     }),
     CharacterCount.configure({ limit: hooks.maxLength }),
     Mention,
@@ -288,7 +577,15 @@ export function createExtensions(hooks: EditorHooks): AnyExtension[] {
   ];
 }
 
-/** The block under the selection, as the toolbar and the « / » menu name it. */
+/**
+ * Function activeBlock
+ *
+ * @description
+ * The block under the selection, as the toolbar and the « / » menu name it.
+ *
+ * @param {Editor} editor - Editor whose selection is inspected or changed.
+ * @returns {CwBlockKind} Kind of the block under the selection.
+ */
 export function activeBlock(editor: Editor): CwBlockKind {
   if (editor.isActive('codeBlock')) return 'code';
   if (editor.isActive('heading', { level: 1 })) return 'h1';
@@ -302,12 +599,17 @@ export function activeBlock(editor: Editor): CwBlockKind {
 }
 
 /**
- * Turns the current block into `kind` (mockup App.dc.html, `setType`): the block is first brought
- * back to a paragraph, out of any list or quote, then converted. `range` (the typed « / ») is
- * removed first. A separator is inserted after the block.
+ * Function applyBlock
+ *
+ * @description
+ * Turns the current block into `kind` (mockup App.dc.html, `setType`): the block is first brought back to a paragraph, out of any list or quote, then converted. `range` (the typed « / ») is removed first. A separator is inserted after the block.
+ *
+ * @param {Editor} editor - Editor whose selection is inspected or changed.
+ * @param {CwBlockKind} kind - Block kind to apply.
+ * @param {Range} range - Typed suggestion range to remove before applying the block.
  */
 export function applyBlock(editor: Editor, kind: CwBlockKind, range?: Range): void {
-  const chain = editor.chain().focus();
+  const chain: ChainedCommands = editor.chain().focus();
   if (range) chain.deleteRange(range);
   if (kind === 'hr') {
     chain.setHorizontalRule().run();

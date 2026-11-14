@@ -1,5 +1,5 @@
-import { Component, signal } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { Component, signal, type WritableSignal } from '@angular/core';
+import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { CwButton } from '@cadenway/ui/components/button';
 
 import { CwEmptyContent } from './empty-content/empty-content.component';
@@ -9,6 +9,13 @@ import { CwEmptyMedia } from './empty-media/empty-media.component';
 import { CwEmptyTitle } from './empty-title/empty-title.component';
 import { CwEmpty } from './empty.component';
 
+/**
+ * Class Host
+ * @class Host
+ *
+ * @description
+ * Test host composing an error alert from empty-state parts and a retry action.
+ */
 @Component({
   imports: [
     CwEmpty,
@@ -35,25 +42,39 @@ import { CwEmpty } from './empty.component';
   `,
 })
 class Host {
-  readonly retries = signal(0);
+  // #region Properties
+  /**
+   * Property retries
+   * @readonly
+   *
+   * @description
+   * Counts clicks received by the projected retry button.
+   *
+   * @type {WritableSignal<number>}
+   * @default 0
+   */
+  public readonly retries: WritableSignal<number> = signal(0);
+  // #endregion
 }
 
 describe('CwEmpty', () => {
   it('reads as its title and description, the media hidden', () => {
-    const fixture = TestBed.createComponent(Host);
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
     fixture.detectChanges();
-    const alert = (fixture.nativeElement as HTMLElement).querySelector('[role="alert"]');
-    const media = alert?.querySelector('[aria-hidden="true"]');
+    const alert: Element | null = (fixture.nativeElement as HTMLElement).querySelector(
+      '[role="alert"]',
+    );
+    const media: Element | null | undefined = alert?.querySelector('[aria-hidden="true"]');
 
     expect(media?.getAttribute('data-tone')).toBe('destructive');
     expect(alert?.textContent).toContain('Impossible de charger les tâches');
   });
 
   it('leaves the focus to its projected actions', () => {
-    const fixture = TestBed.createComponent(Host);
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
     fixture.detectChanges();
-    const host = fixture.nativeElement as HTMLElement;
-    const retry = host.querySelector('button');
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    const retry: HTMLButtonElement | null = host.querySelector('button');
 
     retry?.click();
 

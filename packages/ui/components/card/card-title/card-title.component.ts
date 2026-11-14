@@ -1,6 +1,12 @@
 import { Component } from '@angular/core';
 
-/** The title of a card, `text-base font-semibold` (14 px); it names the block. */
+/**
+ * Class CwCardTitle
+ * @class CwCardTitle
+ *
+ * @description
+ * Names the card block using the Card sheet's semibold title style.
+ */
 @Component({
   selector: 'cw-card-title',
   host: { class: 'col-start-1 block text-base leading-5 font-semibold' },

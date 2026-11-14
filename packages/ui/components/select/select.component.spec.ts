@@ -1,7 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { FormField, form, required } from '@angular/forms/signals';
+import { FormField, form, required, type FieldTree } from '@angular/forms/signals';
 
 import { CwSelectEmpty } from './select-empty/select-empty.component';
 import { CwSelectGroup } from './select-group/select-group.component';
@@ -9,8 +9,21 @@ import { CwSelectOption } from './select-option/select-option.component';
 import { CwSelectSeparator } from './select-separator/select-separator.component';
 import { CwSelect } from './select.component';
 
+/**
+ * Function combobox
+ *
+ * @description
+ * Finds a select trigger by its accessible name.
+ *
+ * @param {HTMLElement} host - Container holding the trigger.
+ * @param {string} name - Expected accessible name.
+ *
+ * @returns {HTMLButtonElement} Matching trigger button.
+ */
 function combobox(host: HTMLElement, name: string): HTMLButtonElement {
-  const found = Array.from(host.querySelectorAll<HTMLButtonElement>('[role="combobox"]')).find(
+  const found: HTMLButtonElement | undefined = Array.from(
+    host.querySelectorAll<HTMLButtonElement>('[role="combobox"]'),
+  ).find(
     (element) =>
       element.getAttribute('aria-label') === name ||
       host.querySelector(`label[for="${element.id}"]`)?.textContent.trim() === name,
@@ -19,24 +32,57 @@ function combobox(host: HTMLElement, name: string): HTMLButtonElement {
   return found;
 }
 
+/**
+ * Function listbox
+ *
+ * @description
+ * Returns the currently open listbox.
+ *
+ * @returns {HTMLElement | null} Open listbox, or null when no listbox is present.
+ */
 function listbox(): HTMLElement | null {
   return document.querySelector<HTMLElement>('[role="listbox"]');
 }
 
+/**
+ * Function option
+ *
+ * @description
+ * Finds an option by its text.
+ *
+ * @param {string} name - Visible option text to find.
+ *
+ * @returns {HTMLElement} Matching option element.
+ */
 function option(name: string): HTMLElement {
-  const found = Array.from(document.querySelectorAll<HTMLElement>('[role="option"]')).find(
-    (element) => element.textContent.trim() === name,
-  );
+  const found: HTMLElement | undefined = Array.from(
+    document.querySelectorAll<HTMLElement>('[role="option"]'),
+  ).find((element) => element.textContent.trim() === name);
   if (!found) throw new Error(`No option named ${name}`);
   return found;
 }
 
+/**
+ * Function key
+ *
+ * @description
+ * Dispatches a keyboard event to the trigger.
+ *
+ * @param {HTMLElement} target - Trigger receiving the event.
+ * @param {string} value - Keyboard key to dispatch.
+ */
 function key(target: HTMLElement, value: string): void {
   target.dispatchEvent(
     new KeyboardEvent('keydown', { key: value, bubbles: true, cancelable: true }),
   );
 }
 
+/**
+ * Component ModelHost
+ *
+ * @description
+ * Exercises select models and option navigation.
+ */
 @Component({
   imports: [CwSelect, CwSelectGroup, CwSelectOption, CwSelectSeparator, CwSelectEmpty],
   template: `
@@ -63,8 +109,29 @@ function key(target: HTMLElement, value: string): void {
   `,
 })
 class ModelHost {
-  readonly status = signal<string | null>(null);
-  readonly open = signal(false);
+  // #region Properties
+  /**
+   * Property status
+   * @readonly
+   *
+   * @description
+   * Selected status value.
+   *
+   * @type {WritableSignal<string | null>}
+   */
+  public readonly status: WritableSignal<string | null> = signal<string | null>(null);
+
+  /**
+   * Property open
+   * @readonly
+   *
+   * @description
+   * Whether the select panel is open.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly open: WritableSignal<boolean> = signal(false);
+  // #endregion
 }
 
 describe('CwSelect', () => {
@@ -82,7 +149,7 @@ describe('CwSelect', () => {
     });
 
     it('shows the placeholder, opens on click and chooses an option', async () => {
-      const trigger = combobox(host, 'Statut');
+      const trigger: HTMLButtonElement = combobox(host, 'Statut');
       expect(trigger.textContent.trim()).toBe('Choisir un statut');
       expect(trigger.hasAttribute('data-placeholder')).toBe(true);
       expect(trigger.getAttribute('aria-expanded')).toBe('false');
@@ -111,8 +178,10 @@ describe('CwSelect', () => {
       expect(option('Bloqué').getAttribute('aria-selected')).toBe('true');
       expect(option('En cours').getAttribute('aria-selected')).toBe('false');
       expect(option('En attente').getAttribute('aria-disabled')).toBe('true');
-      const groups = Array.from(document.querySelectorAll<HTMLElement>('[role="group"]'));
-      const names = groups.map(
+      const groups: HTMLElement[] = Array.from(
+        document.querySelectorAll<HTMLElement>('[role="group"]'),
+      );
+      const names: (string | undefined)[] = groups.map(
         (group) =>
           document.getElementById(group.getAttribute('aria-labelledby') ?? '')?.textContent,
       );
@@ -122,7 +191,7 @@ describe('CwSelect', () => {
     it('opens with the arrows on the chosen option and moves past disabled ones', async () => {
       component.status.set('todo');
       await fixture.whenStable();
-      const trigger = combobox(host, 'Statut');
+      const trigger: HTMLButtonElement = combobox(host, 'Statut');
 
       key(trigger, 'ArrowDown');
       await fixture.whenStable();
@@ -144,7 +213,7 @@ describe('CwSelect', () => {
     });
 
     it('jumps to the enabled option that starts with the typed letters', async () => {
-      const trigger = combobox(host, 'Statut');
+      const trigger: HTMLButtonElement = combobox(host, 'Statut');
       key(trigger, 'Enter');
       await fixture.whenStable();
 
@@ -161,7 +230,7 @@ describe('CwSelect', () => {
     it('closes on Escape without changing the value', async () => {
       component.status.set('todo');
       await fixture.whenStable();
-      const trigger = combobox(host, 'Statut');
+      const trigger: HTMLButtonElement = combobox(host, 'Statut');
 
       key(trigger, ' ');
       await fixture.whenStable();
@@ -175,7 +244,7 @@ describe('CwSelect', () => {
     });
 
     it('closes on a click outside', async () => {
-      const trigger = combobox(host, 'Statut');
+      const trigger: HTMLButtonElement = combobox(host, 'Statut');
       trigger.click();
       await fixture.whenStable();
       expect(listbox()).not.toBeNull();
@@ -201,11 +270,44 @@ describe('CwSelect', () => {
   });
 
   it('matches object values with compareWith', async () => {
+    /**
+     * Interface Sprint
+     *
+     * @description
+     * Object value used to test custom comparison.
+     */
     interface Sprint {
+      // #region Properties
+      /**
+       * Property id
+       * @readonly
+       *
+       * @description
+       * Identifier used for comparison.
+       *
+       * @type {number}
+       */
       readonly id: number;
+
+      /**
+       * Property name
+       * @readonly
+       *
+       * @description
+       * Display name of the sprint.
+       *
+       * @type {string}
+       */
       readonly name: string;
+      // #endregion
     }
 
+    /**
+     * Component ObjectHost
+     *
+     * @description
+     * Exercises custom comparison of object values.
+     */
     @Component({
       imports: [CwSelect, CwSelectOption],
       template: `
@@ -217,15 +319,50 @@ describe('CwSelect', () => {
       `,
     })
     class ObjectHost {
-      readonly sprints: Sprint[] = [
+      // #region Properties
+      /**
+       * Property sprints
+       * @readonly
+       *
+       * @description
+       * Available object values.
+       *
+       * @type {Sprint[]}
+       */
+      public readonly sprints: Sprint[] = [
         { id: 14, name: 'Sprint 14' },
         { id: 15, name: 'Sprint 15' },
       ];
-      readonly sprint = signal<Sprint | null>({ id: 15, name: 'Sprint 15' });
-      readonly sameId = (a: Sprint, b: Sprint): boolean => a.id === b.id;
+
+      /**
+       * Property sprint
+       * @readonly
+       *
+       * @description
+       * Selected sprint value.
+       *
+       * @type {WritableSignal<Sprint | null>}
+       */
+      public readonly sprint: WritableSignal<Sprint | null> = signal<Sprint | null>({
+        id: 15,
+        name: 'Sprint 15',
+      });
+
+      /**
+       * Property sameId
+       * @readonly
+       *
+       * @description
+       * Compares sprint values by identifier.
+       *
+       * @type {(a: Sprint, b: Sprint) => boolean}
+       */
+      public readonly sameId: (a: Sprint, b: Sprint) => boolean = (a: Sprint, b: Sprint): boolean =>
+        a.id === b.id;
+      // #endregion
     }
 
-    const fixture = TestBed.createComponent(ObjectHost);
+    const fixture: ComponentFixture<ObjectHost> = TestBed.createComponent(ObjectHost);
     fixture.autoDetectChanges();
     await fixture.whenStable();
 
@@ -235,6 +372,12 @@ describe('CwSelect', () => {
   });
 
   it('is the value accessor of a reactive form control and reports its invalid state', async () => {
+    /**
+     * Component ReactiveHost
+     *
+     * @description
+     * Exercises the reactive forms value accessor.
+     */
     @Component({
       imports: [CwSelect, CwSelectOption, ReactiveFormsModule],
       template: `
@@ -245,15 +388,26 @@ describe('CwSelect', () => {
       `,
     })
     class ReactiveHost {
-      readonly priority = new FormControl<string | null>(null, {
+      // #region Properties
+      /**
+       * Property priority
+       * @readonly
+       *
+       * @description
+       * Reactive form control for priority.
+       *
+       * @type {FormControl<string | null>}
+       */
+      public readonly priority: FormControl<string | null> = new FormControl<string | null>(null, {
         validators: [(control) => Validators.required(control)],
       });
+      // #endregion
     }
 
-    const fixture = TestBed.createComponent(ReactiveHost);
+    const fixture: ComponentFixture<ReactiveHost> = TestBed.createComponent(ReactiveHost);
     fixture.autoDetectChanges();
     await fixture.whenStable();
-    const trigger = combobox(fixture.nativeElement as HTMLElement, 'Priorité');
+    const trigger: HTMLButtonElement = combobox(fixture.nativeElement as HTMLElement, 'Priorité');
 
     fixture.componentInstance.priority.setValue('basse');
     await fixture.whenStable();
@@ -276,6 +430,12 @@ describe('CwSelect', () => {
   });
 
   it('is a Signal Forms value control', async () => {
+    /**
+     * Component SignalHost
+     *
+     * @description
+     * Exercises the Signal Forms value control.
+     */
     @Component({
       imports: [CwSelect, CwSelectOption, FormField],
       template: `
@@ -286,16 +446,39 @@ describe('CwSelect', () => {
       `,
     })
     class SignalHost {
-      readonly model = signal<{ priority: string | null }>({ priority: null });
-      readonly task = form(this.model, (path) => {
+      // #region Properties
+      /**
+       * Property model
+       * @readonly
+       *
+       * @description
+       * Model for the Signal Forms example.
+       *
+       * @type {WritableSignal<{ priority: string | null }>}
+       */
+      public readonly model: WritableSignal<{ priority: string | null }> = signal<{
+        priority: string | null;
+      }>({ priority: null });
+
+      /**
+       * Property task
+       * @readonly
+       *
+       * @description
+       * Signal Forms tree for priority.
+       *
+       * @type {FieldTree<{ priority: string | null }>}
+       */
+      public readonly task: FieldTree<{ priority: string | null }> = form(this.model, (path) => {
         required(path.priority);
       });
+      // #endregion
     }
 
-    const fixture = TestBed.createComponent(SignalHost);
+    const fixture: ComponentFixture<SignalHost> = TestBed.createComponent(SignalHost);
     fixture.autoDetectChanges();
     await fixture.whenStable();
-    const trigger = combobox(fixture.nativeElement as HTMLElement, 'Priorité');
+    const trigger: HTMLButtonElement = combobox(fixture.nativeElement as HTMLElement, 'Priorité');
 
     trigger.click();
     await fixture.whenStable();

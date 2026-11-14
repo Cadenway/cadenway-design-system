@@ -1,9 +1,12 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, computed, inject, input, type InputSignal, type Signal } from '@angular/core';
 import { _IdGenerator } from '@angular/cdk/a11y';
 
-import { PROPERTY_LIST } from '../property-list.token';
+import { PROPERTY_LIST, type PropertyListHost } from '../property-list.token';
 
 /**
+ * Component CwPropertyGroup
+ *
+ * @description
  * A titled group of properties in a vertical `cw-property-list`: « Propriétés », « Champs
  * personnalisés » (Property List sheet of the Design System artifact).
  *
@@ -21,10 +24,49 @@ import { PROPERTY_LIST } from '../property-list.token';
   templateUrl: './property-group.component.html',
 })
 export class CwPropertyGroup {
-  /** Title of the group (« Propriétés »). */
-  readonly label = input.required<string>();
+  // #region Properties
+  /**
+   * Property label
+   * @readonly
+   *
+   * @description
+   * Title of the property group.
+   *
+   * @type {InputSignal<string>}
+   */
+  public readonly label: InputSignal<string> = input.required<string>();
 
-  protected readonly list = inject(PROPERTY_LIST);
-  protected readonly titleId = inject(_IdGenerator).getId('cw-property-group-');
-  protected readonly first = computed(() => this.list.isFirstGroup(this));
+  /**
+   * Property list
+   * @readonly
+   *
+   * @description
+   * Parent property list context.
+   *
+   * @type {PropertyListHost}
+   */
+  protected readonly list: PropertyListHost = inject(PROPERTY_LIST);
+
+  /**
+   * Property titleId
+   * @readonly
+   *
+   * @description
+   * Identifier of the accessible group title.
+   *
+   * @type {string}
+   */
+  protected readonly titleId: string = inject(_IdGenerator).getId('cw-property-group-');
+
+  /**
+   * Property first
+   * @readonly
+   *
+   * @description
+   * Whether this group is first in the list.
+   *
+   * @type {Signal<boolean>}
+   */
+  protected readonly first: Signal<boolean> = computed(() => this.list.isFirstGroup(this));
+  // #endregion
 }

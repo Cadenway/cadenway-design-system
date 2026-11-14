@@ -15,8 +15,13 @@ import { CwAlertTitle } from './alert-title/alert-title.component';
 import { CwAlert } from './alert.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Alert, every state of its sheet in the Design System artifact, in the light and the dark theme.
  * Copy from the sheet's "Dans Cadenway" section (settings and administration).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Alert',
@@ -30,10 +35,31 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration used for alert examples and interactions.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Locates the light-theme copy rendered by the shared Storybook preview decorator.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the theme examples.
+ *
+ * @returns {HTMLElement} Element containing the light-theme example.
+ *
+ * @throws {Error} When the expected light-theme scope is missing.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -68,8 +94,8 @@ export const Tones: Story = {
         </cw-alert>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getAllByRole(role: string): HTMLElement[] } = within(light(canvasElement));
     await expect(scope.getAllByRole('status')).toHaveLength(2);
     await expect(scope.getAllByRole('alert')).toHaveLength(2);
   },
@@ -122,8 +148,12 @@ export const Keyboard: Story = {
         <p class="text-sm text-muted-foreground">{{ closed }} fermeture(s)</p>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole(role: string, options?: { name?: string }): HTMLElement;
+      queryByRole(role: string): HTMLElement | null;
+      getByText(text: string): HTMLElement;
+    } = within(light(canvasElement));
     await userEvent.tab();
     await expect(scope.getByRole('button', { name: 'Ouvrir les réglages' })).toHaveFocus();
     await userEvent.tab();

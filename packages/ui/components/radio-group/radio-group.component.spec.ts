@@ -1,13 +1,26 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { FormField, form, required } from '@angular/forms/signals';
+import { FormField, form, required, type FieldTree } from '@angular/forms/signals';
 
 import { CwRadioGroupItem } from './radio-group-item/radio-group-item.component';
 import { CwRadioGroup } from './radio-group.component';
 
+/**
+ * Function radio
+ *
+ * @description
+ * Finds a radio button by its associated label.
+ *
+ * @param {HTMLElement} host - Fixture containing the radio options.
+ * @param {string} name - Text of the associated label.
+ *
+ * @returns {HTMLButtonElement} Matching radio button.
+ */
 function radio(host: HTMLElement, name: string): HTMLButtonElement {
-  const found = Array.from(host.querySelectorAll<HTMLButtonElement>('[role="radio"]')).find(
+  const found: HTMLButtonElement | undefined = Array.from(
+    host.querySelectorAll<HTMLButtonElement>('[role="radio"]'),
+  ).find(
     (element) =>
       host.querySelector(`label[for="${element.id}"]`)?.textContent.trim().startsWith(name) ===
       true,
@@ -16,22 +29,56 @@ function radio(host: HTMLElement, name: string): HTMLButtonElement {
   return found;
 }
 
+/**
+ * Function group
+ *
+ * @description
+ * Finds a radio group by its accessible name.
+ *
+ * @param {HTMLElement} host - Fixture containing the radio groups.
+ * @param {string} name - Accessible name of the group.
+ *
+ * @returns {HTMLElement} Matching radio group.
+ */
 function group(host: HTMLElement, name: string): HTMLElement {
-  const found = Array.from(host.querySelectorAll<HTMLElement>('[role="radiogroup"]')).find(
-    (element) => element.getAttribute('aria-label') === name,
-  );
+  const found: HTMLElement | undefined = Array.from(
+    host.querySelectorAll<HTMLElement>('[role="radiogroup"]'),
+  ).find((element) => element.getAttribute('aria-label') === name);
   if (!found) throw new Error(`No radio group named ${name}`);
   return found;
 }
 
+/**
+ * Function press
+ *
+ * @description
+ * Dispatches a keyboard event to a radio.
+ *
+ * @param {HTMLElement} target - Element receiving the keyboard event.
+ * @param {string} key - Key to dispatch.
+ */
 function press(target: HTMLElement, key: string): void {
   target.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
 }
 
+/**
+ * Function leave
+ *
+ * @description
+ * Dispatches a focus-out event from a radio.
+ *
+ * @param {HTMLElement} target - Radio receiving the focus-out event.
+ */
 function leave(target: HTMLElement): void {
   target.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
 }
 
+/**
+ * Class ModelHost
+ *
+ * @description
+ * Hosts radio groups controlled by models.
+ */
 @Component({
   imports: [CwRadioGroup, CwRadioGroupItem],
   template: `
@@ -50,8 +97,29 @@ function leave(target: HTMLElement): void {
   `,
 })
 class ModelHost {
-  readonly view = signal<string | null>('list');
-  readonly visibility = signal<string | null>(null);
+  // #region Properties
+  /**
+   * Property view
+   * @readonly
+   *
+   * @description
+   * Selected default view.
+   *
+   * @type {WritableSignal<string | null>}
+   */
+  public readonly view: WritableSignal<string | null> = signal<string | null>('list');
+
+  /**
+   * Property visibility
+   * @readonly
+   *
+   * @description
+   * Selected visibility.
+   *
+   * @type {WritableSignal<string | null>}
+   */
+  public readonly visibility: WritableSignal<string | null> = signal<string | null>(null);
+  // #endregion
 }
 
 describe('CwRadioGroup', () => {
@@ -111,7 +179,9 @@ describe('CwRadioGroup', () => {
     });
 
     it('names a choice card by its content and selects it from anywhere in the card', async () => {
-      const card = host.querySelector<HTMLLabelElement>(`label[for="${radio(host, 'Privé').id}"]`);
+      const card: HTMLLabelElement | null = host.querySelector<HTMLLabelElement>(
+        `label[for="${radio(host, 'Privé').id}"]`,
+      );
       card?.click();
       await fixture.whenStable();
 
@@ -121,6 +191,12 @@ describe('CwRadioGroup', () => {
   });
 
   it('is the value accessor of a reactive form control and reports its invalid state', async () => {
+    /**
+     * Class ReactiveHost
+     *
+     * @description
+     * Hosts a radio group bound to a reactive form control.
+     */
     @Component({
       imports: [CwRadioGroup, CwRadioGroupItem, ReactiveFormsModule],
       template: `
@@ -131,16 +207,30 @@ describe('CwRadioGroup', () => {
       `,
     })
     class ReactiveHost {
-      readonly visibility = new FormControl<string | null>(null, {
-        validators: [(control) => Validators.required(control)],
-      });
+      // #region Properties
+      /**
+       * Property visibility
+       * @readonly
+       *
+       * @description
+       * Reactive visibility control.
+       *
+       * @type {FormControl<string | null>}
+       */
+      public readonly visibility: FormControl<string | null> = new FormControl<string | null>(
+        null,
+        {
+          validators: [(control) => Validators.required(control)],
+        },
+      );
+      // #endregion
     }
 
-    const fixture = TestBed.createComponent(ReactiveHost);
+    const fixture: ComponentFixture<ReactiveHost> = TestBed.createComponent(ReactiveHost);
     fixture.autoDetectChanges();
     await fixture.whenStable();
-    const host = fixture.nativeElement as HTMLElement;
-    const visibility = group(host, 'Visibilité');
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    const visibility: HTMLElement = group(host, 'Visibilité');
 
     leave(radio(host, 'Public'));
     await fixture.whenStable();
@@ -163,6 +253,12 @@ describe('CwRadioGroup', () => {
   });
 
   it('works with ngModel', async () => {
+    /**
+     * Class TemplateHost
+     *
+     * @description
+     * Hosts a radio group bound through ngModel.
+     */
     @Component({
       imports: [CwRadioGroup, CwRadioGroupItem, FormsModule],
       template: `
@@ -175,16 +271,27 @@ describe('CwRadioGroup', () => {
       `,
     })
     class TemplateHost {
-      readonly frequency = signal('daily');
+      // #region Properties
+      /**
+       * Property frequency
+       * @readonly
+       *
+       * @description
+       * Selected notification frequency.
+       *
+       * @type {WritableSignal<string>}
+       */
+      public readonly frequency: WritableSignal<string> = signal('daily');
+      // #endregion
     }
 
-    const fixture = TestBed.createComponent(TemplateHost);
+    const fixture: ComponentFixture<TemplateHost> = TestBed.createComponent(TemplateHost);
     fixture.autoDetectChanges();
     await fixture.whenStable();
     // NgModel writes its value in a microtask after the first check.
     await new Promise((resolve) => setTimeout(resolve));
     await fixture.whenStable();
-    const host = fixture.nativeElement as HTMLElement;
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
     expect(radio(host, 'Résumé quotidien').getAttribute('aria-checked')).toBe('true');
 
     radio(host, 'Immédiatement').click();
@@ -193,6 +300,12 @@ describe('CwRadioGroup', () => {
   });
 
   it('is a Signal Forms value control', async () => {
+    /**
+     * Class SignalHost
+     *
+     * @description
+     * Hosts a radio group bound to Signal Forms.
+     */
     @Component({
       imports: [CwRadioGroup, CwRadioGroupItem, FormField],
       template: `
@@ -203,17 +316,40 @@ describe('CwRadioGroup', () => {
       `,
     })
     class SignalHost {
-      readonly model = signal<{ visibility: string | null }>({ visibility: null });
-      readonly space = form(this.model, (path) => {
+      // #region Properties
+      /**
+       * Property model
+       * @readonly
+       *
+       * @description
+       * Signal-backed form model.
+       *
+       * @type {WritableSignal<{ visibility: string | null }>}
+       */
+      public readonly model: WritableSignal<{ visibility: string | null }> = signal<{
+        visibility: string | null;
+      }>({ visibility: null });
+
+      /**
+       * Property space
+       * @readonly
+       *
+       * @description
+       * Signal form exposing the required visibility field.
+       *
+       * @type {FieldTree<{ visibility: string | null }>}
+       */
+      public readonly space: FieldTree<{ visibility: string | null }> = form(this.model, (path) => {
         required(path.visibility);
       });
+      // #endregion
     }
 
-    const fixture = TestBed.createComponent(SignalHost);
+    const fixture: ComponentFixture<SignalHost> = TestBed.createComponent(SignalHost);
     fixture.autoDetectChanges();
     await fixture.whenStable();
-    const host = fixture.nativeElement as HTMLElement;
-    const visibility = group(host, 'Visibilité');
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    const visibility: HTMLElement = group(host, 'Visibilité');
     expect(visibility.getAttribute('aria-required')).toBe('true');
 
     leave(radio(host, 'Public'));

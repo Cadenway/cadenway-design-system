@@ -1,23 +1,81 @@
-/** What a calendar selects: one day (`single`) or a start and an end (`range`). */
+/**
+ * Type CwCalendarMode
+ *
+ * @description
+ * Selection mode for a single day or a range of days.
+ *
+ * @type {'single' | 'range'}
+ */
 export type CwCalendarMode = 'single' | 'range';
 
 /**
- * A selected period. `end` is `null` while only the start has been picked: the second pick closes
- * the range (an earlier day becomes the start).
+ * Interface CwDateRange
+ *
+ * @description
+ * Selected period; the second pick closes the range and an earlier day becomes the start.
  */
 export interface CwDateRange {
+  // #region Properties
+  /**
+   * Property start
+   *
+   * @description
+   * First day of the selected period.
+   *
+   * @type {Date}
+   * @readonly
+   */
   readonly start: Date;
+
+  /**
+   * Property end
+   *
+   * @description
+   * Last day of the period, or null while only its start is selected.
+   *
+   * @type {Date | null}
+   * @readonly
+   */
   readonly end: Date | null;
+  // #endregion
 }
 
-/** The value of a calendar: a day in `single` mode, a range in `range` mode, or nothing. */
+/**
+ * Type CwCalendarSelection
+ *
+ * @description
+ * Selected day, selected range or null when nothing is selected.
+ *
+ * @type {Date | CwDateRange | null}
+ */
 export type CwCalendarSelection = Date | CwDateRange | null;
 
-/** The header of a calendar: the month title, or month and year lists for distant dates. */
+/**
+ * Type CwCalendarCaptionLayout
+ *
+ * @description
+ * Displays a month title or month and year dropdowns for distant dates.
+ *
+ * @type {'label' | 'dropdown'}
+ */
 export type CwCalendarCaptionLayout = 'label' | 'dropdown';
 
-/** First day of the week: 0 for Sunday, 1 for Monday (the French week). */
+/**
+ * Type CwWeekStart
+ *
+ * @description
+ * First day of the week: zero for Sunday or one for Monday.
+ *
+ * @type {0 | 1}
+ */
 export type CwWeekStart = 0 | 1;
 
-/** Tells whether a day cannot be picked (public holidays, week-ends); it is shown struck through. */
+/**
+ * Type CwDateDisabledFn
+ *
+ * @description
+ * Determines whether a day cannot be selected and should be shown struck through.
+ *
+ * @type {(date: Date) => boolean}
+ */
 export type CwDateDisabledFn = (date: Date) => boolean;

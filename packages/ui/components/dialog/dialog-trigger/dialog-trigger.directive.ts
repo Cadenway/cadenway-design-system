@@ -1,8 +1,11 @@
-import { Directive, ElementRef, inject, input } from '@angular/core';
+import { Directive, ElementRef, inject, input, type InputSignal } from '@angular/core';
 
 import type { CwDialog } from '../dialog.component';
 
 /**
+ * Directive CwDialogTrigger
+ *
+ * @description
  * Opens a `cw-dialog` from a button: `<button cwButton [cwDialogTrigger]="rename">`.
  *
  * Sets `aria-haspopup="dialog"` and `aria-expanded` while the dialog is open; focus returns to this
@@ -17,8 +20,28 @@ import type { CwDialog } from '../dialog.component';
   },
 })
 export class CwDialogTrigger {
-  /** The dialog to open (a template reference to a `cw-dialog`). */
-  readonly cwDialogTrigger = input.required<CwDialog>();
+  // #region Properties
+  /**
+   * Property cwDialogTrigger
+   * @readonly
+   *
+   * @description
+   * Dialog opened by the trigger.
+   *
+   * @type {InputSignal<CwDialog>}
+   */
+  public readonly cwDialogTrigger: InputSignal<CwDialog> = input.required<CwDialog>();
 
-  protected readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  /**
+   * Property element
+   * @readonly
+   *
+   * @description
+   * Trigger element used to restore focus.
+   *
+   * @type {HTMLElement}
+   */
+  protected readonly element: HTMLElement =
+    inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  // #endregion
 }

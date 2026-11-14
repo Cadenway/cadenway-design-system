@@ -1,2 +1,9 @@
-/** Diameter of a spinner, from 12 px (`xs`) to 32 px (`page`). */
+/**
+ * Type CwSpinnerSize
+ *
+ * @description
+ * Spinner diameter, from 12 pixels for `xs` to 32 pixels for `page`.
+ *
+ * @type {'xs' | 'sm' | 'default' | 'lg' | 'xl' | 'page'}
+ */
 export type CwSpinnerSize = 'xs' | 'sm' | 'default' | 'lg' | 'xl' | 'page';

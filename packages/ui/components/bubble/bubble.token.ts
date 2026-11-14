@@ -3,25 +3,88 @@ import { InjectionToken, type Signal } from '@angular/core';
 import type { CwBubbleAlign, CwBubbleDefaults, CwBubblePosition } from './bubble.types';
 
 /**
+ * Constant CW_BUBBLE_DEFAULTS
+ *
+ * @description
  * Lets a container give its bubbles a default variant, alignment and position (`CwBubbleDefaults`);
  * `cw-message` provides it. A bubble's own inputs win over it.
+ *
+ * @type {InjectionToken<CwBubbleDefaults>}
  */
-export const CW_BUBBLE_DEFAULTS = new InjectionToken<CwBubbleDefaults>('CW_BUBBLE_DEFAULTS');
+export const CW_BUBBLE_DEFAULTS: InjectionToken<CwBubbleDefaults> =
+  new InjectionToken<CwBubbleDefaults>('CW_BUBBLE_DEFAULTS');
 
-/** A bubble as its group and its reactions see it. Not exported from the entry point. */
+/**
+ * Interface BubbleRef
+ *
+ * @description
+ * Internal bubble contract used by groups and reactions.
+ */
 export interface BubbleRef {
+  // #region Properties
+  /**
+   * Property side
+   * @readonly
+   *
+   * @description
+   * Effective alignment of the bubble.
+   *
+   * @type {Signal<CwBubbleAlign>}
+   */
   readonly side: Signal<CwBubbleAlign>;
+  // #endregion
+
+  // #region Methods
+  /**
+   * Method addReaction
+   *
+   * @description
+   * Requests opening the reaction picker.
+   */
   addReaction(): void;
+  // #endregion
 }
 
-/** Each bubble provides itself under this token: its group and its reactions find it without
- * importing its class (it imports theirs). Not exported from the entry point. */
-export const BUBBLE = new InjectionToken<BubbleRef>('BUBBLE');
+/**
+ * Constant BUBBLE
+ *
+ * @description
+ * Internal token through which groups and reactions find their bubble.
+ *
+ * @type {InjectionToken<BubbleRef>}
+ */
+export const BUBBLE: InjectionToken<BubbleRef> = new InjectionToken<BubbleRef>('BUBBLE');
 
-/** A bubble group, as its bubbles see it. Not exported from the entry point. */
+/**
+ * Interface BubbleGroupRef
+ *
+ * @description
+ * Internal group contract used by its bubbles.
+ */
 export interface BubbleGroupRef {
+  // #region Methods
+  /**
+   * Method positionOf
+   *
+   * @description
+   * Returns the bubble's position in the group, or null for an ungrouped bubble.
+   *
+   * @param {BubbleRef} bubble - Bubble whose group position is requested.
+   *
+   * @returns {CwBubblePosition | null} Position in the group, or null when ungrouped.
+   */
   positionOf(bubble: BubbleRef): CwBubblePosition | null;
+  // #endregion
 }
 
-/** The group provides itself under this token. Not exported from the entry point. */
-export const BUBBLE_GROUP = new InjectionToken<BubbleGroupRef>('BUBBLE_GROUP');
+/**
+ * Constant BUBBLE_GROUP
+ *
+ * @description
+ * Internal token through which bubbles find their group.
+ *
+ * @type {InjectionToken<BubbleGroupRef>}
+ */
+export const BUBBLE_GROUP: InjectionToken<BubbleGroupRef> = new InjectionToken<BubbleGroupRef>(
+  'BUBBLE_GROUP',
+);

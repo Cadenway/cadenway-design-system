@@ -6,13 +6,51 @@
 
 import type { CwTimelineScale } from './timeline.types';
 
+/**
+ * Constant SCALES
+ *
+ * @description
+ * French labels for timeline axis scales.
+ *
+ * @type {Record<CwTimelineScale, string>}
+ */
 const SCALES: Record<CwTimelineScale, string> = { day: 'jour', week: 'semaine', month: 'mois' };
 
+/**
+ * Function days
+ *
+ * @description
+ * Formats a day count with its French singular or plural unit.
+ *
+ * @param {number} count - Number of days.
+ *
+ * @returns {string} French day count with the appropriate unit.
+ */
 function days(count: number): string {
   return `${String(count)} ${count > 1 ? 'jours' : 'jour'}`;
 }
 
-export const TIMELINE_TEXTS = {
+/**
+ * Constant TIMELINE_TEXTS
+ *
+ * @description
+ * French ruler labels and accessible timeline announcements.
+ *
+ * @type {{ readonly week: (week: number) => string; readonly weekShort: (week: number) => string; readonly late: (count: number) => string; readonly lateLong: (count: number) => string; readonly conflict: (predecessor: string) => string; readonly conflictAnnounce: (successor: string, predecessor: string) => string; readonly milestone: (label: string, date: string) => string; readonly moved: (name: string, range: string) => string; readonly scale: (scale: CwTimelineScale) => string; readonly zoom: (percent: number) => string; readonly percent: (value: number) => string; }}
+ */
+export const TIMELINE_TEXTS: {
+  readonly week: (week: number) => string;
+  readonly weekShort: (week: number) => string;
+  readonly late: (count: number) => string;
+  readonly lateLong: (count: number) => string;
+  readonly conflict: (predecessor: string) => string;
+  readonly conflictAnnounce: (successor: string, predecessor: string) => string;
+  readonly milestone: (label: string, date: string) => string;
+  readonly moved: (name: string, range: string) => string;
+  readonly scale: (scale: CwTimelineScale) => string;
+  readonly zoom: (percent: number) => string;
+  readonly percent: (value: number) => string;
+} = {
   /** Ruler, day scale: « Semaine 46 ». */
   week: (week: number): string => `Semaine ${String(week)}`,
   /** Ruler, week scale: « S46 ». */

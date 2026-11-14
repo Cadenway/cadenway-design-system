@@ -20,10 +20,15 @@ import { CwTooltipPanel } from './tooltip-panel/tooltip-panel.component';
 import { CwTooltip } from './tooltip.directive';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Tooltip, every state of its sheet in the Design System artifact, in the light and the dark theme.
  * The visual states render the bubble statically next to its trigger (the preview's layout); the
  * behavior stories open real bubbles by hover and keyboard. Copy from the sheet and the mockup
  * (`App.dc.html`).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Tooltip',
@@ -46,17 +51,44 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story for the tooltip examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Returns the light-theme story container.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing theme scopes.
+ *
+ * @returns {HTMLElement} Container for the light theme.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
 /* The static bubble sits above, beside or below its trigger, as in the preview; these are layout
    classes on the host, the bubble's look stays the brick's. */
-const ABOVE = 'absolute bottom-full left-1/2 mb-2 -translate-x-1/2';
+/**
+ * Constant ABOVE
+ *
+ * @description
+ * Positioning classes for a static bubble above its trigger.
+ *
+ * @type {string}
+ */
+const ABOVE: string = 'absolute bottom-full left-1/2 mb-2 -translate-x-1/2';
 
 /** The four sides, with the arrow: flipped automatically when the side lacks room. */
 export const Sides: Story = {
@@ -175,12 +207,20 @@ export const Hover: Story = {
         </button>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const create = scope.getByRole('button', { name: 'Créer une tâche' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string }) => HTMLElement;
+      queryByRole: (role: string) => HTMLElement | null;
+      findByRole: (
+        role: string,
+        options?: object,
+        wait?: { timeout: number },
+      ) => Promise<HTMLElement>;
+    } = within(light(canvasElement));
+    const create: HTMLElement = scope.getByRole('button', { name: 'Créer une tâche' });
 
     await userEvent.hover(create);
-    const bubble = await scope.findByRole('tooltip', {}, { timeout: 2000 });
+    const bubble: HTMLElement = await scope.findByRole('tooltip', {}, { timeout: 2000 });
     await expect(bubble).toHaveTextContent('Créer une tâche');
     await expect(create).toHaveAttribute('aria-describedby', bubble.id);
 
@@ -205,13 +245,21 @@ export const Keyboard: Story = {
         </button>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const copy = scope.getByRole('button', { name: 'Copier le lien' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string }) => HTMLElement;
+      queryByRole: (role: string) => HTMLElement | null;
+      findByRole: (
+        role: string,
+        options?: object,
+        wait?: { timeout: number },
+      ) => Promise<HTMLElement>;
+    } = within(light(canvasElement));
+    const copy: HTMLElement = scope.getByRole('button', { name: 'Copier le lien' });
 
     await userEvent.tab();
     await expect(copy).toHaveFocus();
-    const bubble = await scope.findByRole('tooltip');
+    const bubble: HTMLElement = await scope.findByRole('tooltip');
     await expect(bubble).toHaveAttribute('data-state', 'instant-open');
 
     await userEvent.keyboard('{Escape}');
@@ -231,8 +279,16 @@ export const Closed: Story = {
         <button cwButton variant="outline" cwTooltip="Copier le lien" cwTooltipDisabled>Copier le lien</button>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string }) => HTMLElement;
+      queryByRole: (role: string) => HTMLElement | null;
+      findByRole: (
+        role: string,
+        options?: object,
+        wait?: { timeout: number },
+      ) => Promise<HTMLElement>;
+    } = within(light(canvasElement));
     await userEvent.tab();
     await userEvent.tab();
     await expect(scope.getByRole('button', { name: 'Copier le lien' })).toHaveFocus();

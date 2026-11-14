@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { CwBubble } from '@cadenway/ui/components/bubble';
 
@@ -6,15 +6,41 @@ import { CwMessage } from './message.component';
 import { CwMessageAvatar } from './message-avatar/message-avatar.component';
 import { CwMessageGroup } from './message-group/message-group.component';
 import { CwMessageThread } from './message-thread/message-thread.component';
-import type { CwMessageStatus } from './message.types';
+import type { CwMessageStatus, CwMessageTimeFormatter } from './message.types';
 
+/**
+ * Function required
+ *
+ * @description
+ * Requires an element or other value to be present in the fixture.
+ *
+ * @param {T | null | undefined} value - Value to check.
+ *
+ * @returns {T} The supplied non-null value.
+ *
+ * @throws {Error} When the value is null or undefined.
+ */
 function required<T>(value: T | null | undefined): T {
   if (value === null || value === undefined) throw new Error('Missing element');
   return value;
 }
 
-const NOW = new Date(2026, 10, 12, 13, 0);
+/**
+ * Constant NOW
+ *
+ * @description
+ * Reference time used by the message time tests.
+ *
+ * @type {Date}
+ */
+const NOW: Date = new Date(2026, 10, 12, 13, 0);
 
+/**
+ * Component Host
+ *
+ * @description
+ * Exercises grouped, outgoing and system messages with a fixed reference time.
+ */
 @Component({
   imports: [CwBubble, CwMessage, CwMessageAvatar, CwMessageGroup, CwMessageThread],
   template: `
@@ -22,6 +48,7 @@ const NOW = new Date(2026, 10, 12, 13, 0);
       <cw-message
         author="Karim Benali"
         [time]="first"
+        [formatTime]="formatTime()"
         edited
         (reply)="events.set([...events(), 'reply'])"
       >
@@ -30,6 +57,7 @@ const NOW = new Date(2026, 10, 12, 13, 0);
         <cw-message-thread
           [count]="3"
           [lastReplyAt]="lastReply"
+          [formatTime]="formatTime()"
           [participants]="['Karim Benali', 'Inès Duval']"
           (open)="events.set([...events(), 'thread'])"
         />
@@ -66,20 +94,116 @@ const NOW = new Date(2026, 10, 12, 13, 0);
   `,
 })
 class Host {
-  readonly first = new Date(2026, 10, 12, 10, 42);
-  readonly second = new Date(2026, 10, 12, 10, 44);
-  readonly justNow = new Date(2026, 10, 12, 12, 59, 40);
-  readonly lastReply = new Date(2026, 10, 12, 11, 5);
-  readonly status = signal<CwMessageStatus>('sent');
-  readonly events = signal<string[]>([]);
+  // #region Properties
+  /**
+   * Property first
+   * @readonly
+   *
+   * @description
+   * Timestamp of the first incoming message.
+   *
+   * @type {Date}
+   */
+  public readonly first: Date = new Date(2026, 10, 12, 10, 42);
+
+  /**
+   * Property second
+   * @readonly
+   *
+   * @description
+   * Timestamp of the following incoming message.
+   *
+   * @type {Date}
+   */
+  public readonly second: Date = new Date(2026, 10, 12, 10, 44);
+
+  /**
+   * Property justNow
+   * @readonly
+   *
+   * @description
+   * Outgoing message timestamp less than a minute before the reference time.
+   *
+   * @type {Date}
+   */
+  public readonly justNow: Date = new Date(2026, 10, 12, 12, 59, 40);
+
+  /**
+   * Property lastReply
+   * @readonly
+   *
+   * @description
+   * Timestamp of the last reply in the thread summary.
+   *
+   * @type {Date}
+   */
+  public readonly lastReply: Date = new Date(2026, 10, 12, 11, 5);
+
+  /**
+   * Property formatTime
+   *
+   * @description
+   * Optional formatter supplied to both the message and the thread summary.
+   *
+   * @type {WritableSignal<CwMessageTimeFormatter | null>}
+   * @readonly
+   */
+  public readonly formatTime: WritableSignal<CwMessageTimeFormatter | null> =
+    signal<CwMessageTimeFormatter | null>(null);
+
+  /**
+   * Property status
+   * @readonly
+   *
+   * @description
+   * Sending state of the outgoing message.
+   *
+   * @type {WritableSignal<CwMessageStatus>}
+   */
+  public readonly status: WritableSignal<CwMessageStatus> = signal<CwMessageStatus>('sent');
+
+  /**
+   * Property events
+   * @readonly
+   *
+   * @description
+   * Actions emitted by the messages and thread summary.
+   *
+   * @type {WritableSignal<string[]>}
+   */
+  public readonly events: WritableSignal<string[]> = signal<string[]>([]);
+  // #endregion
 }
 
+/**
+ * Function articles
+ *
+ * @description
+ * Finds regular message articles in the fixture.
+ *
+ * @param {HTMLElement} host - Container holding the messages.
+ *
+ * @returns {HTMLElement[]} Message articles in display order.
+ */
 function articles(host: HTMLElement): HTMLElement[] {
   return Array.from(host.querySelectorAll<HTMLElement>('[role="article"]'));
 }
 
+/**
+ * Function buttonNamed
+ *
+ * @description
+ * Finds a message action by accessible label or visible text.
+ *
+ * @param {HTMLElement} scope - Container holding candidate buttons.
+ * @param {string} name - Expected accessible label or text.
+ *
+ * @returns {HTMLButtonElement} First matching button.
+ *
+ * @throws {Error} When no button has the requested name.
+ */
 function buttonNamed(scope: HTMLElement, name: string): HTMLButtonElement {
-  const found = Array.from(scope.querySelectorAll('button')).find(
+  const found: HTMLButtonElement | undefined = Array.from(scope.querySelectorAll('button')).find(
     (element) =>
       (element.getAttribute('aria-label') ?? element.textContent.replace(/\s+/g, ' ').trim()) ===
       name,
@@ -107,17 +231,35 @@ describe('CwMessage', () => {
   });
 
   it('is an article named by its author and time, with a header and a time element', () => {
-    const [first] = articles(host);
+    const [first]: HTMLElement[] = articles(host);
 
     expect(first.getAttribute('aria-label')).toBe('Karim Benali, 10:42, modifié');
-    const time = first.querySelector('time');
+    const time: HTMLTimeElement | null = first.querySelector('time');
     expect(time?.textContent.trim()).toBe('10:42');
     expect(time?.getAttribute('datetime')).toBe(component.first.toISOString());
   });
 
+  it('uses a consumer-provided timestamp format for messages and thread summaries', async () => {
+    component.formatTime.set(
+      (time: Date, now: Date): string =>
+        `Recorded ${String(time.getHours())}h (${String(now.getFullYear())})`,
+    );
+    await fixture.whenStable();
+
+    const [first]: HTMLElement[] = articles(host);
+    expect(first.querySelector('time')?.textContent.trim()).toBe('Recorded 10h (2026)');
+    expect(first.querySelector('time')?.getAttribute('datetime')).toBe(
+      component.first.toISOString(),
+    );
+    expect(first.querySelector('cw-message-thread')?.textContent).toContain(
+      'Dernière Recorded 11h (2026)',
+    );
+    expect(first.getAttribute('aria-label')).toContain('Recorded 10h');
+  });
+
   it('groups the consecutive messages of one person and tightens their bubbles', () => {
-    const [first, second] = articles(host);
-    const bubbles = [first, second].map((article) =>
+    const [first, second]: HTMLElement[] = articles(host);
+    const bubbles: (HTMLElement | null)[] = [first, second].map((article) =>
       article.querySelector<HTMLElement>('cw-bubble'),
     );
 
@@ -129,8 +271,8 @@ describe('CwMessage', () => {
   });
 
   it('puts an outgoing message on the right, in secondary, with a relative time in its footer', () => {
-    const outgoing = articles(host)[2];
-    const bubble = outgoing.querySelector<HTMLElement>('cw-bubble');
+    const outgoing: HTMLElement = articles(host)[2];
+    const bubble: HTMLElement | null = outgoing.querySelector<HTMLElement>('cw-bubble');
 
     expect(outgoing.dataset['variant']).toBe('outgoing');
     expect(bubble?.dataset['variant']).toBe('secondary');
@@ -141,12 +283,12 @@ describe('CwMessage', () => {
   it('says « Envoi… » while sending and offers retry and delete when the sending failed', async () => {
     component.status.set('sending');
     await fixture.whenStable();
-    const outgoing = articles(host)[2];
+    const outgoing: HTMLElement = articles(host)[2];
     expect(outgoing.querySelector('[role="status"]')?.textContent).toContain('Envoi…');
 
     component.status.set('failed');
     await fixture.whenStable();
-    const alert = outgoing.querySelector<HTMLElement>('[role="alert"]');
+    const alert: HTMLElement | null = outgoing.querySelector<HTMLElement>('[role="alert"]');
     expect(alert?.textContent).toContain("Erreur : Échec de l'envoi");
     buttonNamed(required(alert), 'Réessayer').click();
     buttonNamed(required(alert), 'Supprimer').click();
@@ -154,11 +296,11 @@ describe('CwMessage', () => {
   });
 
   it('offers a toolbar of actions that the arrow keys move through', () => {
-    const [first] = articles(host);
-    const toolbar = required(first.querySelector<HTMLElement>('[role="toolbar"]'));
+    const [first]: HTMLElement[] = articles(host);
+    const toolbar: HTMLElement = required(first.querySelector<HTMLElement>('[role="toolbar"]'));
     expect(toolbar.getAttribute('aria-label')).toBe('Actions du message');
 
-    const react = buttonNamed(toolbar, 'Réagir');
+    const react: HTMLButtonElement = buttonNamed(toolbar, 'Réagir');
     react.focus();
     react.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     expect(document.activeElement).toBe(buttonNamed(toolbar, 'Répondre'));
@@ -168,8 +310,8 @@ describe('CwMessage', () => {
   });
 
   it('summarizes the thread and opens it', () => {
-    const thread = Array.from(host.querySelectorAll('button')).find((element) =>
-      element.textContent.includes('3 réponses'),
+    const thread: HTMLButtonElement | undefined = Array.from(host.querySelectorAll('button')).find(
+      (element) => element.textContent.includes('3 réponses'),
     );
     // The avatars of the participants are hidden: the summary is named by its texts.
     expect(thread?.querySelector('[aria-hidden="true"]')?.textContent).toContain('KB');
@@ -181,13 +323,17 @@ describe('CwMessage', () => {
   });
 
   it('draws system notices with their tone word, role and action', () => {
-    const notice = host.querySelector<HTMLElement>('cw-message[data-tone="warning"]');
+    const notice: HTMLElement | null = host.querySelector<HTMLElement>(
+      'cw-message[data-tone="warning"]',
+    );
     expect(notice?.getAttribute('role')).toBe('status');
     expect(notice?.textContent).toContain('Avertissement :');
     expect(notice?.textContent).toContain('Samuel Roux ne recevra pas de notification.');
     buttonNamed(required(notice), 'Inviter').click();
 
-    const error = host.querySelector<HTMLElement>('cw-message[data-tone="error"]');
+    const error: HTMLElement | null = host.querySelector<HTMLElement>(
+      'cw-message[data-tone="error"]',
+    );
     expect(error?.getAttribute('role')).toBe('alert');
     buttonNamed(required(error), 'Réessayer').click();
 

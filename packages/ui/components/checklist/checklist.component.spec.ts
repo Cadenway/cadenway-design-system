@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CwChecklistAdd } from './checklist-add/checklist-add.component';
@@ -6,15 +6,72 @@ import { CwChecklist } from './checklist.component';
 import type { CwChecklistAddEvent, CwChecklistMoveEvent } from './checklist.types';
 import { CwChecklistItem } from './checklist-item/checklist-item.component';
 
+/**
+ * Interface Row
+ *
+ * @description
+ * Mutable checklist item fixture with nested children.
+ */
 interface Row {
+  // #region Properties
+  /**
+   * Property id
+   *
+   * @description
+   * Stable item identifier.
+   *
+   * @type {string}
+   */
   id: string;
+
+  /**
+   * Property label
+   *
+   * @description
+   * Item label.
+   *
+   * @type {string}
+   */
   label: string;
+
+  /**
+   * Property done
+   *
+   * @description
+   * Whether the item is checked.
+   *
+   * @type {boolean}
+   */
   done: boolean;
+
+  /**
+   * Property children
+   *
+   * @description
+   * Nested fixture items.
+   *
+   * @type {Row[]}
+   */
   children: Row[];
+  // #endregion
 }
 
+/**
+ * Function byName
+ *
+ * @description
+ * Finds a fixture element by selector and accessible name.
+ *
+ * @param {HTMLElement} host - Fixture containing the element.
+ * @param {string} selector - CSS selector used to find candidates.
+ * @param {string} name - Accessible name to match.
+ *
+ * @returns {HTMLElement} Matching fixture element.
+ */
 function byName(host: HTMLElement, selector: string, name: string): HTMLElement {
-  const found = Array.from(host.querySelectorAll<HTMLElement>(selector)).find(
+  const found: HTMLElement | undefined = Array.from(
+    host.querySelectorAll<HTMLElement>(selector),
+  ).find(
     (element) =>
       (element.getAttribute('aria-label') ?? element.textContent.replace(/\s+/g, ' ').trim()) ===
       name,
@@ -23,10 +80,26 @@ function byName(host: HTMLElement, selector: string, name: string): HTMLElement 
   return found;
 }
 
+/**
+ * Function key
+ *
+ * @description
+ * Dispatches a keyboard event to an element.
+ *
+ * @param {HTMLElement} target - Element receiving the event.
+ * @param {string} name - Keyboard key to dispatch.
+ * @param {KeyboardEventInit} [init] - Additional keyboard event options.
+ */
 function key(target: HTMLElement, name: string, init: KeyboardEventInit = {}): void {
   target.dispatchEvent(new KeyboardEvent('keydown', { key: name, bubbles: true, ...init }));
 }
 
+/**
+ * Class Host
+ *
+ * @description
+ * Hosts a checklist with nested items and captured events.
+ */
 @Component({
   imports: [CwChecklist, CwChecklistItem, CwChecklistAdd],
   template: `
@@ -55,7 +128,17 @@ function key(target: HTMLElement, name: string, init: KeyboardEventInit = {}): v
   `,
 })
 class Host {
-  readonly items = signal<Row[]>([
+  // #region Properties
+  /**
+   * Property items
+   * @readonly
+   *
+   * @description
+   * Mutable fixture items.
+   *
+   * @type {WritableSignal<Row[]>}
+   */
+  public readonly items: WritableSignal<Row[]> = signal<Row[]>([
     { id: 'a', label: 'Les accents sont conservés dans Excel', done: true, children: [] },
     {
       id: 'b',
@@ -65,12 +148,76 @@ class Host {
     },
     { id: 'c', label: 'Prévenir les clients concernés', done: false, children: [] },
   ]);
-  readonly readonly = signal(false);
-  readonly expanded = signal(true);
-  readonly hideDone = signal(false);
-  readonly added = signal<CwChecklistAddEvent | null>(null);
-  readonly moves = signal<CwChecklistMoveEvent[]>([]);
-  readonly renamed = signal<string | null>(null);
+
+  /**
+   * Property readonly
+   * @readonly
+   *
+   * @description
+   * Whether checklist editing is disabled.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly readonly: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property expanded
+   * @readonly
+   *
+   * @description
+   * Whether the checklist is expanded.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly expanded: WritableSignal<boolean> = signal(true);
+
+  /**
+   * Property hideDone
+   * @readonly
+   *
+   * @description
+   * Whether completed items are hidden.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly hideDone: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property added
+   * @readonly
+   *
+   * @description
+   * Most recent addition request.
+   *
+   * @type {WritableSignal<CwChecklistAddEvent | null>}
+   */
+  public readonly added: WritableSignal<CwChecklistAddEvent | null> =
+    signal<CwChecklistAddEvent | null>(null);
+
+  /**
+   * Property moves
+   * @readonly
+   *
+   * @description
+   * Recorded movement requests.
+   *
+   * @type {WritableSignal<CwChecklistMoveEvent[]>}
+   */
+  public readonly moves: WritableSignal<CwChecklistMoveEvent[]> = signal<CwChecklistMoveEvent[]>(
+    [],
+  );
+
+  /**
+   * Property renamed
+   * @readonly
+   *
+   * @description
+   * Most recently edited label.
+   *
+   * @type {WritableSignal<string | null>}
+   */
+  public readonly renamed: WritableSignal<string | null> = signal<string | null>(null);
+  // #endregion
 }
 
 describe('CwChecklist', () => {
@@ -87,7 +234,7 @@ describe('CwChecklist', () => {
   });
 
   it('counts the ticked items in the header and the progress bar', async () => {
-    const progress = host.querySelector('[role="progressbar"]');
+    const progress: Element | null = host.querySelector('[role="progressbar"]');
     expect(progress?.getAttribute('aria-label')).toBe("Avancement de « Critères d'acceptation »");
     expect(progress?.getAttribute('aria-valuetext')).toBe('2 sur 4');
     expect(host.textContent).toContain('2 / 4');
@@ -100,8 +247,10 @@ describe('CwChecklist', () => {
   });
 
   it('names the list by its title and nests the sub-items in a list of their own', () => {
-    const list = host.querySelector('ul[aria-labelledby]');
-    const title = document.getElementById(list?.getAttribute('aria-labelledby') ?? '');
+    const list: Element | null = host.querySelector('ul[aria-labelledby]');
+    const title: HTMLElement | null = document.getElementById(
+      list?.getAttribute('aria-labelledby') ?? '',
+    );
     expect(title?.textContent.trim()).toBe("Critères d'acceptation");
     expect(host.querySelector('[role="listitem"] [role="listitem"]')?.textContent).toContain(
       'Excel 365',
@@ -109,7 +258,7 @@ describe('CwChecklist', () => {
   });
 
   it('folds and unfolds the body from its title', async () => {
-    const trigger = byName(host, 'button', "Critères d'acceptation");
+    const trigger: HTMLElement = byName(host, 'button', "Critères d'acceptation");
     expect(trigger.getAttribute('aria-expanded')).toBe('true');
 
     trigger.click();
@@ -120,12 +269,12 @@ describe('CwChecklist', () => {
   });
 
   it('hides the ticked items and offers to show them back', async () => {
-    const toggle = byName(host, 'button', 'Masquer les éléments terminés');
+    const toggle: HTMLElement = byName(host, 'button', 'Masquer les éléments terminés');
     toggle.click();
     await fixture.whenStable();
 
     expect(toggle.getAttribute('aria-pressed')).toBe('true');
-    const hidden = Array.from(host.querySelectorAll('[role="listitem"][hidden]'));
+    const hidden: Element[] = Array.from(host.querySelectorAll('[role="listitem"][hidden]'));
     expect(hidden).toHaveLength(2);
 
     byName(host, 'button', 'Afficher les 2 éléments terminés').click();
@@ -136,7 +285,11 @@ describe('CwChecklist', () => {
   it('adds an item with Enter and keeps the field open', async () => {
     byName(host, 'button', 'Ajouter un élément').click();
     await fixture.whenStable();
-    const field = byName(host, 'input', 'Nouvel élément de checklist') as HTMLInputElement;
+    const field: HTMLInputElement = byName(
+      host,
+      'input',
+      'Nouvel élément de checklist',
+    ) as HTMLInputElement;
     expect(document.activeElement).toBe(field);
 
     field.value = 'Documenter le format dans l’aide';
@@ -151,7 +304,7 @@ describe('CwChecklist', () => {
   it('edits a label from F2 on its box and emits the new label', async () => {
     key(byName(host, '[role="checkbox"]', 'Prévenir les clients concernés'), 'F2');
     await fixture.whenStable();
-    const field = byName(host, 'input', "Modifier l'élément") as HTMLInputElement;
+    const field: HTMLInputElement = byName(host, 'input', "Modifier l'élément") as HTMLInputElement;
     expect(document.activeElement).toBe(field);
 
     field.value = 'Prévenir les clients';
@@ -163,7 +316,11 @@ describe('CwChecklist', () => {
   });
 
   it('moves an item with the keyboard from its handle, and nests it', async () => {
-    const handle = byName(host, 'button', 'Déplacer « Prévenir les clients concernés »');
+    const handle: HTMLElement = byName(
+      host,
+      'button',
+      'Déplacer « Prévenir les clients concernés »',
+    );
     key(handle, ' ');
     key(handle, 'ArrowUp');
     await fixture.whenStable();

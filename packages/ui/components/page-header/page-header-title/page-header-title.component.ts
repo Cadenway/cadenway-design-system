@@ -1,13 +1,17 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, type Signal } from '@angular/core';
 
 import { CwPageHeader } from '../page-header.component';
 import type { CwPageHeaderSize } from '../page-header.types';
 
-/* Literal class strings (Page Header sheet and preview of the Design System artifact): the title
-   style `text-2xl font-semibold tracking-tight`, `text-sm font-semibold` on the compact row. A
-   leading icon sits in the line before the text. The default title wraps (an inline edit inside
-   needs room for its hover fill and focus ring); the compact one shares its single row with the
-   views and the actions, so it truncates. */
+/**
+ * Constant HEADINGS
+ *
+ * @description
+ * Title and leading-icon classes from the Page Header sheet. Standard titles wrap; compact titles
+ * truncate to share their row with views and actions.
+ *
+ * @type {Record<CwPageHeaderSize, string>}
+ */
 const HEADINGS: Record<CwPageHeaderSize, string> = {
   default:
     'min-w-0 text-2xl font-semibold tracking-tight [&>ng-icon]:me-2 [&>ng-icon]:align-[-0.125em]',
@@ -15,6 +19,10 @@ const HEADINGS: Record<CwPageHeaderSize, string> = {
 };
 
 /**
+ * Class CwPageHeaderTitle
+ * @class CwPageHeaderTitle
+ *
+ * @description
  * The title of a `cw-page-header`: renders the page's single `h1` around its content.
  *
  * Project the text, or a `cw-inline-edit` for a title that can be renamed (Page Header sheet,
@@ -26,7 +34,29 @@ const HEADINGS: Record<CwPageHeaderSize, string> = {
   templateUrl: './page-header-title.component.html',
 })
 export class CwPageHeaderTitle {
-  private readonly header = inject(CwPageHeader, { optional: true });
+  // #region Properties
+  /**
+   * Property header
+   * @readonly
+   *
+   * @description
+   * Parent header supplying the title size, or null outside a header.
+   *
+   * @type {CwPageHeader | null}
+   */
+  private readonly header: CwPageHeader | null = inject(CwPageHeader, { optional: true });
 
-  protected readonly headingClasses = computed(() => HEADINGS[this.header?.size() ?? 'default']);
+  /**
+   * Property headingClasses
+   * @readonly
+   *
+   * @description
+   * Heading classes for the parent size, using standard styling without a parent.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly headingClasses: Signal<string> = computed(
+    () => HEADINGS[this.header?.size() ?? 'default'],
+  );
+  // #endregion
 }

@@ -96,8 +96,6 @@
   [class.opacity-50]="isDisabled()"
 ></div>
 
-<!-- The « / » and « @ » menus: one panel, positioned by @tiptap/suggestion with Floating UI at the
-     typed token. The focus stays in the text, which points at the highlighted option. -->
 <div
   #menuPanel
   class="z-50 w-max max-w-sm min-w-56 overflow-hidden rounded-lg border bg-popover text-popover-foreground shadow-md animate-menu-in motion-reduce:animate-none"
@@ -121,17 +119,16 @@
       >
         @if (state.kind === 'block') {
           @for (type of state.items; track type.kind; let index = $index) {
-            <!-- An option of an aria-activedescendant listbox: the text keeps the focus and its
-                 keyboard (Enter, Tab) chooses this row. -->
-            <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
             <div
               role="option"
+              tabindex="-1"
               [id]="optionId(index)"
               [attr.aria-selected]="index === state.active"
               [attr.data-highlighted]="index === state.active ? '' : null"
               class="relative flex cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-hidden transition-colors select-none hover:bg-accent data-highlighted:bg-selected [&_ng-icon]:[--ng-icon__size:1rem]"
               (mousedown)="$event.preventDefault()"
               (pointermove)="highlight(index)"
+              (keydown.enter)="choose(index)"
               (click)="choose(index)"
             >
               @if (type.icon) {
@@ -151,17 +148,16 @@
           }
         } @else {
           @for (person of state.items; track person.id; let index = $index) {
-            <!-- An option of an aria-activedescendant listbox: the text keeps the focus and its
-                 keyboard (Enter, Tab) chooses this row. -->
-            <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
             <div
               role="option"
+              tabindex="-1"
               [id]="optionId(index)"
               [attr.aria-selected]="index === state.active"
               [attr.data-highlighted]="index === state.active ? '' : null"
               class="relative flex cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-hidden transition-colors select-none hover:bg-accent data-highlighted:bg-selected"
               (mousedown)="$event.preventDefault()"
               (pointermove)="highlight(index)"
+              (keydown.enter)="choose(index)"
               (click)="choose(index)"
             >
               <cw-avatar
@@ -171,8 +167,6 @@
                 aria-hidden="true"
               />
               @let parts = nameParts(person.name, state.query);
-              <!-- The found part in bold (CommentComposer preview); an empty mark when nothing
-                   matches, so no whitespace slips between the parts. -->
               <span class="truncate"
                 >{{ parts.before
                 }}<mark class="bg-transparent font-semibold text-foreground">{{ parts.match }}</mark
@@ -205,7 +199,6 @@
   }
 </div>
 
-<!-- The link panel (mockup App.dc.html, « Insérer un lien »), under the selection. -->
 <div
   #linkPanel
   role="dialog"

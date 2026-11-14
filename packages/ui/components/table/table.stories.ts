@@ -13,8 +13,13 @@ import { CwTableRow } from './table-row/table-row.directive';
 import { CwTable } from './table.directive';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Table, every state of its sheet in the Design System artifact, in the light and the dark theme.
  * Copy from the sheet's preview (time spent on a task, storage by space).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Table',
@@ -38,21 +43,58 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration used for table examples and interactions.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Locates the light-theme copy rendered by the shared Storybook preview decorator.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the theme examples.
+ *
+ * @returns {HTMLElement} Element containing the light-theme example.
+ *
+ * @throws {Error} When the expected light-theme scope is missing.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
-const entries = [
+/**
+ * Constant entries
+ *
+ * @description
+ * Example time entries used in the default table story.
+ *
+ * @type {{ person: string; date: string; note: string; time: string }[]}
+ */
+const entries: { person: string; date: string; note: string; time: string }[] = [
   { person: 'Léa Martin', date: 'lun. 9 nov.', note: 'Analyse du bug', time: '1 h 30' },
   { person: 'Karim Benali', date: 'mar. 10 nov.', note: "Correctif d'encodage", time: '2 h 15' },
   { person: 'Léa Martin', date: 'jeu. 12 nov.', note: 'Revue', time: '0 h 45' },
 ];
 
-const spaces = [
+/**
+ * Constant spaces
+ *
+ * @description
+ * Example space, task and storage figures used in the compact table story.
+ *
+ * @type {{ name: string; tasks: string; files: string; share: string }[]}
+ */
+const spaces: { name: string; tasks: string; files: string; share: string }[] = [
   { name: 'Produit', tasks: '248', files: '1,2 Go', share: '48 %' },
   { name: 'Infra', tasks: '96', files: '840 Mo', share: '33 %' },
   { name: 'Support', tasks: '412', files: '310 Mo', share: '12 %' },
@@ -94,8 +136,8 @@ export const Default: Story = {
         </table>
       </cw-table-container>`,
   }),
-  play: async ({ canvasElement }) => {
-    const table = within(light(canvasElement)).getByRole('table', {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const table: HTMLElement = within(light(canvasElement)).getByRole('table', {
       name: 'Temps passé sur CAD-482, semaine 46.',
     });
     await expect(within(table).getAllByRole('columnheader')).toHaveLength(4);
@@ -211,8 +253,8 @@ export const Overflow: Story = {
         </table>
       </cw-table-container>`,
   }),
-  play: async ({ canvasElement }) => {
-    const frame = light(canvasElement).querySelector('cw-table-container');
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const frame: Element | null = light(canvasElement).querySelector('cw-table-container');
     await userEvent.tab();
     await expect(frame).toHaveFocus();
   },

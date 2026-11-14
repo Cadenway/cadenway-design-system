@@ -1,14 +1,18 @@
 import type { CwMentionSearch } from '@cadenway/ui/components/block-editor';
 import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vite';
-import { of } from 'rxjs';
+import { of, type Observable } from 'rxjs';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 
 import { CwCommentComposer } from './comment-composer.component';
 import type { CwAttachmentDraft, CwPerson } from './comment-composer.types';
 
 /**
- * Comment composer, every state of its sheet in the Design System artifact, in the light and the
- * dark theme. Copy from the sheet's preview and the mockup (`App.dc.html`, comments of a task).
+ * Constant meta
+ *
+ * @description
+ * Comment composer states in light and dark themes, using the sheet and mockup content.
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/CommentComposer',
@@ -17,16 +21,50 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration for comment composer examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Finds the light theme section of the story canvas.
+ *
+ * @param {HTMLElement} canvasElement - Canvas containing the themed examples.
+ * @returns {HTMLElement} Light theme section.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
+/**
+ * Constant LEA
+ *
+ * @description
+ * Example comment author.
+ *
+ * @type {CwPerson}
+ */
 const LEA: CwPerson = { id: 'lea', name: 'Léa Martin', role: 'Produit' };
 
+/**
+ * Constant PEOPLE
+ *
+ * @description
+ * People available to the example mention search.
+ *
+ * @type {CwPerson[]}
+ */
 const PEOPLE: CwPerson[] = [
   { id: 'ines', name: 'Inès Duval', role: 'Design' },
   LEA,
@@ -34,9 +72,26 @@ const PEOPLE: CwPerson[] = [
   { id: 'hugo', name: 'Hugo Dubois', role: 'Support' },
 ];
 
-const searchPeople: CwMentionSearch = (query) =>
+/**
+ * Function searchPeople
+ *
+ * @description
+ * Filters example people by name for the mention picker.
+ *
+ * @param {string} query - Text entered in the mention search.
+ * @returns {Observable<readonly CwPerson[]>} Matching example people.
+ */
+const searchPeople: CwMentionSearch = (query: string): Observable<readonly CwPerson[]> =>
   of(PEOPLE.filter((person) => person.name.toLowerCase().includes(query.toLowerCase())));
 
+/**
+ * Constant FILES
+ *
+ * @description
+ * Uploaded and uploading attachments used in the example.
+ *
+ * @type {CwAttachmentDraft[]}
+ */
 const FILES: CwAttachmentDraft[] = [
   { id: 'f1', name: 'capture-excel.png', mimeType: 'image/png', fileSize: 319_488, state: 'done' },
   { id: 'f2', name: 'export-sprint-14.csv', state: 'uploading', progress: 64 },
@@ -54,8 +109,11 @@ export const Full: Story = {
     },
     template: `<cw-comment-composer class="max-w-xl" [author]="author" [mentionSearch]="searchPeople" [(attachments)]="files" [(value)]="value" />`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      findByRole: (role: string, options: { name: string }) => Promise<HTMLElement>;
+      getByRole: (role: string, options?: { name: string }) => HTMLElement;
+    } = within(light(canvasElement));
     await scope.findByRole('textbox', { name: 'Commentaire' });
     await expect(scope.getByRole('toolbar', { name: 'Mise en forme' })).toBeVisible();
     await expect(scope.getByRole('button', { name: 'Envoyer' })).toBeDisabled();
@@ -76,8 +134,10 @@ export const SendError: Story = {
     props: { value: 'Peux-tu relire avant vendredi ?' },
     template: `<cw-comment-composer class="max-w-xl" error="Envoi impossible : connexion perdue. Votre texte est conservé." [(value)]="value" />`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole: (role: string, options?: { name: string }) => HTMLElement } = within(
+      light(canvasElement),
+    );
     await expect(scope.getByRole('alert')).toHaveTextContent('Envoi impossible');
     await waitFor(() =>
       expect(scope.getByRole('textbox', { name: 'Commentaire' })).toHaveAttribute(
@@ -118,9 +178,12 @@ export const CompactFocus: Story = {
     props: { author: LEA, value: '' },
     template: `<cw-comment-composer class="max-w-md" variant="compact" [author]="author" [(value)]="value" />`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const surface = await scope.findByRole('textbox', { name: 'Commentaire' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      findByRole: (role: string, options: { name: string }) => Promise<HTMLElement>;
+      getByRole: (role: string, options?: { name: string }) => HTMLElement;
+    } = within(light(canvasElement));
+    const surface: HTMLElement = await scope.findByRole('textbox', { name: 'Commentaire' });
     await userEvent.click(surface);
     await expect(await scope.findByRole('toolbar', { name: 'Mise en forme' })).toBeVisible();
   },
@@ -140,12 +203,13 @@ export const Mentions: Story = {
     props: { searchPeople, value: '' },
     template: `<cw-comment-composer class="max-w-xl" [mentionSearch]="searchPeople" [(value)]="value" />`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const surface = await scope.findByRole('textbox', { name: 'Commentaire' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { findByRole: (role: string, options: { name: string }) => Promise<HTMLElement> } =
+      within(light(canvasElement));
+    const surface: HTMLElement = await scope.findByRole('textbox', { name: 'Commentaire' });
     await userEvent.click(surface);
     await userEvent.keyboard('Correctif prêt, @in');
-    const listbox = await scope.findByRole('listbox', { name: 'Personnes' });
+    const listbox: HTMLElement = await scope.findByRole('listbox', { name: 'Personnes' });
     await waitFor(() => expect(within(listbox).getAllByRole('option')).toHaveLength(2));
     await userEvent.keyboard('{Enter}');
     await waitFor(() =>
@@ -160,12 +224,15 @@ export const Commands: Story = {
     props: { value: '' },
     template: `<cw-comment-composer class="max-w-xl" [(value)]="value" />`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const surface = await scope.findByRole('textbox', { name: 'Commentaire' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      findByRole: (role: string, options: { name: string }) => Promise<HTMLElement>;
+      queryByRole: (role: string) => HTMLElement | null;
+    } = within(light(canvasElement));
+    const surface: HTMLElement = await scope.findByRole('textbox', { name: 'Commentaire' });
     await userEvent.click(surface);
     await userEvent.keyboard('/');
-    const listbox = await scope.findByRole('listbox', { name: 'Blocs' });
+    const listbox: HTMLElement = await scope.findByRole('listbox', { name: 'Blocs' });
     await expect(within(listbox).getAllByRole('option')).toHaveLength(6);
     await userEvent.keyboard('{Escape}');
     await waitFor(() => expect(scope.queryByRole('listbox')).toBeNull());

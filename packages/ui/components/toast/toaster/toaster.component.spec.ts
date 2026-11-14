@@ -1,10 +1,16 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CwToastService } from '../toast.service';
 import type { CwToastDurations } from '../toast.types';
 import { CwToaster } from './toaster.component';
 
+/**
+ * Component Host
+ *
+ * @description
+ * Supplies configurable toaster inputs and a focus target for interaction tests.
+ */
 @Component({
   imports: [CwToaster],
   template: `
@@ -13,9 +19,40 @@ import { CwToaster } from './toaster.component';
   `,
 })
 class Host {
-  readonly duration = signal<CwToastDurations>({});
-  readonly closeButton = signal(false);
-  readonly expand = signal(false);
+  // #region Properties
+  /**
+   * Property duration
+   *
+   * @description
+   * Overrides toast durations by tone in the fixture.
+   *
+   * @type {WritableSignal<CwToastDurations>}
+   * @readonly
+   */
+  public readonly duration: WritableSignal<CwToastDurations> = signal<CwToastDurations>({});
+
+  /**
+   * Property closeButton
+   *
+   * @description
+   * Controls whether all fixture toasts have a close button.
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  public readonly closeButton: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property expand
+   *
+   * @description
+   * Controls whether the fixture stack stays unfolded.
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  public readonly expand: WritableSignal<boolean> = signal(false);
+  // #endregion
 }
 
 describe('CwToaster', () => {
@@ -24,18 +61,46 @@ describe('CwToaster', () => {
   let toasts: CwToastService;
   let element: HTMLElement;
 
+  /**
+   * Function region
+   *
+   * @description
+   * Finds the notification region in the test fixture.
+   *
+   * @returns {HTMLElement} Focusable notification region.
+   */
   function region(): HTMLElement {
-    const found = element.querySelector<HTMLElement>('section[aria-label="Notifications (F8)"]');
+    const found: HTMLElement | null = element.querySelector<HTMLElement>(
+      'section[aria-label="Notifications (F8)"]',
+    );
     if (!found) throw new Error('No notification region');
     return found;
   }
 
+  /**
+   * Function live
+   *
+   * @description
+   * Finds the currently exposed status and alert notifications.
+   *
+   * @returns {HTMLElement[]} Live notification elements.
+   */
   function live(): HTMLElement[] {
     return Array.from(region().querySelectorAll<HTMLElement>('[role="status"], [role="alert"]'));
   }
 
+  /**
+   * Function named
+   *
+   * @description
+   * Finds a button by its accessible label or displayed text.
+   *
+   * @param {HTMLElement} scope - Element containing the buttons to inspect.
+   * @param {string} name - Expected label or text.
+   * @returns {HTMLButtonElement} Matching button.
+   */
   function named(scope: HTMLElement, name: string): HTMLButtonElement {
-    const found = Array.from(scope.querySelectorAll('button')).find(
+    const found: HTMLButtonElement | undefined = Array.from(scope.querySelectorAll('button')).find(
       (button) => (button.getAttribute('aria-label') ?? button.textContent.trim()) === name,
     );
     if (!found) throw new Error(`No button named ${name}`);
@@ -60,7 +125,7 @@ describe('CwToaster', () => {
   });
 
   it('runs the action, then closes the toast', async () => {
-    const undo = vi.fn();
+    const undo: () => void = vi.fn();
     toasts.success('Tâche déplacée vers Terminé', { undo });
     toasts.show('CAD-482 restaurée', { action: { label: 'Ouvrir', run: vi.fn() } });
     await fixture.whenStable();
@@ -126,7 +191,7 @@ describe('CwToaster', () => {
   it('moves the focus into the region on F8, and back where it was on Escape', async () => {
     toasts.error("Impossible d'enregistrer", { action: { label: 'Réessayer', run: vi.fn() } });
     await fixture.whenStable();
-    const before = named(element, 'Déplacer');
+    const before: HTMLButtonElement = named(element, 'Déplacer');
     before.focus();
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'F8', bubbles: true }));
@@ -134,7 +199,7 @@ describe('CwToaster', () => {
     expect(document.activeElement).toBe(region());
     expect(region().hasAttribute('data-expanded')).toBe(true);
 
-    const retry = named(region(), 'Réessayer');
+    const retry: HTMLButtonElement = named(region(), 'Réessayer');
     retry.focus();
     retry.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     await fixture.whenStable();
@@ -146,7 +211,7 @@ describe('CwToaster', () => {
   it('closes a toast swiped towards the edge of the screen', async () => {
     toasts.error('Étiquette supprimée');
     await fixture.whenStable();
-    const item = live()[0]?.parentElement;
+    const item: HTMLElement | null | undefined = live()[0]?.parentElement;
     if (!item) throw new Error('No toast');
 
     // `detail: 1`: the CDK ignores a mousedown that looks generated by a screen reader.

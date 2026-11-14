@@ -19,10 +19,15 @@ import { CwBreadcrumbPage } from './breadcrumb-page/breadcrumb-page.component';
 import { CwBreadcrumb } from './breadcrumb.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Breadcrumb, every state of its sheet in the Design System artifact, in the light and the dark
  * theme. Each trail is named after its theme: two navigations of a page never share a name. The
  * menus of « … » and of a level with a menu open in the real overlay, attached to the body. Copy
  * from the sheet ("Dans Cadenway").
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Breadcrumb',
@@ -53,10 +58,31 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration used for breadcrumb examples and interactions.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Locates the light-theme copy rendered by the shared Storybook preview decorator.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the theme examples.
+ *
+ * @returns {HTMLElement} Element containing the light-theme example.
+ *
+ * @throws {Error} When the expected light-theme scope is missing.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -71,8 +97,8 @@ export const Default: Story = {
         <span cwBreadcrumbPage>CAD-482</span>
       </nav>`,
   }),
-  play: async ({ canvasElement }) => {
-    const nav = within(light(canvasElement)).getByRole('navigation', {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const nav: HTMLElement = within(light(canvasElement)).getByRole('navigation', {
       name: "Fil d'Ariane light",
     });
     await expect(within(nav).getAllByRole('listitem')).toHaveLength(3);
@@ -151,18 +177,20 @@ export const Collapsed: Story = {
         <span cwBreadcrumbPage>Mapper les champs</span>
       </nav>`,
   }),
-  play: async ({ canvasElement }) => {
-    const nav = within(light(canvasElement)).getByRole('navigation', {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const nav: HTMLElement = within(light(canvasElement)).getByRole('navigation', {
       name: "Fil d'Ariane light",
     });
-    const ellipsis = within(nav).getByRole('button', { name: 'Niveaux masqués' });
+    const ellipsis: HTMLElement = within(nav).getByRole('button', { name: 'Niveaux masqués' });
     await expect(within(nav).queryByRole('link', { name: 'Sprint 14' })).toBeNull();
 
     ellipsis.focus();
     await userEvent.keyboard('{Enter}');
     await expect(ellipsis).toHaveAttribute('aria-expanded', 'true');
-    const menu = await within(document.body).findByRole('menu', { name: 'Niveaux masqués' });
-    const items = within(menu).getAllByRole('menuitem');
+    const menu: HTMLElement = await within(document.body).findByRole('menu', {
+      name: 'Niveaux masqués',
+    });
+    const items: HTMLElement[] = within(menu).getAllByRole('menuitem');
     await expect(items.map((item) => item.textContent.trim())).toEqual([
       'Sprint 14',
       'Import JSON',
@@ -192,12 +220,14 @@ export const LevelWithMenu: Story = {
         <button cwMenuItem><ng-icon name="phosphorListBulletsBold" aria-hidden="true" />Bugs</button>
       </cw-menu>`,
   }),
-  play: async ({ canvasElement }) => {
-    const level = within(light(canvasElement)).getByRole('button', { name: 'Sprint 14' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const level: HTMLElement = within(light(canvasElement)).getByRole('button', {
+      name: 'Sprint 14',
+    });
 
     await userEvent.click(level);
     await expect(level).toHaveAttribute('data-state', 'open');
-    const menu = await within(document.body).findByRole('menu', { name: 'Sprint 14' });
+    const menu: HTMLElement = await within(document.body).findByRole('menu', { name: 'Sprint 14' });
     await userEvent.click(within(menu).getByRole('menuitem', { name: 'Backlog' }));
     await expect(level).toHaveAttribute('data-state', 'closed');
   },

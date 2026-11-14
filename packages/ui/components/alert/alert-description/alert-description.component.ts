@@ -1,8 +1,14 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, type Signal } from '@angular/core';
 
 import { CwAlert } from '../alert.component';
 
-/** The description of an alert: what to do; muted, or the error color in a `destructive` alert. */
+/**
+ * Class CwAlertDescription
+ * @class CwAlertDescription
+ *
+ * @description
+ * Presents alert guidance in muted text, or the error color for a destructive alert.
+ */
 @Component({
   selector: 'cw-alert-description',
   host: {
@@ -11,11 +17,31 @@ import { CwAlert } from '../alert.component';
   templateUrl: './alert-description.component.html',
 })
 export class CwAlertDescription {
-  private readonly alert = inject(CwAlert, { optional: true });
+  // #region Properties
+  /**
+   * Property alert
+   * @readonly
+   *
+   * @description
+   * Parent alert used to select the description tone, or null outside an alert.
+   *
+   * @type {CwAlert | null}
+   */
+  private readonly alert: CwAlert | null = inject(CwAlert, { optional: true });
 
-  protected readonly classes = computed(() =>
+  /**
+   * Property classes
+   * @readonly
+   *
+   * @description
+   * Description classes using the destructive tone when the parent alert requires it.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly classes: Signal<string> = computed(() =>
     this.alert?.variant() === 'destructive'
       ? 'block leading-5 text-grenat-text'
       : 'block leading-5 text-muted-foreground',
   );
+  // #endregion
 }

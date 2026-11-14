@@ -1,5 +1,19 @@
-/** Height and radius of an input group, aligned on the button of the same size. */
+/**
+ * Type CwInputGroupSize
+ *
+ * @description
+ * Input group height and radius aligned with the corresponding button size.
+ *
+ * @type {'sm' | 'default' | 'lg'}
+ */
 export type CwInputGroupSize = 'sm' | 'default' | 'lg';
 
-/** Where an addon sits: before or after the field on its line, or as a row above or below it. */
+/**
+ * Type CwInputGroupAddonAlign
+ *
+ * @description
+ * Position of an addon inline with or above or below the field.
+ *
+ * @type {'inline-start' | 'inline-end' | 'block-start' | 'block-end'}
+ */
 export type CwInputGroupAddonAlign = 'inline-start' | 'inline-end' | 'block-start' | 'block-end';

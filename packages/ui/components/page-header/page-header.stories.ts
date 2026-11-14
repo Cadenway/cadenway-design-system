@@ -37,10 +37,15 @@ import { CwPageHeaderTabs } from './page-header-tabs/page-header-tabs.component'
 import { CwPageHeaderTitle } from './page-header-title/page-header-title.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Page Header, every variant of its sheet in the Design System artifact; each story renders in the
  * light and the dark theme (`.storybook/preview.ts`). Copy from the sheet (« Sprint 14 ») and the
  * mockup's list header (`App.dc.html`). The breadcrumb is plain markup with the Breadcrumb preview's
  * classes; landmark names carry the theme so that the two copies stay distinct.
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/PageHeader',
@@ -88,16 +93,47 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration used for page-header examples and interactions.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Locates the light-theme copy rendered by the shared Storybook preview decorator.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the theme examples.
+ *
+ * @returns {HTMLElement} Element containing the light-theme example.
+ *
+ * @throws {Error} When the expected light-theme scope is missing.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
+/**
+ * Function breadcrumb
+ *
+ * @description
+ * Builds the mockup breadcrumb markup used in page-header examples with a theme-specific name.
+ *
+ * @param {'xs' | 'sm'} size - Text size for the breadcrumb trail.
+ *
+ * @returns {string} Angular template markup for the breadcrumb.
+ */
 function breadcrumb(size: 'xs' | 'sm'): string {
-  const text = size === 'xs' ? 'text-xs' : 'text-sm';
+  const text: string = size === 'xs' ? 'text-xs' : 'text-sm';
   return `
     <nav cwBreadcrumb [attr.aria-label]="cwTheme === 'light' ? 'Fil d\\'Ariane' : 'Fil d\\'Ariane, thème sombre'">
       <ol class="flex items-center gap-1 ${text} text-muted-foreground">
@@ -107,7 +143,15 @@ function breadcrumb(size: 'xs' | 'sm'): string {
     </nav>`;
 }
 
-const MEMBERS = `
+/**
+ * Constant MEMBERS
+ *
+ * @description
+ * Avatar-group markup representing the four sprint members in the header examples.
+ *
+ * @type {string}
+ */
+const MEMBERS: string = `
   <cw-avatar-group ariaLabel="4 membres sur ce sprint">
     <cw-avatar name="Léa Martin" />
     <cw-avatar name="Karim Benali" />
@@ -115,9 +159,15 @@ const MEMBERS = `
     <cw-avatar name="Samuel Roux" />
   </cw-avatar-group>`;
 
-/* The view tabs of the mockup's list header (`App.dc.html`, « Vues »): buttons switched in place,
-   the active icon in its Fill glyph, then « + Vue ». */
-const VIEW_TABS = `
+/**
+ * Constant VIEW_TABS
+ *
+ * @description
+ * Mockup list-view tab markup with active fill icons and an action to add a view.
+ *
+ * @type {string}
+ */
+const VIEW_TABS: string = `
   <cw-page-header-tabs>
     <cw-tabs [(value)]="view">
       <cw-tabs-list ariaLabel="Vues">
@@ -170,10 +220,12 @@ export const ListView: Story = {
         ${VIEW_TABS}
       </cw-page-header>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const views = scope.getByRole('tablist', { name: 'Vues' });
-    const board = within(views).getByRole('tab', { name: 'Tableau' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole(role: string, options?: { name?: string }): HTMLElement } = within(
+      light(canvasElement),
+    );
+    const views: HTMLElement = scope.getByRole('tablist', { name: 'Vues' });
+    const board: HTMLElement = within(views).getByRole('tab', { name: 'Tableau' });
     await expect(board).toHaveAttribute('aria-selected', 'true');
     await userEvent.click(within(views).getByRole('tab', { name: 'Calendrier' }));
     await expect(within(views).getByRole('tab', { name: 'Calendrier' })).toHaveAttribute(
@@ -217,9 +269,11 @@ export const RoutedViews: Story = {
         </cw-page-header-tabs>
       </cw-page-header>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const nav = scope.getByRole('navigation', { name: 'Vues' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole(role: string, options?: { name?: string }): HTMLElement } = within(
+      light(canvasElement),
+    );
+    const nav: HTMLElement = scope.getByRole('navigation', { name: 'Vues' });
     await expect(within(nav).getByRole('link', { name: 'Liste' })).toHaveAttribute(
       'aria-current',
       'page',
@@ -308,8 +362,8 @@ export const Favorite: Story = {
         <cw-page-header-favorite [(favorite)]="favorite" />
       </cw-page-header>`,
   }),
-  play: async ({ canvasElement }) => {
-    const star = within(light(canvasElement)).getByRole('button', { name: 'Favori' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const star: HTMLElement = within(light(canvasElement)).getByRole('button', { name: 'Favori' });
     await expect(star).toHaveAttribute('aria-pressed', 'false');
     await userEvent.click(star);
     await expect(star).toHaveAttribute('aria-pressed', 'true');

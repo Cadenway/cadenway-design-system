@@ -11,9 +11,14 @@ import { CwSelectSeparator } from './select-separator/select-separator.component
 import { CwSelect } from './select.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Select, every state of its sheet in the Design System artifact, in the light and the dark theme.
  * The panel is a native popover inserted next to its trigger, so it takes the theme of its scope.
  * Copy from the sheet's preview (task panel: status, priority, sprint, destination list).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Select',
@@ -37,15 +42,42 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story for select examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Returns the light-theme story container.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing theme scopes.
+ *
+ * @returns {HTMLElement} Container for the light theme.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
-const STATUS_OPTIONS = `
+/**
+ * Constant STATUS_OPTIONS
+ *
+ * @description
+ * Status options used in the examples.
+ *
+ * @type {string}
+ */
+const STATUS_OPTIONS: string = `
   <cw-select-group label="Pas commencé">
     <cw-select-option value="todo"><cw-status-icon status="todo" /> À faire</cw-select-option>
     <cw-select-option value="waiting" disabled><cw-status-icon status="waiting" /> En attente</cw-select-option>
@@ -60,7 +92,15 @@ const STATUS_OPTIONS = `
     <cw-select-option value="done"><cw-status-icon status="done" /> Terminé</cw-select-option>
   </cw-select-group>`;
 
-const PRIORITY_OPTIONS = `
+/**
+ * Constant PRIORITY_OPTIONS
+ *
+ * @description
+ * Priority options used in the examples.
+ *
+ * @type {string}
+ */
+const PRIORITY_OPTIONS: string = `
   <cw-select-option value="urgente"><cw-priority-icon priority="urgente" /> Urgente</cw-select-option>
   <cw-select-option value="haute"><cw-priority-icon priority="haute" /> Haute</cw-select-option>
   <cw-select-option value="moyenne"><cw-priority-icon priority="moyenne" /> Moyenne</cw-select-option>
@@ -137,20 +177,22 @@ export const Keyboard: Story = {
         <cw-select value="todo" ariaLabel="Statut">${STATUS_OPTIONS}</cw-select>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const trigger = within(light(canvasElement)).getByRole('combobox', { name: 'Statut' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const trigger: HTMLElement = within(light(canvasElement)).getByRole('combobox', {
+      name: 'Statut',
+    });
     await userEvent.click(trigger);
     await userEvent.keyboard('{Escape}');
     await expect(trigger).toHaveAttribute('aria-expanded', 'false');
 
     await userEvent.keyboard('{ArrowDown}');
     await expect(trigger).toHaveAttribute('aria-expanded', 'true');
-    const listbox = within(document.body).getByRole('listbox', { name: 'Statut' });
-    const todo = within(listbox).getByRole('option', { name: 'À faire' });
+    const listbox: HTMLElement = within(document.body).getByRole('listbox', { name: 'Statut' });
+    const todo: HTMLElement = within(listbox).getByRole('option', { name: 'À faire' });
     await expect(trigger).toHaveAttribute('aria-activedescendant', todo.id);
 
     await userEvent.keyboard('{ArrowDown}');
-    const progress = within(listbox).getByRole('option', { name: 'En cours' });
+    const progress: HTMLElement = within(listbox).getByRole('option', { name: 'En cours' });
     await expect(trigger).toHaveAttribute('aria-activedescendant', progress.id);
 
     await userEvent.keyboard('{Enter}');

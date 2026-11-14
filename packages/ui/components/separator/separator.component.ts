@@ -1,11 +1,22 @@
-import { booleanAttribute, Component, input } from '@angular/core';
+import {
+  booleanAttribute,
+  Component,
+  input,
+  type InputSignal,
+  type InputSignalWithTransform,
+} from '@angular/core';
 
 import type { CwSeparatorOrientation } from './separator.types';
 
-/* Literal class strings (Separator sheet and preview of the Design System artifact). The horizontal
-   line is drawn by two flexible pseudo-elements, so projected text becomes a centered label between
-   two lines, and an empty separator (`empty:gap-0`) is one continuous 1 px line. No fixed width:
-   it fills a block or a column container, and negative margins (`-mx-1` in a menu) widen it. */
+/**
+ * Constant ORIENTATIONS
+ *
+ * @description
+ * Literal classes from the Separator sheet. Horizontal pseudo-elements surround projected text;
+ * an empty separator becomes one continuous line. Both orientations stretch to their container.
+ *
+ * @type {Record<CwSeparatorOrientation, string>}
+ */
 const ORIENTATIONS: Record<CwSeparatorOrientation, string> = {
   horizontal:
     'flex shrink-0 items-center gap-3 self-stretch text-xs text-muted-foreground before:h-px before:flex-1 before:bg-border after:h-px after:flex-1 after:bg-border empty:gap-0',
@@ -13,6 +24,10 @@ const ORIENTATIONS: Record<CwSeparatorOrientation, string> = {
 };
 
 /**
+ * Class CwSeparator
+ * @class CwSeparator
+ *
+ * @description
  * A 1 px line between groups of content, horizontal or vertical, in `bg-border` (Separator sheet of
  * the Design System artifact).
  *
@@ -33,12 +48,47 @@ const ORIENTATIONS: Record<CwSeparatorOrientation, string> = {
   templateUrl: './separator.component.html',
 })
 export class CwSeparator {
-  /** Direction of the line. */
-  readonly orientation = input<CwSeparatorOrientation>('horizontal');
-  /** Purely visual (`role="none"`); false when the line really separates two groups. */
-  readonly decorative = input(true, { transform: booleanAttribute });
+  // #region Properties
+  /**
+   * Property orientation
+   * @readonly
+   *
+   * @description
+   * Input selecting the line direction and the corresponding layout.
+   *
+   * @type {InputSignal<CwSeparatorOrientation>}
+   * @default 'horizontal'
+   */
+  public readonly orientation: InputSignal<CwSeparatorOrientation> =
+    input<CwSeparatorOrientation>('horizontal');
 
+  /**
+   * Property decorative
+   * @readonly
+   *
+   * @description
+   * Input selecting a purely visual line; false exposes the separator role to assistive technology.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   * @default true
+   */
+  public readonly decorative: InputSignalWithTransform<boolean, unknown> = input(true, {
+    transform: booleanAttribute,
+  });
+  // #endregion
+
+  // #region Methods
+  /**
+   * Method classes
+   * @method classes
+   *
+   * @description
+   * Selects the literal class string for the current orientation.
+   *
+   * @returns {string} Classes applied to the separator host.
+   */
   protected classes(): string {
     return ORIENTATIONS[this.orientation()];
   }
+  // #endregion
 }

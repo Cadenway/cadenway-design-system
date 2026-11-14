@@ -1,4 +1,14 @@
-import { Component, computed, input, model, numberAttribute } from '@angular/core';
+import {
+  Component,
+  computed,
+  input,
+  model,
+  numberAttribute,
+  type InputSignal,
+  type InputSignalWithTransform,
+  type ModelSignal,
+  type Signal,
+} from '@angular/core';
 import { CwRipple } from '@cadenway/ui/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -15,6 +25,10 @@ import {
 } from '@ng-icons/phosphor-icons/fill';
 
 /**
+ * Class CwBubbleReaction
+ * @class CwBubbleReaction
+ *
+ * @description
  * One reaction under a bubble: a Phosphor icon and its count, pressed when it includes you (Bubble
  * sheet of the Design System artifact, « Réactions »).
  *
@@ -25,9 +39,6 @@ import {
  * the count and whether you reacted (« D'accord : 2, dont vous »). Every press draws the ripple.
  */
 @Component({
-  // A component on a native element (attribute selector), as its sheet requires: the element keeps
-  // its native role, focus and form behavior. The lint rule only knows element selectors.
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'button[cwBubbleReaction]',
   imports: [NgIcon],
   hostDirectives: [CwRipple],
@@ -54,27 +65,94 @@ import {
   templateUrl: './bubble-reaction.component.html',
 })
 export class CwBubbleReaction {
-  /** Phosphor icon name in kebab case (`thumbs-up`). */
-  readonly icon = input.required<string>();
-  /** How many people reacted, you included. */
-  readonly count = input(0, { transform: numberAttribute });
-  /** What the reaction means (« D'accord »), read first. */
-  readonly label = input.required<string>();
-  /** Words added to the name when you reacted. */
-  readonly youLabel = input('dont vous');
-  /** Whether you reacted; `[(pressed)]`. */
-  readonly pressed = model(false);
+  // #region Properties
+  /**
+   * Property icon
+   * @readonly
+   *
+   * @description
+   * Phosphor icon name in kebab case.
+   *
+   * @type {InputSignal<string>}
+   */
+  public readonly icon: InputSignal<string> = input.required<string>();
 
-  protected readonly iconName = computed(() => {
-    const pascal = this.icon()
+  /**
+   * Property count
+   * @readonly
+   *
+   * @description
+   * Number of people who reacted, including the current user.
+   *
+   * @type {InputSignalWithTransform<number, unknown>}
+   */
+  public readonly count: InputSignalWithTransform<number, unknown> = input(0, {
+    transform: numberAttribute,
+  });
+
+  /**
+   * Property label
+   * @readonly
+   *
+   * @description
+   * Meaning of the reaction, read first.
+   *
+   * @type {InputSignal<string>}
+   */
+  public readonly label: InputSignal<string> = input.required<string>();
+
+  /**
+   * Property youLabel
+   * @readonly
+   *
+   * @description
+   * Words added to the accessible name when the user reacted.
+   *
+   * @type {InputSignal<string>}
+   */
+  public readonly youLabel: InputSignal<string> = input('dont vous');
+
+  /**
+   * Property pressed
+   * @readonly
+   *
+   * @description
+   * Two-way state indicating whether the user reacted.
+   *
+   * @type {ModelSignal<boolean>}
+   */
+  public readonly pressed: ModelSignal<boolean> = model(false);
+
+  /**
+   * Property iconName
+   * @readonly
+   *
+   * @description
+   * Registered icon name in bold or fill according to the pressed state.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly iconName: Signal<string> = computed(() => {
+    const pascal: string = this.icon()
       .split('-')
       .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
       .join('');
     // An icon name, not a class name: ng-icon looks it up in the registered icon sets.
     return `phosphor${pascal}${this.pressed() ? 'Fill' : 'Bold'}`;
   });
-  protected readonly accessibleName = computed(
+
+  /**
+   * Property accessibleName
+   * @readonly
+   *
+   * @description
+   * Reaction label, count and current-user state for assistive technology.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly accessibleName: Signal<string> = computed(
     () =>
       `${this.label()} : ${String(this.count())}${this.pressed() ? `, ${this.youLabel()}` : ''}`,
   );
+  // #endregion
 }

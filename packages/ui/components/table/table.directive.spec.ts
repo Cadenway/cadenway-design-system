@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { TestBed, type ComponentFixture } from '@angular/core/testing';
 
 import { CwTableBody } from './table-body/table-body.directive';
 import { CwTableCaption } from './table-caption/table-caption.directive';
@@ -12,6 +12,13 @@ import { CwTableHeader } from './table-header/table-header.directive';
 import { CwTableRow } from './table-row/table-row.directive';
 import { CwTable } from './table.directive';
 
+/**
+ * Class Host
+ * @class Host
+ *
+ * @description
+ * Test host with a captioned storage table and a second table showing an empty state.
+ */
 @Component({
   imports: [
     CwTable,
@@ -66,13 +73,25 @@ describe('CwTable', () => {
   let host: HTMLElement;
 
   beforeEach(() => {
-    const fixture = TestBed.createComponent(Host);
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
     fixture.detectChanges();
     host = fixture.nativeElement as HTMLElement;
   });
 
+  /**
+   * Function headerNamed
+   *
+   * @description
+   * Finds a table header in the fixture by its trimmed visible text.
+   *
+   * @param {string} name - Exact header text to match.
+   *
+   * @returns {HTMLTableCellElement} First matching header cell.
+   *
+   * @throws {Error} When no header has the requested name.
+   */
   function headerNamed(name: string): HTMLTableCellElement {
-    const found = Array.from(host.querySelectorAll('th')).find(
+    const found: HTMLTableCellElement | undefined = Array.from(host.querySelectorAll('th')).find(
       (element) => element.textContent.trim() === name,
     );
     if (!found) throw new Error(`No header named ${name}`);
@@ -80,7 +99,7 @@ describe('CwTable', () => {
   }
 
   it('keeps the native table semantics and exposes its size', () => {
-    const table = host.querySelector('table');
+    const table: HTMLTableElement | null = host.querySelector('table');
 
     expect(table?.caption?.textContent.trim()).toBe('Stockage par espace, au 12 nov.');
     expect(table?.tHead?.rows).toHaveLength(1);
@@ -99,7 +118,7 @@ describe('CwTable', () => {
   });
 
   it('spans the empty state over the columns', () => {
-    const empty = Array.from(host.querySelectorAll('td')).find(
+    const empty: HTMLTableCellElement | undefined = Array.from(host.querySelectorAll('td')).find(
       (cell) => cell.textContent.trim() === 'Aucune saisie de temps cette semaine.',
     );
     expect(empty?.colSpan).toBe(3);

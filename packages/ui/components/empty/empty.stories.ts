@@ -25,8 +25,13 @@ import { CwEmptyTitle } from './empty-title/empty-title.component';
 import { CwEmpty } from './empty.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Empty, every state of its sheet in the Design System artifact and the loading error panel of the
  * integration guide, in the light and the dark theme. Copy from the mockup (`App.dc.html`).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Empty',
@@ -61,10 +66,31 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration used for empty-state and error-panel examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Locates the light-theme copy rendered by the shared Storybook preview decorator.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the theme examples.
+ *
+ * @returns {HTMLElement} Element containing the light-theme example.
+ *
+ * @throws {Error} When the expected light-theme scope is missing.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -102,7 +128,7 @@ export const NoResults: Story = {
         </cw-empty-content>
       </cw-empty>`,
   }),
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     await expect(within(light(canvasElement)).getByRole('status')).toHaveTextContent(
       'Aucun résultat pour « export pdf »',
     );
@@ -188,8 +214,8 @@ export const ErrorPanel: Story = {
         </cw-empty>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const alert = within(light(canvasElement)).getByRole('alert');
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const alert: HTMLElement = within(light(canvasElement)).getByRole('alert');
     await expect(alert).toHaveTextContent('Impossible de charger les tâches');
     await expect(within(alert).getByRole('button', { name: 'Réessayer' })).toBeEnabled();
   },

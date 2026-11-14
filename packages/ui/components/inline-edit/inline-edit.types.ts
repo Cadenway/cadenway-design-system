@@ -1,30 +1,151 @@
-/** What an inline edit shows: the text, the open field, or the text while the parent saves it. */
+/**
+ * Type CwInlineEditState
+ *
+ * @description
+ * Reading, editing or saving state of an inline edit.
+ *
+ * @type {'reading' | 'editing' | 'saving'}
+ */
 export type CwInlineEditState = 'reading' | 'editing' | 'saving';
 
-/** The French texts of an inline edit (Inline Edit sheet of the Design System artifact). */
+/**
+ * Interface CwInlineEditLabels
+ *
+ * @description
+ * French labels used by an inline edit.
+ */
 export interface CwInlineEditLabels {
-  /** Description of the text in reading mode (« Cliquer pour modifier »). */
+  // #region Properties
+  /**
+   * Property editHint
+   * @readonly
+   *
+   * @description
+   * Hint describing how to edit.
+   *
+   * @type {string}
+   */
   readonly editHint: string;
-  /** Name of the Enter key in the help line (« Entrée »). */
+
+  /**
+   * Property enterKey
+   * @readonly
+   *
+   * @description
+   * Name of the Enter key.
+   *
+   * @type {string}
+   */
   readonly enterKey: string;
-  /** Name of the Escape key in the help line (« Échap »). */
+
+  /**
+   * Property escapeKey
+   * @readonly
+   *
+   * @description
+   * Name of the Escape key.
+   *
+   * @type {string}
+   */
   readonly escapeKey: string;
-  /** Name of the Control key in the multiline help line (« Ctrl »). */
+
+  /**
+   * Property controlKey
+   * @readonly
+   *
+   * @description
+   * Name of the Control key.
+   *
+   * @type {string}
+   */
   readonly controlKey: string;
-  /** What Enter does, after the key (« pour valider »). */
+
+  /**
+   * Property submit
+   * @readonly
+   *
+   * @description
+   * Action described for the Enter key.
+   *
+   * @type {string}
+   */
   readonly submit: string;
-  /** What Escape does, after the key (« pour annuler »). */
+
+  /**
+   * Property cancel
+   * @readonly
+   *
+   * @description
+   * Action described for the Escape key.
+   *
+   * @type {string}
+   */
   readonly cancel: string;
-  /** What Ctrl + Enter does in a multiline field (« valider »). */
+
+  /**
+   * Property submitMultiline
+   * @readonly
+   *
+   * @description
+   * Submit action in multiline mode.
+   *
+   * @type {string}
+   */
   readonly submitMultiline: string;
-  /** What Escape does in a multiline field (« annuler »). */
+
+  /**
+   * Property cancelMultiline
+   * @readonly
+   *
+   * @description
+   * Cancel action in multiline mode.
+   *
+   * @type {string}
+   */
   readonly cancelMultiline: string;
-  /** Text next to the spinner while the parent saves (« Enregistrement… »). */
+
+  /**
+   * Property saving
+   * @readonly
+   *
+   * @description
+   * Text shown while saving.
+   *
+   * @type {string}
+   */
   readonly saving: string;
-  /** Announced once the parent has saved without error (« Modification enregistrée »). */
+
+  /**
+   * Property saved
+   * @readonly
+   *
+   * @description
+   * Announcement after a successful save.
+   *
+   * @type {string}
+   */
   readonly saved: string;
-  /** Error of an empty value when `required` is set. */
+
+  /**
+   * Property required
+   * @readonly
+   *
+   * @description
+   * Message for an empty required value.
+   *
+   * @type {string}
+   */
   readonly required: string;
-  /** Hidden text of the lock in read-only mode (« Lecture seule »); empty hides the lock. */
+
+  /**
+   * Property readonly
+   * @readonly
+   *
+   * @description
+   * Accessible label of the read-only indicator.
+   *
+   * @type {string}
+   */
   readonly readonly: string;
+  // #endregion
 }

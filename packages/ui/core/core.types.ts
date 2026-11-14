@@ -1,16 +1,64 @@
 /* Types shared across the entry points of `@cadenway/ui`; not public API (`ɵ` prefix). */
 
-/** Side of the trigger a floating panel opens on. */
+/**
+ * Type ɵSide
+ *
+ * @description
+ * Side of the trigger on which a floating panel opens.
+ *
+ * @type {'top' | 'right' | 'bottom' | 'left'}
+ */
 export type ɵSide = 'top' | 'right' | 'bottom' | 'left';
 
-/** Alignment of a floating panel along its side. */
+/**
+ * Type ɵAlign
+ *
+ * @description
+ * Alignment of a floating panel along its chosen side of the trigger.
+ *
+ * @type {'start' | 'center' | 'end'}
+ */
 export type ɵAlign = 'start' | 'center' | 'end';
 
-/** Where a floating panel actually sits: the side of its trigger and its alignment along it. */
+/**
+ * Interface ɵPlacement
+ * @interface ɵPlacement
+ *
+ * @description
+ * Actual placement of a floating panel relative to its trigger.
+ */
 export interface ɵPlacement {
+  // #region Properties
+  /**
+   * Property side
+   * @readonly
+   *
+   * @description
+   * Trigger side on which the panel is positioned.
+   *
+   * @type {ɵSide}
+   */
   readonly side: ɵSide;
+
+  /**
+   * Property align
+   * @readonly
+   *
+   * @description
+   * Alignment of the panel along the chosen side.
+   *
+   * @type {ɵAlign}
+   */
   readonly align: ɵAlign;
+  // #endregion
 }
 
-/** Which arrow keys move through a list: left and right, up and down, or both. */
+/**
+ * Type ɵListOrientation
+ *
+ * @description
+ * Arrow-key directions accepted when navigating a list: horizontal, vertical, or both.
+ *
+ * @type {'horizontal' | 'vertical' | 'both'}
+ */
 export type ɵListOrientation = 'horizontal' | 'vertical' | 'both';

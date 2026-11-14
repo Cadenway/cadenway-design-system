@@ -2,12 +2,20 @@
   viewBox="0 0 16 16"
   aria-hidden="true"
   focusable="false"
-  class="cw-prio block size-full"
+  class="cw-prio block size-full overflow-visible [transition:color_300ms_var(--ease-snap)] motion-reduce:transition-none"
   [class]="tone()"
 >
-  <rect class="cw-prio-bar" x="2.25" y="9" width="2.75" height="4.5" rx="1" fill="currentColor" />
   <rect
-    class="cw-prio-bar"
+    class="cw-prio-bar opacity-[0.22] [transform-box:fill-box] [transform-origin:50%_100%] [transform:scaleY(0.72)] [transition:opacity_220ms_var(--ease-snap),transform_520ms_var(--ease-spring)] group-data-[priority=basse]/priority:opacity-100 group-data-[priority=basse]/priority:[transform:scaleY(1)] group-data-[priority=moyenne]/priority:opacity-100 group-data-[priority=moyenne]/priority:[transform:scaleY(1)] group-data-[priority=haute]/priority:opacity-100 group-data-[priority=haute]/priority:[transform:scaleY(1)] group-data-[priority=urgente]/priority:opacity-0 group-data-[priority=urgente]/priority:[transform:scaleY(0.4)] motion-reduce:transition-none"
+    x="2.25"
+    y="9"
+    width="2.75"
+    height="4.5"
+    rx="1"
+    fill="currentColor"
+  />
+  <rect
+    class="cw-prio-bar opacity-[0.22] [transform-box:fill-box] [transform-origin:50%_100%] [transform:scaleY(0.72)] [transition:opacity_220ms_var(--ease-snap),transform_520ms_var(--ease-spring)] [transition-delay:60ms] group-data-[priority=moyenne]/priority:opacity-100 group-data-[priority=moyenne]/priority:[transform:scaleY(1)] group-data-[priority=haute]/priority:opacity-100 group-data-[priority=haute]/priority:[transform:scaleY(1)] group-data-[priority=urgente]/priority:opacity-0 group-data-[priority=urgente]/priority:[transform:scaleY(0.4)] group-data-[priority=urgente]/priority:[transition-delay:0ms] motion-reduce:transition-none"
     x="6.625"
     y="6.25"
     width="2.75"
@@ -15,14 +23,35 @@
     rx="1"
     fill="currentColor"
   />
-  <rect class="cw-prio-bar" x="11" y="3" width="2.75" height="10.5" rx="1" fill="currentColor" />
-  <rect class="cw-prio-disc" x="1.5" y="1.5" width="13" height="13" rx="3.5" fill="currentColor" />
+  <rect
+    class="cw-prio-bar opacity-[0.22] [transform-box:fill-box] [transform-origin:50%_100%] [transform:scaleY(0.72)] [transition:opacity_220ms_var(--ease-snap),transform_520ms_var(--ease-spring)] [transition-delay:120ms] group-data-[priority=haute]/priority:opacity-100 group-data-[priority=haute]/priority:[transform:scaleY(1)] group-data-[priority=urgente]/priority:opacity-0 group-data-[priority=urgente]/priority:[transform:scaleY(0.4)] group-data-[priority=urgente]/priority:[transition-delay:0ms] motion-reduce:transition-none"
+    x="11"
+    y="3"
+    width="2.75"
+    height="10.5"
+    rx="1"
+    fill="currentColor"
+  />
+  <rect
+    class="cw-prio-disc [transform-box:fill-box] [transform-origin:50%] [transform:scale(0)_rotate(-12deg)] [transition:transform_460ms_var(--ease-spring)] group-data-[priority=urgente]/priority:[transform:scale(1)_rotate(0deg)] group-data-[priority=urgente]/priority:[transition-delay:60ms] motion-reduce:transition-none"
+    x="1.5"
+    y="1.5"
+    width="13"
+    height="13"
+    rx="3.5"
+    fill="currentColor"
+  />
   <path
-    class="cw-prio-bang"
+    class="cw-prio-bang stroke-background [stroke-dasharray:4.1] [stroke-dashoffset:4.1px] [transition:stroke-dashoffset_260ms_var(--ease-snap)] group-data-[priority=urgente]/priority:[stroke-dashoffset:0] group-data-[priority=urgente]/priority:[transition-delay:240ms] motion-reduce:transition-none"
     d="M8 4.6v4.1"
     fill="none"
     stroke-width="1.75"
     stroke-linecap="round"
   />
-  <circle class="cw-prio-dot" cx="8" cy="11.35" r="1.05" />
+  <circle
+    class="cw-prio-dot fill-background [transform-box:fill-box] [transform-origin:50%] [transform:scale(0)] [transition:transform_300ms_var(--ease-spring)] group-data-[priority=urgente]/priority:[transform:scale(1)] group-data-[priority=urgente]/priority:[transition-delay:380ms] motion-reduce:transition-none"
+    cx="8"
+    cy="11.35"
+    r="1.05"
+  />
 </svg>

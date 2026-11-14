@@ -1,54 +1,278 @@
-/** Kind of message: from the others (left), your own (right), or a notice about the thread. */
+/**
+ * Type CwMessageVariant
+ *
+ * @description
+ * Incoming, outgoing or system message layout in a thread.
+ *
+ * @type {'incoming' | 'outgoing' | 'system'}
+ */
 export type CwMessageVariant = 'incoming' | 'outgoing' | 'system';
 
-/** Tone of a system notice or of the state note under a bubble; same tones as Banner and Alert. */
+/**
+ * Type CwMessageTone
+ *
+ * @description
+ * Tone of a system notice or a state note beneath a bubble.
+ *
+ * @type {'default' | 'info' | 'success' | 'warning' | 'error'}
+ */
 export type CwMessageTone = 'default' | 'info' | 'success' | 'warning' | 'error';
 
-/** Sending state of an outgoing message; `failed` brings the error note with « Réessayer ». */
+/**
+ * Type CwMessageStatus
+ *
+ * @description
+ * Sending state of an outgoing message; failed messages offer a retry action.
+ *
+ * @type {'sent' | 'sending' | 'failed'}
+ */
 export type CwMessageStatus = 'sent' | 'sending' | 'failed';
 
-/** The French texts of a message; each one can be replaced through the `labels` input. */
+/**
+ * Type CwMessageTimeFormatter
+ *
+ * @description
+ * Formats a message or reply timestamp relative to the supplied reference time.
+ *
+ * @type {(time: Date, now: Date) => string}
+ */
+export type CwMessageTimeFormatter = (time: Date, now: Date) => string;
+
+/**
+ * Interface CwMessageLabels
+ *
+ * @description
+ * French message labels that callers can override through the labels input.
+ */
 export interface CwMessageLabels {
-  /** After the time of an edited message. */
+  // #region Properties
+  /**
+   * Property edited
+   * @readonly
+   *
+   * @description
+   * Text after the time of an edited message.
+   *
+   * @type {string}
+   */
   readonly edited: string;
-  /** Footer of an outgoing message being sent. */
+
+  /**
+   * Property sending
+   * @readonly
+   *
+   * @description
+   * Footer text while an outgoing message is being sent.
+   *
+   * @type {string}
+   */
   readonly sending: string;
-  /** Note of a message whose sending failed. */
+
+  /**
+   * Property failed
+   * @readonly
+   *
+   * @description
+   * Note shown when sending a message fails.
+   *
+   * @type {string}
+   */
   readonly failed: string;
-  /** Retry button of the failed note. */
+
+  /**
+   * Property retry
+   * @readonly
+   *
+   * @description
+   * Label of the retry button in a failed message note.
+   *
+   * @type {string}
+   */
   readonly retry: string;
-  /** Delete button of the failed note. */
+
+  /**
+   * Property remove
+   * @readonly
+   *
+   * @description
+   * Label of the delete button in a failed message note.
+   *
+   * @type {string}
+   */
   readonly remove: string;
-  /** Accessible name of the action bar. */
+
+  /**
+   * Property actions
+   * @readonly
+   *
+   * @description
+   * Accessible name of the action bar.
+   *
+   * @type {string}
+   */
   readonly actions: string;
-  /** Accessible name of the react button. */
+
+  /**
+   * Property react
+   * @readonly
+   *
+   * @description
+   * Accessible name of the reaction button.
+   *
+   * @type {string}
+   */
   readonly react: string;
-  /** Accessible name of the reply button. */
+
+  /**
+   * Property reply
+   * @readonly
+   *
+   * @description
+   * Accessible name of the reply button.
+   *
+   * @type {string}
+   */
   readonly reply: string;
-  /** Accessible name of the more-actions button. */
+
+  /**
+   * Property more
+   * @readonly
+   *
+   * @description
+   * Accessible name of the more-actions button.
+   *
+   * @type {string}
+   */
   readonly more: string;
-  /** Time of a message less than a minute old. */
+
+  /**
+   * Property justNow
+   * @readonly
+   *
+   * @description
+   * Time text for a message less than a minute old.
+   *
+   * @type {string}
+   */
   readonly justNow: string;
+  // #endregion
 }
 
-/** The tone words read before a notice or a note (« Avertissement : … »), French by default. */
+/**
+ * Interface CwMessageToneLabels
+ *
+ * @description
+ * Tone words read before a notice or a note, in French by default.
+ */
 export interface CwMessageToneLabels {
+  // #region Properties
+  /**
+   * Property info
+   * @readonly
+   *
+   * @description
+   * Word announcing an informational tone.
+   *
+   * @type {string}
+   */
   readonly info: string;
+
+  /**
+   * Property success
+   * @readonly
+   *
+   * @description
+   * Word announcing a successful result.
+   *
+   * @type {string}
+   */
   readonly success: string;
+
+  /**
+   * Property warning
+   * @readonly
+   *
+   * @description
+   * Word announcing a warning.
+   *
+   * @type {string}
+   */
   readonly warning: string;
+
+  /**
+   * Property error
+   * @readonly
+   *
+   * @description
+   * Word announcing an error.
+   *
+   * @type {string}
+   */
   readonly error: string;
+  // #endregion
 }
 
-/** The French texts of a thread summary; each one can be replaced through the `labels` input. */
+/**
+ * Interface CwMessageThreadLabels
+ *
+ * @description
+ * French thread summary labels that callers can override through the labels input.
+ */
 export interface CwMessageThreadLabels {
-  /** After a count of one (« 1 réponse »). */
+  // #region Properties
+  /**
+   * Property reply
+   * @readonly
+   *
+   * @description
+   * Singular word following a count of one reply.
+   *
+   * @type {string}
+   */
   readonly reply: string;
-  /** After any other count (« 3 réponses »). */
+
+  /**
+   * Property replies
+   * @readonly
+   *
+   * @description
+   * Plural word following any other reply count.
+   *
+   * @type {string}
+   */
   readonly replies: string;
-  /** Before the time of the last reply (« Dernière à 11:05 »). */
+
+  /**
+   * Property last
+   * @readonly
+   *
+   * @description
+   * Text preceding the time of the last reply.
+   *
+   * @type {string}
+   */
   readonly last: string;
-  /** Between `last` and a time of today. */
+
+  /**
+   * Property at
+   * @readonly
+   *
+   * @description
+   * Connector between the last-reply label and a time of today.
+   *
+   * @type {string}
+   */
   readonly at: string;
-  /** Time of a reply less than a minute old. */
+
+  /**
+   * Property justNow
+   * @readonly
+   *
+   * @description
+   * Time text for a reply less than a minute old.
+   *
+   * @type {string}
+   */
   readonly justNow: string;
+  // #endregion
 }

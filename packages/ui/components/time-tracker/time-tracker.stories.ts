@@ -7,8 +7,12 @@ import { CwTimeTracker } from './time-tracker.component';
 import type { CwTimeEntry } from './time-tracker.types';
 
 /**
- * Time Tracker, every state of its sheet in the Design System artifact, in the light and the dark
- * theme. Durations, people and notes from the sheet's preview and the mockup (`App.dc.html`).
+ * Constant meta
+ *
+ * @description
+ * Time tracker states in both themes, using the design system preview data.
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/TimeTracker',
@@ -17,18 +21,68 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration for time tracker examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Finds the light theme section of the story canvas.
+ *
+ * @param {HTMLElement} canvasElement - Canvas containing the themed examples.
+ * @returns {HTMLElement} Light theme section.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
-const MINUTE = 60_000;
-const NOW = new Date();
-const YESTERDAY = new Date(NOW.getTime() - 24 * 60 * MINUTE);
+/**
+ * Constant MINUTE
+ *
+ * @description
+ * Number of milliseconds in one minute.
+ *
+ * @type {number}
+ */
+const MINUTE: number = 60_000;
+/**
+ * Constant NOW
+ *
+ * @description
+ * Current date used for the running example.
+ *
+ * @type {Date}
+ */
+const NOW: Date = new Date();
+/**
+ * Constant YESTERDAY
+ *
+ * @description
+ * Previous date used for an entry example.
+ *
+ * @type {Date}
+ */
+const YESTERDAY: Date = new Date(NOW.getTime() - 24 * 60 * MINUTE);
 
+/**
+ * Constant ENTRIES
+ *
+ * @description
+ * Sample time entries displayed in the list.
+ *
+ * @type {CwTimeEntry[]}
+ */
 const ENTRIES: CwTimeEntry[] = [
   {
     id: '1',
@@ -104,9 +158,12 @@ export const EntryForm: Story = {
   render: () => ({
     template: `<cw-time-entry-form class="w-80" />`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const field = scope.getByRole('textbox', { name: 'Durée' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+      getByText: (text: string) => HTMLElement;
+    } = within(light(canvasElement));
+    const field: HTMLElement = scope.getByRole('textbox', { name: 'Durée' });
     await userEvent.type(field, '1h30');
     await expect(scope.getByText('= 1 h 30')).toBeInTheDocument();
   },
@@ -117,9 +174,12 @@ export const EntryFormError: Story = {
   render: () => ({
     template: `<cw-time-entry-form class="w-80" />`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const field = scope.getByRole('textbox', { name: 'Durée' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+      getByText: (text: string) => HTMLElement;
+    } = within(light(canvasElement));
+    const field: HTMLElement = scope.getByRole('textbox', { name: 'Durée' });
     await userEvent.type(field, '1h3O{Enter}');
     await expect(field).toHaveAttribute('aria-invalid', 'true');
   },
@@ -150,9 +210,12 @@ export const Full: Story = {
         <cw-time-entry-form />
       </cw-time-tracker>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const start = scope.getByRole('button', { name: 'Démarrer le minuteur' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+      getByText: (text: string) => HTMLElement;
+    } = within(light(canvasElement));
+    const start: HTMLElement = scope.getByRole('button', { name: 'Démarrer le minuteur' });
     start.focus();
     await userEvent.keyboard('{Enter}');
     await expect(

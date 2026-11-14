@@ -1,5 +1,6 @@
 import {
   type OverlayRef,
+  type FlexibleConnectedPositionStrategy,
   createFlexibleConnectedPositionStrategy,
   createOverlayRef,
   createRepositionScrollStrategy,
@@ -12,46 +13,123 @@ import {
   signal,
   type TemplateRef,
   type ViewContainerRef,
+  type WritableSignal,
 } from '@angular/core';
 
 import { ɵafterExitAnimation } from '../motion/exit-animation';
 import { ɵmenuFrom, ɵpanelPositions } from './overlay-positions';
 
-/* Longest `menu-out` of `@cadenway/tokens` (240 ms) plus a margin: the panel detaches even when no
-   `animationend` comes (a hidden tab, an animation cancelled by the browser). */
-const CLOSE_FALLBACK_MS = 300;
+/**
+ * Constant CLOSE_FALLBACK_MS
+ *
+ * @description
+ * Wait limit in milliseconds: the longest token menu-out animation plus a margin, so a hidden tab
+ * or cancelled animation cannot leave the panel attached indefinitely.
+ *
+ * @type {number}
+ */
+const CLOSE_FALLBACK_MS: number = 300;
 
 /**
+ * Interface ɵConnectedPanelConfig
+ * @interface ɵConnectedPanelConfig
+ *
+ * @description
  * What `ɵConnectedPanel.open` needs: the trigger, the panel template and who to tell about outside
  * clicks and keys.
  *
  * Shared across the entry points of `@cadenway/ui`; not public API (`ɵ` prefix).
  */
 export interface ɵConnectedPanelConfig {
-  /** The element the panel opens against and whose width it takes at least. */
-  readonly origin: HTMLElement;
-  /** The panel's template, rendered in the overlay. */
-  readonly template: TemplateRef<unknown>;
-  /** The view container of the component that declares the template. */
-  readonly viewContainerRef: ViewContainerRef;
-  /** Called on a pointer press outside the panel (the trigger included: the caller filters it). */
-  readonly outsideClick: (event: MouseEvent) => void;
+  // #region Properties
   /**
+   * Property origin
+   * @readonly
+   *
+   * @description
+   * Trigger element used to position the panel and determine its minimum width.
+   *
+   * @type {HTMLElement}
+   */
+  readonly origin: HTMLElement;
+
+  /**
+   * Property template
+   * @readonly
+   *
+   * @description
+   * Panel template rendered inside the connected overlay.
+   *
+   * @type {TemplateRef<unknown>}
+   */
+  readonly template: TemplateRef<unknown>;
+
+  /**
+   * Property viewContainerRef
+   * @readonly
+   *
+   * @description
+   * View container of the component that declares the panel template.
+   *
+   * @type {ViewContainerRef}
+   */
+  readonly viewContainerRef: ViewContainerRef;
+
+  /**
+   * Property outsideClick
+   * @readonly
+   *
+   * @description
+   * Receives pointer presses outside the panel, including presses on the trigger; the owner filters
+   * trigger presses when needed.
+   *
+   * @type {(event: MouseEvent) => void}
+   */
+  readonly outsideClick: (event: MouseEvent) => void;
+
+  /**
+   * Property keydown
+   * @readonly
+   *
+   * @description
    * Called on each key pressed while the focus is inside the panel (Escape). Omit it when the focus
    * stays on the trigger: an overlay that listens to keys takes them from the overlays below it.
+   *
+   * @type {((event: KeyboardEvent) => void) | undefined}
    */
   readonly keydown?: (event: KeyboardEvent) => void;
+
   /**
+   * Property inline
+   * @readonly
+   *
+   * @description
    * Whether the overlay is a native popover inserted right after the trigger (the default): it
    * paints in the top layer but inherits the trigger's theme scope (`data-theme`). False attaches
    * it to the CDK overlay container at the end of the body.
+   *
+   * @type {boolean | undefined}
    */
   readonly inline?: boolean;
-  /** Whether the panel may shrink to the room left in the viewport (false by default). */
+
+  /**
+   * Property flexibleDimensions
+   * @readonly
+   *
+   * @description
+   * Whether the panel may shrink to the available viewport space; defaults to false.
+   *
+   * @type {boolean | undefined}
+   */
   readonly flexibleDimensions?: boolean;
+  // #endregion
 }
 
 /**
+ * Class ɵConnectedPanel
+ * @class ɵConnectedPanel
+ *
+ * @description
  * The floating panel of a select, a combobox, an autocomplete or a date picker: a CDK connected
  * overlay below its trigger (above when there is no room, `ɵpanelPositions('bottom', 'start')`),
  * revealed with `animate-menu-in` from the trigger corner (`--menu-from` on the pane, from the
@@ -64,36 +142,123 @@ export interface ɵConnectedPanelConfig {
  */
 @Service({ autoProvided: false })
 export class ɵConnectedPanel {
-  private readonly injector = inject(Injector);
+  // #region Properties
+  /**
+   * Property injector
+   * @readonly
+   *
+   * @description
+   * Injector used to create the CDK position and overlay strategies for this owner.
+   *
+   * @type {Injector}
+   */
+  private readonly injector: Injector = inject(Injector);
+
+  /**
+   * Property overlayRef
+   *
+   * @description
+   * Current overlay reference, or null when no panel has been created.
+   *
+   * @type {OverlayRef | null}
+   */
   private overlayRef: OverlayRef | null = null;
+
+  /**
+   * Property subscriptions
+   *
+   * @description
+   * Overlay event subscriptions released when the panel is disposed.
+   *
+   * @type {{ unsubscribe(): void }[]}
+   */
   private subscriptions: { unsubscribe(): void }[] = [];
+
+  /**
+   * Property stopClosing
+   *
+   * @description
+   * Cancels an outstanding exit animation wait, or null when none is pending.
+   *
+   * @type {(() => void) | null}
+   */
   private stopClosing: (() => void) | null = null;
 
-  /** Whether the panel is in the page, closing animation included. */
-  readonly attached = signal(false);
-  /** Whether the panel plays its closing animation: bind it to `data-state="closed"`. */
-  readonly closing = signal(false);
-  /** The width of the trigger when the panel opened, the panel's minimum width. */
-  readonly originWidth = signal(0);
+  /**
+   * Property attached
+   * @readonly
+   *
+   * @description
+   * Signal indicating that the panel is in the page, including during its closing animation.
+   *
+   * @type {WritableSignal<boolean>}
+   * @default false
+   */
+  public readonly attached: WritableSignal<boolean> = signal(false);
 
-  /** The overlay pane holding the panel while it is in the page, else null. */
-  get pane(): HTMLElement | null {
+  /**
+   * Property closing
+   * @readonly
+   *
+   * @description
+   * Signal indicating the closing animation; the owner binds it to `data-state="closed"`.
+   *
+   * @type {WritableSignal<boolean>}
+   * @default false
+   */
+  public readonly closing: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property originWidth
+   * @readonly
+   *
+   * @description
+   * Signal holding the trigger width in pixels when the panel opened, used as its minimum width.
+   *
+   * @type {WritableSignal<number>}
+   * @default 0
+   */
+  public readonly originWidth: WritableSignal<number> = signal(0);
+
+  /**
+   * Property pane
+   *
+   * @description
+   * Overlay pane containing the panel, or null when no overlay exists.
+   *
+   * @type {HTMLElement | null}
+   * @returns {HTMLElement | null} Overlay pane, or null when no overlay exists.
+   */
+  public get pane(): HTMLElement | null {
     return this.overlayRef?.overlayElement ?? null;
   }
+  // #endregion
 
-  /** Shows the panel, or keeps it when it was closing. */
-  open(config: ɵConnectedPanelConfig): void {
+  // #region Methods
+  /**
+   * Method open
+   * @method open
+   *
+   * @description
+   * Attaches the configured panel or cancels its pending close when already attached.
+   *
+   * @param {ɵConnectedPanelConfig} config - Trigger, template and event handlers for the panel.
+   */
+  public open(config: ɵConnectedPanelConfig): void {
     this.cancelClose();
     if (this.overlayRef?.hasAttached()) return;
 
     this.originWidth.set(config.origin.getBoundingClientRect().width);
-    const strategy = createFlexibleConnectedPositionStrategy(this.injector, config.origin)
+    const strategy: FlexibleConnectedPositionStrategy = createFlexibleConnectedPositionStrategy(
+      this.injector,
+      config.origin,
+    )
       .withPositions(ɵpanelPositions('bottom', 'start'))
       .withFlexibleDimensions(config.flexibleDimensions ?? false)
       .withPush(false)
       .withViewportMargin(8);
     if (config.inline ?? true) strategy.withPopoverLocation('inline');
-    const overlayRef = createOverlayRef(this.injector, {
+    const overlayRef: OverlayRef = createOverlayRef(this.injector, {
       positionStrategy: strategy,
       scrollStrategy: createRepositionScrollStrategy(this.injector),
     });
@@ -110,17 +275,24 @@ export class ɵConnectedPanel {
         config.outsideClick(event);
       }),
     ];
-    const keydown = config.keydown;
+    const keydown: ((event: KeyboardEvent) => void) | undefined = config.keydown;
     if (keydown) this.subscriptions.push(overlayRef.keydownEvents().subscribe(keydown));
     overlayRef.attach(new TemplatePortal(config.template, config.viewContainerRef));
     this.attached.set(true);
   }
 
   /**
+   * Method close
+   * @method close
+   *
+   * @description
    * Plays the closing animation of `panel` (the element bound to `closing()`), then removes the
    * panel; `done` runs once it is gone. Does nothing when the panel is closed or already closing.
+   *
+   * @param {HTMLElement | null | undefined} panel - Element whose exit animation is observed.
+   * @param {() => void} [done] - Callback invoked after the panel has been disposed.
    */
-  close(panel: HTMLElement | null | undefined, done?: () => void): void {
+  public close(panel: HTMLElement | null | undefined, done?: () => void): void {
     if (!this.overlayRef?.hasAttached() || this.closing()) return;
     this.closing.set(true);
     this.stopClosing = ɵafterExitAnimation(
@@ -133,18 +305,40 @@ export class ɵConnectedPanel {
     );
   }
 
-  /** Repositions the panel after its content changed size. */
-  reposition(): void {
+  /**
+   * Method reposition
+   * @method reposition
+   *
+   * @description
+   * Repositions the attached panel after its content changes size; does nothing without an overlay.
+   */
+  public reposition(): void {
     this.overlayRef?.updatePosition();
   }
 
-  /** Whether `node` is inside the panel (a nested trigger, a click target). */
-  contains(node: Node): boolean {
+  /**
+   * Method contains
+   * @method contains
+   *
+   * @description
+   * Checks whether a nested trigger or event target belongs to the panel's overlay.
+   *
+   * @param {Node} node - Node to locate in the overlay.
+   *
+   * @returns {boolean} Whether the overlay contains the node; false when no overlay exists.
+   */
+  public contains(node: Node): boolean {
     return this.overlayRef?.overlayElement.contains(node) ?? false;
   }
 
-  /** Removes the panel at once, without animation. */
-  dispose(): void {
+  /**
+   * Method dispose
+   * @method dispose
+   *
+   * @description
+   * Cancels closing, unsubscribes from overlay events and removes the panel without animation.
+   */
+  public dispose(): void {
     this.cancelClose();
     for (const subscription of this.subscriptions) subscription.unsubscribe();
     this.subscriptions = [];
@@ -153,9 +347,17 @@ export class ɵConnectedPanel {
     this.attached.set(false);
   }
 
+  /**
+   * Method cancelClose
+   * @method cancelClose
+   *
+   * @description
+   * Stops any pending exit-animation wait and clears the closing signal without disposing the panel.
+   */
   private cancelClose(): void {
     this.stopClosing?.();
     this.stopClosing = null;
     this.closing.set(false);
   }
+  // #endregion
 }

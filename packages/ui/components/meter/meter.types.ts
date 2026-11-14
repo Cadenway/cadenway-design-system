@@ -1,19 +1,71 @@
-/** Shape of the gauge: one continuous fill, whole blocks, or up to three series in one track. */
+/**
+ * Type CwMeterVariant
+ *
+ * @description
+ * Gauge rendered as a continuous bar, blocks or stacked series.
+ *
+ * @type {'bar' | 'segmented' | 'stacked'}
+ */
 export type CwMeterVariant = 'bar' | 'segmented' | 'stacked';
 
-/** Height of the track: 4 px (`sm`), 6 px (`default`), 10 px (`lg`). */
+/**
+ * Type CwMeterSize
+ *
+ * @description
+ * Track height from 4 px to 10 px.
+ *
+ * @type {'sm' | 'default' | 'lg'}
+ */
 export type CwMeterSize = 'sm' | 'default' | 'lg';
 
-/** Level of the value, as for the HTML `<meter>`: it gives the fill color and the note icon. */
+/**
+ * Type CwMeterZone
+ *
+ * @description
+ * Value level determining the fill color and note icon.
+ *
+ * @type {'normal' | 'high' | 'critical' | 'optimum'}
+ */
 export type CwMeterZone = 'normal' | 'high' | 'critical' | 'optimum';
 
-/** One part of a `stacked` gauge: its legend label and its amount, in the unit of the range. */
+/**
+ * Interface CwMeterSeries
+ *
+ * @description
+ * A labeled amount within a stacked gauge.
+ */
 export interface CwMeterSeries {
-  /** Legend label (« Pièces jointes »). */
+  // #region Properties
+  /**
+   * Property label
+   * @readonly
+   *
+   * @description
+   * Legend label for the series.
+   *
+   * @type {string}
+   */
   readonly label: string;
-  /** Amount, in the unit of `min` and `max`. */
+
+  /**
+   * Property value
+   * @readonly
+   *
+   * @description
+   * Amount in the gauge range's unit.
+   *
+   * @type {number}
+   */
   readonly value: number;
+  // #endregion
 }
 
-/** Writes a measured value for the header and `aria-valuetext` (« 6,4 Go sur 10 Go »). */
+/**
+ * Type CwMeterFormat
+ *
+ * @description
+ * Formats a measured value and maximum for the header and accessible value text.
+ *
+ * @type {(value: number, max: number) => string}
+ */
 export type CwMeterFormat = (value: number, max: number) => string;

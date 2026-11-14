@@ -1,11 +1,14 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, computed, inject, input, type InputSignal, type Signal } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorSparkleBold } from '@ng-icons/phosphor-icons/bold';
 
 import { phosphorName } from '../message.styles';
-import { MESSAGE } from '../message.token';
+import { MESSAGE, type MessageRef } from '../message.token';
 
 /**
+ * Component CwMessageAvatar
+ *
+ * @description
  * The avatar column of an incoming message, 32 px wide, aligned on the first bubble under the
  * header (Message sheet of the Design System artifact, « Avatar »).
  *
@@ -25,13 +28,52 @@ import { MESSAGE } from '../message.token';
   templateUrl: './message-avatar.component.html',
 })
 export class CwMessageAvatar {
-  /** Phosphor icon name in kebab case for an icon disc in place of a person (`sparkle`). */
-  readonly icon = input('');
+  // #region Properties
+  /**
+   * Property icon
+   * @readonly
+   *
+   * @description
+   * Kebab-case Phosphor icon name for a neutral disc; an empty string leaves projected content.
+   *
+   * @type {InputSignal<string>}
+   * @default ''
+   */
+  public readonly icon: InputSignal<string> = input('');
 
-  private readonly message = inject(MESSAGE, { optional: true });
+  /**
+   * Property message
+   * @readonly
+   *
+   * @description
+   * Parent message context, or null when the avatar is rendered alone.
+   *
+   * @type {MessageRef | null}
+   */
+  private readonly message: MessageRef | null = inject(MESSAGE, { optional: true });
 
-  protected readonly hidden = computed(() => this.message?.isGrouped() === true);
-  protected readonly iconName = computed(() =>
+  /**
+   * Property hidden
+   * @readonly
+   *
+   * @description
+   * Whether a grouped message hides the avatar while retaining its column width.
+   *
+   * @type {Signal<boolean>}
+   */
+  protected readonly hidden: Signal<boolean> = computed(() => this.message?.isGrouped() === true);
+
+  /**
+   * Property iconName
+   * @readonly
+   *
+   * @description
+   * Registered bold Phosphor icon name, or an empty string when no icon is requested.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly iconName: Signal<string> = computed(() =>
     this.icon() ? phosphorName(this.icon(), 'Bold') : '',
   );
+  // #endregion
 }

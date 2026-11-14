@@ -1,16 +1,44 @@
-import { Directive, computed, input } from '@angular/core';
+import { Directive, computed, input, type InputSignal, type Signal } from '@angular/core';
 
 import { ALIGNS } from '../table.styles';
 import type { CwTableAlign } from '../table.types';
 
-/** A data cell; `align="end"` right-aligns numbers in tabular figures (« 1 h 30 », « 1,2 Go »). */
+/**
+ * Class CwTableCell
+ * @class CwTableCell
+ *
+ * @description
+ * Styles a data cell; end alignment right-aligns numbers and uses tabular figures.
+ */
 @Directive({
   selector: 'td[cwTableCell]',
   host: { '[class]': 'classes()' },
 })
 export class CwTableCell {
-  /** Alignment of the cell content. */
-  readonly align = input<CwTableAlign>('start');
+  // #region Properties
+  /**
+   * Property align
+   * @readonly
+   *
+   * @description
+   * Input selecting alignment of the cell contents.
+   *
+   * @type {InputSignal<CwTableAlign>}
+   * @default 'start'
+   */
+  public readonly align: InputSignal<CwTableAlign> = input<CwTableAlign>('start');
 
-  protected readonly classes = computed(() => `px-3 align-middle ${ALIGNS[this.align()]}`);
+  /**
+   * Property classes
+   * @readonly
+   *
+   * @description
+   * Cell padding and vertical alignment combined with the selected horizontal alignment.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly classes: Signal<string> = computed(
+    () => `px-3 align-middle ${ALIGNS[this.align()]}`,
+  );
+  // #endregion
 }

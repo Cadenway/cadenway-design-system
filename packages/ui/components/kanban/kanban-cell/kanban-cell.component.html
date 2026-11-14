@@ -61,7 +61,6 @@
 @if (current.cards.length === 0 && !inLane()) {
   @if (board.dragging()) {
     @if (!current.target) {
-      <!-- An empty column gives way to the drop ghost while a card is dragged (sheet, "États"). -->
       <div aria-hidden="true" [class]="emptyGhost()"></div>
     }
   } @else if (!current.quickAdd) {

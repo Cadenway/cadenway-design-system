@@ -1,8 +1,15 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CwBadge } from './badge.component';
 
+/**
+ * Class Host
+ * @class Host
+ *
+ * @description
+ * Test form with a static badge, an action badge and a link whose disabled state can change.
+ */
 @Component({
   imports: [CwBadge],
   template: `
@@ -14,9 +21,43 @@ import { CwBadge } from './badge.component';
   `,
 })
 class Host {
-  readonly clicks = signal(0);
-  readonly submitted = signal(false);
-  readonly linkDisabled = signal(false);
+  // #region Properties
+  /**
+   * Property clicks
+   * @readonly
+   *
+   * @description
+   * Number of clicks received by the action badge.
+   *
+   * @type {WritableSignal<number>}
+   * @default 0
+   */
+  public readonly clicks: WritableSignal<number> = signal(0);
+
+  /**
+   * Property submitted
+   * @readonly
+   *
+   * @description
+   * Records whether the test form's submit handler ran.
+   *
+   * @type {WritableSignal<boolean>}
+   * @default false
+   */
+  public readonly submitted: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property linkDisabled
+   * @readonly
+   *
+   * @description
+   * Controls the disabled state of the test link badge.
+   *
+   * @type {WritableSignal<boolean>}
+   * @default false
+   */
+  public readonly linkDisabled: WritableSignal<boolean> = signal(false);
+  // #endregion
 }
 
 describe('CwBadge', () => {
@@ -32,16 +73,29 @@ describe('CwBadge', () => {
     component = fixture.componentInstance;
   });
 
+  /**
+   * Function byText
+   *
+   * @description
+   * Finds a control in the test host by its selector and trimmed visible text.
+   *
+   * @param {string} selector - Selector used to choose candidate elements.
+   * @param {string} text - Visible text to match exactly after trimming.
+   *
+   * @returns {HTMLElement} First matching element.
+   *
+   * @throws {Error} When no matching element exists.
+   */
   function byText(selector: string, text: string): HTMLElement {
-    const found = Array.from(host.querySelectorAll<HTMLElement>(selector)).find(
-      (element) => element.textContent.trim() === text,
-    );
+    const found: HTMLElement | undefined = Array.from(
+      host.querySelectorAll<HTMLElement>(selector),
+    ).find((element) => element.textContent.trim() === text);
     if (!found) throw new Error(`No ${selector} reading ${text}`);
     return found;
   }
 
   it('keeps a span badge out of the tab order and the layout classes of the consumer', () => {
-    const tag = byText('span', 'API');
+    const tag: HTMLElement = byText('span', 'API');
 
     expect(tag.getAttribute('tabindex')).toBeNull();
     expect(tag.classList).toContain('ml-2');
@@ -50,7 +104,7 @@ describe('CwBadge', () => {
   });
 
   it('makes a button badge a non-submitting button', () => {
-    const filter = byText('button', 'Filtre');
+    const filter: HTMLElement = byText('button', 'Filtre');
     filter.click();
 
     expect(filter.getAttribute('type')).toBe('button');
@@ -61,8 +115,8 @@ describe('CwBadge', () => {
   it('disables a link badge through aria-disabled and the tab order', async () => {
     component.linkDisabled.set(true);
     await fixture.whenStable();
-    const link = byText('a', 'Design');
-    const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+    const link: HTMLElement = byText('a', 'Design');
+    const event: MouseEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
     link.dispatchEvent(event);
 
     expect(link.getAttribute('aria-disabled')).toBe('true');

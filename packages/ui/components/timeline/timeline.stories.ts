@@ -15,9 +15,14 @@ import type {
 } from './timeline.types';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Timeline, every state of its sheet in the Design System artifact; each story renders in the light
  * and the dark theme (`.storybook/preview.ts`). Copy from the sheet preview and the Gantt of the
  * mockup (`App.dc.html`). The stories apply every `itemChange`, as a consumer does.
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Timeline',
@@ -37,25 +42,79 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story configuration for timeline examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Selects the light theme copy for interaction checks.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the themed examples.
+ *
+ * @returns {HTMLElement} Light theme section used for interaction checks.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
-function day(date: number, month = 10): Date {
+/**
+ * Function day
+ *
+ * @description
+ * Creates a local fixture date in 2026, defaulting to November.
+ *
+ * @param {number} date - Day of the month.
+ * @param {number} [month] - Zero-based month, defaulting to November.
+ *
+ * @returns {Date} Local fixture date in 2026.
+ */
+function day(date: number, month: number = 10): Date {
   return new Date(2026, month, date);
 }
 
-const TODAY = day(12);
+/**
+ * Constant TODAY
+ *
+ * @description
+ * Current day used by the timeline examples.
+ *
+ * @type {Date}
+ */
+const TODAY: Date = day(12);
 
+/**
+ * Constant GROUPS
+ *
+ * @description
+ * Sprint groups used by the timeline examples.
+ *
+ * @type {CwTimelineGroup[]}
+ */
 const GROUPS: CwTimelineGroup[] = [
   { id: 's14', label: 'Sprint 14', start: day(9), end: day(20), progress: 45 },
   { id: 's15', label: 'Sprint 15', start: day(23), end: day(4, 11) },
 ];
 
+/**
+ * Constant ITEMS
+ *
+ * @description
+ * Dated and undated items used by the examples.
+ *
+ * @type {CwTimelineItem[]}
+ */
 const ITEMS: CwTimelineItem[] = [
   {
     id: 'CAD-466',
@@ -129,22 +188,60 @@ const ITEMS: CwTimelineItem[] = [
   { id: 'CAD-490', name: 'Raccourcis de la Liste', status: 'todo', group: 's15' },
 ];
 
+/**
+ * Constant DEPENDENCIES
+ *
+ * @description
+ * Finish-to-start links used by the examples.
+ *
+ * @type {CwDependency[]}
+ */
 const DEPENDENCIES: CwDependency[] = [
   { from: 'CAD-482', to: 'CAD-488' },
   { from: 'CAD-479', to: 'CAD-503' },
 ];
 
+/**
+ * Constant MILESTONES
+ *
+ * @description
+ * Sprint milestones used by the examples.
+ *
+ * @type {CwMilestone[]}
+ */
 const MILESTONES: CwMilestone[] = [
   { id: 'review-14', label: 'Revue de sprint 14', date: day(20), group: 's14' },
   { id: 'v09', label: 'Version 0.9', date: day(27), group: 's15' },
 ];
 
+/**
+ * Function move
+ *
+ * @description
+ * Applies emitted item dates to the controlled example data.
+ *
+ * @param {readonly CwTimelineItem[]} items - Current controlled example items.
+ * @param {CwTimelineItemChange} change - Emitted date change to apply.
+ *
+ * @returns {CwTimelineItem[]} Updated example items.
+ */
 function move(items: readonly CwTimelineItem[], change: CwTimelineItemChange): CwTimelineItem[] {
   return items.map((item) =>
     item.id === change.item.id ? { ...item, start: change.start, end: change.end } : item,
   );
 }
 
+/**
+ * Function schedule
+ *
+ * @description
+ * Applies a scheduling request to the controlled example data.
+ *
+ * @param {readonly CwTimelineItem[]} items - Current controlled example items.
+ * @param {{ item: CwTimelineItem; start: Date; end: Date }} event - Scheduling request with the item and dates.
+ *
+ * @returns {CwTimelineItem[]} Updated example items.
+ */
 function schedule(
   items: readonly CwTimelineItem[],
   event: { item: CwTimelineItem; start: Date; end: Date },
@@ -154,7 +251,23 @@ function schedule(
   );
 }
 
-const PROPS = {
+/**
+ * Constant PROPS
+ *
+ * @description
+ * Shared fixture data and update handlers for timeline examples.
+ *
+ * @type {{ items: CwTimelineItem[]; groups: CwTimelineGroup[]; dependencies: CwDependency[]; milestones: CwMilestone[]; today: Date; move: typeof move; schedule: typeof schedule; }}
+ */
+const PROPS: {
+  items: CwTimelineItem[];
+  groups: CwTimelineGroup[];
+  dependencies: CwDependency[];
+  milestones: CwMilestone[];
+  today: Date;
+  move: typeof move;
+  schedule: typeof schedule;
+} = {
   items: ITEMS,
   groups: GROUPS,
   dependencies: DEPENDENCIES,
@@ -194,8 +307,9 @@ export const Default: Story = {
         </div>
       </cw-timeline>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole(role: string, options?: { name?: string | RegExp }): HTMLElement } =
+      within(light(canvasElement));
     await expect(scope.getByRole('treegrid', { name: 'Timeline de Produit' })).toBeVisible();
     await expect(
       scope.getByRole('button', {
@@ -245,12 +359,13 @@ export const Keyboard: Story = {
                    [dependencies]="dependencies" [milestones]="milestones" [today]="today" [range]="range"
                    [(selection)]="selection" (itemChange)="items = move(items, $event)" />`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole(role: string, options?: { name?: string | RegExp }): HTMLElement } =
+      within(light(canvasElement));
     await userEvent.tab();
     await expect(scope.getByRole('row', { name: /Sprint 14/ })).toHaveFocus();
     await userEvent.keyboard('{ArrowDown}');
-    const bar = scope.getByRole('button', { name: /^Doc Docker/ });
+    const bar: HTMLElement = scope.getByRole('button', { name: /^Doc Docker/ });
     await expect(bar).toHaveFocus();
     await userEvent.keyboard('{ArrowRight}');
     await expect(scope.getByRole('button', { name: /^Doc Docker/ })).toHaveAccessibleName(

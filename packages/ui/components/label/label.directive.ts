@@ -1,6 +1,10 @@
 import { Directive } from '@angular/core';
 
 /**
+ * Class CwLabel
+ * @class CwLabel
+ *
+ * @description
  * The visible, clickable name of a control (Label sheet of the Design System artifact).
  *
  * Put it on a native `<label>` and point its `for` at the control's `id` (`cw-checkbox`,

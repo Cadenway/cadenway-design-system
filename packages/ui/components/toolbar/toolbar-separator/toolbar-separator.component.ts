@@ -1,16 +1,26 @@
-import { Component, ElementRef, computed, inject } from '@angular/core';
+import { Component, ElementRef, computed, inject, type Signal } from '@angular/core';
 
-import { CW_TOOLBAR } from '../toolbar.token';
+import { CW_TOOLBAR, type ToolbarHandle } from '../toolbar.token';
 import type { CwToolbarSize } from '../toolbar.types';
 
-/* Literal class strings (Toolbar sheet and preview of the Design System artifact): 20 px tall in a
-   `default` bar, 16 px in a `sm` one. */
+/**
+ * Constant SIZES
+ *
+ * @description
+ * Separator height classes for each toolbar size.
+ *
+ * @type {Record<CwToolbarSize, string>}
+ */
 const SIZES: Record<CwToolbarSize, string> = {
   default: 'mx-1 h-5 w-px shrink-0 bg-border',
   sm: 'mx-1 h-4 w-px shrink-0 bg-border',
 };
 
 /**
+ * Class CwToolbarSeparator
+ * @class CwToolbarSeparator
+ *
+ * @description
  * The vertical line between two groups of a `cw-toolbar` (Toolbar sheet of the Design System
  * artifact): `role="separator"` with `aria-orientation="vertical"`, its height following the size
  * of the bar. Hidden while the control or group right after it sits in the « Plus » menu.
@@ -25,10 +35,41 @@ const SIZES: Record<CwToolbarSize, string> = {
   templateUrl: './toolbar-separator.component.html',
 })
 export class CwToolbarSeparator {
-  private readonly toolbar = inject(CW_TOOLBAR, { optional: true });
+  // #region Properties
+  /**
+   * Property toolbar
+   * @readonly
+   *
+   * @description
+   * Optional containing toolbar supplying the common size.
+   *
+   * @type {ToolbarHandle | null}
+   */
+  private readonly toolbar: ToolbarHandle | null = inject(CW_TOOLBAR, { optional: true });
 
-  /** The separator element; the toolbar hides it before a hidden control. Not public API. */
-  readonly ɵelement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  /**
+   * Property ɵelement
+   * @readonly
+   *
+   * @description
+   * Separator element hidden before an overflowed control.
+   * @internal
+   *
+   * @type {HTMLElement}
+   */
+  public readonly ɵelement: HTMLElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
 
-  protected readonly classes = computed(() => SIZES[this.toolbar?.size() ?? 'default']);
+  /**
+   * Property classes
+   * @readonly
+   *
+   * @description
+   * Separator classes matching the toolbar size.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly classes: Signal<string> = computed(
+    () => SIZES[this.toolbar?.size() ?? 'default'],
+  );
+  // #endregion
 }

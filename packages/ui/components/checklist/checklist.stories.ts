@@ -7,8 +7,13 @@ import { CwChecklist } from './checklist.component';
 import { CwChecklistItem } from './checklist-item/checklist-item.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Checklist, every state of its sheet in the Design System artifact, in the light and the dark
  * theme. Copy and items from the sheet's preview and the mockup (`App.dc.html`, task panel).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Checklist',
@@ -19,15 +24,42 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story configuration for checklist examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Selects the light theme copy for interaction checks.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the themed examples.
+ *
+ * @returns {HTMLElement} Light theme section used for interaction checks.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
-const ITEMS = `
+/**
+ * Constant ITEMS
+ *
+ * @description
+ * Shared checklist item markup with nested and disabled items.
+ *
+ * @type {string}
+ */
+const ITEMS: string = `
   <cw-checklist-item itemId="a" label="Les accents sont conservés dans Excel" [checked]="true" />
   <cw-checklist-item itemId="b" label="Le séparateur suit la langue du compte" [checked]="true" />
   <cw-checklist-item itemId="c" label="Tester 10 000 lignes" [due]="due" [assignee]="karim">
@@ -37,7 +69,18 @@ const ITEMS = `
   <cw-checklist-item itemId="d" label="Documenter le format dans l'aide" />
   <cw-checklist-item itemId="e" label="Valider avec la Mairie de Lyon" disabled />`;
 
-const PROPS = { due: new Date(2026, 10, 18), karim: { name: 'Karim Benali' } };
+/**
+ * Constant PROPS
+ *
+ * @description
+ * Shared due date and assignee for the examples.
+ *
+ * @type {{ due: Date; karim: { name: string } }}
+ */
+const PROPS: { due: Date; karim: { name: string } } = {
+  due: new Date(2026, 10, 18),
+  karim: { name: 'Karim Benali' },
+};
 
 /** Items: ticked, assigned with a due date and two sub-items, disabled; the add row. */
 export const Items: Story = {
@@ -145,9 +188,13 @@ export const Keyboard: Story = {
         <p class="text-xs text-muted-foreground" role="status">{{ moved }}</p>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const handle = scope.getByRole('button', { name: 'Déplacer « Tester sur Firefox »' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole(role: string, options?: { name?: string }): HTMLElement } = within(
+      light(canvasElement),
+    );
+    const handle: HTMLElement = scope.getByRole('button', {
+      name: 'Déplacer « Tester sur Firefox »',
+    });
     handle.focus();
     await userEvent.keyboard(' ');
     await userEvent.keyboard('{ArrowUp}');

@@ -8,25 +8,50 @@ import {
   inject,
   input,
   model,
+  type InputSignal,
+  type InputSignalWithTransform,
+  type ModelSignal,
+  type Signal,
 } from '@angular/core';
 import { ɵnavigateList } from '@cadenway/ui/core';
 
 import { ACCORDION_TRIGGER } from './accordion-trigger.token';
+import type { CwAccordionTrigger } from './accordion-trigger/accordion-trigger.component';
 import type { CwAccordionType, CwAccordionValue, CwAccordionVariant } from './accordion.types';
 
-/* Accordion sheet, "Variantes": `card` frames the stack, its triggers go full width. */
+/**
+ * Constant VARIANTS
+ *
+ * @description
+ * Layout classes for an unframed stack or a bordered accordion card.
+ *
+ * @type {Record<CwAccordionVariant, string>}
+ */
 const VARIANTS: Record<CwAccordionVariant, string> = {
   default: 'flex flex-col',
   card: 'flex flex-col overflow-hidden rounded-lg border',
 };
 
-/** The open values, whichever form the model holds. */
+/**
+ * Function openValues
+ *
+ * @description
+ * Normalizes a single, multiple or empty accordion model into a list of open values.
+ *
+ * @param {CwAccordionValue} value - Current model value.
+ *
+ * @returns {readonly string[]} Open section values, or an empty list when none are open.
+ */
 function openValues(value: CwAccordionValue): readonly string[] {
   if (value === null) return [];
   return typeof value === 'string' ? [value] : value;
 }
 
 /**
+ * Class CwAccordion
+ * @class CwAccordion
+ *
+ * @description
  * Stacked sections that fold, to lighten a dense panel: the secondary sections of the task detail,
  * a help FAQ, advanced settings (Accordion sheet of the Design System artifact).
  *
@@ -48,35 +73,138 @@ function openValues(value: CwAccordionValue): readonly string[] {
   templateUrl: './accordion.component.html',
 })
 export class CwAccordion {
-  /** One open section at a time, or independent sections. */
-  readonly type = input<CwAccordionType>('single');
-  /** In `single`, whether the open section closes on its trigger; without it one stays open. */
-  readonly collapsible = input(true, { transform: booleanAttribute });
-  /** The open section(s) by value; `[(value)]`. */
-  readonly value = model<CwAccordionValue>(null);
-  /** Rules between sections, or one framed card. */
-  readonly variant = input<CwAccordionVariant>('default');
+  // #region Properties
+  /**
+   * Property type
+   * @readonly
+   *
+   * @description
+   * Input selecting one open section at a time or independently opened sections.
+   *
+   * @type {InputSignal<CwAccordionType>}
+   * @default 'single'
+   */
+  public readonly type: InputSignal<CwAccordionType> = input<CwAccordionType>('single');
 
-  private readonly allTriggers = contentChildren(ACCORDION_TRIGGER, { descendants: true });
-  // A nested accordion's triggers belong to it, not to this one's arrow keys.
-  private readonly triggers = computed(() =>
+  /**
+   * Property collapsible
+   * @readonly
+   *
+   * @description
+   * Input allowing the open section in single mode to be closed by its trigger.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   * @default true
+   */
+  public readonly collapsible: InputSignalWithTransform<boolean, unknown> = input(true, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property value
+   * @readonly
+   *
+   * @description
+   * Two-way model of open section values, in single or multiple form.
+   *
+   * @type {ModelSignal<CwAccordionValue>}
+   * @default null
+   */
+  public readonly value: ModelSignal<CwAccordionValue> = model<CwAccordionValue>(null);
+
+  /**
+   * Property variant
+   * @readonly
+   *
+   * @description
+   * Input selecting separated sections or a single framed card.
+   *
+   * @type {InputSignal<CwAccordionVariant>}
+   * @default 'default'
+   */
+  public readonly variant: InputSignal<CwAccordionVariant> = input<CwAccordionVariant>('default');
+
+  /**
+   * Property allTriggers
+   * @readonly
+   *
+   * @description
+   * Descendant trigger query, including triggers belonging to nested accordions.
+   *
+   * @type {Signal<readonly CwAccordionTrigger[]>}
+   */
+  private readonly allTriggers: Signal<readonly CwAccordionTrigger[]> = contentChildren(
+    ACCORDION_TRIGGER,
+    { descendants: true },
+  );
+
+  /**
+   * Property triggers
+   * @readonly
+   *
+   * @description
+   * Triggers owned by this accordion, excluding nested accordions from its keyboard navigation.
+   *
+   * @type {Signal<CwAccordionTrigger[]>}
+   */
+  private readonly triggers: Signal<CwAccordionTrigger[]> = computed(() =>
     this.allTriggers().filter((trigger) => trigger.accordion === this),
   );
-  private readonly keyManager = new FocusKeyManager(this.triggers, inject(Injector))
-    .withVerticalOrientation()
-    .withHomeAndEnd();
 
-  protected readonly classes = computed(() => VARIANTS[this.variant()]);
+  /**
+   * Property keyManager
+   * @readonly
+   *
+   * @description
+   * CDK focus manager for vertical arrows and Home and End on this accordion's triggers.
+   *
+   * @type {FocusKeyManager<CwAccordionTrigger>}
+   */
+  private readonly keyManager: FocusKeyManager<CwAccordionTrigger> =
+    new FocusKeyManager<CwAccordionTrigger>(this.triggers, inject(Injector))
+      .withVerticalOrientation()
+      .withHomeAndEnd();
 
-  /** Whether the section of this value is open. */
-  isOpen(value: string): boolean {
+  /**
+   * Property classes
+   * @readonly
+   *
+   * @description
+   * Computed layout classes for the selected variant.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly classes: Signal<string> = computed(() => VARIANTS[this.variant()]);
+  // #endregion
+
+  // #region Methods
+  /**
+   * Method isOpen
+   * @method isOpen
+   *
+   * @description
+   * Checks whether a section value is currently present in the open model.
+   *
+   * @param {string} value - Section value to check.
+   *
+   * @returns {boolean} Whether that section is open.
+   */
+  public isOpen(value: string): boolean {
     return openValues(this.value()).includes(value);
   }
 
-  /** Opens or closes the section of this value, following `type` and `collapsible`. */
-  toggle(value: string): void {
-    const open = openValues(this.value());
-    const isOpen = open.includes(value);
+  /**
+   * Method toggle
+   * @method toggle
+   *
+   * @description
+   * Opens or closes the section according to single or multiple mode and the collapsible setting.
+   *
+   * @param {string} value - Section value to toggle.
+   */
+  public toggle(value: string): void {
+    const open: readonly string[] = openValues(this.value());
+    const isOpen: boolean = open.includes(value);
     if (this.type() === 'multiple') {
       this.value.set(isOpen ? open.filter((each) => each !== value) : [...open, value]);
     } else if (!isOpen) {
@@ -86,10 +214,22 @@ export class CwAccordion {
     }
   }
 
+  /**
+   * Method onKeydown
+   * @method onKeydown
+   *
+   * @description
+   * Moves focus among this accordion's triggers for vertical arrows, Home and End.
+   *
+   * @param {KeyboardEvent} event - Key event originating from a trigger.
+   */
   protected onKeydown(event: KeyboardEvent): void {
-    const trigger = this.triggers().find((each) => each.element === event.target);
+    const trigger: CwAccordionTrigger | undefined = this.triggers().find(
+      (each) => each.element === event.target,
+    );
     if (!trigger || !['ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) return;
     this.keyManager.updateActiveItem(trigger);
     if (ɵnavigateList(this.keyManager, event, 'vertical')) event.preventDefault();
   }
+  // #endregion
 }

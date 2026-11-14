@@ -4,8 +4,13 @@ import { expect, within } from 'storybook/test';
 import { CwLogo } from './logo.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Logo, the mark of its sheet in the Design System artifact, in the light and the dark theme. The
  * horizontal and stacked lockups come once their logotype is redrawn.
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Logo',
@@ -14,10 +19,31 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration used for logo examples and interactions.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Locates the light-theme copy rendered by the shared Storybook preview decorator.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the theme examples.
+ *
+ * @returns {HTMLElement} Element containing the light-theme example.
+ *
+ * @throws {Error} When the expected light-theme scope is missing.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -31,7 +57,7 @@ export const Sizes: Story = {
         <cw-logo [size]="32" /><cw-logo [size]="48" /><cw-logo [size]="96" />
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     await expect(
       within(light(canvasElement)).getAllByRole('img', { name: 'Cadenway' }),
     ).toHaveLength(7);

@@ -1,6 +1,10 @@
-import { Component, input } from '@angular/core';
+import { Component, input, type InputSignal } from '@angular/core';
 
 /**
+ * Class CwStatGroup
+ * @class CwStatGroup
+ *
+ * @description
  * A dashboard row of stats in one card: equal columns, one per `cw-stat`, divided by a thin line,
  * without shadow (Stat sheet of the Design System artifact, "Groupe").
  *
@@ -18,6 +22,16 @@ import { Component, input } from '@angular/core';
   templateUrl: './stat-group.component.html',
 })
 export class CwStatGroup {
-  /** Accessible name of the row (« Semaine 46 »). */
-  readonly ariaLabel = input<string>('');
+  // #region Properties
+  /**
+   * Property ariaLabel
+   * @readonly
+   *
+   * @description
+   * Accessible name of the row.
+   *
+   * @type {InputSignal<string>}
+   */
+  public readonly ariaLabel: InputSignal<string> = input<string>('');
+  // #endregion
 }

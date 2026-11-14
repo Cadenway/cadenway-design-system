@@ -1,5 +1,19 @@
-/** Look of a toggle: `default` without fill or border, `outline` next to `outline` buttons. */
+/**
+ * Type CwToggleVariant
+ *
+ * @description
+ * Toggle appearance: borderless by default or outlined alongside outlined buttons.
+ *
+ * @type {'default' | 'outline'}
+ */
 export type CwToggleVariant = 'default' | 'outline';
 
-/** Height of a toggle, aligned on the buttons of the same row (28, 32 or 36 px). */
+/**
+ * Type CwToggleSize
+ *
+ * @description
+ * Toggle height aligned with buttons in the same row: 28, 32 or 36 pixels.
+ *
+ * @type {'sm' | 'default' | 'lg'}
+ */
 export type CwToggleSize = 'sm' | 'default' | 'lg';

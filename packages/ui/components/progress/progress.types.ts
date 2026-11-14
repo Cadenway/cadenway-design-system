@@ -1,8 +1,29 @@
-/** Color of the filled part: ink, jade for items that have a done state, grenat for an overrun. */
+/**
+ * Type CwProgressVariant
+ *
+ * @description
+ * Fill color: ink by default, jade for completion and grenat for an overrun.
+ *
+ * @type {'default' | 'success' | 'destructive'}
+ */
 export type CwProgressVariant = 'default' | 'success' | 'destructive';
 
-/** Height of the track: 4 px (`sm`), 6 px (`default`), 8 px (`lg`). */
+/**
+ * Type CwProgressSize
+ *
+ * @description
+ * Track height: four, six or eight pixels for small, default or large respectively.
+ *
+ * @type {'sm' | 'default' | 'lg'}
+ */
 export type CwProgressSize = 'sm' | 'default' | 'lg';
 
-/** What the bar shows: an empty or partial fill, a full track, or an unknown amount. */
+/**
+ * Type CwProgressState
+ *
+ * @description
+ * Progress state represented by a partial fill, a complete track or an unknown amount.
+ *
+ * @type {'loading' | 'complete' | 'indeterminate'}
+ */
 export type CwProgressState = 'loading' | 'complete' | 'indeterminate';

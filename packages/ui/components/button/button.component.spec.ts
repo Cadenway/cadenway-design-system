@@ -1,8 +1,15 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CwButton } from './button.component';
 
+/**
+ * Class Host
+ * @class Host
+ *
+ * @description
+ * Test form exposing button variants, loading state, a disabled link and submission events.
+ */
 @Component({
   imports: [CwButton],
   template: `
@@ -23,15 +30,62 @@ import { CwButton } from './button.component';
   `,
 })
 class Host {
-  readonly clicks = signal(0);
-  readonly saving = signal(false);
-  readonly submitted = signal(false);
+  // #region Properties
+  /**
+   * Property clicks
+   * @readonly
+   *
+   * @description
+   * Counts click events received by the test form's action buttons.
+   *
+   * @type {WritableSignal<number>}
+   * @default 0
+   */
+  public readonly clicks: WritableSignal<number> = signal(0);
+
+  /**
+   * Property saving
+   * @readonly
+   *
+   * @description
+   * Controls whether the save button is in its loading state.
+   *
+   * @type {WritableSignal<boolean>}
+   * @default false
+   */
+  public readonly saving: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property submitted
+   * @readonly
+   *
+   * @description
+   * Records whether the form's submit handler has run.
+   *
+   * @type {WritableSignal<boolean>}
+   * @default false
+   */
+  public readonly submitted: WritableSignal<boolean> = signal(false);
+  // #endregion
 }
 
+/**
+ * Function byName
+ *
+ * @description
+ * Finds a test button or link by its aria-label or visible text.
+ *
+ * @param {HTMLElement} host - Container holding the test controls.
+ * @param {string} name - Accessible label or text to match.
+ *
+ * @returns {HTMLElement} First matching control.
+ *
+ * @throws {Error} When no control with the requested name exists.
+ */
 function byName(host: HTMLElement, name: string): HTMLElement {
-  const found = Array.from(host.querySelectorAll<HTMLElement>('button, a')).find(
-    (element) => (element.getAttribute('aria-label') ?? element.textContent.trim()) === name,
-  );
+  const found: HTMLElement | undefined = Array.from(
+    host.querySelectorAll<HTMLElement>('button, a'),
+  ).find((element) => (element.getAttribute('aria-label') ?? element.textContent.trim()) === name);
   if (!found) throw new Error(`No button named ${name}`);
   return found;
 }
@@ -49,7 +103,7 @@ describe('CwButton', () => {
   });
 
   it('defaults to a non-submitting button and keeps the layout classes of the consumer', () => {
-    const create = byName(host, 'Créer une tâche');
+    const create: HTMLElement = byName(host, 'Créer une tâche');
     create.click();
 
     expect(create.getAttribute('type')).toBe('button');
@@ -62,7 +116,7 @@ describe('CwButton', () => {
   it('ignores clicks while loading and stays focusable', async () => {
     component.saving.set(true);
     await fixture.whenStable();
-    const save = byName(host, 'Enregistrer');
+    const save: HTMLElement = byName(host, 'Enregistrer');
 
     save.click();
 
@@ -72,7 +126,7 @@ describe('CwButton', () => {
   });
 
   it('disables a link through aria-disabled and the tab order', () => {
-    const help = byName(host, 'Aide');
+    const help: HTMLElement = byName(host, 'Aide');
 
     expect(help.getAttribute('aria-disabled')).toBe('true');
     expect(help.getAttribute('tabindex')).toBe('-1');

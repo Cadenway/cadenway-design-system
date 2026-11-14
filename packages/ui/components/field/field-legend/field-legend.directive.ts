@@ -1,6 +1,9 @@
 import { Directive } from '@angular/core';
 
 /**
+ * Directive CwFieldLegend
+ *
+ * @description
  * The title of a `fieldset[cwFieldSet]`, which names the set for assistive technologies. Put it on
  * the native `<legend>`, first child of the fieldset; a `cw-field-description` may follow it.
  */

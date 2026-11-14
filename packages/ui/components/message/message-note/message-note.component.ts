@@ -1,4 +1,4 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, input, type InputSignal, type Signal } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorCheckCircleFill,
@@ -11,6 +11,9 @@ import { TONE_ICONS, TONE_LABELS, toneRole } from '../message.styles';
 import type { CwMessageTone, CwMessageToneLabels } from '../message.types';
 
 /**
+ * Component CwMessageNote
+ *
+ * @description
  * A state note under the bubbles of a message: private comment, converted to a task, flagged link,
  * blocked attachment, failed sending (Message sheet of the Design System artifact, « Note d'état »).
  *
@@ -41,18 +44,72 @@ import type { CwMessageTone, CwMessageToneLabels } from '../message.types';
   templateUrl: './message-note.component.html',
 })
 export class CwMessageNote {
-  /** Tone of the note. */
-  readonly tone = input<CwMessageTone>('default');
-  /** Replaces the French tone words. */
-  readonly toneLabels = input<Partial<CwMessageToneLabels>>({});
+  // #region Properties
+  /**
+   * Property tone
+   * @readonly
+   *
+   * @description
+   * Tone controlling the note's icon, color and live role.
+   *
+   * @type {InputSignal<CwMessageTone>}
+   * @default 'default'
+   */
+  public readonly tone: InputSignal<CwMessageTone> = input<CwMessageTone>('default');
 
-  protected readonly role = computed(() => toneRole(this.tone()));
-  protected readonly icon = computed(() => {
-    const tone = this.tone();
+  /**
+   * Property toneLabels
+   * @readonly
+   *
+   * @description
+   * Overrides for the default French tone words.
+   *
+   * @type {InputSignal<Partial<CwMessageToneLabels>>}
+   * @default {}
+   */
+  public readonly toneLabels: InputSignal<Partial<CwMessageToneLabels>> = input<
+    Partial<CwMessageToneLabels>
+  >({});
+
+  /**
+   * Property role
+   * @readonly
+   *
+   * @description
+   * Live role associated with the current tone, or null for the default tone.
+   *
+   * @type {Signal<'alert' | 'status' | null>}
+   */
+  protected readonly role: Signal<'alert' | 'status' | null> = computed(() =>
+    toneRole(this.tone()),
+  );
+
+  /**
+   * Property icon
+   * @readonly
+   *
+   * @description
+   * Filled icon and color for the current tone, or null for the default tone.
+   *
+   * @type {Signal<{ name: string; color: string } | null>}
+   */
+  protected readonly icon: Signal<{ name: string; color: string } | null> = computed(() => {
+    const tone: CwMessageTone = this.tone();
     return tone === 'default' ? null : TONE_ICONS[tone];
   });
-  protected readonly toneWord = computed(() => {
-    const tone = this.tone();
+
+  /**
+   * Property toneWord
+   * @readonly
+   *
+   * @description
+   * Tone word read before the note, or an empty string for the default tone.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly toneWord: Signal<string> = computed(() => {
+    const tone: CwMessageTone = this.tone();
     return tone === 'default' ? '' : { ...TONE_LABELS, ...this.toneLabels() }[tone];
   });
+  // #endregion
 }

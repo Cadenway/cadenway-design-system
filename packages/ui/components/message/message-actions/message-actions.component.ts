@@ -1,9 +1,12 @@
-import { Component, ElementRef, inject, input } from '@angular/core';
+import { Component, ElementRef, inject, input, type InputSignal } from '@angular/core';
 import { FocusKeyManager, type FocusableOption } from '@angular/cdk/a11y';
 import { Directionality } from '@angular/cdk/bidi';
 import { ɵnavigateList } from '@cadenway/ui/core';
 
 /**
+ * Component CwMessageActions
+ *
+ * @description
  * The action bar next to a bubble: React, Reply, More (Message sheet of the Design System artifact,
  * « Barre d'actions »).
  *
@@ -24,17 +27,56 @@ import { ɵnavigateList } from '@cadenway/ui/core';
   templateUrl: './message-actions.component.html',
 })
 export class CwMessageActions {
-  /** Accessible name of the bar. */
-  readonly ariaLabel = input('Actions du message');
+  // #region Properties
+  /**
+   * Property ariaLabel
+   * @readonly
+   *
+   * @description
+   * Accessible name of the action bar.
+   *
+   * @type {InputSignal<string>}
+   * @default 'Actions du message'
+   */
+  public readonly ariaLabel: InputSignal<string> = input('Actions du message');
 
-  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
-  private readonly dir = inject(Directionality, { optional: true });
+  /**
+   * Property host
+   * @readonly
+   *
+   * @description
+   * Toolbar element containing the projected action controls.
+   *
+   * @type {HTMLElement}
+   */
+  private readonly host: HTMLElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
 
+  /**
+   * Property dir
+   * @readonly
+   *
+   * @description
+   * Optional text direction used to interpret horizontal arrow keys.
+   *
+   * @type {Directionality | null}
+   */
+  private readonly dir: Directionality | null = inject(Directionality, { optional: true });
+  // #endregion
+
+  // #region Methods
+  /**
+   * Method navigate
+   *
+   * @description
+   * Moves focus through the current enabled actions with horizontal arrows, Home and End.
+   *
+   * @param {KeyboardEvent} event - Keyboard event received by the toolbar.
+   */
   protected navigate(event: KeyboardEvent): void {
-    const controls = Array.from(
+    const controls: HTMLElement[] = Array.from(
       this.host.querySelectorAll<HTMLElement>('button:not([disabled]), a[href]'),
     );
-    const current = controls.findIndex((control) => control === event.target);
+    const current: number = controls.findIndex((control) => control === event.target);
     if (current < 0) return;
     // The buttons are projected by the consumer or drawn by the message: read them from the DOM
     // at each key, wrapped as focusable options for the CDK manager.
@@ -43,11 +85,14 @@ export class CwMessageActions {
         control.focus();
       },
     }));
-    const manager = new FocusKeyManager(options).withWrap();
+    const manager: FocusKeyManager<FocusableOption> = new FocusKeyManager<FocusableOption>(
+      options,
+    ).withWrap();
     manager.updateActiveItem(current);
     if (ɵnavigateList(manager, event, 'horizontal', this.dir?.value === 'rtl')) {
       event.preventDefault();
     }
     manager.destroy();
   }
+  // #endregion
 }

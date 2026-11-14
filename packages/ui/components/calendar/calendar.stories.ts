@@ -5,8 +5,13 @@ import { CwCalendar } from './calendar.component';
 import type { CwDateDisabledFn } from './calendar.types';
 
 /**
- * Calendar, every state of its sheet in the Design System artifact, in the light and the dark theme.
+ * Constant meta
+ *
+ * @description
+ * Calendar states from the design system sheet in the light and dark themes.
  * November 2026 as in the preview; 1 and 11 November are the instance's public holidays.
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Calendar',
@@ -15,18 +20,53 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration for calendar examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Finds the light theme section of the story canvas.
+ *
+ * @param {HTMLElement} canvasElement - Canvas containing the themed examples.
+ * @returns {HTMLElement} Light theme section.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
-const holidays: CwDateDisabledFn = (date) =>
+/**
+ * Function holidays
+ *
+ * @description
+ * Disables the two November holidays used by the example instance.
+ *
+ * @param {Date} date - Day to check.
+ * @returns {boolean} Whether the day is an example holiday.
+ */
+const holidays: CwDateDisabledFn = (date: Date): boolean =>
   date.getMonth() === 10 && [1, 11].includes(date.getDate());
 
-const november = new Date(2026, 10, 1);
+/**
+ * Constant november
+ *
+ * @description
+ * Initial month shown by the calendar examples.
+ *
+ * @type {Date}
+ */
+const november: Date = new Date(2026, 10, 1);
 
 /** One day, the public holidays disabled. */
 export const Single: Story = {
@@ -92,9 +132,11 @@ export const Keyboard: Story = {
     props: { holidays, november, due: new Date(2026, 10, 10) },
     template: `<cw-calendar [month]="november" [selected]="due" [disabledDates]="holidays" />`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const tenth = scope.getByRole('button', { name: '10 novembre 2026' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole: (role: string, options: { name: string }) => HTMLElement } = within(
+      light(canvasElement),
+    );
+    const tenth: HTMLElement = scope.getByRole('button', { name: '10 novembre 2026' });
     tenth.focus();
     await expect(tenth).toHaveFocus();
 
@@ -103,7 +145,7 @@ export const Keyboard: Story = {
 
     await userEvent.keyboard('{PageDown}');
     await expect(scope.getByRole('grid', { name: 'décembre 2026' })).toBeInTheDocument();
-    const twelfth = scope.getByRole('button', { name: '12 décembre 2026' });
+    const twelfth: HTMLElement = scope.getByRole('button', { name: '12 décembre 2026' });
     await expect(twelfth).toHaveFocus();
 
     await userEvent.keyboard('{Enter}');

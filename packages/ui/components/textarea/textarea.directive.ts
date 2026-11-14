@@ -5,26 +5,45 @@ import {
   computed,
   inject,
   input,
+  type InputSignalWithTransform,
+  type Signal,
 } from '@angular/core';
 import { NgControl } from '@angular/forms';
 import { ɵFOCUS_FIELD } from '@cadenway/ui/core';
 
-/* Literal class strings (Textarea sheet and preview of the Design System artifact), so Tailwind finds
-   them in the compiled package. Inside a disabled `cw-field` the whole field is already at 50 %: the
-   field does not dim twice. */
-const BASE =
+/**
+ * Constant BASE
+ *
+ * @description
+ * Literal Textarea sheet classes so Tailwind finds them in the package. A disabled textarea inside
+ * an already dimmed field is not dimmed twice.
+ *
+ * @type {string}
+ */
+const BASE: string =
   'flex w-full resize-none rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm transition-[color,box-shadow] placeholder:text-muted-foreground motion-reduce:transition-none ' +
   'disabled:cursor-not-allowed disabled:opacity-50 group-data-[disabled=true]/field:disabled:opacity-100 ' +
   'aria-invalid:border-destructive/60 aria-invalid:ring-destructive/15 [&[readonly]]:bg-muted';
 
-/* Textarea sheet: the height follows the content from 64 px to 240 px, then the field scrolls; a
-   fixed field takes its height from `rows`. */
-const HEIGHTS = {
+/**
+ * Constant HEIGHTS
+ *
+ * @description
+ * Height classes from the Textarea sheet: automatic fields grow from 64 to 240 pixels, while fixed
+ * fields take their height from `rows`.
+ *
+ * @type {Readonly<{ auto: 'field-sizing-content min-h-16 max-h-60'; fixed: '' }>}
+ */
+const HEIGHTS: Readonly<{ auto: 'field-sizing-content min-h-16 max-h-60'; fixed: '' }> = {
   auto: 'field-sizing-content min-h-16 max-h-60',
   fixed: '',
 } as const;
 
 /**
+ * Class CwTextarea
+ * @class CwTextarea
+ *
+ * @description
  * The multi-line text field that grows with its content: task description, blocking reason,
  * release note (Textarea sheet of the Design System artifact).
  *
@@ -44,22 +63,74 @@ const HEIGHTS = {
   },
 })
 export class CwTextarea {
-  /** Grows with the content (`field-sizing: content`); `false` keeps the height of `rows`. */
-  readonly autoResize = input(true, { transform: booleanAttribute });
+  // #region Properties
+  /**
+   * Property autoResize
+   * @readonly
+   *
+   * @description
+   * Input allowing the field to grow with its content; false uses the height specified by `rows`.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   * @default true
+   */
+  public readonly autoResize: InputSignalWithTransform<boolean, unknown> = input(true, {
+    transform: booleanAttribute,
+  });
 
-  private readonly ngControl = inject(NgControl, { optional: true, self: true });
-  private readonly declaredInvalid = inject(new HostAttributeToken('aria-invalid'), {
+  /**
+   * Property ngControl
+   * @readonly
+   *
+   * @description
+   * Native Angular form control on this element, or null when no control is bound.
+   *
+   * @type {NgControl | null}
+   */
+  private readonly ngControl: NgControl | null = inject(NgControl, { optional: true, self: true });
+
+  /**
+   * Property declaredInvalid
+   * @readonly
+   *
+   * @description
+   * Static `aria-invalid` value supplied on the host, or null when absent.
+   *
+   * @type {string | null}
+   */
+  private readonly declaredInvalid: string | null = inject(new HostAttributeToken('aria-invalid'), {
     optional: true,
   });
 
-  protected readonly classes = computed(
+  /**
+   * Property classes
+   * @readonly
+   *
+   * @description
+   * Computed field, focus and height classes for the current resize mode.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly classes: Signal<string> = computed(
     () => `${BASE} ${ɵFOCUS_FIELD} ${HEIGHTS[this.autoResize() ? 'auto' : 'fixed']}`,
   );
+  // #endregion
 
+  // #region Methods
+  /**
+   * Method ariaInvalid
+   * @method ariaInvalid
+   *
+   * @description
+   * Reads the control's touched and invalid state, or preserves the static attribute without a control.
+   *
+   * @returns {string | null} `true` for a touched invalid control, the static value, or null.
+   */
   protected ariaInvalid(): string | null {
-    const control = this.ngControl;
+    const control: NgControl | null = this.ngControl;
     if (!control) return this.declaredInvalid;
     // Read on every check: Reactive Forms state is not a signal, Signal Forms state is.
     return control.invalid === true && control.touched === true ? 'true' : null;
   }
+  // #endregion
 }

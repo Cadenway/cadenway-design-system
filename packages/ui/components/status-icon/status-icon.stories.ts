@@ -7,8 +7,13 @@ import { CW_STATUS_LABELS } from './status-icon.constants';
 import type { CwStatusKey } from './status-icon.types';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Status icon, every status of the mockup (`StatutTache.dc.html`), in the light and the dark theme.
  * The icon is decorative: each story writes the French word next to it.
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/StatusIcon',
@@ -17,12 +22,39 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story configuration for status icons.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
-const ORDER = Object.keys(CW_STATUS_LABELS) as CwStatusKey[];
+/**
+ * Constant ORDER
+ *
+ * @description
+ * Status order used by the examples and interactive transition.
+ *
+ * @type {CwStatusKey[]}
+ */
+const ORDER: CwStatusKey[] = Object.keys(CW_STATUS_LABELS) as CwStatusKey[];
 
+/**
+ * Function light
+ *
+ * @description
+ * Selects the light theme copy for interaction checks.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the themed examples.
+ *
+ * @returns {HTMLElement} Light theme section used for interaction checks.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -38,6 +70,20 @@ export const Statuses: Story = {
         }
       </ul>`,
   }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: HTMLElement = light(canvasElement);
+    const todo: SVGElement | null = scope.querySelector(
+      'cw-status-icon[data-status="todo"] .cw-status-ring',
+    );
+    const done: SVGElement | null = scope.querySelector(
+      'cw-status-icon[data-status="done"] .cw-status-check',
+    );
+    if (!todo || !done) throw new Error('Status icon layers missing');
+    await waitFor(async () => {
+      await expect(getComputedStyle(todo).strokeDasharray).toBe('3.1px, 1.8087px');
+      await expect(getComputedStyle(done).strokeDashoffset).toBe('0px');
+    });
+  },
 };
 
 /** The four sizes, from 12 px to 20 px. */
@@ -64,6 +110,15 @@ export const Milestone: Story = {
         }
       </ul>`,
   }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const ring: SVGElement | null = light(canvasElement).querySelector(
+      'cw-status-icon[data-status="todo"] .cw-status-ring',
+    );
+    if (!ring) throw new Error('Milestone ring missing');
+    await waitFor(async () => {
+      await expect(getComputedStyle(ring).transform).toBe('none');
+    });
+  },
 };
 
 /**
@@ -84,9 +139,9 @@ export const FromTransition: Story = {
         </button>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = light(canvasElement);
-    const icon = scope.querySelector('cw-status-icon');
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: HTMLElement = light(canvasElement);
+    const icon: Element | null = scope.querySelector('cw-status-icon');
 
     await waitFor(() => expect(icon).toHaveAttribute('data-status', 'progress'));
     await userEvent.click(within(scope).getByRole('button', { name: 'Statut suivant' }));

@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CwTimeEntryForm } from './time-entry-form/time-entry-form.component';
@@ -12,16 +12,40 @@ import type {
   CwTimeTrackerVariant,
 } from './time-tracker.types';
 
-const MINUTE = 60_000;
+/**
+ * Constant MINUTE
+ *
+ * @description
+ * Number of milliseconds in one minute.
+ *
+ * @type {60000}
+ */
+const MINUTE: 60000 = 60_000;
 
+/**
+ * Function button
+ *
+ * @description
+ * Finds a button by its accessible name.
+ *
+ * @param {HTMLElement} host - Fixture element containing the button.
+ * @param {string} name - Accessible button name.
+ * @returns {HTMLButtonElement} Matching button element.
+ */
 function button(host: HTMLElement, name: string): HTMLButtonElement {
-  const found = Array.from(host.querySelectorAll('button')).find(
+  const found: HTMLButtonElement | undefined = Array.from(host.querySelectorAll('button')).find(
     (element) => (element.getAttribute('aria-label') ?? element.textContent.trim()) === name,
   );
   if (!found) throw new Error(`No button named ${name}`);
   return found;
 }
 
+/**
+ * Component TrackerHost
+ *
+ * @description
+ * Hosts the tracker and records timer events.
+ */
 @Component({
   imports: [CwTimeTracker],
   template: `
@@ -40,14 +64,98 @@ function button(host: HTMLElement, name: string): HTMLButtonElement {
   `,
 })
 class TrackerHost {
-  readonly state = signal<CwTimeTrackerState>('stopped');
-  readonly variant = signal<CwTimeTrackerVariant>('full');
-  readonly elapsed = signal(0);
-  readonly startedAt = new Date(2026, 10, 13, 14, 5);
-  readonly total = signal(213 * MINUTE);
-  readonly estimate = signal<number | null>(180 * MINUTE);
-  readonly events = signal<string[]>([]);
-  readonly stopped = signal<CwTimeStopEvent | null>(null);
+  // #region Properties
+  /**
+   * Property state
+   *
+   * @description
+   * Timer state controlled by the fixture.
+   *
+   * @type {WritableSignal<CwTimeTrackerState>}
+   * @readonly
+   */
+  public readonly state: WritableSignal<CwTimeTrackerState> = signal<CwTimeTrackerState>('stopped');
+
+  /**
+   * Property variant
+   *
+   * @description
+   * Tracker variant displayed by the fixture.
+   *
+   * @type {WritableSignal<CwTimeTrackerVariant>}
+   * @readonly
+   */
+  public readonly variant: WritableSignal<CwTimeTrackerVariant> =
+    signal<CwTimeTrackerVariant>('full');
+
+  /**
+   * Property elapsed
+   *
+   * @description
+   * Elapsed session duration in milliseconds.
+   *
+   * @type {WritableSignal<number>}
+   * @readonly
+   */
+  public readonly elapsed: WritableSignal<number> = signal(0);
+
+  /**
+   * Property startedAt
+   *
+   * @description
+   * Start time supplied to the tracker.
+   *
+   * @type {Date}
+   * @readonly
+   */
+  public readonly startedAt: Date = new Date(2026, 10, 13, 14, 5);
+
+  /**
+   * Property total
+   *
+   * @description
+   * Total tracked duration in milliseconds.
+   *
+   * @type {WritableSignal<number>}
+   * @readonly
+   */
+  public readonly total: WritableSignal<number> = signal(213 * MINUTE);
+
+  /**
+   * Property estimate
+   *
+   * @description
+   * Estimated duration in milliseconds.
+   *
+   * @type {WritableSignal<number | null>}
+   * @readonly
+   */
+  public readonly estimate: WritableSignal<number | null> = signal<number | null>(180 * MINUTE);
+
+  /**
+   * Property events
+   *
+   * @description
+   * Timer events emitted by the fixture.
+   *
+   * @type {WritableSignal<string[]>}
+   * @readonly
+   */
+  public readonly events: WritableSignal<string[]> = signal<string[]>([]);
+
+  /**
+   * Property stopped
+   *
+   * @description
+   * Last stopped session emitted by the tracker.
+   *
+   * @type {WritableSignal<CwTimeStopEvent | null>}
+   * @readonly
+   */
+  public readonly stopped: WritableSignal<CwTimeStopEvent | null> = signal<CwTimeStopEvent | null>(
+    null,
+  );
+  // #endregion
 }
 
 describe('CwTimeTracker', () => {
@@ -93,7 +201,7 @@ describe('CwTimeTracker', () => {
   });
 
   it('sets the total against the estimate and writes the excess', () => {
-    const meter = host.querySelector('[role="meter"]');
+    const meter: Element | null = host.querySelector('[role="meter"]');
     expect(meter?.getAttribute('aria-valuetext')).toContain('3 h 33 / 3 h');
     expect(host.textContent).toContain('33 min de dépassement');
     expect(host.querySelector('cw-time-tracker')?.hasAttribute('data-over')).toBe(true);
@@ -110,7 +218,7 @@ describe('CwTimeTracker', () => {
     component.variant.set('compact');
     await fixture.whenStable();
 
-    const chip = button(host, 'Démarrer le minuteur, 3 h 33 suivies');
+    const chip: HTMLButtonElement = button(host, 'Démarrer le minuteur, 3 h 33 suivies');
     chip.click();
     await fixture.whenStable();
 
@@ -120,28 +228,73 @@ describe('CwTimeTracker', () => {
 });
 
 describe('CwTimeEntryForm', () => {
+  /**
+   * Component FormHost
+   *
+   * @description
+   * Hosts the form and records submission and cancellation.
+   */
   @Component({
     imports: [CwTimeEntryForm],
     template: `<cw-time-entry-form (submit)="added.set($event)" (cancel)="cancelled.set(true)" />`,
   })
   class FormHost {
-    readonly added = signal<CwTimeEntryDraft | null>(null);
-    readonly cancelled = signal(false);
+    // #region Properties
+    /**
+     * Property added
+     *
+     * @description
+     * Last time entry submitted by the form.
+     *
+     * @type {WritableSignal<CwTimeEntryDraft | null>}
+     * @readonly
+     */
+    public readonly added: WritableSignal<CwTimeEntryDraft | null> =
+      signal<CwTimeEntryDraft | null>(null);
+
+    /**
+     * Property cancelled
+     *
+     * @description
+     * Whether the form emitted cancellation.
+     *
+     * @type {WritableSignal<boolean>}
+     * @readonly
+     */
+    public readonly cancelled: WritableSignal<boolean> = signal(false);
+    // #endregion
   }
 
   let host: HTMLElement;
   let component: FormHost;
   let fixture: ComponentFixture<FormHost>;
 
+  /**
+   * Function duration
+   *
+   * @description
+   * Finds the form duration input.
+   * @returns {HTMLInputElement} Duration input element.
+   */
   function duration(): HTMLInputElement {
-    const label = Array.from(host.querySelectorAll('label')).find(
+    const label: HTMLLabelElement | undefined = Array.from(host.querySelectorAll('label')).find(
       (element) => element.textContent.trim() === 'Durée',
     );
-    const field = host.querySelector<HTMLInputElement>(`#${label?.htmlFor ?? ''}`);
+    const field: HTMLInputElement | null = host.querySelector<HTMLInputElement>(
+      `#${label?.htmlFor ?? ''}`,
+    );
     if (!field) throw new Error('No duration field');
     return field;
   }
 
+  /**
+   * Function type
+   *
+   * @description
+   * Types a duration in the form.
+   *
+   * @param {string} text - Duration text to enter.
+   */
   function type(text: string): void {
     duration().value = text;
     duration().dispatchEvent(new Event('input'));
@@ -158,7 +311,9 @@ describe('CwTimeEntryForm', () => {
   it('reads the duration as it is typed and adds it with Enter', async () => {
     type('1h30');
     await fixture.whenStable();
-    const hint = document.getElementById(duration().getAttribute('aria-describedby') ?? '');
+    const hint: HTMLElement | null = document.getElementById(
+      duration().getAttribute('aria-describedby') ?? '',
+    );
     expect(hint?.textContent.trim()).toBe('= 1 h 30');
 
     duration().dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
@@ -189,12 +344,28 @@ describe('CwTimeEntryForm', () => {
 });
 
 describe('CwTimeEntryList', () => {
+  /**
+   * Component ListHost
+   *
+   * @description
+   * Hosts the entry list and records the edited entry.
+   */
   @Component({
     imports: [CwTimeEntryList],
     template: `<cw-time-entry-list [entries]="entries()" (entryEdit)="edited.set($event)" />`,
   })
   class ListHost {
-    readonly entries = signal<CwTimeEntry[]>([
+    // #region Properties
+    /**
+     * Property entries
+     *
+     * @description
+     * Time entries supplied to the list.
+     *
+     * @type {WritableSignal<CwTimeEntry[]>}
+     * @readonly
+     */
+    public readonly entries: WritableSignal<CwTimeEntry[]> = signal<CwTimeEntry[]>([
       {
         id: '1',
         person: { name: 'Karim Benali' },
@@ -210,14 +381,25 @@ describe('CwTimeEntryList', () => {
         duration: 48 * MINUTE,
       },
     ]);
-    readonly edited = signal<CwTimeEntry | null>(null);
+
+    /**
+     * Property edited
+     *
+     * @description
+     * Entry selected for editing.
+     *
+     * @type {WritableSignal<CwTimeEntry | null>}
+     * @readonly
+     */
+    public readonly edited: WritableSignal<CwTimeEntry | null> = signal<CwTimeEntry | null>(null);
+    // #endregion
   }
 
   it('lists the entries with their totals and edits one on click', async () => {
-    const fixture = TestBed.createComponent(ListHost);
+    const fixture: ComponentFixture<ListHost> = TestBed.createComponent(ListHost);
     fixture.autoDetectChanges();
     await fixture.whenStable();
-    const host = fixture.nativeElement as HTMLElement;
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
 
     expect(host.querySelector('ul')?.getAttribute('aria-label')).toBe('Entrées de temps');
     expect(host.textContent).toContain('Sans note');
@@ -228,7 +410,7 @@ describe('CwTimeEntryList', () => {
   });
 
   it('reads « Aucun temps saisi » without entries', async () => {
-    const fixture = TestBed.createComponent(ListHost);
+    const fixture: ComponentFixture<ListHost> = TestBed.createComponent(ListHost);
     fixture.componentInstance.entries.set([]);
     fixture.autoDetectChanges();
     await fixture.whenStable();

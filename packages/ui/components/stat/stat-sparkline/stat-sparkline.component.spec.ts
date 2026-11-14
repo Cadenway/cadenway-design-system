@@ -1,25 +1,52 @@
-import { Component, signal } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { Component, signal, type WritableSignal } from '@angular/core';
+import { TestBed, type ComponentFixture } from '@angular/core/testing';
 
 import type { CwStatSparklineType } from '../stat.types';
 import { CwStatSparkline } from './stat-sparkline.component';
 
+/**
+ * Class Host
+ *
+ * @description
+ * Hosts a sparkline with selectable data and display form.
+ */
 @Component({
   imports: [CwStatSparkline],
   template: `<cw-stat-sparkline [data]="data()" [type]="type()" />`,
 })
 class Host {
-  readonly data = signal<readonly number[]>([2, 5, 3, 9]);
-  readonly type = signal<CwStatSparklineType>('line');
+  // #region Properties
+  /**
+   * Property data
+   * @readonly
+   *
+   * @description
+   * Values displayed in the sparkline.
+   *
+   * @type {WritableSignal<readonly number[]>}
+   */
+  public readonly data: WritableSignal<readonly number[]> = signal<readonly number[]>([2, 5, 3, 9]);
+
+  /**
+   * Property type
+   * @readonly
+   *
+   * @description
+   * Current sparkline form.
+   *
+   * @type {WritableSignal<CwStatSparklineType>}
+   */
+  public readonly type: WritableSignal<CwStatSparklineType> = signal<CwStatSparklineType>('line');
+  // #endregion
 }
 
 describe('CwStatSparkline', () => {
   it('stays decorative whatever its form', async () => {
-    const fixture = TestBed.createComponent(Host);
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
     fixture.autoDetectChanges();
-    const sparkline = (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>(
-      'cw-stat-sparkline',
-    );
+    const sparkline: HTMLElement | null = (
+      fixture.nativeElement as HTMLElement
+    ).querySelector<HTMLElement>('cw-stat-sparkline');
 
     expect(sparkline?.getAttribute('aria-hidden')).toBe('true');
     expect(sparkline?.dataset['type']).toBe('line');

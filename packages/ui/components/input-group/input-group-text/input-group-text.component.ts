@@ -1,6 +1,10 @@
 import { Component } from '@angular/core';
 
 /**
+ * Class CwInputGroupText
+ * @class CwInputGroupText
+ *
+ * @description
  * A text complement in an addon: prefix (`https://`), suffix, unit (« heures »), counter. A field
  * after a start text prefix sits 2 px from it.
  */

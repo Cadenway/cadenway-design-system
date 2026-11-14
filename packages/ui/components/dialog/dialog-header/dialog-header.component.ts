@@ -1,10 +1,20 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, type Signal } from '@angular/core';
 
-import { CW_DIALOG } from '../dialog.token';
+import { CW_DIALOG, type CwDialogContext } from '../dialog.token';
 
 /* Literal class strings (Dialog sheet and preview). The header leaves room for the close button at
    the top right; in a `scrollable` dialog it stays in place above a rule. */
-const CLASSES = {
+/**
+ * Constant CLASSES
+ *
+ * @description
+ * Layout classes for the dialog header.
+ *
+ * @type {typeof CLASSES}
+ */
+const CLASSES: Readonly<
+  Record<'simple' | 'simpleWithClose' | 'scrollable' | 'scrollableWithClose', string>
+> = {
   simple: 'flex flex-col gap-2',
   simpleWithClose: 'flex flex-col gap-2 pr-6',
   scrollable: 'flex flex-col gap-2 border-b px-6 py-4',
@@ -12,6 +22,9 @@ const CLASSES = {
 } as const;
 
 /**
+ * Component CwDialogHeader
+ *
+ * @description
  * The top of a `cw-dialog`: its `h2[cwDialogTitle]` (required) and `p[cwDialogDescription]`.
  *
  * Projected first in the window, whatever its place in the content.
@@ -22,12 +35,32 @@ const CLASSES = {
   templateUrl: './dialog-header.component.html',
 })
 export class CwDialogHeader {
-  private readonly dialog = inject(CW_DIALOG, { optional: true });
+  // #region Properties
+  /**
+   * Property dialog
+   * @readonly
+   *
+   * @description
+   * Parent dialog context when present.
+   *
+   * @type {CwDialogContext | null}
+   */
+  private readonly dialog: CwDialogContext | null = inject(CW_DIALOG, { optional: true });
 
-  protected readonly classes = computed(() => {
-    const scrollable = this.dialog?.scrollable() ?? false;
-    const withClose = this.dialog?.showClose() ?? false;
+  /**
+   * Property classes
+   * @readonly
+   *
+   * @description
+   * Classes derived from the dialog layout.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly classes: Signal<string> = computed(() => {
+    const scrollable: boolean = this.dialog?.scrollable() ?? false;
+    const withClose: boolean = this.dialog?.showClose() ?? false;
     if (scrollable) return withClose ? CLASSES.scrollableWithClose : CLASSES.scrollable;
     return withClose ? CLASSES.simpleWithClose : CLASSES.simple;
   });
+  // #endregion
 }

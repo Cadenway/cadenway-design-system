@@ -1,7 +1,22 @@
-/** Look of a button; one `default` (ink fill) per view, the others `outline`, `secondary` or `ghost`. */
+/**
+ * Type CwButtonVariant
+ *
+ * @description
+ * Button appearance; the Button sheet calls for one ink-filled default per view, with outline,
+ * secondary or ghost for other actions.
+ *
+ * @type {'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'}
+ */
 export type CwButtonVariant =
   'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
 
-/** Height, padding and radius of a button; every control of a row shares one size. */
+/**
+ * Type CwButtonSize
+ *
+ * @description
+ * Height, padding and radius of a button; controls in the same row share a size.
+ *
+ * @type {'xs' | 'sm' | 'default' | 'lg' | 'icon-xs' | 'icon-sm' | 'icon' | 'icon-lg'}
+ */
 export type CwButtonSize =
   'xs' | 'sm' | 'default' | 'lg' | 'icon-xs' | 'icon-sm' | 'icon' | 'icon-lg';

@@ -1,9 +1,15 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { provideCwTooltip } from './tooltip.providers';
 import { CwTooltip } from './tooltip.directive';
 
+/**
+ * Component Host
+ *
+ * @description
+ * Exercises tooltip content, delays and focus interactions.
+ */
 @Component({
   imports: [CwTooltip],
   template: `
@@ -31,33 +37,97 @@ import { CwTooltip } from './tooltip.directive';
   `,
 })
 class Host {
-  readonly hidden = signal(true);
+  // #region Properties
+  /**
+   * Property hidden
+   * @readonly
+   *
+   * @description
+   * Whether the example tooltip is disabled.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly hidden: WritableSignal<boolean> = signal(true);
+  // #endregion
 }
 
+/**
+ * Function button
+ *
+ * @description
+ * Finds a trigger button by its accessible name or text.
+ *
+ * @param {HTMLElement} host - Container holding the trigger.
+ * @param {string} name - Expected accessible name or text.
+ *
+ * @returns {HTMLButtonElement} Matching button element.
+ */
 function button(host: HTMLElement, name: string): HTMLButtonElement {
-  const found = Array.from(host.querySelectorAll('button')).find(
+  const found: HTMLButtonElement | undefined = Array.from(host.querySelectorAll('button')).find(
     (element) => (element.getAttribute('aria-label') ?? element.textContent.trim()) === name,
   );
   if (!found) throw new Error(`No button named ${name}`);
   return found;
 }
 
+/**
+ * Function tooltips
+ *
+ * @description
+ * Returns all rendered tooltip bubbles.
+ *
+ * @returns {HTMLElement[]} Tooltip elements currently rendered in the document.
+ */
 function tooltips(): HTMLElement[] {
   return Array.from(document.querySelectorAll<HTMLElement>('[role="tooltip"]'));
 }
 
+/**
+ * Function tooltip
+ *
+ * @description
+ * Finds a tooltip containing the requested text.
+ *
+ * @param {string} text - Text expected within the tooltip.
+ *
+ * @returns {HTMLElement | undefined} Matching tooltip, or undefined when absent.
+ */
 function tooltip(text: string): HTMLElement | undefined {
   return tooltips().find((element) => element.textContent.includes(text));
 }
 
+/**
+ * Function hover
+ *
+ * @description
+ * Dispatches a pointer-enter event.
+ *
+ * @param {HTMLElement} element - Trigger receiving the pointer-enter event.
+ */
 function hover(element: HTMLElement): void {
   element.dispatchEvent(new MouseEvent('pointerenter'));
 }
 
+/**
+ * Function leave
+ *
+ * @description
+ * Dispatches a pointer-leave event.
+ *
+ * @param {HTMLElement} element - Trigger receiving the pointer-leave event.
+ */
 function leave(element: HTMLElement): void {
   element.dispatchEvent(new MouseEvent('pointerleave'));
 }
 
+/**
+ * Function focusWithKeyboard
+ *
+ * @description
+ * Focuses a trigger using a keyboard focus origin.
+ *
+ * @param {HTMLElement} element - Trigger to focus after a keyboard event.
+ */
 function focusWithKeyboard(element: HTMLElement): void {
   document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
   element.focus();
@@ -67,6 +137,12 @@ describe('CwTooltip', () => {
   let fixture: ComponentFixture<Host>;
   let host: HTMLElement;
 
+  /**
+   * Function render
+   *
+   * @description
+   * Runs change detection for the test application.
+   */
   function render(): void {
     TestBed.tick();
   }
@@ -84,7 +160,7 @@ describe('CwTooltip', () => {
   });
 
   it('opens after 700 ms of hover and describes its trigger without naming it', () => {
-    const create = button(host, 'Créer une tâche');
+    const create: HTMLButtonElement = button(host, 'Créer une tâche');
     hover(create);
     vi.advanceTimersByTime(699);
     render();
@@ -92,7 +168,7 @@ describe('CwTooltip', () => {
 
     vi.advanceTimersByTime(1);
     render();
-    const bubble = tooltip('Créer une tâche');
+    const bubble: HTMLElement | undefined = tooltip('Créer une tâche');
     expect(bubble?.dataset['state']).toBe('delayed-open');
     expect(create.getAttribute('aria-describedby')).toBe(bubble?.id);
     expect(create.getAttribute('aria-label')).toBe('Créer une tâche');
@@ -103,16 +179,18 @@ describe('CwTooltip', () => {
     vi.advanceTimersByTime(700);
     render();
 
-    const keys = Array.from(tooltip('Créer une tâche')?.querySelectorAll('kbd') ?? []);
+    const keys: HTMLElement[] = Array.from(
+      tooltip('Créer une tâche')?.querySelectorAll('kbd') ?? [],
+    );
     expect(keys.map((key) => key.textContent.trim())).toEqual(['C']);
   });
 
   it('closes when the pointer leaves and restores the other descriptions', () => {
-    const search = button(host, 'Rechercher');
+    const search: HTMLButtonElement = button(host, 'Rechercher');
     hover(search);
     vi.advanceTimersByTime(700);
     render();
-    const bubble = tooltip('Rechercher');
+    const bubble: HTMLElement | undefined = tooltip('Rechercher');
     expect(search.getAttribute('aria-describedby')).toBe(`search-hint ${bubble?.id ?? ''}`);
 
     leave(search);
@@ -123,12 +201,12 @@ describe('CwTooltip', () => {
   });
 
   it('stays open while the pointer moves onto the bubble', () => {
-    const create = button(host, 'Créer une tâche');
+    const create: HTMLButtonElement = button(host, 'Créer une tâche');
     hover(create);
     vi.advanceTimersByTime(700);
     render();
-    const bubble = tooltip('Créer une tâche');
-    const pane = bubble?.parentElement;
+    const bubble: HTMLElement | undefined = tooltip('Créer une tâche');
+    const pane: HTMLElement | null | undefined = bubble?.parentElement;
     if (!pane) throw new Error('No overlay pane');
 
     leave(create);
@@ -144,7 +222,7 @@ describe('CwTooltip', () => {
   });
 
   it('opens at once on keyboard focus and closes on Escape, the focus staying', () => {
-    const create = button(host, 'Créer une tâche');
+    const create: HTMLButtonElement = button(host, 'Créer une tâche');
     focusWithKeyboard(create);
     render();
     expect(tooltip('Créer une tâche')?.dataset['state']).toBe('instant-open');
@@ -156,7 +234,7 @@ describe('CwTooltip', () => {
   });
 
   it('does not open on a programmatic focus and closes on blur', () => {
-    const create = button(host, 'Créer une tâche');
+    const create: HTMLButtonElement = button(host, 'Créer une tâche');
     create.focus();
     render();
     expect(tooltips()).toHaveLength(0);
@@ -171,7 +249,7 @@ describe('CwTooltip', () => {
   });
 
   it('closes on a press of the trigger', () => {
-    const create = button(host, 'Créer une tâche');
+    const create: HTMLButtonElement = button(host, 'Créer une tâche');
     hover(create);
     vi.advanceTimersByTime(700);
     render();
@@ -182,8 +260,8 @@ describe('CwTooltip', () => {
   });
 
   it('keeps one bubble open and skips the delay within 300 ms of the previous one', () => {
-    const create = button(host, 'Créer une tâche');
-    const search = button(host, 'Rechercher');
+    const create: HTMLButtonElement = button(host, 'Créer une tâche');
+    const search: HTMLButtonElement = button(host, 'Rechercher');
     hover(create);
     vi.advanceTimersByTime(700);
     render();
@@ -210,7 +288,7 @@ describe('CwTooltip', () => {
   });
 
   it('shows nothing while disabled', () => {
-    const visible = button(host, 'Visible');
+    const visible: HTMLButtonElement = button(host, 'Visible');
     hover(visible);
     vi.advanceTimersByTime(700);
     render();
@@ -236,7 +314,7 @@ describe('CwTooltip with a template', () => {
   });
 
   it('renders the template in the bubble', () => {
-    const fixture = TestBed.createComponent(Host);
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
     TestBed.tick();
 
     hover(button(fixture.nativeElement as HTMLElement, 'Échéance'));
@@ -260,7 +338,7 @@ describe('provideCwTooltip', () => {
 
   it('sets the open delay of every tooltip below it', () => {
     TestBed.configureTestingModule({ providers: [provideCwTooltip({ openDelay: 400 })] });
-    const fixture = TestBed.createComponent(Host);
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
     TestBed.tick();
 
     hover(button(fixture.nativeElement as HTMLElement, 'Créer une tâche'));

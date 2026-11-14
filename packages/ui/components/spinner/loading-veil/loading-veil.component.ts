@@ -1,8 +1,14 @@
-import { Component, input } from '@angular/core';
+import { Component, input, type InputSignal } from '@angular/core';
 
 import { CwSpinner } from '../spinner.component';
 
-/** The veil drawn over a refreshing area: a translucent background and a centered `lg` spinner. */
+/**
+ * Class CwLoadingVeil
+ * @class CwLoadingVeil
+ *
+ * @description
+ * Covers a refreshing area with a translucent background and a centered large spinner.
+ */
 @Component({
   selector: 'cw-loading-veil',
   imports: [CwSpinner],
@@ -13,6 +19,17 @@ import { CwSpinner } from '../spinner.component';
   templateUrl: './loading-veil.component.html',
 })
 export class CwLoadingVeil {
-  /** Accessible name of the wait. */
-  readonly label = input('Chargement');
+  // #region Properties
+  /**
+   * Property label
+   * @readonly
+   *
+   * @description
+   * Accessible name of the wait displayed by the veil's spinner.
+   *
+   * @type {InputSignal<string>}
+   * @default 'Chargement'
+   */
+  public readonly label: InputSignal<string> = input('Chargement');
+  // #endregion
 }

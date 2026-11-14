@@ -3,7 +3,7 @@
     viewBox="0 0 16 16"
     aria-hidden="true"
     focusable="false"
-    class="cw-status cw-ms block size-full"
+    class="cw-status cw-ms block size-full overflow-visible [transition:color_300ms_var(--ease-snap)] motion-reduce:transition-none"
     [class]="tone()"
   >
     <defs>
@@ -13,7 +13,7 @@
     </defs>
     <g transform="rotate(45 8 8)">
       <rect
-        class="cw-status-ring"
+        class="cw-status-ring [stroke-dasharray:4.9087_0] [transform-box:fill-box] [transform-origin:50%] [transform:rotate(0deg)] [transition:stroke-dasharray_450ms_var(--ease-snap),transform_600ms_var(--ease-spring),opacity_200ms_var(--ease-snap)] group-data-[status=todo]/status:[stroke-dasharray:3.1_1.8087] group-data-[status=todo]/status:[transform:rotate(-90deg)] group-data-[status=backlog]/status:[stroke-dasharray:0.01_3.2625] group-data-[status=backlog]/status:[transform:rotate(-180deg)] group-data-[status=triage]/status:[stroke-dasharray:7_2.8175] group-data-[status=triage]/status:[transform:rotate(-77deg)] group-data-[status=done]/status:opacity-0 group-data-[status=done]/status:[transition-delay:0s,0s,120ms] group-data-[status=cancelled]/status:opacity-0 group-data-[status=cancelled]/status:[transition-delay:0s,0s,120ms] motion-reduce:transition-none ![transform:none]"
         x="2.9"
         y="2.9"
         width="10.2"
@@ -29,7 +29,7 @@
     </g>
     <g [attr.clip-path]="clipUrl">
       <circle
-        class="cw-status-pie"
+        class="cw-status-pie [stroke-dasharray:0_11] [transition:stroke-dasharray_500ms_var(--ease-spring)] group-data-[status=progress]/status:[stroke-dasharray:5.4978_11] group-data-[status=review]/status:[stroke-dasharray:8.2467_11] group-data-[status=testing]/status:[stroke-dasharray:11_11] group-data-[status=done]/status:[stroke-dasharray:11_11] group-data-[status=cancelled]/status:[stroke-dasharray:11_11] motion-reduce:transition-none"
         cx="8"
         cy="8"
         r="2.5"
@@ -42,7 +42,7 @@
     </g>
     <g transform="rotate(45 8 8)">
       <rect
-        class="cw-status-disc"
+        class="cw-status-disc [transform-box:fill-box] [transform-origin:50%] [transform:scale(0)] [transition:transform_420ms_var(--ease-spring)] group-data-[status=done]/status:[transform:scale(1)] group-data-[status=cancelled]/status:[transform:scale(1)] motion-reduce:transition-none"
         x="2.65"
         y="2.65"
         width="10.7"
@@ -53,7 +53,7 @@
     </g>
     <g transform="translate(8 8) scale(0.816) translate(-8 -8)">
       <path
-        class="cw-status-wait"
+        class="cw-status-wait [stroke-dasharray:1] [stroke-dashoffset:1px] [transition:stroke-dashoffset_360ms_var(--ease-snap)] group-data-[status=waiting]/status:[stroke-dashoffset:0] group-data-[status=waiting]/status:[transition-delay:140ms] motion-reduce:transition-none"
         d="M8 4.6V8l2.3 1.5"
         pathLength="1"
         fill="none"
@@ -63,7 +63,7 @@
         stroke-linejoin="round"
       />
       <path
-        class="cw-status-in"
+        class="cw-status-in [stroke-dasharray:1] [stroke-dashoffset:1px] [transition:stroke-dashoffset_340ms_var(--ease-snap)] group-data-[status=triage]/status:[stroke-dashoffset:0] group-data-[status=triage]/status:[transition-delay:140ms] motion-reduce:transition-none"
         d="M8 3.9v5.6M5.6 7.3 8 9.7l2.4-2.4"
         pathLength="1"
         fill="none"
@@ -73,7 +73,7 @@
         stroke-linejoin="round"
       />
       <path
-        class="cw-status-check"
+        class="cw-status-check stroke-background [stroke-dasharray:7.1] [stroke-dashoffset:7.1px] [transition:stroke-dashoffset_300ms_var(--ease-snap)] group-data-[status=done]/status:[stroke-dashoffset:0] group-data-[status=done]/status:[transition-delay:180ms] motion-reduce:transition-none"
         d="M5.5 8.5 7 10l3.5-3.5"
         fill="none"
         stroke-width="1.84"
@@ -81,21 +81,21 @@
         stroke-linejoin="round"
       />
       <path
-        class="cw-status-x"
+        class="cw-status-x stroke-background [stroke-dasharray:6.37] [stroke-dashoffset:6.37px] [transition:stroke-dashoffset_240ms_var(--ease-snap)] group-data-[status=cancelled]/status:[stroke-dashoffset:0] group-data-[status=cancelled]/status:[transition-delay:180ms] motion-reduce:transition-none"
         d="M5.75 5.75 10.25 10.25"
         fill="none"
         stroke-width="1.84"
         stroke-linecap="round"
       />
       <path
-        class="cw-status-x"
+        class="cw-status-x stroke-background [stroke-dasharray:6.37] [stroke-dashoffset:6.37px] [transition:stroke-dashoffset_240ms_var(--ease-snap)] group-data-[status=cancelled]/status:[stroke-dashoffset:0] group-data-[status=cancelled]/status:[transition-delay:260ms] motion-reduce:transition-none"
         d="M10.25 5.75 5.75 10.25"
         fill="none"
         stroke-width="1.84"
         stroke-linecap="round"
       />
       <path
-        class="cw-status-bar"
+        class="cw-status-bar [stroke-dasharray:10.02] [stroke-dashoffset:10.02px] [transition:stroke-dashoffset_320ms_var(--ease-snap)] group-data-[status=blocked]/status:[stroke-dashoffset:0] group-data-[status=blocked]/status:[transition-delay:120ms] motion-reduce:transition-none"
         d="M4.46 4.46 11.54 11.54"
         fill="none"
         stroke="currentColor"
@@ -109,11 +109,11 @@
     viewBox="0 0 16 16"
     aria-hidden="true"
     focusable="false"
-    class="cw-status block size-full"
+    class="cw-status block size-full overflow-visible [transition:color_300ms_var(--ease-snap)] motion-reduce:transition-none"
     [class]="tone()"
   >
     <circle
-      class="cw-status-ring"
+      class="cw-status-ring [stroke-dasharray:4.9087_0] [transform-box:fill-box] [transform-origin:50%] [transform:rotate(0deg)] [transition:stroke-dasharray_450ms_var(--ease-snap),transform_600ms_var(--ease-spring),opacity_200ms_var(--ease-snap)] group-data-[status=todo]/status:[stroke-dasharray:3.1_1.8087] group-data-[status=todo]/status:[transform:rotate(-90deg)] group-data-[status=backlog]/status:[stroke-dasharray:0.01_3.2625] group-data-[status=backlog]/status:[transform:rotate(-180deg)] group-data-[status=triage]/status:[stroke-dasharray:7_2.8175] group-data-[status=triage]/status:[transform:rotate(-77deg)] group-data-[status=done]/status:opacity-0 group-data-[status=done]/status:[transition-delay:0s,0s,120ms] group-data-[status=cancelled]/status:opacity-0 group-data-[status=cancelled]/status:[transition-delay:0s,0s,120ms] motion-reduce:transition-none"
       cx="8"
       cy="8"
       r="6.25"
@@ -123,7 +123,7 @@
       stroke-linecap="round"
     />
     <circle
-      class="cw-status-pie"
+      class="cw-status-pie [stroke-dasharray:0_11] [transition:stroke-dasharray_500ms_var(--ease-spring)] group-data-[status=progress]/status:[stroke-dasharray:5.4978_11] group-data-[status=review]/status:[stroke-dasharray:8.2467_11] group-data-[status=testing]/status:[stroke-dasharray:11_11] group-data-[status=done]/status:[stroke-dasharray:11_11] group-data-[status=cancelled]/status:[stroke-dasharray:11_11] motion-reduce:transition-none"
       cx="8"
       cy="8"
       r="1.75"
@@ -133,7 +133,7 @@
       transform="rotate(-90 8 8)"
     />
     <path
-      class="cw-status-wait"
+      class="cw-status-wait [stroke-dasharray:1] [stroke-dashoffset:1px] [transition:stroke-dashoffset_360ms_var(--ease-snap)] group-data-[status=waiting]/status:[stroke-dashoffset:0] group-data-[status=waiting]/status:[transition-delay:140ms] motion-reduce:transition-none"
       d="M8 4.6V8l2.3 1.5"
       pathLength="1"
       fill="none"
@@ -143,7 +143,7 @@
       stroke-linejoin="round"
     />
     <path
-      class="cw-status-in"
+      class="cw-status-in [stroke-dasharray:1] [stroke-dashoffset:1px] [transition:stroke-dashoffset_340ms_var(--ease-snap)] group-data-[status=triage]/status:[stroke-dashoffset:0] group-data-[status=triage]/status:[transition-delay:140ms] motion-reduce:transition-none"
       d="M8 3.9v5.6M5.6 7.3 8 9.7l2.4-2.4"
       pathLength="1"
       fill="none"
@@ -152,9 +152,15 @@
       stroke-linecap="round"
       stroke-linejoin="round"
     />
-    <circle class="cw-status-disc" cx="8" cy="8" r="6.5" fill="currentColor" />
+    <circle
+      class="cw-status-disc [transform-box:fill-box] [transform-origin:50%] [transform:scale(0)] [transition:transform_420ms_var(--ease-spring)] group-data-[status=done]/status:[transform:scale(1)] group-data-[status=cancelled]/status:[transform:scale(1)] motion-reduce:transition-none"
+      cx="8"
+      cy="8"
+      r="6.5"
+      fill="currentColor"
+    />
     <path
-      class="cw-status-check"
+      class="cw-status-check stroke-background [stroke-dasharray:7.1] [stroke-dashoffset:7.1px] [transition:stroke-dashoffset_300ms_var(--ease-snap)] group-data-[status=done]/status:[stroke-dashoffset:0] group-data-[status=done]/status:[transition-delay:180ms] motion-reduce:transition-none"
       d="M5.5 8.5 7 10l3.5-3.5"
       fill="none"
       stroke-width="1.5"
@@ -162,21 +168,21 @@
       stroke-linejoin="round"
     />
     <path
-      class="cw-status-x"
+      class="cw-status-x stroke-background [stroke-dasharray:6.37] [stroke-dashoffset:6.37px] [transition:stroke-dashoffset_240ms_var(--ease-snap)] group-data-[status=cancelled]/status:[stroke-dashoffset:0] group-data-[status=cancelled]/status:[transition-delay:180ms] motion-reduce:transition-none"
       d="M5.75 5.75 10.25 10.25"
       fill="none"
       stroke-width="1.5"
       stroke-linecap="round"
     />
     <path
-      class="cw-status-x"
+      class="cw-status-x stroke-background [stroke-dasharray:6.37] [stroke-dashoffset:6.37px] [transition:stroke-dashoffset_240ms_var(--ease-snap)] group-data-[status=cancelled]/status:[stroke-dashoffset:0] group-data-[status=cancelled]/status:[transition-delay:260ms] motion-reduce:transition-none"
       d="M10.25 5.75 5.75 10.25"
       fill="none"
       stroke-width="1.5"
       stroke-linecap="round"
     />
     <path
-      class="cw-status-bar"
+      class="cw-status-bar [stroke-dasharray:10.02] [stroke-dashoffset:10.02px] [transition:stroke-dashoffset_320ms_var(--ease-snap)] group-data-[status=blocked]/status:[stroke-dashoffset:0] group-data-[status=blocked]/status:[transition-delay:120ms] motion-reduce:transition-none"
       d="M4.46 4.46 11.54 11.54"
       fill="none"
       stroke="currentColor"

@@ -1,6 +1,9 @@
 import { Component } from '@angular/core';
 
 /**
+ * Component CwSelectSeparator
+ *
+ * @description
  * A 1 px line between two groups of a `cw-select`, edge to edge of the panel (Select sheet of the
  * Design System artifact).
  *

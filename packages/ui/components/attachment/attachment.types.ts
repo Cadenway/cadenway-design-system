@@ -1,43 +1,203 @@
-/** What an attachment is: an image, a PDF, another file, or a link; sets its media and main action. */
+/**
+ * Type CwAttachmentType
+ *
+ * @description
+ * What an attachment is: an image, a PDF, another file, or a link; sets its media and main action.
+ *
+ * @type {'image' | 'pdf' | 'file' | 'link'}
+ */
 export type CwAttachmentType = 'image' | 'pdf' | 'file' | 'link';
 
-/** Upload state of an attachment, mirrored on `data-state`. */
+/**
+ * Type CwAttachmentState
+ *
+ * @description
+ * Upload state of an attachment, mirrored on `data-state`.
+ *
+ * @type {'done' | 'uploading' | 'processing' | 'error'}
+ */
 export type CwAttachmentState = 'done' | 'uploading' | 'processing' | 'error';
 
-/** A card (`default`, 58 px) or a compact chip (`sm`, 28 px, composer and form fields). */
+/**
+ * Type CwAttachmentSize
+ *
+ * @description
+ * A card (`default`, 58 px) or a compact chip (`sm`, 28 px, composer and form fields).
+ *
+ * @type {'default' | 'sm'}
+ */
 export type CwAttachmentSize = 'default' | 'sm';
 
-/** A horizontal card or chip, or a `vertical` thumbnail (144 px wide, 4:3 preview). */
+/**
+ * Type CwAttachmentOrientation
+ *
+ * @description
+ * A horizontal card or chip, or a `vertical` thumbnail (144 px wide, 4:3 preview).
+ *
+ * @type {'horizontal' | 'vertical'}
+ */
 export type CwAttachmentOrientation = 'horizontal' | 'vertical';
 
-/** The French texts of an attachment; each one can be replaced through the `labels` input. */
+/**
+ * Interface CwAttachmentLabels
+ *
+ * @description
+ * The French texts of an attachment; each one can be replaced through the `labels` input.
+ */
 export interface CwAttachmentLabels {
-  /** Type word of an image on the second line (« 312 Ko · Image »). */
+  // #region Properties
+  /**
+   * Property image
+   * @readonly
+   *
+   * @description
+   * Type word of an image on the second line (« 312 Ko · Image »).
+   *
+   * @type {string}
+   */
   readonly image: string;
-  /** Type word of a file without extension. */
+
+  /**
+   * Property file
+   * @readonly
+   *
+   * @description
+   * Type word of a file without extension.
+   *
+   * @type {string}
+   */
   readonly file: string;
-  /** Accessible name of the download action, before the name. */
+
+  /**
+   * Property download
+   * @readonly
+   *
+   * @description
+   * Accessible name of the download action, before the name.
+   *
+   * @type {string}
+   */
   readonly download: string;
-  /** Accessible name of the open action of a link, before the name. */
+
+  /**
+   * Property open
+   * @readonly
+   *
+   * @description
+   * Accessible name of the open action of a link, before the name.
+   *
+   * @type {string}
+   */
   readonly open: string;
-  /** Accessible name of the retry action, before the name. */
+
+  /**
+   * Property retry
+   * @readonly
+   *
+   * @description
+   * Accessible name of the retry action, before the name.
+   *
+   * @type {string}
+   */
   readonly retry: string;
-  /** Accessible name of the cancel action, before the name. */
+
+  /**
+   * Property cancel
+   * @readonly
+   *
+   * @description
+   * Accessible name of the cancel action, before the name.
+   *
+   * @type {string}
+   */
   readonly cancel: string;
-  /** Accessible name of the progress bar, before the name. */
+
+  /**
+   * Property progress
+   * @readonly
+   *
+   * @description
+   * Accessible name of the progress bar, before the name.
+   *
+   * @type {string}
+   */
   readonly progress: string;
-  /** Second line while the preview is generated. */
+
+  /**
+   * Property processing
+   * @readonly
+   *
+   * @description
+   * Second line while the preview is generated.
+   *
+   * @type {string}
+   */
   readonly processing: string;
-  /** Shorter second line while processing, on a compact chip. */
+
+  /**
+   * Property processingShort
+   * @readonly
+   *
+   * @description
+   * Shorter second line while processing, on a compact chip.
+   *
+   * @type {string}
+   */
   readonly processingShort: string;
-  /** Second line of a thumbnail while uploading, before the percentage. */
+
+  /**
+   * Property uploading
+   * @readonly
+   *
+   * @description
+   * Second line of a thumbnail while uploading, before the percentage.
+   *
+   * @type {string}
+   */
   readonly uploading: string;
-  /** Second line of a failed compact chip. */
+
+  /**
+   * Property failed
+   * @readonly
+   *
+   * @description
+   * Second line of a failed compact chip.
+   *
+   * @type {string}
+   */
   readonly failed: string;
-  /** Accessible name of the spinner while uploading. */
+
+  /**
+   * Property sending
+   * @readonly
+   *
+   * @description
+   * Accessible name of the spinner while uploading.
+   *
+   * @type {string}
+   */
   readonly sending: string;
-  /** Accessible name of the spinner while processing. */
+
+  /**
+   * Property working
+   * @readonly
+   *
+   * @description
+   * Accessible name of the spinner while processing.
+   *
+   * @type {string}
+   */
   readonly working: string;
-  /** Announced when the upload ends, after the name. */
+
+  /**
+   * Property done
+   * @readonly
+   *
+   * @description
+   * Announced when the upload ends, after the name.
+   *
+   * @type {string}
+   */
   readonly done: string;
+  // #endregion
 }

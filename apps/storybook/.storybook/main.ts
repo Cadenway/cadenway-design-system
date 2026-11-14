@@ -15,7 +15,6 @@ const config: StorybookConfig = {
   },
   stories: [
     '../src/**/*.stories.ts',
-    '../../../packages/*/src/**/*.stories.ts',
     // One folder per brick of @cadenway/ui (`packages/ui/components/<brick>/`).
     '../../../packages/ui/components/*/**/*.stories.ts',
   ],
@@ -57,6 +56,39 @@ const config: StorybookConfig = {
         '@ng-icons/phosphor-icons/bold',
         '@ng-icons/phosphor-icons/fill',
       ],
+    },
+    build: {
+      ...viteConfig.build,
+      // Storybook's preview runtime and axe are each distributed as a single large module.
+      // The budget remains below the original 1.68 MB preview chunk after vendor splitting.
+      chunkSizeWarningLimit: 850,
+      rolldownOptions: {
+        ...viteConfig.build?.rolldownOptions,
+        output: {
+          codeSplitting: {
+            groups: [
+              {
+                name: 'accessibility',
+                test: /node_modules[\\/](?:\.pnpm[\\/]axe-core@[^\\/]+[\\/]node_modules[\\/])?axe-core/,
+                priority: 30,
+              },
+              {
+                name: 'angular',
+                test: /node_modules[\\/]@angular[\\/]/,
+                priority: 20,
+                maxSize: 300_000,
+              },
+              {
+                name: 'storybook',
+                test: /node_modules[\\/](?:@storybook[\\/]|storybook[\\/])/,
+                priority: 10,
+                maxSize: 300_000,
+              },
+              { name: 'vendor', test: /node_modules/, maxSize: 300_000 },
+            ],
+          },
+        },
+      },
     },
   }),
 };

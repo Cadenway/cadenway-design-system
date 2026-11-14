@@ -46,9 +46,14 @@ import { CwSidebar } from './sidebar.component';
 import type { CwSidebarCollapsible, CwSidebarState } from './sidebar.types';
 
 /**
- * Sidebar, every state of its sheet in the Design System artifact, in the light and the dark theme.
+ * Constant meta
+ *
+ * @description
+ * Sidebar states from the design system sheet in light and dark themes.
  * Content and copy from the sheet's preview and the mockup (`App.dc.html`, « Navigation des
  * espaces »): the spaces, lists, counts and account are the consumer's, the brick knows none.
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Sidebar',
@@ -101,17 +106,43 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration for sidebar examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Finds the light theme section of the story canvas.
+ *
+ * @param {HTMLElement} canvasElement - Canvas containing the themed examples.
+ * @returns {HTMLElement} Light theme section.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
 /* The consumer's controls in the header and the footer: full in the expanded sidebar, icon-only
    in the rail (the consumer owns the state). */
-const HEADER = `
+/**
+ * Constant HEADER
+ *
+ * @description
+ * Header markup shared by the sidebar examples.
+ *
+ * @type {string}
+ */
+const HEADER: string = `
   <cw-sidebar-header>
     @if (sb.rail()) {
       <button cwButton variant="ghost" size="icon" aria-label="Changer d'instance : Cadenway">
@@ -136,7 +167,15 @@ const HEADER = `
     }
   </cw-sidebar-header>`;
 
-const NAVIGATION = `
+/**
+ * Constant NAVIGATION
+ *
+ * @description
+ * Navigation groups and spaces shared by the sidebar examples.
+ *
+ * @type {string}
+ */
+const NAVIGATION: string = `
   <cw-sidebar-group>
     <a cwSidebarItem href="#" icon="phosphorHouseBold" (click)="$event.preventDefault()">Accueil</a>
     <a cwSidebarItem href="#" icon="phosphorTrayBold" [count]="3" countLabel="3 non lus" (click)="$event.preventDefault()">Boîte de réception</a>
@@ -162,7 +201,15 @@ const NAVIGATION = `
     </cw-sidebar-space>
   </cw-sidebar-group>`;
 
-const FOOTER = `
+/**
+ * Constant FOOTER
+ *
+ * @description
+ * Progress and account markup shared by the sidebar examples.
+ *
+ * @type {string}
+ */
+const FOOTER: string = `
   <cw-sidebar-footer>
     @if (sb.rail()) {
       <button cwButton variant="ghost" size="icon" aria-haspopup="menu"><cw-avatar name="Léa Martin" size="sm" /></button>
@@ -182,6 +229,16 @@ const FOOTER = `
 
 /* The sidebar next to its content, in a 528 px frame (the preview's). The landmark names differ
    per theme: the stories render every copy twice on one page. */
+/**
+ * Function frame
+ *
+ * @description
+ * Builds a sidebar beside its content in the example frame.
+ *
+ * @param {CwSidebarState} state - Initial sidebar state.
+ * @param {CwSidebarCollapsible} collapsible - Collapse behavior, defaulting to the icon rail.
+ * @returns {string} Angular template for the framed example.
+ */
 function frame(state: CwSidebarState, collapsible: CwSidebarCollapsible = 'icon'): string {
   return `
     <div class="relative flex h-[528px] w-full max-w-xl overflow-hidden rounded-lg border">
@@ -212,10 +269,12 @@ export const Expanded: Story = {
 /** Collapsed to the icon rail: icons only, a tooltip on hover and focus, the count as a dot. */
 export const Collapsed: Story = {
   render: () => ({ template: frame('collapsed') }),
-  play: async ({ canvasElement }) => {
-    const scope = light(canvasElement);
-    const inbox = within(scope).getByRole('link', { name: 'Boîte de réception, 3 non lus' });
-    const home = within(scope).getByRole('link', { name: 'Accueil' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: HTMLElement = light(canvasElement);
+    const inbox: HTMLElement = within(scope).getByRole('link', {
+      name: 'Boîte de réception, 3 non lus',
+    });
+    const home: HTMLElement = within(scope).getByRole('link', { name: 'Accueil' });
 
     home.focus();
     await userEvent.tab();
@@ -236,9 +295,12 @@ export const Offcanvas: Story = {
 /** → and ← open and close a space; Ctrl B folds the sidebar to its rail and back. */
 export const Keyboard: Story = {
   render: () => ({ template: frame('expanded') }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const marketing = scope.getByRole('button', { name: /Marketing/ });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options: { name: string | RegExp }) => HTMLElement;
+      queryByRole: (role: string, options: { name: string | RegExp }) => HTMLElement | null;
+    } = within(light(canvasElement));
+    const marketing: HTMLElement = scope.getByRole('button', { name: /Marketing/ });
 
     marketing.focus();
     await userEvent.keyboard('{ArrowRight}');

@@ -13,8 +13,13 @@ import { CwBannerActions } from './banner-actions/banner-actions.component';
 import { CwBanner } from './banner.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Banner, every state of its sheet in the Design System artifact, in the light and the dark theme.
  * Copy from the sheet's "Dans Cadenway" section (instance messages, archived copy, import).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Banner',
@@ -26,10 +31,31 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration used for banner examples and interactions.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Locates the light-theme copy rendered by the shared Storybook preview decorator.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the theme examples.
+ *
+ * @returns {HTMLElement} Element containing the light-theme example.
+ *
+ * @throws {Error} When the expected light-theme scope is missing.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -63,8 +89,11 @@ export const Tones: Story = {
         <cw-banner tone="neutral" icon="phosphorWrenchBold" title="Maintenance dimanche 15 nov., 02:00 – 03:00." description="L'instance sera en lecture seule." />
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getAllByRole(role: string): HTMLElement[];
+      getByRole(role: string): HTMLElement;
+    } = within(light(canvasElement));
     await expect(scope.getAllByRole('status')).toHaveLength(4);
     await expect(scope.getByRole('alert')).toHaveTextContent(
       'La sauvegarde de cette nuit a échoué.',
@@ -128,8 +157,12 @@ export const Dismiss: Story = {
         <p class="text-sm text-muted-foreground">{{ hidden }} bandeau(x) masqué(s)</p>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole(role: string, options?: { name?: string }): HTMLElement;
+      queryByRole(role: string): HTMLElement | null;
+      getByText(text: string): HTMLElement;
+    } = within(light(canvasElement));
     await userEvent.tab();
     await expect(scope.getByRole('button', { name: "Voir l'espace" })).toHaveFocus();
     await userEvent.tab();

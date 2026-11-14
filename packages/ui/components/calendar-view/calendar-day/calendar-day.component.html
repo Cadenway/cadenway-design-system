@@ -1,4 +1,3 @@
-<!-- The content of an item frame: the consumer's template, else its name. -->
 <ng-template #itemContent let-entry>
   @if (host.itemTemplate(); as template) {
     <ng-container [ngTemplateOutlet]="template" [ngTemplateOutletContext]="entry.context" />

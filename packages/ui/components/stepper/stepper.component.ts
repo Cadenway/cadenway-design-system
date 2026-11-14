@@ -20,6 +20,11 @@ import {
   signal,
   viewChild,
   viewChildren,
+  type InputSignal,
+  type InputSignalWithTransform,
+  type ModelSignal,
+  type Signal,
+  type WritableSignal,
 } from '@angular/core';
 import { ɵnavigateList } from '@cadenway/ui/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -34,6 +39,14 @@ import type {
   CwStepperSize,
 } from './stepper.types';
 
+/**
+ * Constant LABELS
+ *
+ * @description
+ * Default French stepper labels and state words.
+ *
+ * @type {CwStepperLabels}
+ */
 const LABELS: CwStepperLabels = {
   step: 'étape',
   done: 'terminée',
@@ -46,23 +59,63 @@ const LABELS: CwStepperLabels = {
 };
 
 /* Literal class strings (Stepper sheet and preview of the Design System artifact). */
+/**
+ * Constant LIST
+ *
+ * @description
+ * List layout classes for each orientation and compact size.
+ *
+ * @type {Record<CwStepperOrientation | 'sm', string>}
+ */
 const LIST: Record<CwStepperOrientation | 'sm', string> = {
   horizontal: 'flex w-full flex-wrap items-center gap-x-1 gap-y-2',
   sm: 'flex w-full flex-wrap items-center gap-x-0.5 gap-y-2',
   vertical: 'grid',
 };
 
+/**
+ * Constant ROW
+ *
+ * @description
+ * Step row classes for each size.
+ *
+ * @type {Record<CwStepperSize, string>}
+ */
 const ROW: Record<CwStepperSize, string> = {
   default: 'flex items-center gap-2 rounded-md px-1.5 py-1',
   sm: 'flex items-center gap-1.5 rounded-md px-1.5 py-1',
 };
 
-const FOCUS =
+/**
+ * Constant FOCUS
+ *
+ * @description
+ * Visible keyboard focus ring classes.
+ *
+ * @type {string}
+ */
+const FOCUS: string =
   'outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background';
 
 /* A done step is a button: the hover veil, never a border that appears. */
-const BUTTON = `transition-colors motion-reduce:transition-none hover:bg-accent ${FOCUS}`;
+/**
+ * Constant BUTTON
+ *
+ * @description
+ * Interaction classes for a reachable step.
+ *
+ * @type {string}
+ */
+const BUTTON: string = `transition-colors motion-reduce:transition-none hover:bg-accent ${FOCUS}`;
 
+/**
+ * Constant LABEL
+ *
+ * @description
+ * Text classes for each step state.
+ *
+ * @type {Record<CwStepState, string>}
+ */
 const LABEL: Record<CwStepState, string> = {
   done: 'text-foreground',
   current: 'font-medium text-foreground',
@@ -70,27 +123,123 @@ const LABEL: Record<CwStepState, string> = {
   error: 'font-medium text-destructive',
 };
 
+/**
+ * Constant TEXT
+ *
+ * @description
+ * Text size classes for each layout.
+ *
+ * @type {Record<CwStepperSize | 'vertical', string>}
+ */
 const TEXT: Record<CwStepperSize | 'vertical', string> = {
   default: 'text-sm whitespace-nowrap',
   sm: 'text-xs whitespace-nowrap',
   vertical: 'text-sm leading-5',
 };
 
-/** What the template draws for one step. */
+/**
+ * Interface StepView
+ *
+ * @description
+ * Display state and accessible text for a step.
+ */
 interface StepView {
+  // #region Properties
+  /**
+   * Property step
+   * @readonly
+   *
+   * @description
+   * Step represented by the view.
+   *
+   * @type {CwStep}
+   */
   readonly step: CwStep;
+
+  /**
+   * Property index
+   * @readonly
+   *
+   * @description
+   * Zero-based step position.
+   *
+   * @type {number}
+   */
   readonly index: number;
+
+  /**
+   * Property state
+   * @readonly
+   *
+   * @description
+   * Current visual state.
+   *
+   * @type {CwStepState}
+   */
   readonly state: CwStepState;
-  /** A button: the user can go to the step from here. */
+
+  /**
+   * Property reachable
+   * @readonly
+   *
+   * @description
+   * Whether the user can navigate to this step.
+   *
+   * @type {boolean}
+   */
   readonly reachable: boolean;
-  /** The connector after the step is crossed (`bg-track`), else `bg-border`. */
+
+  /**
+   * Property crossed
+   * @readonly
+   *
+   * @description
+   * Whether the connector after this step is crossed.
+   *
+   * @type {boolean}
+   */
   readonly crossed: boolean;
+
+  /**
+   * Property labelId
+   * @readonly
+   *
+   * @description
+   * Identifier of the step label.
+   *
+   * @type {string}
+   */
   readonly labelId: string;
+
+  /**
+   * Property labelClasses
+   * @readonly
+   *
+   * @description
+   * Visual classes for the step label.
+   *
+   * @type {string}
+   */
   readonly labelClasses: string;
+
+  /**
+   * Property hiddenState
+   * @readonly
+   *
+   * @description
+   * Accessible state text following the label.
+   *
+   * @type {string}
+   */
   readonly hiddenState: string;
+  // #endregion
 }
 
 /**
+ * Class CwStepper
+ * @class CwStepper
+ *
+ * @description
  * The progress through a journey in steps: where one is, what is done, what is left; first
  * installation, JSON import, a long form (Stepper sheet of the Design System artifact). Three to
  * six steps, written as `cw-step` children.
@@ -126,67 +275,324 @@ interface StepView {
   templateUrl: './stepper.component.html',
 })
 export class CwStepper {
-  /** One row or one column. */
-  readonly orientation = input<CwStepperOrientation>('horizontal');
-  /** Size of the indicators and labels; `sm` applies to a horizontal stepper only. */
-  readonly size = input<CwStepperSize>('default');
-  /** Index of the current step, from 0; `[(selected)]`. */
-  readonly selected = model(0);
-  /** Forbids moving forward from an invalid step and clicking a step to come. */
-  readonly linear = input(true, { transform: booleanAttribute });
-  /** Accessible name of the list of steps. */
-  readonly ariaLabel = input('Progression');
-  /** Hidden states, « (optionnelle) » and « Étape 3 sur 5 », French by default. */
-  readonly labels = input<Partial<CwStepperLabels>>({});
+  // #region Properties
+  /**
+   * Property orientation
+   * @readonly
+   *
+   * @description
+   * One row or one column.
+   *
+   * @type {InputSignal<CwStepperOrientation>}
+   */
+  public readonly orientation: InputSignal<CwStepperOrientation> =
+    input<CwStepperOrientation>('horizontal');
 
-  private readonly steps = contentChildren(CwStep);
-  private readonly announcer = inject(LiveAnnouncer);
-  private readonly injector = inject(Injector);
-  private readonly directionality = inject(Directionality, { optional: true });
-  private readonly baseId = inject(_IdGenerator).getId('cw-stepper-');
+  /**
+   * Property size
+   * @readonly
+   *
+   * @description
+   * Size of the indicators and labels; `sm` applies to a horizontal stepper only.
+   *
+   * @type {InputSignal<CwStepperSize>}
+   */
+  public readonly size: InputSignal<CwStepperSize> = input<CwStepperSize>('default');
 
-  /* Steps the user moved past: an unset `completed` counts them as done. */
-  private readonly passed = signal<ReadonlySet<CwStep>>(new Set());
+  /**
+   * Property selected
+   * @readonly
+   *
+   * @description
+   * Index of the current step, from 0; `[(selected)]`.
+   *
+   * @type {ModelSignal<number>}
+   */
+  public readonly selected: ModelSignal<number> = model(0);
 
-  private readonly buttons = viewChildren<string, ElementRef<HTMLButtonElement>>('stepButton', {
+  /**
+   * Property linear
+   * @readonly
+   *
+   * @description
+   * Forbids moving forward from an invalid step and clicking a step to come.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   */
+  public readonly linear: InputSignalWithTransform<boolean, unknown> = input(true, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property ariaLabel
+   * @readonly
+   *
+   * @description
+   * Accessible name of the list of steps.
+   *
+   * @type {InputSignal<string>}
+   */
+  public readonly ariaLabel: InputSignal<string> = input('Progression');
+
+  /**
+   * Property labels
+   * @readonly
+   *
+   * @description
+   * Hidden states, « (optionnelle) » and « Étape 3 sur 5 », French by default.
+   *
+   * @type {InputSignal<Partial<CwStepperLabels>>}
+   */
+  public readonly labels: InputSignal<Partial<CwStepperLabels>> = input<Partial<CwStepperLabels>>(
+    {},
+  );
+
+  /**
+   * Property steps
+   * @readonly
+   *
+   * @description
+   * Projected steps in content order.
+   *
+   * @type {Signal<readonly CwStep[]>}
+   */
+  private readonly steps: Signal<readonly CwStep[]> = contentChildren(CwStep);
+
+  /**
+   * Property announcer
+   * @readonly
+   *
+   * @description
+   * Announcer for step changes.
+   *
+   * @type {LiveAnnouncer}
+   */
+  private readonly announcer: LiveAnnouncer = inject(LiveAnnouncer);
+
+  /**
+   * Property injector
+   * @readonly
+   *
+   * @description
+   * Injector used to schedule focus after rendering.
+   *
+   * @type {Injector}
+   */
+  private readonly injector: Injector = inject(Injector);
+
+  /**
+   * Property directionality
+   * @readonly
+   *
+   * @description
+   * Optional writing direction for arrow navigation.
+   *
+   * @type {Directionality | null}
+   */
+  private readonly directionality: Directionality | null = inject(Directionality, {
+    optional: true,
+  });
+
+  /**
+   * Property baseId
+   * @readonly
+   *
+   * @description
+   * Unique prefix for step label identifiers.
+   *
+   * @type {string}
+   */
+  private readonly baseId: string = inject(_IdGenerator).getId('cw-stepper-');
+
+  /**
+   * Property passed
+   * @readonly
+   *
+   * @description
+   * Steps already passed, used when completion is not explicit.
+   *
+   * @type {WritableSignal<ReadonlySet<CwStep>>}
+   */
+  private readonly passed: WritableSignal<ReadonlySet<CwStep>> = signal<ReadonlySet<CwStep>>(
+    new Set(),
+  );
+
+  /**
+   * Property buttons
+   * @readonly
+   *
+   * @description
+   * Reachable step buttons in the view.
+   *
+   * @type {Signal<readonly ElementRef<HTMLButtonElement>[]>}
+   */
+  private readonly buttons: Signal<readonly ElementRef<HTMLButtonElement>[]> = viewChildren<
+    string,
+    ElementRef<HTMLButtonElement>
+  >('stepButton', {
     read: ElementRef,
   });
-  private readonly panel = viewChild<string, ElementRef<HTMLElement>>('panel', {
+
+  /**
+   * Property panel
+   * @readonly
+   *
+   * @description
+   * Current content panel, when rendered.
+   *
+   * @type {Signal<ElementRef<HTMLElement> | undefined>}
+   */
+  private readonly panel: Signal<ElementRef<HTMLElement> | undefined> = viewChild<
+    string,
+    ElementRef<HTMLElement>
+  >('panel', {
     read: ElementRef,
   });
-  private readonly options = computed<FocusableOption[]>(() =>
+
+  /**
+   * Property options
+   * @readonly
+   *
+   * @description
+   * Focusable options for the reachable step buttons.
+   *
+   * @type {Signal<FocusableOption[]>}
+   */
+  private readonly options: Signal<FocusableOption[]> = computed<FocusableOption[]>(() =>
     this.buttons().map((button) => ({
       focus: () => {
         button.nativeElement.focus();
       },
     })),
   );
-  private readonly keyManager = new FocusKeyManager(this.options, this.injector);
 
-  protected readonly text = computed(() => ({ ...LABELS, ...this.labels() }));
-  protected readonly vertical = computed(() => this.orientation() === 'vertical');
-  protected readonly effectiveSize = computed<CwStepperSize>(() =>
+  /**
+   * Property keyManager
+   * @readonly
+   *
+   * @description
+   * Keyboard manager for reachable step buttons.
+   *
+   * @type {FocusKeyManager<FocusableOption>}
+   */
+  private readonly keyManager: FocusKeyManager<FocusableOption> =
+    new FocusKeyManager<FocusableOption>(this.options, this.injector);
+
+  /**
+   * Property text
+   * @readonly
+   *
+   * @description
+   * Default labels merged with consumer overrides.
+   *
+   * @type {Signal<CwStepperLabels>}
+   */
+  protected readonly text: Signal<CwStepperLabels> = computed(() => ({
+    ...LABELS,
+    ...this.labels(),
+  }));
+
+  /**
+   * Property vertical
+   * @readonly
+   *
+   * @description
+   * Whether the stepper uses a vertical layout.
+   *
+   * @type {Signal<boolean>}
+   */
+  protected readonly vertical: Signal<boolean> = computed(() => this.orientation() === 'vertical');
+
+  /**
+   * Property effectiveSize
+   * @readonly
+   *
+   * @description
+   * Size adjusted for the current orientation.
+   *
+   * @type {Signal<CwStepperSize>}
+   */
+  protected readonly effectiveSize: Signal<CwStepperSize> = computed<CwStepperSize>(() =>
     this.vertical() ? 'default' : this.size(),
   );
-  protected readonly listClasses = computed(() =>
+
+  /**
+   * Property listClasses
+   * @readonly
+   *
+   * @description
+   * List layout classes for the current orientation.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly listClasses: Signal<string> = computed(() =>
     this.vertical() ? LIST.vertical : this.effectiveSize() === 'sm' ? LIST.sm : LIST.horizontal,
   );
-  protected readonly rowClasses = computed(() => ROW[this.effectiveSize()]);
-  protected readonly buttonClasses = computed(() => `${ROW[this.effectiveSize()]} ${BUTTON}`);
-  protected readonly verticalButtonClasses = `-mx-1.5 flex w-fit items-center gap-1.5 rounded-md px-1.5 ${BUTTON}`;
 
-  /** The current step, kept within the bounds. */
-  protected readonly current = computed(() =>
+  /**
+   * Property rowClasses
+   * @readonly
+   *
+   * @description
+   * Step row classes for the effective size.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly rowClasses: Signal<string> = computed(() => ROW[this.effectiveSize()]);
+
+  /**
+   * Property buttonClasses
+   * @readonly
+   *
+   * @description
+   * Reachable step button classes for the effective size.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly buttonClasses: Signal<string> = computed(
+    () => `${ROW[this.effectiveSize()]} ${BUTTON}`,
+  );
+
+  /**
+   * Property verticalButtonClasses
+   * @readonly
+   *
+   * @description
+   * Reachable vertical step button classes.
+   *
+   * @type {string}
+   */
+  protected readonly verticalButtonClasses: string = `-mx-1.5 flex w-fit items-center gap-1.5 rounded-md px-1.5 ${BUTTON}`;
+
+  /**
+   * Property current
+   * @readonly
+   *
+   * @description
+   * Selected index clamped to the step count.
+   *
+   * @type {Signal<number>}
+   */
+  protected readonly current: Signal<number> = computed(() =>
     Math.min(Math.max(0, Math.round(this.selected())), Math.max(0, this.steps().length - 1)),
   );
 
-  protected readonly views = computed<readonly StepView[]>(() => {
-    const steps = this.steps();
-    const current = this.current();
-    const text = this.text();
-    const sizeText = this.vertical() ? TEXT.vertical : TEXT[this.effectiveSize()];
+  /**
+   * Property views
+   * @readonly
+   *
+   * @description
+   * Display state and accessible text for each step.
+   *
+   * @type {Signal<readonly StepView[]>}
+   */
+  protected readonly views: Signal<readonly StepView[]> = computed<readonly StepView[]>(() => {
+    const steps: readonly CwStep[] = this.steps();
+    const current: number = this.current();
+    const text: CwStepperLabels = this.text();
+    const sizeText: string = this.vertical() ? TEXT.vertical : TEXT[this.effectiveSize()];
     return steps.map((step, index) => {
-      const state = this.stateOf(index);
+      const state: CwStepState = this.stateOf(index);
       return {
         step,
         index,
@@ -200,76 +606,191 @@ export class CwStepper {
     });
   });
 
-  protected readonly currentView = computed(() => this.views()[this.current()] ?? null);
-  protected readonly errors = computed(() => this.views().filter((view) => view.state === 'error'));
+  /**
+   * Property currentView
+   * @readonly
+   *
+   * @description
+   * Display state for the current step, when present.
+   *
+   * @type {Signal<StepView | null>}
+   */
+  protected readonly currentView: Signal<StepView | null> = computed(
+    () => this.views()[this.current()] ?? null,
+  );
 
-  protected readonly position = computed(
+  /**
+   * Property errors
+   * @readonly
+   *
+   * @description
+   * Views of steps currently reporting an error.
+   *
+   * @type {Signal<StepView[]>}
+   */
+  protected readonly errors: Signal<StepView[]> = computed(() =>
+    this.views().filter((view) => view.state === 'error'),
+  );
+
+  /**
+   * Property position
+   * @readonly
+   *
+   * @description
+   * Formatted position of the current step.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly position: Signal<string> = computed(
     () =>
       `${this.text().position} ${String(this.current() + 1)} ${this.text().of} ${String(this.steps().length)}`,
   );
+  // #endregion
 
-  /** Moves to the next step, unless the current one is invalid in a linear stepper. */
-  next(): void {
-    const current = this.current();
+  // #region Methods
+  /**
+   * Method next
+   * @method next
+   *
+   * @description
+   * Moves forward unless the current linear step is invalid.
+   */
+  public next(): void {
+    const current: number = this.current();
     if (current >= this.steps().length - 1) return;
     if (this.linear() && !this.isValid(current)) return;
     this.move(current + 1);
   }
 
-  /** Moves back to the previous step, if it is `editable`. */
-  previous(): void {
-    const current = this.current();
+  /**
+   * Method previous
+   * @method previous
+   *
+   * @description
+   * Moves back when the previous step is editable.
+   */
+  public previous(): void {
+    const current: number = this.current();
     if (current <= 0 || !this.steps()[current - 1].editable()) return;
     this.move(current - 1);
   }
 
-  /** Back to the first step; the steps passed count as not done again. */
-  reset(): void {
+  /**
+   * Method reset
+   * @method reset
+   *
+   * @description
+   * Returns to the first step and clears passed steps.
+   */
+  public reset(): void {
     this.passed.set(new Set());
     if (this.current() === 0) return;
     this.move(0);
   }
 
+  /**
+   * Method go
+   * @method go
+   *
+   * @description
+   * Moves to a reachable step.
+   *
+   * @param {number} index - Index of the requested step.
+   */
   protected go(index: number): void {
     if (this.canGo(index)) this.move(index);
   }
 
+  /**
+   * Method onKeydown
+   * @method onKeydown
+   *
+   * @description
+   * Moves focus between reachable step buttons using the keyboard.
+   *
+   * @param {KeyboardEvent} event - Keyboard event from a step button.
+   */
   protected onKeydown(event: KeyboardEvent): void {
-    const index = this.buttons().findIndex((button) => button.nativeElement === event.target);
+    const index: number = this.buttons().findIndex(
+      (button) => button.nativeElement === event.target,
+    );
     if (index === -1) return;
     this.keyManager.updateActiveItem(index);
-    const rtl = this.directionality?.value === 'rtl';
-    const orientation = this.vertical() ? 'vertical' : 'horizontal';
+    const rtl: boolean = this.directionality?.value === 'rtl';
+    const orientation: 'vertical' | 'horizontal' = this.vertical() ? 'vertical' : 'horizontal';
     if (ɵnavigateList(this.keyManager, event, orientation, rtl)) event.preventDefault();
   }
 
+  /**
+   * Method stateOf
+   * @method stateOf
+   *
+   * @description
+   * Returns the display state of a step.
+   *
+   * @param {number} index - Index of the step to inspect.
+   *
+   * @returns {CwStepState} Display state of the step.
+   */
   private stateOf(index: number): CwStepState {
-    const step = this.steps()[index];
+    const step: CwStep = this.steps()[index];
     if (step.error()) return 'error';
     if (index === this.current()) return 'current';
     return this.isCompleted(index) ? 'done' : 'todo';
   }
 
+  /**
+   * Method isCompleted
+   * @method isCompleted
+   *
+   * @description
+   * Determines whether a step is completed or has been passed.
+   *
+   * @param {number} index - Index of the step to inspect.
+   *
+   * @returns {boolean} Whether the step is complete or has been passed.
+   */
   private isCompleted(index: number): boolean {
-    const step = this.steps()[index];
+    const step: CwStep = this.steps()[index];
     return step.completed() ?? this.passed().has(step);
   }
 
-  /* Valid to move on from: optional, or without error and not marked `[completed]="false"`. */
+  /**
+   * Method isValid
+   * @method isValid
+   *
+   * @description
+   * Permits forward navigation for an optional step or one without an error or explicit incomplete state.
+   *
+   * @param {number} index - Index of the step to inspect.
+   *
+   * @returns {boolean} Whether forward navigation is permitted for the step.
+   */
   private isValid(index: number): boolean {
-    const step = this.steps()[index];
+    const step: CwStep = this.steps()[index];
     return step.optional() || (!step.error() && step.completed() !== false);
   }
 
+  /**
+   * Method canGo
+   * @method canGo
+   *
+   * @description
+   * Checks whether navigation to a step is permitted.
+   *
+   * @param {number} index - Index of the requested step.
+   *
+   * @returns {boolean} Whether navigation to the step is allowed.
+   */
   private canGo(index: number): boolean {
-    const current = this.current();
-    const steps = this.steps();
+    const current: number = this.current();
+    const steps: readonly CwStep[] = this.steps();
     if (index === current || index < 0 || index >= steps.length) return false;
     if (index < current) return steps[index].editable();
     if (!this.linear()) return true;
     // Sheet, "À éviter": no step clickable forward unless it was done already.
     if (!this.isValid(current) || !this.isCompleted(index)) return false;
-    for (let between = current + 1; between < index; between++) {
+    for (let between: number = current + 1; between < index; between++) {
       if (!steps[between].optional() && (!this.isCompleted(between) || steps[between].error())) {
         return false;
       }
@@ -277,22 +798,32 @@ export class CwStepper {
     return true;
   }
 
+  /**
+   * Method move
+   * @method move
+   *
+   * @description
+   * Changes the selected step, announces it and focuses its panel.
+   *
+   * @param {number} index - Index of the step to select.
+   */
   private move(index: number): void {
-    const current = this.current();
+    const current: number = this.current();
     if (index > current) {
-      const passed = new Set(this.passed());
+      const passed: Set<CwStep> = new Set<CwStep>(this.passed());
       for (const step of this.steps().slice(current, index)) passed.add(step);
       this.passed.set(passed);
     }
     this.selected.set(index);
-    const step = this.steps()[index];
+    const step: CwStep = this.steps()[index];
     void this.announcer.announce(`${this.position()} : ${step.label()}`, 'polite');
     // Sheet, "Accessibilité": the focus goes to the title of the new step's content.
     afterNextRender(
       () => {
-        const panel = this.panel()?.nativeElement;
+        const panel: HTMLElement | undefined = this.panel()?.nativeElement;
         if (!panel) return;
-        const heading = panel.querySelector<HTMLElement>('h1, h2, h3, h4, h5, h6');
+        const heading: HTMLElement | null =
+          panel.querySelector<HTMLElement>('h1, h2, h3, h4, h5, h6');
         if (heading) {
           // A heading is not focusable: `-1` lets the script focus it without a tab stop.
           if (!heading.hasAttribute('tabindex')) heading.tabIndex = -1;
@@ -304,4 +835,5 @@ export class CwStepper {
       { injector: this.injector },
     );
   }
+  // #endregion
 }

@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { CwMenu, CwMenuItem } from '@cadenway/ui/components/menu';
 import { CwMenuTriggerFor } from '@cadenway/ui/components/menu';
@@ -7,6 +7,13 @@ import { CwBreadcrumbLink } from './breadcrumb-link/breadcrumb-link.component';
 import { CwBreadcrumbPage } from './breadcrumb-page/breadcrumb-page.component';
 import { CwBreadcrumb } from './breadcrumb.component';
 
+/**
+ * Class Host
+ * @class Host
+ *
+ * @description
+ * Test host with standard, collapsible and menu-trigger breadcrumb trails.
+ */
 @Component({
   imports: [CwBreadcrumb, CwBreadcrumbLink, CwBreadcrumbPage, CwMenu, CwMenuItem, CwMenuTriggerFor],
   template: `
@@ -40,20 +47,78 @@ import { CwBreadcrumb } from './breadcrumb.component';
   `,
 })
 class Host {
-  readonly separator = signal<'chevron' | 'slash'>('chevron');
-  readonly deep = signal(true);
-  readonly opened = signal<string | null>(null);
+  // #region Properties
+  /**
+   * Property separator
+   * @readonly
+   *
+   * @description
+   * Separator style of the standard trail, changed by the separator test.
+   *
+   * @type {WritableSignal<'chevron' | 'slash'>}
+   * @default 'chevron'
+   */
+  public readonly separator: WritableSignal<'chevron' | 'slash'> = signal<'chevron' | 'slash'>(
+    'chevron',
+  );
+
+  /**
+   * Property deep
+   * @readonly
+   *
+   * @description
+   * Controls the extra level that makes the second trail collapse.
+   *
+   * @type {WritableSignal<boolean>}
+   * @default true
+   */
+  public readonly deep: WritableSignal<boolean> = signal(true);
+
+  /**
+   * Property opened
+   * @readonly
+   *
+   * @description
+   * Records the hidden task link selected through the ellipsis menu, or null before selection.
+   *
+   * @type {WritableSignal<string | null>}
+   * @default null
+   */
+  public readonly opened: WritableSignal<string | null> = signal<string | null>(null);
+  // #endregion
 }
 
+/**
+ * Function trail
+ *
+ * @description
+ * Finds a breadcrumb navigation in the test host by its accessible name.
+ *
+ * @param {HTMLElement} host - Container holding the trails.
+ * @param {string} name - Exact aria-label to match.
+ *
+ * @returns {HTMLElement} First matching navigation element.
+ *
+ * @throws {Error} When no trail has the requested name.
+ */
 function trail(host: HTMLElement, name: string): HTMLElement {
-  const found = Array.from(host.querySelectorAll<HTMLElement>('nav')).find(
+  const found: HTMLElement | undefined = Array.from(host.querySelectorAll<HTMLElement>('nav')).find(
     (nav) => nav.getAttribute('aria-label') === name,
   );
   if (!found) throw new Error(`No navigation named ${name}`);
   return found;
 }
 
-/** The levels a screen reader lists: the list items not hidden from it. */
+/**
+ * Function levels
+ *
+ * @description
+ * Reads the labels of breadcrumb list items that are not hidden from assistive technology.
+ *
+ * @param {HTMLElement} nav - Navigation element containing the breadcrumb list.
+ *
+ * @returns {string[]} Visible level names in list order.
+ */
 function levels(nav: HTMLElement): string[] {
   return Array.from(nav.querySelectorAll<HTMLElement>('ol > li'))
     .filter((li) => !li.hidden && li.getAttribute('aria-hidden') !== 'true')
@@ -80,7 +145,7 @@ describe('CwBreadcrumb', () => {
   });
 
   it('lays the levels out as an ordered list in a named navigation', () => {
-    const nav = trail(host, "Fil d'Ariane");
+    const nav: HTMLElement = trail(host, "Fil d'Ariane");
 
     expect(levels(nav)).toEqual(['Produit', 'Sprint 14', 'CAD-482']);
     expect(nav.querySelectorAll('ol > li[aria-hidden="true"]')).toHaveLength(2);
@@ -88,7 +153,9 @@ describe('CwBreadcrumb', () => {
   });
 
   it('marks the last level as the current page, which is not a link', () => {
-    const page = Array.from(trail(host, "Fil d'Ariane").querySelectorAll('[aria-current]'));
+    const page: Element[] = Array.from(
+      trail(host, "Fil d'Ariane").querySelectorAll('[aria-current]'),
+    );
 
     expect(page).toHaveLength(1);
     expect(page[0].getAttribute('aria-current')).toBe('page');
@@ -97,7 +164,7 @@ describe('CwBreadcrumb', () => {
   });
 
   it('switches to slash separators', async () => {
-    const nav = trail(host, "Fil d'Ariane");
+    const nav: HTMLElement = trail(host, "Fil d'Ariane");
     expect(nav.querySelector('ng-icon')).not.toBeNull();
 
     component.separator.set('slash');
@@ -112,10 +179,12 @@ describe('CwBreadcrumb', () => {
   });
 
   it('folds the middle levels past four into « … »', () => {
-    const nav = trail(host, "Fil d'Ariane de la sous-tâche");
+    const nav: HTMLElement = trail(host, "Fil d'Ariane de la sous-tâche");
 
     expect(levels(nav)).toEqual(['Produit', 'Niveaux masqués', 'CAD-488', 'Mapper les champs']);
-    const ellipsis = nav.querySelector<HTMLButtonElement>('button[aria-label="Niveaux masqués"]');
+    const ellipsis: HTMLButtonElement | null = nav.querySelector<HTMLButtonElement>(
+      'button[aria-label="Niveaux masqués"]',
+    );
     expect(ellipsis?.getAttribute('aria-haspopup')).toBe('menu');
     expect(ellipsis?.getAttribute('aria-expanded')).toBe('false');
   });
@@ -133,15 +202,19 @@ describe('CwBreadcrumb', () => {
   });
 
   it('opens the hidden levels in a menu and follows the chosen one', async () => {
-    const nav = trail(host, "Fil d'Ariane de la sous-tâche");
-    const ellipsis = nav.querySelector<HTMLButtonElement>('button[aria-label="Niveaux masqués"]');
+    const nav: HTMLElement = trail(host, "Fil d'Ariane de la sous-tâche");
+    const ellipsis: HTMLButtonElement | null = nav.querySelector<HTMLButtonElement>(
+      'button[aria-label="Niveaux masqués"]',
+    );
     ellipsis?.click();
     await fixture.whenStable();
 
-    const menu = document.querySelector<HTMLElement>('[role="menu"]');
+    const menu: HTMLElement | null = document.querySelector<HTMLElement>('[role="menu"]');
     expect(menu?.getAttribute('aria-labelledby')).toBe(ellipsis?.id);
     expect(ellipsis?.getAttribute('aria-expanded')).toBe('true');
-    const items = Array.from(menu?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? []);
+    const items: HTMLElement[] = Array.from(
+      menu?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? [],
+    );
     expect(items.map((item) => item.textContent.trim())).toEqual(['Sprint 14', 'Import JSON']);
 
     items[1].click();
@@ -153,7 +226,7 @@ describe('CwBreadcrumb', () => {
   });
 
   it('turns a button level into a menu trigger with a caret', () => {
-    const level = Array.from(
+    const level: HTMLButtonElement | undefined = Array.from(
       trail(host, "Fil d'Ariane avec niveau à menu").querySelectorAll<HTMLButtonElement>('button'),
     ).find((button) => button.textContent.trim() === 'Sprint 14');
 

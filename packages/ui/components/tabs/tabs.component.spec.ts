@@ -1,5 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
+import type { Mock } from 'vitest';
 
 import { CwTab } from './tab/tab.component';
 import { CwTabPanel } from './tab-panel/tab-panel.component';
@@ -8,28 +9,61 @@ import { CwTabsList } from './tabs-list/tabs-list.component';
 import { provideCwTabs } from './tabs.providers';
 import type { CwTabsActivation } from './tabs.types';
 
+/**
+ * Function byRole
+ *
+ * @description
+ * Finds an element by role and accessible name.
+ *
+ * @param {ParentNode} scope - Root containing candidate elements.
+ * @param {string} role - Role to match.
+ * @param {string} name - Accessible name to match.
+ *
+ * @returns {HTMLElement} Matching element.
+ */
 function byRole(scope: ParentNode, role: string, name: string): HTMLElement {
-  const found = Array.from(scope.querySelectorAll<HTMLElement>(`[role="${role}"]`)).find(
-    (element) => accessibleName(element) === name,
-  );
+  const found: HTMLElement | undefined = Array.from(
+    scope.querySelectorAll<HTMLElement>(`[role="${role}"]`),
+  ).find((element) => accessibleName(element) === name);
   if (!found) throw new Error(`No ${role} named ${name}`);
   return found;
 }
 
+/**
+ * Function link
+ *
+ * @description
+ * Finds an anchor by accessible name.
+ *
+ * @param {ParentNode} scope - Root containing links.
+ * @param {string} name - Accessible name to match.
+ *
+ * @returns {HTMLAnchorElement} Matching anchor.
+ */
 function link(scope: ParentNode, name: string): HTMLAnchorElement {
-  const found = Array.from(scope.querySelectorAll<HTMLAnchorElement>('a')).find(
-    (element) => accessibleName(element) === name,
-  );
+  const found: HTMLAnchorElement | undefined = Array.from(
+    scope.querySelectorAll<HTMLAnchorElement>('a'),
+  ).find((element) => accessibleName(element) === name);
   if (!found) throw new Error(`No link named ${name}`);
   return found;
 }
 
 /* Enough of the accessible name computation for these fixtures: `aria-label`, then
    `aria-labelledby`, then the text content. */
+/**
+ * Function accessibleName
+ *
+ * @description
+ * Computes the fixture accessible name from labels or text.
+ *
+ * @param {HTMLElement} element - Fixture element whose name is computed.
+ *
+ * @returns {string} Name derived from labels or text.
+ */
 function accessibleName(element: HTMLElement): string {
-  const label = element.getAttribute('aria-label');
+  const label: string | null = element.getAttribute('aria-label');
   if (label) return label;
-  const labelledBy = element.getAttribute('aria-labelledby');
+  const labelledBy: string | null = element.getAttribute('aria-labelledby');
   if (labelledBy) {
     return accessibleName(element.ownerDocument.getElementById(labelledBy) ?? element);
   }
@@ -37,6 +71,14 @@ function accessibleName(element: HTMLElement): string {
 }
 
 // The CDK key manager types read the legacy `keyCode` too; `ɵnavigateList` reads `key`.
+/**
+ * Constant KEY_CODES
+ *
+ * @description
+ * Key codes used by the CDK keyboard manager.
+ *
+ * @type {Record<string, number>}
+ */
 const KEY_CODES: Record<string, number> = {
   End: 35,
   Home: 36,
@@ -46,8 +88,19 @@ const KEY_CODES: Record<string, number> = {
   ArrowDown: 40,
 };
 
+/**
+ * Function press
+ *
+ * @description
+ * Dispatches a keyboard event with the CDK key code.
+ *
+ * @param {HTMLElement} target - Element receiving the keyboard event.
+ * @param {string} key - Keyboard key to dispatch.
+ *
+ * @returns {KeyboardEvent} Dispatched keyboard event.
+ */
 function press(target: HTMLElement, key: string): KeyboardEvent {
-  const event = new KeyboardEvent('keydown', {
+  const event: KeyboardEvent = new KeyboardEvent('keydown', {
     key,
     keyCode: KEY_CODES[key],
     bubbles: true,
@@ -57,6 +110,12 @@ function press(target: HTMLElement, key: string): KeyboardEvent {
   return event;
 }
 
+/**
+ * Class SectionsHost
+ *
+ * @description
+ * Hosts button tabs and their panels.
+ */
 @Component({
   imports: [CwTabs, CwTabsList, CwTab, CwTabPanel],
   template: `
@@ -75,10 +134,38 @@ function press(target: HTMLElement, key: string): KeyboardEvent {
   `,
 })
 class SectionsHost {
-  readonly section = signal('details');
-  readonly activation = signal<CwTabsActivation>('automatic');
+  // #region Properties
+  /**
+   * Property section
+   * @readonly
+   *
+   * @description
+   * Selected task section.
+   *
+   * @type {WritableSignal<string>}
+   */
+  public readonly section: WritableSignal<string> = signal('details');
+
+  /**
+   * Property activation
+   * @readonly
+   *
+   * @description
+   * Keyboard activation mode.
+   *
+   * @type {WritableSignal<CwTabsActivation>}
+   */
+  public readonly activation: WritableSignal<CwTabsActivation> =
+    signal<CwTabsActivation>('automatic');
+  // #endregion
 }
 
+/**
+ * Class DefaultsHost
+ *
+ * @description
+ * Hosts default and vertical tab sets.
+ */
 @Component({
   imports: [CwTabs, CwTabsList, CwTab],
   template: `
@@ -99,9 +186,26 @@ class SectionsHost {
   `,
 })
 class DefaultsHost {
-  readonly period = signal('');
+  // #region Properties
+  /**
+   * Property period
+   * @readonly
+   *
+   * @description
+   * Selected period.
+   *
+   * @type {WritableSignal<string>}
+   */
+  public readonly period: WritableSignal<string> = signal('');
+  // #endregion
 }
 
+/**
+ * Class LinksHost
+ *
+ * @description
+ * Hosts routed tabs and a disabled link.
+ */
 @Component({
   imports: [CwTabs, CwTabsList, CwTab],
   template: `
@@ -115,11 +219,48 @@ class DefaultsHost {
   `,
 })
 class LinksHost {
-  readonly view = signal('');
-  readonly route = signal('tableau');
-  readonly followed = signal(false);
+  // #region Properties
+  /**
+   * Property view
+   * @readonly
+   *
+   * @description
+   * Selected tab value.
+   *
+   * @type {WritableSignal<string>}
+   */
+  public readonly view: WritableSignal<string> = signal('');
+
+  /**
+   * Property route
+   * @readonly
+   *
+   * @description
+   * Active route used to control link state.
+   *
+   * @type {WritableSignal<string>}
+   */
+  public readonly route: WritableSignal<string> = signal('tableau');
+
+  /**
+   * Property followed
+   * @readonly
+   *
+   * @description
+   * Whether the disabled link was activated.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly followed: WritableSignal<boolean> = signal(false);
+  // #endregion
 }
 
+/**
+ * Class ProvidedHost
+ *
+ * @description
+ * Hosts tab sets with injected defaults and an explicit override.
+ */
 @Component({
   imports: [CwTabs, CwTabsList, CwTab],
   providers: [provideCwTabs({ variant: 'bar', size: 'sm' })],
@@ -150,15 +291,15 @@ describe('CwTabs', () => {
     });
 
     it('wires the tab list, the tabs and the panels', () => {
-      const list = byRole(host, 'tablist', 'Sections de la tâche');
+      const list: HTMLElement = byRole(host, 'tablist', 'Sections de la tâche');
       expect(list.getAttribute('aria-orientation')).toBe('horizontal');
-      const details = byRole(list, 'tab', 'Détails');
+      const details: HTMLElement = byRole(list, 'tab', 'Détails');
       expect(details.getAttribute('type')).toBe('button');
       expect(details.getAttribute('aria-selected')).toBe('true');
       expect(details.getAttribute('data-state')).toBe('active');
       expect(byRole(list, 'tab', 'Activité').getAttribute('aria-selected')).toBe('false');
 
-      const panel = byRole(host, 'tabpanel', 'Détails');
+      const panel: HTMLElement = byRole(host, 'tabpanel', 'Détails');
       expect(details.getAttribute('aria-controls')).toBe(panel.id);
       expect(panel.getAttribute('tabindex')).toBe('0');
       expect(panel.hidden).toBe(false);
@@ -170,7 +311,7 @@ describe('CwTabs', () => {
     });
 
     it('keeps one Tab stop, on the active tab', () => {
-      const tabs = Array.from(host.querySelectorAll<HTMLElement>('[role="tab"]'));
+      const tabs: HTMLElement[] = Array.from(host.querySelectorAll<HTMLElement>('[role="tab"]'));
       expect(tabs.map((tab) => tab.getAttribute('tabindex'))).toEqual(['0', '-1', '-1', '-1']);
     });
 
@@ -190,23 +331,23 @@ describe('CwTabs', () => {
     });
 
     it('disables a tab natively', () => {
-      const time = byRole(host, 'tab', 'Temps passé') as HTMLButtonElement;
+      const time: HTMLButtonElement = byRole(host, 'tab', 'Temps passé') as HTMLButtonElement;
       expect(time.disabled).toBe(true);
     });
 
     it('moves and activates with the arrows, skipping disabled tabs and wrapping', async () => {
-      const details = byRole(host, 'tab', 'Détails');
+      const details: HTMLElement = byRole(host, 'tab', 'Détails');
       details.focus();
 
       expect(press(details, 'ArrowRight').defaultPrevented).toBe(true);
       await fixture.whenStable();
-      const subtasks = byRole(host, 'tab', 'Sous-tâches, 5');
+      const subtasks: HTMLElement = byRole(host, 'tab', 'Sous-tâches, 5');
       expect(document.activeElement).toBe(subtasks);
       expect(fixture.componentInstance.section()).toBe('sous-taches');
 
       press(subtasks, 'ArrowRight');
       await fixture.whenStable();
-      const activity = byRole(host, 'tab', 'Activité');
+      const activity: HTMLElement = byRole(host, 'tab', 'Activité');
       expect(document.activeElement).toBe(activity);
       expect(fixture.componentInstance.section()).toBe('activite');
 
@@ -221,11 +362,11 @@ describe('CwTabs', () => {
     });
 
     it('reaches the ends with Home and End', async () => {
-      const details = byRole(host, 'tab', 'Détails');
+      const details: HTMLElement = byRole(host, 'tab', 'Détails');
       details.focus();
       press(details, 'End');
       await fixture.whenStable();
-      const activity = byRole(host, 'tab', 'Activité');
+      const activity: HTMLElement = byRole(host, 'tab', 'Activité');
       expect(document.activeElement).toBe(activity);
       press(activity, 'Home');
       await fixture.whenStable();
@@ -233,7 +374,7 @@ describe('CwTabs', () => {
     });
 
     it('ignores the vertical arrows in a horizontal list', () => {
-      const details = byRole(host, 'tab', 'Détails');
+      const details: HTMLElement = byRole(host, 'tab', 'Détails');
       details.focus();
       expect(press(details, 'ArrowDown').defaultPrevented).toBe(false);
       expect(document.activeElement).toBe(details);
@@ -242,11 +383,11 @@ describe('CwTabs', () => {
     it('only moves the focus with manual activation', async () => {
       fixture.componentInstance.activation.set('manual');
       await fixture.whenStable();
-      const details = byRole(host, 'tab', 'Détails');
+      const details: HTMLElement = byRole(host, 'tab', 'Détails');
       details.focus();
       press(details, 'ArrowRight');
       await fixture.whenStable();
-      const subtasks = byRole(host, 'tab', 'Sous-tâches, 5');
+      const subtasks: HTMLElement = byRole(host, 'tab', 'Sous-tâches, 5');
       expect(document.activeElement).toBe(subtasks);
       expect(fixture.componentInstance.section()).toBe('details');
 
@@ -275,21 +416,21 @@ describe('CwTabs', () => {
     });
 
     it('is segmented by default', () => {
-      const root = byRole(host, 'tablist', 'Période').closest('cw-tabs');
+      const root: Element | null = byRole(host, 'tablist', 'Période').closest('cw-tabs');
       expect(root?.getAttribute('data-variant')).toBe('segmented');
       expect(root?.getAttribute('data-size')).toBe('default');
     });
 
     it('moves with up and down in a vertical bar list', async () => {
-      const list = byRole(host, 'tablist', 'Réglages');
+      const list: HTMLElement = byRole(host, 'tablist', 'Réglages');
       expect(list.getAttribute('aria-orientation')).toBe('vertical');
       expect(list.getAttribute('data-orientation')).toBe('vertical');
-      const notifications = byRole(list, 'tab', 'Notifications');
+      const notifications: HTMLElement = byRole(list, 'tab', 'Notifications');
       notifications.focus();
       expect(press(notifications, 'ArrowRight').defaultPrevented).toBe(false);
       press(notifications, 'ArrowDown');
       await fixture.whenStable();
-      const security = byRole(list, 'tab', 'Sécurité');
+      const security: HTMLElement = byRole(list, 'tab', 'Sécurité');
       expect(document.activeElement).toBe(security);
       expect(security.getAttribute('aria-selected')).toBe('true');
       press(security, 'ArrowDown');
@@ -309,10 +450,10 @@ describe('CwTabs', () => {
     });
 
     it('is a navigation of links, the active one marked as the current page', () => {
-      const nav = byRole(host, 'navigation', 'Vues');
+      const nav: HTMLElement = byRole(host, 'navigation', 'Vues');
       expect(nav.querySelector('[role="tab"]')).toBeNull();
       expect(nav.hasAttribute('aria-orientation')).toBe(false);
-      const table = link(nav, 'Tableau');
+      const table: HTMLAnchorElement = link(nav, 'Tableau');
       expect(table.getAttribute('aria-current')).toBe('page');
       expect(table.getAttribute('data-state')).toBe('active');
       expect(table.getAttribute('tabindex')).toBe('0');
@@ -328,9 +469,9 @@ describe('CwTabs', () => {
     });
 
     it('follows the link reached by an arrow key', async () => {
-      const list = link(host, 'Liste');
-      const table = link(host, 'Tableau');
-      const followed = vi.fn((event: Event) => {
+      const list: HTMLAnchorElement = link(host, 'Liste');
+      const table: HTMLAnchorElement = link(host, 'Tableau');
+      const followed: Mock<(event: Event) => void> = vi.fn((event: Event) => {
         event.preventDefault();
       });
       list.addEventListener('click', followed);
@@ -343,9 +484,9 @@ describe('CwTabs', () => {
     });
 
     it('cancels the click of a disabled link', () => {
-      const gantt = link(host, 'Gantt');
+      const gantt: HTMLAnchorElement = link(host, 'Gantt');
       expect(gantt.getAttribute('aria-disabled')).toBe('true');
-      const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+      const event: MouseEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
       gantt.dispatchEvent(event);
       expect(event.defaultPrevented).toBe(true);
       expect(fixture.componentInstance.followed()).toBe(false);
@@ -354,13 +495,13 @@ describe('CwTabs', () => {
   });
 
   it('takes its default variant and size from provideCwTabs', async () => {
-    const fixture = TestBed.createComponent(ProvidedHost);
+    const fixture: ComponentFixture<ProvidedHost> = TestBed.createComponent(ProvidedHost);
     await fixture.whenStable();
-    const host = fixture.nativeElement as HTMLElement;
-    const provided = byRole(host, 'tablist', 'Vues').closest('cw-tabs');
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    const provided: Element | null = byRole(host, 'tablist', 'Vues').closest('cw-tabs');
     expect(provided?.getAttribute('data-variant')).toBe('bar');
     expect(provided?.getAttribute('data-size')).toBe('sm');
-    const bound = byRole(host, 'tablist', 'Vue').closest('cw-tabs');
+    const bound: Element | null = byRole(host, 'tablist', 'Vue').closest('cw-tabs');
     expect(bound?.getAttribute('data-variant')).toBe('segmented');
   });
 });

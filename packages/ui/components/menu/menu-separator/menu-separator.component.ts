@@ -1,8 +1,10 @@
 import { Component } from '@angular/core';
 
 /**
- * A 1 px rule between the groups of a `cw-menu`, edge to edge; the destructive item sits after one
- * (DropdownMenu sheet of the Design System artifact). Renders `role="separator"`, 9 px high.
+ * Component CwMenuSeparator
+ *
+ * @description
+ * A 1 px rule between the groups of a `cw-menu`, edge to edge; the destructive item sits after one (DropdownMenu sheet of the Design System artifact). Renders `role="separator"`, 9 px high.
  */
 @Component({
   selector: 'cw-menu-separator',

@@ -20,9 +20,14 @@ import { CwToggleGroupItem } from './toggle-group-item/toggle-group-item.compone
 import { CwToggleGroup } from './toggle-group.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Toggle Group, every state of its sheet in the Design System artifact, in the light and the dark
  * theme. Copy from the sheet's "Dans Cadenway" section (description editor, Affichage menu, Tableau
  * toolbar).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/ToggleGroup',
@@ -46,10 +51,29 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story configuration for toggle group examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Selects the light theme copy for interaction checks.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the themed examples.
+ *
+ * @returns {HTMLElement} Light theme section used for interaction checks.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -157,10 +181,12 @@ export const Keyboard: Story = {
         <button cwToggleGroupItem value="assignee">Assigné</button>
       </cw-toggle-group>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const status = scope.getByRole('radio', { name: 'Statut' });
-    const assignee = scope.getByRole('radio', { name: 'Assigné' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole(role: string, options?: { name?: string }): HTMLElement } = within(
+      light(canvasElement),
+    );
+    const status: HTMLElement = scope.getByRole('radio', { name: 'Statut' });
+    const assignee: HTMLElement = scope.getByRole('radio', { name: 'Assigné' });
 
     await userEvent.tab();
     await expect(status).toHaveFocus();

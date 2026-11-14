@@ -25,8 +25,13 @@ import { CwItemTitle } from './item-title/item-title.component';
 import { CwItem } from './item.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Item, every variant, size and state of its sheet in the Design System artifact, in the light and
  * the dark theme. Copy from the mockup (`App.dc.html`: inbox, settings › members and integrations).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Item',
@@ -61,14 +66,41 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story for the item examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
 // Initials of a member, until `cw-avatar` is used here.
-const INITIALS =
+/**
+ * Constant INITIALS
+ *
+ * @description
+ * Classes for member initials in the examples.
+ *
+ * @type {string}
+ */
+const INITIALS: string =
   'flex size-8 items-center justify-center rounded-full bg-secondary text-xs leading-none font-semibold text-secondary-foreground';
 
+/**
+ * Function light
+ *
+ * @description
+ * Returns the light-theme story container.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing theme scopes.
+ *
+ * @returns {HTMLElement} Container for the light theme.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -159,8 +191,10 @@ export const States: Story = {
         </button>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const disabled = within(light(canvasElement)).getByRole('button', { name: 'Samuel Roux' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const disabled: HTMLElement = within(light(canvasElement)).getByRole('button', {
+      name: 'Samuel Roux',
+    });
     await expect(disabled).toHaveAttribute('aria-disabled', 'true');
   },
 };
@@ -197,9 +231,12 @@ export const Inbox: Story = {
         </a>
       </cw-item-group>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const [first, second, third] = scope.getAllByRole('link');
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name: string }) => HTMLElement;
+      getAllByRole: (role: string) => HTMLElement[];
+    } = within(light(canvasElement));
+    const [first, second, third]: HTMLElement[] = scope.getAllByRole('link');
 
     await userEvent.tab();
     await expect(first).toHaveFocus();
@@ -240,9 +277,12 @@ export const Members: Story = {
         </cw-item>
       </cw-item-group>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const [lea, karim] = scope.getAllByRole('listitem');
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name: string }) => HTMLElement;
+      getAllByRole: (role: string) => HTMLElement[];
+    } = within(light(canvasElement));
+    const [lea, karim]: HTMLElement[] = scope.getAllByRole('listitem');
 
     await userEvent.tab();
     await expect(lea).toHaveFocus();
@@ -269,9 +309,12 @@ export const Selectable: Story = {
         </cw-item>
       </cw-item-group>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const [csv] = scope.getAllByRole('option');
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name: string }) => HTMLElement;
+      getAllByRole: (role: string) => HTMLElement[];
+    } = within(light(canvasElement));
+    const [csv]: HTMLElement[] = scope.getAllByRole('option');
 
     await expect(scope.getByRole('listbox')).toHaveAttribute('aria-multiselectable', 'true');
     await userEvent.tab();

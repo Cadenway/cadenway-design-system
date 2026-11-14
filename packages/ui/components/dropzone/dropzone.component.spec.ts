@@ -1,14 +1,31 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
+import type { Mock } from 'vitest';
 
 import { CwDropzone } from './dropzone.component';
 import type { CwDropzoneRejection } from './dropzone.types';
 
+/**
+ * Function required
+ *
+ * @description
+ * Returns an element or throws when it is absent.
+ *
+ * @param {T | null | undefined} value - Optional value to require.
+ *
+ * @returns {T} The value when present.
+ */
 function required<T>(value: T | null | undefined): T {
   if (value === null || value === undefined) throw new Error('Missing element');
   return value;
 }
 
+/**
+ * Class Host
+ *
+ * @description
+ * Hosts a dropzone with controllable limits and captured results.
+ */
 @Component({
   imports: [CwDropzone],
   template: `
@@ -24,19 +41,98 @@ function required<T>(value: T | null | undefined): T {
   `,
 })
 class Host {
-  readonly maxFiles = signal<number | null>(null);
-  readonly count = signal(0);
-  readonly size = signal<'default' | 'compact'>('default');
-  readonly added = signal<File[]>([]);
-  readonly rejected = signal<CwDropzoneRejection[]>([]);
+  // #region Properties
+  /**
+   * Property maxFiles
+   * @readonly
+   *
+   * @description
+   * Maximum allowed files.
+   *
+   * @type {WritableSignal<number | null>}
+   */
+  public readonly maxFiles: WritableSignal<number | null> = signal<number | null>(null);
+
+  /**
+   * Property count
+   * @readonly
+   *
+   * @description
+   * Number of already attached files.
+   *
+   * @type {WritableSignal<number>}
+   */
+  public readonly count: WritableSignal<number> = signal(0);
+
+  /**
+   * Property size
+   * @readonly
+   *
+   * @description
+   * Dropzone layout size.
+   *
+   * @type {WritableSignal<'default' | 'compact'>}
+   */
+  public readonly size: WritableSignal<'default' | 'compact'> = signal<'default' | 'compact'>(
+    'default',
+  );
+
+  /**
+   * Property added
+   * @readonly
+   *
+   * @description
+   * Files accepted by the dropzone.
+   *
+   * @type {WritableSignal<File[]>}
+   */
+  public readonly added: WritableSignal<File[]> = signal<File[]>([]);
+
+  /**
+   * Property rejected
+   * @readonly
+   *
+   * @description
+   * Files rejected by the dropzone.
+   *
+   * @type {WritableSignal<CwDropzoneRejection[]>}
+   */
+  public readonly rejected: WritableSignal<CwDropzoneRejection[]> = signal<CwDropzoneRejection[]>(
+    [],
+  );
+  // #endregion
 }
 
-function file(name: string, bytes: number, type = ''): File {
+/**
+ * Function file
+ *
+ * @description
+ * Creates a file with the given name, size and MIME type.
+ *
+ * @param {string} name - File name.
+ * @param {number} bytes - File size in bytes.
+ * @param {string} [type] - Optional MIME type.
+ *
+ * @returns {File} File constructed for the test.
+ */
+function file(name: string, bytes: number, type: string = ''): File {
   return new File([new Uint8Array(bytes)], name, { type });
 }
 
+/**
+ * Function dragEvent
+ *
+ * @description
+ * Creates a drag event with simulated files and MIME types.
+ *
+ * @param {string} type - Drag event type.
+ * @param {File[]} [files] - Files exposed by the simulated transfer.
+ * @param {string[]} [itemTypes] - MIME types exposed by transfer items.
+ *
+ * @returns {Event} Simulated drag event.
+ */
 function dragEvent(type: string, files: File[] = [], itemTypes: string[] = []): Event {
-  const event = new Event(type, { bubbles: true, cancelable: true });
+  const event: Event = new Event(type, { bubbles: true, cancelable: true });
   Object.defineProperty(event, 'dataTransfer', {
     value: {
       types: ['Files'],
@@ -62,23 +158,43 @@ describe('CwDropzone', () => {
     component = fixture.componentInstance;
   });
 
+  /**
+   * Function browse
+   *
+   * @description
+   * Finds the browse button in the fixture.
+   *
+   * @returns {HTMLButtonElement} Browse button in the fixture.
+   */
   function browse(): HTMLButtonElement {
-    const button = Array.from(host.querySelectorAll('button')).find((element) =>
-      element.getAttribute('aria-label')?.startsWith('parcourez les fichiers'),
+    const button: HTMLButtonElement | undefined = Array.from(host.querySelectorAll('button')).find(
+      (element) => element.getAttribute('aria-label')?.startsWith('parcourez les fichiers'),
     );
     if (!button) throw new Error('No browse button');
     return button;
   }
 
+  /**
+   * Function pick
+   *
+   * @description
+   * Simulates selection of files in the native picker.
+   *
+   * @param {File[]} files - Files to supply through the picker.
+   */
   function pick(files: File[]): void {
-    const input = required(host.querySelector<HTMLInputElement>('input[type="file"]'));
+    const input: HTMLInputElement = required(
+      host.querySelector<HTMLInputElement>('input[type="file"]'),
+    );
     Object.defineProperty(input, 'files', { value: files, configurable: true });
     input.dispatchEvent(new Event('change'));
   }
 
   it('names the browse button with the limits and opens the native picker', () => {
-    const input = required(host.querySelector<HTMLInputElement>('input[type="file"]'));
-    const click = vi.spyOn(input, 'click').mockImplementation(() => undefined);
+    const input: HTMLInputElement = required(
+      host.querySelector<HTMLInputElement>('input[type="file"]'),
+    );
+    const click: Mock<() => void> = vi.spyOn(input, 'click').mockImplementation(() => undefined);
 
     browse().click();
 
@@ -89,10 +205,10 @@ describe('CwDropzone', () => {
   });
 
   it('accepts by extension or MIME type and rejects by type and size', async () => {
-    const shot = file('capture.webp', 10, 'image/webp');
-    const spec = file('specs.pdf', 10);
-    const exe = file('installateur.exe', 10, 'application/x-msdownload');
-    const big = file('maquette.png', 2 * 1024 * 1024, 'image/png');
+    const shot: File = file('capture.webp', 10, 'image/webp');
+    const spec: File = file('specs.pdf', 10);
+    const exe: File = file('installateur.exe', 10, 'application/x-msdownload');
+    const big: File = file('maquette.png', 2 * 1024 * 1024, 'image/png');
 
     pick([shot, spec, exe, big]);
     await fixture.whenStable();
@@ -108,8 +224,8 @@ describe('CwDropzone', () => {
     component.maxFiles.set(3);
     component.count.set(2);
     await fixture.whenStable();
-    const first = file('a.png', 1, 'image/png');
-    const second = file('b.png', 1, 'image/png');
+    const first: File = file('a.png', 1, 'image/png');
+    const second: File = file('b.png', 1, 'image/png');
 
     pick([first, second]);
     await fixture.whenStable();
@@ -126,8 +242,8 @@ describe('CwDropzone', () => {
     expect(zone.textContent).toContain('Relâchez pour joindre');
     expect(zone.textContent).toContain('2 fichiers');
 
-    const dropped = file('a.png', 1, 'image/png');
-    const drop = dragEvent('drop', [dropped]);
+    const dropped: File = file('a.png', 1, 'image/png');
+    const drop: Event = dragEvent('drop', [dropped]);
     zone.dispatchEvent(drop);
     await fixture.whenStable();
 
@@ -150,8 +266,8 @@ describe('CwDropzone', () => {
   });
 
   it('takes the files pasted while it holds the focus', async () => {
-    const pasted = file('collage.png', 1, 'image/png');
-    const paste = new Event('paste', { bubbles: true, cancelable: true });
+    const pasted: File = file('collage.png', 1, 'image/png');
+    const paste: Event = new Event('paste', { bubbles: true, cancelable: true });
     Object.defineProperty(paste, 'clipboardData', { value: { files: [pasted] } });
 
     browse().dispatchEvent(paste);

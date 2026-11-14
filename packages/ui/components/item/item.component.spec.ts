@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CwItemActions } from './item-actions/item-actions.component';
@@ -9,6 +9,12 @@ import { CwItemSeparator } from './item-separator/item-separator.component';
 import { CwItemTitle } from './item-title/item-title.component';
 import { CwItem } from './item.component';
 
+/**
+ * Component Host
+ *
+ * @description
+ * Exercises item groups, navigation and selection.
+ */
 @Component({
   imports: [
     CwItem,
@@ -69,25 +75,78 @@ import { CwItem } from './item.component';
   `,
 })
 class Host {
-  readonly opened = signal(0);
-  readonly exportSelected = signal(false);
+  // #region Properties
+  /**
+   * Property opened
+   * @readonly
+   *
+   * @description
+   * Number of notification link activations.
+   *
+   * @type {WritableSignal<number>}
+   */
+  public readonly opened: WritableSignal<number> = signal(0);
+
+  /**
+   * Property exportSelected
+   * @readonly
+   *
+   * @description
+   * Selection state of the export item.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly exportSelected: WritableSignal<boolean> = signal(false);
+  // #endregion
 }
 
+/**
+ * Function group
+ *
+ * @description
+ * Finds a group by its accessible name.
+ *
+ * @param {HTMLElement} host - Container holding item groups.
+ * @param {string} name - Accessible name of the group.
+ *
+ * @returns {HTMLElement} Matching item group element.
+ */
 function group(host: HTMLElement, name: string): HTMLElement {
-  const found = host.querySelector<HTMLElement>(`cw-item-group[aria-label="${name}"]`);
+  const found: HTMLElement | null = host.querySelector<HTMLElement>(
+    `cw-item-group[aria-label="${name}"]`,
+  );
   if (!found) throw new Error(`No group named ${name}`);
   return found;
 }
 
+/**
+ * Function row
+ *
+ * @description
+ * Finds an item row containing the given title.
+ *
+ * @param {HTMLElement} scope - Group containing candidate rows.
+ * @param {string} title - Text identifying the row.
+ *
+ * @returns {HTMLElement} Matching item row.
+ */
 function row(scope: HTMLElement, title: string): HTMLElement {
-  const found = Array.from(scope.querySelectorAll<HTMLElement>('cw-item, [cwItem]')).find(
-    (element) => element.textContent.includes(title),
-  );
+  const found: HTMLElement | undefined = Array.from(
+    scope.querySelectorAll<HTMLElement>('cw-item, [cwItem]'),
+  ).find((element) => element.textContent.includes(title));
   if (!found) throw new Error(`No row titled ${title}`);
   return found;
 }
 
 // The CDK key manager reads `keyCode`, which the KeyboardEvent constructor leaves at 0.
+/**
+ * Constant KEY_CODES
+ *
+ * @description
+ * Keyboard codes read by the CDK focus manager.
+ *
+ * @type {Record<string, number>}
+ */
 const KEY_CODES: Record<string, number> = {
   ' ': 32,
   End: 35,
@@ -96,8 +155,21 @@ const KEY_CODES: Record<string, number> = {
   ArrowDown: 40,
 };
 
+/**
+ * Function press
+ *
+ * @description
+ * Dispatches a keyboard event with the CDK key code.
+ *
+ * @param {HTMLElement} target - Element receiving the keyboard event.
+ * @param {string} key - Keyboard key to dispatch.
+ */
 function press(target: HTMLElement, key: string): void {
-  const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+  const event: KeyboardEvent = new KeyboardEvent('keydown', {
+    key,
+    bubbles: true,
+    cancelable: true,
+  });
   Object.defineProperty(event, 'keyCode', { value: KEY_CODES[key] });
   target.dispatchEvent(event);
 }
@@ -118,8 +190,8 @@ describe('CwItemGroup', () => {
   });
 
   it('is a list of list items with a single tab stop', () => {
-    const members = group(host, 'Membres');
-    const rows = Array.from(members.querySelectorAll('cw-item'));
+    const members: HTMLElement = group(host, 'Membres');
+    const rows: Element[] = Array.from(members.querySelectorAll('cw-item'));
 
     expect(members.getAttribute('role')).toBe('list');
     expect(rows.every((element) => element.getAttribute('role') === 'listitem')).toBe(true);
@@ -132,10 +204,10 @@ describe('CwItemGroup', () => {
   });
 
   it('moves the focus with the arrows, skipping disabled rows, and Home and End', async () => {
-    const members = group(host, 'Membres');
-    const lea = row(members, 'Léa Martin');
-    const karim = row(members, 'Karim Benali');
-    const ines = row(members, 'Inès Duval');
+    const members: HTMLElement = group(host, 'Membres');
+    const lea: HTMLElement = row(members, 'Léa Martin');
+    const karim: HTMLElement = row(members, 'Karim Benali');
+    const ines: HTMLElement = row(members, 'Inès Duval');
     lea.focus();
 
     press(lea, 'ArrowDown');
@@ -153,8 +225,8 @@ describe('CwItemGroup', () => {
   });
 
   it('keeps the native role of links and becomes a plain group around them', () => {
-    const notifications = group(host, 'Notifications');
-    const link = row(notifications, 'mentionné');
+    const notifications: HTMLElement = group(host, 'Notifications');
+    const link: HTMLElement = row(notifications, 'mentionné');
 
     link.click();
 
@@ -165,9 +237,9 @@ describe('CwItemGroup', () => {
   });
 
   it('is a multi-selection listbox whose options toggle on click and Space', async () => {
-    const files = group(host, 'Fichiers');
-    const csv = row(files, 'export-taches.csv');
-    const image = row(files, 'maquette.png');
+    const files: HTMLElement = group(host, 'Fichiers');
+    const csv: HTMLElement = row(files, 'export-taches.csv');
+    const image: HTMLElement = row(files, 'maquette.png');
 
     expect(files.getAttribute('role')).toBe('listbox');
     expect(files.getAttribute('aria-multiselectable')).toBe('true');
@@ -185,19 +257,38 @@ describe('CwItemGroup', () => {
   });
 });
 
+/**
+ * Component Single
+ *
+ * @description
+ * Exercises a disabled standalone button item.
+ */
 @Component({
   imports: [CwItem],
   template: `<button cwItem disabled (click)="clicks.set(clicks() + 1)">Configurer</button>`,
 })
 class Single {
-  readonly clicks = signal(0);
+  // #region Properties
+  /**
+   * Property clicks
+   * @readonly
+   *
+   * @description
+   * Number of clicks handled by the button.
+   *
+   * @type {WritableSignal<number>}
+   */
+  public readonly clicks: WritableSignal<number> = signal(0);
+  // #endregion
 }
 
 describe('CwItem', () => {
   it('ignores clicks while disabled and leaves the tab order', () => {
-    const fixture = TestBed.createComponent(Single);
+    const fixture: ComponentFixture<Single> = TestBed.createComponent(Single);
     fixture.detectChanges();
-    const item = (fixture.nativeElement as HTMLElement).querySelector('button');
+    const item: HTMLButtonElement | null = (fixture.nativeElement as HTMLElement).querySelector(
+      'button',
+    );
 
     item?.click();
 

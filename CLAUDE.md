@@ -33,6 +33,7 @@ checks during bootstrap.
 
 ```bash
 pnpm format:check
+pnpm test:ui-lint
 pnpm lint
 pnpm typecheck
 pnpm test:coverage
@@ -41,6 +42,9 @@ pnpm test:storybook           # interaction and accessibility checks
 pnpm build                    # every package
 pnpm changeset status
 ```
+
+The [architecture check rollout](docs/architecture.md#architecture-check-rollout) describes how
+to activate `pnpm test:architecture` when the published checker is available.
 
 ## Tooling: this repository ships its own `.claude/`
 

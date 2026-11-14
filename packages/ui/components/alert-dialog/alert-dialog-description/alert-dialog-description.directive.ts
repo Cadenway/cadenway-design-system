@@ -4,6 +4,9 @@ import { Directive, inject } from '@angular/core';
 import { CW_ALERT_DIALOG } from '../alert-dialog.token';
 
 /**
+ * Directive CwAlertDialogDescription
+ *
+ * @description
  * The consequences in a `cw-alert-dialog`, counted (« Ses 64 tâches … seront supprimés
  * définitivement. »); it describes the dialog (`aria-describedby`), read as soon as it opens.
  *
@@ -14,7 +17,18 @@ import { CW_ALERT_DIALOG } from '../alert-dialog.token';
   host: { class: 'text-sm text-pretty text-muted-foreground', '[id]': 'id' },
 })
 export class CwAlertDialogDescription {
-  protected readonly id =
+  // #region Properties
+  /**
+   * Property id
+   * @readonly
+   *
+   * @description
+   * Identifier used by the dialog.
+   *
+   * @type {string}
+   */
+  protected readonly id: string =
     inject(CW_ALERT_DIALOG, { optional: true })?.descriptionId ??
     inject(_IdGenerator).getId('cw-alert-dialog-description-');
+  // #endregion
 }

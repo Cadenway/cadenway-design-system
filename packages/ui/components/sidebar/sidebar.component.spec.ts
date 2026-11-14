@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideIcons } from '@ng-icons/core';
 import { phosphorHouseBold, phosphorTrayBold } from '@ng-icons/phosphor-icons/bold';
@@ -13,6 +13,12 @@ import { CwSidebarToggle } from './sidebar-toggle/sidebar-toggle.directive';
 import { CwSidebar } from './sidebar.component';
 import type { CwSidebarCollapsible, CwSidebarState } from './sidebar.types';
 
+/**
+ * Component Host
+ *
+ * @description
+ * Hosts a sidebar and controls its layout and active space.
+ */
 @Component({
   imports: [
     CwSidebar,
@@ -47,43 +53,133 @@ import type { CwSidebarCollapsible, CwSidebarState } from './sidebar.types';
   `,
 })
 class Host {
-  readonly state = signal<CwSidebarState>('expanded');
-  readonly collapsible = signal<CwSidebarCollapsible>('icon');
-  readonly produit = signal(false);
-  readonly sprintActive = signal(true);
+  // #region Properties
+  /**
+   * Property state
+   *
+   * @description
+   * Expanded or collapsed state controlled by the fixture.
+   *
+   * @type {WritableSignal<CwSidebarState>}
+   * @readonly
+   */
+  public readonly state: WritableSignal<CwSidebarState> = signal<CwSidebarState>('expanded');
+
+  /**
+   * Property collapsible
+   *
+   * @description
+   * Configured collapse behavior.
+   *
+   * @type {WritableSignal<CwSidebarCollapsible>}
+   * @readonly
+   */
+  public readonly collapsible: WritableSignal<CwSidebarCollapsible> =
+    signal<CwSidebarCollapsible>('icon');
+
+  /**
+   * Property produit
+   *
+   * @description
+   * Whether the example space is expanded.
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  public readonly produit: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property sprintActive
+   *
+   * @description
+   * Whether the sprint link is the active page.
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  public readonly sprintActive: WritableSignal<boolean> = signal(true);
+  // #endregion
 }
 
 // The name a link gets from its content: the text without its `aria-hidden` parts.
+/**
+ * Function nameFromContent
+ *
+ * @description
+ * Reads link text while omitting content hidden from assistive technology.
+ *
+ * @param {HTMLElement} element - Element whose visible content is read.
+ * @returns {string} Text excluding hidden content.
+ */
 function nameFromContent(element: HTMLElement): string {
-  const copy = element.cloneNode(true) as HTMLElement;
+  const copy: HTMLElement = element.cloneNode(true) as HTMLElement;
   for (const hidden of Array.from(copy.querySelectorAll('[aria-hidden="true"]'))) hidden.remove();
   return copy.textContent.replace(/\s+/g, ' ').trim();
 }
 
+/**
+ * Function link
+ *
+ * @description
+ * Finds a sidebar link by its accessible name.
+ *
+ * @param {HTMLElement} host - Fixture containing the requested control.
+ * @param {string} name - Accessible name to match.
+ * @returns {HTMLAnchorElement} Matching sidebar link.
+ */
 function link(host: HTMLElement, name: string): HTMLAnchorElement {
-  const found = Array.from(host.querySelectorAll('a')).find(
+  const found: HTMLAnchorElement | undefined = Array.from(host.querySelectorAll('a')).find(
     (element) => (element.getAttribute('aria-label') ?? nameFromContent(element)) === name,
   );
   if (!found) throw new Error(`No link named ${name}`);
   return found;
 }
 
+/**
+ * Function button
+ *
+ * @description
+ * Finds a sidebar button by its accessible name.
+ *
+ * @param {HTMLElement} host - Fixture containing the requested control.
+ * @param {string} name - Accessible name to match.
+ * @returns {HTMLButtonElement} Matching sidebar button.
+ */
 function button(host: HTMLElement, name: string): HTMLButtonElement {
-  const found = Array.from(host.querySelectorAll('button')).find(
+  const found: HTMLButtonElement | undefined = Array.from(host.querySelectorAll('button')).find(
     (element) => (element.getAttribute('aria-label') ?? element.textContent.trim()) === name,
   );
   if (!found) throw new Error(`No button named ${name}`);
   return found;
 }
 
+/**
+ * Function spaceTrigger
+ *
+ * @description
+ * Finds the space expansion button.
+ *
+ * @param {HTMLElement} host - Fixture containing the requested control.
+ * @returns {HTMLButtonElement} Space expansion button.
+ */
 function spaceTrigger(host: HTMLElement): HTMLButtonElement {
-  const found = Array.from(host.querySelectorAll('button')).find((element) =>
-    element.hasAttribute('aria-expanded'),
+  const found: HTMLButtonElement | undefined = Array.from(host.querySelectorAll('button')).find(
+    (element) => element.hasAttribute('aria-expanded'),
   );
   if (!found) throw new Error('No space trigger');
   return found;
 }
 
+/**
+ * Function press
+ *
+ * @description
+ * Dispatches a keyboard event to a fixture element.
+ *
+ * @param {EventTarget} target - Event target receiving the keyboard event.
+ * @param {string} key - Keyboard key to dispatch.
+ * @param {KeyboardEventInit} init - Additional keyboard event options.
+ */
 function press(target: EventTarget, key: string, init: KeyboardEventInit = {}): void {
   target.dispatchEvent(
     new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...init }),
@@ -106,8 +202,8 @@ describe('CwSidebar', () => {
   });
 
   it('is a named navigation of named groups, the count read after the label', () => {
-    const nav = host.querySelector('nav');
-    const spaces = host.querySelectorAll('cw-sidebar-group')[1];
+    const nav: HTMLElement | null = host.querySelector('nav');
+    const spaces: Element = host.querySelectorAll('cw-sidebar-group')[1];
 
     expect(nav?.getAttribute('aria-label')).toBe('Navigation principale');
     expect(spaces.getAttribute('role')).toBe('group');
@@ -123,8 +219,10 @@ describe('CwSidebar', () => {
   });
 
   it('opens a space on click, → and ←, through its two-way binding', async () => {
-    const trigger = spaceTrigger(host);
-    const lists = document.getElementById(trigger.getAttribute('aria-controls') ?? '');
+    const trigger: HTMLButtonElement = spaceTrigger(host);
+    const lists: HTMLElement | null = document.getElementById(
+      trigger.getAttribute('aria-controls') ?? '',
+    );
     expect(trigger.getAttribute('aria-expanded')).toBe('false');
     expect(lists?.hasAttribute('inert')).toBe(true);
 
@@ -143,7 +241,7 @@ describe('CwSidebar', () => {
   });
 
   it('collapses to the icon rail with the toggle, the items named by label and count', async () => {
-    const toggle = button(host, 'Replier la barre latérale');
+    const toggle: HTMLButtonElement = button(host, 'Replier la barre latérale');
     expect(toggle.getAttribute('aria-controls')).toBe(host.querySelector('nav')?.id);
 
     toggle.click();
@@ -159,12 +257,12 @@ describe('CwSidebar', () => {
     fixture.componentInstance.state.set('collapsed');
     await fixture.whenStable();
 
-    const inbox = link(host, 'Boîte de réception, 3 non lus');
+    const inbox: HTMLAnchorElement = link(host, 'Boîte de réception, 3 non lus');
     document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
     inbox.focus();
     await fixture.whenStable();
 
-    const bubble = document.querySelector('[role="tooltip"]');
+    const bubble: Element | null = document.querySelector('[role="tooltip"]');
     expect(bubble?.textContent).toContain('Boîte de réception · 3');
 
     inbox.blur();
@@ -175,7 +273,7 @@ describe('CwSidebar', () => {
     fixture.componentInstance.state.set('collapsed');
     await fixture.whenStable();
 
-    const rail = button(host, 'Produit');
+    const rail: HTMLButtonElement = button(host, 'Produit');
     expect(rail.getAttribute('data-active')).toBe('true');
 
     rail.click();
@@ -189,7 +287,7 @@ describe('CwSidebar', () => {
     await fixture.whenStable();
     expect(fixture.componentInstance.state()).toBe('collapsed');
 
-    const search = host.querySelector('input');
+    const search: HTMLInputElement | null = host.querySelector('input');
     if (!search) throw new Error('No search field');
     press(search, 'b', { ctrlKey: true });
     await fixture.whenStable();
@@ -265,7 +363,7 @@ describe('CwSidebar on a phone', () => {
 
     fixture.componentInstance.state.set('expanded');
     await fixture.whenStable();
-    const home = link(host, 'Accueil');
+    const home: HTMLAnchorElement = link(host, 'Accueil');
     home.addEventListener('click', (event) => {
       event.preventDefault();
     });

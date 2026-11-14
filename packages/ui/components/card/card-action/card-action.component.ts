@@ -1,6 +1,10 @@
 import { Component } from '@angular/core';
 
 /**
+ * Class CwCardAction
+ * @class CwCardAction
+ *
+ * @description
  * The action of a card header, on the right of the title and description: one `outline` `sm`
  * button (« Inviter »).
  */

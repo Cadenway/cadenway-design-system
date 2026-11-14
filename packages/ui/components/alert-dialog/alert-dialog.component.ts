@@ -14,6 +14,12 @@ import {
   output,
   signal,
   type TemplateRef,
+  type InputSignal,
+  type InputSignalWithTransform,
+  type ModelSignal,
+  type OutputEmitterRef,
+  type Signal,
+  type WritableSignal,
   untracked,
   viewChild,
   ViewContainerRef,
@@ -33,29 +39,72 @@ import type {
 /* Literal class strings (Alert Dialog sheet and preview of the Design System artifact, mockup
    `App.dc.html` for the item list and the typed confirmation), so Tailwind finds them in the
    compiled package. */
-const PANEL =
+/**
+ * Constant PANEL
+ *
+ * @description
+ * Classes for the alert dialog panel.
+ *
+ * @type {string}
+ */
+const PANEL: string =
   'relative grid w-[calc(100vw-2rem)] gap-4 rounded-xl border bg-popover p-6 text-popover-foreground shadow-xl outline-none max-sm:p-4 ' +
   'animate-pop-in motion-reduce:animate-none data-[state=closed]:animate-pop-out motion-reduce:data-[state=closed]:animate-none';
 
+/**
+ * Constant SIZES
+ *
+ * @description
+ * Panel size classes.
+ *
+ * @type {Record<CwAlertDialogSize, string>}
+ */
 const SIZES: Record<CwAlertDialogSize, string> = {
   sm: 'max-w-xs text-center',
   default: 'max-w-md',
 };
 
+/**
+ * Constant HEADERS
+ *
+ * @description
+ * Header layout classes by dialog size.
+ *
+ * @type {Record<CwAlertDialogSize, string>}
+ */
 const HEADERS: Record<CwAlertDialogSize, string> = {
   sm: 'grid gap-1.5',
   default: 'flex flex-col gap-2',
 };
 
+/**
+ * Constant FOOTERS
+ *
+ * @description
+ * Footer layout classes by dialog size.
+ *
+ * @type {Record<CwAlertDialogSize, string>}
+ */
 const FOOTERS: Record<CwAlertDialogSize, string> = {
   sm: 'grid grid-cols-2 gap-2',
   default: 'flex justify-end gap-2',
 };
 
 // The list scrolls past nine lines: it is focusable so the keyboard scrolls it too.
-const ITEMS = `flex max-h-36 flex-col gap-0.5 overflow-y-auto rounded-lg bg-muted px-3 py-2 text-start text-sm ${ɵFOCUS_INSET}`;
+/**
+ * Constant ITEMS
+ *
+ * @description
+ * Scrollable item list classes.
+ *
+ * @type {string}
+ */
+const ITEMS: string = `flex max-h-36 flex-col gap-0.5 overflow-y-auto rounded-lg bg-muted px-3 py-2 text-start text-sm ${ɵFOCUS_INSET}`;
 
 /**
+ * Component CwAlertDialog
+ *
+ * @description
  * A modal confirmation before an irreversible or heavy action: it names the object, counts what
  * will be lost and closes only on an explicit choice (Alert Dialog sheet of the Design System
  * artifact). An action that can be undone runs at once with « Annuler » in a toast instead.
@@ -84,69 +133,372 @@ const ITEMS = `flex max-h-36 flex-col gap-0.5 overflow-y-auto rounded-lg bg-mute
   templateUrl: './alert-dialog.component.html',
 })
 export class CwAlertDialog implements CwAlertDialogContext {
-  /** Whether the confirmation is open; two-way with `[(open)]`. */
-  readonly open = model(false);
-  /** Style of the action and the media. */
-  readonly variant = input<CwAlertDialogVariant>('default');
-  /** Width and layout. */
-  readonly size = input<CwAlertDialogSize>('default');
-  /** Text to type (the object's name) before the action is enabled; empty for none. */
-  readonly confirmText = input('');
-  /** Label of the confirmation field, followed by `confirmText` in bold. */
-  readonly confirmLabel = input('Pour confirmer, saisissez');
-  /** The action is running: nothing closes the dialog but the consumer; `aria-busy` is set. */
-  readonly pending = input(false, { transform: booleanAttribute });
-  /** The objects concerned, listed when there are more than one. */
-  readonly items = input<readonly string[]>([]);
-  /** Text of the last line when `items` holds more than eight entries. */
-  readonly moreLabel = input<(count: number) => string>((count) => `+ ${String(count)} autres`);
-  /** Emits when the action is activated (click, or Enter in the confirmation field). */
-  readonly confirm = output();
-  /** Emits when « Annuler » or Escape closes the dialog. */
-  // The sheet names the output `cancel`; it is emitted by the component, never by a native dialog.
-  // eslint-disable-next-line @angular-eslint/no-output-native
-  readonly cancel = output<CwAlertDialogCancelReason>();
+  // #region Properties
+  /**
+   * Property open
+   * @readonly
+   *
+   * @description
+   * Whether the dialog is open.
+   *
+   * @type {ModelSignal<boolean>}
+   */
+  public readonly open: ModelSignal<boolean> = model(false);
 
-  /** Id given to `h2[cwAlertDialogTitle]`, which names the dialog. */
-  readonly titleId: string;
-  /** Id given to `p[cwAlertDialogDescription]`, which describes the dialog. */
-  readonly descriptionId: string;
+  /**
+   * Property variant
+   * @readonly
+   *
+   * @description
+   * Style of the action and media.
+   *
+   * @type {InputSignal<CwAlertDialogVariant>}
+   */
+  public readonly variant: InputSignal<CwAlertDialogVariant> =
+    input<CwAlertDialogVariant>('default');
+
+  /**
+   * Property size
+   * @readonly
+   *
+   * @description
+   * Dialog size and layout.
+   *
+   * @type {InputSignal<CwAlertDialogSize>}
+   */
+  public readonly size: InputSignal<CwAlertDialogSize> = input<CwAlertDialogSize>('default');
+
+  /**
+   * Property confirmText
+   * @readonly
+   *
+   * @description
+   * Text that must be typed to confirm.
+   *
+   * @type {InputSignal<string>}
+   */
+  public readonly confirmText: InputSignal<string> = input('');
+
+  /**
+   * Property confirmLabel
+   * @readonly
+   *
+   * @description
+   * Label of the confirmation field.
+   *
+   * @type {InputSignal<string>}
+   */
+  public readonly confirmLabel: InputSignal<string> = input('Pour confirmer, saisissez');
+
+  /**
+   * Property pending
+   * @readonly
+   *
+   * @description
+   * Whether the action is running.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   */
+  public readonly pending: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property items
+   * @readonly
+   *
+   * @description
+   * Objects concerned by the action.
+   *
+   * @type {InputSignal<readonly string[]>}
+   */
+  public readonly items: InputSignal<readonly string[]> = input<readonly string[]>([]);
+
+  /**
+   * Property moreLabel
+   * @readonly
+   *
+   * @description
+   * Label for items beyond the display limit.
+   *
+   * @type {InputSignal<(count: number) => string>}
+   */
+  public readonly moreLabel: InputSignal<(count: number) => string> = input<
+    (count: number) => string
+  >((count) => `+ ${String(count)} autres`);
+
+  /**
+   * Property confirm
+   * @readonly
+   *
+   * @description
+   * Emits when the action is confirmed.
+   *
+   * @type {OutputEmitterRef<void>}
+   */
+  public readonly confirm: OutputEmitterRef<void> = output();
+
+  /**
+   * Property cancel
+   * @readonly
+   *
+   * @description
+   * Emits the user cancellation reason.
+   *
+   * @type {OutputEmitterRef<CwAlertDialogCancelReason>}
+   */
+  public readonly cancel: OutputEmitterRef<CwAlertDialogCancelReason> =
+    output<CwAlertDialogCancelReason>();
+
+  /**
+   * Property titleId
+   * @readonly
+   *
+   * @description
+   * Identifier of the dialog title.
+   *
+   * @type {string}
+   */
+  public readonly titleId: string;
+
+  /**
+   * Property descriptionId
+   * @readonly
+   *
+   * @description
+   * Identifier of the dialog description.
+   *
+   * @type {string}
+   */
+  public readonly descriptionId: string;
+
+  /**
+   * Property inputId
+   * @readonly
+   *
+   * @description
+   * Identifier of the confirmation field.
+   *
+   * @type {string}
+   */
   protected readonly inputId: string;
 
-  protected readonly typed = signal('');
-  /** The typed text matches `confirmText` (always true without one). */
-  readonly confirmed = computed(() => {
-    const expected = this.confirmText();
+  /**
+   * Property typed
+   * @readonly
+   *
+   * @description
+   * Text typed into the confirmation field.
+   *
+   * @type {WritableSignal<string>}
+   */
+  protected readonly typed: WritableSignal<string> = signal('');
+
+  /**
+   * Property confirmed
+   * @readonly
+   *
+   * @description
+   * Whether the confirmation text matches.
+   *
+   * @type {Signal<boolean>}
+   */
+  public readonly confirmed: Signal<boolean> = computed(() => {
+    const expected: string = this.confirmText();
     return !expected || this.typed().trim() === expected;
   });
 
-  protected readonly state = signal<'open' | 'closed'>('open');
-  protected readonly panelClasses = computed(() => `${PANEL} ${SIZES[this.size()]}`);
-  protected readonly headerClasses = computed(() => HEADERS[this.size()]);
-  protected readonly footerClasses = computed(() => FOOTERS[this.size()]);
-  protected readonly itemsClasses = ITEMS;
-  protected readonly shownItems = computed(() => this.items().slice(0, CW_ALERT_DIALOG_MAX_ITEMS));
-  protected readonly moreCount = computed(() =>
+  /**
+   * Property state
+   * @readonly
+   *
+   * @description
+   * Panel animation state.
+   *
+   * @type {WritableSignal<'open' | 'closed'>}
+   */
+  protected readonly state: WritableSignal<'open' | 'closed'> = signal<'open' | 'closed'>('open');
+
+  /**
+   * Property panelClasses
+   * @readonly
+   *
+   * @description
+   * Panel classes for the current size.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly panelClasses: Signal<string> = computed(
+    () => `${PANEL} ${SIZES[this.size()]}`,
+  );
+
+  /**
+   * Property headerClasses
+   * @readonly
+   *
+   * @description
+   * Header classes for the current size.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly headerClasses: Signal<string> = computed(() => HEADERS[this.size()]);
+
+  /**
+   * Property footerClasses
+   * @readonly
+   *
+   * @description
+   * Footer classes for the current size.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly footerClasses: Signal<string> = computed(() => FOOTERS[this.size()]);
+
+  /**
+   * Property itemsClasses
+   * @readonly
+   *
+   * @description
+   * Classes for the scrollable item list.
+   *
+   * @type {string}
+   */
+  protected readonly itemsClasses: string = ITEMS;
+
+  /**
+   * Property shownItems
+   * @readonly
+   *
+   * @description
+   * Items displayed within the limit.
+   *
+   * @type {Signal<string[]>}
+   */
+  protected readonly shownItems: Signal<string[]> = computed(() =>
+    this.items().slice(0, CW_ALERT_DIALOG_MAX_ITEMS),
+  );
+
+  /**
+   * Property moreCount
+   * @readonly
+   *
+   * @description
+   * Number of items beyond the display limit.
+   *
+   * @type {Signal<number>}
+   */
+  protected readonly moreCount: Signal<number> = computed(() =>
     Math.max(0, this.items().length - CW_ALERT_DIALOG_MAX_ITEMS),
   );
   // Mockup App.dc.html: the field turns invalid once something is typed that does not match.
-  protected readonly mismatch = computed(() => this.typed() !== '' && !this.confirmed());
+  /**
+   * Property mismatch
+   * @readonly
+   *
+   * @description
+   * Whether typed confirmation text does not match.
+   *
+   * @type {Signal<boolean>}
+   */
+  protected readonly mismatch: Signal<boolean> = computed(
+    () => this.typed() !== '' && !this.confirmed(),
+  );
 
-  private readonly template = viewChild.required<TemplateRef<unknown>>('panel');
-  private readonly description = contentChild(CwAlertDialogDescription, { descendants: true });
-  private readonly viewContainerRef = inject(ViewContainerRef);
-  private readonly injector = inject(Injector);
-  private readonly overlay = inject(ɵModalOverlay);
+  /**
+   * Property template
+   * @readonly
+   *
+   * @description
+   * Template attached to the modal overlay.
+   *
+   * @type {Signal<TemplateRef<unknown>>}
+   */
+  private readonly template: Signal<TemplateRef<unknown>> =
+    viewChild.required<TemplateRef<unknown>>('panel');
+
+  /**
+   * Property description
+   * @readonly
+   *
+   * @description
+   * Projected dialog description when present.
+   *
+   * @type {Signal<CwAlertDialogDescription | undefined>}
+   */
+  private readonly description: Signal<CwAlertDialogDescription | undefined> = contentChild(
+    CwAlertDialogDescription,
+    { descendants: true },
+  );
+
+  /**
+   * Property viewContainerRef
+   * @readonly
+   *
+   * @description
+   * Container used to attach the overlay.
+   *
+   * @type {ViewContainerRef}
+   */
+  private readonly viewContainerRef: ViewContainerRef = inject(ViewContainerRef);
+
+  /**
+   * Property injector
+   * @readonly
+   *
+   * @description
+   * Injector used to schedule confirmation handling.
+   *
+   * @type {Injector}
+   */
+  private readonly injector: Injector = inject(Injector);
+
+  /**
+   * Property overlay
+   * @readonly
+   *
+   * @description
+   * Modal overlay hosting the dialog.
+   *
+   * @type {ɵModalOverlay}
+   */
+  private readonly overlay: ɵModalOverlay = inject(ɵModalOverlay);
+
+  /**
+   * Property origin
+   *
+   * @description
+   * Trigger receiving focus after close.
+   *
+   * @type {HTMLElement | null}
+   */
   private origin: HTMLElement | null = null;
-  private keyboardClose = false;
 
-  constructor() {
-    const ids = inject(_IdGenerator);
+  /**
+   * Property keyboardClose
+   *
+   * @description
+   * Whether the dialog closed through Escape.
+   *
+   * @type {boolean}
+   */
+  private keyboardClose: boolean = false;
+  // #endregion
+
+  // #region Constructor
+  /**
+   * Constructor
+   * @constructor
+   *
+   * @description
+   * Initializes identifiers and synchronizes the modal overlay.
+   */
+  public constructor() {
+    const ids: _IdGenerator = inject(_IdGenerator);
     this.titleId = ids.getId('cw-alert-dialog-title-');
     this.descriptionId = ids.getId('cw-alert-dialog-description-');
     this.inputId = ids.getId('cw-alert-dialog-confirm-');
     effect(() => {
-      const open = this.open();
+      const open: boolean = this.open();
       untracked(() => {
         if (open) this.attach();
         else this.detach();
@@ -156,28 +508,54 @@ export class CwAlertDialog implements CwAlertDialogContext {
       this.overlay.dispose();
     });
   }
+  // #endregion
 
-  /** Opens the dialog; focus returns to `origin` (the trigger) when it closes. */
-  show(origin?: HTMLElement): void {
+  // #region Methods
+  /**
+   * Method show
+   *
+   * @description
+   * Opens the dialog and remembers the focus origin.
+   *
+   * @param {HTMLElement} [origin] - Optional trigger receiving focus after the dialog closes.
+   */
+  public show(origin?: HTMLElement): void {
     this.origin = origin ?? null;
     this.open.set(true);
   }
 
-  /** Closes the dialog, even while `pending` (the action has ended). */
-  close(): void {
+  /**
+   * Method close
+   *
+   * @description
+   * Closes the dialog after an action.
+   */
+  public close(): void {
     this.open.set(false);
   }
 
-  /** Cancels on behalf of the user (« Annuler », Escape); ignored while `pending`. */
-  requestCancel(reason: CwAlertDialogCancelReason): void {
+  /**
+   * Method requestCancel
+   *
+   * @description
+   * Cancels the dialog when no action is pending.
+   *
+   * @param {CwAlertDialogCancelReason} reason - User action requesting cancellation.
+   */
+  public requestCancel(reason: CwAlertDialogCancelReason): void {
     if (!this.overlay.attached || this.pending()) return;
     this.keyboardClose = reason === 'escape';
     this.cancel.emit(reason);
     this.open.set(false);
   }
 
-  /** Runs the action when it is enabled, then closes unless the consumer set `pending`. */
-  requestConfirm(): void {
+  /**
+   * Method requestConfirm
+   *
+   * @description
+   * Emits confirmation and closes unless an action is pending.
+   */
+  public requestConfirm(): void {
     if (!this.overlay.attached || this.pending() || !this.confirmed()) return;
     this.confirm.emit();
     // The consumer's `pending` binding reaches this input on the next render: decide then.
@@ -189,17 +567,37 @@ export class CwAlertDialog implements CwAlertDialogContext {
     );
   }
 
+  /**
+   * Method onType
+   *
+   * @description
+   * Updates the typed confirmation text.
+   *
+   * @param {Event} event - Input event containing the typed confirmation text.
+   */
   protected onType(event: Event): void {
     if (event.target instanceof HTMLInputElement) this.typed.set(event.target.value);
   }
 
-  // Mockup App.dc.html: Enter in the confirmation field runs the action once the text matches. Only
-  // there: Enter on the focusable item list must never run a destructive action.
+  /**
+   * Method onEnter
+   *
+   * @description
+   * Requests confirmation from the confirmation field; Enter on the item list does not confirm.
+   *
+   * @param {Event} event - Enter event received by the confirmation field.
+   */
   protected onEnter(event: Event): void {
     event.preventDefault();
     this.requestConfirm();
   }
 
+  /**
+   * Method attach
+   *
+   * @description
+   * Attaches the modal overlay and configures focus.
+   */
   private attach(): void {
     if (this.overlay.attached) return;
     this.state.set('open');
@@ -225,6 +623,12 @@ export class CwAlertDialog implements CwAlertDialogContext {
     });
   }
 
+  /**
+   * Method detach
+   *
+   * @description
+   * Detaches the modal overlay and restores focus.
+   */
   private detach(): void {
     if (!this.overlay.attached) return;
     this.state.set('closed');
@@ -236,10 +640,19 @@ export class CwAlertDialog implements CwAlertDialogContext {
     );
   }
 
+  /**
+   * Method onKeydown
+   *
+   * @description
+   * Handles Escape when it belongs to this dialog.
+   *
+   * @param {KeyboardEvent} event - Keyboard event received by the modal overlay.
+   */
   private onKeydown(event: KeyboardEvent): void {
     if (event.key !== 'Escape' || event.altKey || event.ctrlKey || event.metaKey) return;
     if (this.overlay.escapeBelongsElsewhere(event)) return;
     event.preventDefault();
     this.requestCancel('escape');
   }
+  // #endregion
 }

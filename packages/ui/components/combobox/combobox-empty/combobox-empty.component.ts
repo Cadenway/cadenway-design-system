@@ -3,6 +3,9 @@ import { Component } from '@angular/core';
 import { EMPTY } from '../combobox.styles';
 
 /**
+ * Component CwComboboxEmpty
+ *
+ * @description
  * The message a `cw-combobox` shows when its search matches nothing (« Aucune personne trouvée »),
  * in place of its `emptyText` (Combobox sheet of the Design System artifact).
  *

@@ -1,13 +1,34 @@
 import { InjectionToken, type Signal } from '@angular/core';
 
-/** What the nested parts of a `cw-markdown` read from it. */
+/**
+ * Interface MarkdownContext
+ *
+ * @description
+ * Context provided to nested Markdown renderers.
+ */
 export interface MarkdownContext {
-  /** Word read before a mention by assistive technologies (« mention Karim Benali »). */
+  // #region Properties
+  /**
+   * Property mentionLabel
+   * @readonly
+   *
+   * @description
+   * Word read by assistive technologies before a mention.
+   *
+   * @type {Signal<string>}
+   */
   readonly mentionLabel: Signal<string>;
+  // #endregion
 }
 
 /**
+ * Constant MARKDOWN_CONTEXT
+ *
+ * @description
  * The enclosing `cw-markdown`, for its nested block and inline parts, which import neither it nor
  * each other's parent. Not exported from the entry point.
+ *
+ * @type {InjectionToken<MarkdownContext>}
  */
-export const MARKDOWN_CONTEXT = new InjectionToken<MarkdownContext>('MARKDOWN_CONTEXT');
+export const MARKDOWN_CONTEXT: InjectionToken<MarkdownContext> =
+  new InjectionToken<MarkdownContext>('MARKDOWN_CONTEXT');

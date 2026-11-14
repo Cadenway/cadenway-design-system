@@ -8,7 +8,6 @@
 >
   @if (swimlanes()) {
     <div class="relative min-w-fit flex-1">
-      <!-- The canvas bands of the columns run behind the lane headers (Kanban sheet, "Couloir"). -->
       <div aria-hidden="true" class="absolute inset-0 flex gap-2">
         @for (column of columnViews(); track column.column.id) {
           <div

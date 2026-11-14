@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CwCommand } from './command.component';
@@ -13,6 +13,12 @@ import { CwCommandList } from './command-list/command-list.component';
 import { CwCommandLoading } from './command-loading/command-loading.component';
 import { CwCommandSeparator } from './command-separator/command-separator.component';
 
+/**
+ * Component Host
+ *
+ * @description
+ * Hosts command controls and records their state for the fixture.
+ */
 @Component({
   imports: [
     CwCommand,
@@ -49,33 +55,123 @@ import { CwCommandSeparator } from './command-separator/command-separator.compon
   `,
 })
 class Host {
-  readonly search = signal('');
-  readonly loading = signal(false);
-  readonly loop = signal(true);
-  readonly filter = signal<CwCommandFilter | null>(cwCommandFuzzyFilter);
-  readonly ran = signal<string | null>(null);
+  // #region Properties
+  /**
+   * Property search
+   *
+   * @description
+   * Current search text controlled by the fixture.
+   *
+   * @type {WritableSignal<string>}
+   * @readonly
+   */
+  public readonly search: WritableSignal<string> = signal('');
+
+  /**
+   * Property loading
+   *
+   * @description
+   * Whether the fixture simulates a pending search.
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  public readonly loading: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property loop
+   *
+   * @description
+   * Whether keyboard navigation wraps.
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  public readonly loop: WritableSignal<boolean> = signal(true);
+
+  /**
+   * Property filter
+   *
+   * @description
+   * Filter function configured by the fixture.
+   *
+   * @type {WritableSignal<CwCommandFilter | null>}
+   * @readonly
+   */
+  public readonly filter: WritableSignal<CwCommandFilter | null> = signal<CwCommandFilter | null>(
+    cwCommandFuzzyFilter,
+  );
+
+  /**
+   * Property ran
+   *
+   * @description
+   * Last command value selected in the fixture.
+   *
+   * @type {WritableSignal<string | null>}
+   * @readonly
+   */
+  public readonly ran: WritableSignal<string | null> = signal<string | null>(null);
+  // #endregion
 }
 
+/**
+ * Function field
+ *
+ * @description
+ * Finds the native command search field.
+ *
+ * @param {HTMLElement} host - Fixture containing command controls.
+ * @returns {HTMLInputElement} Native command search input.
+ */
 function field(host: HTMLElement): HTMLInputElement {
-  const found = host.querySelector<HTMLInputElement>('input[role="combobox"]');
+  const found: HTMLInputElement | null =
+    host.querySelector<HTMLInputElement>('input[role="combobox"]');
   if (!found) throw new Error('No combobox');
   return found;
 }
 
+/**
+ * Function shownOptions
+ *
+ * @description
+ * Collects visible option text in the fixture.
+ *
+ * @param {HTMLElement} host - Fixture containing command controls.
+ * @returns {string[]} Visible option texts in document order.
+ */
 function shownOptions(host: HTMLElement): string[] {
   return Array.from(host.querySelectorAll<HTMLElement>('[role="option"]'))
     .filter((option) => !option.hidden)
     .map((option) => option.textContent.trim());
 }
 
+/**
+ * Function shownGroups
+ *
+ * @description
+ * Collects names of visible command groups.
+ *
+ * @param {HTMLElement} host - Fixture containing command controls.
+ * @returns {string[]} Visible group names in document order.
+ */
 function shownGroups(host: HTMLElement): string[] {
   return Array.from(host.querySelectorAll<HTMLElement>('[role="group"]'))
     .filter((group) => !group.hidden)
     .map((group) => group.getAttribute('aria-label') ?? '');
 }
 
+/**
+ * Function highlighted
+ *
+ * @description
+ * Finds the text of the active descendant.
+ *
+ * @param {HTMLElement} host - Fixture containing command controls.
+ * @returns {string | undefined} Highlighted option text, or undefined when absent.
+ */
 function highlighted(host: HTMLElement): string | undefined {
-  const id = field(host).getAttribute('aria-activedescendant');
+  const id: string | null = field(host).getAttribute('aria-activedescendant');
   return id ? host.querySelector(`#${id}`)?.textContent.trim() : undefined;
 }
 
@@ -84,15 +180,37 @@ describe('CwCommand', () => {
   let host: HTMLElement;
   let component: Host;
 
+  /**
+   * Function type
+   *
+   * @description
+   * Enters search text in the fixture field.
+   *
+   * @param {string} text - Search text to enter.
+   * @returns {Promise<void>} Promise resolved after the fixture updates.
+   */
   async function type(text: string): Promise<void> {
-    const input = field(host);
+    const input: HTMLInputElement = field(host);
     input.value = text;
     input.dispatchEvent(new Event('input'));
     await fixture.whenStable();
   }
 
+  /**
+   * Function press
+   *
+   * @description
+   * Dispatches a keyboard event to the search field.
+   *
+   * @param {string} key - Keyboard key to dispatch.
+   * @returns {Promise<KeyboardEvent>} Dispatched keyboard event after the fixture updates.
+   */
   async function press(key: string): Promise<KeyboardEvent> {
-    const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+    const event: KeyboardEvent = new KeyboardEvent('keydown', {
+      key,
+      bubbles: true,
+      cancelable: true,
+    });
     field(host).dispatchEvent(event);
     await fixture.whenStable();
     return event;
@@ -107,8 +225,8 @@ describe('CwCommand', () => {
   });
 
   it('wires the field to the listbox and highlights the first result', () => {
-    const input = field(host);
-    const list = host.querySelector('[role="listbox"]');
+    const input: HTMLInputElement = field(host);
+    const list: Element | null = host.querySelector('[role="listbox"]');
     expect(list?.getAttribute('aria-label')).toBe('Résultats');
     expect(input.getAttribute('aria-controls')).toBe(list?.id);
     expect(highlighted(host)).toBe('Créer une tâche');
@@ -152,11 +270,13 @@ describe('CwCommand', () => {
 
   it('runs the highlighted item on Enter and an item on click', async () => {
     await press('ArrowDown');
-    const enter = await press('Enter');
+    const enter: KeyboardEvent = await press('Enter');
     expect(enter.defaultPrevented).toBe(true);
     expect(component.ran()).toBe('Supprimer la tâche');
 
-    const options = Array.from(host.querySelectorAll<HTMLElement>('[role="option"]'));
+    const options: HTMLElement[] = Array.from(
+      host.querySelectorAll<HTMLElement>('[role="option"]'),
+    );
     options.at(3)?.click();
     expect(component.ran()).toBe('export-csv');
 
@@ -167,7 +287,7 @@ describe('CwCommand', () => {
 
   it('clears the search on Escape before anything else', async () => {
     await type('csv');
-    const escape = await press('Escape');
+    const escape: KeyboardEvent = await press('Escape');
 
     expect(escape.defaultPrevented).toBe(true);
     expect(component.search()).toBe('');
@@ -178,7 +298,7 @@ describe('CwCommand', () => {
     await type('facturation');
 
     expect(shownOptions(host)).toEqual([]);
-    const empty = host.querySelector<HTMLElement>('cw-command-empty');
+    const empty: HTMLElement | null = host.querySelector<HTMLElement>('cw-command-empty');
     expect(empty?.hidden).toBe(false);
     expect(empty?.textContent.trim()).toBe('Aucun résultat pour « facturation »');
   });
@@ -190,7 +310,7 @@ describe('CwCommand', () => {
 
     expect(shownOptions(host)).toHaveLength(4);
     expect(host.querySelector('cw-command')?.getAttribute('aria-busy')).toBe('true');
-    const loading = host.querySelector<HTMLElement>('cw-command-loading');
+    const loading: HTMLElement | null = host.querySelector<HTMLElement>('cw-command-loading');
     expect(loading?.hidden).toBe(false);
     expect(loading?.textContent.trim()).toBe('Recherche…');
     expect(host.querySelector<HTMLElement>('cw-command-empty')?.hidden).toBe(true);

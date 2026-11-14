@@ -1,10 +1,22 @@
-import { Component, computed, contentChildren, input } from '@angular/core';
+import {
+  Component,
+  computed,
+  contentChildren,
+  input,
+  type InputSignal,
+  type Signal,
+} from '@angular/core';
 
 import type { CwButtonGroupOrientation } from './button-group.types';
 
-/* Literal class strings (Button Group sheet and preview of the Design System artifact), so Tailwind
-   finds them in the compiled package. Welded: inner corners cancelled, shared borders merged, the
-   focused button above its neighbors so its ring shows whole. A group of groups only spaces them. */
+/**
+ * Constant WELDED
+ *
+ * @description
+ * Literal classes joining adjacent controls and preserving the focused control's complete ring.
+ *
+ * @type {Record<CwButtonGroupOrientation, string>}
+ */
 const WELDED: Record<CwButtonGroupOrientation, string> = {
   horizontal:
     'flex w-fit items-stretch [&>*]:focus-visible:z-10 [&>*:not(:first-child)]:rounded-l-none [&>*:not(:first-child)]:border-l-0 [&>*:not(:last-child)]:rounded-r-none',
@@ -12,12 +24,24 @@ const WELDED: Record<CwButtonGroupOrientation, string> = {
     'flex w-fit flex-col items-stretch [&>*]:focus-visible:z-10 [&>*:not(:first-child)]:rounded-t-none [&>*:not(:first-child)]:border-t-0 [&>*:not(:last-child)]:rounded-b-none',
 };
 
+/**
+ * Constant NESTED
+ *
+ * @description
+ * Layout classes spacing nested groups instead of welding their controls together.
+ *
+ * @type {Record<CwButtonGroupOrientation, string>}
+ */
 const NESTED: Record<CwButtonGroupOrientation, string> = {
   horizontal: 'flex w-fit items-center gap-2',
   vertical: 'flex w-fit flex-col items-start gap-2',
 };
 
 /**
+ * Class CwButtonGroup
+ * @class CwButtonGroup
+ *
+ * @description
  * Welds two to four related buttons into one block: the split « Créer une tâche ▾ » button, Filtrer
  * / Trier / Grouper, the sprint navigation (Button Group sheet of the Design System artifact).
  *
@@ -38,14 +62,53 @@ const NESTED: Record<CwButtonGroupOrientation, string> = {
   templateUrl: './button-group.component.html',
 })
 export class CwButtonGroup {
-  /** Direction of the group; the separator takes the other one. */
-  readonly orientation = input<CwButtonGroupOrientation>('horizontal');
-  /** Accessible name of the group (« Navigation de sprint »); required. */
-  readonly ariaLabel = input.required<string>();
+  // #region Properties
+  /**
+   * Property orientation
+   * @readonly
+   *
+   * @description
+   * Input selecting the group's direction; its separator takes the opposite orientation.
+   *
+   * @type {InputSignal<CwButtonGroupOrientation>}
+   * @default 'horizontal'
+   */
+  public readonly orientation: InputSignal<CwButtonGroupOrientation> =
+    input<CwButtonGroupOrientation>('horizontal');
 
-  private readonly nested = contentChildren(CwButtonGroup);
+  /**
+   * Property ariaLabel
+   * @readonly
+   *
+   * @description
+   * Required accessible name for the group.
+   *
+   * @type {InputSignal<string>}
+   */
+  public readonly ariaLabel: InputSignal<string> = input.required<string>();
 
-  protected readonly classes = computed(() =>
+  /**
+   * Property nested
+   * @readonly
+   *
+   * @description
+   * Projected child groups; their presence selects spaced rather than welded layout.
+   *
+   * @type {Signal<readonly CwButtonGroup[]>}
+   */
+  private readonly nested: Signal<readonly CwButtonGroup[]> = contentChildren(CwButtonGroup);
+
+  /**
+   * Property classes
+   * @readonly
+   *
+   * @description
+   * Computed layout classes for the selected orientation and nesting state.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly classes: Signal<string> = computed(() =>
     this.nested().length > 0 ? NESTED[this.orientation()] : WELDED[this.orientation()],
   );
+  // #endregion
 }

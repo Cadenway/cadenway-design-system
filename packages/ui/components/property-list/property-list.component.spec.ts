@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { CwInlineEdit } from '@cadenway/ui/components/inline-edit';
 import { CwSelect, CwSelectOption } from '@cadenway/ui/components/select';
@@ -8,9 +8,18 @@ import { CwPropertyGroup } from './property-group/property-group.component';
 import { CwPropertyList } from './property-list.component';
 import { CwPropertyValue } from './property-value/property-value.directive';
 
-/** The accessible name given by `aria-labelledby`, else `aria-label`, else the text. */
+/**
+ * Function nameOf
+ *
+ * @description
+ * Reads an element name from its labelledby references, label or text.
+ *
+ * @param {Element} element - Element whose accessible name references are read.
+ *
+ * @returns {string} Text from aria-labelledby, aria-label or the element content.
+ */
 function nameOf(element: Element): string {
-  const ids = element.getAttribute('aria-labelledby');
+  const ids: string | null = element.getAttribute('aria-labelledby');
   if (ids) {
     return ids
       .split(' ')
@@ -20,14 +29,31 @@ function nameOf(element: Element): string {
   return element.getAttribute('aria-label') ?? element.textContent.trim();
 }
 
+/**
+ * Function control
+ *
+ * @description
+ * Finds a property control by accessible name.
+ *
+ * @param {HTMLElement} host - Container holding candidate controls.
+ * @param {string} name - Expected accessible name.
+ *
+ * @returns {HTMLElement} Matching button or input.
+ */
 function control(host: HTMLElement, name: string): HTMLElement {
-  const found = Array.from(host.querySelectorAll<HTMLElement>('button, input')).find(
-    (element) => nameOf(element) === name,
-  );
+  const found: HTMLElement | undefined = Array.from(
+    host.querySelectorAll<HTMLElement>('button, input'),
+  ).find((element) => nameOf(element) === name);
   if (!found) throw new Error(`No control named ${name}`);
   return found;
 }
 
+/**
+ * Component Host
+ *
+ * @description
+ * Exercises property lists with editable and read-only controls.
+ */
 @Component({
   imports: [
     CwPropertyList,
@@ -77,14 +103,95 @@ function control(host: HTMLElement, name: string): HTMLElement {
   `,
 })
 class Host {
-  readonly status = signal<string | null>('progress');
-  readonly statusOpen = signal(false);
-  readonly sprintOpen = signal(false);
-  readonly estimate = signal('3 h');
-  readonly estimateError = signal<string | null>(null);
-  readonly version = signal<string | null>(null);
-  readonly showEmpty = signal(false);
-  readonly added = signal(0);
+  // #region Properties
+  /**
+   * Property status
+   * @readonly
+   *
+   * @description
+   * Selected status.
+   *
+   * @type {WritableSignal<string | null>}
+   */
+  public readonly status: WritableSignal<string | null> = signal<string | null>('progress');
+
+  /**
+   * Property statusOpen
+   * @readonly
+   *
+   * @description
+   * Whether the status select is open.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly statusOpen: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property sprintOpen
+   * @readonly
+   *
+   * @description
+   * Whether the sprint select is open.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly sprintOpen: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property estimate
+   * @readonly
+   *
+   * @description
+   * Current estimate value.
+   *
+   * @type {WritableSignal<string>}
+   */
+  public readonly estimate: WritableSignal<string> = signal('3 h');
+
+  /**
+   * Property estimateError
+   * @readonly
+   *
+   * @description
+   * Validation message for the estimate.
+   *
+   * @type {WritableSignal<string | null>}
+   */
+  public readonly estimateError: WritableSignal<string | null> = signal<string | null>(null);
+
+  /**
+   * Property version
+   * @readonly
+   *
+   * @description
+   * Selected version.
+   *
+   * @type {WritableSignal<string | null>}
+   */
+  public readonly version: WritableSignal<string | null> = signal<string | null>(null);
+
+  /**
+   * Property showEmpty
+   * @readonly
+   *
+   * @description
+   * Whether empty properties are shown.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly showEmpty: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property added
+   * @readonly
+   *
+   * @description
+   * Number of add-field requests.
+   *
+   * @type {WritableSignal<number>}
+   */
+  public readonly added: WritableSignal<number> = signal(0);
+  // #endregion
 }
 
 describe('CwPropertyList', () => {
@@ -101,14 +208,16 @@ describe('CwPropertyList', () => {
   });
 
   it('lays out the labels and values as description terms in named groups', () => {
-    const terms = Array.from(host.querySelectorAll('dt')).map((term) => term.textContent.trim());
+    const terms: string[] = Array.from(host.querySelectorAll('dt')).map((term) =>
+      term.textContent.trim(),
+    );
     expect(terms).toEqual(['Statut', 'Estimation', 'Sprint', 'Version']);
-    const groups = Array.from(host.querySelectorAll('[role="group"]')).map(nameOf);
+    const groups: string[] = Array.from(host.querySelectorAll('[role="group"]')).map(nameOf);
     expect(groups).toEqual(['Propriétés', 'Champs personnalisés']);
   });
 
   it('names each value « label value » and keeps the control working', async () => {
-    const status = control(host, 'Statut En cours');
+    const status: HTMLElement = control(host, 'Statut En cours');
     expect(control(host, 'Estimation 3 h').tagName).toBe('BUTTON');
 
     status.click();
@@ -118,8 +227,8 @@ describe('CwPropertyList', () => {
   });
 
   it('folds the empty properties behind « Champs vides » and shows them back', async () => {
-    const toggle = Array.from(host.querySelectorAll('button')).find((button) =>
-      button.textContent.includes('Champs vides'),
+    const toggle: HTMLButtonElement | undefined = Array.from(host.querySelectorAll('button')).find(
+      (button) => button.textContent.includes('Champs vides'),
     );
     expect(toggle?.textContent.replace(/\s+/g, ' ').trim()).toBe('Champs vides1');
     expect(toggle?.getAttribute('aria-expanded')).toBe('false');
@@ -134,7 +243,7 @@ describe('CwPropertyList', () => {
   });
 
   it('keeps a read-only value out of the tab order and closed', async () => {
-    const sprint = control(host, 'Sprint Sprint 14');
+    const sprint: HTMLElement = control(host, 'Sprint Sprint 14');
     expect(sprint.tabIndex).toBe(-1);
     expect(host.textContent).toContain('Lecture seule');
 
@@ -149,9 +258,9 @@ describe('CwPropertyList', () => {
     component.estimateError.set('Saisissez une durée.');
     await fixture.whenStable();
 
-    const estimate = control(host, 'Estimation 3 h');
+    const estimate: HTMLElement = control(host, 'Estimation 3 h');
     expect(estimate.getAttribute('aria-invalid')).toBe('true');
-    const described = (estimate.getAttribute('aria-describedby') ?? '').split(' ')[0] ?? '';
+    const described: string = (estimate.getAttribute('aria-describedby') ?? '').split(' ')[0] ?? '';
     expect(document.getElementById(described)?.textContent.trim()).toBe('Saisissez une durée.');
   });
 

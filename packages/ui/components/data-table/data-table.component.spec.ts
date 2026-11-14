@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CwCellDef } from './cell/cell.directive';
@@ -15,13 +15,68 @@ import type {
   CwSort,
 } from './data-table.types';
 
+/**
+ * Interface Task
+ *
+ * @description
+ * Row data used by the table fixture.
+ */
 interface Task {
+  // #region Properties
+  /**
+   * Property id
+   *
+   * @description
+   * Stable task identifier.
+   *
+   * @type {string}
+   * @readonly
+   */
   readonly id: string;
+
+  /**
+   * Property name
+   *
+   * @description
+   * Displayed task name.
+   *
+   * @type {string}
+   * @readonly
+   */
   readonly name: string;
+
+  /**
+   * Property status
+   *
+   * @description
+   * Task status used for grouping.
+   *
+   * @type {string}
+   * @readonly
+   */
   readonly status: string;
+
+  /**
+   * Property estimate
+   *
+   * @description
+   * Task estimate used for numeric sorting.
+   *
+   * @type {number}
+   * @readonly
+   */
   readonly estimate: number;
+  // #endregion
 }
 
+/**
+ * Constant TASKS
+ *
+ * @description
+ * Rows supplied to the table fixture.
+ *
+ * @type {readonly Task[]}
+ */
 const TASKS: readonly Task[] = [
   { id: 'CAD-482', name: "Corriger l'export CSV", status: 'progress', estimate: 3 },
   { id: 'CAD-479', name: 'Maquetter la vue Calendrier', status: 'progress', estimate: 5 },
@@ -29,11 +84,25 @@ const TASKS: readonly Task[] = [
   { id: 'CAD-488', name: 'Importer les espaces', status: 'todo', estimate: 2 },
 ];
 
+/**
+ * Constant ACTIONS
+ *
+ * @description
+ * Bulk actions supplied to the table fixture.
+ *
+ * @type {readonly CwBulkAction[]}
+ */
 const ACTIONS: readonly CwBulkAction[] = [
   { id: 'status', label: 'Statut', shortcut: 'S' },
   { id: 'delete', label: 'Supprimer', shortcut: 'Delete', variant: 'destructive' },
 ];
 
+/**
+ * Component Host
+ *
+ * @description
+ * Hosts the table and records emitted interactions.
+ */
 @Component({
   imports: [CwDataTable, CwDataTableColumn, CwCellDef, CwCellEditorDef, CwDataTableEmpty],
   template: `
@@ -84,27 +153,225 @@ const ACTIONS: readonly CwBulkAction[] = [
   `,
 })
 class Host {
-  readonly data = signal<readonly Task[]>(TASKS);
-  readonly groupBy = signal<string | null>(null);
-  readonly page = signal<number | null>(null);
-  readonly pageSize = signal(50);
-  readonly loading = signal(false);
-  readonly projectEmpty = signal(false);
-  readonly sort = signal<readonly CwSort[]>([]);
-  readonly selection = signal<CwDataTableSelection>([]);
-  readonly collapsed = signal<readonly string[]>([]);
-  readonly widths = signal<Readonly<Record<string, number>>>({});
-  readonly order = signal<readonly string[]>([]);
-  readonly visibility = signal<Readonly<Record<string, boolean>>>({});
-  readonly opened = signal<Task | null>(null);
-  readonly edits: CwCellEditEvent<Task>[] = [];
-  readonly bulk: CwBulkActionEvent[] = [];
-  readonly resizes: CwColumnResizeEvent[] = [];
-  readonly actions = ACTIONS;
-  readonly groupLabel = (key: string): string =>
+  // #region Properties
+  /**
+   * Property data
+   *
+   * @description
+   * Rows displayed by the table.
+   *
+   * @type {WritableSignal<readonly Task[]>}
+   * @readonly
+   */
+  public readonly data: WritableSignal<readonly Task[]> = signal<readonly Task[]>(TASKS);
+
+  /**
+   * Property groupBy
+   *
+   * @description
+   * Column used for grouping.
+   *
+   * @type {WritableSignal<string | null>}
+   * @readonly
+   */
+  public readonly groupBy: WritableSignal<string | null> = signal<string | null>(null);
+
+  /**
+   * Property page
+   *
+   * @description
+   * Current page controlled by the fixture.
+   *
+   * @type {WritableSignal<number | null>}
+   * @readonly
+   */
+  public readonly page: WritableSignal<number | null> = signal<number | null>(null);
+
+  /**
+   * Property pageSize
+   *
+   * @description
+   * Rows per page.
+   *
+   * @type {WritableSignal<number>}
+   * @readonly
+   */
+  public readonly pageSize: WritableSignal<number> = signal(50);
+
+  /**
+   * Property loading
+   *
+   * @description
+   * Whether the loading state is displayed.
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  public readonly loading: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property projectEmpty
+   *
+   * @description
+   * Whether custom empty-state content is projected.
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  public readonly projectEmpty: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property sort
+   *
+   * @description
+   * Sort criteria controlled by the fixture.
+   *
+   * @type {WritableSignal<readonly CwSort[]>}
+   * @readonly
+   */
+  public readonly sort: WritableSignal<readonly CwSort[]> = signal<readonly CwSort[]>([]);
+
+  /**
+   * Property selection
+   *
+   * @description
+   * Selected row identifiers.
+   *
+   * @type {WritableSignal<CwDataTableSelection>}
+   * @readonly
+   */
+  public readonly selection: WritableSignal<CwDataTableSelection> = signal<CwDataTableSelection>(
+    [],
+  );
+
+  /**
+   * Property collapsed
+   *
+   * @description
+   * Folded group identifiers.
+   *
+   * @type {WritableSignal<readonly string[]>}
+   * @readonly
+   */
+  public readonly collapsed: WritableSignal<readonly string[]> = signal<readonly string[]>([]);
+
+  /**
+   * Property widths
+   *
+   * @description
+   * Column widths controlled by the fixture.
+   *
+   * @type {WritableSignal<Readonly<Record<string, number>>>}
+   * @readonly
+   */
+  public readonly widths: WritableSignal<Readonly<Record<string, number>>> = signal<
+    Readonly<Record<string, number>>
+  >({});
+
+  /**
+   * Property order
+   *
+   * @description
+   * Column order controlled by the fixture.
+   *
+   * @type {WritableSignal<readonly string[]>}
+   * @readonly
+   */
+  public readonly order: WritableSignal<readonly string[]> = signal<readonly string[]>([]);
+
+  /**
+   * Property visibility
+   *
+   * @description
+   * Column visibility controlled by the fixture.
+   *
+   * @type {WritableSignal<Readonly<Record<string, boolean>>>}
+   * @readonly
+   */
+  public readonly visibility: WritableSignal<Readonly<Record<string, boolean>>> = signal<
+    Readonly<Record<string, boolean>>
+  >({});
+
+  /**
+   * Property opened
+   *
+   * @description
+   * Last row opened by the table.
+   *
+   * @type {WritableSignal<Task | null>}
+   * @readonly
+   */
+  public readonly opened: WritableSignal<Task | null> = signal<Task | null>(null);
+
+  /**
+   * Property edits
+   *
+   * @description
+   * Cell edits emitted by the table.
+   *
+   * @type {CwCellEditEvent<Task>[]}
+   * @readonly
+   */
+  public readonly edits: CwCellEditEvent<Task>[] = [];
+
+  /**
+   * Property bulk
+   *
+   * @description
+   * Bulk actions emitted by the table.
+   *
+   * @type {CwBulkActionEvent[]}
+   * @readonly
+   */
+  public readonly bulk: CwBulkActionEvent[] = [];
+
+  /**
+   * Property resizes
+   *
+   * @description
+   * Column resizes emitted by the table.
+   *
+   * @type {CwColumnResizeEvent[]}
+   * @readonly
+   */
+  public readonly resizes: CwColumnResizeEvent[] = [];
+
+  /**
+   * Property actions
+   *
+   * @description
+   * Bulk actions available in the fixture.
+   *
+   * @type {readonly CwBulkAction[]}
+   * @readonly
+   */
+  public readonly actions: readonly CwBulkAction[] = ACTIONS;
+
+  /**
+   * Property groupLabel
+   *
+   * @description
+   * Formats a group label for the fixture.
+   *
+   * @type {(key: string) => string}
+   * @readonly
+   */
+  public readonly groupLabel: (key: string) => string = (key: string): string =>
     ({ progress: 'En cours', blocked: 'Bloqué', todo: 'À faire' })[key] ?? key;
+  // #endregion
 }
 
+/**
+ * Function byRole
+ *
+ * @description
+ * Finds elements with a role and optional accessible name.
+ *
+ * @param {HTMLElement} root - Fixture element to search.
+ * @param {string} role - ARIA role to find.
+ * @param {string} name - Accessible name to find, when provided.
+ * @returns {HTMLElement[]} Matching elements.
+ */
 function byRole(root: HTMLElement, role: string, name?: string): HTMLElement[] {
   return Array.from(root.querySelectorAll<HTMLElement>(`[role="${role}"]`)).filter(
     (element) =>
@@ -114,36 +381,101 @@ function byRole(root: HTMLElement, role: string, name?: string): HTMLElement[] {
   );
 }
 
+/**
+ * Function one
+ *
+ * @description
+ * Finds one element by role and accessible name.
+ *
+ * @param {HTMLElement} root - Fixture element to search.
+ * @param {string} role - ARIA role to find.
+ * @param {string} name - Accessible name to find, when provided.
+ * @returns {HTMLElement} Matching element.
+ */
 function one(root: HTMLElement, role: string, name: string): HTMLElement {
-  const found = byRole(root, role, name).at(0);
+  const found: HTMLElement | undefined = byRole(root, role, name).at(0);
   if (!found) throw new Error(`No ${role} named ${name}`);
   return found;
 }
 
+/**
+ * Function button
+ *
+ * @description
+ * Finds a button by accessible name.
+ *
+ * @param {HTMLElement} root - Fixture element to search.
+ * @param {string} name - Accessible name to find, when provided.
+ * @returns {HTMLButtonElement} Matching button.
+ */
 function button(root: HTMLElement, name: string): HTMLButtonElement {
-  const found = Array.from(root.querySelectorAll('button')).find((element) => {
-    const label = element.getAttribute('aria-label') ?? element.textContent.replace(/\s+/g, ' ');
-    return label.trim().startsWith(name);
-  });
+  const found: HTMLButtonElement | undefined = Array.from(root.querySelectorAll('button')).find(
+    (element) => {
+      const label: string =
+        element.getAttribute('aria-label') ?? element.textContent.replace(/\s+/g, ' ');
+      return label.trim().startsWith(name);
+    },
+  );
   if (!found) throw new Error(`No button named ${name}`);
   return found;
 }
 
+/**
+ * Function dataRows
+ *
+ * @description
+ * Finds rendered data rows.
+ *
+ * @param {HTMLElement} root - Fixture element to search.
+ * @returns {HTMLElement[]} Rendered data row elements.
+ */
 function dataRows(root: HTMLElement): HTMLElement[] {
   return byRole(root, 'row').filter((row) => row.hasAttribute('aria-selected'));
 }
 
+/**
+ * Function names
+ *
+ * @description
+ * Reads displayed task names from the table.
+ *
+ * @param {HTMLElement} root - Fixture element to search.
+ * @returns {string[]} Displayed task names.
+ */
 function names(root: HTMLElement): string[] {
   return dataRows(root).map((row) => byRole(row, 'gridcell')[1]?.textContent.trim() ?? '');
 }
 
+/**
+ * Function required
+ *
+ * @description
+ * Returns a value or fails the test when it is missing.
+ *
+ * @param {V | null | undefined} value - Value that must be present.
+ * @returns {V} Non-null value.
+ */
 function required<V>(value: V | null | undefined): V {
   if (value === null || value === undefined) throw new Error('Missing element');
   return value;
 }
 
+/**
+ * Function key
+ *
+ * @description
+ * Dispatches a keyboard event to an element.
+ *
+ * @param {Element} target - Element receiving the keyboard event.
+ * @param {KeyboardEventInit} init - Keyboard event options.
+ * @returns {KeyboardEvent} Dispatched keyboard event.
+ */
 function key(target: Element, init: KeyboardEventInit): KeyboardEvent {
-  const event = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, ...init });
+  const event: KeyboardEvent = new KeyboardEvent('keydown', {
+    bubbles: true,
+    cancelable: true,
+    ...init,
+  });
   target.dispatchEvent(event);
   return event;
 }
@@ -161,13 +493,20 @@ describe('CwDataTable', () => {
     await fixture.whenStable();
   });
 
+  /**
+   * Function stable
+   *
+   * @description
+   * Waits for the fixture to settle.
+   * @returns {Promise<void>} Promise resolved when the fixture settles.
+   */
   async function stable(): Promise<void> {
     await fixture.whenStable();
   }
 
   describe('rows and columns', () => {
     it('renders a named grid with a header and one row per item', () => {
-      const grid = one(host, 'grid', 'Tâches de Produit');
+      const grid: HTMLElement = one(host, 'grid', 'Tâches de Produit');
       expect(grid.getAttribute('aria-multiselectable')).toBe('true');
       expect(grid.getAttribute('aria-rowcount')).toBe('5');
       expect(grid.getAttribute('aria-colcount')).toBe('4');
@@ -181,7 +520,7 @@ describe('CwDataTable', () => {
     });
 
     it('renders the default cell from the row value', () => {
-      const [first] = dataRows(host);
+      const [first]: HTMLElement[] = dataRows(host);
       expect(byRole(first, 'gridcell')[3].textContent.trim()).toBe('3');
     });
 
@@ -209,7 +548,7 @@ describe('CwDataTable', () => {
 
   describe('sorting', () => {
     it('cycles ascending, descending, then no sort on click', async () => {
-      const sortButton = (): HTMLButtonElement => button(host, 'Nom');
+      const sortButton: () => HTMLButtonElement = (): HTMLButtonElement => button(host, 'Nom');
       sortButton().click();
       await stable();
       expect(component.sort()).toEqual([{ key: 'name', dir: 'asc' }]);
@@ -247,7 +586,7 @@ describe('CwDataTable', () => {
         'Maquetter la vue Calendrier',
         'Importer les espaces',
       ]);
-      const estimate = byRole(host, 'columnheader').find(
+      const estimate: HTMLElement | undefined = byRole(host, 'columnheader').find(
         (th) => th.dataset['cwCol'] === 'estimate',
       );
       expect(estimate?.hasAttribute('aria-sort')).toBe(false);
@@ -261,7 +600,7 @@ describe('CwDataTable', () => {
       await stable();
       expect(component.selection()).toEqual(['CAD-479']);
       expect(dataRows(host)[1].getAttribute('aria-selected')).toBe('true');
-      const all = one(host, 'checkbox', 'Tout sélectionner sur la page');
+      const all: HTMLElement = one(host, 'checkbox', 'Tout sélectionner sur la page');
       expect(all.getAttribute('aria-checked')).toBe('mixed');
 
       all.click();
@@ -310,7 +649,7 @@ describe('CwDataTable', () => {
       expect(button(host, 'En cours').getAttribute('aria-expanded')).toBe('false');
       expect(names(host)).toEqual(['Migrer les pièces jointes', 'Importer les espaces']);
 
-      const blockedCell = required(
+      const blockedCell: HTMLElement = required(
         button(host, 'Bloqué').closest<HTMLElement>('[role="gridcell"]'),
       );
       key(blockedCell, { key: 'ArrowLeft' });
@@ -340,12 +679,24 @@ describe('CwDataTable', () => {
   });
 
   describe('keyboard', () => {
+    /**
+     * Function cell
+     *
+     * @description
+     * Finds a cell by row and column index.
+     *
+     * @param {number} row - Row index.
+     * @param {number} column - Column index.
+     * @returns {HTMLElement} Matching grid cell.
+     */
     function cell(row: number, column: number): HTMLElement {
       return byRole(dataRows(host)[row], 'gridcell')[column];
     }
 
     it('keeps a single tab stop and moves it with the arrows', async () => {
-      const tabStops = Array.from(host.querySelectorAll<HTMLElement>('[tabindex="0"]'));
+      const tabStops: HTMLElement[] = Array.from(
+        host.querySelectorAll<HTMLElement>('[tabindex="0"]'),
+      );
       expect(tabStops).toHaveLength(1);
       expect(tabStops[0]).toBe(cell(0, 0));
 
@@ -361,7 +712,7 @@ describe('CwDataTable', () => {
       expect(document.activeElement?.getAttribute('role')).toBe('columnheader');
       await stable();
       // One cell keeps the tab stop; the controls of that header cell (its resize handle) follow it with Tab.
-      const cells = host.querySelectorAll(
+      const cells: NodeListOf<Element> = host.querySelectorAll(
         '[role="gridcell"][tabindex="0"], [role="columnheader"][tabindex="0"]',
       );
       expect(cells).toHaveLength(1);
@@ -391,6 +742,15 @@ describe('CwDataTable', () => {
   });
 
   describe('editing', () => {
+    /**
+     * Function nameCell
+     *
+     * @description
+     * Finds the name cell in a row.
+     *
+     * @param {number} row - Row index.
+     * @returns {HTMLElement} Name cell in the row.
+     */
     function nameCell(row: number): HTMLElement {
       return byRole(dataRows(host)[row], 'gridcell')[1];
     }
@@ -398,7 +758,9 @@ describe('CwDataTable', () => {
     it('opens the editor with F2 and emits cellEdit on commit', async () => {
       key(nameCell(0), { key: 'F2' });
       await stable();
-      const field = host.querySelector<HTMLInputElement>('input[aria-label="Nom de la tâche"]');
+      const field: HTMLInputElement | null = host.querySelector<HTMLInputElement>(
+        'input[aria-label="Nom de la tâche"]',
+      );
       expect(field).toBeTruthy();
       expect(nameCell(0).hasAttribute('data-editing')).toBe(true);
       expect(document.activeElement).toBe(field);
@@ -415,7 +777,9 @@ describe('CwDataTable', () => {
     it('cancels with Escape', async () => {
       nameCell(1).dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
       await stable();
-      const field = host.querySelector<HTMLInputElement>('input[aria-label="Nom de la tâche"]');
+      const field: HTMLInputElement | null = host.querySelector<HTMLInputElement>(
+        'input[aria-label="Nom de la tâche"]',
+      );
       key(required(field), { key: 'Escape' });
       await stable();
       expect(host.querySelector('input[aria-label="Nom de la tâche"]')).toBeNull();
@@ -429,17 +793,17 @@ describe('CwDataTable', () => {
       one(host, 'checkbox', 'Sélectionner CAD-482').click();
       one(host, 'checkbox', 'Sélectionner CAD-488').click();
       await stable();
-      const bar = one(host, 'toolbar', 'Actions sur la sélection');
+      const bar: HTMLElement = one(host, 'toolbar', 'Actions sur la sélection');
       expect(bar.textContent).toContain('2 tâches sélectionnées');
 
-      const status = button(bar, 'Statut');
+      const status: HTMLButtonElement = button(bar, 'Statut');
       expect(status.getAttribute('aria-keyshortcuts')).toBe('S');
       status.click();
       expect(component.bulk).toEqual([
         { action: 'status', ids: ['CAD-482', 'CAD-488'], trigger: status },
       ]);
 
-      const cell = byRole(dataRows(host)[0], 'gridcell')[2];
+      const cell: HTMLElement = byRole(dataRows(host)[0], 'gridcell')[2];
       key(cell, { key: 'Delete' });
       expect(component.bulk[1]?.action).toBe('delete');
 
@@ -452,7 +816,7 @@ describe('CwDataTable', () => {
 
   describe('columns', () => {
     it('resizes a column from its handle with the arrows', async () => {
-      const handle = one(host, 'separator', 'Largeur de la colonne Estimation');
+      const handle: HTMLElement = one(host, 'separator', 'Largeur de la colonne Estimation');
       expect(handle.getAttribute('aria-valuemin')).toBe('72');
       component.widths.set({ estimate: 100 });
       await stable();
@@ -469,7 +833,9 @@ describe('CwDataTable', () => {
     });
 
     it('moves a column with Ctrl + Shift + arrows on its header', async () => {
-      const status = byRole(host, 'columnheader').find((th) => th.dataset['cwCol'] === 'status');
+      const status: HTMLElement | undefined = byRole(host, 'columnheader').find(
+        (th) => th.dataset['cwCol'] === 'status',
+      );
       key(required(status), { key: 'ArrowRight', ctrlKey: true, shiftKey: true });
       await stable();
       expect(component.order()).toEqual(['name', 'estimate', 'status']);
@@ -485,7 +851,9 @@ describe('CwDataTable', () => {
 
     it('shows the page of rows, its range, and moves between pages', async () => {
       expect(dataRows(host)).toHaveLength(3);
-      const nav = required(host.querySelector<HTMLElement>('nav[aria-label="Pagination"]'));
+      const nav: HTMLElement = required(
+        host.querySelector<HTMLElement>('nav[aria-label="Pagination"]'),
+      );
       expect(host.textContent).toContain('1–3 sur 4 tâches');
       expect(host.textContent).toContain('Page 1 sur 2');
       expect(button(nav, 'Page précédente').disabled).toBe(true);

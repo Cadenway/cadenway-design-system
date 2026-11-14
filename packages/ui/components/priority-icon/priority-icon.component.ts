@@ -7,12 +7,22 @@ import {
   inject,
   input,
   signal,
+  type InputSignal,
+  type InputSignalWithTransform,
+  type Signal,
+  type WritableSignal,
 } from '@angular/core';
 
 import type { CwPriorityIconSize, CwPriorityKey } from './priority-icon.types';
 
-/* Literal class strings (mockup `PrioriteTache.dc.html`, `TONES` and `SIZES`), so Tailwind finds
-   them in the compiled package. The number of lit bars carries the meaning, the color confirms it. */
+/**
+ * Constant TONES
+ *
+ * @description
+ * Literal color classes for each priority, discoverable by Tailwind.
+ *
+ * @type {Record<CwPriorityKey, string>}
+ */
 const TONES: Record<CwPriorityKey, string> = {
   urgente: 'text-grenat',
   haute: 'text-cornaline',
@@ -20,6 +30,14 @@ const TONES: Record<CwPriorityKey, string> = {
   basse: 'text-ink-muted',
 };
 
+/**
+ * Constant SIZES
+ *
+ * @description
+ * Literal dimension classes for each supported icon size.
+ *
+ * @type {Record<CwPriorityIconSize, string>}
+ */
 const SIZES: Record<CwPriorityIconSize, string> = {
   '3': 'size-3',
   '3.5': 'size-3.5',
@@ -27,16 +45,40 @@ const SIZES: Record<CwPriorityIconSize, string> = {
   '5': 'size-5',
 };
 
+/**
+ * Function isPriority
+ *
+ * @description
+ * Checks whether a value names a supported priority.
+ *
+ * @param {unknown} value - Value to check against supported priority keys.
+ *
+ * @returns {value is CwPriorityKey} Whether the value is a supported priority.
+ */
 function isPriority(value: unknown): value is CwPriorityKey {
   return typeof value === 'string' && Object.hasOwn(TONES, value);
 }
 
+/**
+ * Function toSize
+ *
+ * @description
+ * Normalizes a size input, falling back to the default for unsupported values.
+ *
+ * @param {CwPriorityIconSize | number | null | undefined} value - Requested size, expressed as a string or number.
+ *
+ * @returns {CwPriorityIconSize} Supported size, or the default when the value is unsupported.
+ */
 function toSize(value: CwPriorityIconSize | number | null | undefined): CwPriorityIconSize {
-  const size = String(value ?? '4');
+  const size: string = String(value ?? '4');
   return Object.hasOwn(SIZES, size) ? (size as CwPriorityIconSize) : '4';
 }
 
 /**
+ * Class CwPriorityIcon
+ * @class CwPriorityIcon
+ *
+ * @description
  * The animated icon of a task priority: three growing bars that light up one by one, folding into
  * a disc with an exclamation mark for `urgente` (mockup `PrioriteTache.dc.html`).
  *
@@ -49,7 +91,6 @@ function toSize(value: CwPriorityIconSize | number | null | undefined): CwPriori
  */
 @Component({
   selector: 'cw-priority-icon',
-  styleUrl: './priority-icon.component.css',
   host: {
     '[class]': 'hostClasses()',
     '[attr.data-priority]': 'shown()',
@@ -58,32 +99,123 @@ function toSize(value: CwPriorityIconSize | number | null | undefined): CwPriori
   templateUrl: './priority-icon.component.html',
 })
 export class CwPriorityIcon {
-  /** The priority to draw; an unknown key draws `moyenne`. */
-  readonly priority = input<CwPriorityKey>('moyenne');
-  /** A previous priority drawn first, then morphed into `priority` two frames after the first render. */
-  readonly from = input<CwPriorityKey | null | undefined>(undefined);
-  /** Side of the icon: `3` (12 px) to `5` (20 px); numbers are accepted. */
-  readonly size = input<CwPriorityIconSize, CwPriorityIconSize | number | null | undefined>('4', {
+  // #region Properties
+  /**
+   * Property priority
+   * @readonly
+   *
+   * @description
+   * Priority to draw; unsupported values fall back to moyenne.
+   *
+   * @type {InputSignal<CwPriorityKey>}
+   */
+  public readonly priority: InputSignal<CwPriorityKey> = input<CwPriorityKey>('moyenne');
+
+  /**
+   * Property from
+   * @readonly
+   *
+   * @description
+   * Previous priority displayed before the initial morph.
+   *
+   * @type {InputSignal<CwPriorityKey | null | undefined>}
+   */
+  public readonly from: InputSignal<CwPriorityKey | null | undefined> = input<
+    CwPriorityKey | null | undefined
+  >(undefined);
+
+  /**
+   * Property size
+   * @readonly
+   *
+   * @description
+   * Icon side length, accepting supported string or numeric values.
+   *
+   * @type {InputSignalWithTransform<CwPriorityIconSize, CwPriorityIconSize | number | null | undefined>}
+   */
+  public readonly size: InputSignalWithTransform<
+    CwPriorityIconSize,
+    CwPriorityIconSize | number | null | undefined
+  > = input<CwPriorityIconSize, CwPriorityIconSize | number | null | undefined>('4', {
     transform: toSize,
   });
 
-  private readonly armed = signal(false);
+  /**
+   * Property armed
+   * @readonly
+   *
+   * @description
+   * Whether the initial animation frames have elapsed.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  private readonly armed: WritableSignal<boolean> = signal(false);
 
-  protected readonly current = computed<CwPriorityKey>(() => {
-    const priority = this.priority();
+  /**
+   * Property current
+   * @readonly
+   *
+   * @description
+   * Validated target priority with its default fallback.
+   *
+   * @type {Signal<CwPriorityKey>}
+   */
+  protected readonly current: Signal<CwPriorityKey> = computed<CwPriorityKey>(() => {
+    const priority: CwPriorityKey = this.priority();
     return isPriority(priority) ? priority : 'moyenne';
   });
-  protected readonly shown = computed<CwPriorityKey>(() => {
-    const from = this.from();
-    const current = this.current();
+
+  /**
+   * Property shown
+   * @readonly
+   *
+   * @description
+   * Priority currently drawn during the initial morph.
+   *
+   * @type {Signal<CwPriorityKey>}
+   */
+  protected readonly shown: Signal<CwPriorityKey> = computed<CwPriorityKey>(() => {
+    const from: CwPriorityKey | null | undefined = this.from();
+    const current: CwPriorityKey = this.current();
     return !this.armed() && isPriority(from) && from !== current ? from : current;
   });
-  protected readonly tone = computed(() => TONES[this.shown()]);
-  protected readonly hostClasses = computed(() => `${SIZES[this.size()]} inline-flex shrink-0`);
 
-  constructor() {
-    const view = inject(DOCUMENT).defaultView;
-    let frame = 0;
+  /**
+   * Property tone
+   * @readonly
+   *
+   * @description
+   * Color class for the priority currently drawn.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly tone: Signal<string> = computed(() => TONES[this.shown()]);
+
+  /**
+   * Property hostClasses
+   * @readonly
+   *
+   * @description
+   * Host layout and size classes.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly hostClasses: Signal<string> = computed(
+    () => `${SIZES[this.size()]} group/priority inline-flex shrink-0`,
+  );
+  // #endregion
+
+  // #region Constructor
+  /**
+   * Constructor
+   * @constructor
+   *
+   * @description
+   * Schedules the initial morph and cancels its pending frame on destruction.
+   */
+  public constructor() {
+    const view: (Window & typeof globalThis) | null = inject(DOCUMENT).defaultView;
+    let frame: number = 0;
     // Mockup `PrioriteTache.dc.html`: two frames, so the browser paints `from` before the morph starts.
     afterNextRender(() => {
       if (typeof view?.requestAnimationFrame !== 'function') {
@@ -100,4 +232,5 @@ export class CwPriorityIcon {
       view?.cancelAnimationFrame(frame);
     });
   }
+  // #endregion
 }

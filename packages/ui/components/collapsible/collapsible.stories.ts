@@ -9,8 +9,13 @@ import { CwCollapsibleTrigger } from './collapsible-trigger/collapsible-trigger.
 import { CwCollapsible } from './collapsible.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Collapsible, every variant and state of its sheet in the Design System artifact, in the light and
  * the dark theme. Copy from the sheet's preview and the mockup (`App.dc.html`, task detail).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Collapsible',
@@ -30,15 +35,44 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration used for collapsible examples and interactions.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Locates the light-theme copy rendered by the shared Storybook preview decorator.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the theme examples.
+ *
+ * @returns {HTMLElement} Element containing the light-theme example.
+ *
+ * @throws {Error} When the expected light-theme scope is missing.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
-const SUBTASKS = `
+/**
+ * Constant SUBTASKS
+ *
+ * @description
+ * Shared subtask markup used in the collapsible stories, with status icons and task labels.
+ *
+ * @type {string}
+ */
+const SUBTASKS: string = `
   <ul class="flex flex-col pt-1">
     <li class="flex h-8 items-center gap-2 px-2 text-sm">
       <cw-status-icon status="done" />
@@ -176,9 +210,11 @@ export const Keyboard: Story = {
         <cw-collapsible-content>${SUBTASKS}</cw-collapsible-content>
       </cw-collapsible>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const trigger = scope.getByRole('button', { name: 'Déplier les sous-tâches' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole(role: string, options?: { name?: string }): HTMLElement } = within(
+      light(canvasElement),
+    );
+    const trigger: HTMLElement = scope.getByRole('button', { name: 'Déplier les sous-tâches' });
 
     trigger.focus();
     await userEvent.keyboard('{Enter}');

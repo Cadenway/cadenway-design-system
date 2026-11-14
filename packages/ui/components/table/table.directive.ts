@@ -1,8 +1,12 @@
-import { Directive, input } from '@angular/core';
+import { Directive, input, type InputSignal } from '@angular/core';
 
 import type { CwTableSize } from './table.types';
 
 /**
+ * Class CwTable
+ * @class CwTable
+ *
+ * @description
  * A styled native table for simple read-only data (time spent, audit log, storage quotas, import
  * summary): no sorting, selection or grouping, which belong to `cw-data-table` (Table sheet of the
  * Design System artifact).
@@ -21,6 +25,17 @@ import type { CwTableSize } from './table.types';
   },
 })
 export class CwTable {
-  /** Row height, passed down to the header, body and footer rows. */
-  readonly size = input<CwTableSize>('default');
+  // #region Properties
+  /**
+   * Property size
+   * @readonly
+   *
+   * @description
+   * Input selecting the row height used by the header, body and footer.
+   *
+   * @type {InputSignal<CwTableSize>}
+   * @default 'default'
+   */
+  public readonly size: InputSignal<CwTableSize> = input<CwTableSize>('default');
+  // #endregion
 }

@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CwCollapsibleChevron } from './collapsible-chevron/collapsible-chevron.component';
@@ -6,6 +6,13 @@ import { CwCollapsibleContent } from './collapsible-content/collapsible-content.
 import { CwCollapsibleTrigger } from './collapsible-trigger/collapsible-trigger.directive';
 import { CwCollapsible } from './collapsible.component';
 
+/**
+ * Class Host
+ * @class Host
+ *
+ * @description
+ * Test host with a mutable subtask block and a disabled block with a row trigger.
+ */
 @Component({
   imports: [CwCollapsible, CwCollapsibleTrigger, CwCollapsibleContent, CwCollapsibleChevron],
   template: `
@@ -32,12 +39,48 @@ import { CwCollapsible } from './collapsible.component';
   `,
 })
 class Host {
-  readonly subtasks = signal(false);
-  readonly clicks = signal(0);
+  // #region Properties
+  /**
+   * Property subtasks
+   * @readonly
+   *
+   * @description
+   * Two-way expansion model for the subtask block.
+   *
+   * @type {WritableSignal<boolean>}
+   * @default false
+   */
+  public readonly subtasks: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property clicks
+   * @readonly
+   *
+   * @description
+   * Counts consumer clicks received by the disabled block's trigger.
+   *
+   * @type {WritableSignal<number>}
+   * @default 0
+   */
+  public readonly clicks: WritableSignal<number> = signal(0);
+  // #endregion
 }
 
+/**
+ * Function button
+ *
+ * @description
+ * Finds a test trigger button by its aria-label or trimmed visible text.
+ *
+ * @param {HTMLElement} host - Container holding the trigger buttons.
+ * @param {string} name - Exact button name to match.
+ *
+ * @returns {HTMLButtonElement} First matching button.
+ *
+ * @throws {Error} When no button has the requested name.
+ */
 function button(host: HTMLElement, name: string): HTMLButtonElement {
-  const found = Array.from(host.querySelectorAll('button')).find(
+  const found: HTMLButtonElement | undefined = Array.from(host.querySelectorAll('button')).find(
     (element) => (element.getAttribute('aria-label') ?? element.textContent.trim()) === name,
   );
   if (!found) throw new Error(`No button named ${name}`);
@@ -55,8 +98,8 @@ describe('CwCollapsible', () => {
   });
 
   it('starts closed, its content inert and controlled by the trigger', () => {
-    const trigger = button(host, 'Déplier les sous-tâches');
-    const content = host.querySelector('cw-collapsible-content');
+    const trigger: HTMLButtonElement = button(host, 'Déplier les sous-tâches');
+    const content: Element | null = host.querySelector('cw-collapsible-content');
 
     expect(trigger.getAttribute('type')).toBe('button');
     expect(trigger.getAttribute('aria-expanded')).toBe('false');
@@ -69,8 +112,8 @@ describe('CwCollapsible', () => {
     button(host, 'Déplier les sous-tâches').click();
     await fixture.whenStable();
 
-    const trigger = button(host, 'Replier les sous-tâches');
-    const content = host.querySelector('cw-collapsible-content');
+    const trigger: HTMLButtonElement = button(host, 'Replier les sous-tâches');
+    const content: Element | null = host.querySelector('cw-collapsible-content');
     expect(fixture.componentInstance.subtasks()).toBe(true);
     expect(trigger.getAttribute('aria-expanded')).toBe('true');
     expect(content?.hasAttribute('inert')).toBe(false);
@@ -89,7 +132,7 @@ describe('CwCollapsible', () => {
   });
 
   it('does not toggle nor let the click through when disabled', async () => {
-    const trigger = button(host, 'Bloqué 0');
+    const trigger: HTMLButtonElement = button(host, 'Bloqué 0');
     expect(trigger.getAttribute('aria-disabled')).toBe('true');
 
     trigger.click();

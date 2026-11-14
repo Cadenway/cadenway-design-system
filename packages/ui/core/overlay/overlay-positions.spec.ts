@@ -1,8 +1,9 @@
 import { ɵmenuFrom, ɵpanelPositions, ɵplacementOf } from './overlay-positions';
+import type { ConnectedPosition } from '@angular/cdk/overlay';
 
 describe('ɵpanelPositions', () => {
   it('tries the requested side and alignment first, then the opposite side', () => {
-    const positions = ɵpanelPositions('bottom', 'start');
+    const positions: ConnectedPosition[] = ɵpanelPositions('bottom', 'start');
 
     expect(positions[0]).toMatchObject({ originY: 'bottom', overlayY: 'top', overlayX: 'start' });
     expect(positions[3]).toMatchObject({ originY: 'top', overlayY: 'bottom', overlayX: 'start' });

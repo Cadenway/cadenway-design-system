@@ -10,6 +10,11 @@ import {
   output,
   PLATFORM_ID,
   signal,
+  type InputSignal,
+  type InputSignalWithTransform,
+  type OutputEmitterRef,
+  type Signal,
+  type WritableSignal,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { CwButton } from '@cadenway/ui/components/button';
@@ -24,10 +29,24 @@ import {
 
 import type { CwBannerPlacement, CwBannerTone } from './banner.types';
 
-/* Literal class strings (Banner sheet and preview of the Design System artifact), so Tailwind finds
-   them in the compiled package. */
-const BASE = 'flex w-full gap-3 border text-sm animate-item-in motion-reduce:animate-none';
+/**
+ * Constant BASE
+ *
+ * @description
+ * Literal Banner sheet layout and entrance-animation classes, visible to Tailwind.
+ *
+ * @type {string}
+ */
+const BASE: string = 'flex w-full gap-3 border text-sm animate-item-in motion-reduce:animate-none';
 
+/**
+ * Constant TONES
+ *
+ * @description
+ * Background and border classes for each banner tone.
+ *
+ * @type {Record<CwBannerTone, string>}
+ */
 const TONES: Record<CwBannerTone, string> = {
   info: 'border-transparent bg-muted',
   success: 'border-transparent bg-muted',
@@ -36,17 +55,40 @@ const TONES: Record<CwBannerTone, string> = {
   neutral: 'bg-background',
 };
 
+/**
+ * Constant PLACEMENTS
+ *
+ * @description
+ * Border, radius and padding classes for inline and top placements.
+ *
+ * @type {Record<CwBannerPlacement, string>}
+ */
 const PLACEMENTS: Record<CwBannerPlacement, string> = {
   inline: 'rounded-lg px-3',
   top: 'rounded-none border-x-0 border-t-0 px-4',
 };
 
-const LAYOUTS = {
+/**
+ * Constant LAYOUTS
+ *
+ * @description
+ * Alignment and spacing for single-line and multiline messages.
+ *
+ * @type {Readonly<{ single: string; multiline: string }>}
+ */
+const LAYOUTS: Readonly<{ single: string; multiline: string }> = {
   single: 'min-h-10 items-center py-1.5',
   multiline: 'items-start py-2.5',
-} as const;
+};
 
-// Filled icon in the tone's color; neutral shows a context icon in Bold, muted.
+/**
+ * Constant ICONS
+ *
+ * @description
+ * Default icon names for banner tones; neutral uses a bold context icon.
+ *
+ * @type {Record<CwBannerTone, string>}
+ */
 const ICONS: Record<CwBannerTone, string> = {
   info: 'phosphorInfoFill',
   success: 'phosphorCheckCircleFill',
@@ -55,6 +97,14 @@ const ICONS: Record<CwBannerTone, string> = {
   neutral: 'phosphorInfoBold',
 };
 
+/**
+ * Constant ICON_TONES
+ *
+ * @description
+ * Icon color classes for each banner tone.
+ *
+ * @type {Record<CwBannerTone, string>}
+ */
 const ICON_TONES: Record<CwBannerTone, string> = {
   info: 'shrink-0 text-primary',
   success: 'shrink-0 text-jade',
@@ -63,12 +113,32 @@ const ICON_TONES: Record<CwBannerTone, string> = {
   neutral: 'shrink-0 text-muted-foreground',
 };
 
-const STORAGE_PREFIX = 'cw-banner:';
+/**
+ * Constant STORAGE_PREFIX
+ *
+ * @description
+ * Prefix for keys used to persist banner dismissal in local storage.
+ *
+ * @type {string}
+ */
+const STORAGE_PREFIX: string = 'cw-banner:';
 
-const FOCUSABLE =
+/**
+ * Constant FOCUSABLE
+ *
+ * @description
+ * Selector for elements that may receive focus after a banner is dismissed.
+ *
+ * @type {string}
+ */
+const FOCUSABLE: string =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 /**
+ * Class CwBanner
+ * @class CwBanner
+ *
+ * @description
  * A full-width strip at the top of the application or of a page, for a message about the whole
  * instance or space that stays while it is true: new version, quota, failed backup, maintenance,
  * archived copy (Banner sheet of the Design System artifact). For an action's feedback use a toast;
@@ -99,7 +169,6 @@ const FOCUSABLE =
   host: {
     '[class]': 'classes()',
     '[attr.role]': 'tone() === "error" ? "alert" : "status"',
-    // `title` is an input: keep it off the element, where it would draw a native tooltip.
     '[attr.title]': 'null',
     '[attr.hidden]': 'closed() ? "" : null',
     '[attr.data-tone]': 'tone()',
@@ -108,78 +177,341 @@ const FOCUSABLE =
   templateUrl: './banner.component.html',
 })
 export class CwBanner {
-  /** Tone: icon color, background and ARIA role. */
-  readonly tone = input<CwBannerTone>('info');
-  /** Rounded in the page column, or flat across the window. */
-  readonly placement = input<CwBannerPlacement>('inline');
-  /** Main sentence, in `font-medium` (« Stockage presque plein. »). */
-  readonly title = input.required<string>();
-  /** Rest of the message, muted (« 46 Go utilisés sur 50 Go. »). */
-  readonly description = input('');
-  /** Name of a registered icon replacing the tone's icon: the context icon of a `neutral` banner. */
-  readonly icon = input<string | null>(null);
-  /** Shows « Masquer le bandeau »; `false` for an error still in progress. */
-  readonly dismissible = input(true, { transform: booleanAttribute });
-  /** Stores the dismissal under this key, so the banner does not come back. */
-  readonly dismissKey = input<string | null>(null);
-  /** Accessible name of the close button. */
-  readonly closeLabel = input('Masquer le bandeau');
-  /** Title on its own line and the description under it, for a long message. */
-  readonly multiline = input(false, { transform: booleanAttribute });
-  /** Emitted when the banner is hidden through its close button. */
-  readonly dismissed = output();
+  // #region Properties
+  /**
+   * Property tone
+   * @readonly
+   *
+   * @description
+   * Input selecting the banner's default icon, color and ARIA role.
+   *
+   * @type {InputSignal<CwBannerTone>}
+   * @default 'info'
+   */
+  public readonly tone: InputSignal<CwBannerTone> = input<CwBannerTone>('info');
 
-  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
-  private readonly document = inject(DOCUMENT);
-  private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
-  private readonly dismissedHere = signal(false);
-  private readonly stored = signal(false);
-  protected readonly closed = computed(() => this.dismissedHere() || this.stored());
+  /**
+   * Property placement
+   * @readonly
+   *
+   * @description
+   * Input selecting rounded inline placement or a flat banner across the top of the window.
+   *
+   * @type {InputSignal<CwBannerPlacement>}
+   * @default 'inline'
+   */
+  public readonly placement: InputSignal<CwBannerPlacement> = input<CwBannerPlacement>('inline');
 
-  protected readonly classes = computed(
+  /**
+   * Property title
+   * @readonly
+   *
+   * @description
+   * Required main sentence shown in the banner.
+   *
+   * @type {InputSignal<string>}
+   */
+  public readonly title: InputSignal<string> = input.required<string>();
+
+  /**
+   * Property description
+   * @readonly
+   *
+   * @description
+   * Additional message text, empty when no description is provided.
+   *
+   * @type {InputSignal<string>}
+   * @default ''
+   */
+  public readonly description: InputSignal<string> = input('');
+
+  /**
+   * Property icon
+   * @readonly
+   *
+   * @description
+   * Registered replacement icon name; null uses the tone's default icon.
+   *
+   * @type {InputSignal<string | null>}
+   * @default null
+   */
+  public readonly icon: InputSignal<string | null> = input<string | null>(null);
+
+  /**
+   * Property dismissible
+   * @readonly
+   *
+   * @description
+   * Input controlling whether the close button is displayed.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   * @default true
+   */
+  public readonly dismissible: InputSignalWithTransform<boolean, unknown> = input(true, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property dismissKey
+   * @readonly
+   *
+   * @description
+   * Optional key used to persist dismissal in local storage; null keeps dismissal in memory only.
+   *
+   * @type {InputSignal<string | null>}
+   * @default null
+   */
+  public readonly dismissKey: InputSignal<string | null> = input<string | null>(null);
+
+  /**
+   * Property closeLabel
+   * @readonly
+   *
+   * @description
+   * Accessible name of the close button.
+   *
+   * @type {InputSignal<string>}
+   * @default 'Masquer le bandeau'
+   */
+  public readonly closeLabel: InputSignal<string> = input('Masquer le bandeau');
+
+  /**
+   * Property multiline
+   * @readonly
+   *
+   * @description
+   * Input placing the title and description on separate lines for a longer message.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   * @default false
+   */
+  public readonly multiline: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property dismissed
+   * @readonly
+   *
+   * @description
+   * Emits when the banner is hidden by a dismissal call.
+   *
+   * @type {OutputEmitterRef<void>}
+   */
+  public readonly dismissed: OutputEmitterRef<void> = output();
+
+  /**
+   * Property host
+   * @readonly
+   *
+   * @description
+   * Native banner element used to determine whether dismissal must move focus.
+   *
+   * @type {HTMLElement}
+   */
+  private readonly host: HTMLElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+
+  /**
+   * Property document
+   * @readonly
+   *
+   * @description
+   * Document used for focus management and access to the window's storage.
+   *
+   * @type {Document}
+   */
+  private readonly document: Document = inject(DOCUMENT);
+
+  /**
+   * Property browser
+   * @readonly
+   *
+   * @description
+   * Whether this instance runs in a browser where local storage may be accessed.
+   *
+   * @type {boolean}
+   */
+  private readonly browser: boolean = isPlatformBrowser(inject(PLATFORM_ID));
+
+  /**
+   * Property dismissedHere
+   * @readonly
+   *
+   * @description
+   * Whether this instance has been dismissed during its current lifetime.
+   *
+   * @type {WritableSignal<boolean>}
+   * @default false
+   */
+  private readonly dismissedHere: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property stored
+   * @readonly
+   *
+   * @description
+   * Whether a dismissal is stored for the current dismissal key.
+   *
+   * @type {WritableSignal<boolean>}
+   * @default false
+   */
+  private readonly stored: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property closed
+   * @readonly
+   *
+   * @description
+   * Whether the banner is hidden by a current or stored dismissal.
+   *
+   * @type {Signal<boolean>}
+   */
+  protected readonly closed: Signal<boolean> = computed(
+    () => this.dismissedHere() || this.stored(),
+  );
+
+  /**
+   * Property classes
+   * @readonly
+   *
+   * @description
+   * Computed host classes for tone, placement and message layout.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly classes: Signal<string> = computed(
     () =>
       `${BASE} ${TONES[this.tone()]} ${PLACEMENTS[this.placement()]} ${this.multiline() ? LAYOUTS.multiline : LAYOUTS.single}`,
   );
-  protected readonly iconName = computed(() => this.icon() ?? ICONS[this.tone()]);
-  protected readonly iconClasses = computed(
+
+  /**
+   * Property iconName
+   * @readonly
+   *
+   * @description
+   * Replacement icon when supplied, otherwise the current tone's default icon.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly iconName: Signal<string> = computed(() => this.icon() ?? ICONS[this.tone()]);
+
+  /**
+   * Property iconClasses
+   * @readonly
+   *
+   * @description
+   * Icon tone and multiline alignment classes.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly iconClasses: Signal<string> = computed(
     () => `${ICON_TONES[this.tone()]}${this.multiline() ? ' mt-0.5' : ''}`,
   );
-  protected readonly messageClasses = computed(() =>
+
+  /**
+   * Property messageClasses
+   * @readonly
+   *
+   * @description
+   * Message layout classes, truncating single-line text and allowing multiline text to wrap.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly messageClasses: Signal<string> = computed(() =>
     this.multiline() ? 'min-w-0 flex-1 leading-5' : 'min-w-0 flex-1 truncate',
   );
-  protected readonly titleClasses = computed(() => {
-    const color =
+
+  /**
+   * Property titleClasses
+   * @readonly
+   *
+   * @description
+   * Title color and display classes based on tone and message layout.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly titleClasses: Signal<string> = computed(() => {
+    const color: string =
       this.tone() === 'error' ? 'font-medium text-grenat-text' : 'font-medium text-foreground';
     return this.multiline() ? `${color} block` : color;
   });
-  protected readonly descriptionClasses = computed(() =>
+
+  /**
+   * Property descriptionClasses
+   * @readonly
+   *
+   * @description
+   * Description text color for the current tone.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly descriptionClasses: Signal<string> = computed(() =>
     this.tone() === 'error' ? 'text-grenat-text' : 'text-muted-foreground',
   );
-  protected readonly closeClasses = computed(() => {
-    const color =
+
+  /**
+   * Property closeClasses
+   * @readonly
+   *
+   * @description
+   * Close-button spacing and color classes for the current tone and layout.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly closeClasses: Signal<string> = computed(() => {
+    const color: string =
       this.tone() === 'error' ? 'text-grenat-text' : 'text-muted-foreground hover:text-foreground';
     return this.multiline() ? `-my-1 -mr-1 ${color}` : `-mr-1 ${color}`;
   });
+  // #endregion
 
-  constructor() {
+  // #region Constructor
+  /**
+   * Constructor
+   * @constructor
+   *
+   * @description
+   * Observes dismissal-key changes and loads the stored state when a key is present.
+   */
+  public constructor() {
     effect(() => {
-      const key = this.dismissKey();
+      const key: string | null = this.dismissKey();
       this.stored.set(key !== null && this.readStored(key));
     });
   }
+  // #endregion
 
-  /** Hides the banner, stores the dismissal under `dismissKey`, emits `dismissed`. */
-  dismiss(): void {
+  // #region Methods
+  /**
+   * Method dismiss
+   * @method dismiss
+   *
+   * @description
+   * Hides the banner, persists the dismissal when keyed, moves focus when necessary and emits once.
+   * Repeated calls after closing do nothing.
+   */
+  public dismiss(): void {
     if (this.closed()) return;
-    const hadFocus = this.host.contains(this.document.activeElement);
-    const next = hadFocus ? this.focusTarget() : null;
-    const key = this.dismissKey();
+    const hadFocus: boolean = this.host.contains(this.document.activeElement);
+    const next: HTMLElement | null = hadFocus ? this.focusTarget() : null;
+    const key: string | null = this.dismissKey();
     if (key !== null) this.writeStored(key);
     this.dismissedHere.set(true);
     next?.focus();
     this.dismissed.emit();
   }
 
+  /**
+   * Method readStored
+   * @method readStored
+   *
+   * @description
+   * Reads a dismissal from browser storage, treating server rendering and storage failures as absent.
+   *
+   * @param {string} key - Consumer-provided dismissal key, without the storage prefix.
+   *
+   * @returns {boolean} Whether the stored value indicates a dismissal.
+   */
   private readStored(key: string): boolean {
     if (!this.browser) return false;
     try {
@@ -190,6 +522,15 @@ export class CwBanner {
     }
   }
 
+  /**
+   * Method writeStored
+   * @method writeStored
+   *
+   * @description
+   * Persists dismissal in browser storage when available; storage failures leave it in memory only.
+   *
+   * @param {string} key - Consumer-provided dismissal key, without the storage prefix.
+   */
   private writeStored(key: string): void {
     if (!this.browser) return;
     try {
@@ -199,12 +540,22 @@ export class CwBanner {
     }
   }
 
-  // Banner sheet, "Accessibilité": after « Masquer », the focus goes to the main content.
+  /**
+   * Method focusTarget
+   * @method focusTarget
+   *
+   * @description
+   * Finds a focus candidate in main content, falling back to the first candidate after the banner.
+   *
+   * @returns {HTMLElement | null} Focus target outside the banner, or null when none is found.
+   */
   private focusTarget(): HTMLElement | null {
-    const main = this.document.querySelector('main');
-    const inMain = main?.querySelector<HTMLElement>(FOCUSABLE);
+    const main: HTMLElement | null = this.document.querySelector('main');
+    const inMain: HTMLElement | null | undefined = main?.querySelector<HTMLElement>(FOCUSABLE);
     if (inMain && !this.host.contains(inMain)) return inMain;
-    const candidates = Array.from(this.document.querySelectorAll<HTMLElement>(FOCUSABLE));
+    const candidates: HTMLElement[] = Array.from(
+      this.document.querySelectorAll<HTMLElement>(FOCUSABLE),
+    );
     return (
       candidates.find(
         (element) =>
@@ -213,4 +564,5 @@ export class CwBanner {
       ) ?? null
     );
   }
+  // #endregion
 }

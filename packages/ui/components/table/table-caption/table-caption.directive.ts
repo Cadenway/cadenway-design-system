@@ -1,6 +1,12 @@
 import { Directive } from '@angular/core';
 
-/** The caption under the table: what it holds and its period. */
+/**
+ * Class CwTableCaption
+ * @class CwTableCaption
+ *
+ * @description
+ * Styles the native caption below the table to describe its contents and period.
+ */
 @Directive({
   selector: 'caption[cwTableCaption]',
   host: { class: 'mt-3 text-left text-xs text-muted-foreground' },

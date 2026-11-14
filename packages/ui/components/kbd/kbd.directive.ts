@@ -1,20 +1,40 @@
-import { Directive, computed, input } from '@angular/core';
+import { Directive, computed, input, type InputSignal, type Signal } from '@angular/core';
 
 import type { CwKbdSize, CwKbdVariant } from './kbd.types';
 
-/* Literal class strings (Kbd sheet and preview of the Design System artifact, mockup `App.dc.html`),
-   so Tailwind finds them in the compiled package. A key is flat: no gradient, no shadow; its relief
-   is the 2 px bottom border. */
-const BASE =
+/**
+ * Constant BASE
+ *
+ * @description
+ * Literal classes for a flat key from the Kbd sheet and mockup, kept visible to Tailwind.
+ *
+ * @type {string}
+ */
+const BASE: string =
   'pointer-events-none inline-flex w-fit items-center justify-center gap-0.5 align-middle font-sans leading-none font-medium whitespace-nowrap select-none [font-variant-emoji:text]';
 
+/**
+ * Constant VARIANTS
+ *
+ * @description
+ * Key appearance classes, including the default key's two-pixel bottom border.
+ *
+ * @type {Record<CwKbdVariant, string>}
+ */
 const VARIANTS: Record<CwKbdVariant, string> = {
   default:
     'border border-line-strong border-b-2 border-b-line-control bg-background text-muted-foreground dark:bg-surface-overlay',
   inverse: 'bg-background/15 text-background dark:bg-secondary dark:text-muted-foreground',
 };
 
-// The inverse key keeps a 4 px radius at every size and has no border (mockup tooltips).
+/**
+ * Constant SIZES
+ *
+ * @description
+ * Dimensions by appearance and size. Inverse tooltip keys keep a four-pixel radius and no border.
+ *
+ * @type {Record<CwKbdVariant, Record<CwKbdSize, string>>}
+ */
 const SIZES: Record<CwKbdVariant, Record<CwKbdSize, string>> = {
   default: {
     sm: 'h-4 min-w-4 rounded-[4px] px-[3px] text-[9px]',
@@ -29,6 +49,10 @@ const SIZES: Record<CwKbdVariant, Record<CwKbdSize, string>> = {
 };
 
 /**
+ * Class CwKbd
+ * @class CwKbd
+ *
+ * @description
  * One keyboard key, drawn as a small flat key (Kbd sheet of the Design System artifact).
  *
  * Put it on a native `<kbd>`, one key per element: `Ctrl`, `Maj`, `Alt` under Windows and Linux,
@@ -45,12 +69,42 @@ const SIZES: Record<CwKbdVariant, Record<CwKbdSize, string>> = {
   },
 })
 export class CwKbd {
-  /** Look of the key; `inverse` on the ink fill of a tooltip. */
-  readonly variant = input<CwKbdVariant>('default');
-  /** Height, padding and text size. */
-  readonly size = input<CwKbdSize>('default');
+  // #region Properties
+  /**
+   * Property variant
+   * @readonly
+   *
+   * @description
+   * Input selecting the key appearance; inverse is intended for a tooltip's ink fill.
+   *
+   * @type {InputSignal<CwKbdVariant>}
+   * @default 'default'
+   */
+  public readonly variant: InputSignal<CwKbdVariant> = input<CwKbdVariant>('default');
 
-  protected readonly classes = computed(
+  /**
+   * Property size
+   * @readonly
+   *
+   * @description
+   * Input selecting key height, padding and text size.
+   *
+   * @type {InputSignal<CwKbdSize>}
+   * @default 'default'
+   */
+  public readonly size: InputSignal<CwKbdSize> = input<CwKbdSize>('default');
+
+  /**
+   * Property classes
+   * @readonly
+   *
+   * @description
+   * Computed classes for the selected appearance and size.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly classes: Signal<string> = computed(
     () => `${BASE} ${VARIANTS[this.variant()]} ${SIZES[this.variant()][this.size()]}`,
   );
+  // #endregion
 }

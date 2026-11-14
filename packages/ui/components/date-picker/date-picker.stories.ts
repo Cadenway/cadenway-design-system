@@ -8,8 +8,13 @@ import { CwDatePicker } from './date-picker.component';
 import type { CwDatePreset } from './date-picker.types';
 
 /**
- * Date Picker, every state of its sheet in the Design System artifact, in the light and the dark
+ * Constant meta
+ *
+ * @description
+ * Date Picker states from the design system sheet in the light and dark
  * theme. The presets are the mockup's (`App.dc.html`, QUICK_DATES), computed by the consumer.
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/DatePicker',
@@ -18,14 +23,40 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration for date-picker examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Finds the light theme section of the story canvas.
+ *
+ * @param {HTMLElement} canvasElement - Canvas containing the themed examples.
+ * @returns {HTMLElement} Light theme section.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
+/**
+ * Constant presets
+ *
+ * @description
+ * Consumer-computed shortcuts used in the example picker.
+ *
+ * @type {CwDatePreset[]}
+ */
 const presets: CwDatePreset[] = [
   { label: 'Aujourd’hui', date: new Date(2026, 10, 12) },
   { label: 'Demain', date: new Date(2026, 10, 13) },
@@ -34,7 +65,15 @@ const presets: CwDatePreset[] = [
   { label: 'Sans échéance', date: null },
 ];
 
-const due = new Date(2026, 10, 18);
+/**
+ * Constant due
+ *
+ * @description
+ * Selected due date used in the examples.
+ *
+ * @type {Date}
+ */
+const due: Date = new Date(2026, 10, 18);
 
 /** Closed: empty, filled, range, disabled, error, and the typed variant. */
 export const States: Story = {
@@ -100,12 +139,14 @@ export const OpenAndClose: Story = {
     props: { due, presets },
     template: `<cw-date-picker ariaLabel="Échéance" [value]="due" [presets]="presets" withTime />`,
   }),
-  play: async ({ canvasElement }) => {
-    const trigger = within(light(canvasElement)).getByRole('button', {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const trigger: HTMLElement = within(light(canvasElement)).getByRole('button', {
       name: 'Échéance, mer. 18 nov. 2026',
     });
     await userEvent.click(trigger);
-    const panel = await within(document.body).findByRole('dialog', { name: 'Choisir une date' });
+    const panel: HTMLElement = await within(document.body).findByRole('dialog', {
+      name: 'Choisir une date',
+    });
     await waitFor(() =>
       expect(within(panel).getByRole('button', { name: '18 novembre 2026' })).toHaveFocus(),
     );
@@ -122,13 +163,13 @@ export const KeyboardPick: Story = {
     props: { due },
     template: `<cw-date-picker ariaLabel="Échéance" [value]="due" />`,
   }),
-  play: async ({ canvasElement }) => {
-    const trigger = within(light(canvasElement)).getByRole('button', {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const trigger: HTMLElement = within(light(canvasElement)).getByRole('button', {
       name: 'Échéance, mer. 18 nov. 2026',
     });
     trigger.focus();
     await userEvent.keyboard('{ArrowDown}');
-    const panel = await within(document.body).findByRole('dialog');
+    const panel: HTMLElement = await within(document.body).findByRole('dialog');
     await waitFor(() =>
       expect(within(panel).getByRole('button', { name: '18 novembre 2026' })).toHaveFocus(),
     );

@@ -1,9 +1,16 @@
 import { Component } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { TestBed, type ComponentFixture } from '@angular/core/testing';
 
 import { CwKbdGroup } from './kbd-group/kbd-group.directive';
 import { CwKbd } from './kbd.directive';
 
+/**
+ * Class Host
+ * @class Host
+ *
+ * @description
+ * Test host containing individual keyboard keys and a key combination.
+ */
 @Component({
   imports: [CwKbd, CwKbdGroup],
   template: `
@@ -17,9 +24,9 @@ class Host {}
 
 describe('CwKbd', () => {
   it('keeps the native kbd element and exposes its size and variant as hooks', () => {
-    const fixture = TestBed.createComponent(Host);
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
     fixture.detectChanges();
-    const keys = Array.from(
+    const keys: Element[] = Array.from(
       (fixture.nativeElement as HTMLElement).querySelectorAll('p kbd[cwKbd]'),
     );
 

@@ -1,57 +1,126 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { FormField, form, required } from '@angular/forms/signals';
+import { FormField, form, required, type FieldTree } from '@angular/forms/signals';
 
 import { CwComboboxEmpty } from './combobox-empty/combobox-empty.component';
 import { CwComboboxGroup } from './combobox-group/combobox-group.component';
 import { CwComboboxOption } from './combobox-option/combobox-option.component';
 import { CwCombobox } from './combobox.component';
 
+/**
+ * Function trigger
+ *
+ * @description
+ * Finds a combobox trigger by accessible name.
+ *
+ * @param {HTMLElement} host - Container holding the trigger.
+ * @param {string} name - Expected accessible name.
+ *
+ * @returns {HTMLButtonElement} Matching trigger button.
+ */
 function trigger(host: HTMLElement, name: string): HTMLButtonElement {
-  const found = Array.from(
+  const found: HTMLButtonElement | undefined = Array.from(
     host.querySelectorAll<HTMLButtonElement>('button[role="combobox"]'),
   ).find((element) => element.getAttribute('aria-label') === name);
   if (!found) throw new Error(`No combobox named ${name}`);
   return found;
 }
 
+/**
+ * Function searchField
+ *
+ * @description
+ * Returns the search input.
+ *
+ * @returns {HTMLInputElement} Search input currently rendered in the panel.
+ */
 function searchField(): HTMLInputElement {
-  const found = document.querySelector<HTMLInputElement>('input[role="combobox"]');
+  const found: HTMLInputElement | null =
+    document.querySelector<HTMLInputElement>('input[role="combobox"]');
   if (!found) throw new Error('No search field');
   return found;
 }
 
+/**
+ * Function listbox
+ *
+ * @description
+ * Returns the current listbox.
+ *
+ * @returns {HTMLElement | null} Open listbox, or null when absent.
+ */
 function listbox(): HTMLElement | null {
   return document.querySelector<HTMLElement>('[role="listbox"]');
 }
 
-/** The options a user can see: hidden ones are out of the accessibility tree. */
+/**
+ * Function visibleOptions
+ *
+ * @description
+ * Returns text of options visible to the user.
+ *
+ * @returns {string[]} Visible option labels in display order.
+ */
 function visibleOptions(): string[] {
   return Array.from(document.querySelectorAll<HTMLElement>('[role="option"]'))
     .filter((element) => !element.closest('[hidden]'))
     .map((element) => element.textContent.trim());
 }
 
+/**
+ * Function option
+ *
+ * @description
+ * Finds an option by text.
+ *
+ * @param {string} name - Visible option text to find.
+ *
+ * @returns {HTMLElement} Matching option element.
+ */
 function option(name: string): HTMLElement {
-  const found = Array.from(document.querySelectorAll<HTMLElement>('[role="option"]')).find(
-    (element) => element.textContent.trim().startsWith(name),
-  );
+  const found: HTMLElement | undefined = Array.from(
+    document.querySelectorAll<HTMLElement>('[role="option"]'),
+  ).find((element) => element.textContent.trim().startsWith(name));
   if (!found) throw new Error(`No option named ${name}`);
   return found;
 }
 
+/**
+ * Function key
+ *
+ * @description
+ * Dispatches a keyboard event.
+ *
+ * @param {HTMLElement} target - Element receiving the keyboard event.
+ * @param {string} value - Keyboard key to dispatch.
+ */
 function key(target: HTMLElement, value: string): void {
   target.dispatchEvent(
     new KeyboardEvent('keydown', { key: value, bubbles: true, cancelable: true }),
   );
 }
 
+/**
+ * Function type
+ *
+ * @description
+ * Updates the search field and dispatches input.
+ *
+ * @param {HTMLInputElement} field - Search field to update.
+ * @param {string} text - Text to enter before dispatching input.
+ */
 function type(field: HTMLInputElement, text: string): void {
   field.value = text;
   field.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
+/**
+ * Component ModelHost
+ *
+ * @description
+ * Exercises single and multiple combobox selection.
+ */
 @Component({
   imports: [CwCombobox, CwComboboxGroup, CwComboboxOption, CwComboboxEmpty],
   template: `
@@ -92,11 +161,63 @@ function type(field: HTMLInputElement, text: string): void {
   `,
 })
 class ModelHost {
-  readonly owner = signal<unknown>(null);
-  readonly labels = signal<unknown>([]);
-  readonly created = signal<string | null>(null);
-  readonly searches: string[] = [];
-  readonly createLabel = (query: string): string => `Créer l'étiquette « ${query} »`;
+  // #region Properties
+  /**
+   * Property owner
+   * @readonly
+   *
+   * @description
+   * Selected owner.
+   *
+   * @type {WritableSignal<unknown>}
+   */
+  public readonly owner: WritableSignal<unknown> = signal<unknown>(null);
+
+  /**
+   * Property labels
+   * @readonly
+   *
+   * @description
+   * Selected labels.
+   *
+   * @type {WritableSignal<unknown>}
+   */
+  public readonly labels: WritableSignal<unknown> = signal<unknown>([]);
+
+  /**
+   * Property created
+   * @readonly
+   *
+   * @description
+   * Last requested creation.
+   *
+   * @type {WritableSignal<string | null>}
+   */
+  public readonly created: WritableSignal<string | null> = signal<string | null>(null);
+
+  /**
+   * Property searches
+   * @readonly
+   *
+   * @description
+   * Recorded search queries.
+   *
+   * @type {string[]}
+   */
+  public readonly searches: string[] = [];
+
+  /**
+   * Property createLabel
+   * @readonly
+   *
+   * @description
+   * Formats the creation label.
+   *
+   * @type {(query: string) => string}
+   */
+  public readonly createLabel: (query: string) => string = (query: string): string =>
+    `Créer l'étiquette « ${query} »`;
+  // #endregion
 }
 
 describe('CwCombobox', () => {
@@ -113,7 +234,7 @@ describe('CwCombobox', () => {
   });
 
   it('opens on click with the focus in the search, filters without accents and chooses', async () => {
-    const owner = trigger(host, 'Responsable');
+    const owner: HTMLButtonElement = trigger(host, 'Responsable');
     expect(owner.textContent.trim()).toBe('Choisir une personne');
 
     owner.click();
@@ -155,7 +276,7 @@ describe('CwCombobox', () => {
   });
 
   it('says when nothing matches, then clears the search and closes on Escape', async () => {
-    const owner = trigger(host, 'Responsable');
+    const owner: HTMLButtonElement = trigger(host, 'Responsable');
     key(owner, 'z');
     await fixture.whenStable();
     expect(searchField().value).toBe('z');
@@ -173,7 +294,7 @@ describe('CwCombobox', () => {
   });
 
   it('ticks several values and stays open in multiple', async () => {
-    const labels = trigger(host, 'Étiquettes');
+    const labels: HTMLButtonElement = trigger(host, 'Étiquettes');
     labels.click();
     await fixture.whenStable();
     expect(listbox()?.getAttribute('aria-multiselectable')).toBe('true');
@@ -214,6 +335,16 @@ describe('CwCombobox', () => {
     expect(component.created()).toBe('Design');
   });
 
+  it('creates the searched value when Enter is pressed on the create option', async () => {
+    trigger(host, 'Étiquettes').click();
+    await fixture.whenStable();
+    type(searchField(), 'Design');
+    await fixture.whenStable();
+    key(option("Créer l'étiquette « Design »"), 'Enter');
+    await fixture.whenStable();
+    expect(component.created()).toBe('Design');
+  });
+
   it('shows the projected empty message when the search matches nothing', async () => {
     trigger(host, 'Personnes').click();
     await fixture.whenStable();
@@ -234,7 +365,7 @@ describe('CwCombobox', () => {
   });
 
   it('closes on a click outside', async () => {
-    const owner = trigger(host, 'Responsable');
+    const owner: HTMLButtonElement = trigger(host, 'Responsable');
     owner.click();
     await fixture.whenStable();
 
@@ -248,6 +379,12 @@ describe('CwCombobox', () => {
 
 describe('CwCombobox in forms', () => {
   it('is the value accessor of a reactive form control and reports its invalid state', async () => {
+    /**
+     * Component ReactiveHost
+     *
+     * @description
+     * Exercises the reactive forms value accessor.
+     */
     @Component({
       imports: [CwCombobox, CwComboboxOption, ReactiveFormsModule],
       template: `
@@ -258,15 +395,26 @@ describe('CwCombobox in forms', () => {
       `,
     })
     class ReactiveHost {
-      readonly owner = new FormControl<string | null>(null, {
+      // #region Properties
+      /**
+       * Property owner
+       * @readonly
+       *
+       * @description
+       * Reactive form control for the owner.
+       *
+       * @type {FormControl<string | null>}
+       */
+      public readonly owner: FormControl<string | null> = new FormControl<string | null>(null, {
         validators: [(control) => Validators.required(control)],
       });
+      // #endregion
     }
 
-    const fixture = TestBed.createComponent(ReactiveHost);
+    const fixture: ComponentFixture<ReactiveHost> = TestBed.createComponent(ReactiveHost);
     fixture.autoDetectChanges();
     await fixture.whenStable();
-    const owner = trigger(fixture.nativeElement as HTMLElement, 'Responsable');
+    const owner: HTMLButtonElement = trigger(fixture.nativeElement as HTMLElement, 'Responsable');
 
     fixture.componentInstance.owner.setValue('karim');
     await fixture.whenStable();
@@ -288,6 +436,12 @@ describe('CwCombobox in forms', () => {
   });
 
   it('is a Signal Forms value control, multiple included', async () => {
+    /**
+     * Component SignalHost
+     *
+     * @description
+     * Exercises the Signal Forms value control.
+     */
     @Component({
       imports: [CwCombobox, CwComboboxOption, FormField],
       template: `
@@ -298,16 +452,42 @@ describe('CwCombobox in forms', () => {
       `,
     })
     class SignalHost {
-      readonly model = signal<{ assignees: readonly string[] }>({ assignees: [] });
-      readonly task = form(this.model, (path) => {
-        required(path.assignees);
-      });
+      // #region Properties
+      /**
+       * Property model
+       * @readonly
+       *
+       * @description
+       * Signal Forms model for assignees.
+       *
+       * @type {WritableSignal<{ assignees: readonly string[] }>}
+       */
+      public readonly model: WritableSignal<{ assignees: readonly string[] }> = signal<{
+        assignees: readonly string[];
+      }>({ assignees: [] });
+
+      /**
+       * Property task
+       * @readonly
+       *
+       * @description
+       * Signal Forms tree for the task.
+       *
+       * @type {FieldTree<{ assignees: readonly string[] }>}
+       */
+      public readonly task: FieldTree<{ assignees: readonly string[] }> = form(
+        this.model,
+        (path) => {
+          required(path.assignees);
+        },
+      );
+      // #endregion
     }
 
-    const fixture = TestBed.createComponent(SignalHost);
+    const fixture: ComponentFixture<SignalHost> = TestBed.createComponent(SignalHost);
     fixture.autoDetectChanges();
     await fixture.whenStable();
-    const assignees = trigger(fixture.nativeElement as HTMLElement, 'Assignés');
+    const assignees: HTMLButtonElement = trigger(fixture.nativeElement as HTMLElement, 'Assignés');
 
     assignees.click();
     await fixture.whenStable();

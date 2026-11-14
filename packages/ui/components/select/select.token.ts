@@ -2,22 +2,83 @@ import { InjectionToken, type Signal } from '@angular/core';
 
 import type { CwSelectOption } from './select-option/select-option.component';
 
-/** What an option, a group or the empty message reads from the select that holds it. */
+/**
+ * Interface SelectHost
+ *
+ * @description
+ * Context shared with options and groups inside a select.
+ */
 export interface SelectHost {
-  /** Whether the option's value is the select's value. */
+  // #region Methods
+  /**
+   * Method isSelected
+   *
+   * @description
+   * Reports whether a value is selected.
+   *
+   * @param {unknown} value - Option value to compare with the selection.
+   *
+   * @returns {boolean} Whether the value is currently selected.
+   */
   isSelected(value: unknown): boolean;
-  /** The option highlighted by the arrows or the pointer, for `data-highlighted`. */
+  // #endregion
+
+  // #region Properties
+  /**
+   * Property highlighted
+   * @readonly
+   *
+   * @description
+   * Option highlighted by keyboard or pointer.
+   *
+   * @type {Signal<CwSelectOption | null>}
+   */
   readonly highlighted: Signal<CwSelectOption | null>;
-  /** The options of the select, in order, for the entrance stagger. */
+
+  /**
+   * Property options
+   * @readonly
+   *
+   * @description
+   * Options in their display order.
+   *
+   * @type {Signal<readonly CwSelectOption[]>}
+   */
   readonly options: Signal<readonly CwSelectOption[]>;
-  /** Chooses an option (click). */
+  // #endregion
+
+  // #region Methods
+  /**
+   * Method choose
+   *
+   * @description
+   * Chooses an option.
+   *
+   * @param {CwSelectOption} option - Option to select.
+   */
   choose(option: CwSelectOption): void;
-  /** Highlights an option (pointer). */
+
+  /**
+   * Method highlight
+   *
+   * @description
+   * Highlights an option.
+   *
+   * @param {CwSelectOption} option - Option to highlight.
+   */
   highlight(option: CwSelectOption): void;
+  // #endregion
 }
 
 /**
+ * Constant SELECT_HOST
+ *
+ * @description
  * The select an option belongs to. The select provides itself under this token, so its options
  * find it without importing its class (it imports them). Not exported from the entry point.
+ *
+ * @type {InjectionToken<SelectHost>}
  */
-export const SELECT_HOST = new InjectionToken<SelectHost>('SELECT_HOST');
+export const SELECT_HOST: InjectionToken<SelectHost> = new InjectionToken<SelectHost>(
+  'SELECT_HOST',
+);

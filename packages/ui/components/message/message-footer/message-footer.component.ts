@@ -1,6 +1,9 @@
 import { Component } from '@angular/core';
 
 /**
+ * Component CwMessageFooter
+ *
+ * @description
  * The line under the bubbles of a message, styled like its header: time, « modifié », sending
  * state (Message sheet of the Design System artifact, « Pied »).
  *

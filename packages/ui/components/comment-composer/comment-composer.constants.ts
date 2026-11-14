@@ -1,8 +1,13 @@
 import type { CwCommentComposerLabels, CwComposerCommand } from './comment-composer.types';
 
 /**
+ * Constant CW_COMPOSER_COMMANDS
+ *
+ * @description
  * The blocks offered after « / » by default (CommentComposer sheet, `commands`: title, lists, box,
  * code, quote), with the labels and Markdown hints of its preview.
+ *
+ * @type {readonly CwComposerCommand[]}
  */
 export const CW_COMPOSER_COMMANDS: readonly CwComposerCommand[] = [
   { kind: 'h2', label: 'Titre', hint: '##' },
@@ -13,7 +18,14 @@ export const CW_COMPOSER_COMMANDS: readonly CwComposerCommand[] = [
   { kind: 'quote', label: 'Citation', hint: '>' },
 ];
 
-/** Default French texts of `cw-comment-composer` (CommentComposer sheet and preview). */
+/**
+ * Constant CW_COMMENT_COMPOSER_LABELS
+ *
+ * @description
+ * Default French texts of `cw-comment-composer` from the design system sheet and preview.
+ *
+ * @type {CwCommentComposerLabels}
+ */
 export const CW_COMMENT_COMPOSER_LABELS: CwCommentComposerLabels = {
   editor: 'Commentaire',
   toolbar: 'Mise en forme',

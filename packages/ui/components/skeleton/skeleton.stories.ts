@@ -4,8 +4,13 @@ import { expect, within } from 'storybook/test';
 import { CwSkeleton } from './skeleton.directive';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Skeleton, every state of its sheet in the Design System artifact, in the light and the dark
  * theme. Geometries from the mockup loading states (`App.dc.html`: list, Kanban card, comments).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Skeleton',
@@ -14,10 +19,31 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration used for the skeleton examples and interactions.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Locates the light-theme copy rendered by the shared Storybook preview decorator.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the theme examples.
+ *
+ * @returns {HTMLElement} Element containing the light-theme example.
+ *
+ * @throws {Error} When the expected light-theme scope is missing.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -79,8 +105,8 @@ export const ListRows: Story = {
         }
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const status = within(light(canvasElement)).getByRole('status', {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const status: HTMLElement = within(light(canvasElement)).getByRole('status', {
       name: 'Chargement des tâches',
     });
     await expect(status).toHaveAttribute('aria-busy', 'true');

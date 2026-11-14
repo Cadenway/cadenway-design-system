@@ -1,10 +1,9 @@
 <ng-content select="[cwTimelineToolbar]" />
 @let ax = axis();
 @let nameWidth = nameColumnWidth();
-<!-- The keys bubble from the focusable rows and bars inside the grid (one tab stop, roving). -->
-<!-- eslint-disable-next-line @angular-eslint/template/interactive-supports-focus -->
 <div
   role="treegrid"
+  tabindex="-1"
   class="min-h-0 flex-1 overflow-auto rounded-lg border bg-background"
   [attr.aria-label]="ariaLabel()"
   (keydown)="onKeydown($event)"
@@ -300,7 +299,6 @@
                             }
                           </span>
                           @if (bar.percent) {
-                            <!-- A kept space, so the text of the bar reads « name 60 % » as its accessible name does. -->
                             &ngsp;
                             <span
                               class="relative ml-auto shrink-0 pr-3 whitespace-nowrap tabular-nums"

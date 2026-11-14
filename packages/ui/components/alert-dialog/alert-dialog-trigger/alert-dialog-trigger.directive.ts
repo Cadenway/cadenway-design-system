@@ -1,8 +1,11 @@
-import { Directive, ElementRef, inject, input } from '@angular/core';
+import { Directive, ElementRef, inject, input, type InputSignal } from '@angular/core';
 
 import type { CwAlertDialog } from '../alert-dialog.component';
 
 /**
+ * Directive CwAlertDialogTrigger
+ *
+ * @description
  * Opens a `cw-alert-dialog` from a button: `<button cwButton [cwAlertDialogTrigger]="remove">`.
  *
  * Sets `aria-haspopup="dialog"` and `aria-expanded` while the dialog is open; focus returns to this
@@ -17,8 +20,29 @@ import type { CwAlertDialog } from '../alert-dialog.component';
   },
 })
 export class CwAlertDialogTrigger {
-  /** The alert dialog to open (a template reference to a `cw-alert-dialog`). */
-  readonly cwAlertDialogTrigger = input.required<CwAlertDialog>();
+  // #region Properties
+  /**
+   * Property cwAlertDialogTrigger
+   * @readonly
+   *
+   * @description
+   * Alert dialog opened by the trigger.
+   *
+   * @type {InputSignal<CwAlertDialog>}
+   */
+  public readonly cwAlertDialogTrigger: InputSignal<CwAlertDialog> =
+    input.required<CwAlertDialog>();
 
-  protected readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  /**
+   * Property element
+   * @readonly
+   *
+   * @description
+   * Trigger element used to restore focus.
+   *
+   * @type {HTMLElement}
+   */
+  protected readonly element: HTMLElement =
+    inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  // #endregion
 }

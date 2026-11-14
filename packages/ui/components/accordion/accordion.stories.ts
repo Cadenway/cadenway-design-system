@@ -21,8 +21,13 @@ import { CwAccordionTrigger } from './accordion-trigger/accordion-trigger.compon
 import { CwAccordion } from './accordion.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Accordion, every variant and state of its sheet in the Design System artifact, in the light and
  * the dark theme. Copy from the sheet's preview (task detail, help FAQ).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Accordion',
@@ -61,15 +66,42 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story configuration for accordion examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Selects the light theme copy for interaction checks.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the themed examples.
+ *
+ * @returns {HTMLElement} Light theme section used for interaction checks.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
-const DETAIL_SECTIONS = `
+/**
+ * Constant DETAIL_SECTIONS
+ *
+ * @description
+ * Shared task detail sections used in single-mode examples.
+ *
+ * @type {string}
+ */
+const DETAIL_SECTIONS: string = `
   <cw-accordion-item value="champs">
     <button cwAccordionTrigger>Champs personnalisés</button>
     <cw-accordion-content>
@@ -162,11 +194,13 @@ export const Keyboard: Story = {
   render: () => ({
     template: `<cw-accordion class="w-96" value="champs">${DETAIL_SECTIONS}</cw-accordion>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const fields = scope.getByRole('button', { name: 'Champs personnalisés' });
-    const dependencies = scope.getByRole('button', { name: 'Dépendances' });
-    const history = scope.getByRole('button', { name: 'Historique' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole(role: string, options?: { name?: string }): HTMLElement } = within(
+      light(canvasElement),
+    );
+    const fields: HTMLElement = scope.getByRole('button', { name: 'Champs personnalisés' });
+    const dependencies: HTMLElement = scope.getByRole('button', { name: 'Dépendances' });
+    const history: HTMLElement = scope.getByRole('button', { name: 'Historique' });
 
     fields.focus();
     await userEvent.keyboard('{ArrowDown}');

@@ -30,7 +30,7 @@
         [attr.aria-invalid]="unreadable() || missing() ? 'true' : null"
         [attr.aria-describedby]="hintId"
         (input)="onDurationInput($event)"
-        (blur)="onDurationBlur()"
+        (blur)="onFieldBlur()"
       />
       @if (unreadable() || missing()) {
         <p [id]="hintId" class="flex items-start gap-1 text-xs font-medium text-destructive">
@@ -51,6 +51,7 @@
         [value]="value().date"
         [disabled]="isDisabled()"
         (valueChange)="onDate($event)"
+        (touch)="onFieldBlur()"
       />
     </div>
   </div>
@@ -66,6 +67,7 @@
       [placeholder]="text().notePlaceholder"
       [disabled]="isDisabled()"
       (input)="onNote($event)"
+      (blur)="onFieldBlur()"
     />
   </div>
 
@@ -75,12 +77,15 @@
       [checked]="value().billable"
       [disabled]="isDisabled()"
       (checkedChange)="onBillable($event)"
+      (touch)="onFieldBlur()"
     />
     <label [for]="billableId">{{ text().billable }}</label>
   </div>
 
   <div class="flex justify-end gap-2">
-    <button cwButton variant="ghost" size="sm" (click)="cancel.emit()">{{ text().cancel }}</button>
+    <button cwButton variant="ghost" size="sm" [disabled]="isDisabled()" (click)="cancel.emit()">
+      {{ text().cancel }}
+    </button>
     <button cwButton size="sm" [disabled]="isDisabled()" (click)="add()">
       {{ text().submit }}
     </button>

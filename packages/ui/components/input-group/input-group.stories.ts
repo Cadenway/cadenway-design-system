@@ -27,9 +27,14 @@ import { CwInputGroupTextarea } from './input-group-textarea/input-group-textare
 import { CwInputGroup } from './input-group.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Input Group, every state of its sheet in the Design System artifact, in the light and the dark
  * theme. Copy from the sheet and the mockup (view search, integrations, comment composer of the
  * task panel in `App.dc.html`).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/InputGroup',
@@ -68,16 +73,43 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story configuration for input group examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Selects the light theme copy for interaction checks.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the themed examples.
+ *
+ * @returns {HTMLElement} Light theme section used for interaction checks.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
 /* The key cap of the Kbd brick, inlined here so this story does not depend on its entry point. */
-const KEY =
+/**
+ * Constant KEY
+ *
+ * @description
+ * Key-cap classes used by the search shortcut example.
+ *
+ * @type {string}
+ */
+const KEY: string =
   'pointer-events-none inline-flex h-[18px] w-fit min-w-[18px] items-center justify-center gap-0.5 rounded-[5px] border border-line-strong border-b-2 border-b-line-control bg-background px-1 font-sans text-[10px] leading-none font-medium text-muted-foreground select-none dark:bg-surface-overlay';
 
 /** Inline addons: icon and shortcut, URL prefix and copy, counter and clear, password, loading, unit. */
@@ -168,8 +200,8 @@ export const States: Story = {
         </cw-field>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const url = within(light(canvasElement)).getByLabelText('URL du webhook');
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const url: HTMLElement = within(light(canvasElement)).getByLabelText('URL du webhook');
 
     await expect(url).toHaveAttribute('aria-invalid', 'true');
     await expect(url).toHaveAccessibleDescription("L'URL ne doit pas contenir d'espace.");
@@ -212,10 +244,12 @@ export const Keyboard: Story = {
         </cw-input-group-addon>
       </cw-input-group>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const search = scope.getByRole('textbox', { name: 'Rechercher des tâches' });
-    const addon = search.previousElementSibling;
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole(role: string, options?: { name?: string }): HTMLElement } = within(
+      light(canvasElement),
+    );
+    const search: HTMLElement = scope.getByRole('textbox', { name: 'Rechercher des tâches' });
+    const addon: Element | null = search.previousElementSibling;
     if (!(addon instanceof HTMLElement)) throw new Error('Start addon missing');
 
     await userEvent.click(addon);

@@ -1,2 +1,9 @@
-/** Characters a one-time code accepts: digits (TOTP, e-mail code) or letters and digits (recovery code). */
+/**
+ * Type CwInputOtpCharset
+ *
+ * @description
+ * Characters accepted by a one-time code: digits or alphanumeric characters.
+ *
+ * @type {'digits' | 'alphanumeric'}
+ */
 export type CwInputOtpCharset = 'digits' | 'alphanumeric';

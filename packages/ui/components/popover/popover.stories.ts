@@ -22,9 +22,14 @@ import { CwPopoverTrigger } from './popover-trigger/popover-trigger.directive';
 import { CwPopover } from './popover.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Popover, every state of its sheet in the Design System artifact, in the light and the dark theme.
  * The open states render real panels (their overlay sits next to the trigger, in its theme scope);
  * the keyboard story opens and closes one. Copy from the sheet and its preview.
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Popover',
@@ -56,10 +61,29 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story for popover examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Returns the light-theme story container.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing theme scopes.
+ *
+ * @returns {HTMLElement} Container for the light theme.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -194,15 +218,19 @@ export const Keyboard: Story = {
         <button cwButton variant="ghost">Ailleurs</button>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const trigger = scope.getByRole('button', { name: 'Partager' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name: string }) => HTMLElement;
+      findByRole: (role: string, options?: { name: string }) => Promise<HTMLElement>;
+      queryByRole: (role: string) => HTMLElement | null;
+    } = within(light(canvasElement));
+    const trigger: HTMLElement = scope.getByRole('button', { name: 'Partager' });
     await expect(trigger).toHaveAttribute('aria-expanded', 'false');
 
     await userEvent.tab();
     await expect(trigger).toHaveFocus();
     await userEvent.keyboard('{Enter}');
-    const panel = await scope.findByRole('dialog', { name: 'Partager « Sprint 14 »' });
+    const panel: HTMLElement = await scope.findByRole('dialog', { name: 'Partager « Sprint 14 »' });
     await expect(trigger).toHaveAttribute('aria-expanded', 'true');
     await expect(trigger).toHaveAttribute('aria-controls', panel.id);
     await waitFor(() => expect(within(panel).getByRole('textbox')).toHaveFocus());
@@ -234,10 +262,14 @@ export const Modal: Story = {
         </cw-popover>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name: string }) => HTMLElement;
+      findByRole: (role: string, options?: { name: string }) => Promise<HTMLElement>;
+      queryByRole: (role: string) => HTMLElement | null;
+    } = within(light(canvasElement));
     await userEvent.click(scope.getByRole('button', { name: 'Renommer la colonne' }));
-    const panel = await scope.findByRole('dialog', { name: 'Renommer la colonne' });
+    const panel: HTMLElement = await scope.findByRole('dialog', { name: 'Renommer la colonne' });
     await expect(panel).toHaveAttribute('aria-modal', 'true');
     await waitFor(() => expect(within(panel).getByRole('textbox')).toHaveFocus());
 

@@ -1,12 +1,17 @@
 import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vite';
-import { expect, within } from 'storybook/test';
+import { expect, waitFor, within } from 'storybook/test';
 
 import { CwLoadingOverlay } from './loading-overlay/loading-overlay.directive';
 import { CwSpinnerIndicator } from './spinner-indicator/spinner-indicator.component';
 import { CwSpinner } from './spinner.component';
 
 /**
- * Spinner, every state of its sheet in the Design System artifact, in the light and the dark theme.
+ * Constant meta
+ *
+ * @description
+ * Spinner sheet examples rendered in the light and dark themes in Storybook.
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Spinner',
@@ -15,6 +20,14 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration used for the spinner examples and interactions.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
 /** The six sizes, muted. */
@@ -37,10 +50,10 @@ export const WithLabel: Story = {
   render: () => ({
     template: `<cw-spinner label="Analyse des 128 tâches…" showLabel [delay]="0" />`,
   }),
-  play: async ({ canvasElement }) => {
-    await expect(await within(canvasElement).findAllByText('Analyse des 128 tâches…')).toHaveLength(
-      2,
-    );
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    await waitFor(async () => {
+      await expect(within(canvasElement).queryAllByText('Analyse des 128 tâches…')).toHaveLength(2);
+    });
   },
 };
 

@@ -29,10 +29,12 @@ import { CwDataTable } from './data-table.component';
 import type { CwBulkAction, CwSort } from './data-table.types';
 
 /**
- * Data Table, every state of its two sheets in the Design System artifact (DataTable,
- * DataTableComplete), in the light and the dark theme. The rows, statuses, labels and bulk actions
- * are this story's data, as a consumer would pass them: the brick knows none of them. Copy from the
- * sheets and the mockup (`App.dc.html`, list view).
+ * Constant meta
+ *
+ * @description
+ * Data table examples in both themes using mockup task data.
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/DataTable',
@@ -71,15 +73,50 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration for data table examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Finds the light theme section of the story canvas.
+ *
+ * @param {HTMLElement} canvasElement - Canvas containing the themed examples.
+ * @returns {HTMLElement} Light theme section.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
-const TASKS = [
+/**
+ * Constant TASKS
+ *
+ * @description
+ * Sample task rows displayed by the table.
+ *
+ * @type {{ id: string; name: string; status: string; priority: string; due: string; dueLabel: string; late: boolean; estimate: number; }[]}
+ */
+const TASKS: {
+  id: string;
+  name: string;
+  status: string;
+  priority: string;
+  due: string;
+  dueLabel: string;
+  late: boolean;
+  estimate: number;
+}[] = [
   {
     id: 'CAD-482',
     name: "Corriger l'export CSV des tâches",
@@ -132,12 +169,28 @@ const TASKS = [
   },
 ];
 
+/**
+ * Constant STATUS_LABELS
+ *
+ * @description
+ * Displayed labels for task statuses.
+ *
+ * @type {Record<string, string>}
+ */
 const STATUS_LABELS: Record<string, string> = {
   progress: 'En cours',
   blocked: 'Bloqué',
   todo: 'À faire',
 };
 
+/**
+ * Constant PRIORITY_LABELS
+ *
+ * @description
+ * Accessible labels for task priorities.
+ *
+ * @type {Record<string, string>}
+ */
 const PRIORITY_LABELS: Record<string, string> = {
   urgente: 'Priorité urgente',
   haute: 'Priorité haute',
@@ -146,6 +199,14 @@ const PRIORITY_LABELS: Record<string, string> = {
 };
 
 /* The sheet's default actions become the story's data: the brick has none. */
+/**
+ * Constant BULK_ACTIONS
+ *
+ * @description
+ * Sample actions available for selected rows.
+ *
+ * @type {readonly CwBulkAction[]}
+ */
 const BULK_ACTIONS: readonly CwBulkAction[] = [
   { id: 'status', label: 'Statut', shortcut: 'S' },
   { id: 'assign', label: 'Assigner', shortcut: 'A' },
@@ -154,7 +215,21 @@ const BULK_ACTIONS: readonly CwBulkAction[] = [
   { id: 'delete', label: 'Supprimer', shortcut: 'Delete', variant: 'destructive' },
 ];
 
-const PROPS = {
+/**
+ * Constant PROPS
+ *
+ * @description
+ * Shared table data and formatting functions.
+ *
+ * @type {{ tasks: typeof TASKS; statusLabel: (key: string) => string; priorityLabels: Record<string, string>; statusLabels: Record<string, string>; rowLabel: (task: { id: string }) => string; }}
+ */
+const PROPS: {
+  tasks: typeof TASKS;
+  statusLabel: (key: string) => string;
+  priorityLabels: Record<string, string>;
+  statusLabels: Record<string, string>;
+  rowLabel: (task: { id: string }) => string;
+} = {
   tasks: TASKS,
   statusLabel: (key: string): string => STATUS_LABELS[key] ?? key,
   priorityLabels: PRIORITY_LABELS,
@@ -164,7 +239,15 @@ const PROPS = {
 
 /* The columns of the list view (mockup `App.dc.html`): Nom, Statut, Priorité, Échéance,
    Estimation, then the row actions. */
-const COLUMNS = `
+/**
+ * Constant COLUMNS
+ *
+ * @description
+ * Projected column definitions and cell templates.
+ *
+ * @type {string}
+ */
+const COLUMNS: string = `
   <cw-data-table-column key="name" header="Nom" sortable [minWidth]="200" [maxWidth]="640">
     <ng-template cwCell let-t>
       <span class="flex min-w-0 items-center gap-2">
@@ -208,7 +291,15 @@ const COLUMNS = `
     </ng-template>
   </cw-data-table-column>`;
 
-const GROUP = `
+/**
+ * Constant GROUP
+ *
+ * @description
+ * Projected group header template.
+ *
+ * @type {string}
+ */
+const GROUP: string = `
   <ng-template cwDataTableGroup let-key let-label="label">
     <cw-status-icon [status]="key" /><span class="font-medium">{{ label }}</span>
   </ng-template>`;
@@ -233,9 +324,13 @@ export const Grouped: Story = {
         ${COLUMNS}
       </cw-data-table>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const todo = scope.getByRole('button', { name: /À faire/ });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+      queryByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement | null;
+      getByText: (text: string) => HTMLElement;
+    } = within(light(canvasElement));
+    const todo: HTMLElement = scope.getByRole('button', { name: /À faire/ });
     await expect(todo).toHaveAttribute('aria-expanded', 'false');
     await userEvent.click(todo);
     await expect(todo).toHaveAttribute('aria-expanded', 'true');
@@ -276,8 +371,10 @@ export const Loading: Story = {
         ${COLUMNS}
       </cw-data-table>`,
   }),
-  play: async ({ canvasElement }) => {
-    const grid = within(light(canvasElement)).getByRole('grid', { name: 'Tâches de Produit' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const grid: HTMLElement = within(light(canvasElement)).getByRole('grid', {
+      name: 'Tâches de Produit',
+    });
     await expect(grid).toHaveAttribute('aria-busy', 'true');
   },
 };
@@ -326,10 +423,14 @@ export const Paginated: Story = {
         ${COLUMNS}
       </cw-data-table>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+      queryByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement | null;
+      getByText: (text: string) => HTMLElement;
+    } = within(light(canvasElement));
     await expect(scope.getByText('1–2 sur 5 tâches')).toBeVisible();
-    const nav = scope.getByRole('navigation', { name: 'Pagination light' });
+    const nav: HTMLElement = scope.getByRole('navigation', { name: 'Pagination light' });
     await userEvent.click(within(nav).getByRole('button', { name: 'Page suivante' }));
     await expect(scope.getByText('3–4 sur 5 tâches')).toBeVisible();
   },
@@ -345,9 +446,13 @@ export const BulkActions: Story = {
         ${COLUMNS}
       </cw-data-table>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const bar = scope.getByRole('toolbar', { name: 'Actions sur la sélection' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+      queryByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement | null;
+      getByText: (text: string) => HTMLElement;
+    } = within(light(canvasElement));
+    const bar: HTMLElement = scope.getByRole('toolbar', { name: 'Actions sur la sélection' });
     await expect(bar).toHaveTextContent('3 tâches sélectionnées');
     await expect(
       scope.getByRole('checkbox', { name: 'Tout sélectionner sur la page' }),
@@ -378,12 +483,18 @@ export const InlineEdit: Story = {
       </cw-data-table>
       <p class="text-sm text-muted-foreground">Dernière valeur : {{ edited || '—' }}</p>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const cell = scope.getByRole('gridcell', { name: "Corriger l'export CSV des tâches" });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+      queryByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement | null;
+      getByText: (text: string) => HTMLElement;
+    } = within(light(canvasElement));
+    const cell: HTMLElement = scope.getByRole('gridcell', {
+      name: "Corriger l'export CSV des tâches",
+    });
     cell.focus();
     await userEvent.keyboard('{F2}');
-    const field = scope.getByRole('textbox', { name: 'Nom de CAD-482' });
+    const field: HTMLElement = scope.getByRole('textbox', { name: 'Nom de CAD-482' });
     await expect(field).toHaveFocus();
     await userEvent.keyboard('{Escape}');
     await expect(scope.queryByRole('textbox', { name: 'Nom de CAD-482' })).toBeNull();
@@ -401,10 +512,14 @@ export const Keyboard: Story = {
         ${COLUMNS}
       </cw-data-table>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const tick = scope.getByRole('checkbox', { name: 'Sélectionner CAD-482' });
-    const first = tick.closest<HTMLElement>('[role="gridcell"]');
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+      queryByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement | null;
+      getByText: (text: string) => HTMLElement;
+    } = within(light(canvasElement));
+    const tick: HTMLElement = scope.getByRole('checkbox', { name: 'Sélectionner CAD-482' });
+    const first: HTMLElement | null = tick.closest<HTMLElement>('[role="gridcell"]');
     first?.focus();
     await expect(first).toHaveFocus();
     await userEvent.keyboard('{ArrowRight}');
@@ -426,15 +541,22 @@ export const Sorting: Story = {
         ${COLUMNS}
       </cw-data-table>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+      queryByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement | null;
+      getByText: (text: string) => HTMLElement;
+    } = within(light(canvasElement));
     await userEvent.click(scope.getByRole('button', { name: /^Priorité/ }));
     await expect(scope.getByRole('columnheader', { name: /Priorité/ })).toHaveAttribute(
       'aria-sort',
       'ascending',
     );
     // One user session, so the held Shift key reaches the click.
-    const user = userEvent.setup();
+    const user: {
+      keyboard: (keys: string) => Promise<void>;
+      click: (element: Element) => Promise<void>;
+    } = userEvent.setup();
     await user.keyboard('{Shift>}');
     await user.click(scope.getByRole('button', { name: /^Estimation/ }));
     await user.keyboard('{/Shift}');
@@ -454,9 +576,15 @@ export const ResizableColumns: Story = {
         ${COLUMNS}
       </cw-data-table>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const handle = scope.getByRole('separator', { name: 'Largeur de la colonne Échéance' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+      queryByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement | null;
+      getByText: (text: string) => HTMLElement;
+    } = within(light(canvasElement));
+    const handle: HTMLElement = scope.getByRole('separator', {
+      name: 'Largeur de la colonne Échéance',
+    });
     handle.focus();
     await userEvent.keyboard('{ArrowRight}');
     await expect(handle).toHaveAttribute('aria-valuenow', '120');

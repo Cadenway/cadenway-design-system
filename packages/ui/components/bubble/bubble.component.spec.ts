@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CwBubble } from './bubble.component';
@@ -8,6 +8,12 @@ import { CwBubbleQuote } from './bubble-quote/bubble-quote.component';
 import { CwBubbleReaction } from './bubble-reaction/bubble-reaction.component';
 import { CwBubbleReactions } from './bubble-reactions/bubble-reactions.component';
 
+/**
+ * Class Host
+ *
+ * @description
+ * Hosts bubbles, a quote and reactions for interaction tests.
+ */
 @Component({
   imports: [CwBubble, CwBubbleGroup, CwBubbleQuote, CwBubbleReaction, CwBubbleReactions],
   template: `
@@ -18,7 +24,6 @@ import { CwBubbleReactions } from './bubble-reactions/bubble-reactions.component
       >
       Bien vu. On force l'UTF-8 avec BOM ?
       <cw-bubble-reactions>
-        <!-- eslint-disable-next-line @angular-eslint/template/elements-content -- the reaction renders its icon and count -->
         <button
           cwBubbleReaction
           icon="thumbs-up"
@@ -37,13 +42,55 @@ import { CwBubbleReactions } from './bubble-reactions/bubble-reactions.component
   `,
 })
 class Host {
-  readonly liked = signal(false);
-  readonly adds = signal(0);
-  readonly navigated = signal(false);
+  // #region Properties
+  /**
+   * Property liked
+   * @readonly
+   *
+   * @description
+   * Two-way reaction state.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly liked: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property adds
+   * @readonly
+   *
+   * @description
+   * Number of reaction picker requests.
+   *
+   * @type {WritableSignal<number>}
+   */
+  public readonly adds: WritableSignal<number> = signal(0);
+
+  /**
+   * Property navigated
+   * @readonly
+   *
+   * @description
+   * Whether quote navigation was requested.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly navigated: WritableSignal<boolean> = signal(false);
+  // #endregion
 }
 
+/**
+ * Function buttonNamed
+ *
+ * @description
+ * Finds a fixture button by its accessible label or visible text.
+ *
+ * @param {HTMLElement} host - Fixture containing the button.
+ * @param {string} name - Accessible label or visible button text.
+ *
+ * @returns {HTMLButtonElement} Matching button.
+ */
 function buttonNamed(host: HTMLElement, name: string): HTMLButtonElement {
-  const found = Array.from(host.querySelectorAll('button')).find(
+  const found: HTMLButtonElement | undefined = Array.from(host.querySelectorAll('button')).find(
     (element) => (element.getAttribute('aria-label') ?? element.textContent.trim()) === name,
   );
   if (!found) throw new Error(`No button named ${name}`);
@@ -63,8 +110,8 @@ describe('CwBubble', () => {
   });
 
   it('defaults to muted at the start and keeps the given variant and alignment', () => {
-    const plain = host.querySelector<HTMLElement>('#plain');
-    const reply = host.querySelector<HTMLElement>('#reply');
+    const plain: HTMLElement | null = host.querySelector<HTMLElement>('#plain');
+    const reply: HTMLElement | null = host.querySelector<HTMLElement>('#reply');
 
     expect(plain?.dataset['variant']).toBe('muted');
     expect(plain?.dataset['align']).toBe('start');
@@ -79,7 +126,7 @@ describe('CwBubble', () => {
   });
 
   it('toggles a reaction and names it with its count', async () => {
-    const reaction = buttonNamed(host, "D'accord : 2");
+    const reaction: HTMLButtonElement = buttonNamed(host, "D'accord : 2");
     expect(reaction.getAttribute('aria-pressed')).toBe('false');
     expect(reaction.getAttribute('type')).toBe('button');
 
@@ -101,7 +148,7 @@ describe('CwBubble', () => {
   });
 
   it('gives the bubbles of a group their positions', () => {
-    const positions = Array.from(
+    const positions: (string | undefined)[] = Array.from(
       host.querySelectorAll<HTMLElement>('cw-bubble-group cw-bubble'),
     ).map((bubble) => bubble.dataset['position']);
 
@@ -110,6 +157,12 @@ describe('CwBubble', () => {
   });
 
   it('takes its variant, alignment and position from a container', () => {
+    /**
+     * Class Container
+     *
+     * @description
+     * Supplies inherited defaults to a bubble.
+     */
     @Component({
       imports: [CwBubble],
       providers: [
@@ -126,9 +179,11 @@ describe('CwBubble', () => {
     })
     class Container {}
 
-    const container = TestBed.createComponent(Container);
+    const container: ComponentFixture<Container> = TestBed.createComponent(Container);
     container.detectChanges();
-    const bubble = (container.nativeElement as HTMLElement).querySelector<HTMLElement>('cw-bubble');
+    const bubble: HTMLElement | null = (
+      container.nativeElement as HTMLElement
+    ).querySelector<HTMLElement>('cw-bubble');
 
     expect(bubble?.dataset['variant']).toBe('secondary');
     expect(bubble?.dataset['align']).toBe('end');

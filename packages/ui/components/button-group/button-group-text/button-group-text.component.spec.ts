@@ -1,10 +1,17 @@
 import { Component } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { CwButton } from '@cadenway/ui/components/button';
 
 import { CwButtonGroupText } from './button-group-text.component';
 import { CwButtonGroup } from '../button-group.component';
 
+/**
+ * Class Host
+ * @class Host
+ *
+ * @description
+ * Test host placing a descriptive text beside a button in a group.
+ */
 @Component({
   imports: [CwButton, CwButtonGroup, CwButtonGroupText],
   template: `
@@ -18,11 +25,13 @@ class Host {}
 
 describe('CwButtonGroupText', () => {
   it('shows a text that names what follows', () => {
-    const fixture = TestBed.createComponent(Host);
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
     fixture.autoDetectChanges();
-    const host = fixture.nativeElement as HTMLElement;
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
 
-    const group = host.querySelector<HTMLElement>('[role="group"][aria-label="Déplacer"]');
+    const group: HTMLElement | null = host.querySelector<HTMLElement>(
+      '[role="group"][aria-label="Déplacer"]',
+    );
 
     expect(group?.textContent).toContain('Déplacer vers');
   });

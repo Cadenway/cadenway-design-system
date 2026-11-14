@@ -1,11 +1,12 @@
 import { LiveAnnouncer } from '@angular/cdk/a11y';
-import { CdkDropList, type CdkDragDrop } from '@angular/cdk/drag-drop';
-import { Component, signal } from '@angular/core';
+import { CdkDropList, type CdkDrag, type CdkDragDrop } from '@angular/cdk/drag-drop';
+import { Component, signal, type DebugElement, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 
 import { CwCalendarItemDef } from './calendar-item-def/calendar-item-def.directive';
 import { CwCalendarView } from './calendar-view.component';
+import type { DropData } from './calendar-view.token';
 import type {
   CwCalendarCreate,
   CwCalendarItemMove,
@@ -13,20 +14,86 @@ import type {
   CwCalendarViewMode,
 } from './calendar-view.types';
 
+/**
+ * Interface Task
+ *
+ * @description
+ * Calendar item used by the test fixture.
+ */
 interface Task {
+  // #region Properties
+  /**
+   * Property id
+   *
+   * @description
+   * Stable identifier of the task.
+   *
+   * @type {string}
+   * @readonly
+   */
   readonly id: string;
+
+  /**
+   * Property name
+   *
+   * @description
+   * Displayed task name.
+   *
+   * @type {string}
+   * @readonly
+   */
   readonly name: string;
+
+  /**
+   * Property span
+   *
+   * @description
+   * Scheduled dates and all-day state of the task.
+   *
+   * @type {CwCalendarSpan | null}
+   * @readonly
+   */
   readonly span: CwCalendarSpan | null;
+  // #endregion
 }
 
-function day(date: number, hours = 0, minutes = 0): Date {
+/**
+ * Function day
+ *
+ * @description
+ * Creates a date in November 2026 for the fixture.
+ *
+ * @param {number} date - Day of the month.
+ * @param {number} hours - Hour of the date.
+ * @param {number} minutes - Minute of the date.
+ * @returns {Date} Date in the fixture month.
+ */
+function day(date: number, hours: number = 0, minutes: number = 0): Date {
   return new Date(2026, 10, date, hours, minutes);
 }
 
-function allDay(date: number, to = date): CwCalendarSpan {
+/**
+ * Function allDay
+ *
+ * @description
+ * Creates an all-day span for the fixture.
+ *
+ * @param {number} date - Day of the month.
+ * @param {number} to - Last day of the all-day span.
+ * @returns {CwCalendarSpan} All-day calendar span.
+ */
+function allDay(date: number, to: number = date): CwCalendarSpan {
   return { start: day(date), end: day(to), allDay: true };
 }
 
+/**
+ * Constant TASKS
+ *
+ * @description
+ * Sample calendar items used by the fixture.
+ *
+ * @type {Task[]}
+ */
 const TASKS: Task[] = [
   { id: 'CAD-482', name: "Corriger l'export CSV", span: allDay(12) },
   {
@@ -46,6 +113,12 @@ const TASKS: Task[] = [
   { id: 'CAD-500', name: 'Sans échéance', span: null },
 ];
 
+/**
+ * Component Host
+ *
+ * @description
+ * Hosts a calendar view and records emitted interactions.
+ */
 @Component({
   imports: [CwCalendarView, CwCalendarItemDef],
   template: `
@@ -72,23 +145,167 @@ const TASKS: Task[] = [
   `,
 })
 class Host {
-  readonly items = TASKS;
-  readonly today = day(12, 10, 12);
-  readonly view = signal<CwCalendarViewMode>('month');
-  readonly date = signal<Date | null>(day(12));
-  readonly weekends = signal(true);
-  readonly readonly = signal(false);
-  readonly moves: CwCalendarItemMove<Task>[] = [];
-  readonly creations: CwCalendarCreate[] = [];
-  readonly opened: Task[] = [];
-  unscheduled = 0;
-  readonly id = (task: Task): string => task.id;
-  readonly name = (task: Task): string => task.name;
-  readonly span = (task: Task): CwCalendarSpan | null => task.span;
+  // #region Properties
+  /**
+   * Property items
+   *
+   * @description
+   * Items supplied to the calendar.
+   *
+   * @type {Task[]}
+   * @readonly
+   */
+  public readonly items: Task[] = TASKS;
+
+  /**
+   * Property today
+   *
+   * @description
+   * Current date supplied to the calendar.
+   *
+   * @type {Date}
+   * @readonly
+   */
+  public readonly today: Date = day(12, 10, 12);
+
+  /**
+   * Property view
+   *
+   * @description
+   * Calendar view selected by the fixture.
+   *
+   * @type {WritableSignal<CwCalendarViewMode>}
+   * @readonly
+   */
+  public readonly view: WritableSignal<CwCalendarViewMode> = signal<CwCalendarViewMode>('month');
+
+  /**
+   * Property date
+   *
+   * @description
+   * Displayed date controlled by the fixture.
+   *
+   * @type {WritableSignal<Date | null>}
+   * @readonly
+   */
+  public readonly date: WritableSignal<Date | null> = signal<Date | null>(day(12));
+
+  /**
+   * Property weekends
+   *
+   * @description
+   * Whether weekends are displayed.
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  public readonly weekends: WritableSignal<boolean> = signal(true);
+
+  /**
+   * Property readonly
+   *
+   * @description
+   * Whether item changes are disabled.
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  public readonly readonly: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property moves
+   *
+   * @description
+   * Item moves emitted by the calendar.
+   *
+   * @type {CwCalendarItemMove<Task>[]}
+   * @readonly
+   */
+  public readonly moves: CwCalendarItemMove<Task>[] = [];
+
+  /**
+   * Property creations
+   *
+   * @description
+   * Creation requests emitted by the calendar.
+   *
+   * @type {CwCalendarCreate[]}
+   * @readonly
+   */
+  public readonly creations: CwCalendarCreate[] = [];
+
+  /**
+   * Property opened
+   *
+   * @description
+   * Items opened in the calendar.
+   *
+   * @type {Task[]}
+   * @readonly
+   */
+  public readonly opened: Task[] = [];
+
+  /**
+   * Property unscheduled
+   *
+   * @description
+   * Number of unscheduled-item requests.
+   *
+   * @type {number}
+   */
+  public unscheduled: number = 0;
+
+  /**
+   * Property id
+   *
+   * @description
+   * Stable identifier of the task.
+   *
+   * @type {(task: Task) => string}
+   * @readonly
+   */
+  public readonly id: (task: Task) => string = (task: Task): string => task.id;
+
+  /**
+   * Property name
+   *
+   * @description
+   * Displayed task name.
+   *
+   * @type {(task: Task) => string}
+   * @readonly
+   */
+  public readonly name: (task: Task) => string = (task: Task): string => task.name;
+
+  /**
+   * Property span
+   *
+   * @description
+   * Scheduled dates and all-day state of the task.
+   *
+   * @type {(task: Task) => CwCalendarSpan | null}
+   * @readonly
+   */
+  public readonly span: (task: Task) => CwCalendarSpan | null = (
+    task: Task,
+  ): CwCalendarSpan | null => task.span;
+  // #endregion
 }
 
+/**
+ * Function cell
+ *
+ * @description
+ * Finds a calendar grid cell by its displayed date.
+ *
+ * @param {HTMLElement} host - Fixture element to search.
+ * @param {string} name - Displayed or accessible name to find.
+ * @returns {HTMLElement} Matching calendar cell.
+ */
 function cell(host: HTMLElement, name: string): HTMLElement {
-  const found = Array.from(host.querySelectorAll<HTMLElement>('[role="gridcell"]')).find(
+  const found: HTMLElement | undefined = Array.from(
+    host.querySelectorAll<HTMLElement>('[role="gridcell"]'),
+  ).find(
     // A cell is named by its content, which starts with its full date.
     (element) => element.firstElementChild?.textContent.trim() === name,
   );
@@ -96,8 +313,20 @@ function cell(host: HTMLElement, name: string): HTMLElement {
   return found;
 }
 
+/**
+ * Function button
+ *
+ * @description
+ * Finds a button by its accessible name.
+ *
+ * @param {HTMLElement} host - Fixture element to search.
+ * @param {string} name - Displayed or accessible name to find.
+ * @returns {HTMLButtonElement} Matching button.
+ */
 function button(host: HTMLElement, name: string): HTMLButtonElement {
-  const found = Array.from(host.querySelectorAll<HTMLButtonElement>('button')).find(
+  const found: HTMLButtonElement | undefined = Array.from(
+    host.querySelectorAll<HTMLButtonElement>('button'),
+  ).find(
     (element) =>
       (element.getAttribute('aria-label') ??
         element.getAttribute('title') ??
@@ -107,6 +336,15 @@ function button(host: HTMLElement, name: string): HTMLButtonElement {
   return found;
 }
 
+/**
+ * Function press
+ *
+ * @description
+ * Dispatches a keyboard event to a target.
+ *
+ * @param {HTMLElement} target - Element receiving the event.
+ * @param {string} key - Keyboard key to dispatch.
+ */
 function press(target: HTMLElement, key: string): void {
   target.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
 }
@@ -128,8 +366,15 @@ describe('CwCalendarView', () => {
     component = fixture.componentInstance;
   });
 
+  /**
+   * Function grid
+   *
+   * @description
+   * Finds the calendar grid.
+   * @returns {HTMLElement} Calendar grid element.
+   */
   function grid(): HTMLElement {
-    const found = host.querySelector<HTMLElement>('[role="grid"]');
+    const found: HTMLElement | null = host.querySelector<HTMLElement>('[role="grid"]');
     if (!found) throw new Error('No grid');
     return found;
   }
@@ -137,7 +382,7 @@ describe('CwCalendarView', () => {
   it('draws six weeks from Monday, named by the month', () => {
     expect(grid().getAttribute('aria-label')).toBe('Novembre 2026');
     expect(grid().querySelectorAll('[role="row"]').length).toBe(7);
-    const headers = Array.from(grid().querySelectorAll('[role="columnheader"]'));
+    const headers: Element[] = Array.from(grid().querySelectorAll('[role="columnheader"]'));
     expect(headers.map((header) => header.textContent.trim())).toEqual([
       'lun.',
       'mar.',
@@ -153,21 +398,21 @@ describe('CwCalendarView', () => {
   });
 
   it('marks today and gives it the tab stop', () => {
-    const today = cell(host, 'jeudi 12 novembre 2026, 4 tâches');
+    const today: HTMLElement = cell(host, 'jeudi 12 novembre 2026, 4 tâches');
     expect(today.getAttribute('aria-current')).toBe('date');
     expect(today.getAttribute('tabindex')).toBe('0');
     expect(grid().querySelectorAll('[role="gridcell"][tabindex="0"]').length).toBe(1);
   });
 
   it('shows maxPerDay lines, then « +n autres »', () => {
-    const today = cell(host, 'jeudi 12 novembre 2026, 4 tâches');
-    const items = Array.from(today.querySelectorAll('button[title]'));
+    const today: HTMLElement = cell(host, 'jeudi 12 novembre 2026, 4 tâches');
+    const items: Element[] = Array.from(today.querySelectorAll('button[title]'));
     expect(items.map((item) => item.getAttribute('title'))).toEqual(["Corriger l'export CSV"]);
     expect(button(today, '+3 autres').getAttribute('aria-haspopup')).toBe('dialog');
   });
 
   it('draws an item over several days as one bar', () => {
-    const bar = button(host, 'Maquetter la vue Calendrier, du 16 au 18 nov.');
+    const bar: HTMLButtonElement = button(host, 'Maquetter la vue Calendrier, du 16 au 18 nov.');
     expect(cell(host, 'lundi 16 novembre 2026, 1 tâche').contains(bar)).toBe(true);
     expect(bar.textContent).toContain('16 nov. – 18 nov.');
     expect(cell(host, 'mardi 17 novembre 2026, 2 tâches').textContent).toContain(
@@ -184,7 +429,7 @@ describe('CwCalendarView', () => {
   });
 
   it('moves through the days with the keyboard and changes month at the edge', async () => {
-    const today = cell(host, 'jeudi 12 novembre 2026, 4 tâches');
+    const today: HTMLElement = cell(host, 'jeudi 12 novembre 2026, 4 tâches');
     today.focus();
     press(today, 'ArrowRight');
     await fixture.whenStable();
@@ -206,14 +451,14 @@ describe('CwCalendarView', () => {
   });
 
   it('creates on the active day with N', () => {
-    const today = cell(host, 'jeudi 12 novembre 2026, 4 tâches');
+    const today: HTMLElement = cell(host, 'jeudi 12 novembre 2026, 4 tâches');
     today.focus();
     press(today, 'n');
     expect(component.creations).toEqual([{ date: day(12), allDay: true }]);
   });
 
   it('moves a grabbed item with Space and the arrows, keeping its times', async () => {
-    const item = button(host, 'Corriger le tri');
+    const item: HTMLButtonElement = button(host, 'Corriger le tri');
     item.focus();
     press(item, ' ');
     await fixture.whenStable();
@@ -241,7 +486,7 @@ describe('CwCalendarView', () => {
   });
 
   it('cancels a keyboard move on Escape', async () => {
-    const item = button(host, 'Corriger le tri');
+    const item: HTMLButtonElement = button(host, 'Corriger le tri');
     press(item, ' ');
     press(document.activeElement as HTMLElement, 'ArrowRight');
     await fixture.whenStable();
@@ -252,15 +497,19 @@ describe('CwCalendarView', () => {
   });
 
   it('reschedules an item dropped with the pointer on another day', async () => {
-    const lists = fixture.debugElement.queryAll(By.directive(CdkDropList));
-    const lists$ = lists.map((element) => element.injector.get(CdkDropList));
-    const source = lists$.find((list) =>
+    const lists: DebugElement[] = fixture.debugElement.queryAll(By.directive(CdkDropList));
+    const lists$: CdkDropList<DropData>[] = lists.map(
+      (element) => element.injector.get(CdkDropList) as unknown as CdkDropList<DropData>,
+    );
+    const source: CdkDropList<DropData> | undefined = lists$.find((list) =>
       list.getSortedItems().some((drag) => drag.data === 'CAD-485'),
     );
-    const target = lists$.find(
-      (list) => (list.data as { date: Date }).date.getTime() === day(24).getTime(),
+    const target: CdkDropList<DropData> | undefined = lists$.find(
+      (list) => list.data.date.getTime() === day(24).getTime(),
     );
-    const drag = source?.getSortedItems().find((candidate) => candidate.data === 'CAD-485');
+    const drag: CdkDrag<string> | undefined = source
+      ?.getSortedItems()
+      .find((candidate) => candidate.data === 'CAD-485');
     if (!source || !target || !drag) throw new Error('Drop lists missing');
     target.dropped.emit({
       previousContainer: source,
@@ -268,7 +517,7 @@ describe('CwCalendarView', () => {
       previousIndex: 0,
       currentIndex: 0,
       item: drag,
-    } as unknown as CdkDragDrop<unknown>);
+    } as unknown as CdkDragDrop<DropData, DropData, string>);
     await fixture.whenStable();
     expect(component.moves).toEqual([
       { item: TASKS[5], start: day(24), end: day(24), allDay: true },
@@ -284,13 +533,13 @@ describe('CwCalendarView', () => {
     expect(component.view()).toBe('week');
     expect(grid().getAttribute('aria-label')).toBe('Semaine du 9 au 15 novembre 2026');
     expect(host.textContent).toContain('9 – 15 nov. 2026');
-    const today = Array.from(grid().querySelectorAll('[role="columnheader"]')).find(
-      (header) => header.getAttribute('aria-current') === 'date',
-    );
+    const today: Element | undefined = Array.from(
+      grid().querySelectorAll('[role="columnheader"]'),
+    ).find((header) => header.getAttribute('aria-current') === 'date');
     expect(today?.textContent.replace(/\s+/g, '')).toBe('jeu.12');
     expect(grid().querySelector('[role="rowheader"]')?.textContent.trim()).toBe('Journée');
 
-    const block = button(host, 'Corriger le tri');
+    const block: HTMLButtonElement = button(host, 'Corriger le tri');
     expect(block.textContent).toContain('9:00 – 10:00');
     expect(cell(host, 'mardi 10 novembre 2026, 9:00').contains(block)).toBe(true);
     expect(cell(host, 'jeudi 12 novembre 2026, 10:00').querySelector('svg')).not.toBeNull();
@@ -299,7 +548,7 @@ describe('CwCalendarView', () => {
   it('moves a block to another slot, keeping its duration', async () => {
     component.view.set('week');
     await fixture.whenStable();
-    const block = button(host, 'Corriger le tri');
+    const block: HTMLButtonElement = button(host, 'Corriger le tri');
     press(block, ' ');
     await fixture.whenStable();
     press(document.activeElement as HTMLElement, 'ArrowDown');

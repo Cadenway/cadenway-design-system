@@ -1,4 +1,4 @@
-import { Component, computed, contentChildren } from '@angular/core';
+import { Component, computed, contentChildren, type Signal } from '@angular/core';
 import type { CwBubblePosition } from '@cadenway/ui/components/bubble';
 
 import {
@@ -9,12 +9,41 @@ import {
   type MessageRef,
 } from '../message.token';
 
-// Message sheet, « Groupé »: consecutive messages of one person less than 5 minutes apart.
-const GROUP_WINDOW = 5 * 60_000;
+/**
+ * Type MessageList
+ *
+ * @description
+ * Messages projected into a group in display order.
+ *
+ * @type {readonly MessageRef[]}
+ */
+type MessageList = readonly MessageRef[];
 
+// Message sheet, « Groupé »: consecutive messages of one person less than 5 minutes apart.
+/**
+ * Constant GROUP_WINDOW
+ *
+ * @description
+ * Maximum interval in milliseconds for consecutive messages to share a group.
+ *
+ * @type {number}
+ */
+const GROUP_WINDOW: number = 5 * 60_000;
+
+/**
+ * Constant ALONE
+ *
+ * @description
+ * Fallback position for a message not found in the group.
+ *
+ * @type {MessagePlace}
+ */
 const ALONE: MessagePlace = { grouped: false, position: null, first: false };
 
 /**
+ * Component CwMessageGroup
+ *
+ * @description
  * Wraps the messages of a thread and groups the consecutive ones of the same person (Message sheet
  * of the Design System artifact, « Groupé »).
  *
@@ -33,17 +62,36 @@ const ALONE: MessagePlace = { grouped: false, position: null, first: false };
   templateUrl: './message-group.component.html',
 })
 export class CwMessageGroup implements MessageGroupRef {
-  private readonly messages = contentChildren(MESSAGE, { descendants: true });
+  // #region Properties
+  /**
+   * Property messages
+   * @readonly
+   *
+   * @description
+   * Messages projected into the group, in display order.
+   *
+   * @type {Signal<MessageList>}
+   */
+  private readonly messages: Signal<MessageList> = contentChildren(MESSAGE, { descendants: true });
 
-  private readonly places = computed(() => {
-    const messages = this.messages();
-    const continues = messages.map((message, index) =>
+  /**
+   * Property places
+   * @readonly
+   *
+   * @description
+   * Position and grouping state computed for each projected message.
+   *
+   * @type {Signal<Map<MessageRef, MessagePlace>>}
+   */
+  private readonly places: Signal<Map<MessageRef, MessagePlace>> = computed(() => {
+    const messages: readonly MessageRef[] = this.messages();
+    const continues: boolean[] = messages.map((message, index) =>
       index > 0 ? this.follows(messages[index - 1], message) : false,
     );
-    const places = new Map<MessageRef, MessagePlace>();
+    const places: Map<MessageRef, MessagePlace> = new Map<MessageRef, MessagePlace>();
     messages.forEach((message, index) => {
-      const starts = !continues[index];
-      const goesOn = index + 1 < messages.length && continues[index + 1];
+      const starts: boolean = !continues[index];
+      const goesOn: boolean = index + 1 < messages.length && continues[index + 1];
       let position: CwBubblePosition | null = null;
       if (starts && goesOn) position = 'first';
       else if (!starts && goesOn) position = 'middle';
@@ -52,15 +100,38 @@ export class CwMessageGroup implements MessageGroupRef {
     });
     return places;
   });
+  // #endregion
 
-  /** Where a message of this group sits. */
-  placeOf(message: MessageRef): MessagePlace {
+  // #region Methods
+  /**
+   * Method placeOf
+   *
+   * @description
+   * Returns the grouping state and bubble position of a projected message.
+   *
+   * @param {MessageRef} message - Message whose position is requested.
+   *
+   * @returns {MessagePlace} Computed position, or the ungrouped fallback when absent.
+   */
+  public placeOf(message: MessageRef): MessagePlace {
     return this.places().get(message) ?? ALONE;
   }
 
+  /**
+   * Method follows
+   *
+   * @description
+   * Checks whether adjacent messages have the same author and side and are less than five minutes apart.
+   * System messages and timestamps out of order do not join a run.
+   *
+   * @param {MessageRef} previous - Message immediately preceding the candidate.
+   * @param {MessageRef} message - Candidate message to add to the run.
+   *
+   * @returns {boolean} Whether the candidate continues the previous message's run.
+   */
   private follows(previous: MessageRef, message: MessageRef): boolean {
-    const before = previous.time();
-    const time = message.time();
+    const before: Date | null = previous.time();
+    const time: Date | null = message.time();
     return (
       message.variant() !== 'system' &&
       message.variant() === previous.variant() &&
@@ -73,4 +144,5 @@ export class CwMessageGroup implements MessageGroupRef {
       time.getTime() - before.getTime() < GROUP_WINDOW
     );
   }
+  // #endregion
 }

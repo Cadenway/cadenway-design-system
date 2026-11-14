@@ -1,17 +1,73 @@
-/** Diameter of an avatar: 20 px (`xs`, menus, mentions) to 40 px (`lg`, a member's profile). */
+/**
+ * Type CwAvatarSize
+ *
+ * @description
+ * Avatar diameter from 20 px (`xs`) to 40 px (`lg`).
+ *
+ * @type {'xs' | 'sm' | 'default' | 'lg'}
+ */
 export type CwAvatarSize = 'xs' | 'sm' | 'default' | 'lg';
 
-/** Presence shown by the dot: online (green), away (muted); `null` means offline, no dot. */
+/**
+ * Type CwAvatarPresence
+ *
+ * @description
+ * Presence shown by the dot: online or away; a null input means offline.
+ *
+ * @type {'online' | 'away'}
+ */
 export type CwAvatarPresence = 'online' | 'away';
 
-/** The hidden texts of an avatar, French by default (Avatar sheet of the Design System artifact). */
+/**
+ * Interface CwAvatarLabels
+ *
+ * @description
+ * Accessible avatar text, supplied in French by default.
+ */
 export interface CwAvatarLabels {
-  /** Name read when `name` is unknown (a deleted account). */
+  // #region Properties
+  /**
+   * Property unknown
+   * @readonly
+   *
+   * @description
+   * Name read when the account name is unknown.
+   *
+   * @type {string}
+   */
   readonly unknown: string;
-  /** Suffix read after the name of an online person, without parentheses. */
+
+  /**
+   * Property online
+   * @readonly
+   *
+   * @description
+   * Suffix read after the name of an online person, without parentheses.
+   *
+   * @type {string}
+   */
   readonly online: string;
-  /** Suffix read after the name of an away person, without parentheses. */
+
+  /**
+   * Property away
+   * @readonly
+   *
+   * @description
+   * Suffix read after the name of an away person, without parentheses.
+   *
+   * @type {string}
+   */
   readonly away: string;
-  /** Suffix read after the name of a deactivated account, without parentheses. */
+
+  /**
+   * Property disabled
+   * @readonly
+   *
+   * @description
+   * Suffix read after the name of a deactivated account, without parentheses.
+   *
+   * @type {string}
+   */
   readonly disabled: string;
+  // #endregion
 }

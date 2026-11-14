@@ -1,8 +1,12 @@
 import type { CwKanbanLabels } from './kanban.types';
 
 /**
- * The default texts of the board, word for word from the Kanban sheet and the mockup
- * (`App.dc.html`, vue Tableau). A `labels` input overrides any of them.
+ * Constant CW_KANBAN_LABELS
+ *
+ * @description
+ * The default texts of the board, word for word from the Kanban sheet and the mockup (`App.dc.html`, vue Tableau). A `labels` input overrides any of them.
+ *
+ * @type {CwKanbanLabels}
  */
 export const CW_KANBAN_LABELS: CwKanbanLabels = {
   add: 'Ajouter une tâche',

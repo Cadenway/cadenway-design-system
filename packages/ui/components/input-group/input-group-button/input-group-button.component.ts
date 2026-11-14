@@ -1,18 +1,19 @@
-import { Component, input } from '@angular/core';
+import { Component, input, type InputSignal } from '@angular/core';
 import { CwButton, type CwButtonSize, type CwButtonVariant } from '@cadenway/ui/components/button';
 import { CwRipple } from '@cadenway/ui/core';
 import { CwSpinner } from '@cadenway/ui/components/spinner';
 
 /**
+ * Class CwInputGroupButton
+ * @class CwInputGroupButton
+ *
+ * @description
  * A button inside an addon: the Button brick, `ghost` and `xs` by default (`icon-xs` for an icon,
  * `default` only for the send action). Same contract as `button[cwButton]`: `type="button"`,
  * `loading`, `disabled`, ripple; an icon-only button needs an `aria-label` (« Copier l'URL »), a
  * show / hide button toggles `aria-pressed`.
  */
 @Component({
-  // A component on a native element (attribute selector), as its sheet requires: the element keeps
-  // its native role, focus and form behavior. The lint rule only knows element selectors.
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'button[cwInputGroupButton]',
   imports: [CwSpinner],
   hostDirectives: [CwRipple],
@@ -27,11 +28,28 @@ import { CwSpinner } from '@cadenway/ui/components/spinner';
   templateUrl: './input-group-button.component.html',
 })
 export class CwInputGroupButton extends CwButton {
-  /** Look of the button; `ghost` in an addon, `default` for the send action only. */
-  override readonly variant = input<CwButtonVariant>('ghost');
+  // #region Properties
   /**
+   * Property variant
+   * @readonly
+   *
+   * @description
+   * Button appearance, ghost in an addon by default.
+   *
+   * @type {InputSignal<CwButtonVariant>}
+   */
+  public override readonly variant: InputSignal<CwButtonVariant> = input<CwButtonVariant>('ghost');
+
+  /**
+   * Property size
+   * @readonly
+   *
+   * @description
    * Size of the button: `xs` or `icon-xs` in a 28 or 32 px group, `sm` or `icon-sm` in a 36 px one.
    * Typed as every Button size because an input signal cannot narrow the type it overrides.
+   *
+   * @type {InputSignal<CwButtonSize>}
    */
-  override readonly size = input<CwButtonSize>('xs');
+  public override readonly size: InputSignal<CwButtonSize> = input<CwButtonSize>('xs');
+  // #endregion
 }

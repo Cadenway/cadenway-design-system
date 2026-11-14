@@ -3,6 +3,10 @@ import { Directive, inject, TemplateRef } from '@angular/core';
 import type { CwTimelineBarContext } from '../timeline.types';
 
 /**
+ * Class CwTimelineBarDef
+ * @class CwTimelineBarDef
+ *
+ * @description
  * Replaces the content of every bar of a `cw-timeline` (status icon, name and percentage by
  * default): `<ng-template cwTimelineBar let-item let-width="width">`.
  *
@@ -12,16 +16,38 @@ import type { CwTimelineBarContext } from '../timeline.types';
  */
 @Directive({ selector: 'ng-template[cwTimelineBar]' })
 export class CwTimelineBarDef {
-  /** The template, read by `cw-timeline`. */
-  readonly template = inject<TemplateRef<CwTimelineBarContext>>(TemplateRef);
+  // #region Properties
+  /**
+   * Property template
+   * @readonly
+   *
+   * @description
+   * Bar content template consumed by the timeline.
+   *
+   * @type {TemplateRef<CwTimelineBarContext>}
+   */
+  public readonly template: TemplateRef<CwTimelineBarContext> =
+    inject<TemplateRef<CwTimelineBarContext>>(TemplateRef);
+  // #endregion
 
-  /** Types the template context for the template type checker; never called at run time. */
-  /* eslint-disable @typescript-eslint/no-unused-vars -- the signature is Angular's contract. */
-  static ngTemplateContextGuard(
+  // #region Methods
+  /**
+   * Method ngTemplateContextGuard
+   * @method ngTemplateContextGuard
+   *
+   * @description
+   * Declares the template context type for Angular's template checker.
+   *
+   * @param {CwTimelineBarDef} _directive - Directive instance used by Angular's template checker.
+   * @param {unknown} _context - Unknown template context to narrow.
+   *
+   * @returns {context is CwTimelineBarContext} Whether the context has the timeline bar shape.
+   */
+  public static ngTemplateContextGuard(
     _directive: CwTimelineBarDef,
-    context: unknown,
-  ): context is CwTimelineBarContext {
+    _context: unknown,
+  ): _context is CwTimelineBarContext {
     return true;
   }
-  /* eslint-enable @typescript-eslint/no-unused-vars */
+  // #endregion
 }

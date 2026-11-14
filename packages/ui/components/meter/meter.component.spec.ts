@@ -1,9 +1,15 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CwMeter } from './meter.component';
-import type { CwMeterSeries } from './meter.types';
+import type { CwMeterFormat, CwMeterSeries } from './meter.types';
 
+/**
+ * Class Host
+ *
+ * @description
+ * Hosts gauges covering ranges, zones, stacked series and loading.
+ */
 @Component({
   imports: [CwMeter],
   template: `
@@ -37,20 +43,74 @@ import type { CwMeterSeries } from './meter.types';
   `,
 })
 class Host {
-  readonly storage = signal(6.4);
-  readonly loading = signal(false);
-  readonly series: CwMeterSeries[] = [
+  // #region Properties
+  /**
+   * Property storage
+   * @readonly
+   *
+   * @description
+   * Measured storage amount for zone tests.
+   *
+   * @type {WritableSignal<number>}
+   */
+  public readonly storage: WritableSignal<number> = signal(6.4);
+
+  /**
+   * Property loading
+   * @readonly
+   *
+   * @description
+   * Loading state of the API calls gauge.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly loading: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property series
+   * @readonly
+   *
+   * @description
+   * Stacked storage series.
+   *
+   * @type {CwMeterSeries[]}
+   */
+  public readonly series: CwMeterSeries[] = [
     { label: 'Pièces jointes', value: 4.1 },
     { label: 'Documents', value: 2.3 },
   ];
-  readonly go = (value: number, max: number): string =>
+
+  /**
+   * Property go
+   * @readonly
+   *
+   * @description
+   * Formats storage values in gigabytes for the fixture.
+   *
+   * @type {CwMeterFormat}
+   */
+  public readonly go: CwMeterFormat = (value: number, max: number): string =>
     `${String(value).replace('.', ',')} Go sur ${String(max)} Go`;
+  // #endregion
 }
 
+/**
+ * Function meterNamed
+ *
+ * @description
+ * Finds a meter by its referenced or direct accessible label.
+ *
+ * @param {HTMLElement} host - Fixture containing the meters.
+ * @param {string} name - Accessible label to match.
+ *
+ * @returns {HTMLElement} Matching meter element.
+ */
 function meterNamed(host: HTMLElement, name: string): HTMLElement {
-  const found = Array.from(host.querySelectorAll<HTMLElement>('[role="meter"]')).find((element) => {
-    const labelledBy = element.getAttribute('aria-labelledby');
-    const label = labelledBy
+  const found: HTMLElement | undefined = Array.from(
+    host.querySelectorAll<HTMLElement>('[role="meter"]'),
+  ).find((element) => {
+    const labelledBy: string | null = element.getAttribute('aria-labelledby');
+    const label: string | null | undefined = labelledBy
       ? host.querySelector(`[id="${labelledBy}"]`)?.textContent.trim()
       : element.getAttribute('aria-label');
     return label === name;
@@ -59,8 +119,18 @@ function meterNamed(host: HTMLElement, name: string): HTMLElement {
   return found;
 }
 
+/**
+ * Function gauge
+ *
+ * @description
+ * Finds the component host containing a meter element.
+ *
+ * @param {HTMLElement} element - Meter element inside the component.
+ *
+ * @returns {HTMLElement} Containing meter component host.
+ */
 function gauge(element: HTMLElement): HTMLElement {
-  const root = element.closest<HTMLElement>('cw-meter');
+  const root: HTMLElement | null = element.closest<HTMLElement>('cw-meter');
   if (!root) throw new Error('Meter host missing');
   return root;
 }
@@ -78,7 +148,7 @@ describe('CwMeter', () => {
   });
 
   it('exposes the range, the value and the formatted value text', () => {
-    const storage = meterNamed(host, "Stockage de l'instance");
+    const storage: HTMLElement = meterNamed(host, "Stockage de l'instance");
 
     expect(storage.getAttribute('aria-valuenow')).toBe('6.4');
     expect(storage.getAttribute('aria-valuemin')).toBe('0');
@@ -89,14 +159,16 @@ describe('CwMeter', () => {
   });
 
   it('describes the gauge by its note', () => {
-    const storage = meterNamed(host, "Stockage de l'instance");
-    const note = host.querySelector(`[id="${storage.getAttribute('aria-describedby') ?? ''}"]`);
+    const storage: HTMLElement = meterNamed(host, "Stockage de l'instance");
+    const note: Element | null = host.querySelector(
+      `[id="${storage.getAttribute('aria-describedby') ?? ''}"]`,
+    );
 
     expect(note?.textContent.trim()).toBe('3,6 Go disponibles');
   });
 
   it('enters the high zone at 80 % and the critical zone at 95 % of the range', async () => {
-    const storage = meterNamed(host, "Stockage de l'instance");
+    const storage: HTMLElement = meterNamed(host, "Stockage de l'instance");
 
     component.storage.set(8);
     await fixture.whenStable();
@@ -112,7 +184,7 @@ describe('CwMeter', () => {
   });
 
   it('writes the overrun over the threshold', () => {
-    const sprint = meterNamed(host, 'Charge du sprint 14');
+    const sprint: HTMLElement = meterNamed(host, 'Charge du sprint 14');
 
     expect(gauge(sprint).dataset['zone']).toBe('critical');
     expect(gauge(sprint).hasAttribute('data-over')).toBe(true);
@@ -126,12 +198,12 @@ describe('CwMeter', () => {
   });
 
   it('stays one meter in segmented and stacked forms', () => {
-    const seats = meterNamed(host, 'Sièges');
+    const seats: HTMLElement = meterNamed(host, 'Sièges');
     expect(seats.getAttribute('aria-valuenow')).toBe('7');
 
-    const byType = meterNamed(host, 'Stockage par type');
+    const byType: HTMLElement = meterNamed(host, 'Stockage par type');
     expect(byType.getAttribute('aria-valuenow')).toBe('6.4');
-    const legend = gauge(byType).querySelector('ul')?.textContent ?? '';
+    const legend: string = gauge(byType).querySelector('ul')?.textContent ?? '';
     expect(legend).toContain('Pièces jointes');
     expect(legend).toContain('4,1');
     expect(legend).toContain('Libre');
@@ -139,7 +211,7 @@ describe('CwMeter', () => {
   });
 
   it('reads « Aucune mesure » without a value and is named by aria-label without a header', () => {
-    const load = meterNamed(host, 'Charge de Léa Martin');
+    const load: HTMLElement = meterNamed(host, 'Charge de Léa Martin');
 
     expect(load.getAttribute('aria-valuetext')).toBe('Aucune mesure');
     expect(load.getAttribute('aria-valuenow')).toBe('0');
@@ -148,7 +220,9 @@ describe('CwMeter', () => {
   it('replaces the track by a skeleton while loading', async () => {
     component.loading.set(true);
     await fixture.whenStable();
-    const calls = Array.from(host.querySelectorAll<HTMLElement>('cw-meter')).at(-1);
+    const calls: HTMLElement | undefined = Array.from(
+      host.querySelectorAll<HTMLElement>('cw-meter'),
+    ).at(-1);
 
     expect(calls?.getAttribute('aria-busy')).toBe('true');
     expect(calls?.querySelector('[role="meter"]')).toBeNull();

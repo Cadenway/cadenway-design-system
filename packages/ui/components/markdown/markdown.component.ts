@@ -1,11 +1,15 @@
-import { Component, computed, input } from '@angular/core';
+import type { Marked } from 'marked';
+import { Component, computed, input, type InputSignal, type Signal } from '@angular/core';
 
 import { CwMarkdownBlocks } from './markdown-blocks/markdown-blocks.component';
 import { ɵcreateMarked } from './markdown.marked';
 import { MARKDOWN_CONTEXT, type MarkdownContext } from './markdown.token';
-import { toBlocks } from './markdown.tree';
+import { toBlocks, type MarkdownBlock } from './markdown.tree';
 
 /**
+ * Component CwMarkdown
+ *
+ * @description
  * Shows stored Markdown as formatted text: a comment, a task description, a document in reading
  * mode (mockup App.dc.html, "Texte riche").
  *
@@ -25,12 +29,51 @@ import { toBlocks } from './markdown.tree';
   templateUrl: './markdown.component.html',
 })
 export class CwMarkdown implements MarkdownContext {
-  /** The Markdown to show. */
-  readonly source = input('');
-  /** Word read before a mention by assistive technologies (« mention Karim Benali »). */
-  readonly mentionLabel = input('mention');
+  // #region Properties
+  /**
+   * Property source
+   * @readonly
+   *
+   * @description
+   * Markdown source to render.
+   *
+   * @type {InputSignal<string>}
+   */
+  public readonly source: InputSignal<string> = input('');
 
-  private readonly marked = ɵcreateMarked();
+  /**
+   * Property mentionLabel
+   * @readonly
+   *
+   * @description
+   * Accessible prefix read before a mention.
+   *
+   * @type {InputSignal<string>}
+   */
+  public readonly mentionLabel: InputSignal<string> = input('mention');
 
-  protected readonly blocks = computed(() => toBlocks(this.marked.lexer(this.source())));
+  /**
+   * Property marked
+   * @readonly
+   *
+   * @description
+   * Configured Markdown lexer.
+   *
+   * @type {Marked}
+   */
+  private readonly marked: Marked = ɵcreateMarked();
+
+  /**
+   * Property blocks
+   * @readonly
+   *
+   * @description
+   * Parsed blocks rendered by the component.
+   *
+   * @type {Signal<MarkdownBlock[]>}
+   */
+  protected readonly blocks: Signal<MarkdownBlock[]> = computed(() =>
+    toBlocks(this.marked.lexer(this.source())),
+  );
+  // #endregion
 }

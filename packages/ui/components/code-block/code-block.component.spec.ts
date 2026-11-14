@@ -1,11 +1,20 @@
-import { Component, signal } from '@angular/core';
+import type { Mock } from 'vitest';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { Clipboard } from '@angular/cdk/clipboard';
 
 import { CwCodeBlock } from './code-block.component';
 
-const COMPOSE = [
+/**
+ * Constant COMPOSE
+ *
+ * @description
+ * Compose diff used by the code block tests.
+ *
+ * @type {string}
+ */
+const COMPOSE: string = [
   '# Cadenway — instance de production',
   'services:',
   '  cadenway:',
@@ -15,6 +24,12 @@ const COMPOSE = [
   '      - "8080:8080"',
 ].join('\n');
 
+/**
+ * Component Host
+ *
+ * @description
+ * Exercises code block rendering and copy feedback.
+ */
 @Component({
   imports: [CwCodeBlock],
   template: `
@@ -36,21 +51,73 @@ const COMPOSE = [
   `,
 })
 class Host {
-  readonly compose = COMPOSE;
-  readonly copies = signal<string[]>([]);
-  readonly copyable = signal(true);
+  // #region Properties
+  /**
+   * Property compose
+   * @readonly
+   *
+   * @description
+   * Compose diff shown in the first block.
+   *
+   * @type {string}
+   */
+  public readonly compose: string = COMPOSE;
+
+  /**
+   * Property copies
+   * @readonly
+   *
+   * @description
+   * Text emitted after successful copies.
+   *
+   * @type {WritableSignal<string[]>}
+   */
+  public readonly copies: WritableSignal<string[]> = signal<string[]>([]);
+
+  /**
+   * Property copyable
+   * @readonly
+   *
+   * @description
+   * Whether the second block can be copied.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly copyable: WritableSignal<boolean> = signal(true);
+  // #endregion
 }
 
+/**
+ * Function area
+ *
+ * @description
+ * Finds a code area by accessible name.
+ *
+ * @param {HTMLElement} host - Container holding the code block.
+ * @param {string} name - Expected accessible name of the code area.
+ *
+ * @returns {HTMLElement} Matching code area element.
+ */
 function area(host: HTMLElement, name: string): HTMLElement {
-  const found = Array.from(host.querySelectorAll<HTMLElement>('[role="group"]')).find(
-    (element) => element.getAttribute('aria-label') === name,
-  );
+  const found: HTMLElement | undefined = Array.from(
+    host.querySelectorAll<HTMLElement>('[role="group"]'),
+  ).find((element) => element.getAttribute('aria-label') === name);
   if (!found) throw new Error(`No code area named ${name}`);
   return found;
 }
 
+/**
+ * Function copyButton
+ *
+ * @description
+ * Finds the copy button by its accessible name.
+ *
+ * @param {HTMLElement} host - Container holding the code block.
+ *
+ * @returns {HTMLButtonElement} Copy button for the code block.
+ */
 function copyButton(host: HTMLElement): HTMLButtonElement {
-  const found = Array.from(host.querySelectorAll('button')).find(
+  const found: HTMLButtonElement | undefined = Array.from(host.querySelectorAll('button')).find(
     (element) =>
       (element.getAttribute('aria-label') ?? element.textContent.trim()) === 'Copier le code',
   );
@@ -62,8 +129,8 @@ describe('CwCodeBlock', () => {
   let host: HTMLElement;
   let component: Host;
   let fixture: ComponentFixture<Host>;
-  const copy = vi.fn<(text: string) => boolean>(() => true);
-  const announce = vi.fn(() => Promise.resolve());
+  const copy: Mock<(text: string) => boolean> = vi.fn<(text: string) => boolean>(() => true);
+  const announce: Mock<() => Promise<void>> = vi.fn(() => Promise.resolve());
 
   beforeEach(() => {
     vi.useFakeTimers();
@@ -91,11 +158,11 @@ describe('CwCodeBlock', () => {
   });
 
   it('marks diff lines with a sign and a hidden word, and numbers the resulting file', () => {
-    const lines = Array.from(
+    const lines: HTMLElement[] = Array.from(
       area(host, 'docker-compose.yml, 7 lignes').querySelectorAll<HTMLElement>('code > span'),
     );
-    const removed = lines.at(3);
-    const added = lines.at(4);
+    const removed: HTMLElement | undefined = lines.at(3);
+    const added: HTMLElement | undefined = lines.at(4);
 
     expect(removed?.dataset['line']).toBe('removed');
     expect(removed?.textContent).toContain('retiré');
@@ -107,11 +174,11 @@ describe('CwCodeBlock', () => {
   });
 
   it('copies the resulting code, announces and shows « Copié » for 2 s', () => {
-    const button = copyButton(host);
+    const button: HTMLButtonElement = copyButton(host);
     button.click();
     fixture.detectChanges();
 
-    const expected = COMPOSE.split('\n')
+    const expected: string = COMPOSE.split('\n')
       .filter((line) => !line.startsWith('-'))
       .map((line) => (line.startsWith('+') ? line.slice(1) : line))
       .join('\n');
@@ -138,7 +205,9 @@ describe('CwCodeBlock', () => {
   });
 
   it('hides line numbers from assistive technologies', () => {
-    const number = area(host, 'docker-compose.yml, 7 lignes').querySelector('[aria-hidden="true"]');
+    const number: Element | null = area(host, 'docker-compose.yml, 7 lignes').querySelector(
+      '[aria-hidden="true"]',
+    );
     expect(number?.textContent).toBe('1');
   });
 

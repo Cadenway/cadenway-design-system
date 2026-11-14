@@ -45,9 +45,14 @@ import { CwTabs } from './tabs.component';
 import { CwTabsList } from './tabs-list/tabs-list.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Tabs, every state of its sheet in the Design System artifact; each story renders in the light and
  * the dark theme (`.storybook/preview.ts`). Copy from the mockup (`App.dc.html`: view tabs, task
  * sections, settings). The active tab's icon swaps to its Fill glyph through `#tab="cwTab"`.
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Tabs',
@@ -91,19 +96,54 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story configuration for tab examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Selects the light theme copy for interaction checks.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the themed examples.
+ *
+ * @returns {HTMLElement} Light theme section used for interaction checks.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
 /* The counter is read after the label (« Tableau, 4 »); the browser puts a space around the hidden
    comma, since the tab's children are flex items. */
-const COUNTED_BOARD = /^Tableau\s*,\s*4$/;
+/**
+ * Constant COUNTED_BOARD
+ *
+ * @description
+ * Accessible board-tab name including its counter.
+ *
+ * @type {RegExp}
+ */
+const COUNTED_BOARD: RegExp = /^Tableau\s*,\s*4$/;
 
-const VIEW_TABS = `
+/**
+ * Constant VIEW_TABS
+ *
+ * @description
+ * Shared view-tab markup for keyboard interaction examples.
+ *
+ * @type {string}
+ */
+const VIEW_TABS: string = `
   <cw-tabs-list ariaLabel="Vues de la liste">
     <button cwTab value="liste" #liste="cwTab">
       <ng-icon [name]="liste.isActive() ? 'phosphorListBulletsFill' : 'phosphorListBulletsBold'" />Liste</button>
@@ -250,10 +290,11 @@ export const Links: Story = {
         </cw-tabs-list>
       </cw-tabs>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const nav = scope.getByRole('navigation', { name: 'Vues' });
-    const table = within(nav).getByRole('link', { name: 'Tableau' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole(role: string, options?: { name?: string | RegExp }): HTMLElement } =
+      within(light(canvasElement));
+    const nav: HTMLElement = scope.getByRole('navigation', { name: 'Vues' });
+    const table: HTMLElement = within(nav).getByRole('link', { name: 'Tableau' });
     await expect(table).toHaveAttribute('aria-current', 'page');
 
     await userEvent.click(within(nav).getByRole('link', { name: 'Liste' }));
@@ -273,15 +314,16 @@ export const Keyboard: Story = {
     props: { view: 'liste' },
     template: `<cw-tabs [(value)]="view">${VIEW_TABS}</cw-tabs>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const list = scope.getByRole('tab', { name: 'Liste' });
-    const calendar = scope.getByRole('tab', { name: 'Calendrier' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole(role: string, options?: { name?: string | RegExp }): HTMLElement } =
+      within(light(canvasElement));
+    const list: HTMLElement = scope.getByRole('tab', { name: 'Liste' });
+    const calendar: HTMLElement = scope.getByRole('tab', { name: 'Calendrier' });
 
     await userEvent.tab();
     await expect(list).toHaveFocus();
     await userEvent.keyboard('{ArrowRight}');
-    const board = scope.getByRole('tab', { name: COUNTED_BOARD });
+    const board: HTMLElement = scope.getByRole('tab', { name: COUNTED_BOARD });
     await expect(board).toHaveFocus();
     await expect(board).toHaveAttribute('aria-selected', 'true');
     await userEvent.keyboard('{End}');
@@ -298,10 +340,11 @@ export const ManualActivation: Story = {
     props: { view: 'liste' },
     template: `<cw-tabs activation="manual" [(value)]="view">${VIEW_TABS}</cw-tabs>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const list = scope.getByRole('tab', { name: 'Liste' });
-    const board = scope.getByRole('tab', { name: COUNTED_BOARD });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole(role: string, options?: { name?: string | RegExp }): HTMLElement } =
+      within(light(canvasElement));
+    const list: HTMLElement = scope.getByRole('tab', { name: 'Liste' });
+    const board: HTMLElement = scope.getByRole('tab', { name: COUNTED_BOARD });
 
     await userEvent.click(list);
     await userEvent.keyboard('{ArrowRight}');

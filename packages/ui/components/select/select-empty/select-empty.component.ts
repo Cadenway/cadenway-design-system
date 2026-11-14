@@ -3,6 +3,9 @@ import { Component } from '@angular/core';
 import { EMPTY } from '../select.styles';
 
 /**
+ * Component CwSelectEmpty
+ *
+ * @description
  * The message a `cw-select` shows when it has no option (« Aucun sprint planifié. »), in place of
  * its `emptyText` (Select sheet of the Design System artifact).
  *

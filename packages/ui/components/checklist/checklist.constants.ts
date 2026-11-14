@@ -1,8 +1,13 @@
 import type { CwChecklistLabels } from './checklist.types';
 
 /**
+ * Constant CW_CHECKLIST_LABELS
+ *
+ * @description
  * The default French texts of `cw-checklist` and its items (Checklist sheet and preview of the
  * Design System artifact, mockup `App.dc.html`); the `labels` input overrides any of them.
+ *
+ * @type {CwChecklistLabels}
  */
 export const CW_CHECKLIST_LABELS: CwChecklistLabels = {
   hideCompleted: 'Masquer les éléments terminés',

@@ -1,8 +1,11 @@
 import { Directive, ElementRef, inject } from '@angular/core';
 
-import { CW_ALERT_DIALOG } from '../alert-dialog.token';
+import { CW_ALERT_DIALOG, type CwAlertDialogContext } from '../alert-dialog.token';
 
 /**
+ * Directive CwAlertDialogCancel
+ *
+ * @description
  * The « Annuler » button of a `cw-alert-dialog` (`outline`): it emits `cancel` with the reason
  * `button` and closes the dialog; it has the focus when the dialog opens.
  *
@@ -17,9 +20,30 @@ import { CW_ALERT_DIALOG } from '../alert-dialog.token';
   },
 })
 export class CwAlertDialogCancel {
-  protected readonly dialog = inject(CW_ALERT_DIALOG, { optional: true });
+  // #region Properties
+  /**
+   * Property dialog
+   * @readonly
+   *
+   * @description
+   * Parent alert dialog context when present.
+   *
+   * @type {CwAlertDialogContext | null}
+   */
+  protected readonly dialog: CwAlertDialogContext | null = inject(CW_ALERT_DIALOG, {
+    optional: true,
+  });
+  // #endregion
 
-  constructor() {
+  // #region Constructor
+  /**
+   * Constructor
+   * @constructor
+   *
+   * @description
+   * Prevents blocked clicks before consumer handlers run.
+   */
+  public constructor() {
     // Capture phase: the guard runs before the consumer's own (click) listener on the same element.
     inject<ElementRef<HTMLElement>>(ElementRef).nativeElement.addEventListener(
       'click',
@@ -32,4 +56,5 @@ export class CwAlertDialogCancel {
       { capture: true },
     );
   }
+  // #endregion
 }

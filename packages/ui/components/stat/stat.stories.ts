@@ -6,9 +6,14 @@ import { CwStatSparkline } from './stat-sparkline/stat-sparkline.component';
 import { CwStat } from './stat.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Stat, every state of its sheet in the Design System artifact; each story renders in the light and
  * the dark theme (`.storybook/preview.ts`). Copy from the sheet preview and the mockup dashboard
  * (`App.dc.html`).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Stat',
@@ -17,10 +22,29 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story configuration for stat examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Selects the light theme copy for interaction checks.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the themed examples.
+ *
+ * @returns {HTMLElement} Light theme section used for interaction checks.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -36,8 +60,10 @@ export const Group: Story = {
         <cw-stat label="Tâches ouvertes" value="18" delta="Stable" comparison="depuis lundi" />
       </cw-stat-group>`,
   }),
-  play: async ({ canvasElement }) => {
-    const group = within(light(canvasElement)).getByRole('group', { name: 'Semaine 46' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const group: HTMLElement = within(light(canvasElement)).getByRole('group', {
+      name: 'Semaine 46',
+    });
     await expect(group).toHaveTextContent('en hausse : +7');
     await expect(group).toHaveTextContent('en baisse : −0,8 j');
   },
@@ -68,8 +94,10 @@ export const WithGoal: Story = {
   render: () => ({
     template: `<cw-stat class="w-64" label="Points livrés" value="34" [goal]="{ value: 34, max: 50, unit: 'engagés' }" />`,
   }),
-  play: async ({ canvasElement }) => {
-    const bar = within(light(canvasElement)).getByRole('progressbar', { name: 'Points livrés' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const bar: HTMLElement = within(light(canvasElement)).getByRole('progressbar', {
+      name: 'Points livrés',
+    });
     await expect(bar).toHaveAttribute('aria-valuenow', '34');
   },
 };
@@ -90,8 +118,8 @@ export const Loading: Story = {
   render: () => ({
     template: `<cw-stat class="w-64" label="En retard" value="3" loading />`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = light(canvasElement);
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: HTMLElement = light(canvasElement);
     await expect(scope.querySelector('cw-stat')).toHaveAttribute('aria-busy', 'true');
   },
 };
@@ -101,7 +129,7 @@ export const Refreshing: Story = {
   render: () => ({
     template: `<cw-stat class="w-64" label="Tâches ouvertes" value="18" delta="Stable" comparison="depuis lundi" refreshing />`,
   }),
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     await expect(
       within(light(canvasElement)).getByRole('status', { name: 'Actualisation' }),
     ).toBeVisible();

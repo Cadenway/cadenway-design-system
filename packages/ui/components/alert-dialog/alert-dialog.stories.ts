@@ -1,4 +1,4 @@
-import { signal } from '@angular/core';
+import { signal, type WritableSignal } from '@angular/core';
 import { CwButton } from '@cadenway/ui/components/button';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorArchiveBold, phosphorTrashBold } from '@ng-icons/phosphor-icons/bold';
@@ -20,11 +20,16 @@ import { CwAlertDialogTrigger } from './alert-dialog-trigger/alert-dialog-trigge
 import { CwAlertDialog } from './alert-dialog.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Alert Dialog, every state of its sheet in the Design System artifact, in the light and the dark
  * theme. The open dialog renders in a CDK overlay on the page body, outside the theme scopes: the
  * visual states are static renderings of the preview (the dialog in a framed page), the interactive
  * stories open the real dialog in their play function and close it again. Copy from the mockup
  * (`App.dc.html`) and the sheet.
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/AlertDialog',
@@ -52,21 +57,60 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story for alert dialog examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Returns the light-theme story container.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing theme scopes.
+ *
+ * @returns {HTMLElement} Container for the light theme.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
-async function closed(timeout = 1000): Promise<void> {
+/**
+ * Function closed
+ *
+ * @description
+ * Waits until the alert dialog is removed.
+ *
+ * @param {number} [timeout] - Maximum wait in milliseconds; defaults to 1000.
+ *
+ * @returns {Promise<void>} Completion once the alert dialog is absent.
+ */
+async function closed(timeout: number = 1000): Promise<void> {
   await waitFor(() => expect(document.body.querySelector('[role="alertdialog"]')).toBeNull(), {
     timeout,
   });
 }
 
 // A framed page under the backdrop, from the preview.
+/**
+ * Function frame
+ *
+ * @description
+ * Renders the static dialog preview frame.
+ *
+ * @param {string} window - Dialog markup displayed inside the framed preview.
+ *
+ * @returns {string} Markup for the page and dialog preview.
+ */
 function frame(window: string): string {
   return `
     <div class="relative isolate h-[200px] w-full max-w-xl overflow-hidden rounded-lg border bg-background">
@@ -135,12 +179,12 @@ export const Keyboard: Story = {
         <button cwButton variant="destructive" cwAlertDialogAction><ng-icon name="phosphorTrashBold" /> Supprimer la liste</button>
       </cw-alert-dialog>`,
   }),
-  play: async ({ canvasElement }) => {
-    const trigger = within(light(canvasElement)).getByRole('button', {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const trigger: HTMLElement = within(light(canvasElement)).getByRole('button', {
       name: 'Supprimer la liste',
     });
     await userEvent.click(trigger);
-    const dialog = await within(document.body).findByRole('alertdialog', {
+    const dialog: HTMLElement = await within(document.body).findByRole('alertdialog', {
       name: 'Supprimer la liste « Backlog » ?',
     });
     await waitFor(() =>
@@ -166,11 +210,11 @@ export const SmallWithMedia: Story = {
         <button cwButton variant="destructive" cwAlertDialogAction>Retirer</button>
       </cw-alert-dialog>`,
   }),
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     await userEvent.click(
       within(light(canvasElement)).getByRole('button', { name: 'Retirer Samuel Roux' }),
     );
-    const dialog = await within(document.body).findByRole('alertdialog', {
+    const dialog: HTMLElement = await within(document.body).findByRole('alertdialog', {
       name: 'Retirer Samuel Roux ?',
     });
     await expect(dialog.firstElementChild).toHaveAttribute('data-size', 'sm');
@@ -209,18 +253,18 @@ export const ConfirmText: Story = {
         <button cwButton variant="destructive" cwAlertDialogAction><ng-icon name="phosphorTrashBold" /> Supprimer l'espace</button>
       </cw-alert-dialog>`,
   }),
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     await userEvent.click(
       within(light(canvasElement)).getByRole('button', { name: "Supprimer l'espace" }),
     );
-    const dialog = await within(document.body).findByRole('alertdialog', {
+    const dialog: HTMLElement = await within(document.body).findByRole('alertdialog', {
       name: "Supprimer l'espace « Marketing » ?",
     });
     await expect(within(dialog).getByText('+ 2 autres')).toBeInTheDocument();
-    const field = within(dialog).getByRole('textbox', {
+    const field: HTMLElement = within(dialog).getByRole('textbox', {
       name: 'Pour confirmer, saisissez Marketing',
     });
-    const action = within(dialog).getByRole('button', { name: "Supprimer l'espace" });
+    const action: HTMLElement = within(dialog).getByRole('button', { name: "Supprimer l'espace" });
     await waitFor(() => expect(field).toHaveFocus());
     await expect(action).toHaveAttribute('aria-disabled', 'true');
 
@@ -236,9 +280,9 @@ export const ConfirmText: Story = {
 /** Running action (`pending`): spinner and participle label, Annuler and Escape blocked. */
 export const Pending: Story = {
   render: () => {
-    const pending = signal(false);
+    const pending: WritableSignal<boolean> = signal(false);
     // The consumer's deletion: pending for a moment, then it closes the dialog itself.
-    const remove = (dialog: CwAlertDialog): void => {
+    const remove: (dialog: CwAlertDialog) => void = (dialog: CwAlertDialog): void => {
       pending.set(true);
       setTimeout(() => {
         pending.set(false);
@@ -259,11 +303,11 @@ export const Pending: Story = {
         </cw-alert-dialog>`,
     };
   },
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     await userEvent.click(
       within(light(canvasElement)).getByRole('button', { name: "Supprimer l'automatisation" }),
     );
-    const dialog = await within(document.body).findByRole('alertdialog');
+    const dialog: HTMLElement = await within(document.body).findByRole('alertdialog');
     await userEvent.click(within(dialog).getByRole('button', { name: 'Supprimer' }));
     await waitFor(() => expect(dialog.firstElementChild).toHaveAttribute('aria-busy', 'true'));
 

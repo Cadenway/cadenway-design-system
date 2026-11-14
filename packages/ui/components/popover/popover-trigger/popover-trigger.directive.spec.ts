@@ -1,9 +1,15 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CwPopover } from '../popover.component';
 import { CwPopoverTrigger } from './popover-trigger.directive';
 
+/**
+ * Component Host
+ *
+ * @description
+ * Exercises popover trigger registration.
+ */
 @Component({
   imports: [CwPopover, CwPopoverTrigger],
   template: `
@@ -15,18 +21,58 @@ import { CwPopoverTrigger } from './popover-trigger.directive';
   `,
 })
 class Host {
-  readonly second = signal(true);
-  readonly open = signal(false);
+  // #region Properties
+  /**
+   * Property second
+   * @readonly
+   *
+   * @description
+   * Whether the second trigger is shown.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly second: WritableSignal<boolean> = signal(true);
+
+  /**
+   * Property open
+   * @readonly
+   *
+   * @description
+   * Whether the popover is open.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly open: WritableSignal<boolean> = signal(false);
+  // #endregion
 }
 
+/**
+ * Function button
+ *
+ * @description
+ * Finds a trigger button by its text.
+ *
+ * @param {HTMLElement} host - Container holding the trigger.
+ * @param {string} name - Expected visible button text.
+ *
+ * @returns {HTMLButtonElement} Matching trigger button.
+ */
 function button(host: HTMLElement, name: string): HTMLButtonElement {
-  const found = Array.from(host.querySelectorAll('button')).find(
+  const found: HTMLButtonElement | undefined = Array.from(host.querySelectorAll('button')).find(
     (element) => element.textContent.trim() === name,
   );
   if (!found) throw new Error(`No button named ${name}`);
   return found;
 }
 
+/**
+ * Function panels
+ *
+ * @description
+ * Returns rendered popover panels.
+ *
+ * @returns {HTMLElement[]} Popover panels currently rendered in the document.
+ */
 function panels(): HTMLElement[] {
   return Array.from(document.querySelectorAll<HTMLElement>('[role="dialog"]'));
 }
@@ -46,8 +92,8 @@ describe('CwPopoverTrigger', () => {
   });
 
   it('moves a shared panel to the trigger that opened it', async () => {
-    const first = button(host, 'Échéance');
-    const second = button(host, 'Autre échéance');
+    const first: HTMLButtonElement = button(host, 'Échéance');
+    const second: HTMLButtonElement = button(host, 'Autre échéance');
     first.click();
     await fixture.whenStable();
     expect(first.getAttribute('aria-expanded')).toBe('true');

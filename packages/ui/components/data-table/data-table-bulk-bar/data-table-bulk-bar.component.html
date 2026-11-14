@@ -1,8 +1,7 @@
 @if (table.selectedCount() > 0) {
-  <!-- The buttons take the focus; the toolbar moves it between them (roving tab stop). -->
-  <!-- eslint-disable-next-line @angular-eslint/template/interactive-supports-focus -->
   <div
     role="toolbar"
+    tabindex="-1"
     aria-orientation="horizontal"
     [attr.aria-label]="label()"
     class="pointer-events-auto flex max-w-full items-center gap-0.5 overflow-x-auto rounded-lg border bg-popover p-1 text-popover-foreground shadow-lg animate-item-in motion-reduce:animate-none"

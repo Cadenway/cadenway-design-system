@@ -1,4 +1,4 @@
-import { signal } from '@angular/core';
+import { signal, type WritableSignal } from '@angular/core';
 import { CwAvatar } from '@cadenway/ui/components/avatar';
 import { CwField, CwFieldError, CwFieldLabel } from '@cadenway/ui/components/field';
 import { CwInput } from '@cadenway/ui/components/input';
@@ -12,9 +12,14 @@ import { CwAutocompleteTrigger } from './autocomplete-trigger/autocomplete-trigg
 import { CwAutocomplete } from './autocomplete.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Autocomplete, every state of its sheet in the Design System artifact, in the light and the dark
  * theme. The panel is a native popover inserted next to its field, so it takes the theme of its
  * scope. Copy from the sheet's preview (quick search of tasks, mentions, sprint name).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Autocomplete',
@@ -38,37 +43,141 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story for autocomplete examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Returns the light-theme story container.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing theme scopes.
+ *
+ * @returns {HTMLElement} Container for the light theme.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
+/**
+ * Interface Task
+ *
+ * @description
+ * Task suggestion shown in the examples.
+ */
 interface Task {
+  // #region Properties
+  /**
+   * Property id
+   * @readonly
+   *
+   * @description
+   * Task identifier.
+   *
+   * @type {string}
+   */
   readonly id: string;
+
+  /**
+   * Property title
+   * @readonly
+   *
+   * @description
+   * Task title.
+   *
+   * @type {string}
+   */
   readonly title: string;
+
+  /**
+   * Property status
+   * @readonly
+   *
+   * @description
+   * Task status.
+   *
+   * @type {'progress' | 'todo' | 'done'}
+   */
   readonly status: 'progress' | 'todo' | 'done';
+
+  /**
+   * Property archived
+   * @readonly
+   *
+   * @description
+   * Whether the task is archived.
+   *
+   * @type {boolean}
+   */
   readonly archived: boolean;
+  // #endregion
 }
 
+/**
+ * Constant TASKS
+ *
+ * @description
+ * Task suggestions in the examples.
+ *
+ * @type {readonly Task[]}
+ */
 const TASKS: readonly Task[] = [
   { id: 'CAD-482', title: "Corriger l'export CSV des tâches", status: 'progress', archived: false },
   { id: 'CAD-493', title: 'Exporter les sprints au format iCal', status: 'todo', archived: false },
   { id: 'CAD-301', title: 'Export Trello (archivée)', status: 'done', archived: true },
 ];
 
-const LISTS = [{ id: 'exports', name: 'Exports et rapports', team: 'Produit' }];
+/**
+ * Constant LISTS
+ *
+ * @description
+ * List suggestions in the examples.
+ *
+ * @type {{ id: string; name: string; team: string }[]}
+ */
+const LISTS: { id: string; name: string; team: string }[] = [
+  { id: 'exports', name: 'Exports et rapports', team: 'Produit' },
+];
 
-const PEOPLE = [
+/**
+ * Constant PEOPLE
+ *
+ * @description
+ * People suggestions in the examples.
+ *
+ * @type {{ id: string; name: string; team: string }[]}
+ */
+const PEOPLE: { id: string; name: string; team: string }[] = [
   { id: 'lea', name: 'Léa Martin', team: 'Produit' },
   { id: 'leo', name: 'Léo Garnier', team: 'Marketing' },
   { id: 'ines', name: 'Inès Duval', team: 'Produit' },
 ];
 
+/**
+ * Function matching
+ *
+ * @description
+ * Filters suggestions by their text.
+ *
+ * @param {readonly T[]} items - Suggestions to filter.
+ * @param {(item: T) => string} text - Function extracting searchable text from a suggestion.
+ * @param {string} query - Text to match without case differences.
+ *
+ * @returns {T[]} Suggestions whose extracted text includes the query.
+ */
 function matching<T>(items: readonly T[], text: (item: T) => string, query: string): T[] {
-  const folded = query.toLowerCase();
+  const folded: string = query.toLowerCase();
   return items.filter((item) => text(item).toLowerCase().includes(folded));
 }
 
@@ -111,7 +220,7 @@ export const Sizes: Story = {
 /** Quick search: tasks and lists in groups, the typed part in bold, a meta on the right. */
 export const Grouped: Story = {
   render: () => {
-    const query = signal('');
+    const query: WritableSignal<string> = signal('');
     return {
       props: {
         query,
@@ -146,13 +255,17 @@ export const Grouped: Story = {
         </div>`,
     };
   },
-  play: async ({ canvasElement }) => {
-    const field = within(light(canvasElement)).getByRole('combobox', { name: 'Recherche' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const field: HTMLElement = within(light(canvasElement)).getByRole('combobox', {
+      name: 'Recherche',
+    });
     await userEvent.click(field);
     await expect(field).toHaveAttribute('aria-expanded', 'false');
     await userEvent.keyboard('export');
     await expect(field).toHaveAttribute('aria-expanded', 'true');
-    const listbox = within(document.body).getByRole('listbox', { name: 'Suggestions' });
+    const listbox: HTMLElement = within(document.body).getByRole('listbox', {
+      name: 'Suggestions',
+    });
     await expect(within(listbox).getAllByRole('group')).toHaveLength(2);
   },
 };
@@ -160,7 +273,7 @@ export const Grouped: Story = {
 /** Mentions: the panel opens after « @ », and choosing replaces the mention only. */
 export const Mention: Story = {
   render: () => {
-    const query = signal('');
+    const query: WritableSignal<string> = signal('');
     return {
       props: { query, people: () => matching(PEOPLE, (person) => person.name, query()) },
       template: `
@@ -177,8 +290,10 @@ export const Mention: Story = {
         </div>`,
     };
   },
-  play: async ({ canvasElement }) => {
-    const field = within(light(canvasElement)).getByRole('combobox', { name: 'Commentaire' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const field: HTMLElement = within(light(canvasElement)).getByRole('combobox', {
+      name: 'Commentaire',
+    });
     await userEvent.click(field);
     await userEvent.keyboard('Merci @Lé');
     await expect(field).toHaveAttribute('aria-expanded', 'true');
@@ -197,7 +312,7 @@ export const Loading: Story = {
         <cw-autocomplete #search loading />
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     await userEvent.type(
       within(light(canvasElement)).getByRole('combobox', { name: 'Recherche' }),
       'rev',
@@ -216,8 +331,10 @@ export const NoSuggestion: Story = {
         <cw-autocomplete #sprints />
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const field = within(light(canvasElement)).getByRole('combobox', { name: 'Nom du sprint' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const field: HTMLElement = within(light(canvasElement)).getByRole('combobox', {
+      name: 'Nom du sprint',
+    });
     await userEvent.type(field, 'Revue Q4');
     await waitFor(() =>
       expect(

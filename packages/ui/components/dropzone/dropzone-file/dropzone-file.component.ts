@@ -7,6 +7,10 @@ import {
   input,
   numberAttribute,
   output,
+  type InputSignal,
+  type InputSignalWithTransform,
+  type OutputEmitterRef,
+  type Signal,
 } from '@angular/core';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { CwButton } from '@cadenway/ui/components/button';
@@ -28,6 +32,14 @@ import { phosphorCheckCircleFill } from '@ng-icons/phosphor-icons/fill';
 import { fileIcon } from '../dropzone.format';
 import type { CwDropzoneFileLabels, CwDropzoneFileState } from '../dropzone.types';
 
+/**
+ * Constant LABELS
+ *
+ * @description
+ * Default French labels for upload file rows.
+ *
+ * @type {CwDropzoneFileLabels}
+ */
 const LABELS: CwDropzoneFileLabels = {
   queued: 'En attente',
   of: 'sur',
@@ -40,6 +52,10 @@ const LABELS: CwDropzoneFileLabels = {
 };
 
 /**
+ * Class CwDropzoneFile
+ * @class CwDropzoneFile
+ *
+ * @description
  * One line of the upload queue under a drop zone: type icon, name, sizes, progress and the action
  * the state allows (Dropzone sheet of the Design System artifact, « Liste d'envoi »).
  *
@@ -76,47 +92,212 @@ const LABELS: CwDropzoneFileLabels = {
   templateUrl: './dropzone-file.component.html',
 })
 export class CwDropzoneFile {
-  /** File name, shown truncated and used in every accessible name of the row. */
-  readonly name = input.required<string>();
-  /** File size in bytes. */
-  readonly size = input(0, { transform: numberAttribute });
-  /** Upload state. */
-  readonly state = input<CwDropzoneFileState>('queued');
-  /** Upload progress, 0 to 100, while `uploading`. */
-  readonly progress = input(0, { transform: numberAttribute });
-  /** Error message shown under the name in the `error` state (« Trop volumineux : 50 Mo maximum. »). */
-  readonly error = input('');
-  /** Offers « Réessayer » in the `error` state; set it for network errors, not for local refusals. */
-  readonly retryable = input(false, { transform: booleanAttribute });
-  /** Replaces some of the French texts. */
-  readonly labels = input<Partial<CwDropzoneFileLabels>>({});
+  // #region Properties
+  /**
+   * Property name
+   * @readonly
+   *
+   * @description
+   * File name, shown truncated and used in every accessible name of the row.
+   *
+   * @type {InputSignal<string>}
+   */
+  public readonly name: InputSignal<string> = input.required<string>();
 
-  /** Cancel the upload (`queued`, `uploading`). */
-  // The sheet names this output `cancel`; it is bound on the component, not on a dialog.
-  // eslint-disable-next-line @angular-eslint/no-output-native
-  readonly cancel = output();
-  /** Send the file again (`error` and `retryable`). */
-  readonly retry = output();
-  /** Take the file out of the queue (`done`, `error`). */
-  readonly remove = output();
-
-  private readonly announcer = inject(LiveAnnouncer);
-
-  protected readonly text = computed(() => ({ ...LABELS, ...this.labels() }));
-  protected readonly icon = computed(() => fileIcon(this.name()));
-  protected readonly percent = computed(() =>
-    Math.round(Math.min(100, Math.max(0, this.progress()))),
-  );
-  protected readonly sizeText = computed(() => ɵformatFileSize(this.size()));
-  protected readonly progressText = computed(() => {
-    const sent = ɵformatFileSize((this.size() * this.percent()) / 100);
-    return `${String(this.percent())} % · ${sent} ${this.text().of} ${this.sizeText()}`;
+  /**
+   * Property size
+   * @readonly
+   *
+   * @description
+   * File size in bytes.
+   *
+   * @type {InputSignalWithTransform<number, unknown>}
+   */
+  public readonly size: InputSignalWithTransform<number, unknown> = input(0, {
+    transform: numberAttribute,
   });
 
-  constructor() {
+  /**
+   * Property state
+   * @readonly
+   *
+   * @description
+   * Upload state.
+   *
+   * @type {InputSignal<CwDropzoneFileState>}
+   */
+  public readonly state: InputSignal<CwDropzoneFileState> = input<CwDropzoneFileState>('queued');
+
+  /**
+   * Property progress
+   * @readonly
+   *
+   * @description
+   * Upload progress, 0 to 100, while `uploading`.
+   *
+   * @type {InputSignalWithTransform<number, unknown>}
+   */
+  public readonly progress: InputSignalWithTransform<number, unknown> = input(0, {
+    transform: numberAttribute,
+  });
+
+  /**
+   * Property error
+   * @readonly
+   *
+   * @description
+   * Error message shown under the name in the `error` state (« Trop volumineux : 50 Mo maximum. »).
+   *
+   * @type {InputSignal<string>}
+   */
+  public readonly error: InputSignal<string> = input('');
+
+  /**
+   * Property retryable
+   * @readonly
+   *
+   * @description
+   * Offers « Réessayer » in the `error` state; set it for network errors, not for local refusals.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   */
+  public readonly retryable: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property labels
+   * @readonly
+   *
+   * @description
+   * Replaces some of the French texts.
+   *
+   * @type {InputSignal<Partial<CwDropzoneFileLabels>>}
+   */
+  public readonly labels: InputSignal<Partial<CwDropzoneFileLabels>> = input<
+    Partial<CwDropzoneFileLabels>
+  >({});
+
+  /**
+   * Property cancel
+   * @readonly
+   *
+   * @description
+   * Cancel the upload (`queued`, `uploading`).
+   *
+   * @type {OutputEmitterRef<void>}
+   */
+  public readonly cancel: OutputEmitterRef<void> = output();
+
+  /**
+   * Property retry
+   * @readonly
+   *
+   * @description
+   * Send the file again (`error` and `retryable`).
+   *
+   * @type {OutputEmitterRef<void>}
+   */
+  public readonly retry: OutputEmitterRef<void> = output();
+
+  /**
+   * Property remove
+   * @readonly
+   *
+   * @description
+   * Take the file out of the queue (`done`, `error`).
+   *
+   * @type {OutputEmitterRef<void>}
+   */
+  public readonly remove: OutputEmitterRef<void> = output();
+
+  /**
+   * Property announcer
+   * @readonly
+   *
+   * @description
+   * Announcer for upload completion and errors.
+   *
+   * @type {LiveAnnouncer}
+   */
+  private readonly announcer: LiveAnnouncer = inject(LiveAnnouncer);
+
+  /**
+   * Property text
+   * @readonly
+   *
+   * @description
+   * Default file row labels merged with overrides.
+   *
+   * @type {Signal<CwDropzoneFileLabels>}
+   */
+  protected readonly text: Signal<CwDropzoneFileLabels> = computed(() => ({
+    ...LABELS,
+    ...this.labels(),
+  }));
+
+  /**
+   * Property icon
+   * @readonly
+   *
+   * @description
+   * File icon selected from the name extension.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly icon: Signal<string> = computed(() => fileIcon(this.name()));
+
+  /**
+   * Property percent
+   * @readonly
+   *
+   * @description
+   * Upload progress rounded and clamped from zero to one hundred.
+   *
+   * @type {Signal<number>}
+   */
+  protected readonly percent: Signal<number> = computed(() =>
+    Math.round(Math.min(100, Math.max(0, this.progress()))),
+  );
+
+  /**
+   * Property sizeText
+   * @readonly
+   *
+   * @description
+   * Formatted file size.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly sizeText: Signal<string> = computed(() => ɵformatFileSize(this.size()));
+
+  /**
+   * Property progressText
+   * @readonly
+   *
+   * @description
+   * Formatted upload percentage and sent size.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly progressText: Signal<string> = computed(() => {
+    const sent: string = ɵformatFileSize((this.size() * this.percent()) / 100);
+    return `${String(this.percent())} % · ${sent} ${this.text().of} ${this.sizeText()}`;
+  });
+  // #endregion
+
+  // #region Constructor
+  /**
+   * Constructor
+   * @constructor
+   *
+   * @description
+   * Announces upload completion or errors after state transitions.
+   */
+  public constructor() {
     let previous: CwDropzoneFileState | null = null;
     effect(() => {
-      const state = this.state();
+      const state: CwDropzoneFileState = this.state();
       // Announce transitions only: a row rendered as done or failed is read with the list.
       if (previous !== null && previous !== state) {
         if (state === 'done') void this.announcer.announce(`${this.name()} ${this.text().done}`);
@@ -125,4 +306,5 @@ export class CwDropzoneFile {
       previous = state;
     });
   }
+  // #endregion
 }

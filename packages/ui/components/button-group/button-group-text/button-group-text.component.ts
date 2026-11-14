@@ -1,6 +1,10 @@
 import { Component } from '@angular/core';
 
 /**
+ * Class CwButtonGroupText
+ * @class CwButtonGroupText
+ *
+ * @description
  * A non-interactive text or icon that names what follows in a `cw-button-group` (« Déplacer vers »
  * before the sprint choice).
  */

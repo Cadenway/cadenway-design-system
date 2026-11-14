@@ -1,5 +1,19 @@
-/** Tone of a banner: icon, background (errors only) and ARIA role. */
+/**
+ * Type CwBannerTone
+ *
+ * @description
+ * Banner tone selecting the default icon, background and ARIA role.
+ *
+ * @type {'info' | 'success' | 'warning' | 'error' | 'neutral'}
+ */
 export type CwBannerTone = 'info' | 'success' | 'warning' | 'error' | 'neutral';
 
-/** `inline` in the page column (rounded); `top` across the window above the application. */
+/**
+ * Type CwBannerPlacement
+ *
+ * @description
+ * Rounded inline placement in the page column or flat placement across the top of the window.
+ *
+ * @type {'inline' | 'top'}
+ */
 export type CwBannerPlacement = 'inline' | 'top';

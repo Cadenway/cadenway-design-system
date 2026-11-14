@@ -6,19 +6,60 @@ import {
   inject,
   input,
   numberAttribute,
+  type InputSignal,
+  type InputSignalWithTransform,
 } from '@angular/core';
 
 import type { CwAutocompleteOption } from '../autocomplete-option/autocomplete-option.component';
 import type { CwAutocomplete } from '../autocomplete.component';
 
-/** The search the field holds: where it starts in the text, where it ends, and its text. */
+/**
+ * Interface Search
+ *
+ * @description
+ * Search range and query in the input field.
+ */
 interface Search {
+  // #region Properties
+  /**
+   * Property start
+   * @readonly
+   *
+   * @description
+   * Start offset of the search.
+   *
+   * @type {number}
+   */
   readonly start: number;
+
+  /**
+   * Property end
+   * @readonly
+   *
+   * @description
+   * End offset of the search.
+   *
+   * @type {number}
+   */
   readonly end: number;
+
+  /**
+   * Property text
+   * @readonly
+   *
+   * @description
+   * Text of the query.
+   *
+   * @type {string}
+   */
   readonly text: string;
+  // #endregion
 }
 
 /**
+ * Directive CwAutocompleteTrigger
+ *
+ * @description
  * Turns a text field into the trigger of a `cw-autocomplete` panel: the field keeps its free text,
  * the panel suggests while the user types (Autocomplete sheet of the Design System artifact).
  *
@@ -51,34 +92,126 @@ interface Search {
   },
 })
 export class CwAutocompleteTrigger {
-  /** The panel of suggestions this field opens. */
-  readonly cwAutocomplete = input.required<CwAutocomplete>();
-  /** The character that opens the panel at the start of a word (`'@'` for mentions). */
-  readonly trigger = input<string>();
-  /** The number of characters to type before the panel opens, without `trigger`. */
-  readonly minLength = input(1, { transform: numberAttribute });
+  // #region Properties
+  /**
+   * Property cwAutocomplete
+   * @readonly
+   *
+   * @description
+   * Suggestion panel opened by the field.
+   *
+   * @type {InputSignal<CwAutocomplete>}
+   */
+  public readonly cwAutocomplete: InputSignal<CwAutocomplete> = input.required<CwAutocomplete>();
 
-  private readonly field = inject<ElementRef<HTMLInputElement>>(ElementRef).nativeElement;
-  // The browser's own suggestions would cover the panel; a declared `autocomplete` is kept.
-  protected readonly nativeAutocomplete =
+  /**
+   * Property trigger
+   * @readonly
+   *
+   * @description
+   * Optional character opening a word search.
+   *
+   * @type {InputSignal<string | undefined>}
+   */
+  public readonly trigger: InputSignal<string | undefined> = input<string>();
+
+  /**
+   * Property minLength
+   * @readonly
+   *
+   * @description
+   * Minimum query length without a trigger character.
+   *
+   * @type {InputSignalWithTransform<number, unknown>}
+   */
+  public readonly minLength: InputSignalWithTransform<number, unknown> = input(1, {
+    transform: numberAttribute,
+  });
+
+  /**
+   * Property field
+   * @readonly
+   *
+   * @description
+   * Input element containing the query.
+   *
+   * @type {HTMLInputElement}
+   */
+  private readonly field: HTMLInputElement =
+    inject<ElementRef<HTMLInputElement>>(ElementRef).nativeElement;
+
+  /**
+   * Property nativeAutocomplete
+   * @readonly
+   *
+   * @description
+   * Native autocomplete attribute retained on the input.
+   *
+   * @type {string}
+   */
+  protected readonly nativeAutocomplete: string =
     inject(new HostAttributeToken('autocomplete'), { optional: true }) ?? 'off';
+
+  /**
+   * Property current
+   *
+   * @description
+   * Current query range.
+   *
+   * @type {Search | null}
+   */
   private current: Search | null = null;
-  private writing = false;
 
-  protected readonly panel = this.cwAutocomplete;
+  /**
+   * Property writing
+   *
+   * @description
+   * Whether the directive is writing a selected value.
+   *
+   * @type {boolean}
+   */
+  private writing: boolean = false;
 
-  constructor() {
+  /**
+   * Property panel
+   * @readonly
+   *
+   * @description
+   * Suggestion panel bound to the input.
+   *
+   * @type {InputSignal<CwAutocomplete>}
+   */
+  protected readonly panel: InputSignal<CwAutocomplete> = this.cwAutocomplete;
+  // #endregion
+
+  // #region Constructor
+  /**
+   * Constructor
+   * @constructor
+   *
+   * @description
+   * Closes the panel when the trigger is destroyed.
+   */
+  public constructor() {
     inject(DestroyRef).onDestroy(() => {
       this.panel().hide();
     });
   }
+  // #endregion
 
+  // #region Methods
+  /**
+   * Method onInput
+   *
+   * @description
+   * Updates the query and opens or closes the panel.
+   */
   protected onInput(): void {
     // The `input` event this directive dispatches after a choice is for the forms, not a search.
     if (this.writing) return;
-    const search = this.readSearch();
+    const search: Search | null = this.readSearch();
     this.current = search;
-    const panel = this.panel();
+    const panel: CwAutocomplete = this.panel();
     if (!search) {
       panel.hide();
       return;
@@ -89,11 +222,19 @@ export class CwAutocompleteTrigger {
     });
   }
 
+  /**
+   * Method onKeydown
+   *
+   * @description
+   * Handles navigation, selection and dismissal keys.
+   *
+   * @param {KeyboardEvent} event - Keyboard event received by the input.
+   */
   protected onKeydown(event: KeyboardEvent): void {
-    const panel = this.panel();
+    const panel: CwAutocomplete = this.panel();
     if (!panel.isOpen()) {
       if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-        const search = this.readSearch();
+        const search: Search | null = this.readSearch();
         if (!search) return;
         event.preventDefault();
         this.current = search;
@@ -124,33 +265,47 @@ export class CwAutocompleteTrigger {
     }
   }
 
-  /* The search: the whole text without `trigger`; with it, the word that starts with the trigger
-     character and ends at the caret. Null when the panel should stay closed. */
+  /**
+   * Method readSearch
+   *
+   * @description
+   * Reads the query and its range from the input.
+   *
+   * @returns {Search | null} Current query range and text, or null when the panel should remain closed.
+   */
   private readSearch(): Search | null {
-    const value = this.field.value;
-    const trigger = this.trigger();
+    const value: string = this.field.value;
+    const trigger: string | undefined = this.trigger();
     if (!trigger) {
       return value.length >= this.minLength() ? { start: 0, end: value.length, text: value } : null;
     }
-    const caret = this.field.selectionStart ?? value.length;
-    const before = value.slice(0, caret);
-    const index = before.lastIndexOf(trigger);
+    const caret: number = this.field.selectionStart ?? value.length;
+    const before: string = value.slice(0, caret);
+    const index: number = before.lastIndexOf(trigger);
     if (index < 0) return null;
-    const atWordStart = index === 0 || /\s/.test(before.charAt(index - 1));
-    const text = before.slice(index + trigger.length);
+    const atWordStart: boolean = index === 0 || /\s/.test(before.charAt(index - 1));
+    const text: string = before.slice(index + trigger.length);
     if (!atWordStart || /\s/.test(text)) return null;
     return { start: index, end: caret, text };
   }
 
+  /**
+   * Method write
+   *
+   * @description
+   * Writes a selected suggestion into the input.
+   *
+   * @param {CwAutocompleteOption} option - Selected suggestion whose text is written to the field.
+   */
   private write(option: CwAutocompleteOption): void {
-    const text = option.text();
-    const value = this.field.value;
-    const trigger = this.trigger();
-    const search = this.current;
+    const text: string = option.text();
+    const value: string = this.field.value;
+    const trigger: string | undefined = this.trigger();
+    const search: Search | null = this.current;
     let next: string;
     let caret: number;
     if (trigger && search) {
-      const inserted = `${trigger}${text} `;
+      const inserted: string = `${trigger}${text} `;
       next = value.slice(0, search.start) + inserted + value.slice(search.end);
       caret = search.start + inserted.length;
     } else {
@@ -167,4 +322,5 @@ export class CwAutocompleteTrigger {
     }
     this.current = null;
   }
+  // #endregion
 }

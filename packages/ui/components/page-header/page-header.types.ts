@@ -1,2 +1,9 @@
-/** Height of a page header: three stacked rows (`default`) or one 44 px row (`compact`). */
+/**
+ * Type CwPageHeaderSize
+ *
+ * @description
+ * Page header layout: three stacked rows by default or one 44-pixel compact row.
+ *
+ * @type {'default' | 'compact'}
+ */
 export type CwPageHeaderSize = 'default' | 'compact';

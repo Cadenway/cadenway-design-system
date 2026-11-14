@@ -1,8 +1,15 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CwToggle } from './toggle.component';
 
+/**
+ * Class Host
+ * @class Host
+ *
+ * @description
+ * Test form with mutable filter and formatting toggles and a disabled pressed toggle.
+ */
 @Component({
   imports: [CwToggle],
   template: `
@@ -14,15 +21,62 @@ import { CwToggle } from './toggle.component';
   `,
 })
 class Host {
-  readonly onlyMine = signal(false);
-  readonly bold = signal(true);
-  readonly submitted = signal(false);
+  // #region Properties
+  /**
+   * Property onlyMine
+   * @readonly
+   *
+   * @description
+   * Pressed model for the personal-filter toggle.
+   *
+   * @type {WritableSignal<boolean>}
+   * @default false
+   */
+  public readonly onlyMine: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property bold
+   * @readonly
+   *
+   * @description
+   * Pressed model for the initially active bold toggle.
+   *
+   * @type {WritableSignal<boolean>}
+   * @default true
+   */
+  public readonly bold: WritableSignal<boolean> = signal(true);
+
+  /**
+   * Property submitted
+   * @readonly
+   *
+   * @description
+   * Records whether the form's submit handler ran.
+   *
+   * @type {WritableSignal<boolean>}
+   * @default false
+   */
+  public readonly submitted: WritableSignal<boolean> = signal(false);
+  // #endregion
 }
 
+/**
+ * Function byName
+ *
+ * @description
+ * Finds a toggle button by its aria-label or trimmed visible text.
+ *
+ * @param {HTMLElement} host - Container holding the toggle buttons.
+ * @param {string} name - Exact accessible label or text to match.
+ *
+ * @returns {HTMLButtonElement} First matching toggle.
+ *
+ * @throws {Error} When no toggle has the requested name.
+ */
 function byName(host: HTMLElement, name: string): HTMLButtonElement {
-  const found = Array.from(host.querySelectorAll<HTMLButtonElement>('button')).find(
-    (element) => (element.getAttribute('aria-label') ?? element.textContent.trim()) === name,
-  );
+  const found: HTMLButtonElement | undefined = Array.from(
+    host.querySelectorAll<HTMLButtonElement>('button'),
+  ).find((element) => (element.getAttribute('aria-label') ?? element.textContent.trim()) === name);
   if (!found) throw new Error(`No toggle named ${name}`);
   return found;
 }
@@ -40,7 +94,7 @@ describe('CwToggle', () => {
   });
 
   it('flips the pressed model on click without submitting the form', async () => {
-    const onlyMine = byName(host, 'Moi uniquement');
+    const onlyMine: HTMLButtonElement = byName(host, 'Moi uniquement');
     expect(onlyMine.getAttribute('aria-pressed')).toBe('false');
     expect(onlyMine.dataset['state']).toBe('off');
 
@@ -55,7 +109,7 @@ describe('CwToggle', () => {
   });
 
   it('reflects a pressed model given by the consumer and flips it back', async () => {
-    const bold = byName(host, 'Gras');
+    const bold: HTMLButtonElement = byName(host, 'Gras');
     expect(bold.getAttribute('aria-pressed')).toBe('true');
 
     bold.click();
@@ -66,7 +120,7 @@ describe('CwToggle', () => {
   });
 
   it('stays pressed and inert when disabled', () => {
-    const hide = byName(host, 'Masquer les terminées');
+    const hide: HTMLButtonElement = byName(host, 'Masquer les terminées');
 
     expect(hide.disabled).toBe(true);
     expect(hide.getAttribute('aria-pressed')).toBe('true');

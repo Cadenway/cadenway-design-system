@@ -10,9 +10,14 @@ import { expect, userEvent, within } from 'storybook/test';
 import { CwTextarea } from './textarea.directive';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Textarea, every state of its sheet in the Design System artifact, in the light and the dark theme.
  * Labels, help and errors come from `cw-field`, which wires the ids. Copy from the sheet and the
  * mockup (task panel of `App.dc.html`).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Textarea',
@@ -25,10 +30,31 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration used for textarea examples and interactions.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Locates the light-theme copy rendered by the shared Storybook preview decorator.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the theme examples.
+ *
+ * @returns {HTMLElement} Element containing the light-theme example.
+ *
+ * @throws {Error} When the expected light-theme scope is missing.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -66,8 +92,8 @@ export const States: Story = {
         </cw-field>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const reason = within(light(canvasElement)).getByLabelText('Motif du blocage');
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const reason: HTMLElement = within(light(canvasElement)).getByLabelText('Motif du blocage');
 
     await expect(reason).toHaveAttribute('aria-invalid', 'true');
     await expect(reason).toHaveAccessibleDescription('Expliquez ce qui bloque la tâche.');
@@ -94,8 +120,8 @@ export const Keyboard: Story = {
         <textarea cwTextarea></textarea>
       </cw-field>`,
   }),
-  play: async ({ canvasElement }) => {
-    const reason = within(light(canvasElement)).getByLabelText('Motif du blocage');
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const reason: HTMLElement = within(light(canvasElement)).getByLabelText('Motif du blocage');
 
     await userEvent.tab();
     await expect(reason).toHaveFocus();

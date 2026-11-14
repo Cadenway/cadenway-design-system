@@ -11,6 +11,11 @@ import {
   linkedSignal,
   output,
   signal,
+  type InputSignal,
+  type InputSignalWithTransform,
+  type OutputEmitterRef,
+  type Signal,
+  type WritableSignal,
 } from '@angular/core';
 import { LiveAnnouncer, _IdGenerator } from '@angular/cdk/a11y';
 import { NgTemplateOutlet } from '@angular/common';
@@ -28,17 +33,10 @@ import type {
 } from '../relations.types';
 
 /**
- * The picker that adds a relation: the relation type, then a search among the consumer's items
- * (Relations sheet of the Design System artifact). `cw-relations` opens it in a popover under
- * « Ajouter »; it also works alone.
+ * Component CwRelationPicker
  *
- * The « Type » row is a small `cw-select` of `types` (`defaultType`, else the first one, at the
- * start). The search is a `cw-combobox`: its panel holds the search field (« Nom ou
- * identifiant »), the results (`results`, with the `cwRelationLeading` glyph, the reference, the
- * title and the path), the result count announced, ↑ ↓ and Enter; it emits `search` at each
- * keystroke for the consumer's search, and `loading` shows the spinner. An item of `linkedIds` is
- * disabled with « Déjà liée ». Choosing a result emits `add` with the type and the item, announces
- * « Relation ajoutée : Bloque CAD-482 » and clears the search.
+ * @description
+ * The picker that adds a relation: the relation type, then a search among the consumer's items (Relations sheet of the Design System artifact). `cw-relations` opens it in a popover under « Ajouter »; it also works alone. The « Type » row is a small `cw-select` of `types` (`defaultType`, else the first one, at the start). The search is a `cw-combobox`: its panel holds the search field (« Nom ou identifiant »), the results (`results`, with the `cwRelationLeading` glyph, the reference, the title and the path), the result count announced, ↑ ↓ and Enter; it emits `search` at each keystroke for the consumer's search, and `loading` shows the spinner. An item of `linkedIds` is disabled with « Déjà liée ». Choosing a result emits `add` with the type and the item, announces « Relation ajoutée : Bloque CAD-482 » and clears the search.
  */
 @Component({
   selector: 'cw-relation-picker',
@@ -47,54 +45,269 @@ import type {
   templateUrl: './relation-picker.component.html',
 })
 export class CwRelationPicker {
-  /** The relation types to choose from, in order. */
-  readonly types = input.required<readonly CwRelationType[]>();
-  /** The type chosen at the start; the first of `types` when not given. */
-  readonly defaultType = input<string | null>(null);
-  /** The items to choose from: the consumer's results for the current search. */
-  readonly results = input<readonly CwRelationItem[]>([]);
-  /** Ids of the items already related: listed, disabled, « Déjà liée ». */
-  readonly linkedIds = input<readonly string[]>([]);
-  /** The consumer's search is running. */
-  readonly loading = input(false, { transform: booleanAttribute });
-  /** Glyph template of the results; a projected `ng-template[cwRelationLeading]` otherwise. */
-  readonly leading = input<TemplateRef<CwRelationLeadingContext> | null>(null);
-  /** French texts, any of them overridden (`CW_RELATIONS_LABELS`). */
-  readonly labels = input<Partial<CwRelationsLabels>>({});
-  /** Emits the search at each keystroke. */
-  // The sheet's search goes through the picker; no native `search` event reaches this host.
-  // eslint-disable-next-line @angular-eslint/no-output-native
-  readonly search = output<string>();
-  /** Emits the chosen type and item. */
-  readonly add = output<CwRelationAddEvent>();
+  // #region Properties
+  /**
+   * Property types
+   *
+   * @description
+   * The relation types to choose from, in order.
+   *
+   * @type {InputSignal<readonly CwRelationType[]>}
+   * @readonly
+   */
+  public readonly types: InputSignal<readonly CwRelationType[]> =
+    input.required<readonly CwRelationType[]>();
 
-  private readonly announcer = inject(LiveAnnouncer);
-  private readonly injector = inject(Injector);
-  private readonly projectedLeading = contentChild(CwRelationLeading);
+  /**
+   * Property defaultType
+   *
+   * @description
+   * The type chosen at the start; the first of `types` when not given.
+   *
+   * @type {InputSignal<string | null>}
+   * @readonly
+   */
+  public readonly defaultType: InputSignal<string | null> = input<string | null>(null);
 
-  protected readonly typeId = inject(_IdGenerator).getId('cw-relation-picker-type-');
-  protected readonly text = computed(() => ({ ...CW_RELATIONS_LABELS, ...this.labels() }));
-  protected readonly type = linkedSignal<string | null>(
+  /**
+   * Property results
+   *
+   * @description
+   * The items to choose from: the consumer's results for the current search.
+   *
+   * @type {InputSignal<readonly CwRelationItem[]>}
+   * @readonly
+   */
+  public readonly results: InputSignal<readonly CwRelationItem[]> = input<
+    readonly CwRelationItem[]
+  >([]);
+
+  /**
+   * Property linkedIds
+   *
+   * @description
+   * Ids of the items already related: listed, disabled, « Déjà liée ».
+   *
+   * @type {InputSignal<readonly string[]>}
+   * @readonly
+   */
+  public readonly linkedIds: InputSignal<readonly string[]> = input<readonly string[]>([]);
+
+  /**
+   * Property loading
+   *
+   * @description
+   * The consumer's search is running.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   * @readonly
+   */
+  public readonly loading: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property leading
+   *
+   * @description
+   * Glyph template of the results; a projected `ng-template[cwRelationLeading]` otherwise.
+   *
+   * @type {InputSignal<TemplateRef<CwRelationLeadingContext> | null>}
+   * @readonly
+   */
+  public readonly leading: InputSignal<TemplateRef<CwRelationLeadingContext> | null> =
+    input<TemplateRef<CwRelationLeadingContext> | null>(null);
+
+  /**
+   * Property labels
+   *
+   * @description
+   * French texts, any of them overridden (`CW_RELATIONS_LABELS`).
+   *
+   * @type {InputSignal<Partial<CwRelationsLabels>>}
+   * @readonly
+   */
+  public readonly labels: InputSignal<Partial<CwRelationsLabels>> = input<
+    Partial<CwRelationsLabels>
+  >({});
+
+  /**
+   * Property search
+   *
+   * @description
+   * Emits the search at each keystroke.
+   *
+   * @type {OutputEmitterRef<string>}
+   * @readonly
+   */
+  public readonly search: OutputEmitterRef<string> = output<string>();
+
+  /**
+   * Property add
+   *
+   * @description
+   * Emits the chosen type and item.
+   *
+   * @type {OutputEmitterRef<CwRelationAddEvent>}
+   * @readonly
+   */
+  public readonly add: OutputEmitterRef<CwRelationAddEvent> = output<CwRelationAddEvent>();
+
+  /**
+   * Property announcer
+   *
+   * @description
+   * Live announcer for relation changes.
+   *
+   * @type {LiveAnnouncer}
+   * @readonly
+   */
+  private readonly announcer: LiveAnnouncer = inject(LiveAnnouncer);
+
+  /**
+   * Property injector
+   *
+   * @description
+   * Injector used for work scheduled after rendering.
+   *
+   * @type {Injector}
+   * @readonly
+   */
+  private readonly injector: Injector = inject(Injector);
+
+  /**
+   * Property projectedLeading
+   *
+   * @description
+   * Optional consumer-projected leading template.
+   *
+   * @type {Signal<CwRelationLeading | undefined>}
+   * @readonly
+   */
+  private readonly projectedLeading: Signal<CwRelationLeading | undefined> =
+    contentChild(CwRelationLeading);
+
+  /**
+   * Property typeId
+   *
+   * @description
+   * Unique identifier for the relation-type field.
+   *
+   * @type {string}
+   * @readonly
+   */
+  protected readonly typeId: string = inject(_IdGenerator).getId('cw-relation-picker-type-');
+
+  /**
+   * Property text
+   *
+   * @description
+   * Default labels merged with consumer overrides.
+   *
+   * @type {Signal<{ title: string; add: string; addRelation: string; empty: string; actions: (reference: string) => string; open: string; changeType: string; copyLink: string; remove: string; removed: string; added: (type: string, reference: string) => string; picker: string; type: string; search: string; searchPlaceholder: string; alreadyLinked: string; noResult: string; }>}
+   * @readonly
+   */
+  protected readonly text: Signal<{
+    title: string;
+    add: string;
+    addRelation: string;
+    empty: string;
+    actions: (reference: string) => string;
+    open: string;
+    changeType: string;
+    copyLink: string;
+    remove: string;
+    removed: string;
+    added: (type: string, reference: string) => string;
+    picker: string;
+    type: string;
+    search: string;
+    searchPlaceholder: string;
+    alreadyLinked: string;
+    noResult: string;
+  }> = computed(() => ({ ...CW_RELATIONS_LABELS, ...this.labels() }));
+
+  /**
+   * Property type
+   *
+   * @description
+   * Currently selected relation type identifier.
+   *
+   * @type {WritableSignal<string | null>}
+   * @readonly
+   */
+  protected readonly type: WritableSignal<string | null> = linkedSignal<string | null>(
     () => this.defaultType() ?? this.types().at(0)?.id ?? null,
   );
-  protected readonly chosen = signal<CwRelationItem | null>(null);
-  protected readonly leadingTemplate = computed(
-    () => this.leading() ?? this.projectedLeading()?.template ?? null,
-  );
-  protected readonly keywords = (item: CwRelationItem): readonly string[] =>
-    [item.reference, item.path].filter((word): word is string => !!word);
 
+  /**
+   * Property chosen
+   *
+   * @description
+   * Current combobox choice, cleared after selection.
+   *
+   * @type {WritableSignal<CwRelationItem | null>}
+   * @readonly
+   */
+  protected readonly chosen: WritableSignal<CwRelationItem | null> = signal<CwRelationItem | null>(
+    null,
+  );
+
+  /**
+   * Property leadingTemplate
+   *
+   * @description
+   * Explicit or projected template used before result content.
+   *
+   * @type {Signal<TemplateRef<CwRelationLeadingContext> | null>}
+   * @readonly
+   */
+  protected readonly leadingTemplate: Signal<TemplateRef<CwRelationLeadingContext> | null> =
+    computed(() => this.leading() ?? this.projectedLeading()?.template ?? null);
+
+  /**
+   * Property keywords
+   *
+   * @description
+   * Extracts reference and path for result search.
+   *
+   * @type {(item: CwRelationItem) => readonly string[]}
+   * @readonly
+   */
+  protected readonly keywords: (item: CwRelationItem) => readonly string[] = (
+    item: CwRelationItem,
+  ): readonly string[] => [item.reference, item.path].filter((word): word is string => !!word);
+  // #endregion
+
+  // #region Methods
+  /**
+   * Method isLinked
+   *
+   * @description
+   * Checks whether an item is already linked.
+   *
+   * @param {CwRelationItem} item - Related item involved in the interaction.
+   * @returns {boolean} Whether the item is already linked.
+   */
   protected isLinked(item: CwRelationItem): boolean {
     return this.linkedIds().includes(item.id);
   }
 
+  /**
+   * Method onChoose
+   *
+   * @description
+   * Reports the selected relation and clears the picker choice.
+   *
+   * @param {unknown} item - Related item involved in the interaction.
+   */
   protected onChoose(item: unknown): void {
-    const type = this.type();
+    const type: string | null = this.type();
     if (!item || type === null) return;
-    const chosen = item as CwRelationItem;
+    const chosen: CwRelationItem = item as CwRelationItem;
     this.chosen.set(chosen);
     this.add.emit({ type, item: chosen });
-    const label = this.types().find((candidate) => candidate.id === type)?.label ?? type;
+    const label: string = this.types().find((candidate) => candidate.id === type)?.label ?? type;
     void this.announcer.announce(
       this.text().added(label, chosen.reference ?? chosen.title),
       'polite',
@@ -108,4 +321,5 @@ export class CwRelationPicker {
       { injector: this.injector },
     );
   }
+  // #endregion
 }

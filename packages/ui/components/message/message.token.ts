@@ -3,33 +3,143 @@ import type { CwBubblePosition } from '@cadenway/ui/components/bubble';
 
 import type { CwMessageVariant } from './message.types';
 
-/** A message as its group and its parts see it. Not exported from the entry point. */
+/**
+ * Interface MessageRef
+ *
+ * @description
+ * Message state used internally by its group and projected parts.
+ */
 export interface MessageRef {
+  // #region Properties
+  /**
+   * Property author
+   * @readonly
+   *
+   * @description
+   * Display name of the message author.
+   *
+   * @type {Signal<string>}
+   */
   readonly author: Signal<string>;
+
+  /**
+   * Property time
+   * @readonly
+   *
+   * @description
+   * Message timestamp, or null when it is unavailable.
+   *
+   * @type {Signal<Date | null>}
+   */
   readonly time: Signal<Date | null>;
+
+  /**
+   * Property variant
+   * @readonly
+   *
+   * @description
+   * Incoming, outgoing or system message layout.
+   *
+   * @type {Signal<CwMessageVariant>}
+   */
   readonly variant: Signal<CwMessageVariant>;
-  /** Whether avatar and header are hidden (set by the group or the `grouped` input). */
+
+  /**
+   * Property isGrouped
+   * @readonly
+   *
+   * @description
+   * Whether the group or the grouped input hides the avatar and header.
+   *
+   * @type {Signal<boolean>}
+   */
   readonly isGrouped: Signal<boolean>;
+  // #endregion
 }
 
-/** Each message provides itself under this token: its group and its avatar find it without
- * importing its class. Not exported from the entry point. */
-export const MESSAGE = new InjectionToken<MessageRef>('MESSAGE');
+/**
+ * Constant MESSAGE
+ *
+ * @description
+ * Internal token by which a message exposes its state to its group and avatar.
+ *
+ * @type {InjectionToken<MessageRef>}
+ */
+export const MESSAGE: InjectionToken<MessageRef> = new InjectionToken<MessageRef>('MESSAGE');
 
-/** Where a message sits in its group. */
+/**
+ * Interface MessagePlace
+ *
+ * @description
+ * Position of a message within its group.
+ */
 export interface MessagePlace {
-  /** Not the first message of a run: avatar and header hidden. */
+  // #region Properties
+  /**
+   * Property grouped
+   * @readonly
+   *
+   * @description
+   * Whether the message follows another in a run and hides its avatar and header.
+   *
+   * @type {boolean}
+   */
   readonly grouped: boolean;
-  /** Position of its bubble in the run, `null` alone. */
+
+  /**
+   * Property position
+   * @readonly
+   *
+   * @description
+   * Bubble position in the run, or null for a single message.
+   *
+   * @type {CwBubblePosition | null}
+   */
   readonly position: CwBubblePosition | null;
-  /** First message of the group. */
+
+  /**
+   * Property first
+   * @readonly
+   *
+   * @description
+   * Whether this is the first message in the group.
+   *
+   * @type {boolean}
+   */
   readonly first: boolean;
+  // #endregion
 }
 
-/** A message group, as its messages see it. Not exported from the entry point. */
+/**
+ * Interface MessageGroupRef
+ *
+ * @description
+ * Internal group contract used by its messages to determine their position.
+ */
 export interface MessageGroupRef {
+  // #region Methods
+  /**
+   * Method placeOf
+   *
+   * @description
+   * Finds the position and grouping state of a message.
+   *
+   * @param {MessageRef} message - Message whose position is requested.
+   *
+   * @returns {MessagePlace} Position and grouping state within the group.
+   */
   placeOf(message: MessageRef): MessagePlace;
+  // #endregion
 }
 
-/** The group provides itself under this token. Not exported from the entry point. */
-export const MESSAGE_GROUP = new InjectionToken<MessageGroupRef>('MESSAGE_GROUP');
+/**
+ * Constant MESSAGE_GROUP
+ *
+ * @description
+ * Internal token by which a group exposes positioning to its messages.
+ *
+ * @type {InjectionToken<MessageGroupRef>}
+ */
+export const MESSAGE_GROUP: InjectionToken<MessageGroupRef> = new InjectionToken<MessageGroupRef>(
+  'MESSAGE_GROUP',
+);

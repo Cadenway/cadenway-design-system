@@ -1,7 +1,7 @@
-import { Component, signal } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { Component, signal, type WritableSignal } from '@angular/core';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { FormField, form, required } from '@angular/forms/signals';
+import { FormField, form, required, type FieldTree } from '@angular/forms/signals';
 import { CwInput } from '@cadenway/ui/components/input';
 
 import { CwFieldContent } from './field-content/field-content.component';
@@ -10,15 +10,39 @@ import { CwFieldError } from './field-error/field-error.component';
 import { CwFieldLabel } from './field-label/field-label.directive';
 import { CwField } from './field.component';
 
+/**
+ * Function labelled
+ *
+ * @description
+ * Finds a control associated with a label.
+ *
+ * @param {HTMLElement} host - Container holding the label and control.
+ * @param {string} name - Visible label text to find.
+ *
+ * @returns {HTMLElement} Control referenced by the matching label.
+ */
 function labelled(host: HTMLElement, name: string): HTMLElement {
-  const label = Array.from(host.querySelectorAll('label')).find(
+  const label: HTMLLabelElement | undefined = Array.from(host.querySelectorAll('label')).find(
     (element) => element.textContent.trim() === name,
   );
-  const control = label?.htmlFor ? host.querySelector<HTMLElement>(`#${label.htmlFor}`) : null;
+  const control: HTMLElement | null = label?.htmlFor
+    ? host.querySelector<HTMLElement>(`#${label.htmlFor}`)
+    : null;
   if (!control) throw new Error(`No control labelled ${name}`);
   return control;
 }
 
+/**
+ * Function description
+ *
+ * @description
+ * Reads text from a control accessible description.
+ *
+ * @param {HTMLElement} host - Container holding the referenced description elements.
+ * @param {HTMLElement} control - Control whose aria-describedby is read.
+ *
+ * @returns {string} Description texts joined in identifier order.
+ */
 function description(host: HTMLElement, control: HTMLElement): string {
   return (control.getAttribute('aria-describedby') ?? '')
     .split(' ')
@@ -29,6 +53,12 @@ function description(host: HTMLElement, control: HTMLElement): string {
 
 describe('CwField', () => {
   it('wires the label, the description and, once touched and invalid, the error', async () => {
+    /**
+     * Component Host
+     *
+     * @description
+     * Exercises reactive form validation and error messages.
+     */
     @Component({
       imports: [
         CwField,
@@ -40,7 +70,6 @@ describe('CwField', () => {
       ],
       template: `
         <cw-field>
-          <!-- eslint-disable-next-line @angular-eslint/template/label-has-associated-control -- cw-field sets its for -->
           <label cwFieldLabel>Préfixe des identifiants</label>
           <input cwInput [formControl]="prefix" />
           <cw-field-description>2 à 6 lettres majuscules.</cw-field-description>
@@ -49,19 +78,40 @@ describe('CwField', () => {
       `,
     })
     class Host {
-      readonly prefix = new FormControl('', {
+      // #region Properties
+      /**
+       * Property prefix
+       * @readonly
+       *
+       * @description
+       * Reactive form control under test.
+       *
+       * @type {FormControl<string>}
+       */
+      public readonly prefix: FormControl<string> = new FormControl<string>('', {
         nonNullable: true,
         validators: [(control) => Validators.required(control)],
       });
-      readonly messages = { required: 'Indiquez un préfixe.' };
+
+      /**
+       * Property messages
+       * @readonly
+       *
+       * @description
+       * Validation messages indexed by error kind.
+       *
+       * @type {Record<string, string>}
+       */
+      public readonly messages: Record<string, string> = { required: 'Indiquez un préfixe.' };
+      // #endregion
     }
 
-    const fixture = TestBed.createComponent(Host);
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
     fixture.autoDetectChanges();
     await fixture.whenStable();
-    const host = fixture.nativeElement as HTMLElement;
-    const prefix = labelled(host, 'Préfixe des identifiants');
-    const field = prefix.closest('cw-field');
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    const prefix: HTMLElement = labelled(host, 'Préfixe des identifiants');
+    const field: Element | null = prefix.closest('cw-field');
 
     expect(description(host, prefix)).toBe('2 à 6 lettres majuscules.');
     expect(field?.hasAttribute('data-invalid')).toBe(false);
@@ -79,6 +129,12 @@ describe('CwField', () => {
   });
 
   it('keeps the ids and the label of the consumer, and forces the error state', async () => {
+    /**
+     * Component Host
+     *
+     * @description
+     * Exercises consumer-provided labels and forced errors.
+     */
     @Component({
       imports: [CwField, CwFieldLabel, CwFieldError, CwInput],
       template: `
@@ -91,14 +147,25 @@ describe('CwField', () => {
       `,
     })
     class Host {
-      readonly taken = signal(false);
+      // #region Properties
+      /**
+       * Property taken
+       * @readonly
+       *
+       * @description
+       * Whether the prefix is already taken.
+       *
+       * @type {WritableSignal<boolean>}
+       */
+      public readonly taken: WritableSignal<boolean> = signal(false);
+      // #endregion
     }
 
-    const fixture = TestBed.createComponent(Host);
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
     fixture.autoDetectChanges();
     await fixture.whenStable();
-    const host = fixture.nativeElement as HTMLElement;
-    const prefix = labelled(host, 'Préfixe');
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    const prefix: HTMLElement = labelled(host, 'Préfixe');
 
     expect(prefix.id).toBe('space-prefix');
     expect(description(host, prefix)).toBe('Utilisé dans CAD-482.');
@@ -117,11 +184,16 @@ describe('CwField', () => {
   });
 
   it('shows the message of a Signal Forms error', async () => {
+    /**
+     * Component Host
+     *
+     * @description
+     * Exercises Signal Forms validation messages.
+     */
     @Component({
       imports: [CwField, CwFieldLabel, CwFieldError, CwInput, FormField],
       template: `
         <cw-field>
-          <!-- eslint-disable-next-line @angular-eslint/template/label-has-associated-control -- cw-field sets its for -->
           <label cwFieldLabel>Nom</label>
           <input cwInput [formField]="space.name" />
           <cw-field-error [errors]="space.name().errors()" />
@@ -129,17 +201,38 @@ describe('CwField', () => {
       `,
     })
     class Host {
-      readonly model = signal({ name: '' });
-      readonly space = form(this.model, (path) => {
+      // #region Properties
+      /**
+       * Property model
+       * @readonly
+       *
+       * @description
+       * Model for the Signal Forms example.
+       *
+       * @type {WritableSignal<{ name: string }>}
+       */
+      public readonly model: WritableSignal<{ name: string }> = signal({ name: '' });
+
+      /**
+       * Property space
+       * @readonly
+       *
+       * @description
+       * Validated Signal Forms tree.
+       *
+       * @type {FieldTree<{ name: string }>}
+       */
+      public readonly space: FieldTree<{ name: string }> = form(this.model, (path) => {
         required(path.name, { message: "Donnez un nom à l'espace." });
       });
+      // #endregion
     }
 
-    const fixture = TestBed.createComponent(Host);
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
     fixture.autoDetectChanges();
     await fixture.whenStable();
-    const host = fixture.nativeElement as HTMLElement;
-    const name = labelled(host, 'Nom');
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    const name: HTMLElement = labelled(host, 'Nom');
 
     name.dispatchEvent(new FocusEvent('blur'));
     await fixture.whenStable();
@@ -149,12 +242,17 @@ describe('CwField', () => {
   });
 
   it('names a control a label cannot point at through aria-labelledby', async () => {
+    /**
+     * Component Host
+     *
+     * @description
+     * Exercises labels for a non-labelable control.
+     */
     @Component({
       imports: [CwField, CwFieldContent, CwFieldLabel, CwFieldDescription],
       template: `
         <cw-field orientation="horizontal">
           <cw-field-content>
-            <!-- eslint-disable-next-line @angular-eslint/template/label-has-associated-control -- cw-field sets its for -->
             <label cwFieldLabel>Vue par défaut</label>
             <cw-field-description>Ouverte en premier.</cw-field-description>
           </cw-field-content>
@@ -164,12 +262,12 @@ describe('CwField', () => {
     })
     class Host {}
 
-    const fixture = TestBed.createComponent(Host);
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
     fixture.autoDetectChanges();
     await fixture.whenStable();
-    const host = fixture.nativeElement as HTMLElement;
-    const group = host.querySelector<HTMLElement>('[role="radiogroup"]');
-    const labelId = group?.getAttribute('aria-labelledby') ?? '';
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    const group: HTMLElement | null = host.querySelector<HTMLElement>('[role="radiogroup"]');
+    const labelId: string = group?.getAttribute('aria-labelledby') ?? '';
 
     expect(host.querySelector(`#${labelId}`)?.textContent.trim()).toBe('Vue par défaut');
     expect(group && description(host, group)).toBe('Ouverte en premier.');

@@ -30,6 +30,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm format:check
+      - run: pnpm test:ui-lint
+      # Restore test:architecture with the published dependency as described in docs/architecture.md.
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test:coverage
@@ -55,6 +57,13 @@ jobs:
           status=0
           for file in .claude/rules/*.md .claude/skills/*/SKILL.md; do
             twin=".codex/${file#.claude/}"
+            if ! cmp --silent "$file" "$twin"; then
+              echo "::error file=$file::differs from $twin"
+              status=1
+            fi
+          done
+          for file in .codex/rules/*.md; do
+            twin=".claude/${file#.codex/}"
             if ! cmp --silent "$file" "$twin"; then
               echo "::error file=$file::differs from $twin"
               status=1

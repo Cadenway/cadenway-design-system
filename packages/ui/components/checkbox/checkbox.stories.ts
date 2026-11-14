@@ -4,8 +4,13 @@ import { expect, userEvent, within } from 'storybook/test';
 import { CwCheckbox } from './checkbox.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Checkbox, every state of its sheet in the Design System artifact, in the light and the dark theme.
  * Copy from the mockup (`App.dc.html`, `Compte.dc.html`).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Checkbox',
@@ -14,10 +19,31 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration used for checkbox examples and interactions.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Locates the light-theme copy rendered by the shared Storybook preview decorator.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the theme examples.
+ *
+ * @returns {HTMLElement} Element containing the light-theme example.
+ *
+ * @throws {Error} When the expected light-theme scope is missing.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -55,8 +81,10 @@ export const Keyboard: Story = {
   render: () => ({
     template: `<cw-checkbox ariaLabel="Tout sélectionner" [indeterminate]="true" />`,
   }),
-  play: async ({ canvasElement }) => {
-    const box = within(light(canvasElement)).getByRole('checkbox', { name: 'Tout sélectionner' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const box: HTMLElement = within(light(canvasElement)).getByRole('checkbox', {
+      name: 'Tout sélectionner',
+    });
     await expect(box).toHaveAttribute('aria-checked', 'mixed');
 
     await userEvent.tab();

@@ -1,13 +1,27 @@
-import { Directive, ElementRef, HostAttributeToken, computed, inject, input } from '@angular/core';
+import {
+  Directive,
+  ElementRef,
+  HostAttributeToken,
+  computed,
+  inject,
+  input,
+  type InputSignal,
+  type Signal,
+} from '@angular/core';
 import { ɵFOCUS_INSET } from '@cadenway/ui/core';
 
 import { CwCollapsible } from '../collapsible.component';
 import type { CwCollapsibleTriggerVariant } from '../collapsible.types';
 
-/* Group row of the List view (Collapsible sheet, "Anatomie" 2): a full-width 36 px row, inset focus
-   ring like every row. `aria-disabled` rather than `disabled`: the trigger often shares its element
-   with `cwButton`, which owns the native `disabled` attribute. Literal strings, so Tailwind finds
-   them in the compiled package. */
+/**
+ * Constant VARIANTS
+ *
+ * @description
+ * Literal classes for a bare trigger or a full-width 36-pixel List group row with an inset focus ring.
+ * The trigger uses `aria-disabled` because a shared `cwButton` may own the native disabled attribute.
+ *
+ * @type {Record<CwCollapsibleTriggerVariant, string>}
+ */
 const VARIANTS: Record<CwCollapsibleTriggerVariant, string> = {
   bare: '',
   row:
@@ -17,6 +31,10 @@ const VARIANTS: Record<CwCollapsibleTriggerVariant, string> = {
 };
 
 /**
+ * Class CwCollapsibleTrigger
+ * @class CwCollapsibleTrigger
+ *
+ * @description
  * Opens and closes the `cw-collapsible` it sits in (Collapsible sheet of the Design System
  * artifact): on click, Enter and Space, since it goes on a native `<button>`.
  *
@@ -41,17 +59,87 @@ const VARIANTS: Record<CwCollapsibleTriggerVariant, string> = {
   },
 })
 export class CwCollapsibleTrigger {
-  /** Look of the trigger: none of its own (`bare`, on a `cwButton`), or the group row. */
-  readonly variant = input<CwCollapsibleTriggerVariant>('bare');
+  // #region Properties
+  /**
+   * Property variant
+   * @readonly
+   *
+   * @description
+   * Input selecting unstyled `bare` presentation or the List group row.
+   *
+   * @type {InputSignal<CwCollapsibleTriggerVariant>}
+   * @default 'bare'
+   */
+  public readonly variant: InputSignal<CwCollapsibleTriggerVariant> =
+    input<CwCollapsibleTriggerVariant>('bare');
 
-  protected readonly collapsible = inject(CwCollapsible);
-  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
-  protected readonly isButton = this.element.tagName === 'BUTTON';
-  protected readonly declaredType = inject(new HostAttributeToken('type'), { optional: true });
+  /**
+   * Property collapsible
+   * @readonly
+   *
+   * @description
+   * Parent block whose expansion state and disabled state drive the trigger.
+   *
+   * @type {CwCollapsible}
+   */
+  protected readonly collapsible: CwCollapsible = inject(CwCollapsible);
 
-  protected readonly classes = computed(() => VARIANTS[this.variant()]);
+  /**
+   * Property element
+   * @readonly
+   *
+   * @description
+   * Native trigger host used to determine its type and guard disabled clicks.
+   *
+   * @type {HTMLElement}
+   */
+  private readonly element: HTMLElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
 
-  constructor() {
+  /**
+   * Property isButton
+   * @readonly
+   *
+   * @description
+   * Whether the trigger host is a native button.
+   *
+   * @type {boolean}
+   */
+  protected readonly isButton: boolean = this.element.tagName === 'BUTTON';
+
+  /**
+   * Property declaredType
+   * @readonly
+   *
+   * @description
+   * Native type attribute supplied by the consumer, or null when absent.
+   *
+   * @type {string | null}
+   */
+  protected readonly declaredType: string | null = inject(new HostAttributeToken('type'), {
+    optional: true,
+  });
+
+  /**
+   * Property classes
+   * @readonly
+   *
+   * @description
+   * Computed class string for the selected trigger variant.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly classes: Signal<string> = computed(() => VARIANTS[this.variant()]);
+  // #endregion
+
+  // #region Constructor
+  /**
+   * Constructor
+   * @constructor
+   *
+   * @description
+   * Installs a capture-phase guard that suppresses clicks when the parent block is disabled.
+   */
+  public constructor() {
     // Capture phase: a disabled block swallows the click before the consumer's own (click).
     this.element.addEventListener(
       'click',
@@ -64,4 +152,5 @@ export class CwCollapsibleTrigger {
       { capture: true },
     );
   }
+  // #endregion
 }

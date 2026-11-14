@@ -1,14 +1,30 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, input, type InputSignal, type Signal } from '@angular/core';
 
 import type { CwPopoverAlign, CwPopoverSide } from '../popover.types';
 
 /* Literal class strings (Popover sheet and preview of the Design System artifact). In light, a
    1.5 px shadow turned outwards continues the panel's `shadow-md`, in the contact shadow token; in
    dark, the elevation and the border are enough. */
-const BASE =
+/**
+ * Constant BASE
+ *
+ * @description
+ * Base classes for the popover arrow.
+ *
+ * @type {string}
+ */
+const BASE: string =
   'pointer-events-none absolute block size-2.5 rotate-45 rounded-[2px] bg-popover dark:shadow-none';
 
 // The diamond pokes 5 px out of the edge facing the trigger; its two outer sides carry the border.
+/**
+ * Constant SIDES
+ *
+ * @description
+ * Arrow classes by panel side.
+ *
+ * @type {Record<CwPopoverSide, string>}
+ */
 const SIDES: Record<CwPopoverSide, string> = {
   top: '-bottom-[5px] border-r border-b shadow-[1.5px_1.5px_2px_-0.5px_var(--shadow-contact)]',
   right: '-left-[5px] border-b border-l shadow-[-1.5px_1.5px_2px_-0.5px_var(--shadow-contact)]',
@@ -18,6 +34,14 @@ const SIDES: Record<CwPopoverSide, string> = {
 
 // Along the edge: centered, or under the middle of a 32 px trigger when the panel is aligned on one
 // of its edges.
+/**
+ * Constant ALONG
+ *
+ * @description
+ * Arrow classes by alignment and axis.
+ *
+ * @type {Record<'horizontal' | 'vertical', Record<CwPopoverAlign, string>>}
+ */
 const ALONG: Record<'horizontal' | 'vertical', Record<CwPopoverAlign, string>> = {
   horizontal: {
     start: 'start-4 -translate-x-1/2 rtl:translate-x-1/2',
@@ -32,6 +56,9 @@ const ALONG: Record<'horizontal' | 'vertical', Record<CwPopoverAlign, string>> =
 };
 
 /**
+ * Component CwPopoverArrow
+ *
+ * @description
  * The diamond of a popover panel, pointing to its trigger (Popover sheet, "Anatomie" 5).
  *
  * `cw-popover` draws it itself when its `arrow` input is set, on the side the panel actually took;
@@ -49,14 +76,43 @@ const ALONG: Record<'horizontal' | 'vertical', Record<CwPopoverAlign, string>> =
   templateUrl: './popover-arrow.component.html',
 })
 export class CwPopoverArrow {
-  /** Side of the trigger the panel sits on; the diamond is on the opposite edge of the panel. */
-  readonly side = input<CwPopoverSide>('bottom');
-  /** Alignment of the panel along that side. */
-  readonly align = input<CwPopoverAlign>('center');
+  // #region Properties
+  /**
+   * Property side
+   * @readonly
+   *
+   * @description
+   * Side of the trigger where the panel sits.
+   *
+   * @type {InputSignal<CwPopoverSide>}
+   */
+  public readonly side: InputSignal<CwPopoverSide> = input<CwPopoverSide>('bottom');
 
-  protected readonly classes = computed(() => {
-    const side = this.side();
-    const axis = side === 'top' || side === 'bottom' ? 'horizontal' : 'vertical';
+  /**
+   * Property align
+   * @readonly
+   *
+   * @description
+   * Panel alignment along its side.
+   *
+   * @type {InputSignal<CwPopoverAlign>}
+   */
+  public readonly align: InputSignal<CwPopoverAlign> = input<CwPopoverAlign>('center');
+
+  /**
+   * Property classes
+   * @readonly
+   *
+   * @description
+   * Arrow classes for side and alignment.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly classes: Signal<string> = computed(() => {
+    const side: CwPopoverSide = this.side();
+    const axis: 'horizontal' | 'vertical' =
+      side === 'top' || side === 'bottom' ? 'horizontal' : 'vertical';
     return `${BASE} ${SIDES[side]} ${ALONG[axis][this.align()]}`;
   });
+  // #endregion
 }

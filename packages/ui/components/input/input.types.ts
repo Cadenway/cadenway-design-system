@@ -1,2 +1,9 @@
-/** Height, padding and radius of a text field, aligned on the button of the same size. */
+/**
+ * Type CwInputSize
+ *
+ * @description
+ * Height, padding and radius of a text field, aligned with a button of the same size.
+ *
+ * @type {'sm' | 'default' | 'lg'}
+ */
 export type CwInputSize = 'sm' | 'default' | 'lg';

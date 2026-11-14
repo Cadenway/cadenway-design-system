@@ -4,14 +4,29 @@ import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { CwDropzone } from './dropzone.component';
 import { CwDropzoneFile } from './dropzone-file/dropzone-file.component';
 
+/**
+ * Function required
+ *
+ * @description
+ * Returns an element or throws when it is absent.
+ *
+ * @param {T | null | undefined} value - Optional value to require.
+ *
+ * @returns {T} The value when present.
+ */
 function required<T>(value: T | null | undefined): T {
   if (value === null || value === undefined) throw new Error('Missing element');
   return value;
 }
 
 /**
+ * Constant meta
+ *
+ * @description
  * Dropzone, every state of its sheet in the Design System artifact, in the light and the dark
  * theme. Copy from the mockup (`App.dc.html`, attachments tab and request form).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Dropzone',
@@ -20,16 +35,44 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story configuration for dropzone examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Selects the light theme copy for interaction checks.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the themed examples.
+ *
+ * @returns {HTMLElement} Light theme section used for interaction checks.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
+/**
+ * Function dragOver
+ *
+ * @description
+ * Dispatches a file drag event to a dropzone.
+ *
+ * @param {Element} zone - Dropzone receiving the drag event.
+ * @param {File[]} files - Files exposed by the simulated transfer.
+ */
 function dragOver(zone: Element, files: File[]): void {
-  const transfer = new DataTransfer();
+  const transfer: DataTransfer = new DataTransfer();
   for (const file of files) transfer.items.add(file);
   zone.dispatchEvent(
     new DragEvent('dragenter', { bubbles: true, cancelable: true, dataTransfer: transfer }),
@@ -55,8 +98,8 @@ export const DragOver: Story = {
   render: () => ({
     template: `<cw-dropzone class="max-w-sm" accept=".png,.pdf" />`,
   }),
-  play: async ({ canvasElement }) => {
-    const zone = required(light(canvasElement).querySelector('cw-dropzone'));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const zone: Element = required(light(canvasElement).querySelector('cw-dropzone'));
     dragOver(zone, [
       new File(['a'], 'capture.png', { type: 'image/png' }),
       new File(['b'], 'specs.pdf', { type: 'application/pdf' }),
@@ -72,8 +115,8 @@ export const RejectWhileDragging: Story = {
   render: () => ({
     template: `<cw-dropzone class="max-w-sm" accept=".png,.pdf" />`,
   }),
-  play: async ({ canvasElement }) => {
-    const zone = required(light(canvasElement).querySelector('cw-dropzone'));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const zone: Element = required(light(canvasElement).querySelector('cw-dropzone'));
     dragOver(zone, [new File(['a'], 'installateur.exe', { type: 'application/x-msdownload' })]);
 
     await waitFor(() => expect(zone).toHaveAttribute('data-state', 'reject'));
@@ -86,8 +129,8 @@ export const Keyboard: Story = {
   render: () => ({
     template: `<cw-dropzone class="max-w-sm" />`,
   }),
-  play: async ({ canvasElement }) => {
-    const browse = within(light(canvasElement)).getByRole('button', {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const browse: HTMLElement = within(light(canvasElement)).getByRole('button', {
       name: 'parcourez les fichiers (50 Mo max.)',
     });
     await userEvent.tab();
@@ -128,8 +171,10 @@ export const Errors: Story = {
         <cw-dropzone-file name="rapport-sprint.pdf" [size]="1153434" state="error" error="Envoi interrompu : connexion perdue." retryable />
       </ul>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole(role: string, options?: { name?: string }): HTMLElement } = within(
+      light(canvasElement),
+    );
     await expect(
       scope.getByRole('button', { name: "Réessayer l'envoi de rapport-sprint.pdf" }),
     ).toBeInTheDocument();

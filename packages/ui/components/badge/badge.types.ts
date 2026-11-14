@@ -1,5 +1,19 @@
-/** Look of a badge: `outline` for statuses, labels and metadata; `default` only for a novelty. */
+/**
+ * Type CwBadgeVariant
+ *
+ * @description
+ * Badge appearance; the Badge sheet uses outline for statuses and metadata, and default for novelty.
+ *
+ * @type {'default' | 'secondary' | 'destructive' | 'outline' | 'ghost' | 'link'}
+ */
 export type CwBadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline' | 'ghost' | 'link';
 
-/** Height of a badge: `default` 22 px, `sm` 18 px for counters and dense rows. */
+/**
+ * Type CwBadgeSize
+ *
+ * @description
+ * Badge height: 22 pixels by default or 18 pixels for counters and dense rows.
+ *
+ * @type {'default' | 'sm'}
+ */
 export type CwBadgeSize = 'default' | 'sm';

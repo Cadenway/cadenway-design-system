@@ -1,9 +1,12 @@
-import { Component, inject, input } from '@angular/core';
+import { Component, inject, input, type InputSignal } from '@angular/core';
 import { _IdGenerator } from '@angular/cdk/a11y';
 
 import { GROUP_TITLE } from '../select.styles';
 
 /**
+ * Component CwSelectGroup
+ *
+ * @description
  * A titled run of options of a `cw-select` (statuses by category: « Pas commencé », « Actif »,
  * « Fermé »), separated from the next one by a `cw-select-separator` (Select sheet of the Design
  * System artifact).
@@ -20,9 +23,38 @@ import { GROUP_TITLE } from '../select.styles';
   templateUrl: './select-group.component.html',
 })
 export class CwSelectGroup {
-  /** The title of the group, shown above its options. */
-  readonly label = input.required<string>();
+  // #region Properties
+  /**
+   * Property label
+   * @readonly
+   *
+   * @description
+   * Title shown above the options.
+   *
+   * @type {InputSignal<string>}
+   */
+  public readonly label: InputSignal<string> = input.required<string>();
 
-  protected readonly titleId = inject(_IdGenerator).getId('cw-select-group-');
-  protected readonly titleClass = GROUP_TITLE;
+  /**
+   * Property titleId
+   * @readonly
+   *
+   * @description
+   * Identifier naming the option group.
+   *
+   * @type {string}
+   */
+  protected readonly titleId: string = inject(_IdGenerator).getId('cw-select-group-');
+
+  /**
+   * Property titleClass
+   * @readonly
+   *
+   * @description
+   * Classes for the group title.
+   *
+   * @type {string}
+   */
+  protected readonly titleClass: string = GROUP_TITLE;
+  // #endregion
 }

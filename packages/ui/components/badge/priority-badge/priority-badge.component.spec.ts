@@ -1,9 +1,16 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import type { CwPriorityKey } from '@cadenway/ui/components/priority-icon';
 
 import { CwPriorityBadge } from './priority-badge.component';
 
+/**
+ * Class Host
+ * @class Host
+ *
+ * @description
+ * Test host with a changing priority badge and an icon-only priority badge.
+ */
 @Component({
   imports: [CwPriorityBadge],
   template: `
@@ -12,7 +19,19 @@ import { CwPriorityBadge } from './priority-badge.component';
   `,
 })
 class Host {
-  readonly priority = signal<CwPriorityKey>('urgente');
+  // #region Properties
+  /**
+   * Property priority
+   * @readonly
+   *
+   * @description
+   * Signal used by tests to change the first badge's priority.
+   *
+   * @type {WritableSignal<CwPriorityKey>}
+   * @default 'urgente'
+   */
+  public readonly priority: WritableSignal<CwPriorityKey> = signal<CwPriorityKey>('urgente');
+  // #endregion
 }
 
 describe('CwPriorityBadge', () => {
@@ -28,12 +47,20 @@ describe('CwPriorityBadge', () => {
     component = fixture.componentInstance;
   });
 
+  /**
+   * Function priorityBadges
+   *
+   * @description
+   * Retrieves the rendered priority badge elements in their template order.
+   *
+   * @returns {HTMLElement[]} Priority badge hosts in the test fixture.
+   */
   function priorityBadges(): HTMLElement[] {
     return Array.from(host.querySelectorAll<HTMLElement>('cw-priority-badge'));
   }
 
   it('writes the French word of the priority, the bars hidden', async () => {
-    const [badge] = priorityBadges();
+    const [badge]: HTMLElement[] = priorityBadges();
 
     expect(badge.textContent.trim()).toBe('Urgente');
     expect(badge.getAttribute('role')).toBeNull();
@@ -46,7 +73,7 @@ describe('CwPriorityBadge', () => {
   });
 
   it('names a priority badge without its word as an image', () => {
-    const badge = priorityBadges()[1];
+    const badge: HTMLElement = priorityBadges()[1];
 
     expect(badge.textContent.trim()).toBe('');
     expect(badge.getAttribute('role')).toBe('img');
@@ -56,7 +83,7 @@ describe('CwPriorityBadge', () => {
   it('reads moyenne for an unknown priority', async () => {
     component.priority.set('none' as CwPriorityKey);
     await fixture.whenStable();
-    const [badge] = priorityBadges();
+    const [badge]: HTMLElement[] = priorityBadges();
 
     expect(badge.textContent.trim()).toBe('Moyenne');
     expect(badge.dataset['priority']).toBe('moyenne');

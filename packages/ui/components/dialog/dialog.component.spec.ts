@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { CwButton } from '@cadenway/ui/components/button';
 
@@ -11,6 +11,12 @@ import { CwDialogTrigger } from './dialog-trigger/dialog-trigger.directive';
 import { CwDialog } from './dialog.component';
 import type { CwDialogCloseReason } from './dialog.types';
 
+/**
+ * Component Host
+ *
+ * @description
+ * Exercises dialog opening, closing and pending states.
+ */
 @Component({
   imports: [
     CwButton,
@@ -56,34 +62,131 @@ import type { CwDialogCloseReason } from './dialog.types';
   `,
 })
 class Host {
-  readonly open = signal(false);
-  readonly pending = signal(false);
-  readonly overlayCloses = signal(true);
-  readonly showClose = signal(true);
-  readonly menuOpen = signal(false);
-  readonly reasons: CwDialogCloseReason[] = [];
+  // #region Properties
+  /**
+   * Property open
+   * @readonly
+   *
+   * @description
+   * Whether the dialog is open.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly open: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property pending
+   * @readonly
+   *
+   * @description
+   * Whether a submission is pending.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly pending: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property overlayCloses
+   * @readonly
+   *
+   * @description
+   * Whether backdrop clicks close the dialog.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly overlayCloses: WritableSignal<boolean> = signal(true);
+
+  /**
+   * Property showClose
+   * @readonly
+   *
+   * @description
+   * Whether the close button is visible.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly showClose: WritableSignal<boolean> = signal(true);
+
+  /**
+   * Property menuOpen
+   * @readonly
+   *
+   * @description
+   * Whether the nested menu is open.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly menuOpen: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property reasons
+   * @readonly
+   *
+   * @description
+   * Recorded dialog close reasons.
+   *
+   * @type {CwDialogCloseReason[]}
+   */
+  public readonly reasons: CwDialogCloseReason[] = [];
+  // #endregion
 }
 
+/**
+ * Function dialog
+ *
+ * @description
+ * Returns the currently open dialog.
+ *
+ * @returns {HTMLElement | null} Open dialog element, or null when absent.
+ */
 function dialog(): HTMLElement | null {
   return document.querySelector<HTMLElement>('[role="dialog"]');
 }
 
 // The backdrop has no role: it is the element just before the window's overlay wrapper.
+/**
+ * Function backdrop
+ *
+ * @description
+ * Finds the modal backdrop.
+ *
+ * @returns {HTMLElement} Backdrop element preceding the dialog overlay.
+ */
 function backdrop(): HTMLElement {
-  const wrapper = dialog()?.parentElement?.parentElement;
-  const found = wrapper?.previousElementSibling;
+  const wrapper: HTMLElement | null | undefined = dialog()?.parentElement?.parentElement;
+  const found: Element | null | undefined = wrapper?.previousElementSibling;
   if (!(found instanceof HTMLElement)) throw new Error('No backdrop');
   return found;
 }
 
+/**
+ * Function button
+ *
+ * @description
+ * Finds a button by accessible name or text.
+ *
+ * @param {ParentNode} scope - Container holding candidate buttons.
+ * @param {string} name - Expected accessible name or text.
+ *
+ * @returns {HTMLButtonElement} Matching button element.
+ */
 function button(scope: ParentNode, name: string): HTMLButtonElement {
-  const found = Array.from(scope.querySelectorAll<HTMLButtonElement>('button')).find(
-    (element) => (element.getAttribute('aria-label') ?? element.textContent.trim()) === name,
-  );
+  const found: HTMLButtonElement | undefined = Array.from(
+    scope.querySelectorAll<HTMLButtonElement>('button'),
+  ).find((element) => (element.getAttribute('aria-label') ?? element.textContent.trim()) === name);
   if (!found) throw new Error(`No button named ${name}`);
   return found;
 }
 
+/**
+ * Function press
+ *
+ * @description
+ * Dispatches a keyboard event.
+ *
+ * @param {EventTarget} target - Element receiving the keyboard event.
+ * @param {string} key - Keyboard key to dispatch.
+ */
 function press(target: EventTarget, key: string): void {
   target.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
 }
@@ -93,11 +196,19 @@ describe('CwDialog', () => {
   let host: Host;
   let trigger: HTMLButtonElement;
 
+  /**
+   * Function openFromTrigger
+   *
+   * @description
+   * Opens the dialog using its trigger.
+   *
+   * @returns {Promise<HTMLElement>} Dialog element after the trigger opens it.
+   */
   async function openFromTrigger(): Promise<HTMLElement> {
     trigger.focus();
     trigger.click();
     await fixture.whenStable();
-    const found = dialog();
+    const found: HTMLElement | null = dialog();
     if (!found) throw new Error('Dialog not open');
     return found;
   }
@@ -114,13 +225,17 @@ describe('CwDialog', () => {
     expect(trigger.getAttribute('aria-haspopup')).toBe('dialog');
     expect(trigger.getAttribute('aria-expanded')).toBe('false');
 
-    const window = await openFromTrigger();
+    const window: HTMLElement = await openFromTrigger();
 
     expect(host.open()).toBe(true);
     expect(trigger.getAttribute('aria-expanded')).toBe('true');
     expect(window.getAttribute('aria-modal')).toBe('true');
-    const title = document.getElementById(window.getAttribute('aria-labelledby') ?? '');
-    const description = document.getElementById(window.getAttribute('aria-describedby') ?? '');
+    const title: HTMLElement | null = document.getElementById(
+      window.getAttribute('aria-labelledby') ?? '',
+    );
+    const description: HTMLElement | null = document.getElementById(
+      window.getAttribute('aria-describedby') ?? '',
+    );
     expect(title?.textContent.trim()).toBe('Renommer la liste');
     expect(description?.textContent).toContain('espace Produit');
   });
@@ -128,13 +243,13 @@ describe('CwDialog', () => {
   // jsdom has no layout, so the CDK focus trap finds no tabbable element and falls back to the
   // window itself; the first field is checked in the browser (story `Simple`).
   it('moves the focus inside the window on open', async () => {
-    const window = await openFromTrigger();
+    const window: HTMLElement = await openFromTrigger();
 
     expect(window.contains(document.activeElement)).toBe(true);
   });
 
   it('closes on Escape with the reason escape and gives the focus back to the trigger', async () => {
-    const window = await openFromTrigger();
+    const window: HTMLElement = await openFromTrigger();
 
     press(window.querySelector('input') ?? window, 'Escape');
     await fixture.whenStable();
@@ -146,10 +261,10 @@ describe('CwDialog', () => {
   });
 
   it('closes an open popup inside it before itself on Escape', async () => {
-    const window = await openFromTrigger();
+    const window: HTMLElement = await openFromTrigger();
     host.menuOpen.set(true);
     await fixture.whenStable();
-    const visibility = button(window, 'Visibilité');
+    const visibility: HTMLButtonElement = button(window, 'Visibilité');
 
     press(visibility, 'Escape');
     await fixture.whenStable();
@@ -178,7 +293,7 @@ describe('CwDialog', () => {
   });
 
   it('closes from the close button and from cwDialogClose with the reason close', async () => {
-    let window = await openFromTrigger();
+    let window: HTMLElement = await openFromTrigger();
     button(window, 'Fermer').click();
     await fixture.whenStable();
     expect(dialog()).toBeNull();
@@ -192,7 +307,7 @@ describe('CwDialog', () => {
   });
 
   it('closes with the reason action when the consumer sets open to false', async () => {
-    const window = await openFromTrigger();
+    const window: HTMLElement = await openFromTrigger();
 
     button(window, 'Renommer').click();
     await fixture.whenStable();
@@ -202,10 +317,10 @@ describe('CwDialog', () => {
   });
 
   it('ignores Escape, the backdrop and the close buttons while pending', async () => {
-    const window = await openFromTrigger();
+    const window: HTMLElement = await openFromTrigger();
     host.pending.set(true);
     await fixture.whenStable();
-    const panel = window.firstElementChild;
+    const panel: Element | null = window.firstElementChild;
 
     press(window.querySelector('input') ?? window, 'Escape');
     backdrop().click();
@@ -221,7 +336,7 @@ describe('CwDialog', () => {
 
   it('hides the close button when showClose is false', async () => {
     host.showClose.set(false);
-    const window = await openFromTrigger();
+    const window: HTMLElement = await openFromTrigger();
 
     expect(() => button(window, 'Fermer')).toThrow();
   });

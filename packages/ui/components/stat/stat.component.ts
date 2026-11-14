@@ -1,4 +1,13 @@
-import { booleanAttribute, Component, computed, inject, input } from '@angular/core';
+import {
+  booleanAttribute,
+  Component,
+  computed,
+  inject,
+  input,
+  type InputSignal,
+  type InputSignalWithTransform,
+  type Signal,
+} from '@angular/core';
 import { CwSkeleton } from '@cadenway/ui/components/skeleton';
 import { CwSpinner } from '@cadenway/ui/components/spinner';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -19,27 +28,63 @@ import type {
   CwStatTrendLabels,
 } from './stat.types';
 
-/* Literal class strings (Stat sheet and preview of the Design System artifact), so Tailwind finds
-   them in the compiled package. */
+/**
+ * Constant SIZES
+ *
+ * @description
+ * Literal stat layout classes for each size, discoverable by Tailwind.
+ *
+ * @type {Record<CwStatSize, string>}
+ */
 const SIZES: Record<CwStatSize, string> = {
   default: 'grid min-w-0 content-start gap-1 p-4',
   sm: 'grid min-w-0 content-start gap-0.5 px-3 py-2.5',
 };
 
-// Alone, a stat is its own card; in a `cw-stat-group` the group draws the card.
-const CARD = 'rounded-xl border bg-card text-card-foreground';
+/**
+ * Constant CARD
+ *
+ * @description
+ * Card classes used by a stat outside a group.
+ *
+ * @type {string}
+ */
+const CARD: string = 'rounded-xl border bg-card text-card-foreground';
 
+/**
+ * Constant VALUES
+ *
+ * @description
+ * Value text classes for each size.
+ *
+ * @type {Record<CwStatSize, string>}
+ */
 const VALUES: Record<CwStatSize, string> = {
   default: 'text-2xl font-semibold tracking-tight tabular-nums',
   sm: 'text-lg font-semibold tracking-tight tabular-nums',
 };
 
+/**
+ * Constant VALUE_SKELETONS
+ *
+ * @description
+ * Loading placeholder dimensions for each stat size.
+ *
+ * @type {Record<CwStatSize, string>}
+ */
 const VALUE_SKELETONS: Record<CwStatSize, string> = {
   default: 'my-0.5 h-6 w-12 rounded-md',
   sm: 'my-0.5 h-5 w-10 rounded-md',
 };
 
-// The color follows the meaning for the team, never the sign (sheet, "États").
+/**
+ * Constant INLINE_DELTAS
+ *
+ * @description
+ * Inline change classes colored by sentiment.
+ *
+ * @type {Record<CwStatSentiment, string>}
+ */
 const INLINE_DELTAS: Record<CwStatSentiment, string> = {
   positive:
     'flex shrink-0 items-center gap-1 font-medium text-jade-text [&_ng-icon]:[--ng-icon__size:0.875rem]',
@@ -49,6 +94,14 @@ const INLINE_DELTAS: Record<CwStatSentiment, string> = {
     'flex shrink-0 items-center gap-1 font-medium text-muted-foreground [&_ng-icon]:[--ng-icon__size:0.875rem]',
 };
 
+/**
+ * Constant PILL_DELTAS
+ *
+ * @description
+ * Pill change classes colored by sentiment.
+ *
+ * @type {Record<CwStatSentiment, string>}
+ */
 const PILL_DELTAS: Record<CwStatSentiment, string> = {
   positive:
     'inline-flex h-5 shrink-0 items-center gap-0.5 rounded-md bg-jade-soft px-1.5 font-medium text-jade-text [&_ng-icon]:[--ng-icon__size:0.75rem]',
@@ -58,18 +111,45 @@ const PILL_DELTAS: Record<CwStatSentiment, string> = {
     'inline-flex h-5 shrink-0 items-center gap-0.5 rounded-md bg-muted px-1.5 font-medium text-muted-foreground [&_ng-icon]:[--ng-icon__size:0.75rem]',
 };
 
+/**
+ * Constant ICONS
+ *
+ * @description
+ * Icon names representing each trend direction.
+ *
+ * @type {Record<CwStatTrend, string>}
+ */
 const ICONS: Record<CwStatTrend, string> = {
   up: 'phosphorTrendUpBold',
   down: 'phosphorTrendDownBold',
   flat: 'phosphorArrowRightBold',
 };
 
-// French copy of the goal line (sheet preview: « 34 sur 50 engagés · 68 % »).
-const GOAL_OF = 'sur';
-
-const NUMBER = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 2 });
+/**
+ * Constant GOAL_OF
+ *
+ * @description
+ * French separator between current and target goal values.
+ *
+ * @type {string}
+ */
+const GOAL_OF: string = 'sur';
 
 /**
+ * Constant NUMBER
+ *
+ * @description
+ * French number formatter used for values and goals.
+ *
+ * @type {Intl.NumberFormat}
+ */
+const NUMBER: Intl.NumberFormat = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 2 });
+
+/**
+ * Class CwStat
+ * @class CwStat
+ *
+ * @description
  * A dashboard figure: a label, a value, and optionally its change colored by its meaning, a
  * sparkline or a goal track (Stat sheet of the Design System artifact). For a series to read in
  * detail use `cw-chart`; for the progress of one operation, `cw-progress`.
@@ -100,63 +180,296 @@ const NUMBER = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 2 });
   templateUrl: './stat.component.html',
 })
 export class CwStat {
-  /** Short and stable label (« Terminées cette semaine »). */
-  readonly label = input.required<string>();
-  /** The figure: a string is shown as given (« 3,2 j »), a number is formatted in `fr-FR`. */
-  readonly value = input.required<string | number>();
-  /** The change as written (« +7 », « −0,8 j »); empty hides it. */
-  readonly delta = input<string>('');
-  /** Direction of the change, drawn as an arrow. */
-  readonly trend = input<CwStatTrend>('flat');
-  /** Meaning of the change for the team, which sets its color. */
-  readonly sentiment = input<CwStatSentiment>('neutral');
-  /** The period compared with, always written (« par rapport à S45 »). */
-  readonly comparison = input<string>('');
-  /** A goal track under the value; `null` draws none. */
-  readonly goal = input<CwStatGoal | null>(null);
-  /** `default` on a dashboard, `sm` in a side panel. */
-  readonly size = input<CwStatSize>('default');
-  /** The change as text after the arrow (`inline`) or as a tinted pill (`pill`). */
-  readonly deltaVariant = input<CwStatDeltaVariant>('inline');
-  /** First load: shimmer blocks in place of the value and the change, `aria-busy`. */
-  readonly loading = input(false, { transform: booleanAttribute });
-  /** Refresh: the old value stays, a spinner follows the label. */
-  readonly refreshing = input(false, { transform: booleanAttribute });
-  /** Accessible name of the refresh spinner. */
-  readonly refreshingLabel = input<string>('Actualisation');
-  /** The words read before the change, per trend. */
-  readonly trendLabels = input<CwStatTrendLabels>(CW_STAT_TREND_LABELS);
+  // #region Properties
+  /**
+   * Property label
+   * @readonly
+   *
+   * @description
+   * Short, stable label for the figure.
+   *
+   * @type {InputSignal<string>}
+   */
+  public readonly label: InputSignal<string> = input.required<string>();
 
-  private readonly group = inject(CwStatGroup, { optional: true });
+  /**
+   * Property value
+   * @readonly
+   *
+   * @description
+   * Figure shown as supplied for strings or formatted in French for numbers.
+   *
+   * @type {InputSignal<string | number>}
+   */
+  public readonly value: InputSignal<string | number> = input.required<string | number>();
 
-  protected readonly hostClasses = computed(() =>
+  /**
+   * Property delta
+   * @readonly
+   *
+   * @description
+   * Written change; an empty string hides it.
+   *
+   * @type {InputSignal<string>}
+   */
+  public readonly delta: InputSignal<string> = input<string>('');
+
+  /**
+   * Property trend
+   * @readonly
+   *
+   * @description
+   * Direction of the change, represented by an arrow.
+   *
+   * @type {InputSignal<CwStatTrend>}
+   */
+  public readonly trend: InputSignal<CwStatTrend> = input<CwStatTrend>('flat');
+
+  /**
+   * Property sentiment
+   * @readonly
+   *
+   * @description
+   * Meaning of the change, which determines its color.
+   *
+   * @type {InputSignal<CwStatSentiment>}
+   */
+  public readonly sentiment: InputSignal<CwStatSentiment> = input<CwStatSentiment>('neutral');
+
+  /**
+   * Property comparison
+   * @readonly
+   *
+   * @description
+   * Written comparison period.
+   *
+   * @type {InputSignal<string>}
+   */
+  public readonly comparison: InputSignal<string> = input<string>('');
+
+  /**
+   * Property goal
+   * @readonly
+   *
+   * @description
+   * Goal displayed under the figure, or null to hide it.
+   *
+   * @type {InputSignal<CwStatGoal | null>}
+   */
+  public readonly goal: InputSignal<CwStatGoal | null> = input<CwStatGoal | null>(null);
+
+  /**
+   * Property size
+   * @readonly
+   *
+   * @description
+   * Dashboard or smaller side-panel size.
+   *
+   * @type {InputSignal<CwStatSize>}
+   */
+  public readonly size: InputSignal<CwStatSize> = input<CwStatSize>('default');
+
+  /**
+   * Property deltaVariant
+   * @readonly
+   *
+   * @description
+   * Change displayed inline or as a tinted pill.
+   *
+   * @type {InputSignal<CwStatDeltaVariant>}
+   */
+  public readonly deltaVariant: InputSignal<CwStatDeltaVariant> =
+    input<CwStatDeltaVariant>('inline');
+
+  /**
+   * Property loading
+   * @readonly
+   *
+   * @description
+   * Replaces value and change with placeholders during the first load.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   */
+  public readonly loading: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property refreshing
+   * @readonly
+   *
+   * @description
+   * Shows a spinner while retaining the previous value.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   */
+  public readonly refreshing: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property refreshingLabel
+   * @readonly
+   *
+   * @description
+   * Accessible name of the refresh spinner.
+   *
+   * @type {InputSignal<string>}
+   */
+  public readonly refreshingLabel: InputSignal<string> = input<string>('Actualisation');
+
+  /**
+   * Property trendLabels
+   * @readonly
+   *
+   * @description
+   * Screen-reader words preceding the change for each trend.
+   *
+   * @type {InputSignal<CwStatTrendLabels>}
+   */
+  public readonly trendLabels: InputSignal<CwStatTrendLabels> =
+    input<CwStatTrendLabels>(CW_STAT_TREND_LABELS);
+
+  /**
+   * Property group
+   * @readonly
+   *
+   * @description
+   * Optional parent providing a shared card around the stat.
+   *
+   * @type {CwStatGroup | null}
+   */
+  private readonly group: CwStatGroup | null = inject(CwStatGroup, { optional: true });
+
+  /**
+   * Property hostClasses
+   * @readonly
+   *
+   * @description
+   * Layout classes and standalone card styling when outside a group.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly hostClasses: Signal<string> = computed(() =>
     this.group ? SIZES[this.size()] : `${SIZES[this.size()]} ${CARD}`,
   );
-  protected readonly valueClasses = computed(() => VALUES[this.size()]);
-  protected readonly valueSkeleton = computed(() => VALUE_SKELETONS[this.size()]);
-  protected readonly shownValue = computed(() => {
-    const value = this.value();
+
+  /**
+   * Property valueClasses
+   * @readonly
+   *
+   * @description
+   * Value text classes for the current size.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly valueClasses: Signal<string> = computed(() => VALUES[this.size()]);
+
+  /**
+   * Property valueSkeleton
+   * @readonly
+   *
+   * @description
+   * Loading placeholder classes for the current size.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly valueSkeleton: Signal<string> = computed(() => VALUE_SKELETONS[this.size()]);
+
+  /**
+   * Property shownValue
+   * @readonly
+   *
+   * @description
+   * Display value, formatting numbers in French.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly shownValue: Signal<string> = computed(() => {
+    const value: string | number = this.value();
     return typeof value === 'number' ? NUMBER.format(value) : value;
   });
-  protected readonly hasChange = computed(() => this.delta() !== '' || this.comparison() !== '');
-  protected readonly deltaClasses = computed(() =>
+
+  /**
+   * Property hasChange
+   * @readonly
+   *
+   * @description
+   * Whether there is a change or comparison to show.
+   *
+   * @type {Signal<boolean>}
+   */
+  protected readonly hasChange: Signal<boolean> = computed(
+    () => this.delta() !== '' || this.comparison() !== '',
+  );
+
+  /**
+   * Property deltaClasses
+   * @readonly
+   *
+   * @description
+   * Change classes selected by presentation and sentiment.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly deltaClasses: Signal<string> = computed(() =>
     this.deltaVariant() === 'pill'
       ? PILL_DELTAS[this.sentiment()]
       : INLINE_DELTAS[this.sentiment()],
   );
-  protected readonly icon = computed(() => ICONS[this.trend()]);
-  protected readonly trendText = computed(() => this.trendLabels()[this.trend()]);
 
-  protected readonly goalPercent = computed(() => {
-    const goal = this.goal();
+  /**
+   * Property icon
+   * @readonly
+   *
+   * @description
+   * Icon name for the current trend.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly icon: Signal<string> = computed(() => ICONS[this.trend()]);
+
+  /**
+   * Property trendText
+   * @readonly
+   *
+   * @description
+   * Screen-reader label for the current trend.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly trendText: Signal<string> = computed(() => this.trendLabels()[this.trend()]);
+
+  /**
+   * Property goalPercent
+   * @readonly
+   *
+   * @description
+   * Goal progress clamped between zero and one hundred percent.
+   *
+   * @type {Signal<number>}
+   */
+  protected readonly goalPercent: Signal<number> = computed(() => {
+    const goal: CwStatGoal | null = this.goal();
     if (!goal || goal.max <= 0) return 0;
     return Math.min(100, Math.max(0, (goal.value / goal.max) * 100));
   });
-  protected readonly goalText = computed(() => {
-    const goal = this.goal();
+
+  /**
+   * Property goalText
+   * @readonly
+   *
+   * @description
+   * Formatted current value, target and percentage for the goal.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly goalText: Signal<string> = computed(() => {
+    const goal: CwStatGoal | null = this.goal();
     if (!goal) return '';
-    const unit = goal.unit ? ` ${goal.unit}` : '';
-    const percent = NUMBER.format(Math.round(this.goalPercent()));
+    const unit: string = goal.unit ? ` ${goal.unit}` : '';
+    const percent: string = NUMBER.format(Math.round(this.goalPercent()));
     return `${NUMBER.format(goal.value)} ${GOAL_OF} ${NUMBER.format(goal.max)}${unit} · ${percent} %`;
   });
+  // #endregion
 }

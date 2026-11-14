@@ -6,8 +6,13 @@ import { CwPriorityBadge } from './priority-badge/priority-badge.component';
 import { CwStatusBadge } from './status-badge/status-badge.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Badge, every state of its sheet in the Design System artifact, in the light and the dark theme.
  * Copy from the sheet and the mockup (`App.dc.html`).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Badge',
@@ -16,10 +21,31 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration used for badge examples and interactions.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Locates the light-theme copy rendered by the shared Storybook preview decorator.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the theme examples.
+ *
+ * @returns {HTMLElement} Element containing the light-theme example.
+ *
+ * @throws {Error} When the expected light-theme scope is missing.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -103,8 +129,11 @@ export const Priorities: Story = {
         <cw-priority-badge priority="basse" [showLabel]="false" />
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole(role: string, options?: { name?: string }): HTMLElement;
+      getByText(text: string): HTMLElement;
+    } = within(light(canvasElement));
     await expect(scope.getByRole('img', { name: 'Priorité haute' })).toBeInTheDocument();
     await expect(scope.getByText('Urgente')).toBeInTheDocument();
   },
@@ -123,8 +152,10 @@ export const Clickable: Story = {
         <span class="text-sm text-muted-foreground" role="status">{{ count }} filtre(s)</span>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole(role: string, options?: { name?: string }): HTMLElement } = within(
+      light(canvasElement),
+    );
     await userEvent.tab();
     await expect(scope.getByRole('link', { name: 'Design' })).toHaveFocus();
     await userEvent.tab();

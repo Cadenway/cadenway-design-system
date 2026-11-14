@@ -1,35 +1,94 @@
-import { Component, computed, input, numberAttribute } from '@angular/core';
+import {
+  Component,
+  computed,
+  input,
+  numberAttribute,
+  type InputSignal,
+  type InputSignalWithTransform,
+  type Signal,
+} from '@angular/core';
 
 import type { CwProgressSize, CwProgressState, CwProgressVariant } from './progress.types';
 
-/* Literal class strings (Progress sheet and preview of the Design System artifact), so Tailwind
-   finds them in the compiled package. */
-const TRACK = 'relative block w-full overflow-hidden rounded-full bg-track';
+/**
+ * Constant TRACK
+ *
+ * @description
+ * Literal Progress sheet classes for the full-width track, kept visible to Tailwind.
+ *
+ * @type {string}
+ */
+const TRACK: string = 'relative block w-full overflow-hidden rounded-full bg-track';
 
+/**
+ * Constant SIZES
+ *
+ * @description
+ * Track-height classes for each supported progress size.
+ *
+ * @type {Record<CwProgressSize, string>}
+ */
 const SIZES: Record<CwProgressSize, string> = {
   sm: 'h-1',
   default: 'h-1.5',
   lg: 'h-2',
 };
 
+/**
+ * Constant FILLS
+ *
+ * @description
+ * Fill-color classes for neutral, successful and destructive progress.
+ *
+ * @type {Record<CwProgressVariant, string>}
+ */
 const FILLS: Record<CwProgressVariant, string> = {
   default: 'bg-foreground',
   success: 'bg-jade',
   destructive: 'bg-destructive',
 };
 
-const DETERMINATE =
+/**
+ * Constant DETERMINATE
+ *
+ * @description
+ * Fill and width-transition classes used when a progress amount is known.
+ *
+ * @type {string}
+ */
+const DETERMINATE: string =
   'block h-full rounded-full transition-[width] duration-300 ease-snap motion-reduce:transition-none';
 
-const INDETERMINATE =
+/**
+ * Constant INDETERMINATE
+ *
+ * @description
+ * Segment and animation classes used when the progress amount is unknown.
+ *
+ * @type {string}
+ */
+const INDETERMINATE: string =
   'absolute inset-y-0 left-[30%] block w-2/5 animate-pulse rounded-full motion-reduce:animate-none';
 
-/** Turns an amount accepted from a template into a number, keeping `null` for "unknown". */
+/**
+ * Function nullableNumber
+ *
+ * @description
+ * Converts a template value to a number while preserving empty values as an unknown amount.
+ *
+ * @param {unknown} value - Value supplied to the progress input.
+ *
+ * @returns {number | null} Converted number, or null for null, undefined or an empty string.
+ */
 function nullableNumber(value: unknown): number | null {
   return value === null || value === undefined || value === '' ? null : numberAttribute(value);
 }
 
 /**
+ * Class CwProgress
+ * @class CwProgress
+ *
+ * @description
  * A progress bar: how far an operation or a set of items has gone, on a `track` with an ink fill,
  * or jade or grenat when the color carries a meaning (Progress sheet of the Design System
  * artifact).
@@ -58,45 +117,178 @@ function nullableNumber(value: unknown): number | null {
   templateUrl: './progress.component.html',
 })
 export class CwProgress {
-  /** Amount done, from 0 to `max`; `null` when it is unknown (indeterminate). */
-  readonly value = input<number | null, unknown>(null, { transform: nullableNumber });
-  /** Amount at completion: `[value]="2" [max]="5"` reads « 2 / 5 ». */
-  readonly max = input(100, { transform: numberAttribute });
-  /** Color of the fill. */
-  readonly variant = input<CwProgressVariant>('default');
-  /** Height of the track; one size per context. */
-  readonly size = input<CwProgressSize>('default');
-  /** Accessible name (« Sous-tâches terminées »). */
-  readonly ariaLabel = input.required<string>();
-  /** `aria-valuetext` (« 2 sur 5 »); the rounded percentage (« 40 % ») when not given. */
-  readonly valueText = input<string | null>(null);
+  // #region Properties
+  /**
+   * Property value
+   * @readonly
+   *
+   * @description
+   * Input carrying the completed amount; null represents unknown progress.
+   *
+   * @type {InputSignalWithTransform<number | null, unknown>}
+   * @default null
+   */
+  public readonly value: InputSignalWithTransform<number | null, unknown> = input<
+    number | null,
+    unknown
+  >(null, { transform: nullableNumber });
 
-  protected readonly clamped = computed(() => {
-    const value = this.value();
+  /**
+   * Property max
+   * @readonly
+   *
+   * @description
+   * Input carrying the amount at completion; for example, a value of two with max five is two of five.
+   *
+   * @type {InputSignalWithTransform<number, unknown>}
+   * @default 100
+   */
+  public readonly max: InputSignalWithTransform<number, unknown> = input(100, {
+    transform: numberAttribute,
+  });
+
+  /**
+   * Property variant
+   * @readonly
+   *
+   * @description
+   * Input selecting the semantic fill color.
+   *
+   * @type {InputSignal<CwProgressVariant>}
+   * @default 'default'
+   */
+  public readonly variant: InputSignal<CwProgressVariant> = input<CwProgressVariant>('default');
+
+  /**
+   * Property size
+   * @readonly
+   *
+   * @description
+   * Input selecting the height of the track.
+   *
+   * @type {InputSignal<CwProgressSize>}
+   * @default 'default'
+   */
+  public readonly size: InputSignal<CwProgressSize> = input<CwProgressSize>('default');
+
+  /**
+   * Property ariaLabel
+   * @readonly
+   *
+   * @description
+   * Required accessible name describing what the progress bar measures.
+   *
+   * @type {InputSignal<string>}
+   */
+  public readonly ariaLabel: InputSignal<string> = input.required<string>();
+
+  /**
+   * Property valueText
+   * @readonly
+   *
+   * @description
+   * Optional accessible value text; null uses the rounded percentage for known progress.
+   *
+   * @type {InputSignal<string | null>}
+   * @default null
+   */
+  public readonly valueText: InputSignal<string | null> = input<string | null>(null);
+
+  /**
+   * Property clamped
+   * @readonly
+   *
+   * @description
+   * Known progress clamped between zero and max when max is non-negative, or null for unknown or
+   * non-numeric input. A negative max is returned as the upper bound.
+   *
+   * @type {Signal<number | null>}
+   */
+  protected readonly clamped: Signal<number | null> = computed(() => {
+    const value: number | null = this.value();
     if (value === null || Number.isNaN(value)) return null;
     return Math.min(Math.max(value, 0), this.max());
   });
 
-  protected readonly percent = computed(() => {
-    const value = this.clamped();
-    const max = this.max();
+  /**
+   * Property percent
+   * @readonly
+   *
+   * @description
+   * Fill percentage; zero for unknown progress or a non-positive maximum.
+   *
+   * @type {Signal<number>}
+   */
+  protected readonly percent: Signal<number> = computed(() => {
+    const value: number | null = this.clamped();
+    const max: number = this.max();
     return value === null || max <= 0 ? 0 : (value / max) * 100;
   });
 
-  protected readonly state = computed<CwProgressState>(() => {
-    const value = this.clamped();
+  /**
+   * Property state
+   * @readonly
+   *
+   * @description
+   * Whether the progress is indeterminate, complete or still loading.
+   *
+   * @type {Signal<CwProgressState>}
+   */
+  protected readonly state: Signal<CwProgressState> = computed<CwProgressState>(() => {
+    const value: number | null = this.clamped();
     if (value === null) return 'indeterminate';
     return value >= this.max() ? 'complete' : 'loading';
   });
 
-  protected readonly text = computed(() => {
+  /**
+   * Property text
+   * @readonly
+   *
+   * @description
+   * Accessible value text: the supplied text, a rounded percentage, or null for unknown progress.
+   *
+   * @type {Signal<string | null>}
+   */
+  protected readonly text: Signal<string | null> = computed(() => {
     if (this.state() === 'indeterminate') return this.valueText();
     return this.valueText() ?? `${String(Math.round(this.percent()))} %`;
   });
 
-  protected readonly classes = computed(() => `${TRACK} ${SIZES[this.size()]}`);
-  protected readonly determinateClasses = computed(() => `${DETERMINATE} ${FILLS[this.variant()]}`);
-  protected readonly indeterminateClasses = computed(
+  /**
+   * Property classes
+   * @readonly
+   *
+   * @description
+   * Track classes combined with the selected height.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly classes: Signal<string> = computed(() => `${TRACK} ${SIZES[this.size()]}`);
+
+  /**
+   * Property determinateClasses
+   * @readonly
+   *
+   * @description
+   * Known-progress fill classes combined with the selected color.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly determinateClasses: Signal<string> = computed(
+    () => `${DETERMINATE} ${FILLS[this.variant()]}`,
+  );
+
+  /**
+   * Property indeterminateClasses
+   * @readonly
+   *
+   * @description
+   * Unknown-progress segment classes combined with the selected color.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly indeterminateClasses: Signal<string> = computed(
     () => `${INDETERMINATE} ${FILLS[this.variant()]}`,
   );
+  // #endregion
 }

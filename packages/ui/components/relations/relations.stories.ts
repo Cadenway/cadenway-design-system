@@ -5,12 +5,22 @@ import { expect, userEvent, within } from 'storybook/test';
 import { CwRelationLeading } from './relation-leading/relation-leading.directive';
 import { CwRelationPicker } from './relation-picker/relation-picker.component';
 import { CwRelations } from './relations.component';
-import type { CwRelation, CwRelationItem, CwRelationType } from './relations.types';
+import type {
+  CwRelation,
+  CwRelationItem,
+  CwRelationPerson,
+  CwRelationType,
+} from './relations.types';
 
 /**
- * Relations, every state of its sheet in the Design System artifact, in the light and the dark
- * theme. The relation types, tasks and statuses are the consumer's data, taken from the sheet's
+ * Constant meta
+ *
+ * @description
+ * Relations in the light and dark themes, covering the design system sheet.
+ * The relation types, tasks and statuses are the consumer's data, taken from the sheet's
  * preview and the mockup (`App.dc.html`).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Relations',
@@ -21,14 +31,40 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration for relation examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Finds the light theme section of the story canvas.
+ *
+ * @param {HTMLElement} canvasElement - Canvas containing the themed examples.
+ * @returns {HTMLElement} Light theme section.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
+/**
+ * Constant TYPES
+ *
+ * @description
+ * Relation types displayed by the example list and picker.
+ *
+ * @type {CwRelationType[]}
+ */
 const TYPES: CwRelationType[] = [
   { id: 'parent', label: 'Tâche parente' },
   { id: 'blocked-by', label: 'Bloquée par' },
@@ -37,15 +73,75 @@ const TYPES: CwRelationType[] = [
   { id: 'duplicate-of', label: 'Doublon de' },
 ];
 
+/**
+ * Interface Task
+ *
+ * @description
+ * Example relation item with the status used by its leading icon.
+ */
 interface Task extends CwRelationItem {
+  // #region Properties
+  /**
+   * Property status
+   *
+   * @description
+   * Status key used by the projected icon.
+   *
+   * @type {string}
+   * @readonly
+   */
   readonly status: string;
+  // #endregion
 }
 
-const lea = { name: 'Léa Martin' };
-const karim = { name: 'Karim Benali' };
-const ines = { name: 'Inès Duval' };
-const samuel = { name: 'Samuel Roux' };
+/**
+ * Constant lea
+ *
+ * @description
+ * Example assignee Léa Martin.
+ *
+ * @type {CwRelationPerson}
+ */
+const lea: CwRelationPerson = { name: 'Léa Martin' };
 
+/**
+ * Constant karim
+ *
+ * @description
+ * Example assignee Karim Benali.
+ *
+ * @type {CwRelationPerson}
+ */
+const karim: CwRelationPerson = { name: 'Karim Benali' };
+
+/**
+ * Constant ines
+ *
+ * @description
+ * Example assignee Inès Duval.
+ *
+ * @type {CwRelationPerson}
+ */
+const ines: CwRelationPerson = { name: 'Inès Duval' };
+
+/**
+ * Constant samuel
+ *
+ * @description
+ * Example assignee Samuel Roux.
+ *
+ * @type {CwRelationPerson}
+ */
+const samuel: CwRelationPerson = { name: 'Samuel Roux' };
+
+/**
+ * Constant RELATIONS
+ *
+ * @description
+ * Example relations grouped by type in the stories.
+ *
+ * @type {CwRelation[]}
+ */
 const RELATIONS: CwRelation[] = [
   {
     id: '1',
@@ -123,6 +219,14 @@ const RELATIONS: CwRelation[] = [
   },
 ];
 
+/**
+ * Constant RESULTS
+ *
+ * @description
+ * Example search results supplied to the relation picker.
+ *
+ * @type {Task[]}
+ */
 const RESULTS: Task[] = [
   { id: 'CAD-479', reference: 'CAD-479', title: 'Maquetter la vue Calendrier', status: 'progress' },
   { id: 'CAD-471', reference: 'CAD-471', title: 'Migrer les pièces jointes', status: 'blocked' },
@@ -135,7 +239,15 @@ const RESULTS: Task[] = [
   },
 ];
 
-const LEADING = `
+/**
+ * Constant LEADING
+ *
+ * @description
+ * Projected status-icon template used before relation items.
+ *
+ * @type {string}
+ */
+const LEADING: string = `
   <ng-template cwRelationLeading let-item>
     <cw-status-icon [status]="item.status" />
   </ng-template>`;
@@ -181,12 +293,14 @@ export const Keyboard: Story = {
     props: { types: TYPES, relations: RELATIONS.slice(0, 2) },
     template: `<cw-relations class="w-full max-w-md" [types]="types" [relations]="relations">${LEADING}</cw-relations>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const title = scope.getByRole('link', { name: 'Refonte des exports' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole: (role: string, options: { name: string }) => HTMLElement } = within(
+      light(canvasElement),
+    );
+    const title: HTMLElement = scope.getByRole('link', { name: 'Refonte des exports' });
     title.focus();
     await userEvent.keyboard('{Shift>}{F10}{/Shift}');
-    const more = scope.getByRole('button', { name: 'Actions de la relation CAD-470' });
+    const more: HTMLElement = scope.getByRole('button', { name: 'Actions de la relation CAD-470' });
     await expect(more).toHaveAttribute('aria-expanded', 'true');
     await userEvent.keyboard('{Escape}');
     await expect(more).toHaveAttribute('aria-expanded', 'false');

@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CwTimeline } from './timeline.component';
@@ -14,12 +14,38 @@ import type {
   CwTimelineSchedule,
 } from './timeline.types';
 
+/**
+ * Function day
+ *
+ * @description
+ * Creates a local November 2026 date for the fixture.
+ *
+ * @param {number} date - Day of November 2026.
+ *
+ * @returns {Date} Local fixture date.
+ */
 function day(date: number): Date {
   return new Date(2026, 10, date);
 }
 
+/**
+ * Constant GROUPS
+ *
+ * @description
+ * Groups used in the timeline fixture.
+ *
+ * @type {CwTimelineGroup[]}
+ */
 const GROUPS: CwTimelineGroup[] = [{ id: 's14', label: 'Sprint 14' }];
 
+/**
+ * Constant ITEMS
+ *
+ * @description
+ * Dated and undated timeline fixture items.
+ *
+ * @type {CwTimelineItem[]}
+ */
 const ITEMS: CwTimelineItem[] = [
   {
     id: 'csv',
@@ -51,12 +77,34 @@ const ITEMS: CwTimelineItem[] = [
   { id: 'shortcuts', name: 'Raccourcis de la Liste', status: 'todo', group: 's14' },
 ];
 
+/**
+ * Constant DEPENDENCIES
+ *
+ * @description
+ * Finish-to-start links used in the fixture.
+ *
+ * @type {CwDependency[]}
+ */
 const DEPENDENCIES: CwDependency[] = [{ from: 'csv', to: 'import' }];
 
+/**
+ * Constant MILESTONES
+ *
+ * @description
+ * Milestones used in the fixture.
+ *
+ * @type {CwMilestone[]}
+ */
 const MILESTONES: CwMilestone[] = [
   { id: 'review', label: 'Revue de sprint 14', date: day(20), group: 's14' },
 ];
 
+/**
+ * Class Host
+ *
+ * @description
+ * Hosts a controlled timeline and records emitted changes.
+ */
 @Component({
   imports: [CwTimeline],
   template: `
@@ -80,23 +128,177 @@ const MILESTONES: CwMilestone[] = [
   `,
 })
 class Host {
-  readonly items = signal<readonly CwTimelineItem[]>(ITEMS);
-  readonly groups = GROUPS;
-  readonly dependencies = DEPENDENCIES;
-  readonly milestones = MILESTONES;
-  readonly today = day(12);
-  readonly scale = signal<CwTimelineScale>('day');
-  readonly zoom = signal(1);
-  readonly range = signal<CwTimelineRange | null>({ start: day(9), end: day(29) });
-  readonly selection = signal<readonly string[]>([]);
-  readonly collapsed = signal<readonly string[]>([]);
-  readonly changes: CwTimelineItemChange[] = [];
-  readonly scheduled: CwTimelineSchedule[] = [];
-  readonly conflicts: CwTimelineConflict[] = [];
-  readonly opened: string[] = [];
+  // #region Properties
+  /**
+   * Property items
+   * @readonly
+   *
+   * @description
+   * Items displayed and updated by the fixture.
+   *
+   * @type {WritableSignal<readonly CwTimelineItem[]>}
+   */
+  public readonly items: WritableSignal<readonly CwTimelineItem[]> =
+    signal<readonly CwTimelineItem[]>(ITEMS);
 
-  // The timeline is controlled: the consumer writes the new dates back.
-  apply(change: CwTimelineItemChange): void {
+  /**
+   * Property groups
+   * @readonly
+   *
+   * @description
+   * Groups displayed by the timeline.
+   *
+   * @type {CwTimelineGroup[]}
+   */
+  public readonly groups: CwTimelineGroup[] = GROUPS;
+
+  /**
+   * Property dependencies
+   * @readonly
+   *
+   * @description
+   * Dependencies displayed by the timeline.
+   *
+   * @type {CwDependency[]}
+   */
+  public readonly dependencies: CwDependency[] = DEPENDENCIES;
+
+  /**
+   * Property milestones
+   * @readonly
+   *
+   * @description
+   * Milestones displayed by the timeline.
+   *
+   * @type {CwMilestone[]}
+   */
+  public readonly milestones: CwMilestone[] = MILESTONES;
+
+  /**
+   * Property today
+   * @readonly
+   *
+   * @description
+   * Current day used by the fixture.
+   *
+   * @type {Date}
+   */
+  public readonly today: Date = day(12);
+
+  /**
+   * Property scale
+   * @readonly
+   *
+   * @description
+   * Selected axis scale.
+   *
+   * @type {WritableSignal<CwTimelineScale>}
+   */
+  public readonly scale: WritableSignal<CwTimelineScale> = signal<CwTimelineScale>('day');
+
+  /**
+   * Property zoom
+   * @readonly
+   *
+   * @description
+   * Selected axis zoom.
+   *
+   * @type {WritableSignal<number>}
+   */
+  public readonly zoom: WritableSignal<number> = signal(1);
+
+  /**
+   * Property range
+   * @readonly
+   *
+   * @description
+   * Visible date range.
+   *
+   * @type {WritableSignal<CwTimelineRange | null>}
+   */
+  public readonly range: WritableSignal<CwTimelineRange | null> = signal<CwTimelineRange | null>({
+    start: day(9),
+    end: day(29),
+  });
+
+  /**
+   * Property selection
+   * @readonly
+   *
+   * @description
+   * Selected item identifiers.
+   *
+   * @type {WritableSignal<readonly string[]>}
+   */
+  public readonly selection: WritableSignal<readonly string[]> = signal<readonly string[]>([]);
+
+  /**
+   * Property collapsed
+   * @readonly
+   *
+   * @description
+   * Collapsed group identifiers.
+   *
+   * @type {WritableSignal<readonly string[]>}
+   */
+  public readonly collapsed: WritableSignal<readonly string[]> = signal<readonly string[]>([]);
+
+  /**
+   * Property changes
+   * @readonly
+   *
+   * @description
+   * Recorded item changes.
+   *
+   * @type {CwTimelineItemChange[]}
+   */
+  public readonly changes: CwTimelineItemChange[] = [];
+
+  /**
+   * Property scheduled
+   * @readonly
+   *
+   * @description
+   * Recorded scheduling requests.
+   *
+   * @type {CwTimelineSchedule[]}
+   */
+  public readonly scheduled: CwTimelineSchedule[] = [];
+
+  /**
+   * Property conflicts
+   * @readonly
+   *
+   * @description
+   * Recorded dependency conflicts.
+   *
+   * @type {CwTimelineConflict[]}
+   */
+  public readonly conflicts: CwTimelineConflict[] = [];
+
+  /**
+   * Property opened
+   * @readonly
+   *
+   * @description
+   * Identifiers of opened items.
+   *
+   * @type {string[]}
+   */
+  public readonly opened: string[] = [];
+  // #endregion
+
+  // #region Methods
+  /**
+   * Method apply
+   * @method apply
+   *
+   * @description
+   * Records a change and writes the new dates back to the controlled items.
+   *
+   * @param {CwTimelineItemChange} change - Date change to apply to controlled fixture items.
+   */
+  public apply(change: CwTimelineItemChange): void {
     this.changes.push(change);
     this.items.update((items) =>
       items.map((item) =>
@@ -104,14 +306,35 @@ class Host {
       ),
     );
   }
+  // #endregion
 }
 
+/**
+ * Function key
+ *
+ * @description
+ * Dispatches a keyboard event to a fixture element.
+ *
+ * @param {Element} element - Element receiving the event.
+ * @param {string} name - Keyboard key to dispatch.
+ * @param {KeyboardEventInit} [init] - Additional keyboard event options.
+ */
 function key(element: Element, name: string, init: KeyboardEventInit = {}): void {
   element.dispatchEvent(
     new KeyboardEvent('keydown', { key: name, bubbles: true, cancelable: true, ...init }),
   );
 }
 
+/**
+ * Function pointer
+ *
+ * @description
+ * Dispatches a pointer-like mouse event at the given horizontal position.
+ *
+ * @param {Element} element - Element receiving the event.
+ * @param {string} type - Mouse event type.
+ * @param {number} clientX - Horizontal pointer position in pixels.
+ */
 function pointer(element: Element, type: string, clientX: number): void {
   element.dispatchEvent(
     new MouseEvent(type, { bubbles: true, cancelable: true, clientX, button: 0 }),
@@ -123,18 +346,38 @@ describe('CwTimeline', () => {
   let component: Host;
   let fixture: ComponentFixture<Host>;
 
+  /**
+   * Function bar
+   *
+   * @description
+   * Finds a bar by its accessible name.
+   *
+   * @param {string} name - Accessible name of the bar.
+   *
+   * @returns {HTMLElement} Matching timeline bar.
+   */
   function bar(name: string): HTMLElement {
-    const found = Array.from(host.querySelectorAll<HTMLElement>('[role="button"]')).find(
-      (element) => element.getAttribute('aria-label')?.startsWith(name),
-    );
+    const found: HTMLElement | undefined = Array.from(
+      host.querySelectorAll<HTMLElement>('[role="button"]'),
+    ).find((element) => element.getAttribute('aria-label')?.startsWith(name));
     if (!found) throw new Error(`No bar named ${name}`);
     return found;
   }
 
+  /**
+   * Function row
+   *
+   * @description
+   * Finds a row by the text of its first cell.
+   *
+   * @param {string} name - Text of the first row cell.
+   *
+   * @returns {HTMLElement} Matching timeline row.
+   */
   function row(name: string): HTMLElement {
-    const found = Array.from(host.querySelectorAll<HTMLElement>('[role="row"]')).find((element) =>
-      element.querySelector('[role="gridcell"]')?.textContent.includes(name),
-    );
+    const found: HTMLElement | undefined = Array.from(
+      host.querySelectorAll<HTMLElement>('[role="row"]'),
+    ).find((element) => element.querySelector('[role="gridcell"]')?.textContent.includes(name));
     if (!found) throw new Error(`No row named ${name}`);
     return found;
   }
@@ -164,7 +407,7 @@ describe('CwTimeline', () => {
   });
 
   it('keeps one tab stop and moves between rows with the arrows', async () => {
-    const group = row('Sprint 14');
+    const group: HTMLElement = row('Sprint 14');
     expect(group.tabIndex).toBe(0);
     expect(bar("Corriger l'export CSV").tabIndex).toBe(-1);
 
@@ -177,7 +420,7 @@ describe('CwTimeline', () => {
   });
 
   it('collapses and expands a group with the arrows', async () => {
-    const group = row('Sprint 14');
+    const group: HTMLElement = row('Sprint 14');
     key(group, 'ArrowLeft');
     await fixture.whenStable();
 
@@ -190,7 +433,7 @@ describe('CwTimeline', () => {
   });
 
   it('moves a bar by one day, changes its end with Shift and its start with Alt', async () => {
-    const csv = bar("Corriger l'export CSV");
+    const csv: HTMLElement = bar("Corriger l'export CSV");
 
     key(csv, 'ArrowRight');
     await fixture.whenStable();
@@ -210,7 +453,7 @@ describe('CwTimeline', () => {
   });
 
   it('reports a change that makes a successor start before its predecessor ends', async () => {
-    const csv = bar("Corriger l'export CSV");
+    const csv: HTMLElement = bar("Corriger l'export CSV");
 
     key(csv, 'ArrowRight', { shiftKey: true });
     await fixture.whenStable();
@@ -225,7 +468,7 @@ describe('CwTimeline', () => {
   });
 
   it('moves a bar by whole days under the pointer', async () => {
-    const csv = bar("Corriger l'export CSV");
+    const csv: HTMLElement = bar("Corriger l'export CSV");
 
     pointer(csv, 'pointerdown', 100);
     pointer(csv, 'pointermove', 172);
@@ -239,7 +482,7 @@ describe('CwTimeline', () => {
   });
 
   it('selects with Space or a click, opens with Enter and clears with Escape', async () => {
-    const csv = bar("Corriger l'export CSV");
+    const csv: HTMLElement = bar("Corriger l'export CSV");
 
     key(csv, ' ');
     await fixture.whenStable();
@@ -261,7 +504,7 @@ describe('CwTimeline', () => {
   });
 
   it('schedules an undated item for today on Enter', () => {
-    const undated = row('Raccourcis de la Liste');
+    const undated: HTMLElement = row('Raccourcis de la Liste');
     expect(undated.textContent).toContain('Sans date');
 
     key(undated, 'Enter');
@@ -272,7 +515,7 @@ describe('CwTimeline', () => {
   });
 
   it('changes the scale with J, S and M and the period with Page Down', () => {
-    const grid = row('Sprint 14');
+    const grid: HTMLElement = row('Sprint 14');
 
     key(grid, 'm');
     expect(component.scale()).toBe('month');
@@ -281,13 +524,13 @@ describe('CwTimeline', () => {
     key(grid, 'j');
     expect(component.scale()).toBe('day');
 
-    const before = component.range()?.start.getTime() ?? 0;
+    const before: number = component.range()?.start.getTime() ?? 0;
     key(grid, 'PageDown');
     expect((component.range()?.start.getTime() ?? 0) - before).toBe(7 * 86_400_000);
   });
 
   it('walks the zoom steps with Ctrl + wheel and Ctrl + / −', () => {
-    const grid = host.querySelector('[role="treegrid"]');
+    const grid: Element | null = host.querySelector('[role="treegrid"]');
     if (!grid) throw new Error('No grid');
 
     grid.dispatchEvent(new WheelEvent('wheel', { deltaY: 100, ctrlKey: true, cancelable: true }));

@@ -8,8 +8,13 @@ import { CwBubbleReaction } from './bubble-reaction/bubble-reaction.component';
 import { CwBubbleReactions } from './bubble-reactions/bubble-reactions.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Bubble, every state of its sheet in the Design System artifact, in the light and the dark theme.
  * Copy from the mockup (`App.dc.html`, comments tab).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Bubble',
@@ -22,10 +27,29 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story configuration for bubble examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Selects the light theme copy for interaction checks.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the themed examples.
+ *
+ * @returns {HTMLElement} Light theme section used for interaction checks.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -118,9 +142,11 @@ export const Reactions: Story = {
         </cw-bubble-reactions>
       </cw-bubble>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const bravo = scope.getByRole('button', { name: 'Bravo : 2' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole(role: string, options?: { name?: string }): HTMLElement } = within(
+      light(canvasElement),
+    );
+    const bravo: HTMLElement = scope.getByRole('button', { name: 'Bravo : 2' });
     await expect(scope.getByRole('button', { name: "D'accord : 3, dont vous" })).toHaveAttribute(
       'aria-pressed',
       'true',

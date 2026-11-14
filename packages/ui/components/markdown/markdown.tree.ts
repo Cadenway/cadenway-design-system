@@ -8,7 +8,14 @@ import type { Token, Tokens } from 'marked';
 
 import type { ɵMentionToken } from './markdown.marked';
 
-/** An inline piece of a block: text, a mark around other pieces, code, a link, a break, a mention. */
+/**
+ * Type MarkdownInline
+ *
+ * @description
+ * Inline pieces rendered inside a Markdown block.
+ *
+ * @type {MarkdownInline}
+ */
 export type MarkdownInline =
   | { readonly kind: 'text'; readonly text: string }
   | {
@@ -25,21 +32,100 @@ export type MarkdownInline =
   | { readonly kind: 'br' }
   | { readonly kind: 'mention'; readonly id: string; readonly label: string };
 
-/** An item of a list; a task item carries its checkbox state and a plain-text name for it. */
+/**
+ * Interface MarkdownListItem
+ *
+ * @description
+ * List item with optional task checkbox state.
+ */
 export interface MarkdownListItem {
+  // #region Properties
+  /**
+   * Property task
+   * @readonly
+   *
+   * @description
+   * Whether the item is a task.
+   *
+   * @type {boolean}
+   */
   readonly task: boolean;
+
+  /**
+   * Property checked
+   * @readonly
+   *
+   * @description
+   * Whether the task is checked.
+   *
+   * @type {boolean}
+   */
   readonly checked: boolean;
+
+  /**
+   * Property label
+   * @readonly
+   *
+   * @description
+   * Plain text label for the checkbox.
+   *
+   * @type {string}
+   */
   readonly label: string;
+
+  /**
+   * Property children
+   * @readonly
+   *
+   * @description
+   * Blocks contained by the list item.
+   *
+   * @type {readonly MarkdownBlock[]}
+   */
   readonly children: readonly MarkdownBlock[];
+  // #endregion
 }
 
-/** A cell of a table, with its column alignment. */
+/**
+ * Interface MarkdownCell
+ *
+ * @description
+ * Table cell with its alignment and inline content.
+ */
 export interface MarkdownCell {
+  // #region Properties
+  /**
+   * Property align
+   * @readonly
+   *
+   * @description
+   * Text alignment of the cell.
+   *
+   * @type {'start' | 'center' | 'end'}
+   */
   readonly align: 'start' | 'center' | 'end';
+
+  /**
+   * Property children
+   * @readonly
+   *
+   * @description
+   * Inline content of the cell.
+   *
+   * @type {readonly MarkdownInline[]}
+   */
   readonly children: readonly MarkdownInline[];
+  // #endregion
 }
 
-/** A block of the document. `text` is the bare text of a tight list item (no paragraph). */
+/**
+ * Type MarkdownBlock
+ *
+ * @description
+ * Block-level Markdown rendering model.
+ *
+ * @type {MarkdownBlock}
+ */
 export type MarkdownBlock =
   | {
       readonly kind: 'heading';
@@ -65,6 +151,14 @@ export type MarkdownBlock =
 
 /* The editor (`@tiptap/markdown`) writes `&`, `<` and `>` as entities and Paragraph writes `&nbsp;`
    for a kept blank line; marked keeps entities as they are in text tokens. */
+/**
+ * Constant NAMED
+ *
+ * @description
+ * Supported named HTML character entities.
+ *
+ * @type {Record<string, string>}
+ */
 const NAMED: Record<string, string> = {
   amp: '&',
   lt: '<',
@@ -74,39 +168,92 @@ const NAMED: Record<string, string> = {
   nbsp: String.fromCharCode(160),
 };
 
-const ENTITY = /&(?:#(\d{1,7})|#[xX]([0-9a-fA-F]{1,6})|(amp|lt|gt|quot|apos|nbsp));/g;
+/**
+ * Constant ENTITY
+ *
+ * @description
+ * Pattern for supported HTML character entities.
+ *
+ * @type {RegExp}
+ */
+const ENTITY: RegExp = /&(?:#(\d{1,7})|#[xX]([0-9a-fA-F]{1,6})|(amp|lt|gt|quot|apos|nbsp));/g;
 
+/**
+ * Function decodeEntities
+ *
+ * @description
+ * Decodes supported character entities in text.
+ *
+ * @param {string} text - Text containing supported character entities.
+ *
+ * @returns {string} Text with recognized valid entities decoded.
+ */
 function decodeEntities(text: string): string {
   return text.replace(ENTITY, (match: string, dec?: string, hex?: string, name?: string) => {
     if (name) return NAMED[name];
-    const code = dec !== undefined ? Number(dec) : parseInt(hex ?? '', 16);
+    const code: number = dec !== undefined ? Number(dec) : parseInt(hex ?? '', 16);
     return code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : match;
   });
 }
 
-const SAFE_SCHEME = /^(?:https?|mailto|tel):/i;
+/**
+ * Constant SAFE_SCHEME
+ *
+ * @description
+ * Allowed absolute URL schemes.
+ *
+ * @type {RegExp}
+ */
+const SAFE_SCHEME: RegExp = /^(?:https?|mailto|tel):/i;
 
 /* Control characters, the space and DEL: browsers drop them from an address before reading it. */
+/**
+ * Function isDropped
+ *
+ * @description
+ * Reports whether browsers discard a character from a URL.
+ *
+ * @param {string} char - Character to examine in a link address.
+ *
+ * @returns {boolean} Whether browsers discard the character when parsing an address.
+ */
 function isDropped(char: string): boolean {
-  const code = char.charCodeAt(0);
+  const code: number = char.charCodeAt(0);
   return code <= 32 || code === 127;
 }
 
 /**
+ * Function safeHref
+ *
+ * @description
  * The address a link may point to: `http`, `https`, `mailto`, `tel` or a relative address; `null`
  * for anything else (`javascript:`, `data:`…). Characters browsers drop from an address are removed
  * before the scheme is read.
+ *
+ * @param {string} href - Untrusted Markdown link address.
+ *
+ * @returns {string | null} Trimmed safe address, or null for an empty or disallowed scheme.
  */
 export function safeHref(href: string): string | null {
-  const value = href.trim();
+  const value: string = href.trim();
   if (value === '') return null;
-  const compact = Array.from(value)
+  const compact: string = Array.from(value)
     .filter((char) => !isDropped(char))
     .join('');
   if (!/^[a-z][a-z0-9+.-]*:/i.test(compact)) return value;
   return SAFE_SCHEME.test(compact) ? value : null;
 }
 
+/**
+ * Function plainText
+ *
+ * @description
+ * Extracts plain text from inline pieces.
+ *
+ * @param {readonly MarkdownInline[]} nodes - Inline pieces from which to extract text.
+ *
+ * @returns {string} Plain text including mention labels and spaces for breaks.
+ */
 function plainText(nodes: readonly MarkdownInline[]): string {
   return nodes
     .map((node) => {
@@ -125,6 +272,16 @@ function plainText(nodes: readonly MarkdownInline[]): string {
     .join('');
 }
 
+/**
+ * Function blocksText
+ *
+ * @description
+ * Extracts plain text from block content.
+ *
+ * @param {readonly MarkdownBlock[]} blocks - Blocks from which to extract text.
+ *
+ * @returns {string} Trimmed plain text from text-bearing blocks.
+ */
 function blocksText(blocks: readonly MarkdownBlock[]): string {
   return blocks
     .map((block) =>
@@ -138,23 +295,52 @@ function blocksText(blocks: readonly MarkdownBlock[]): string {
 
 /* marked types a token either as its own interface or as `Tokens.Generic` (fields of type any):
    shared fields are read through these typed accessors. */
+/**
+ * Function textOf
+ *
+ * @description
+ * Reads text from a Markdown token.
+ *
+ * @param {Token} token - Markdown token whose text field is read.
+ *
+ * @returns {string} Token text, or an empty string when unavailable.
+ */
 function textOf(token: Token): string {
   const value: unknown = (token as Tokens.Generic)['text'];
   return typeof value === 'string' ? value : '';
 }
 
+/**
+ * Function childrenOf
+ *
+ * @description
+ * Reads child tokens from a Markdown token.
+ *
+ * @param {Token} token - Markdown token whose child tokens are read.
+ *
+ * @returns {Token[]} Child tokens, or an empty array when unavailable.
+ */
 function childrenOf(token: Token): Token[] {
   const value: unknown = (token as Tokens.Generic).tokens;
   return Array.isArray(value) ? (value as Token[]) : [];
 }
 
-/** Converts inline tokens; unknown tokens with children keep their children, others their text. */
+/**
+ * Function toInline
+ *
+ * @description
+ * Converts inline tokens, preserving children or text from unknown tokens.
+ *
+ * @param {readonly Token[]} tokens - Inline lexer tokens to convert.
+ *
+ * @returns {MarkdownInline[]} Inline rendering models preserving recognized marks and safe links.
+ */
 export function toInline(tokens: readonly Token[]): MarkdownInline[] {
   const out: MarkdownInline[] = [];
   for (const token of tokens) {
     switch (token.type) {
       case 'text': {
-        const children = childrenOf(token);
+        const children: Token[] = childrenOf(token);
         if (children.length) out.push(...toInline(children));
         else out.push({ kind: 'text', text: decodeEntities(textOf(token)) });
         break;
@@ -183,7 +369,7 @@ export function toInline(tokens: readonly Token[]): MarkdownInline[] {
         break;
       case 'link':
       case 'image': {
-        const link = token as Tokens.Link | Tokens.Image;
+        const link: Tokens.Link | Tokens.Image = token as Tokens.Link | Tokens.Image;
         // An image shows as a link to its address, named by its alternative text: no remote
         // content is loaded from a comment or a description.
         out.push({
@@ -201,7 +387,7 @@ export function toInline(tokens: readonly Token[]): MarkdownInline[] {
         out.push({ kind: 'br' });
         break;
       case 'mention': {
-        const mention = token as ɵMentionToken;
+        const mention: ɵMentionToken = token as ɵMentionToken;
         out.push({ kind: 'mention', id: mention.id, label: mention.label });
         break;
       }
@@ -212,7 +398,7 @@ export function toInline(tokens: readonly Token[]): MarkdownInline[] {
       case 'checkbox':
         break;
       default: {
-        const children = childrenOf(token);
+        const children: Token[] = childrenOf(token);
         if (children.length) out.push(...toInline(children));
         else out.push({ kind: 'text', text: decodeEntities(textOf(token)) });
       }
@@ -221,18 +407,59 @@ export function toInline(tokens: readonly Token[]): MarkdownInline[] {
   return out;
 }
 
-const ALIGN = { left: 'start', center: 'center', right: 'end' } as const;
+/**
+ * Constant ALIGN
+ *
+ * @description
+ * Mapping from Markdown table alignment to display alignment.
+ *
+ * @type {{ readonly left: 'start'; readonly center: 'center'; readonly right: 'end' }}
+ */
+const ALIGN: { readonly left: 'start'; readonly center: 'center'; readonly right: 'end' } = {
+  left: 'start',
+  center: 'center',
+  right: 'end',
+} as const;
 
+/**
+ * Function toCell
+ *
+ * @description
+ * Converts a Markdown table cell to the rendering model.
+ *
+ * @param {Tokens.TableCell} cell - Lexer table cell to convert.
+ *
+ * @returns {MarkdownCell} Cell rendering model with alignment and inline content.
+ */
 function toCell(cell: Tokens.TableCell): MarkdownCell {
   return { align: cell.align ? ALIGN[cell.align] : 'start', children: toInline(cell.tokens) };
 }
 
+/**
+ * Function codeLanguage
+ *
+ * @description
+ * Extracts a code block language when present.
+ *
+ * @param {Token} token - Code block token whose language is read.
+ *
+ * @returns {string | null} First language token, or null when none is supplied.
+ */
 function codeLanguage(token: Token): string | null {
-  const language = (token as Tokens.Code).lang?.trim().split(/\s+/)[0] ?? '';
+  const language: string = (token as Tokens.Code).lang?.trim().split(/\s+/)[0] ?? '';
   return language === '' ? null : language;
 }
 
-/** Converts block tokens; `space` and link definitions are dropped. */
+/**
+ * Function toBlocks
+ *
+ * @description
+ * Converts block tokens while dropping spaces and link definitions.
+ *
+ * @param {readonly Token[]} tokens - Block lexer tokens to convert.
+ *
+ * @returns {MarkdownBlock[]} Block rendering models with spaces and link definitions omitted.
+ */
 export function toBlocks(tokens: readonly Token[]): MarkdownBlock[] {
   const out: MarkdownBlock[] = [];
   for (const token of tokens) {
@@ -251,7 +478,7 @@ export function toBlocks(tokens: readonly Token[]): MarkdownBlock[] {
         out.push({ kind: 'paragraph', children: toInline(childrenOf(token)) });
         break;
       case 'text': {
-        const children = childrenOf(token);
+        const children: Token[] = childrenOf(token);
         out.push({
           kind: 'text',
           children: children.length
@@ -261,9 +488,11 @@ export function toBlocks(tokens: readonly Token[]): MarkdownBlock[] {
         break;
       }
       case 'list': {
-        const list = token as Tokens.List;
-        const items = list.items.map((item): MarkdownListItem => {
-          const children = toBlocks(item.tokens.filter((child) => child.type !== 'checkbox'));
+        const list: Tokens.List = token as Tokens.List;
+        const items: MarkdownListItem[] = list.items.map((item): MarkdownListItem => {
+          const children: MarkdownBlock[] = toBlocks(
+            item.tokens.filter((child) => child.type !== 'checkbox'),
+          );
           return {
             task: item.task,
             checked: item.checked === true,
@@ -290,7 +519,7 @@ export function toBlocks(tokens: readonly Token[]): MarkdownBlock[] {
         out.push({ kind: 'hr' });
         break;
       case 'table': {
-        const table = token as Tokens.Table;
+        const table: Tokens.Table = token as Tokens.Table;
         out.push({
           kind: 'table',
           header: table.header.map(toCell),
@@ -303,7 +532,7 @@ export function toBlocks(tokens: readonly Token[]): MarkdownBlock[] {
         out.push({ kind: 'paragraph', children: [{ kind: 'text', text: token.raw.trim() }] });
         break;
       default: {
-        const children = childrenOf(token);
+        const children: Token[] = childrenOf(token);
         out.push({
           kind: 'paragraph',
           children: children.length

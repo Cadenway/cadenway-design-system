@@ -1,5 +1,19 @@
-/** Row height: 40 px rows and a 36 px header (`default`), or 32 px for both (`sm`). */
+/**
+ * Type CwTableSize
+ *
+ * @description
+ * Row height: 40-pixel body and 36-pixel header by default, or 32 pixels for both in small tables.
+ *
+ * @type {'default' | 'sm'}
+ */
 export type CwTableSize = 'default' | 'sm';
 
-/** Horizontal alignment of a header or a cell; `end` also sets tabular figures for numbers. */
+/**
+ * Type CwTableAlign
+ *
+ * @description
+ * Horizontal alignment of a header or cell; end alignment also uses tabular figures for numbers.
+ *
+ * @type {'start' | 'end' | 'center'}
+ */
 export type CwTableAlign = 'start' | 'end' | 'center';

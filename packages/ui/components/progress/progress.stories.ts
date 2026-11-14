@@ -12,8 +12,13 @@ import { expect, within } from 'storybook/test';
 import { CwProgress } from './progress.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Progress, every state of its sheet in the Design System artifact, in the light and the dark
  * theme. Copy from the sheet's "Dans Cadenway" section (sprint, import, subtasks, storage quota).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Progress',
@@ -27,10 +32,31 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration used for progress examples and interactions.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Locates the light-theme copy rendered by the shared Storybook preview decorator.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the theme examples.
+ *
+ * @returns {HTMLElement} Element containing the light-theme example.
+ *
+ * @throws {Error} When the expected light-theme scope is missing.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -76,8 +102,10 @@ export const Values: Story = {
         </div>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole(role: string, options?: { name?: string }): HTMLElement } = within(
+      light(canvasElement),
+    );
     await expect(scope.getByRole('progressbar', { name: 'Avancement 100 %' })).toHaveAttribute(
       'data-state',
       'complete',
@@ -105,8 +133,8 @@ export const Indeterminate: Story = {
         </div>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const bar = within(light(canvasElement)).getByRole('progressbar', {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const bar: HTMLElement = within(light(canvasElement)).getByRole('progressbar', {
       name: 'Analyse du fichier',
     });
     await expect(bar).toHaveAttribute('data-state', 'indeterminate');

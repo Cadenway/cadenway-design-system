@@ -1,8 +1,29 @@
-/** Frame of an empty state: none inside an area already framed, dashed on a free page area. */
+/**
+ * Type CwEmptyVariant
+ *
+ * @description
+ * Empty-state frame: none in a framed area or a dashed outline in a free page area.
+ *
+ * @type {'default' | 'outline'}
+ */
 export type CwEmptyVariant = 'default' | 'outline';
 
-/** Spacing of an empty state: `default` for a whole view, `sm` for a panel section or a popover. */
+/**
+ * Type CwEmptySize
+ *
+ * @description
+ * Empty-state spacing for a whole view or a compact panel section or popover.
+ *
+ * @type {'default' | 'sm'}
+ */
 export type CwEmptySize = 'default' | 'sm';
 
-/** Color of the media icon: `destructive` for a loading error. */
+/**
+ * Type CwEmptyMediaTone
+ *
+ * @description
+ * Media icon tone, including a destructive tone for a loading error.
+ *
+ * @type {'default' | 'destructive'}
+ */
 export type CwEmptyMediaTone = 'default' | 'destructive';

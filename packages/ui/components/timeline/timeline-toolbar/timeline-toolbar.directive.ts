@@ -1,6 +1,10 @@
 import { Directive } from '@angular/core';
 
 /**
+ * Class CwTimelineToolbar
+ * @class CwTimelineToolbar
+ *
+ * @description
  * Marks the toolbar projected above a `cw-timeline` (scale, period, grouping, « Dépendances »,
  * « Créer une tâche »): `<cw-toolbar cwTimelineToolbar …>`.
  *

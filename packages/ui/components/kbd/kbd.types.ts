@@ -1,5 +1,19 @@
-/** Look of a key: `default` in running text and menus, `inverse` on the ink fill of a tooltip. */
+/**
+ * Type CwKbdVariant
+ *
+ * @description
+ * Key appearance for text and menus, or inverse on a tooltip's ink fill.
+ *
+ * @type {'default' | 'inverse'}
+ */
 export type CwKbdVariant = 'default' | 'inverse';
 
-/** Height of a key: 16 px (`sm`, dense menu rows), 18 px (`default`), 20 px (`lg`, shortcut help). */
+/**
+ * Type CwKbdSize
+ *
+ * @description
+ * Key height: 16 pixels for dense rows, 18 by default, or 20 for shortcut help.
+ *
+ * @type {'sm' | 'default' | 'lg'}
+ */
 export type CwKbdSize = 'sm' | 'default' | 'lg';

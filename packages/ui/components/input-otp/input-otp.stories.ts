@@ -14,8 +14,13 @@ import { CwInputOtpSlot } from './input-otp-slot/input-otp-slot.component';
 import { CwInputOtp } from './input-otp.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Input OTP, every state of its sheet in the Design System artifact, in the light and the dark
  * theme. Copy from the sheet's example (two-factor sign-in, `Otp.dc.html`).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/InputOTP',
@@ -29,15 +34,42 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story configuration for OTP examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Selects the light theme copy for interaction checks.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the themed examples.
+ *
+ * @returns {HTMLElement} Light theme section used for interaction checks.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
-const SIX = `
+/**
+ * Constant SIX
+ *
+ * @description
+ * Six code boxes arranged in two groups of three.
+ *
+ * @type {string}
+ */
+const SIX: string = `
   <cw-input-otp-group>
     <cw-input-otp-slot index="0" /><cw-input-otp-slot index="1" /><cw-input-otp-slot index="2" />
   </cw-input-otp-group>
@@ -70,8 +102,8 @@ export const Invalid: Story = {
         </p>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const code = within(light(canvasElement)).getByRole('textbox', {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const code: HTMLElement = within(light(canvasElement)).getByRole('textbox', {
       name: 'Code de vérification',
     });
     await expect(code).toHaveAttribute('aria-invalid', 'true');
@@ -113,9 +145,11 @@ export const Keyboard: Story = {
         <p class="text-xs text-muted-foreground" role="status">{{ completed ? 'Code complet : ' + completed : '' }}</p>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const code = scope.getByRole('textbox', { name: 'Code de vérification' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole(role: string, options?: { name?: string }): HTMLElement } = within(
+      light(canvasElement),
+    );
+    const code: HTMLElement = scope.getByRole('textbox', { name: 'Code de vérification' });
 
     await userEvent.tab();
     await expect(code).toHaveFocus();

@@ -14,11 +14,17 @@ import { CwMessageAvatar } from './message-avatar/message-avatar.component';
 import { CwMessageGroup } from './message-group/message-group.component';
 import { CwMessageNote } from './message-note/message-note.component';
 import { CwMessageThread } from './message-thread/message-thread.component';
+import type { CwMessageTimeFormatter } from './message.types';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Message, every state of its sheet in the Design System artifact, in the light and the dark theme.
  * Copy from the mockup (`App.dc.html`, comments tab). Times are relative to the moment the story
  * renders.
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Message',
@@ -43,14 +49,69 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story for the message examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function absoluteTime
+ *
+ * @description
+ * Formats a timestamp with an absolute date for the customizable-time example.
+ *
+ * @param {Date} time - Message or reply timestamp.
+ * @returns {string} Date formatted for the example.
+ */
+const absoluteTime: CwMessageTimeFormatter = (time: Date): string =>
+  new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long' }).format(time);
+
+/** Message and reply dates formatted by the consumer. */
+export const CustomTime: Story = {
+  render: () => ({
+    props: { time: new Date(2026, 10, 12), formatTime: absoluteTime },
+    template: `
+      <cw-message class="max-w-xl" author="Camille" [time]="time" [formatTime]="formatTime">
+        <cw-bubble>Un message daté.</cw-bubble>
+        <cw-message-thread [count]="1" [lastReplyAt]="time" [formatTime]="formatTime" />
+      </cw-message>`,
+  }),
+};
+
+/**
+ * Function ago
+ *
+ * @description
+ * Creates a timestamp relative to the time the story renders.
+ *
+ * @param {number} minutes - Number of minutes before the current time.
+ *
+ * @returns {Date} Corresponding timestamp.
+ */
 function ago(minutes: number): Date {
   return new Date(Date.now() - minutes * 60_000);
 }
 
+/**
+ * Function light
+ *
+ * @description
+ * Finds the light-theme story container.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the theme scopes.
+ *
+ * @returns {HTMLElement} Container for the light theme.
+ *
+ * @throws {Error} When the light-theme container is missing.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -192,9 +253,11 @@ export const Keyboard: Story = {
         <cw-bubble>J'ai reproduit le bug.</cw-bubble>
       </cw-message>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const toolbar = scope.getByRole('toolbar', { name: 'Actions du message' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole: (role: string, options: { name: string }) => HTMLElement } = within(
+      light(canvasElement),
+    );
+    const toolbar: HTMLElement = scope.getByRole('toolbar', { name: 'Actions du message' });
 
     await userEvent.tab();
     await expect(within(toolbar).getByRole('button', { name: 'Réagir' })).toHaveFocus();

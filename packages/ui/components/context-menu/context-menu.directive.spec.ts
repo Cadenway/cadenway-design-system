@@ -1,13 +1,36 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { CwMenu, CwMenuItem, CwMenuSeparator } from '@cadenway/ui/components/menu';
 
 import { CwContextMenuTriggerFor } from './context-menu.directive';
 
+/**
+ * Interface Task
+ *
+ * @description
+ * Task data supplied to the context menu.
+ */
 interface Task {
+  // #region Properties
+  /**
+   * Property key
+   * @readonly
+   *
+   * @description
+   * Identifier displayed on the task card.
+   *
+   * @type {string}
+   */
   readonly key: string;
+  // #endregion
 }
 
+/**
+ * Component Host
+ *
+ * @description
+ * Exercises context menu interactions on a task card.
+ */
 @Component({
   imports: [CwContextMenuTriggerFor, CwMenu, CwMenuItem, CwMenuSeparator],
   template: `
@@ -32,14 +55,67 @@ interface Task {
   `,
 })
 class Host {
-  readonly task: Task = { key: 'CAD-482' };
-  readonly disabled = signal(false);
-  readonly events = signal<string[]>([]);
-  readonly opened = signal<unknown>(null);
+  // #region Properties
+  /**
+   * Property task
+   * @readonly
+   *
+   * @description
+   * Task supplied as menu data.
+   *
+   * @type {Task}
+   */
+  public readonly task: Task = { key: 'CAD-482' };
+
+  /**
+   * Property disabled
+   * @readonly
+   *
+   * @description
+   * Whether the trigger is disabled.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly disabled: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property events
+   * @readonly
+   *
+   * @description
+   * Menu lifecycle events.
+   *
+   * @type {WritableSignal<string[]>}
+   */
+  public readonly events: WritableSignal<string[]> = signal<string[]>([]);
+
+  /**
+   * Property opened
+   * @readonly
+   *
+   * @description
+   * Data received by the open action.
+   *
+   * @type {WritableSignal<unknown>}
+   */
+  public readonly opened: WritableSignal<unknown> = signal<unknown>(null);
+  // #endregion
 }
 
-function contextMenu(target: Element, x = 120, y = 80): MouseEvent {
-  const event = new MouseEvent('contextmenu', {
+/**
+ * Function contextMenu
+ *
+ * @description
+ * Dispatches a context menu event at the specified coordinates.
+ *
+ * @param {Element} target - Element receiving the context menu event.
+ * @param {number} [x] - Horizontal pointer coordinate, defaulting to 120.
+ * @param {number} [y] - Vertical pointer coordinate, defaulting to 80.
+ *
+ * @returns {MouseEvent} Dispatched context menu event.
+ */
+function contextMenu(target: Element, x: number = 120, y: number = 80): MouseEvent {
+  const event: MouseEvent = new MouseEvent('contextmenu', {
     bubbles: true,
     cancelable: true,
     clientX: x,
@@ -49,14 +125,32 @@ function contextMenu(target: Element, x = 120, y = 80): MouseEvent {
   return event;
 }
 
+/**
+ * Function panel
+ *
+ * @description
+ * Returns the currently open task menu.
+ *
+ * @returns {HTMLElement | null} Open task menu, or null when absent.
+ */
 function panel(): HTMLElement | null {
   return document.querySelector<HTMLElement>('[role="menu"][aria-label="Actions de CAD-482"]');
 }
 
+/**
+ * Function item
+ *
+ * @description
+ * Finds a menu item by its visible name.
+ *
+ * @param {string} name - Visible menu item text to find.
+ *
+ * @returns {HTMLElement} Matching menu item element.
+ */
 function item(name: string): HTMLElement {
-  const found = Array.from(document.querySelectorAll<HTMLElement>('[role="menuitem"]')).find(
-    (element) => element.textContent.trim() === name,
-  );
+  const found: HTMLElement | undefined = Array.from(
+    document.querySelectorAll<HTMLElement>('[role="menuitem"]'),
+  ).find((element) => element.textContent.trim() === name);
   if (!found) throw new Error(`No menu item named ${name}`);
   return found;
 }
@@ -69,8 +163,8 @@ describe('CwContextMenuTriggerFor', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(Host);
     fixture.autoDetectChanges();
-    const host = fixture.nativeElement as HTMLElement;
-    const found = host.querySelector<HTMLElement>('article');
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    const found: HTMLElement | null = host.querySelector<HTMLElement>('article');
     if (!found) throw new Error('Card missing');
     card = found;
     component = fixture.componentInstance;
@@ -83,7 +177,7 @@ describe('CwContextMenuTriggerFor', () => {
   it('opens the menu on a right click instead of the browser menu', async () => {
     expect(card.dataset['state']).toBe('closed');
 
-    const event = contextMenu(card);
+    const event: MouseEvent = contextMenu(card);
     await fixture.whenStable();
 
     expect(event.defaultPrevented).toBe(true);
@@ -129,7 +223,7 @@ describe('CwContextMenuTriggerFor', () => {
   });
 
   it('leaves the browser menu when disabled and in an editable field', async () => {
-    const field = card.querySelector('input');
+    const field: HTMLInputElement | null = card.querySelector('input');
     if (!field) throw new Error('Field missing');
     expect(contextMenu(field).defaultPrevented).toBe(false);
 

@@ -1,7 +1,7 @@
-import { Component, signal } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { Component, signal, type WritableSignal } from '@angular/core';
+import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { FormField, form, required } from '@angular/forms/signals';
+import { FormField, form, required, type FieldTree } from '@angular/forms/signals';
 
 import { CwInputGroupAddon } from './input-group-addon/input-group-addon.component';
 import { CwInputGroupButton } from './input-group-button/input-group-button.component';
@@ -10,16 +10,34 @@ import { CwInputGroupText } from './input-group-text/input-group-text.component'
 import { CwInputGroupTextarea } from './input-group-textarea/input-group-textarea.directive';
 import { CwInputGroup } from './input-group.component';
 
+/**
+ * Function byName
+ *
+ * @description
+ * Finds an element by selector and accessible name or text.
+ *
+ * @param {HTMLElement} host - Fixture containing the element.
+ * @param {string} selector - CSS selector used to find candidates.
+ * @param {string} name - Accessible name or visible text to match.
+ *
+ * @returns {HTMLElement} Matching element.
+ */
 function byName(host: HTMLElement, selector: string, name: string): HTMLElement {
-  const found = Array.from(host.querySelectorAll<HTMLElement>(selector)).find(
-    (element) => (element.getAttribute('aria-label') ?? element.textContent.trim()) === name,
-  );
+  const found: HTMLElement | undefined = Array.from(
+    host.querySelectorAll<HTMLElement>(selector),
+  ).find((element) => (element.getAttribute('aria-label') ?? element.textContent.trim()) === name);
   if (!found) throw new Error(`No ${selector} named ${name}`);
   return found;
 }
 
 describe('CwInputGroup', () => {
   it('groups a field with its addons and focuses the field from an addon', () => {
+    /**
+     * Class Host
+     *
+     * @description
+     * Hosts an input group with text addons.
+     */
     @Component({
       imports: [CwInputGroup, CwInputGroupAddon, CwInputGroupInput, CwInputGroupText],
       template: `
@@ -34,11 +52,11 @@ describe('CwInputGroup', () => {
     })
     class Host {}
 
-    const fixture = TestBed.createComponent(Host);
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
     fixture.detectChanges();
-    const host = fixture.nativeElement as HTMLElement;
-    const group = host.querySelector<HTMLElement>('[role="group"]');
-    const url = byName(host, 'input', 'URL du webhook') as HTMLInputElement;
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    const group: HTMLElement | null = host.querySelector<HTMLElement>('[role="group"]');
+    const url: HTMLInputElement = byName(host, 'input', 'URL du webhook') as HTMLInputElement;
 
     expect(group?.dataset['size']).toBe('sm');
     expect(host.querySelector('[data-align="inline-end"]')?.textContent.trim()).toBe('heures');
@@ -48,6 +66,12 @@ describe('CwInputGroup', () => {
   });
 
   it('renders a ghost Button, xs by default, that never submits', () => {
+    /**
+     * Class Host
+     *
+     * @description
+     * Hosts an input group with addon buttons.
+     */
     @Component({
       imports: [CwInputGroup, CwInputGroupAddon, CwInputGroupButton, CwInputGroupInput],
       template: `
@@ -68,15 +92,36 @@ describe('CwInputGroup', () => {
       `,
     })
     class Host {
-      readonly copies = signal(0);
-      readonly submitted = signal(false);
+      // #region Properties
+      /**
+       * Property copies
+       * @readonly
+       *
+       * @description
+       * Number of copy actions.
+       *
+       * @type {WritableSignal<number>}
+       */
+      public readonly copies: WritableSignal<number> = signal(0);
+
+      /**
+       * Property submitted
+       * @readonly
+       *
+       * @description
+       * Whether the form was submitted.
+       *
+       * @type {WritableSignal<boolean>}
+       */
+      public readonly submitted: WritableSignal<boolean> = signal(false);
+      // #endregion
     }
 
-    const fixture = TestBed.createComponent(Host);
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
     fixture.detectChanges();
-    const host = fixture.nativeElement as HTMLElement;
-    const copy = byName(host, 'button', 'Copier la clé') as HTMLButtonElement;
-    const send = byName(host, 'button', 'Envoyer') as HTMLButtonElement;
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    const copy: HTMLButtonElement = byName(host, 'button', 'Copier la clé') as HTMLButtonElement;
+    const send: HTMLButtonElement = byName(host, 'button', 'Envoyer') as HTMLButtonElement;
 
     copy.dispatchEvent(new PointerEvent('pointerdown', { button: 0 }));
     copy.click();
@@ -95,6 +140,12 @@ describe('CwInputGroup', () => {
   });
 
   it('keeps the native value accessor of a reactive form and reports invalid once touched', async () => {
+    /**
+     * Class ReactiveHost
+     *
+     * @description
+     * Hosts an input group bound to a reactive form control.
+     */
     @Component({
       imports: [CwInputGroup, CwInputGroupInput, ReactiveFormsModule],
       template: `
@@ -104,15 +155,26 @@ describe('CwInputGroup', () => {
       `,
     })
     class ReactiveHost {
-      readonly url = new FormControl('', {
+      // #region Properties
+      /**
+       * Property url
+       * @readonly
+       *
+       * @description
+       * Reactive URL field.
+       *
+       * @type {FormControl<string>}
+       */
+      public readonly url: FormControl<string> = new FormControl<string>('', {
         nonNullable: true,
         validators: [(control) => Validators.required(control)],
       });
+      // #endregion
     }
 
-    const fixture = TestBed.createComponent(ReactiveHost);
+    const fixture: ComponentFixture<ReactiveHost> = TestBed.createComponent(ReactiveHost);
     fixture.autoDetectChanges();
-    const url = byName(
+    const url: HTMLInputElement = byName(
       fixture.nativeElement as HTMLElement,
       'input',
       'URL du webhook',
@@ -130,6 +192,12 @@ describe('CwInputGroup', () => {
   });
 
   it('works with Signal Forms on a text area', async () => {
+    /**
+     * Class SignalHost
+     *
+     * @description
+     * Hosts a textarea bound through Signal Forms.
+     */
     @Component({
       imports: [CwInputGroup, CwInputGroupTextarea, FormField],
       template: `
@@ -143,15 +211,36 @@ describe('CwInputGroup', () => {
       `,
     })
     class SignalHost {
-      readonly model = signal({ comment: '' });
-      readonly composer = form(this.model, (path) => {
+      // #region Properties
+      /**
+       * Property model
+       * @readonly
+       *
+       * @description
+       * Signal-backed comment model.
+       *
+       * @type {WritableSignal<{ comment: string }>}
+       */
+      public readonly model: WritableSignal<{ comment: string }> = signal({ comment: '' });
+
+      /**
+       * Property composer
+       * @readonly
+       *
+       * @description
+       * Signal form with a required comment.
+       *
+       * @type {FieldTree<{ comment: string }>}
+       */
+      public readonly composer: FieldTree<{ comment: string }> = form(this.model, (path) => {
         required(path.comment);
       });
+      // #endregion
     }
 
-    const fixture = TestBed.createComponent(SignalHost);
+    const fixture: ComponentFixture<SignalHost> = TestBed.createComponent(SignalHost);
     fixture.autoDetectChanges();
-    const comment = byName(
+    const comment: HTMLTextAreaElement = byName(
       fixture.nativeElement as HTMLElement,
       'textarea',
       'Commentaire',

@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CwToolbarGroup } from './toolbar-group/toolbar-group.component';
@@ -8,6 +8,12 @@ import { CwToolbarSeparator } from './toolbar-separator/toolbar-separator.compon
 import { CwToolbarSpacer } from './toolbar-spacer/toolbar-spacer.component';
 import { CwToolbar } from './toolbar.component';
 
+/**
+ * Class Host
+ *
+ * @description
+ * Hosts grouped toolbar controls and records overflow events.
+ */
 @Component({
   imports: [
     CwToolbar,
@@ -41,27 +47,107 @@ import { CwToolbar } from './toolbar.component';
   `,
 })
 class Host {
-  readonly size = signal<'default' | 'sm'>('default');
-  readonly counts: number[] = [];
-  readonly log: string[] = [];
+  // #region Properties
+  /**
+   * Property size
+   * @readonly
+   *
+   * @description
+   * Toolbar size controlled by the fixture.
+   *
+   * @type {WritableSignal<'default' | 'sm'>}
+   */
+  public readonly size: WritableSignal<'default' | 'sm'> = signal<'default' | 'sm'>('default');
+
+  /**
+   * Property counts
+   * @readonly
+   *
+   * @description
+   * Recorded overflow counts.
+   *
+   * @type {number[]}
+   */
+  public readonly counts: number[] = [];
+
+  /**
+   * Property log
+   * @readonly
+   *
+   * @description
+   * Recorded control activations.
+   *
+   * @type {string[]}
+   */
+  public readonly log: string[] = [];
+  // #endregion
 }
 
+/**
+
+ * Function key
+
+ *
+
+ * @description
+
+ * Dispatches a keyboard event to a control.
+
+ *
+ * @param {Element} target - Control receiving the event.
+ * @param {string} value - Keyboard key to dispatch.
+ *
+ * @returns {KeyboardEvent} Dispatched keyboard event.
+ */
 function key(target: Element, value: string): KeyboardEvent {
-  const event = new KeyboardEvent('keydown', { key: value, bubbles: true, cancelable: true });
+  const event: KeyboardEvent = new KeyboardEvent('keydown', {
+    key: value,
+    bubbles: true,
+    cancelable: true,
+  });
   target.dispatchEvent(event);
   return event;
 }
 
+/**
+
+ * Function active
+
+ *
+
+ * @description
+
+ * Returns the currently focused element.
+
+ *
+ * @returns {Element} Currently focused element.
+ */
 function active(): Element {
-  const element = document.activeElement;
+  const element: Element | null = document.activeElement;
   if (!element) throw new Error('No focused element');
   return element;
 }
 
+/**
+
+ * Function button
+
+ *
+
+ * @description
+
+ * Finds a button by accessible label or text.
+
+ *
+ * @param {HTMLElement} host - Fixture containing buttons.
+ * @param {string} name - Accessible label or text to match.
+ *
+ * @returns {HTMLButtonElement} Matching button.
+ */
 function button(host: HTMLElement, name: string): HTMLButtonElement {
-  const found = Array.from(host.querySelectorAll<HTMLButtonElement>('button')).find(
-    (element) => (element.getAttribute('aria-label') ?? element.textContent.trim()) === name,
-  );
+  const found: HTMLButtonElement | undefined = Array.from(
+    host.querySelectorAll<HTMLButtonElement>('button'),
+  ).find((element) => (element.getAttribute('aria-label') ?? element.textContent.trim()) === name);
   if (!found) throw new Error(`No button named ${name}`);
   return found;
 }
@@ -82,7 +168,7 @@ describe('CwToolbar', () => {
   });
 
   it('renders a named horizontal toolbar with groups and a vertical separator', async () => {
-    const toolbar = host.querySelector('[role="toolbar"]');
+    const toolbar: Element | null = host.querySelector('[role="toolbar"]');
     expect(toolbar?.getAttribute('aria-label')).toBe('Vue Liste');
     expect(toolbar?.getAttribute('aria-orientation')).toBe('horizontal');
     expect(toolbar?.getAttribute('data-size')).toBe('default');
@@ -97,7 +183,7 @@ describe('CwToolbar', () => {
   });
 
   it('gives one Tab stop to its controls and leaves the other fields alone', () => {
-    const stops = Array.from(host.querySelectorAll<HTMLElement>('button')).filter(
+    const stops: HTMLElement[] = Array.from(host.querySelectorAll<HTMLElement>('button')).filter(
       (element) => element.tabIndex === 0,
     );
     expect(stops.map((element) => element.textContent.trim())).toEqual(['Filtrer']);
@@ -108,7 +194,7 @@ describe('CwToolbar', () => {
   });
 
   it('moves with the arrows in a loop, skipping disabled and hidden controls', () => {
-    const filter = button(host, 'Filtrer');
+    const filter: HTMLButtonElement = button(host, 'Filtrer');
     filter.focus();
 
     expect(key(filter, 'ArrowRight').defaultPrevented).toBe(true);
@@ -136,7 +222,7 @@ describe('CwToolbar', () => {
   });
 
   it('leaves the arrows of the search field to its caret', () => {
-    const search = host.querySelector<HTMLInputElement>('input');
+    const search: HTMLInputElement | null = host.querySelector<HTMLInputElement>('input');
     if (!search) throw new Error('No search field');
     search.focus();
     expect(key(search, 'ArrowLeft').defaultPrevented).toBe(false);
@@ -145,7 +231,13 @@ describe('CwToolbar', () => {
 });
 
 describe('CwToolbar overflow', () => {
-  const WIDTH = 100;
+  /**
+   * Constant WIDTH
+   *
+   * @description
+   * Simulated width of each visible button in pixels.
+   */
+  const WIDTH: number = 100;
   let callbacks: (() => void)[];
   let original: unknown;
   let available: number;
@@ -153,6 +245,17 @@ describe('CwToolbar overflow', () => {
   let host: HTMLElement;
 
   /* jsdom has no layout: every visible button is 100 px wide, the bar `available` px wide. */
+  /**
+   * Function visible
+   *
+   * @description
+   * Checks visibility of a control within the fixture hierarchy.
+   *
+   * @param {HTMLElement} element - Control to inspect.
+   * @param {HTMLElement} root - Root of the fixture hierarchy.
+   *
+   * @returns {boolean} Whether the control is visible within the fixture.
+   */
   function visible(element: HTMLElement, root: HTMLElement): boolean {
     for (let node: HTMLElement | null = element; node && node !== root; node = node.parentElement) {
       if (node.style.display === 'none') return false;
@@ -163,16 +266,16 @@ describe('CwToolbar overflow', () => {
   beforeEach(async () => {
     callbacks = [];
     available = 450;
-    const view = window as unknown as Record<string, unknown>;
+    const view: Record<string, unknown> = window as unknown as Record<string, unknown>;
     original = view['ResizeObserver'];
     view['ResizeObserver'] = class {
-      constructor(callback: () => void) {
+      public constructor(callback: () => void) {
         callbacks.push(callback);
       }
-      observe(): void {
+      public observe(): void {
         // The test calls the callback itself.
       }
-      disconnect(): void {
+      public disconnect(): void {
         // Nothing to release.
       }
     };
@@ -181,7 +284,7 @@ describe('CwToolbar overflow', () => {
     host = fixture.nativeElement as HTMLElement;
     fixture.autoDetectChanges();
     await fixture.whenStable();
-    const toolbar = host.querySelector<HTMLElement>('[role="toolbar"]');
+    const toolbar: HTMLElement | null = host.querySelector<HTMLElement>('[role="toolbar"]');
     if (!toolbar) throw new Error('No toolbar');
     Object.defineProperty(toolbar, 'clientWidth', { get: () => available });
     Object.defineProperty(toolbar, 'scrollWidth', {
@@ -197,6 +300,14 @@ describe('CwToolbar overflow', () => {
     (window as unknown as Record<string, unknown>)['ResizeObserver'] = original;
   });
 
+  /**
+   * Function resize
+   *
+   * @description
+   * Changes the simulated width and invokes resize observers.
+   *
+   * @param {number} width - Simulated container width in pixels.
+   */
   function resize(width: number): void {
     available = width;
     for (const callback of callbacks) callback();
@@ -206,7 +317,7 @@ describe('CwToolbar overflow', () => {
     resize(450);
     await fixture.whenStable();
 
-    const toolbar = host.querySelector<HTMLElement>('[role="toolbar"]');
+    const toolbar: HTMLElement | null = host.querySelector<HTMLElement>('[role="toolbar"]');
     expect(toolbar?.hasAttribute('data-overflowing')).toBe(true);
     expect(button(host, 'Exporter').style.display).toBe('none');
     expect(button(host, 'Grouper').style.display).toBe('none');
@@ -215,14 +326,14 @@ describe('CwToolbar overflow', () => {
     expect(host.querySelector<HTMLElement>('[role="separator"]')?.style.display).toBe('none');
     expect(fixture.componentInstance.counts).toEqual([2]);
 
-    const more = button(host, 'Plus d’options');
+    const more: HTMLButtonElement = button(host, 'Plus d’options');
     expect(more.getAttribute('aria-haspopup')).toBe('menu');
     more.click();
     await fixture.whenStable();
 
-    const menu = document.querySelector('[role="menu"]');
+    const menu: Element | null = document.querySelector('[role="menu"]');
     expect(menu?.getAttribute('aria-label')).toBe('Plus d’options');
-    const entries = Array.from(menu?.querySelectorAll('[role="menuitem"]') ?? []);
+    const entries: Element[] = Array.from(menu?.querySelectorAll('[role="menuitem"]') ?? []);
     expect(entries.map((entry) => entry.textContent.trim())).toEqual(['Grouper par', 'Exporter']);
 
     (entries[0] as HTMLElement).click();
@@ -248,7 +359,7 @@ describe('CwToolbar overflow', () => {
   it('lets the arrows reach the « Plus » button once it shows', async () => {
     resize(450);
     await fixture.whenStable();
-    const trier = button(host, 'Trier');
+    const trier: HTMLButtonElement = button(host, 'Trier');
     trier.focus();
     key(trier, 'ArrowRight');
     expect(document.activeElement).toBe(button(host, 'Plus d’options'));

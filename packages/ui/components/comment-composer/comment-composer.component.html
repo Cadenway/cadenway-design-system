@@ -2,11 +2,9 @@
   @if (author(); as person) {
     <cw-avatar class="mt-1 shrink-0" size="sm" [name]="person.name" [src]="person.src ?? null" />
   }
-  <!-- The frame only listens: focus, Échap, pasted and dropped files bubble up from the text and
-       the buttons inside it. -->
-  <!-- eslint-disable-next-line @angular-eslint/template/interactive-supports-focus -->
   <div
     #frame
+    tabindex="-1"
     [class]="layout()"
     (focusin)="onFocusIn($event)"
     (focusout)="onFocusOut($event)"

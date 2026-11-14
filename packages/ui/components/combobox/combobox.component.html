@@ -93,16 +93,15 @@
     >
       <ng-content />
       @if (showCreate()) {
-        <!-- An option of an aria-activedescendant listbox: the search field keeps the focus and
-             its keyboard (Enter) chooses this row, as it does the other options. -->
-        <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
         <div
           role="option"
+          tabindex="-1"
           aria-selected="false"
           [id]="createId"
           [class]="optionClass"
           [attr.data-highlighted]="createActive() ? '' : null"
           (mousedown)="$event.preventDefault()"
+          (keydown.enter)="onCreateClick()"
           (click)="onCreateClick()"
           (pointermove)="onCreatePointerMove()"
         >

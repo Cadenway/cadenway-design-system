@@ -2,7 +2,13 @@ import { Component } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorMinusBold } from '@ng-icons/phosphor-icons/bold';
 
-/** The dash between two groups of boxes of `cw-input-otp` (`role="separator"`). */
+/**
+ * Class CwInputOtpSeparator
+ * @class CwInputOtpSeparator
+ *
+ * @description
+ * Separator shown between groups of OTP boxes.
+ */
 @Component({
   selector: 'cw-input-otp-separator',
   imports: [NgIcon],

@@ -27,13 +27,16 @@ const inBothThemes: Decorator = (storyFn, context) => {
   };
 };
 
-/** Annotations applied to every story, in the Storybook UI and in the Vitest run alike. */
+/**
+ * Annotations applied to every story, in the Storybook UI and in the Vitest run alike.
+ * Axe retains every violation and incomplete result while limiting successful nodes in reports.
+ */
 const preview: Preview = {
   decorators: [inBothThemes],
   parameters: {
     // An accessibility violation fails the story test (`pnpm test:storybook`) instead of being a
     // warning in the panel: every brick passes the accessibility checks (CLAUDE.md, TL;DR 4).
-    a11y: { test: 'error' },
+    a11y: { test: 'error', options: { resultTypes: ['violations', 'incomplete'] } },
   },
 };
 

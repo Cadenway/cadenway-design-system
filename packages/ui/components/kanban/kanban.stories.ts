@@ -16,10 +16,12 @@ import { CwKanbanLaneMarkerDef } from './kanban-lane-marker-def/kanban-lane-mark
 import type { CwKanbanColumn, CwKanbanLane } from './kanban.types';
 
 /**
- * Kanban, every state of its sheet in the Design System artifact, in the light and the dark theme.
- * The board is generic: these stories give it the mockup's sprint (`App.dc.html`, vue Tableau) as
- * plain data and draw the card with the priority icon, badges and avatars, as the webapp's task
- * card does.
+ * Constant meta
+ *
+ * @description
+ * Kanban board examples in both themes using mockup task data.
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Kanban',
@@ -41,25 +43,138 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration for kanban examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Interface StoryTask
+ *
+ * @description
+ * Task displayed by the board examples.
+ */
 interface StoryTask {
+  // #region Properties
+  /**
+   * Property id
+   *
+   * @description
+   * Stable task identifier.
+   *
+   * @type {string}
+   * @readonly
+   */
   readonly id: string;
+
+  /**
+   * Property name
+   *
+   * @description
+   * Displayed task name.
+   *
+   * @type {string}
+   * @readonly
+   */
   readonly name: string;
+
+  /**
+   * Property status
+   *
+   * @description
+   * Column identifier of the task.
+   *
+   * @type {string}
+   * @readonly
+   */
   readonly status: string;
+
+  /**
+   * Property priority
+   *
+   * @description
+   * Task priority used for swimlanes.
+   *
+   * @type {CwPriorityKey}
+   * @readonly
+   */
   readonly priority: CwPriorityKey;
+
+  /**
+   * Property tags
+   *
+   * @description
+   * Labels displayed on the card.
+   *
+   * @type {readonly string[]}
+   * @readonly
+   */
   readonly tags: readonly string[];
+
+  /**
+   * Property due
+   *
+   * @description
+   * Displayed due date.
+   *
+   * @type {string}
+   * @readonly
+   */
   readonly due: string;
+
+  /**
+   * Property late
+   *
+   * @description
+   * Whether the task is overdue.
+   *
+   * @type {boolean | undefined}
+   * @readonly
+   */
   readonly late?: boolean;
+
+  /**
+   * Property assignees
+   *
+   * @description
+   * Names of assigned people.
+   *
+   * @type {readonly string[]}
+   * @readonly
+   */
   readonly assignees: readonly string[];
+  // #endregion
 }
 
+/**
+ * Function light
+ *
+ * @description
+ * Finds the light theme section of the story canvas.
+ *
+ * @param {HTMLElement} canvasElement - Canvas containing the themed examples.
+ * @returns {HTMLElement} Light theme section.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
+/**
+ * Constant columns
+ *
+ * @description
+ * Columns displayed by the board.
+ *
+ * @type {CwKanbanColumn[]}
+ */
 const columns: CwKanbanColumn[] = [
   { id: 'todo', label: 'À faire', status: 'todo' },
   { id: 'progress', label: 'En cours', status: 'progress' },
@@ -68,6 +183,14 @@ const columns: CwKanbanColumn[] = [
   { id: 'waiting', label: 'En attente', status: 'waiting' },
 ];
 
+/**
+ * Constant lanes
+ *
+ * @description
+ * Priority swimlanes displayed by the board.
+ *
+ * @type {CwKanbanLane[]}
+ */
 const lanes: CwKanbanLane[] = [
   { id: 'urgente', label: 'Urgente' },
   { id: 'haute', label: 'Haute' },
@@ -75,6 +198,14 @@ const lanes: CwKanbanLane[] = [
   { id: 'basse', label: 'Basse' },
 ];
 
+/**
+ * Constant tasks
+ *
+ * @description
+ * Sample tasks displayed by the board.
+ *
+ * @type {StoryTask[]}
+ */
 const tasks: StoryTask[] = [
   {
     id: 'CAD-488',
@@ -151,7 +282,21 @@ const tasks: StoryTask[] = [
   },
 ];
 
-const accessors = {
+/**
+ * Constant accessors
+ *
+ * @description
+ * Functions used to read task fields.
+ *
+ * @type {{ id: (task: StoryTask) => string; status: (task: StoryTask) => string; priority: (task: StoryTask) => string; label: (task: StoryTask) => string; done: (task: StoryTask) => boolean; }}
+ */
+const accessors: {
+  id: (task: StoryTask) => string;
+  status: (task: StoryTask) => string;
+  priority: (task: StoryTask) => string;
+  label: (task: StoryTask) => string;
+  done: (task: StoryTask) => boolean;
+} = {
   id: (task: StoryTask): string => task.id,
   status: (task: StoryTask): string => task.status,
   priority: (task: StoryTask): string => task.priority,
@@ -159,7 +304,21 @@ const accessors = {
   done: (task: StoryTask): boolean => task.status === 'done',
 };
 
-const props = {
+/**
+ * Constant props
+ *
+ * @description
+ * Shared board data and task accessors.
+ *
+ * @type {typeof accessors & { columns: CwKanbanColumn[]; lanes: CwKanbanLane[]; tasks: StoryTask[]; limits: { progress: number }; priorityLabels: typeof CW_PRIORITY_LABELS; }}
+ */
+const props: typeof accessors & {
+  columns: CwKanbanColumn[];
+  lanes: CwKanbanLane[];
+  tasks: StoryTask[];
+  limits: { progress: number };
+  priorityLabels: typeof CW_PRIORITY_LABELS;
+} = {
   columns,
   lanes,
   tasks,
@@ -169,7 +328,15 @@ const props = {
 };
 
 /* The card content, as the webapp's task card draws it (mockup `App.dc.html`, vue Tableau). */
-const CARD = `
+/**
+ * Constant CARD
+ *
+ * @description
+ * Projected card template with task details.
+ *
+ * @type {string}
+ */
+const CARD: string = `
   <ng-template cwKanbanCard [cwKanbanCardOf]="tasks" let-task let-density="density">
     @if (density === 'compact') {
       <p class="min-w-0 flex-1 truncate text-sm font-medium" [class.text-muted-foreground]="task.status === 'done'" [attr.title]="task.name">{{ task.name }}</p>
@@ -201,7 +368,15 @@ const CARD = `
   </ng-template>`;
 
 /* A region per theme: its name must be unique on the page. */
-const NAME = `[ariaLabel]="'Tableau de Sprint 14' + (cwTheme === 'dark' ? ', thème sombre' : '')"`;
+/**
+ * Constant NAME
+ *
+ * @description
+ * Theme-specific accessible name for the board.
+ *
+ * @type {string}
+ */
+const NAME: string = `[ariaLabel]="'Tableau de Sprint 14' + (cwTheme === 'dark' ? ', thème sombre' : '')"`;
 
 /** Detailed board: limit of 2 exceeded on « En cours », an empty column, « En attente » folded. */
 export const Detailed: Story = {
@@ -255,9 +430,13 @@ export const Swimlanes: Story = {
         <ng-template cwKanbanLaneMarker let-lane><cw-priority-icon [priority]="lane.id" /></ng-template>
       </cw-kanban>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const haute = scope.getByRole('button', { name: /^Haute/ });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+      findByRole: (role: string, options?: { name?: string | RegExp }) => Promise<HTMLElement>;
+      queryByRole: (role: string) => HTMLElement | null;
+    } = within(light(canvasElement));
+    const haute: HTMLElement = scope.getByRole('button', { name: /^Haute/ });
     await expect(haute).toHaveAttribute('aria-expanded', 'false');
     await userEvent.click(haute);
     await expect(haute).toHaveAttribute('aria-expanded', 'true');
@@ -287,10 +466,14 @@ export const QuickAdd: Story = {
         ${CARD}
       </cw-kanban>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+      findByRole: (role: string, options?: { name?: string | RegExp }) => Promise<HTMLElement>;
+      queryByRole: (role: string) => HTMLElement | null;
+    } = within(light(canvasElement));
     await userEvent.click(scope.getByRole('button', { name: 'Ajouter une tâche dans À faire' }));
-    const field = await scope.findByRole('textbox', { name: 'Nom de la tâche' });
+    const field: HTMLElement = await scope.findByRole('textbox', { name: 'Nom de la tâche' });
     await waitFor(() => expect(field).toHaveFocus());
     await userEvent.type(field, 'Préparer la démo du sprint{Enter}');
     await expect(field).toHaveValue('');
@@ -309,14 +492,18 @@ export const KeyboardMove: Story = {
         ${CARD}
       </cw-kanban>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const card = scope.getByRole('article', { name: /^CAD-488/ });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+      findByRole: (role: string, options?: { name?: string | RegExp }) => Promise<HTMLElement>;
+      queryByRole: (role: string) => HTMLElement | null;
+    } = within(light(canvasElement));
+    const card: HTMLElement = scope.getByRole('article', { name: /^CAD-488/ });
     card.focus();
     await userEvent.keyboard(' ');
     await expect(card).toHaveAttribute('data-grabbed');
     await userEvent.keyboard('{ArrowRight}');
-    const blocked = scope.getByRole('list', { name: 'Bloqué' });
+    const blocked: HTMLElement = scope.getByRole('list', { name: 'Bloqué' });
     await userEvent.keyboard('{ArrowRight}');
     await waitFor(() =>
       expect(within(blocked).getByRole('article', { name: /^CAD-488/ })).toHaveFocus(),

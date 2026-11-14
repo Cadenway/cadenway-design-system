@@ -4,8 +4,13 @@ import { expect, within } from 'storybook/test';
 import { CwMarkdown } from './markdown.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Markdown, the read view of rich text in the light and the dark theme. Copy from the mockup
  * (`App.dc.html`: documents, task description, comments).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Markdown',
@@ -14,15 +19,42 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story for Markdown rendering examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Returns the light-theme story container.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing theme scopes.
+ *
+ * @returns {HTMLElement} Container for the light theme.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
-const DOCUMENT = [
+/**
+ * Constant DOCUMENT
+ *
+ * @description
+ * Markdown document shown in the example.
+ *
+ * @type {string}
+ */
+const DOCUMENT: string = [
   '# Export CSV des tâches',
   '',
   'Les équipes exportent leurs tâches pour les **revues de sprint**. Le fichier doit garder les',
@@ -58,8 +90,10 @@ export const Document: Story = {
     props: { source: DOCUMENT },
     template: `<cw-markdown class="max-w-2xl" [source]="source" />`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options: { name: string; level?: number }) => HTMLElement;
+    } = within(light(canvasElement));
     await expect(
       scope.getByRole('heading', { level: 1, name: 'Export CSV des tâches' }),
     ).toBeVisible();
@@ -90,8 +124,8 @@ export const UnsafeInput: Story = {
     },
     template: `<cw-markdown class="max-w-md" [source]="source" />`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = light(canvasElement);
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: HTMLElement = light(canvasElement);
     await expect(scope.querySelector('img')).toBeNull();
     await expect(within(scope).queryByRole('link')).toBeNull();
   },

@@ -6,16 +6,21 @@ import {
   applicationConfig,
   moduleMetadata,
 } from '@storybook/angular-vite';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 
 import { CwPaginationEllipsis } from './pagination-ellipsis/pagination-ellipsis.component';
 import { CwPaginationLink } from './pagination-link/pagination-link.component';
 import { CwPagination } from './pagination.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Pagination, every state of its sheet in the Design System artifact, in the light and the dark
  * theme. Each navigation is named after its theme: two navigations of a page never share a name.
  * Copy from the sheet and the mockup (`Organisation.dc.html`, members).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Pagination',
@@ -29,10 +34,28 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story configuration for pagination examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Selects the light theme copy for interaction checks.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing both theme copies.
+ * @returns {HTMLElement} Light theme section.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -45,8 +68,10 @@ export const Full: Story = {
       <cw-pagination ariaLabel="Pagination {{ cwTheme }}" [total]="300" [pageSizes]="[]"
                      [(page)]="page" />`,
   }),
-  play: async ({ canvasElement }) => {
-    const nav = within(light(canvasElement)).getByRole('navigation', { name: 'Pagination light' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const nav: HTMLElement = within(light(canvasElement)).getByRole('navigation', {
+      name: 'Pagination light',
+    });
     await expect(within(nav).getByRole('button', { name: 'Page 6' })).toHaveAttribute(
       'aria-current',
       'page',
@@ -81,16 +106,48 @@ export const TableBar: Story = {
       <div class="w-full max-w-[720px] border-t pt-3"><cw-pagination ariaLabel="Pagination {{ cwTheme }}"
                      variant="simple" [total]="286" showRange [(page)]="page" [(pageSize)]="pageSize" /></div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByText(text: string): HTMLElement;
+      getByRole(role: string, options?: { name?: string }): HTMLElement;
+    } = within(light(canvasElement));
     await expect(scope.getByText('51–75 sur 286')).toBeVisible();
     await expect(scope.getByText('Page 3 sur 12')).toBeVisible();
 
     await userEvent.click(scope.getByRole('combobox', { name: 'Lignes par page' }));
-    const listbox = await within(document.body).findByRole('listbox');
+    const listbox: HTMLElement = await within(document.body).findByRole('listbox');
     await userEvent.click(within(listbox).getByRole('option', { name: '50' }));
     await expect(scope.getByText('1–50 sur 286')).toBeVisible();
     await expect(scope.getByText('Page 1 sur 6')).toBeVisible();
+
+    const triggers: HTMLElement[] = Array.from(
+      canvasElement.querySelectorAll<HTMLElement>('cw-select button[role="combobox"]'),
+    );
+    await waitFor(async () => {
+      await expect(triggers).toHaveLength(2);
+      for (const trigger of triggers) await expect(trigger).toHaveTextContent('50');
+    });
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          resolve();
+        });
+      });
+    });
+    await Promise.allSettled(
+      triggers.flatMap((trigger) =>
+        trigger.getAnimations({ subtree: true }).map((animation) => animation.finished),
+      ),
+    );
+    await waitFor(async () => {
+      for (const trigger of triggers) {
+        const label: HTMLSpanElement | null =
+          trigger.querySelector<HTMLSpanElement>(':scope > span');
+        await expect(label).not.toBeNull();
+        if (!label) throw new Error('Select label missing');
+        await expect(getComputedStyle(label).opacity).toBe('1');
+      }
+    });
   },
 };
 
@@ -102,8 +159,10 @@ export const Simple: Story = {
       <cw-pagination ariaLabel="Pagination {{ cwTheme }}" variant="simple" [total]="300"
                      [pageSizes]="[]" [(page)]="page" />`,
   }),
-  play: async ({ canvasElement }) => {
-    const nav = within(light(canvasElement)).getByRole('navigation', { name: 'Pagination light' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const nav: HTMLElement = within(light(canvasElement)).getByRole('navigation', {
+      name: 'Pagination light',
+    });
     await userEvent.tab();
     await expect(within(nav).getByRole('button', { name: 'Précédent' })).toHaveFocus();
     await userEvent.keyboard('{Enter}');

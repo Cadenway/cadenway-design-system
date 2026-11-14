@@ -16,8 +16,13 @@ import { expect, userEvent, within } from 'storybook/test';
 import { CwButton } from './button.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Button, every state of its sheet in the Design System artifact; each story renders in the light
  * and the dark theme (`.storybook/preview.ts`). Copy from the mockup (`App.dc.html`).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Button',
@@ -38,10 +43,31 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story configuration used for the button examples and interactions.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Locates the light-theme copy rendered by the shared Storybook preview decorator.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing both theme examples.
+ *
+ * @returns {HTMLElement} Element containing the light-theme example.
+ *
+ * @throws {Error} When the expected light-theme scope is missing.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -89,8 +115,10 @@ export const Loading: Story = {
         <button cwButton variant="outline" loading>Enregistrer</button>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const button = within(light(canvasElement)).getByRole('button', { name: /Enregistrer/ });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const button: HTMLElement = within(light(canvasElement)).getByRole('button', {
+      name: /Enregistrer/,
+    });
 
     await expect(button).toHaveAttribute('aria-busy', 'true');
     await userEvent.tab();
@@ -108,8 +136,9 @@ export const Disabled: Story = {
         <a cwButton variant="link" href="#aide" disabled>Voir l'aide</a>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole(role: string, options?: { name?: string | RegExp }): HTMLElement } =
+      within(light(canvasElement));
 
     await expect(scope.getByRole('button', { name: 'Créer une tâche' })).toBeDisabled();
     await expect(scope.getByRole('link', { name: "Voir l'aide" })).toHaveAttribute(
@@ -129,8 +158,9 @@ export const Keyboard: Story = {
         <span class="text-sm text-muted-foreground" role="status">{{ count }} créée(s)</span>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole(role: string, options?: { name?: string | RegExp }): HTMLElement } =
+      within(light(canvasElement));
     await userEvent.tab();
     await expect(scope.getByRole('button', { name: 'Créer une tâche' })).toHaveFocus();
     await userEvent.keyboard('{Enter}');

@@ -3,13 +3,10 @@ import { Directive, inject } from '@angular/core';
 import { CommandState } from '../command-state/command-state.service';
 
 /**
- * The search field of a command: borderless, in the search row of `cw-command` or
- * `cw-command-dialog` (Command sheet of the Design System artifact).
+ * Directive CwCommandInput
  *
- * Put it on a native `<input>` with a placeholder that says what to type (« Rechercher une tâche,
- * un espace ou une action… ») and an `aria-label` when no label names it. It is the
- * `role="combobox"` of the list: `aria-controls` points at the listbox, `aria-activedescendant`
- * at the highlighted item. Its value is the command's `search`.
+ * @description
+ * The search field of a command: borderless, in the search row of `cw-command` or `cw-command-dialog` (Command sheet of the Design System artifact). Put it on a native `<input>` with a placeholder that says what to type (« Rechercher une tâche, un espace ou une action… ») and an `aria-label` when no label names it. It is the `role="combobox"` of the list: `aria-controls` points at the listbox, `aria-activedescendant` at the highlighted item. Its value is the command's `search`.
  */
 @Directive({
   selector: 'input[cwCommandInput]',
@@ -30,9 +27,30 @@ import { CommandState } from '../command-state/command-state.service';
   },
 })
 export class CwCommandInput {
-  protected readonly state = inject(CommandState);
+  // #region Properties
+  /**
+   * Property state
+   *
+   * @description
+   * Shared command state used to render and navigate results.
+   *
+   * @type {CommandState}
+   * @readonly
+   */
+  protected readonly state: CommandState = inject(CommandState);
+  // #endregion
 
+  // #region Methods
+  /**
+   * Method onInput
+   *
+   * @description
+   * Updates the command search from the native input.
+   *
+   * @param {Event} event - Input event from the search field.
+   */
   protected onInput(event: Event): void {
     this.state.setSearch((event.target as HTMLInputElement).value);
   }
+  // #endregion
 }

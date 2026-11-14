@@ -1,9 +1,14 @@
 import type { CwToastTone } from './toast.types';
 
 /**
+ * Constant CW_TOAST_DURATIONS
+ *
+ * @description
  * Default duration of each tone, in milliseconds: 6 s as in the mockup (`App.dc.html`, every toast
  * closes after 6000 ms); an error and a running operation stay until closed or updated.
  * `cw-toaster`'s `duration` overrides any of them.
+ *
+ * @type {Readonly<Record<CwToastTone, number>>}
  */
 export const CW_TOAST_DURATIONS: Readonly<Record<CwToastTone, number>> = {
   default: 6000,

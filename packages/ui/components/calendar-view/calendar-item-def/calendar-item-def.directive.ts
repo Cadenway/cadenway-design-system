@@ -1,34 +1,58 @@
-import { Directive, TemplateRef, inject, input } from '@angular/core';
+import { Directive, TemplateRef, inject, input, type InputSignal } from '@angular/core';
 
 import type { CwCalendarItemContext } from '../calendar-view.types';
 
 /**
- * The content of each item of a `cw-calendar-view`:
- * `<ng-template cwCalendarItem let-item let-view="view">`, usually the status icon and the name.
+ * Directive CwCalendarItemDef
  *
- * The calendar draws the frame (pill, bar, block, popover row), its states (hover veil, focus ring,
- * lifted preview) and, in the week view, the hours under the content; the template draws the
- * content, which must keep a visible name (truncated, the frame carries a `title`). It receives the
- * item, `view` (`month`, `bar`, `week` or `list`) and `span`. Without it, an item shows its
- * `itemLabel`. Bind `[cwCalendarItemOf]` to the calendar's items to type `let-item` in strict
- * templates.
+ * @description
+ * The content of each item of a `cw-calendar-view`: `<ng-template cwCalendarItem let-item let-view="view">`, usually the status icon and the name. The calendar draws the frame (pill, bar, block, popover row), its states (hover veil, focus ring, lifted preview) and, in the week view, the hours under the content; the template draws the content, which must keep a visible name (truncated, the frame carries a `title`). It receives the item, `view` (`month`, `bar`, `week` or `list`) and `span`. Without it, an item shows its `itemLabel`. Bind `[cwCalendarItemOf]` to the calendar's items to type `let-item` in strict templates.
  */
 @Directive({ selector: 'ng-template[cwCalendarItem]' })
 export class CwCalendarItemDef<T = unknown> {
-  /** The calendar's items, only read by the template type checker to type the context. */
-  readonly cwCalendarItemOf = input<readonly T[] | undefined>(undefined);
+  // #region Properties
+  /**
+   * Property cwCalendarItemOf
+   *
+   * @description
+   * The calendar's items, only read by the template type checker to type the context.
+   *
+   * @type {InputSignal<readonly T[] | undefined>}
+   * @readonly
+   */
+  public readonly cwCalendarItemOf: InputSignal<readonly T[] | undefined> = input<
+    readonly T[] | undefined
+  >(undefined);
 
-  /** The template, read by the calendar. */
-  readonly template = inject<TemplateRef<CwCalendarItemContext<T>>>(TemplateRef);
+  /**
+   * Property template
+   *
+   * @description
+   * The template, read by the calendar.
+   *
+   * @type {TemplateRef<CwCalendarItemContext<T>>}
+   * @readonly
+   */
+  public readonly template: TemplateRef<CwCalendarItemContext<T>> =
+    inject<TemplateRef<CwCalendarItemContext<T>>>(TemplateRef);
+  // #endregion
 
-  /** Types the template context for the template type checker. */
-  // The compiler reads the signature only: the parameters exist for their types.
-  /* eslint-disable @typescript-eslint/no-unused-vars */
-  static ngTemplateContextGuard<T>(
+  // #region Methods
+  /**
+   * Method ngTemplateContextGuard
+   *
+   * @description
+   * Types the template context for the template type checker.
+   *
+   * @param {CwCalendarItemDef<T>} _directive - Directive instance used by the template checker.
+   * @param {unknown} _context - Context of the item to open.
+   * @returns {context is CwCalendarItemContext<T>} Whether the context has the declared template type.
+   */
+  public static ngTemplateContextGuard<T>(
     _directive: CwCalendarItemDef<T>,
-    context: unknown,
-  ): context is CwCalendarItemContext<T> {
+    _context: unknown,
+  ): _context is CwCalendarItemContext<T> {
     return true;
   }
-  /* eslint-enable @typescript-eslint/no-unused-vars */
+  // #endregion
 }

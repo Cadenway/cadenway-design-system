@@ -15,6 +15,7 @@ export type {
   CwMessageLabels,
   CwMessageStatus,
   CwMessageThreadLabels,
+  CwMessageTimeFormatter,
   CwMessageTone,
   CwMessageToneLabels,
   CwMessageVariant,

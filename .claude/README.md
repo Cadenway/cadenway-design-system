@@ -7,6 +7,12 @@ settings and launch configuration. The application launch requires the planned p
 Start from [AGENTS.md](../AGENTS.md) (the rules every assistant follows) and [CLAUDE.md](../CLAUDE.md)
 (the Claude entry point).
 
+For `packages/ui`, read [the comment convention](rules/comments.md) before editing declarations.
+Run `pnpm lint:ui` and `pnpm format:ui:check` after UI changes. The shared quality gate also runs
+`pnpm test:ui-lint` to verify the custom ESLint rules. These commands check structure; review the
+meaning and accuracy of docblocks separately. The corresponding Codex rule and quality command
+must describe the same behavior. Rules and shared skills are checked for parity in CI.
+
 ## Settings (`settings.json`)
 
 - **Hooks** are wired through `${CLAUDE_PROJECT_DIR}` so they resolve from any working directory:

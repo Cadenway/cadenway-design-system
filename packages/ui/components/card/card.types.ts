@@ -1,2 +1,9 @@
-/** Spacing of a card: `default` for settings and dashboards, `sm` for the dense cards of a board. */
+/**
+ * Type CwCardSize
+ *
+ * @description
+ * Card spacing: standard for settings and dashboards, small for dense board cards.
+ *
+ * @type {'default' | 'sm'}
+ */
 export type CwCardSize = 'default' | 'sm';

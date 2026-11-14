@@ -18,8 +18,13 @@ import { CwFieldTitle } from './field-title/field-title.component';
 import { CwField } from './field.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Field, every state of its sheet in the Design System artifact, in the light and the dark theme.
  * Copy from the sheet and the mockup (space creation and settings in `App.dc.html`).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Field',
@@ -48,10 +53,29 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story for field examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Returns the light-theme story container.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing theme scopes.
+ *
+ * @returns {HTMLElement} Container for the light theme.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -91,8 +115,11 @@ export const FieldSet: Story = {
         </fieldset>
       </form>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options: { name: string }) => HTMLElement;
+      getByLabelText: (label: string) => HTMLElement;
+    } = within(light(canvasElement));
 
     await expect(scope.getByRole('group', { name: 'Nouvel espace' })).toBeInTheDocument();
     await expect(scope.getByLabelText('Préfixe des identifiants')).toHaveAccessibleDescription(
@@ -139,8 +166,10 @@ export const ChoiceCards: Story = {
         </label>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const board = within(light(canvasElement)).getByRole('checkbox', { name: /Tableau/ });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const board: HTMLElement = within(light(canvasElement)).getByRole('checkbox', {
+      name: /Tableau/,
+    });
 
     await userEvent.click(board);
     await expect(board).toHaveAttribute('aria-checked', 'true');
@@ -176,8 +205,10 @@ export const Validation: Story = {
         <cw-field-error [errors]="prefix.errors" [messages]="messages" />
       </cw-field>`,
   }),
-  play: async ({ canvasElement }) => {
-    const prefix = within(light(canvasElement)).getByLabelText('Préfixe des identifiants');
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const prefix: HTMLElement = within(light(canvasElement)).getByLabelText(
+      'Préfixe des identifiants',
+    );
 
     await userEvent.click(prefix);
     await userEvent.tab();

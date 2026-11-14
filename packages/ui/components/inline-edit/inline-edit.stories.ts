@@ -4,8 +4,13 @@ import { expect, userEvent, within } from 'storybook/test';
 import { CwInlineEdit } from './inline-edit.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Inline Edit, every state of its sheet in the Design System artifact, in the light and the dark
  * theme. Copy from the mockup (`App.dc.html`, task panel title).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/InlineEdit',
@@ -14,10 +19,29 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story for inline edit examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Returns the light-theme story container.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing theme scopes.
+ *
+ * @returns {HTMLElement} Container for the light theme.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -110,12 +134,14 @@ export const Keyboard: Story = {
         <p class="text-xs text-muted-foreground" role="status">{{ saved }}</p>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const read = scope.getByRole('button', { name: "Corriger l'export CSV" });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole: (role: string, options?: { name: string }) => HTMLElement } = within(
+      light(canvasElement),
+    );
+    const read: HTMLElement = scope.getByRole('button', { name: "Corriger l'export CSV" });
 
     await userEvent.click(read);
-    const input = scope.getByRole('textbox', { name: 'Titre de la tâche' });
+    const input: HTMLElement = scope.getByRole('textbox', { name: 'Titre de la tâche' });
     await expect(input).toHaveFocus();
     await userEvent.keyboard('{End} des tâches{Enter}');
     await expect(scope.getByRole('status')).toHaveTextContent("Corriger l'export CSV des tâches");

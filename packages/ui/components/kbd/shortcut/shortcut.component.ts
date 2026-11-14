@@ -1,18 +1,73 @@
-import { Component, computed, DOCUMENT, inject, input } from '@angular/core';
+import {
+  Component,
+  computed,
+  DOCUMENT,
+  inject,
+  input,
+  type InputSignal,
+  type Signal,
+} from '@angular/core';
 
 import { CwKbdGroup } from '../kbd-group/kbd-group.directive';
 import { CwKbd } from '../kbd.directive';
 import type { CwKbdSize, CwKbdVariant } from '../kbd.types';
 
-/* French names of the keys, visible (`label`) and spoken (`spoken`): written once here so a later
-   `@angular/localize` extraction is mechanical. Conventions of the Kbd sheet, "Clavier". */
+/**
+ * Interface KeyName
+ * @interface KeyName
+ *
+ * @description
+ * Visible, spoken and ARIA names for a key, following the Kbd sheet's keyboard conventions.
+ */
 interface KeyName {
+  // #region Properties
+  /**
+   * Property label
+   * @readonly
+   *
+   * @description
+   * Text or symbol displayed on the key.
+   *
+   * @type {string}
+   */
   readonly label: string;
+
+  /**
+   * Property spoken
+   * @readonly
+   *
+   * @description
+   * French name included in the visually hidden shortcut description.
+   *
+   * @type {string}
+   */
   readonly spoken: string;
-  /** The `aria-keyshortcuts` name of the key (WAI-ARIA, UI Events `key` values). */
+
+  /**
+   * Property aria
+   * @readonly
+   *
+   * @description
+   * Key name used in `aria-keyshortcuts` according to WAI-ARIA and UI Events.
+   *
+   * @type {string}
+   */
   readonly aria: string;
+  // #endregion
 }
 
+/**
+ * Function keyName
+ *
+ * @description
+ * Maps a shortcut token to visible, spoken and ARIA key names, accounting for macOS modifiers.
+ * Unrecognized single characters are capitalized and other tokens are retained.
+ *
+ * @param {string} token - Key token from a shortcut combination.
+ * @param {boolean} mac - Whether platform-specific modifiers use macOS names.
+ *
+ * @returns {KeyName} Names used to render and announce the key.
+ */
 function keyName(token: string, mac: boolean): KeyName {
   switch (token.toLowerCase()) {
     case 'mod':
@@ -59,18 +114,32 @@ function keyName(token: string, mac: boolean): KeyName {
     case 'arrowright':
       return { label: '→', spoken: 'Flèche droite', aria: 'ArrowRight' };
     default: {
-      const label = token.length === 1 ? token.toUpperCase() : token;
+      const label: string = token.length === 1 ? token.toUpperCase() : token;
       return { label, spoken: label, aria: label };
     }
   }
 }
 
+/**
+ * Function isMac
+ *
+ * @description
+ * Checks the document window's platform and user agent for an Apple desktop or mobile device.
+ *
+ * @param {Document} document - Document whose window provides navigator information.
+ *
+ * @returns {boolean} Whether the window reports an Apple platform; false without a window.
+ */
 function isMac(document: Document): boolean {
-  const navigator = document.defaultView?.navigator;
+  const navigator: Navigator | undefined = document.defaultView?.navigator;
   return !!navigator && /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent);
 }
 
 /**
+ * Class CwShortcut
+ * @class CwShortcut
+ *
+ * @description
  * A shortcut written from its keys: `keys="mod+K"` shows Ctrl K under Windows and Linux and ⌘ K
  * under macOS; a space separates the steps of a sequence (`keys="g i"` shows G puis I).
  *
@@ -91,18 +160,75 @@ function isMac(document: Document): boolean {
   templateUrl: './shortcut.component.html',
 })
 export class CwShortcut {
-  /** The shortcut: `+` between the keys of a combination, a space between the steps of a sequence. */
-  readonly keys = input.required<string>();
-  /** Height of the keys. */
-  readonly size = input<CwKbdSize>('default');
-  /** Look of the keys; `inverse` inside a tooltip. */
-  readonly variant = input<CwKbdVariant>('default');
-  /** The word between the steps of a sequence. */
-  readonly thenLabel = input('puis');
+  // #region Properties
+  /**
+   * Property keys
+   * @readonly
+   *
+   * @description
+   * Required shortcut string: `+` joins keys in a combination and spaces separate sequence steps.
+   *
+   * @type {InputSignal<string>}
+   */
+  public readonly keys: InputSignal<string> = input.required<string>();
 
-  private readonly mac = isMac(inject(DOCUMENT));
+  /**
+   * Property size
+   * @readonly
+   *
+   * @description
+   * Input selecting the height of the displayed keys.
+   *
+   * @type {InputSignal<CwKbdSize>}
+   * @default 'default'
+   */
+  public readonly size: InputSignal<CwKbdSize> = input<CwKbdSize>('default');
 
-  protected readonly steps = computed(() =>
+  /**
+   * Property variant
+   * @readonly
+   *
+   * @description
+   * Input selecting key appearance; inverse is used inside a tooltip.
+   *
+   * @type {InputSignal<CwKbdVariant>}
+   * @default 'default'
+   */
+  public readonly variant: InputSignal<CwKbdVariant> = input<CwKbdVariant>('default');
+
+  /**
+   * Property thenLabel
+   * @readonly
+   *
+   * @description
+   * Word spoken between consecutive steps of a shortcut sequence.
+   *
+   * @type {InputSignal<string>}
+   * @default 'puis'
+   */
+  public readonly thenLabel: InputSignal<string> = input('puis');
+
+  /**
+   * Property mac
+   * @readonly
+   *
+   * @description
+   * Platform decision used to render modifier names for this component instance.
+   *
+   * @type {boolean}
+   */
+  private readonly mac: boolean = isMac(inject(DOCUMENT));
+
+  /**
+   * Property steps
+   * @readonly
+   *
+   * @description
+   * Parsed shortcut sequence, with each combination represented by its ordered key names.
+   *
+   * @type {Signal<KeyName[][]>}
+   */
+  protected readonly steps: Signal<KeyName[][]> = computed(() =>
     this.keys()
       .trim()
       .split(/\s+/)
@@ -115,18 +241,34 @@ export class CwShortcut {
       ),
   );
 
-  protected readonly spoken = computed(() =>
+  /**
+   * Property spoken
+   * @readonly
+   *
+   * @description
+   * French spoken shortcut text joining combination keys and sequence steps.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly spoken: Signal<string> = computed(() =>
     this.steps()
       .map((step) => step.map((key) => key.spoken).join(' '))
       .join(` ${this.thenLabel()} `),
   );
 
   /**
+   * Property ariaKeyShortcuts
+   * @readonly
+   *
+   * @description
    * The `aria-keyshortcuts` value of the shortcut (`Control+K`, `Meta+K` under macOS), for the
    * element that triggers the action. A sequence has no `aria-keyshortcuts` form: empty string.
+   *
+   * @type {Signal<string>}
    */
-  readonly ariaKeyShortcuts = computed(() => {
-    const steps = this.steps();
+  public readonly ariaKeyShortcuts: Signal<string> = computed(() => {
+    const steps: KeyName[][] = this.steps();
     return steps.length === 1 ? steps[0].map((key) => key.aria).join('+') : '';
   });
+  // #endregion
 }

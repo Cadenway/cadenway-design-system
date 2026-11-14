@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CwCommandFooter } from '../command-footer/command-footer.component';
@@ -8,6 +8,12 @@ import { CwCommandItem } from '../command-item/command-item.component';
 import { CwCommandList } from '../command-list/command-list.component';
 import { CwCommandDialog } from './command-dialog.component';
 
+/**
+ * Component Host
+ *
+ * @description
+ * Hosts command controls and records their state for the fixture.
+ */
 @Component({
   imports: [
     CwCommandDialog,
@@ -34,17 +40,63 @@ import { CwCommandDialog } from './command-dialog.component';
   `,
 })
 class Host {
-  readonly open = signal(false);
-  readonly search = signal('');
-  readonly ran = signal<string | null>(null);
+  // #region Properties
+  /**
+   * Property open
+   *
+   * @description
+   * Whether the dialog is open.
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  public readonly open: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property search
+   *
+   * @description
+   * Current search text controlled by the fixture.
+   *
+   * @type {WritableSignal<string>}
+   * @readonly
+   */
+  public readonly search: WritableSignal<string> = signal('');
+
+  /**
+   * Property ran
+   *
+   * @description
+   * Last command value selected in the fixture.
+   *
+   * @type {WritableSignal<string | null>}
+   * @readonly
+   */
+  public readonly ran: WritableSignal<string | null> = signal<string | null>(null);
+  // #endregion
 }
 
+/**
+ * Function palette
+ *
+ * @description
+ * Finds the open command dialog.
+ * @returns {HTMLElement | null} Open dialog, or null when absent.
+ */
 function palette(): HTMLElement | null {
   return document.querySelector<HTMLElement>('[role="dialog"]');
 }
 
+/**
+ * Function field
+ *
+ * @description
+ * Finds the native command search field.
+ * @returns {HTMLInputElement} Native command search input.
+ */
 function field(): HTMLInputElement {
-  const found = palette()?.querySelector<HTMLInputElement>('input[role="combobox"]');
+  const found: HTMLInputElement | null | undefined =
+    palette()?.querySelector<HTMLInputElement>('input[role="combobox"]');
   if (!found) throw new Error('No palette field');
   return found;
 }
@@ -54,6 +106,16 @@ describe('CwCommandDialog', () => {
   let host: HTMLElement;
   let component: Host;
 
+  /**
+   * Function keydown
+   *
+   * @description
+   * Dispatches a keyboard event and waits for the fixture.
+   *
+   * @param {EventTarget} target - Event target receiving the keyboard event.
+   * @param {KeyboardEventInit} init - Keyboard event options.
+   * @returns {Promise<void>} Promise resolved after the fixture updates.
+   */
   async function keydown(target: EventTarget, init: KeyboardEventInit): Promise<void> {
     target.dispatchEvent(
       new KeyboardEvent('keydown', { bubbles: true, cancelable: true, ...init }),
@@ -74,7 +136,7 @@ describe('CwCommandDialog', () => {
     await keydown(document.body, { key: 'k', ctrlKey: true });
 
     expect(component.open()).toBe(true);
-    const dialog = palette();
+    const dialog: HTMLElement | null = palette();
     expect(dialog?.getAttribute('aria-label')).toBe('Palette de commandes');
     expect(dialog?.getAttribute('aria-modal')).toBe('true');
     await fixture.whenStable();
@@ -85,7 +147,7 @@ describe('CwCommandDialog', () => {
   it('clears the search on the first Escape and closes on the second', async () => {
     component.open.set(true);
     await fixture.whenStable();
-    const input = field();
+    const input: HTMLInputElement = field();
     input.value = 'tableau';
     input.dispatchEvent(new Event('input'));
     await fixture.whenStable();
@@ -103,7 +165,7 @@ describe('CwCommandDialog', () => {
   it('runs an item with Enter, empties the search when reopened and toggles with Ctrl K', async () => {
     component.open.set(true);
     await fixture.whenStable();
-    const input = field();
+    const input: HTMLInputElement = field();
     input.value = 'créer';
     input.dispatchEvent(new Event('input'));
     await fixture.whenStable();

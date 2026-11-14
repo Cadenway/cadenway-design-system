@@ -1,8 +1,16 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, computed, inject, type Signal, input, type InputSignal } from '@angular/core';
 
 import { CwItem } from '../item.component';
 import type { CwItemMediaVariant, CwItemSize } from '../item.types';
 
+/**
+ * Constant MEDIA
+ *
+ * @description
+ * Media classes by variant and item size.
+ *
+ * @type {Record<CwItemMediaVariant, Record<CwItemSize, string>>}
+ */
 const MEDIA: Record<CwItemMediaVariant, Record<CwItemSize, string>> = {
   default: {
     default: 'flex shrink-0 items-center justify-center',
@@ -24,6 +32,9 @@ const MEDIA: Record<CwItemMediaVariant, Record<CwItemSize, string>> = {
 };
 
 /**
+ * Component CwItemMedia
+ *
+ * @description
  * The media of an item, before its content: an avatar (`default`), an icon in a `bg-secondary`
  * tile (`icon`) or an image in a framed thumbnail (`image`); sized by the parent item.
  */
@@ -36,12 +47,40 @@ const MEDIA: Record<CwItemMediaVariant, Record<CwItemSize, string>> = {
   templateUrl: './item-media.component.html',
 })
 export class CwItemMedia {
-  /** Shape of the media. */
-  readonly variant = input<CwItemMediaVariant>('default');
+  // #region Properties
+  /**
+   * Property variant
+   * @readonly
+   *
+   * @description
+   * Shape of the item media.
+   *
+   * @type {InputSignal<CwItemMediaVariant>}
+   */
+  public readonly variant: InputSignal<CwItemMediaVariant> = input<CwItemMediaVariant>('default');
 
-  private readonly item = inject(CwItem, { optional: true });
+  /**
+   * Property item
+   * @readonly
+   *
+   * @description
+   * Parent item supplying the row state.
+   *
+   * @type {CwItem | null}
+   */
+  private readonly item: CwItem | null = inject(CwItem, { optional: true });
 
-  protected readonly classes = computed(
+  /**
+   * Property classes
+   * @readonly
+   *
+   * @description
+   * Classes selected from the parent item size.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly classes: Signal<string> = computed(
     () => MEDIA[this.variant()][this.item?.size() ?? 'default'],
   );
+  // #endregion
 }

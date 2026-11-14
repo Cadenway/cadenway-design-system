@@ -1,6 +1,12 @@
 import { Component } from '@angular/core';
 
-/** The title of an empty state: it names the absence (« Aucune tâche dans cette liste »). */
+/**
+ * Class CwEmptyTitle
+ * @class CwEmptyTitle
+ *
+ * @description
+ * Names what is missing in an empty state, such as tasks in a list.
+ */
 @Component({
   selector: 'cw-empty-title',
   host: { class: 'block text-sm font-medium' },

@@ -6,8 +6,13 @@ import { CwAvatarGroup } from './avatar-group/avatar-group.component';
 import { CwAvatar } from './avatar.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Avatar, every state of its sheet in the Design System artifact, in the light and the dark theme.
  * Names and copy from the sheet's preview (comment author, Assignés field).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Avatar',
@@ -16,16 +21,42 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story configuration for avatar examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Selects the light theme copy for interaction checks.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the themed examples.
+ *
+ * @returns {HTMLElement} Light theme section used for interaction checks.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
-/* A neutral portrait standing for a profile photo; it is picture content, not interface color. */
-const PHOTO = `data:image/svg+xml,${encodeURIComponent(
+/**
+ * Constant PHOTO
+ *
+ * @description
+ * Neutral portrait used as an example profile photo.
+ *
+ * @type {string}
+ */
+const PHOTO: string = `data:image/svg+xml,${encodeURIComponent(
   "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>" +
     "<rect width='64' height='64' fill='hsl(0 0% 70%)'/>" +
     "<path d='M9 64c1.6-12.5 10.5-19.5 23-19.5S53.4 51.5 55 64z' fill='hsl(0 0% 25%)'/>" +
@@ -115,8 +146,10 @@ export const Group: Story = {
         </cw-avatar-group>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const stacks = within(light(canvasElement)).getAllByRole('group', { name: 'Assignés' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const stacks: HTMLElement[] = within(light(canvasElement)).getAllByRole('group', {
+      name: 'Assignés',
+    });
 
     await expect(stacks[0]).toHaveTextContent('et Samuel Roux');
     await expect(stacks[2]).toHaveTextContent('et Karim Benali, Samuel Roux');
@@ -170,8 +203,10 @@ export const Keyboard: Story = {
         <span class="text-sm text-muted-foreground" role="status">{{ picks }} ouverture(s)</span>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole(role: string, options?: { name?: string }): HTMLElement } = within(
+      light(canvasElement),
+    );
 
     await userEvent.tab();
     await expect(scope.getByRole('button', { name: 'Assigner' })).toHaveFocus();

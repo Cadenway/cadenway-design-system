@@ -1,6 +1,12 @@
 import { Directive } from '@angular/core';
 
-/** The header of a table: a rule under its row. */
+/**
+ * Class CwTableHeader
+ * @class CwTableHeader
+ *
+ * @description
+ * Styles the native table header with a rule under each header row.
+ */
 @Directive({
   selector: 'thead[cwTableHeader]',
   host: { class: '[&_tr]:border-b' },

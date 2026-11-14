@@ -5,9 +5,14 @@ import { expect, userEvent, within } from 'storybook/test';
 import { CwLabel } from './label.directive';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Label, every state of its sheet in the Design System artifact, in the light and the dark theme.
  * Copy from the sheet and the mockup (`Organisation.dc.html`). Each story renders twice (one scope
  * per theme), so the labels wrap their control instead of pointing at a fixed `id`.
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Label',
@@ -16,14 +21,42 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration used for label examples and interactions.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
-// The field of the preview, until `input[cwInput]` exists in this package.
-const FIELD =
+/**
+ * Constant FIELD
+ *
+ * @description
+ * Field classes used by the label previews to show labels beside a native input.
+ *
+ * @type {string}
+ */
+const FIELD: string =
   'h-8 w-64 rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm font-normal outline-hidden placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-50';
 
+/**
+ * Function light
+ *
+ * @description
+ * Locates the light-theme copy rendered by the shared Storybook preview decorator.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the theme examples.
+ *
+ * @returns {HTMLElement} Element containing the light-theme example.
+ *
+ * @throws {Error} When the expected light-theme scope is missing.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -55,9 +88,12 @@ export const NextToCheckbox: Story = {
   render: () => ({
     template: `<label cwLabel><cw-checkbox /> Afficher les sous-tâches</label>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const box = scope.getByRole('checkbox', { name: 'Afficher les sous-tâches' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole(role: string, options?: { name?: string }): HTMLElement;
+      getByText(text: string): HTMLElement;
+    } = within(light(canvasElement));
+    const box: HTMLElement = scope.getByRole('checkbox', { name: 'Afficher les sous-tâches' });
 
     await userEvent.click(scope.getByText('Afficher les sous-tâches'));
     await expect(box).toHaveAttribute('aria-checked', 'true');

@@ -38,9 +38,14 @@ import { CwMenuTriggerFor } from './menu-trigger-for/menu-trigger-for.directive'
 import { CwMenu } from './menu.component';
 
 /**
- * Menu (DropdownMenu sheet of the Design System artifact), in the light and the dark theme. The
+ * Constant meta
+ *
+ * @description
+ * Menu examples in light and dark themes from the design system sheet. The
  * visual states render `inline` panels, as the sheet's preview does; the open, keyboard and
  * submenu paths open the real overlay, attached to the body. Copy from the mockup (`App.dc.html`).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Menu',
@@ -88,16 +93,42 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration for menu examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Finds the light theme section of the story canvas.
+ *
+ * @param {HTMLElement} canvasElement - Canvas containing the themed examples.
+ * @returns {HTMLElement} Light theme section.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
 /* The task actions of the mockup's `…` button, with their submenus (closed in the static view). */
-const ACTIONS = `
+/**
+ * Constant ACTIONS
+ *
+ * @description
+ * Task action menu markup used by the stories.
+ *
+ * @type {string}
+ */
+const ACTIONS: string = `
   <cw-menu-label><span class="font-mono">CAD-482</span></cw-menu-label>
   <button cwMenuItem aria-keyshortcuts="Enter"><ng-icon name="phosphorArrowRightBold" /> Ouvrir <cw-menu-shortcut>Entrée</cw-menu-shortcut></button>
   <button cwMenuItem aria-keyshortcuts="F2"><ng-icon name="phosphorPencilSimpleBold" /> Renommer <cw-menu-shortcut>F2</cw-menu-shortcut></button>
@@ -109,7 +140,15 @@ const ACTIONS = `
   <cw-menu-separator />
   <button cwMenuItem variant="destructive" aria-keyshortcuts="Delete"><ng-icon name="phosphorTrashBold" /> Supprimer <cw-menu-shortcut>Suppr</cw-menu-shortcut></button>`;
 
-const MOVE = `
+/**
+ * Constant MOVE
+ *
+ * @description
+ * Move-to submenu markup used by the stories.
+ *
+ * @type {string}
+ */
+const MOVE: string = `
   <cw-menu-label>Produit</cw-menu-label>
   <button cwMenuItem selected disabled><ng-icon name="phosphorListBulletsBold" /> Sprint 14</button>
   <button cwMenuItem><ng-icon name="phosphorListBulletsBold" /> Backlog</button>
@@ -118,7 +157,15 @@ const MOVE = `
   <cw-menu-label>Marketing</cw-menu-label>
   <button cwMenuItem><ng-icon name="phosphorListBulletsBold" /> Lancement v2</button>`;
 
-const STATUS = `
+/**
+ * Constant STATUS
+ *
+ * @description
+ * Status submenu markup used by the stories.
+ *
+ * @type {string}
+ */
+const STATUS: string = `
   <button cwMenuItem>À faire</button>
   <button cwMenuItem>En cours</button>
   <button cwMenuItem>Terminé</button>`;
@@ -159,12 +206,14 @@ export const Options: Story = {
         </cw-menu-radio-group>
       </cw-menu>`,
   }),
-  play: async ({ canvasElement }) => {
-    const menu = within(light(canvasElement)).getByRole('menu', { name: 'Affichage' });
-    const done = within(menu).getByRole('menuitemcheckbox', { name: 'Tâches terminées' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const menu: HTMLElement = within(light(canvasElement)).getByRole('menu', { name: 'Affichage' });
+    const done: HTMLElement = within(menu).getByRole('menuitemcheckbox', {
+      name: 'Tâches terminées',
+    });
     await userEvent.click(done);
     await expect(done).toHaveAttribute('aria-checked', 'true');
-    const assignee = within(menu).getByRole('menuitemradio', { name: 'Assigné' });
+    const assignee: HTMLElement = within(menu).getByRole('menuitemradio', { name: 'Assigné' });
     await userEvent.click(assignee);
     await expect(assignee).toHaveAttribute('aria-checked', 'true');
     await expect(within(menu).getByRole('menuitemradio', { name: 'Statut' })).toHaveAttribute(
@@ -221,13 +270,17 @@ export const Dropdown: Story = {
         <button cwMenuItem variant="destructive" (triggered)="last = 'Supprimer'"><ng-icon name="phosphorTrashBold" /> Supprimer</button>
       </cw-menu>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const trigger = scope.getByRole('button', { name: 'Actions de la tâche' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole: (role: string, options?: { name: string }) => HTMLElement } = within(
+      light(canvasElement),
+    );
+    const trigger: HTMLElement = scope.getByRole('button', { name: 'Actions de la tâche' });
 
     await userEvent.click(trigger);
     await expect(trigger).toHaveAttribute('aria-expanded', 'true');
-    const menu = await within(document.body).findByRole('menu', { name: 'Actions de la tâche' });
+    const menu: HTMLElement = await within(document.body).findByRole('menu', {
+      name: 'Actions de la tâche',
+    });
     await userEvent.click(within(menu).getByRole('menuitem', { name: /Dupliquer/ }));
 
     await expect(scope.getByRole('status')).toHaveTextContent('Dupliquer');
@@ -253,13 +306,17 @@ export const Keyboard: Story = {
         </cw-menu-group>
       </cw-menu>`,
   }),
-  play: async ({ canvasElement }) => {
-    const trigger = within(light(canvasElement)).getByRole('button', { name: 'Affichage' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const trigger: HTMLElement = within(light(canvasElement)).getByRole('button', {
+      name: 'Affichage',
+    });
     trigger.focus();
 
     await userEvent.keyboard('{Enter}');
-    const menu = await within(document.body).findByRole('menu', { name: 'Affichage' });
-    const subtasks = within(menu).getByRole('menuitemcheckbox', { name: 'Sous-tâches' });
+    const menu: HTMLElement = await within(document.body).findByRole('menu', { name: 'Affichage' });
+    const subtasks: HTMLElement = within(menu).getByRole('menuitemcheckbox', {
+      name: 'Sous-tâches',
+    });
     await waitFor(() => expect(subtasks).toHaveFocus());
 
     await userEvent.keyboard(' ');
@@ -284,20 +341,24 @@ export const Submenu: Story = {
       <cw-menu #move>${MOVE}</cw-menu>
       <cw-menu #status>${STATUS}</cw-menu>`,
   }),
-  play: async ({ canvasElement }) => {
-    const trigger = within(light(canvasElement)).getByRole('button', {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const trigger: HTMLElement = within(light(canvasElement)).getByRole('button', {
       name: 'Actions de la tâche',
     });
     trigger.focus();
 
     await userEvent.keyboard('{ArrowDown}');
-    const menu = await within(document.body).findByRole('menu', { name: 'Actions de la tâche' });
-    const move = within(menu).getByRole('menuitem', { name: 'Déplacer vers…' });
+    const menu: HTMLElement = await within(document.body).findByRole('menu', {
+      name: 'Actions de la tâche',
+    });
+    const move: HTMLElement = within(menu).getByRole('menuitem', { name: 'Déplacer vers…' });
     await userEvent.keyboard('{ArrowDown}{ArrowDown}{ArrowDown}');
     await expect(move).toHaveFocus();
 
     await userEvent.keyboard('{ArrowRight}');
-    const submenu = await within(document.body).findByRole('menu', { name: 'Déplacer vers…' });
+    const submenu: HTMLElement = await within(document.body).findByRole('menu', {
+      name: 'Déplacer vers…',
+    });
     await expect(move).toHaveAttribute('aria-expanded', 'true');
     await waitFor(() =>
       expect(within(submenu).getByRole('menuitem', { name: 'Backlog' })).toHaveFocus(),

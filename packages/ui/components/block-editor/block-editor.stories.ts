@@ -1,13 +1,17 @@
 import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vite';
-import { of } from 'rxjs';
+import { of, type Observable } from 'rxjs';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 
 import { CwBlockEditor } from './block-editor.component';
 import type { CwMentionPerson, CwMentionSearch } from './block-editor.types';
 
 /**
- * Block editor, the rich text editing of the mockup (`App.dc.html`: document editor, task
- * description), in the light and the dark theme. The value is Markdown.
+ * Constant meta
+ *
+ * @description
+ * Markdown block editor examples in light and dark themes.
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/BlockEditor',
@@ -16,14 +20,40 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration for block editor examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Finds the light theme section of the story canvas.
+ *
+ * @param {HTMLElement} canvasElement - Canvas containing the themed examples.
+ * @returns {HTMLElement} Light theme section.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
+/**
+ * Constant PEOPLE
+ *
+ * @description
+ * People offered by the sample mention search.
+ *
+ * @type {CwMentionPerson[]}
+ */
 const PEOPLE: CwMentionPerson[] = [
   { id: 'karim', name: 'Karim Benali', role: 'Développement' },
   { id: 'ines', name: 'Inès Duval', role: 'Design' },
@@ -31,10 +61,27 @@ const PEOPLE: CwMentionPerson[] = [
   { id: 'hugo', name: 'Hugo Dubois', role: 'Support' },
 ];
 
-const searchPeople: CwMentionSearch = (query) =>
+/**
+ * Function searchPeople
+ *
+ * @description
+ * Searches sample people by name.
+ *
+ * @param {string} query - Name fragment to search.
+ * @returns {Observable<readonly CwMentionPerson[]>} Matching people.
+ */
+const searchPeople: CwMentionSearch = (query: string): Observable<readonly CwMentionPerson[]> =>
   of(PEOPLE.filter((person) => person.name.toLowerCase().includes(query.toLowerCase())));
 
-const DOCUMENT = [
+/**
+ * Constant DOCUMENT
+ *
+ * @description
+ * Markdown document displayed in the editing example.
+ *
+ * @type {string}
+ */
+const DOCUMENT: string = [
   '# Export CSV des tâches',
   '',
   'Les équipes exportent leurs tâches pour les **revues de sprint**. Le fichier garde les accents',
@@ -61,8 +108,12 @@ export const Document: Story = {
     props: { value: DOCUMENT },
     template: `<cw-block-editor class="max-w-2xl" [(value)]="value" />`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+      findByRole: (role: string, options?: { name?: string | RegExp }) => Promise<HTMLElement>;
+      queryByRole: (role: string) => HTMLElement | null;
+    } = within(light(canvasElement));
     await waitFor(() =>
       expect(scope.getByRole('textbox', { name: 'Contenu du document' })).toHaveTextContent(
         'Export CSV des tâches',
@@ -103,12 +154,16 @@ export const SlashMenu: Story = {
     props: { value: '' },
     template: `<cw-block-editor class="max-w-2xl" [(value)]="value" />`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const surface = await scope.findByRole('textbox', { name: 'Contenu du document' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+      findByRole: (role: string, options?: { name?: string | RegExp }) => Promise<HTMLElement>;
+      queryByRole: (role: string) => HTMLElement | null;
+    } = within(light(canvasElement));
+    const surface: HTMLElement = await scope.findByRole('textbox', { name: 'Contenu du document' });
     await userEvent.click(surface);
     await userEvent.keyboard('/');
-    const listbox = await scope.findByRole('listbox', { name: 'Blocs' });
+    const listbox: HTMLElement = await scope.findByRole('listbox', { name: 'Blocs' });
     await expect(within(listbox).getAllByRole('option')).toHaveLength(10);
     await userEvent.keyboard('{ArrowDown}{Enter}');
     await waitFor(() => expect(scope.queryByRole('listbox')).toBeNull());
@@ -126,12 +181,16 @@ export const Mentions: Story = {
         <cw-block-editor variant="field" [toolbar]="false" ariaLabel="Commentaire" placeholder="Écrire un commentaire…" [mentionSearch]="searchPeople" [(value)]="value" />
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const surface = await scope.findByRole('textbox', { name: 'Commentaire' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+      findByRole: (role: string, options?: { name?: string | RegExp }) => Promise<HTMLElement>;
+      queryByRole: (role: string) => HTMLElement | null;
+    } = within(light(canvasElement));
+    const surface: HTMLElement = await scope.findByRole('textbox', { name: 'Commentaire' });
     await userEvent.click(surface);
     await userEvent.keyboard('Merci @in');
-    const listbox = await scope.findByRole('listbox', { name: 'Personnes' });
+    const listbox: HTMLElement = await scope.findByRole('listbox', { name: 'Personnes' });
     await waitFor(() => expect(within(listbox).getAllByRole('option')).toHaveLength(2));
     await userEvent.keyboard('{Enter}');
     await waitFor(() =>
@@ -146,9 +205,13 @@ export const Keyboard: Story = {
     props: { value: 'relire avant vendredi' },
     template: `<cw-block-editor class="max-w-2xl" [(value)]="value" />`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const surface = await scope.findByRole('textbox', { name: 'Contenu du document' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+      findByRole: (role: string, options?: { name?: string | RegExp }) => Promise<HTMLElement>;
+      queryByRole: (role: string) => HTMLElement | null;
+    } = within(light(canvasElement));
+    const surface: HTMLElement = await scope.findByRole('textbox', { name: 'Contenu du document' });
     await userEvent.click(surface);
     await userEvent.keyboard('{Control>}a{/Control}{Control>}b{/Control}');
     await waitFor(() => expect(surface.querySelector('strong')).toHaveTextContent('relire'));

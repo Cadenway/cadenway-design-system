@@ -1,9 +1,23 @@
 import { _IdGenerator } from '@angular/cdk/a11y';
-import { Component, booleanAttribute, computed, inject, input, model } from '@angular/core';
+import {
+  Component,
+  booleanAttribute,
+  computed,
+  inject,
+  input,
+  model,
+  type InputSignalWithTransform,
+  type ModelSignal,
+  type Signal,
+} from '@angular/core';
 
 import type { CwCollapsibleState } from './collapsible.types';
 
 /**
+ * Class CwCollapsible
+ * @class CwCollapsible
+ *
+ * @description
  * A block that folds behind a trigger: the subtasks of a task, a group of the List view, the
  * elements beyond the first ones (Collapsible sheet of the Design System artifact).
  *
@@ -24,19 +38,68 @@ import type { CwCollapsibleState } from './collapsible.types';
   templateUrl: './collapsible.component.html',
 })
 export class CwCollapsible {
-  /** Whether the content shows; `[(expanded)]`. */
-  readonly expanded = model(false);
-  /** Keeps the block as it is: the trigger is dimmed and does not toggle. */
-  readonly disabled = input(false, { transform: booleanAttribute });
+  // #region Properties
+  /**
+   * Property expanded
+   * @readonly
+   *
+   * @description
+   * Two-way model controlling whether the collapsible content is visible.
+   *
+   * @type {ModelSignal<boolean>}
+   * @default false
+   */
+  public readonly expanded: ModelSignal<boolean> = model(false);
 
-  /** Id of the content, referenced by the trigger's `aria-controls`. */
-  readonly contentId = inject(_IdGenerator).getId('cw-collapsible-content-');
+  /**
+   * Property disabled
+   * @readonly
+   *
+   * @description
+   * Input preventing the trigger from toggling the block while keeping its current state.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   * @default false
+   */
+  public readonly disabled: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
 
-  /** `open` or `closed`, for the `data-state` hook of every part. */
-  readonly state = computed<CwCollapsibleState>(() => (this.expanded() ? 'open' : 'closed'));
+  /**
+   * Property contentId
+   * @readonly
+   *
+   * @description
+   * Generated content identifier referenced by the trigger's `aria-controls`.
+   *
+   * @type {string}
+   */
+  public readonly contentId: string = inject(_IdGenerator).getId('cw-collapsible-content-');
 
-  /** Opens a closed block and closes an open one, unless it is disabled. */
-  toggle(): void {
+  /**
+   * Property state
+   * @readonly
+   *
+   * @description
+   * Open or closed state shared by the root and child `data-state` hooks.
+   *
+   * @type {Signal<CwCollapsibleState>}
+   */
+  public readonly state: Signal<CwCollapsibleState> = computed<CwCollapsibleState>(() =>
+    this.expanded() ? 'open' : 'closed',
+  );
+  // #endregion
+
+  // #region Methods
+  /**
+   * Method toggle
+   * @method toggle
+   *
+   * @description
+   * Flips the expanded model unless the block is disabled.
+   */
+  public toggle(): void {
     if (!this.disabled()) this.expanded.update((expanded) => !expanded);
   }
+  // #endregion
 }

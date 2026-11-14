@@ -13,10 +13,15 @@ import { CwRadioGroupItem } from './radio-group-item/radio-group-item.component'
 import { CwRadioGroup } from './radio-group.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Radio Group, every state of its sheet in the Design System artifact, in the light and the dark
  * theme. Labels point at the generated id of each option (`#option` then `option.id()`), so the two
  * themes never share an id. Copy from the sheet and the mockup (space creation, list settings,
  * profile in `App.dc.html`).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/RadioGroup',
@@ -30,10 +35,29 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story configuration for radio group examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Selects the light theme copy for interaction checks.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the themed examples.
+ *
+ * @returns {HTMLElement} Light theme section used for interaction checks.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -114,8 +138,10 @@ export const Invalid: Story = {
         <cw-field-error>Choisissez une visibilité.</cw-field-error>
       </cw-field>`,
   }),
-  play: async ({ canvasElement }) => {
-    const group = within(light(canvasElement)).getByRole('radiogroup', { name: 'Visibilité' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const group: HTMLElement = within(light(canvasElement)).getByRole('radiogroup', {
+      name: 'Visibilité',
+    });
 
     await expect(group).toHaveAttribute('aria-invalid', 'true');
     await expect(group).toHaveAccessibleDescription('Choisissez une visibilité.');
@@ -141,9 +167,12 @@ export const ChoiceCards: Story = {
         </cw-radio-group-item>
       </cw-radio-group>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const publicSpace = scope.getByRole('radio', { name: /Public/ });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole(role: string, options?: { name?: string | RegExp }): HTMLElement;
+      getByText(text: string): HTMLElement;
+    } = within(light(canvasElement));
+    const publicSpace: HTMLElement = scope.getByRole('radio', { name: /Public/ });
 
     await userEvent.click(scope.getByText("Tous les membres de l'instance."));
     await expect(publicSpace).toHaveAttribute('aria-checked', 'true');
@@ -164,8 +193,10 @@ export const Keyboard: Story = {
         <cw-radio-group-item value="calendar" variant="card">Calendrier</cw-radio-group-item>
       </cw-radio-group>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole(role: string, options?: { name?: string }): HTMLElement } = within(
+      light(canvasElement),
+    );
 
     await userEvent.tab();
     await expect(scope.getByRole('radio', { name: 'Tableau' })).toHaveFocus();

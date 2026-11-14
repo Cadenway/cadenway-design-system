@@ -1,2 +1,9 @@
-/** Layout of a property list: a label / value column, or chips without a visible label. */
+/**
+ * Type CwPropertyListOrientation
+ *
+ * @description
+ * Layout of a property list as label and value columns or chips.
+ *
+ * @type {'vertical' | 'inline'}
+ */
 export type CwPropertyListOrientation = 'vertical' | 'inline';

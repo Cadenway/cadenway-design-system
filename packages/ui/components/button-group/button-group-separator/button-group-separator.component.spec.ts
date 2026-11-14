@@ -1,10 +1,17 @@
 import { Component } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { CwButton } from '@cadenway/ui/components/button';
 
 import { CwButtonGroupSeparator } from './button-group-separator.component';
 import { CwButtonGroup } from '../button-group.component';
 
+/**
+ * Class Host
+ * @class Host
+ *
+ * @description
+ * Test host with separators in horizontal and vertical button groups.
+ */
 @Component({
   imports: [CwButton, CwButtonGroup, CwButtonGroupSeparator],
   template: `
@@ -22,8 +29,23 @@ import { CwButtonGroup } from '../button-group.component';
 })
 class Host {}
 
+/**
+ * Function group
+ *
+ * @description
+ * Finds a test button group by its accessible name.
+ *
+ * @param {HTMLElement} host - Container holding the groups.
+ * @param {string} name - Exact aria-label to match.
+ *
+ * @returns {HTMLElement} Matching group element.
+ *
+ * @throws {Error} When no group has the requested name.
+ */
 function group(host: HTMLElement, name: string): HTMLElement {
-  const found = host.querySelector<HTMLElement>(`[role="group"][aria-label="${name}"]`);
+  const found: HTMLElement | null = host.querySelector<HTMLElement>(
+    `[role="group"][aria-label="${name}"]`,
+  );
   if (!found) throw new Error(`No group named ${name}`);
   return found;
 }
@@ -32,14 +54,14 @@ describe('CwButtonGroupSeparator', () => {
   let host: HTMLElement;
 
   beforeEach(() => {
-    const fixture = TestBed.createComponent(Host);
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
     fixture.autoDetectChanges();
     host = fixture.nativeElement as HTMLElement;
   });
 
   it('orients the separator across its group', () => {
-    const horizontal = group(host, 'Créer').querySelector('[role="separator"]');
-    const vertical = group(host, 'Ordre').querySelector('[role="separator"]');
+    const horizontal: Element | null = group(host, 'Créer').querySelector('[role="separator"]');
+    const vertical: Element | null = group(host, 'Ordre').querySelector('[role="separator"]');
 
     expect(horizontal?.getAttribute('aria-orientation')).toBe('vertical');
     expect(vertical?.getAttribute('aria-orientation')).toBe('horizontal');

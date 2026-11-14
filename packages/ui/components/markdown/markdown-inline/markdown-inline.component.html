@@ -1,7 +1,5 @@
 <ng-container *ngTemplateOutlet="pieces; context: { $implicit: nodes() }" />
 
-<!-- Recursion through a template rather than the component itself: a component that renders
-     itself is not resolved by every compiler (Storybook's JIT build). -->
 <ng-template #pieces let-list>
   @for (node of asNodes(list); track $index) {
     @switch (node.kind) {

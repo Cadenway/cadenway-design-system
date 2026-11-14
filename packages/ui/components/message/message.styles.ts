@@ -6,7 +6,14 @@
 
 import type { CwMessageTone, CwMessageToneLabels } from './message.types';
 
-/** Filled icon and its color, per tone (`default` has none of its own). */
+/**
+ * Constant TONE_ICONS
+ *
+ * @description
+ * Filled icon and color for each non-default message tone.
+ *
+ * @type {typeof TONE_ICONS}
+ */
 export const TONE_ICONS: Record<
   Exclude<CwMessageTone, 'default'>,
   { name: string; color: string }
@@ -17,7 +24,14 @@ export const TONE_ICONS: Record<
   error: { name: 'phosphorWarningCircleFill', color: 'shrink-0 text-destructive' },
 };
 
-/** The tone word read before the text. */
+/**
+ * Constant TONE_LABELS
+ *
+ * @description
+ * Default French tone words read before a notice or note.
+ *
+ * @type {CwMessageToneLabels}
+ */
 export const TONE_LABELS: CwMessageToneLabels = {
   info: 'Information',
   success: 'Succès',
@@ -25,16 +39,35 @@ export const TONE_LABELS: CwMessageToneLabels = {
   error: 'Erreur',
 };
 
-/** Live role per tone: an error interrupts, the other tones wait; `default` has none (the thread
- * is already a `log`). */
+/**
+ * Function toneRole
+ *
+ * @description
+ * Selects an interrupting role for errors and a polite role for other non-default tones.
+ * The default tone needs no live role because its thread is already a log.
+ *
+ * @param {CwMessageTone} tone - Tone of the message or note.
+ *
+ * @returns {'alert' | 'status' | null} Live role, or null for the default tone.
+ */
 export function toneRole(tone: CwMessageTone): 'alert' | 'status' | null {
   if (tone === 'error') return 'alert';
   return tone === 'default' ? null : 'status';
 }
 
-/** `phosphor` + PascalCase + weight from a kebab-case Phosphor name (`lightning`). */
+/**
+ * Function phosphorName
+ *
+ * @description
+ * Builds a registered Phosphor icon name from its kebab-case name and weight.
+ *
+ * @param {string} kebab - Kebab-case icon name, such as `lightning`.
+ * @param {'Bold' | 'Fill'} weight - Icon weight suffix.
+ *
+ * @returns {string} Phosphor icon name with a PascalCase body.
+ */
 export function phosphorName(kebab: string, weight: 'Bold' | 'Fill'): string {
-  const pascal = kebab
+  const pascal: string = kebab
     .split('-')
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join('');

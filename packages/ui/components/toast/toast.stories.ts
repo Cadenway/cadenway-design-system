@@ -13,22 +13,40 @@ import { CwToastService } from './toast.service';
 import type { CwToast } from './toast.types';
 import { CwToaster } from './toaster/toaster.component';
 
-/**
- * Toast, every state of its sheet in the Design System artifact. The tones are static renderings
- * (the toast drawn in place) in the light and the dark theme; the interactive stories lay out the
- * two themes themselves, one `cw-toaster` each (light at the bottom right, dark at the bottom
- * left), and drive `CwToastService` from their play function. Copy from the mockup (`App.dc.html`)
- * and the sheet.
- */
 // The service of the story's application, captured at bootstrap: the props call it from the
 // template (a render function runs outside any injection context).
+/**
+ * Constant toasts
+ *
+ * @description
+ * Holds the story application's service after bootstrap for template callbacks.
+ *
+ * @type {CwToastService | undefined}
+ */
 let toasts: CwToastService | undefined;
 
+/**
+ * Function service
+ *
+ * @description
+ * Retrieves the service captured during the story application's initialization.
+ *
+ * @returns {CwToastService} Initialized toast service.
+ */
 function service(): CwToastService {
   if (!toasts) throw new Error('CwToastService not ready');
   return toasts;
 }
 
+/**
+ * Constant meta
+ *
+ * @description
+ * Configures toast stories and captures the service at application bootstrap. Static tones and
+ * interactive stacks cover the light and dark themes from the design system sheet.
+ *
+ * @type {Meta}
+ */
 const meta: Meta = {
   title: 'UI/Toast',
   decorators: [
@@ -45,20 +63,59 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Defines the Storybook object used by the toast examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Locates the light theme section rendered within the story canvas.
+ *
+ * @param {HTMLElement} canvasElement - Root element of the story canvas.
+ * @returns {HTMLElement} Light theme section.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
 // The toasts of a region: `role="status"`, and `role="alert"` for an error.
+/**
+ * Function live
+ *
+ * @description
+ * Collects status and alert notifications within a toaster region.
+ *
+ * @param {HTMLElement} region - Toaster region to inspect.
+ * @returns {HTMLElement[]} Notifications exposed through live roles.
+ */
 function live(region: HTMLElement): HTMLElement[] {
-  const scope = within(region);
+  const scope: { queryAllByRole: (role: string) => HTMLElement[] } = within(region);
   return [...scope.queryAllByRole('status'), ...scope.queryAllByRole('alert')];
 }
 
+/**
+ * Function toast
+ *
+ * @description
+ * Creates a static toast record for visual examples.
+ *
+ * @param {string} id - Identifier of the example toast.
+ * @param {CwToast['tone']} tone - Visual tone of the example.
+ * @param {string} title - Primary notification text.
+ * @param {string} description - Optional text beneath the title.
+ * @returns {CwToast} Open toast record without a close button.
+ */
 function toast(id: string, tone: CwToast['tone'], title: string, description?: string): CwToast {
   return {
     id,
@@ -71,7 +128,17 @@ function toast(id: string, tone: CwToast['tone'], title: string, description?: s
 }
 
 // Both themes side by side, each with its own toaster; the dark one answers F9 so F8 stays light's.
-function themes(content: string, toaster = ''): string {
+/**
+ * Function themes
+ *
+ * @description
+ * Builds the two themed story sections with separate toaster hotkeys.
+ *
+ * @param {string} content - Markup displayed in the light section.
+ * @param {string} toaster - Optional attributes applied to both toasters.
+ * @returns {string} Angular template for both themes.
+ */
+function themes(content: string, toaster: string = ''): string {
   return `
     <div class="grid gap-4 lg:grid-cols-2">
       <div data-theme="light" class="flex min-h-48 min-w-0 flex-col items-start gap-4 rounded-xl bg-background p-6 text-foreground">
@@ -175,10 +242,12 @@ export const Stack: Story = {
         </div>`),
     };
   },
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole: (role: string, options: { name: string }) => HTMLElement } = within(
+      light(canvasElement),
+    );
     await userEvent.click(scope.getByRole('button', { name: 'Afficher cinq toasts' }));
-    const region = scope.getByRole('region', { name: 'Notifications (F8)' });
+    const region: HTMLElement = scope.getByRole('region', { name: 'Notifications (F8)' });
     await waitFor(() => expect(live(region)).toHaveLength(3));
     await expect(region).toHaveTextContent('+2');
 
@@ -220,10 +289,12 @@ export const UndoAndOpen: Story = {
         </div>`),
     };
   },
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole: (role: string, options: { name: string }) => HTMLElement } = within(
+      light(canvasElement),
+    );
     await userEvent.click(scope.getByRole('button', { name: 'Déplacer vers Terminé' }));
-    const region = scope.getByRole('region', { name: 'Notifications (F8)' });
+    const region: HTMLElement = scope.getByRole('region', { name: 'Notifications (F8)' });
     await userEvent.click(await within(region).findByRole('button', { name: 'Annuler' }));
 
     await waitFor(() => expect(region).toHaveTextContent('Déplacement annulé'));
@@ -251,11 +322,13 @@ export const Keyboard: Story = {
       template: themes(`<button cwButton variant="outline" (click)="fail()">Enregistrer</button>`),
     };
   },
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const save = scope.getByRole('button', { name: 'Enregistrer' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole: (role: string, options: { name: string }) => HTMLElement } = within(
+      light(canvasElement),
+    );
+    const save: HTMLElement = scope.getByRole('button', { name: 'Enregistrer' });
     await userEvent.click(save);
-    const region = scope.getByRole('region', { name: 'Notifications (F8)' });
+    const region: HTMLElement = scope.getByRole('region', { name: 'Notifications (F8)' });
     await within(region).findByRole('alert');
 
     await userEvent.keyboard('{F8}');

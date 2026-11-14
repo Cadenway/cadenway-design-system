@@ -1,9 +1,16 @@
-import { Component, signal } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { Component, signal, type WritableSignal } from '@angular/core';
+import { TestBed, type ComponentFixture } from '@angular/core/testing';
 
 import { CwSkeleton } from './skeleton.directive';
 import type { CwSkeletonAnimation } from './skeleton.types';
 
+/**
+ * Class Host
+ * @class Host
+ *
+ * @description
+ * Test loading region containing two placeholder shapes with a configurable animation.
+ */
 @Component({
   imports: [CwSkeleton],
   template: `
@@ -14,15 +21,30 @@ import type { CwSkeletonAnimation } from './skeleton.types';
   `,
 })
 class Host {
-  readonly animation = signal<CwSkeletonAnimation>('pulse');
+  // #region Properties
+  /**
+   * Property animation
+   * @readonly
+   *
+   * @description
+   * Signal used by the test to change the second placeholder's animation.
+   *
+   * @type {WritableSignal<CwSkeletonAnimation>}
+   * @default 'pulse'
+   */
+  public readonly animation: WritableSignal<CwSkeletonAnimation> =
+    signal<CwSkeletonAnimation>('pulse');
+  // #endregion
 }
 
 describe('CwSkeleton', () => {
   it('hides every shape and leaves the busy container as the only thing announced', () => {
-    const fixture = TestBed.createComponent(Host);
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
     fixture.detectChanges();
-    const container = (fixture.nativeElement as HTMLElement).querySelector('[role="status"]');
-    const shapes = Array.from(container?.children ?? []);
+    const container: Element | null = (fixture.nativeElement as HTMLElement).querySelector(
+      '[role="status"]',
+    );
+    const shapes: Element[] = Array.from(container?.children ?? []);
 
     expect(container?.getAttribute('aria-label')).toBe('Chargement des tâches');
     expect(shapes).toHaveLength(2);
@@ -30,9 +52,9 @@ describe('CwSkeleton', () => {
   });
 
   it('keeps the shape given by the consumer and exposes the animation as a hook', async () => {
-    const fixture = TestBed.createComponent(Host);
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
     fixture.detectChanges();
-    const [circle, line] = Array.from(
+    const [circle, line]: Element[] = Array.from(
       (fixture.nativeElement as HTMLElement).querySelectorAll('[aria-hidden="true"]'),
     );
 

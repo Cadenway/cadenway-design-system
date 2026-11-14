@@ -3,7 +3,11 @@ import angular from 'angular-eslint';
 import prettier from 'eslint-config-prettier';
 import { defineConfig, globalIgnores } from 'eslint/config';
 import globals from 'globals';
+import jsdoc from 'eslint-plugin-jsdoc';
 import tseslint from 'typescript-eslint';
+import uiDocumentation from './rules/ui-documentation.mjs';
+import uiMemberRegions from './rules/ui-member-regions.mjs';
+import uiNativeOutputs from './rules/ui-native-outputs.mjs';
 
 export default defineConfig(
   globalIgnores([
@@ -38,7 +42,10 @@ export default defineConfig(
       // suffix is required (`Button`, not `ButtonComponent`), so the suffix rules stay off.
       '@angular-eslint/component-selector': [
         'error',
-        { type: 'element', prefix: 'cw', style: 'kebab-case' },
+        [
+          { type: 'element', prefix: 'cw', style: 'kebab-case' },
+          { type: 'attribute', prefix: 'cw', style: 'camelCase' },
+        ],
       ],
       '@angular-eslint/directive-selector': [
         'error',
@@ -81,8 +88,118 @@ export default defineConfig(
     },
   },
   {
+    files: ['packages/ui/**/*.ts'],
+    linterOptions: { noInlineConfig: true },
+    plugins: {
+      jsdoc,
+      cadenway: {
+        rules: {
+          'ui-documentation': uiDocumentation,
+          'ui-member-regions': uiMemberRegions,
+          'ui-native-outputs': uiNativeOutputs,
+        },
+      },
+    },
+    rules: {
+      // Explicit annotations are permitted in the UI package, including for literal initializers.
+      '@typescript-eslint/no-inferrable-types': 'off',
+      // Literal annotations preserve narrow exported types while satisfying explicit typing.
+      '@typescript-eslint/prefer-as-const': 'off',
+      '@typescript-eslint/explicit-member-accessibility': ['error', { accessibility: 'explicit' }],
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@angular-eslint/no-input-rename': ['error', { allowedNames: ['disabled', 'pinned'] }],
+      '@angular-eslint/no-output-native': 'off',
+      'cadenway/ui-native-outputs': 'error',
+      'cadenway/ui-documentation': 'error',
+      'cadenway/ui-member-regions': 'error',
+      'jsdoc/require-jsdoc': [
+        'error',
+        {
+          require: { FunctionDeclaration: true, ClassDeclaration: true },
+          contexts: [
+            'TSInterfaceDeclaration',
+            'TSTypeAliasDeclaration',
+            'TSEnumDeclaration',
+            'TSEnumMember',
+            'Program > VariableDeclaration',
+            'ExportNamedDeclaration[declaration.type="VariableDeclaration"]',
+            'ClassDeclaration > ClassBody > PropertyDefinition',
+            'ClassDeclaration > ClassBody > MethodDefinition',
+            'ClassDeclaration > ClassBody > TSAbstractPropertyDefinition',
+            'ClassDeclaration > ClassBody > TSAbstractMethodDefinition',
+            'TSInterfaceBody > TSPropertySignature',
+            'TSInterfaceBody > TSMethodSignature',
+            'TSTypeAliasDeclaration > TSTypeLiteral > TSPropertySignature',
+            'TSTypeAliasDeclaration > TSTypeLiteral > TSMethodSignature',
+          ],
+        },
+      ],
+      'jsdoc/require-param': [
+        'error',
+        {
+          checkDestructured: false,
+          checkDestructuredRoots: false,
+          contexts: [
+            'FunctionDeclaration',
+            'VariableDeclarator > ArrowFunctionExpression',
+            'MethodDefinition > FunctionExpression',
+            'TSMethodSignature',
+          ],
+        },
+      ],
+      'jsdoc/require-param-type': 'error',
+      'jsdoc/require-param-description': 'error',
+      'jsdoc/require-returns': [
+        'error',
+        {
+          contexts: [
+            'FunctionDeclaration',
+            'VariableDeclarator > ArrowFunctionExpression',
+            'MethodDefinition > FunctionExpression',
+            {
+              context: 'TSMethodSignature[returnType.typeAnnotation.type!="TSVoidKeyword"]',
+              forceRequireReturn: true,
+            },
+          ],
+        },
+      ],
+      'jsdoc/require-returns-type': 'error',
+      'jsdoc/require-returns-description': 'error',
+      '@typescript-eslint/typedef': [
+        'error',
+        {
+          variableDeclaration: true,
+          memberVariableDeclaration: true,
+          arrayDestructuring: true,
+          objectDestructuring: true,
+        },
+      ],
+    },
+  },
+  {
     files: ['**/*.html'],
     extends: [angular.configs.templateRecommended, angular.configs.templateAccessibility],
+  },
+  {
+    files: ['packages/ui/**/*.html'],
+    linterOptions: { noInlineConfig: true },
+    rules: {
+      '@angular-eslint/template/elements-content': [
+        'error',
+        { allowList: ['cwAvatarAdd', 'cwBubbleReaction'] },
+      ],
+      '@angular-eslint/template/label-has-associated-control': [
+        'error',
+        {
+          labelComponents: [
+            {
+              selector: 'label',
+              inputs: ['for', 'htmlFor', 'cwFieldLabel', 'cwQuestionnaireChoice'],
+            },
+          ],
+        },
+      ],
+    },
   },
   {
     files: ['**/*.mjs'],

@@ -1,12 +1,16 @@
-import { Directive, computed, input } from '@angular/core';
+import { Directive, computed, input, type InputSignal, type Signal } from '@angular/core';
 
 import type { CwSkeletonAnimation } from './skeleton.types';
 
-/* Literal class strings (Skeleton sheet and preview of the Design System artifact). The pulse is the
-   mockup's `cw-sk` (`animate-skeleton`, 1.6 s, cw-motion-tokens); the shimmer is a reflection that
-   sweeps the `before` pseudo-element. Reduced motion freezes both.
-   The default radius sits in `:where()` (zero specificity): the native `class` of the consumer gives
-   the shape (`rounded-full`, `rounded-[4px]`, `rounded-lg`) and always wins over it. */
+/**
+ * Constant ANIMATIONS
+ *
+ * @description
+ * Literal classes from the Skeleton sheet for pulse, shimmer and still placeholders. Reduced
+ * motion freezes both animations. The default radius uses `:where()` so consumer shape classes win.
+ *
+ * @type {Record<CwSkeletonAnimation, string>}
+ */
 const ANIMATIONS: Record<CwSkeletonAnimation, string> = {
   pulse: 'block bg-secondary [:where(&)]:rounded-md animate-skeleton motion-reduce:animate-none',
   shimmer:
@@ -15,6 +19,10 @@ const ANIMATIONS: Record<CwSkeletonAnimation, string> = {
 };
 
 /**
+ * Class CwSkeleton
+ * @class CwSkeleton
+ *
+ * @description
  * A loading placeholder that takes the exact shape of the content to come: a text line, an
  * avatar, a checkbox, a badge, a chart (Skeleton sheet of the Design System artifact).
  *
@@ -33,8 +41,28 @@ const ANIMATIONS: Record<CwSkeletonAnimation, string> = {
   },
 })
 export class CwSkeleton {
-  /** Loading animation; reduced motion turns it off. */
-  readonly animation = input<CwSkeletonAnimation>('pulse');
+  // #region Properties
+  /**
+   * Property animation
+   * @readonly
+   *
+   * @description
+   * Input selecting the loading animation; reduced motion disables the animation.
+   *
+   * @type {InputSignal<CwSkeletonAnimation>}
+   * @default 'pulse'
+   */
+  public readonly animation: InputSignal<CwSkeletonAnimation> = input<CwSkeletonAnimation>('pulse');
 
-  protected readonly classes = computed(() => ANIMATIONS[this.animation()]);
+  /**
+   * Property classes
+   * @readonly
+   *
+   * @description
+   * Computed class string for the current animation and reduced-motion behavior.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly classes: Signal<string> = computed(() => ANIMATIONS[this.animation()]);
+  // #endregion
 }

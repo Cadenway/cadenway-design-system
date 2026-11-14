@@ -14,6 +14,12 @@ import {
   signal,
   untracked,
   viewChild,
+  type InputSignal,
+  type InputSignalWithTransform,
+  type ModelSignal,
+  type OutputEmitterRef,
+  type Signal,
+  type WritableSignal,
 } from '@angular/core';
 import { LiveAnnouncer, _IdGenerator } from '@angular/cdk/a11y';
 import { type ControlValueAccessor, NgControl } from '@angular/forms';
@@ -30,30 +36,83 @@ import type { CwInlineEditLabels, CwInlineEditState } from './inline-edit.types'
 /* Literal class strings (Inline Edit sheet and preview of the Design System artifact). The text does
    not move by a pixel between reading and editing: same `-mx-1.5 px-1.5`, a transparent border
    kept in reading mode, the same vertical padding, and the font inherited from the context. */
-const READ =
+/**
+ * Constant READ
+ *
+ * @description
+ * Classes for an editable value in reading mode.
+ *
+ * @type {string}
+ */
+const READ: string =
   'group/edit -mx-1.5 flex w-fit max-w-[calc(100%+0.75rem)] gap-2 rounded-md border border-transparent px-1.5 text-left transition-colors hover:bg-accent outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none';
 
-const STATIC =
+/**
+ * Constant STATIC
+ *
+ * @description
+ * Classes for a read-only value.
+ *
+ * @type {string}
+ */
+const STATIC: string =
   '-mx-1.5 flex w-fit max-w-[calc(100%+0.75rem)] gap-2 rounded-md border border-transparent px-1.5';
 
-const FIELD =
+/**
+ * Constant FIELD
+ *
+ * @description
+ * Classes for the editing field.
+ *
+ * @type {string}
+ */
+const FIELD: string =
   '-mx-1.5 w-[calc(100%+0.75rem)] min-w-0 rounded-md border border-input bg-transparent px-1.5 outline-hidden focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20 aria-invalid:border-destructive/60 aria-invalid:ring-3 aria-invalid:ring-destructive/15 placeholder:font-normal placeholder:text-muted-foreground';
 
-const LINES = {
+/**
+ * Constant LINES
+ *
+ * @description
+ * Reading layout classes by line mode.
+ *
+ * @type {Readonly<Record<'single' | 'multiline', string>>}
+ */
+const LINES: Readonly<Record<'single' | 'multiline', string>> = {
   single: 'items-center py-[3px]',
   multiline: 'items-start py-1 leading-relaxed',
 } as const;
 
-const FIELD_LINES = {
+/**
+ * Constant FIELD_LINES
+ *
+ * @description
+ * Editing layout classes by line mode.
+ *
+ * @type {Readonly<Record<'single' | 'multiline', string>>}
+ */
+const FIELD_LINES: Readonly<Record<'single' | 'multiline', string>> = {
   single: 'py-[3px]',
   multiline: 'field-sizing-content min-h-16 resize-none py-1 leading-relaxed',
 } as const;
 
+/**
+ * Function optionalLength
+ *
+ * @description
+ * Converts an optional maximum length to a number.
+ *
+ * @param {unknown} value - Maximum-length input, including empty values.
+ *
+ * @returns {number | undefined} Converted length, or undefined for an empty value.
+ */
 function optionalLength(value: unknown): number | undefined {
   return value === null || value === undefined || value === '' ? undefined : numberAttribute(value);
 }
 
 /**
+ * Component CwInlineEdit
+ *
+ * @description
  * A text that turns into a field on click, at the same place and the same size: a task title, a
  * list name, a short description (Inline Edit sheet of the Design System artifact).
  *
@@ -90,75 +149,516 @@ function optionalLength(value: unknown): number | undefined {
   templateUrl: './inline-edit.component.html',
 })
 export class CwInlineEdit implements FormValueControl<string>, ControlValueAccessor {
-  /** The text; `[(value)]`, or the value of a form control. */
-  readonly value = model('');
-  /** Whether the field is open; `[(editing)]`. */
-  readonly editing = model(false);
-  /** A `textarea` that grows with its lines; Ctrl + Enter validates, Enter adds a line. */
-  readonly multiline = input(false, { transform: booleanAttribute });
-  /** Text shown when the value is empty (« Ajouter une description… »), and in the empty field. */
-  readonly placeholder = input('');
-  /** Refuses an empty value: the field stays open with `labels.required`. */
-  readonly required = input(false, { transform: booleanAttribute });
-  /** Maximum length of the text, as the native `maxlength`; `null` for none. */
-  readonly maxLength = input<number | undefined, unknown>(undefined, { transform: optionalLength });
-  /** The parent is saving: the text shows with a spinner and cannot be clicked. */
-  readonly saving = input(false, { transform: booleanAttribute });
-  /** A refusal (validation or server): the field reopens with the typed text and this message. */
-  readonly error = input<string | null>(null);
-  /** A click outside, or Tab, validates; `false` makes them cancel. */
-  readonly submitOnBlur = input(true, { transform: booleanAttribute });
-  /** Bare text, no hover nor pencil; a lock explains it (`labels.readonly`). */
-  readonly readonly = input(false, { transform: booleanAttribute });
-  /** Disables the text (Signal Forms binds it from the field). */
-  readonly disabled = input(false, { transform: booleanAttribute });
-  /** Invalid state given by Signal Forms; shown once touched. */
-  readonly invalid = input(false, { transform: booleanAttribute });
-  /** Touched state given by Signal Forms. */
-  readonly touched = input(false, { transform: booleanAttribute });
-  /** Name of the field (« Titre de la tâche »); the text names the button in reading mode. */
-  readonly ariaLabel = input('');
-  /** French texts, any of them overridden (`CW_INLINE_EDIT_LABELS`). */
-  readonly labels = input<Partial<CwInlineEditLabels>>({});
-  /** Emits the new text when a changed and valid value is validated. */
-  readonly save = output<string>();
-  /** Emits when the edition is cancelled: Escape, or an unchanged value validated. */
-  // The sheet names this output `cancel`; no native `cancel` event bubbles from this host's content.
-  // eslint-disable-next-line @angular-eslint/no-output-native
-  readonly cancel = output();
-  /** Emitted when the focus leaves the field: Signal Forms marks the field touched. */
-  readonly touch = output();
+  // #region Properties
+  /**
+   * Property value
+   * @readonly
+   *
+   * @description
+   * Current value of the editor.
+   *
+   * @type {ModelSignal<string>}
+   */
+  public readonly value: ModelSignal<string> = model('');
 
-  private readonly readButton = viewChild<ElementRef<HTMLButtonElement>>('readButton');
-  private readonly field = viewChild<ElementRef<HTMLInputElement | HTMLTextAreaElement>>('field');
-  private readonly injector = inject(Injector);
-  private readonly announcer = inject(LiveAnnouncer);
-  private readonly ngControl = inject(NgControl, { optional: true, self: true });
-  private readonly formDisabled = signal(false);
-  private readonly accessorTouched = signal(false);
-  private readonly ids = inject(_IdGenerator);
+  /**
+   * Property editing
+   * @readonly
+   *
+   * @description
+   * Whether the field is open.
+   *
+   * @type {ModelSignal<boolean>}
+   */
+  public readonly editing: ModelSignal<boolean> = model(false);
+
+  /**
+   * Property multiline
+   * @readonly
+   *
+   * @description
+   * Whether the field accepts multiple lines.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   */
+  public readonly multiline: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property placeholder
+   * @readonly
+   *
+   * @description
+   * Text shown when the value is empty.
+   *
+   * @type {InputSignal<string>}
+   */
+  public readonly placeholder: InputSignal<string> = input('');
+
+  /**
+   * Property required
+   * @readonly
+   *
+   * @description
+   * Whether an empty value is rejected.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   */
+  public readonly required: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property maxLength
+   * @readonly
+   *
+   * @description
+   * Optional maximum length of the value.
+   *
+   * @type {InputSignalWithTransform<number | undefined, unknown>}
+   */
+  public readonly maxLength: InputSignalWithTransform<number | undefined, unknown> = input<
+    number | undefined,
+    unknown
+  >(undefined, {
+    transform: optionalLength,
+  });
+
+  /**
+   * Property saving
+   * @readonly
+   *
+   * @description
+   * Whether the parent is saving.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   */
+  public readonly saving: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property error
+   * @readonly
+   *
+   * @description
+   * Validation or server error message.
+   *
+   * @type {InputSignal<string | null>}
+   */
+  public readonly error: InputSignal<string | null> = input<string | null>(null);
+
+  /**
+   * Property submitOnBlur
+   * @readonly
+   *
+   * @description
+   * Whether leaving the field validates changes.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   */
+  public readonly submitOnBlur: InputSignalWithTransform<boolean, unknown> = input(true, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property readonly
+   * @readonly
+   *
+   * @description
+   * Whether the value is read-only.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   */
+  public readonly readonly: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property disabled
+   * @readonly
+   *
+   * @description
+   * Whether the editor is disabled.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   */
+  public readonly disabled: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property invalid
+   * @readonly
+   *
+   * @description
+   * Invalid state supplied by Signal Forms.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   */
+  public readonly invalid: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property touched
+   * @readonly
+   *
+   * @description
+   * Touched state supplied by Signal Forms.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   */
+  public readonly touched: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property ariaLabel
+   * @readonly
+   *
+   * @description
+   * Accessible name of the editing field.
+   *
+   * @type {InputSignal<string>}
+   */
+  public readonly ariaLabel: InputSignal<string> = input('');
+
+  /**
+   * Property labels
+   * @readonly
+   *
+   * @description
+   * Overrides for default labels.
+   *
+   * @type {InputSignal<Partial<CwInlineEditLabels>>}
+   */
+  public readonly labels: InputSignal<Partial<CwInlineEditLabels>> = input<
+    Partial<CwInlineEditLabels>
+  >({});
+
+  /**
+   * Property save
+   * @readonly
+   *
+   * @description
+   * Emits a changed and valid value.
+   *
+   * @type {OutputEmitterRef<string>}
+   */
+  public readonly save: OutputEmitterRef<string> = output<string>();
+
+  /**
+   * Property cancel
+   * @readonly
+   *
+   * @description
+   * Emits when editing is cancelled.
+   *
+   * @type {OutputEmitterRef<void>}
+   */
+  public readonly cancel: OutputEmitterRef<void> = output();
+
+  /**
+   * Property touch
+   * @readonly
+   *
+   * @description
+   * Emits when the field is touched.
+   *
+   * @type {OutputEmitterRef<void>}
+   */
+  public readonly touch: OutputEmitterRef<void> = output();
+
+  /**
+   * Property readButton
+   * @readonly
+   *
+   * @description
+   * Button used in reading mode.
+   *
+   * @type {Signal<ElementRef<HTMLButtonElement> | undefined>}
+   */
+  private readonly readButton: Signal<ElementRef<HTMLButtonElement> | undefined> =
+    viewChild<ElementRef<HTMLButtonElement>>('readButton');
+
+  /**
+   * Property field
+   * @readonly
+   *
+   * @description
+   * Editing field when rendered.
+   *
+   * @type {Signal<ElementRef<HTMLInputElement | HTMLTextAreaElement> | undefined>}
+   */
+  private readonly field: Signal<ElementRef<HTMLInputElement | HTMLTextAreaElement> | undefined> =
+    viewChild<ElementRef<HTMLInputElement | HTMLTextAreaElement>>('field');
+
+  /**
+   * Property injector
+   * @readonly
+   *
+   * @description
+   * Injector used to schedule focus after rendering.
+   *
+   * @type {Injector}
+   */
+  private readonly injector: Injector = inject(Injector);
+
+  /**
+   * Property announcer
+   * @readonly
+   *
+   * @description
+   * Announces save results and errors.
+   *
+   * @type {LiveAnnouncer}
+   */
+  private readonly announcer: LiveAnnouncer = inject(LiveAnnouncer);
+
+  /**
+   * Property ngControl
+   * @readonly
+   *
+   * @description
+   * Reactive or template-driven control if present.
+   *
+   * @type {NgControl | null}
+   */
+  private readonly ngControl: NgControl | null = inject(NgControl, { optional: true, self: true });
+
+  /**
+   * Property formDisabled
+   * @readonly
+   *
+   * @description
+   * Disabled state supplied by the value accessor.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  private readonly formDisabled: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property accessorTouched
+   * @readonly
+   *
+   * @description
+   * Touched state reported through the value accessor.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  private readonly accessorTouched: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property ids
+   * @readonly
+   *
+   * @description
+   * Generator for accessible element identifiers.
+   *
+   * @type {_IdGenerator}
+   */
+  private readonly ids: _IdGenerator = inject(_IdGenerator);
+
+  /**
+   * Property onChange
+   *
+   * @description
+   * Callback registered by the form control.
+   *
+   * @type {(value: string) => void}
+   */
   private onChange: (value: string) => void = () => undefined;
+
+  /**
+   * Property onTouched
+   *
+   * @description
+   * Touch callback registered by the form control.
+   *
+   * @type {() => void}
+   */
   private onTouched: () => void = () => undefined;
   // Escape and Enter close the field themselves: the blur that follows must not act a second time.
-  private closing = false;
+  /**
+   * Property closing
+   *
+   * @description
+   * Whether a keyboard action is already closing the field.
+   *
+   * @type {boolean}
+   */
+  private closing: boolean = false;
 
-  protected readonly hintId = this.ids.getId('cw-inline-edit-hint-');
-  protected readonly helpId = this.ids.getId('cw-inline-edit-help-');
-  protected readonly errorId = this.ids.getId('cw-inline-edit-error-');
-  protected readonly draft = signal('');
-  protected readonly localError = signal<string | null>(null);
-  protected readonly text = computed(() => ({ ...CW_INLINE_EDIT_LABELS, ...this.labels() }));
-  protected readonly message = computed(() => this.localError() ?? this.error());
-  protected readonly isDisabled = computed(() => this.disabled() || this.formDisabled());
-  protected readonly state = computed<CwInlineEditState>(() =>
+  /**
+   * Property hintId
+   * @readonly
+   *
+   * @description
+   * Identifier of the reading-mode hint.
+   *
+   * @type {string}
+   */
+  protected readonly hintId: string = this.ids.getId('cw-inline-edit-hint-');
+
+  /**
+   * Property helpId
+   * @readonly
+   *
+   * @description
+   * Identifier of the editing help text.
+   *
+   * @type {string}
+   */
+  protected readonly helpId: string = this.ids.getId('cw-inline-edit-help-');
+
+  /**
+   * Property errorId
+   * @readonly
+   *
+   * @description
+   * Identifier of the error message.
+   *
+   * @type {string}
+   */
+  protected readonly errorId: string = this.ids.getId('cw-inline-edit-error-');
+
+  /**
+   * Property draft
+   * @readonly
+   *
+   * @description
+   * Value currently being edited.
+   *
+   * @type {WritableSignal<string>}
+   */
+  protected readonly draft: WritableSignal<string> = signal('');
+
+  /**
+   * Property localError
+   * @readonly
+   *
+   * @description
+   * Local validation error message.
+   *
+   * @type {WritableSignal<string | null>}
+   */
+  protected readonly localError: WritableSignal<string | null> = signal<string | null>(null);
+
+  /**
+   * Property text
+   * @readonly
+   *
+   * @description
+   * Default labels merged with overrides.
+   *
+   * @type {Signal<CwInlineEditLabels>}
+   */
+  protected readonly text: Signal<CwInlineEditLabels> = computed(() => ({
+    ...CW_INLINE_EDIT_LABELS,
+    ...this.labels(),
+  }));
+
+  /**
+   * Property message
+   * @readonly
+   *
+   * @description
+   * Local or server error message.
+   *
+   * @type {Signal<string | null>}
+   */
+  protected readonly message: Signal<string | null> = computed(
+    () => this.localError() ?? this.error(),
+  );
+
+  /**
+   * Property isDisabled
+   * @readonly
+   *
+   * @description
+   * Combined input and form disabled state.
+   *
+   * @type {Signal<boolean>}
+   */
+  protected readonly isDisabled: Signal<boolean> = computed(
+    () => this.disabled() || this.formDisabled(),
+  );
+
+  /**
+   * Property state
+   * @readonly
+   *
+   * @description
+   * Current reading, editing or saving state.
+   *
+   * @type {Signal<CwInlineEditState>}
+   */
+  protected readonly state: Signal<CwInlineEditState> = computed<CwInlineEditState>(() =>
     this.saving() && !this.editing() ? 'saving' : this.editing() ? 'editing' : 'reading',
   );
-  protected readonly lines = computed(() => (this.multiline() ? 'multiline' : 'single'));
-  protected readonly readClasses = computed(() => `${READ} ${LINES[this.lines()]}`);
-  protected readonly staticClasses = computed(() => `${STATIC} ${LINES[this.lines()]}`);
-  protected readonly fieldClasses = computed(() => `${FIELD} ${FIELD_LINES[this.lines()]}`);
 
-  constructor() {
+  /**
+   * Property lines
+   * @readonly
+   *
+   * @description
+   * Current line layout mode.
+   *
+   * @type {Signal<'single' | 'multiline'>}
+   */
+  protected readonly lines: Signal<'single' | 'multiline'> = computed(() =>
+    this.multiline() ? 'multiline' : 'single',
+  );
+
+  /**
+   * Property readClasses
+   * @readonly
+   *
+   * @description
+   * Classes for the reading button.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly readClasses: Signal<string> = computed(() => `${READ} ${LINES[this.lines()]}`);
+
+  /**
+   * Property staticClasses
+   * @readonly
+   *
+   * @description
+   * Classes for read-only content.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly staticClasses: Signal<string> = computed(
+    () => `${STATIC} ${LINES[this.lines()]}`,
+  );
+
+  /**
+   * Property fieldClasses
+   * @readonly
+   *
+   * @description
+   * Classes for the editing field.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly fieldClasses: Signal<string> = computed(
+    () => `${FIELD} ${FIELD_LINES[this.lines()]}`,
+  );
+  // #endregion
+
+  // #region Constructor
+  /**
+   * Constructor
+   * @constructor
+   *
+   * @description
+   * Connects form state and synchronizes editing and save feedback.
+   */
+  public constructor() {
     // Reactive and template-driven forms: this text is the control's value accessor. Set here
     // rather than through NG_VALUE_ACCESSOR, so it can read the control's validity.
     if (this.ngControl) this.ngControl.valueAccessor = this;
@@ -166,7 +666,7 @@ export class CwInlineEdit implements FormValueControl<string>, ControlValueAcces
     // A server refusal arrives after `save`: the field reopens with the typed text (sheet, "Règles":
     // never lose the input on a server error) and the message is announced.
     effect(() => {
-      const error = this.error();
+      const error: string | null = this.error();
       if (!error) return;
       untracked(() => {
         if (!this.editing() && !this.readonly()) this.open(false);
@@ -175,10 +675,10 @@ export class CwInlineEdit implements FormValueControl<string>, ControlValueAcces
     });
 
     // The end of `saving` without an error is the confirmation of the save (sheet, "Accessibilité").
-    let wasSaving = false;
+    let wasSaving: boolean = false;
     effect(() => {
-      const saving = this.saving();
-      const error = this.error();
+      const saving: boolean = this.saving();
+      const error: string | null = this.error();
       if (wasSaving && !saving && !error) {
         untracked(() => void this.announcer.announce(this.text().saved, 'polite'));
       }
@@ -195,48 +695,121 @@ export class CwInlineEdit implements FormValueControl<string>, ControlValueAcces
       });
     });
   }
+  // #endregion
 
-  /** Moves the focus to the text, or into the field while editing (Signal Forms calls it). */
-  focus(options?: FocusOptions): void {
+  // #region Methods
+  /**
+   * Method focus
+   *
+   * @description
+   * Focuses the reading button or editing field.
+   *
+   * @param {FocusOptions} [options] - Optional browser focus behavior.
+   */
+  public focus(options?: FocusOptions): void {
     (this.field() ?? this.readButton())?.nativeElement.focus(options);
   }
 
-  writeValue(value: unknown): void {
+  /**
+   * Method writeValue
+   *
+   * @description
+   * Writes a value supplied by the form control.
+   *
+   * @param {unknown} value - Form value to write; non-string values clear the editor.
+   */
+  public writeValue(value: unknown): void {
     this.value.set(typeof value === 'string' ? value : '');
   }
 
-  registerOnChange(fn: (value: string) => void): void {
+  /**
+   * Method registerOnChange
+   *
+   * @description
+   * Registers the form change callback.
+   *
+   * @param {(value: string) => void} fn - Callback notified when the value changes.
+   */
+  public registerOnChange(fn: (value: string) => void): void {
     this.onChange = fn;
   }
 
-  registerOnTouched(fn: () => void): void {
+  /**
+   * Method registerOnTouched
+   *
+   * @description
+   * Registers the form touch callback.
+   *
+   * @param {() => void} fn - Callback notified when the field is touched.
+   */
+  public registerOnTouched(fn: () => void): void {
     this.onTouched = fn;
   }
 
-  setDisabledState(isDisabled: boolean): void {
+  /**
+   * Method setDisabledState
+   *
+   * @description
+   * Sets the disabled state supplied by the form.
+   *
+   * @param {boolean} isDisabled - Disabled state supplied by the form.
+   */
+  public setDisabledState(isDisabled: boolean): void {
     this.formDisabled.set(isDisabled);
   }
 
+  /**
+   * Method isInvalid
+   *
+   * @description
+   * Reports whether validation feedback should be shown.
+   *
+   * @returns {boolean} Whether validation feedback should be displayed.
+   */
   protected isInvalid(): boolean {
     if (this.message()) return true;
     if (this.invalid() && this.touched()) return true;
-    const control = this.ngControl;
+    const control: NgControl | null = this.ngControl;
     return (
       !!control && control.invalid === true && (control.touched === true || this.accessorTouched())
     );
   }
 
+  /**
+   * Method onReadKeydown
+   *
+   * @description
+   * Opens editing when the F2 key is pressed.
+   *
+   * @param {KeyboardEvent} event - Keyboard event received by the reading button.
+   */
   protected onReadKeydown(event: KeyboardEvent): void {
     if (event.key !== 'F2') return;
     event.preventDefault();
     this.open(true);
   }
 
+  /**
+   * Method onFieldInput
+   *
+   * @description
+   * Updates the draft from the field.
+   *
+   * @param {Event} event - Input event containing the current draft.
+   */
   protected onFieldInput(event: Event): void {
     this.draft.set((event.target as HTMLInputElement).value);
     if (this.localError()) this.localError.set(null);
   }
 
+  /**
+   * Method onFieldKeydown
+   *
+   * @description
+   * Handles keyboard submission and cancellation.
+   *
+   * @param {KeyboardEvent} event - Keyboard event received by the editing field.
+   */
   protected onFieldKeydown(event: KeyboardEvent): void {
     if (event.key === 'Escape') {
       event.preventDefault();
@@ -245,13 +818,19 @@ export class CwInlineEdit implements FormValueControl<string>, ControlValueAcces
       return;
     }
     if (event.key !== 'Enter' || event.isComposing) return;
-    const modified = event.ctrlKey || event.metaKey;
+    const modified: boolean = event.ctrlKey || event.metaKey;
     if (this.multiline() && !modified) return;
     event.preventDefault();
     this.closing = true;
     this.commit(true);
   }
 
+  /**
+   * Method onFieldBlur
+   *
+   * @description
+   * Marks the field touched and commits or cancels.
+   */
   protected onFieldBlur(): void {
     this.markTouched();
     if (this.closing) {
@@ -263,7 +842,14 @@ export class CwInlineEdit implements FormValueControl<string>, ControlValueAcces
     else this.close(false);
   }
 
-  /** Opens the field with the current text, selected. */
+  /**
+   * Method open
+   *
+   * @description
+   * Opens the field with the current value.
+   *
+   * @param {boolean} select - Whether to select the field contents after opening.
+   */
   protected open(select: boolean): void {
     if (this.readonly() || this.isDisabled() || this.saving()) return;
     if (!this.editing() || !this.field()) this.draft.set(this.value());
@@ -271,10 +857,19 @@ export class CwInlineEdit implements FormValueControl<string>, ControlValueAcces
     this.focusField(select);
   }
 
+  /**
+   * Method focusField
+   *
+   * @description
+   * Focuses the rendered field and optionally selects its value.
+   *
+   * @param {boolean} select - Whether to select the field contents after focusing.
+   */
   private focusField(select: boolean): void {
     afterNextRender(
       () => {
-        const field = this.field()?.nativeElement;
+        const field: HTMLInputElement | HTMLTextAreaElement | undefined =
+          this.field()?.nativeElement;
         if (!field) return;
         field.focus();
         if (select) field.select();
@@ -283,8 +878,16 @@ export class CwInlineEdit implements FormValueControl<string>, ControlValueAcces
     );
   }
 
+  /**
+   * Method commit
+   *
+   * @description
+   * Validates and emits a changed draft.
+   *
+   * @param {boolean} restoreFocus - Whether to return focus to the reading button after committing.
+   */
   private commit(restoreFocus: boolean): void {
-    const next = this.multiline() ? this.draft() : this.draft().trim();
+    const next: string = this.multiline() ? this.draft() : this.draft().trim();
     if (this.required() && next.trim() === '') {
       this.localError.set(this.text().required);
       this.closing = false;
@@ -304,6 +907,14 @@ export class CwInlineEdit implements FormValueControl<string>, ControlValueAcces
     if (restoreFocus) this.focusRead();
   }
 
+  /**
+   * Method close
+   *
+   * @description
+   * Cancels editing and restores focus when requested.
+   *
+   * @param {boolean} restoreFocus - Whether to return focus to the reading button after cancellation.
+   */
   private close(restoreFocus: boolean): void {
     this.localError.set(null);
     this.editing.set(false);
@@ -312,13 +923,26 @@ export class CwInlineEdit implements FormValueControl<string>, ControlValueAcces
     if (restoreFocus) this.focusRead();
   }
 
+  /**
+   * Method focusRead
+   *
+   * @description
+   * Focuses the reading button after rendering.
+   */
   private focusRead(): void {
     afterNextRender(() => this.readButton()?.nativeElement.focus(), { injector: this.injector });
   }
 
+  /**
+   * Method markTouched
+   *
+   * @description
+   * Reports the touched state to forms.
+   */
   private markTouched(): void {
     this.accessorTouched.set(true);
     this.onTouched();
     this.touch.emit();
   }
+  // #endregion
 }

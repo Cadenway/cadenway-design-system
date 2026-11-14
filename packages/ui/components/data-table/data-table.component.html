@@ -3,11 +3,10 @@
 <div class="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border">
   <div class="relative flex min-h-0 flex-1 flex-col">
     <div #scroller class="relative min-h-0 flex-1 overflow-auto">
-      <!-- The cells take the focus; the grid listens to their keys and focus as one widget. -->
-      <!-- eslint-disable-next-line @angular-eslint/template/interactive-supports-focus -->
       <table
         #table
         role="grid"
+        tabindex="-1"
         [attr.aria-label]="ariaLabel()"
         [attr.aria-multiselectable]="selectable() ? 'true' : null"
         [attr.aria-rowcount]="ariaRowCount()"
@@ -380,7 +379,6 @@
       </table>
 
       @if (bulkBarVisible()) {
-        <!-- Sheet DataTableComplete, "Règles": an empty margin under the last row so the bar never covers it. -->
         <div class="h-14" aria-hidden="true"></div>
       }
 

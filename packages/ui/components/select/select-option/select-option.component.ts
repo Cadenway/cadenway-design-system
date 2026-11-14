@@ -1,14 +1,27 @@
-import { booleanAttribute, Component, computed, ElementRef, inject, input } from '@angular/core';
+import {
+  booleanAttribute,
+  Component,
+  computed,
+  ElementRef,
+  inject,
+  input,
+  type InputSignal,
+  type InputSignalWithTransform,
+  type Signal,
+} from '@angular/core';
 import { _IdGenerator } from '@angular/cdk/a11y';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorCheckBold } from '@ng-icons/phosphor-icons/bold';
 
 import { ɵenterDelay } from '@cadenway/ui/core';
 
-import { SELECT_HOST } from '../select.token';
+import { SELECT_HOST, type SelectHost } from '../select.token';
 import { OPTION, OPTION_ENTER } from '../select.styles';
 
 /**
+ * Component CwSelectOption
+ *
+ * @description
  * A choice of a `cw-select`: a glyph and a word (« En cours »), with the check on the right when it
  * is the select's value (Select sheet of the Design System artifact).
  *
@@ -29,7 +42,6 @@ import { OPTION, OPTION_ENTER } from '../select.styles';
     '[attr.aria-selected]': 'selected()',
     '[attr.aria-disabled]': 'disabled() ? "true" : null',
     '[attr.data-highlighted]': 'highlighted() ? "" : null',
-    // The focus stays on the trigger (aria-activedescendant): a press must not take it.
     '(mousedown)': '$event.preventDefault()',
     '(click)': 'onClick()',
     '(pointermove)': 'onPointerMove()',
@@ -37,34 +49,139 @@ import { OPTION, OPTION_ENTER } from '../select.styles';
   templateUrl: './select-option.component.html',
 })
 export class CwSelectOption<T = unknown> {
-  /** The value the select takes when this option is chosen. */
-  readonly value = input.required<T>();
-  /** Makes the option inert; the arrows skip it. */
-  readonly disabled = input(false, { transform: booleanAttribute });
+  // #region Properties
+  /**
+   * Property value
+   * @readonly
+   *
+   * @description
+   * Value selected when this option is chosen.
+   *
+   * @type {InputSignal<T>}
+   */
+  public readonly value: InputSignal<T> = input.required<T>();
 
-  private readonly host = inject(SELECT_HOST);
+  /**
+   * Property disabled
+   * @readonly
+   *
+   * @description
+   * Whether the option is disabled.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   */
+  public readonly disabled: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
 
-  /** @internal The id `aria-activedescendant` points at. */
-  readonly id = inject(_IdGenerator).getId('cw-select-option-');
-  /** @internal The option element, for the scroll into view and the copy into the trigger. */
-  readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  /**
+   * Property host
+   * @readonly
+   *
+   * @description
+   * Parent select context.
+   *
+   * @type {SelectHost}
+   */
+  private readonly host: SelectHost = inject(SELECT_HOST);
 
-  protected readonly selected = computed(() => this.host.isSelected(this.value()));
-  protected readonly highlighted = computed(() => this.host.highlighted() === this);
-  protected readonly delay = computed(() =>
-    ɵenterDelay(this.host.options().indexOf(this as CwSelectOption)),
+  /**
+   * Property id
+   * @readonly
+   *
+   * @description
+   * Identifier used by aria-activedescendant.
+   *
+   * @internal
+   *
+   * @type {string}
+   */
+  public readonly id: string = inject(_IdGenerator).getId('cw-select-option-');
+
+  /**
+   * Property element
+   * @readonly
+   *
+   * @description
+   * Option element used for scrolling and display.
+   *
+   * @internal
+   *
+   * @type {HTMLElement}
+   */
+  public readonly element: HTMLElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+
+  /**
+   * Property selected
+   * @readonly
+   *
+   * @description
+   * Whether the option is selected.
+   *
+   * @type {Signal<boolean>}
+   */
+  protected readonly selected: Signal<boolean> = computed(() => this.host.isSelected(this.value()));
+
+  /**
+   * Property highlighted
+   * @readonly
+   *
+   * @description
+   * Whether the option is highlighted.
+   *
+   * @type {Signal<boolean>}
+   */
+  protected readonly highlighted: Signal<boolean> = computed(
+    () => this.host.highlighted() === this,
   );
 
-  /** @internal The text of the option, for the typeahead and the label animation. */
-  label(): string {
+  /**
+   * Property delay
+   * @readonly
+   *
+   * @description
+   * Entrance animation delay in milliseconds.
+   *
+   * @type {Signal<number>}
+   */
+  protected readonly delay: Signal<number> = computed(() =>
+    ɵenterDelay(this.host.options().indexOf(this as CwSelectOption)),
+  );
+  // #endregion
+
+  // #region Methods
+  /**
+   * Method label
+   *
+   * @description
+   * Returns the text used by typeahead and the trigger.
+   *
+   * @internal
+   *
+   * @returns {string} Visible option text with surrounding whitespace removed.
+   */
+  public label(): string {
     return this.element.textContent.trim();
   }
 
+  /**
+   * Method onClick
+   *
+   * @description
+   * Chooses the option when enabled.
+   */
   protected onClick(): void {
     if (!this.disabled()) this.host.choose(this as CwSelectOption);
   }
 
+  /**
+   * Method onPointerMove
+   *
+   * @description
+   * Highlights the option when enabled.
+   */
   protected onPointerMove(): void {
     if (!this.disabled() && !this.highlighted()) this.host.highlight(this as CwSelectOption);
   }
+  // #endregion
 }

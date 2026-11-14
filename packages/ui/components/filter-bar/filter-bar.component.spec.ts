@@ -1,5 +1,5 @@
 import { LiveAnnouncer } from '@angular/cdk/a11y';
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CwFilterBar } from './filter-bar.component';
@@ -7,6 +7,14 @@ import type { CwFilter, CwFilterField, CwSavedFilter } from './filter-bar.types'
 import { CwFilterValueDef } from './filter-value/filter-value.directive';
 
 /* The mockup's fields (`App.dc.html`), given as data: the bar knows none of them. */
+/**
+ * Constant FIELDS
+ *
+ * @description
+ * Filter fields supplied to the test fixture.
+ *
+ * @type {CwFilterField[]}
+ */
 const FIELDS: CwFilterField[] = [
   {
     key: 'status',
@@ -72,6 +80,14 @@ const FIELDS: CwFilterField[] = [
   },
 ];
 
+/**
+ * Constant SAVED
+ *
+ * @description
+ * Saved filters available to the test fixture.
+ *
+ * @type {CwSavedFilter[]}
+ */
 const SAVED: CwSavedFilter[] = [
   {
     id: 'late',
@@ -81,6 +97,12 @@ const SAVED: CwSavedFilter[] = [
   { id: 'review', label: 'Revue du sprint', filters: [] },
 ];
 
+/**
+ * Component Host
+ *
+ * @description
+ * Hosts filter controls and records emitted changes for the fixture.
+ */
 @Component({
   imports: [CwFilterBar, CwFilterValueDef],
   template: `
@@ -103,32 +125,129 @@ const SAVED: CwSavedFilter[] = [
   `,
 })
 class Host {
-  readonly fields = FIELDS;
-  readonly filters = signal<readonly CwFilter[]>([]);
-  readonly saved = signal<readonly CwSavedFilter[]>([]);
-  readonly dirty = signal(false);
-  readonly changes: (readonly CwFilter[])[] = [];
-  readonly events: string[] = [];
+  // #region Properties
+  /**
+   * Property fields
+   *
+   * @description
+   * Fields available to the filter bar.
+   *
+   * @type {CwFilterField[]}
+   * @readonly
+   */
+  public readonly fields: CwFilterField[] = FIELDS;
+
+  /**
+   * Property filters
+   *
+   * @description
+   * Filters currently selected in the fixture.
+   *
+   * @type {WritableSignal<readonly CwFilter[]>}
+   * @readonly
+   */
+  public readonly filters: WritableSignal<readonly CwFilter[]> = signal<readonly CwFilter[]>([]);
+
+  /**
+   * Property saved
+   *
+   * @description
+   * Saved filters currently available.
+   *
+   * @type {WritableSignal<readonly CwSavedFilter[]>}
+   * @readonly
+   */
+  public readonly saved: WritableSignal<readonly CwSavedFilter[]> = signal<
+    readonly CwSavedFilter[]
+  >([]);
+
+  /**
+   * Property dirty
+   *
+   * @description
+   * Whether the saved view has unsaved changes.
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  public readonly dirty: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property changes
+   *
+   * @description
+   * Filter changes emitted by the bar.
+   *
+   * @type {(readonly CwFilter[])[]}
+   * @readonly
+   */
+  public readonly changes: (readonly CwFilter[])[] = [];
+
+  /**
+   * Property events
+   *
+   * @description
+   * Actions emitted by the bar.
+   *
+   * @type {string[]}
+   * @readonly
+   */
+  public readonly events: string[] = [];
+  // #endregion
 }
 
+/**
+ * Function key
+ *
+ * @description
+ * Dispatches a keyboard event to a target.
+ *
+ * @param {Element} target - Element receiving the event.
+ * @param {string} value - Keyboard key to dispatch.
+ * @returns {KeyboardEvent} Dispatched keyboard event.
+ */
 function key(target: Element, value: string): KeyboardEvent {
-  const event = new KeyboardEvent('keydown', { key: value, bubbles: true, cancelable: true });
+  const event: KeyboardEvent = new KeyboardEvent('keydown', {
+    key: value,
+    bubbles: true,
+    cancelable: true,
+  });
   target.dispatchEvent(event);
   return event;
 }
 
+/**
+ * Function named
+ *
+ * @description
+ * Finds an element with the given accessible name.
+ *
+ * @param {ParentNode} container - Parent searched for the element.
+ * @param {string} selector - Selector identifying candidate elements.
+ * @param {string} name - Accessible name to find.
+ * @returns {HTMLElement} Matching element.
+ */
 function named(container: ParentNode, selector: string, name: string): HTMLElement {
-  const found = Array.from(container.querySelectorAll<HTMLElement>(selector)).find(
-    (element) => (element.getAttribute('aria-label') ?? element.textContent.trim()) === name,
-  );
+  const found: HTMLElement | undefined = Array.from(
+    container.querySelectorAll<HTMLElement>(selector),
+  ).find((element) => (element.getAttribute('aria-label') ?? element.textContent.trim()) === name);
   if (!found) throw new Error(`No ${selector} named ${name}`);
   return found;
 }
 
+/**
+ * Function menuNamed
+ *
+ * @description
+ * Finds an open menu by its accessible name.
+ *
+ * @param {string} name - Accessible name to find.
+ * @returns {HTMLElement} Matching open menu.
+ */
 function menuNamed(name: string): HTMLElement {
-  const found = Array.from(document.querySelectorAll<HTMLElement>('[role="menu"]')).find(
-    (menu) => menu.getAttribute('aria-label') === name,
-  );
+  const found: HTMLElement | undefined = Array.from(
+    document.querySelectorAll<HTMLElement>('[role="menu"]'),
+  ).find((menu) => menu.getAttribute('aria-label') === name);
   if (!found) throw new Error(`No open menu named ${name}`);
   return found;
 }
@@ -165,13 +284,29 @@ describe('CwFilterBar', () => {
     fixture.destroy();
   });
 
+  /**
+   * Function withFilters
+   *
+   * @description
+   * Sets the current filters and waits for the fixture.
+   *
+   * @param {readonly CwFilter[]} filters - Filters to apply to the fixture.
+   * @returns {Promise<void>} Promise resolved after the fixture updates.
+   */
   async function withFilters(filters: readonly CwFilter[]): Promise<void> {
     component.filters.set(filters);
     await fixture.whenStable();
   }
 
+  /**
+   * Function region
+   *
+   * @description
+   * Finds the filter bar region.
+   * @returns {HTMLElement} Filter bar region.
+   */
   function region(): HTMLElement {
-    const found = host.querySelector<HTMLElement>('[role="region"]');
+    const found: HTMLElement | null = host.querySelector<HTMLElement>('[role="region"]');
     if (!found) throw new Error('No region');
     return found;
   }
@@ -194,20 +329,20 @@ describe('CwFilterBar', () => {
       { field: 'title', operator: 'contains', value: 'export' },
     ]);
 
-    const status = named(host, '[role="group"]', 'Filtre Statut');
+    const status: HTMLElement = named(host, '[role="group"]', 'Filtre Statut');
     expect(status.textContent).toContain('Statut');
     expect(named(status, 'button', 'Opérateur : est').getAttribute('aria-haspopup')).toBe('menu');
     expect(named(status, 'button', 'En cours, Bloqué')).toBeTruthy();
     expect(named(status, 'button', 'Retirer le filtre Statut')).toBeTruthy();
 
-    const people = named(host, '[role="group"]', 'Filtre Assigné');
+    const people: HTMLElement = named(host, '[role="group"]', 'Filtre Assigné');
     expect(named(people, 'button', '3 personnes')).toBeTruthy();
-    const due = named(host, '[role="group"]', 'Filtre Échéance');
+    const due: HTMLElement = named(host, '[role="group"]', 'Filtre Échéance');
     expect(named(due, 'button', '30 nov.').getAttribute('aria-haspopup')).toBe('dialog');
     // « est vide » needs no value: operator and remove only.
-    const labels = named(host, '[role="group"]', 'Filtre Étiquette');
+    const labels: HTMLElement = named(host, '[role="group"]', 'Filtre Étiquette');
     expect(labels.querySelectorAll('button')).toHaveLength(2);
-    const title = named(host, '[role="group"]', 'Filtre Titre');
+    const title: HTMLElement = named(host, '[role="group"]', 'Filtre Titre');
     expect(named(title, 'button', '« export »')).toBeTruthy();
 
     expect(region().hasAttribute('data-empty')).toBe(false);
@@ -216,12 +351,12 @@ describe('CwFilterBar', () => {
 
   it('changes the operator from its menu, dropping the value for a valueless one', async () => {
     await withFilters([{ field: 'labels', operator: 'is', value: ['bug'] }]);
-    const chip = named(host, '[role="group"]', 'Filtre Étiquette');
+    const chip: HTMLElement = named(host, '[role="group"]', 'Filtre Étiquette');
     named(chip, 'button', 'Opérateur : est').click();
     await fixture.whenStable();
 
-    const menu = document.querySelector('[role="menu"]');
-    const empty = named(menu ?? document, '[role="menuitem"]', 'est vide');
+    const menu: Element | null = document.querySelector('[role="menu"]');
+    const empty: HTMLElement = named(menu ?? document, '[role="menuitem"]', 'est vide');
     expect(named(menu ?? document, '[role="menuitem"]', 'est').getAttribute('aria-current')).toBe(
       'true',
     );
@@ -236,13 +371,13 @@ describe('CwFilterBar', () => {
 
   it('ticks values in a menu that stays open, in the order of the field', async () => {
     await withFilters([{ field: 'status', operator: 'is', value: ['blocked'] }]);
-    const chip = named(host, '[role="group"]', 'Filtre Statut');
-    const value = named(chip, 'button', 'Bloqué');
+    const chip: HTMLElement = named(host, '[role="group"]', 'Filtre Statut');
+    const value: HTMLElement = named(chip, 'button', 'Bloqué');
     value.click();
     await fixture.whenStable();
 
-    const menu = menuNamed('Valeurs du filtre Statut');
-    const progress = named(menu, '[role="menuitemcheckbox"]', 'En cours');
+    const menu: HTMLElement = menuNamed('Valeurs du filtre Statut');
+    const progress: HTMLElement = named(menu, '[role="menuitemcheckbox"]', 'En cours');
     expect(named(menu, '[role="menuitemcheckbox"]', 'Bloqué').getAttribute('aria-checked')).toBe(
       'true',
     );
@@ -257,12 +392,12 @@ describe('CwFilterBar', () => {
 
   it('applies a typed text on Enter', async () => {
     await withFilters([{ field: 'title', operator: 'contains', value: null }]);
-    const chip = named(host, '[role="group"]', 'Filtre Titre');
-    const value = named(chip, 'button', '…');
+    const chip: HTMLElement = named(host, '[role="group"]', 'Filtre Titre');
+    const value: HTMLElement = named(chip, 'button', '…');
     value.click();
     await fixture.whenStable();
 
-    const field = document.querySelector<HTMLInputElement>(
+    const field: HTMLInputElement | null = document.querySelector<HTMLInputElement>(
       'input[aria-label="Valeurs du filtre Titre"]',
     );
     if (!field) throw new Error('No text field');
@@ -279,14 +414,14 @@ describe('CwFilterBar', () => {
       { field: 'status', operator: 'is', value: ['progress'] },
       { field: 'people', operator: 'is', value: ['CM'] },
     ]);
-    const remove = named(host, 'button', 'Retirer le filtre Statut');
+    const remove: HTMLElement = named(host, 'button', 'Retirer le filtre Statut');
     remove.focus();
     expect(key(remove, 'Backspace').defaultPrevented).toBe(true);
     await fixture.whenStable();
 
     expect(component.filters()).toEqual([{ field: 'people', operator: 'is', value: ['CM'] }]);
     expect(announced).toContain('Filtre Statut retiré');
-    const people = named(host, '[role="group"]', 'Filtre Assigné');
+    const people: HTMLElement = named(host, '[role="group"]', 'Filtre Assigné');
     expect(document.activeElement).toBe(named(people, 'button', 'Opérateur : est'));
 
     named(host, 'button', 'Retirer le filtre Assigné').click();
@@ -299,13 +434,13 @@ describe('CwFilterBar', () => {
     named(host, 'button', 'Ajouter un filtre').click();
     await fixture.whenStable();
 
-    const fields = menuNamed('Champs');
+    const fields: HTMLElement = menuNamed('Champs');
     named(fields, '[role="menuitem"]', 'Priorité').click();
     await fixture.whenStable();
 
     expect(component.filters()).toEqual([{ field: 'priority', operator: 'is', value: null }]);
     expect(announced).toContain('Filtre Priorité ajouté');
-    const chip = named(host, '[role="group"]', 'Filtre Priorité');
+    const chip: HTMLElement = named(host, '[role="group"]', 'Filtre Priorité');
     expect(named(chip, 'button', 'Choisir…').getAttribute('aria-expanded')).toBe('true');
     expect(menuNamed('Valeurs du filtre Priorité')).toBeTruthy();
   });
@@ -330,12 +465,12 @@ describe('CwFilterBar', () => {
     component.saved.set(SAVED);
     await withFilters([{ field: 'people', operator: 'is', value: ['CM'] }]);
 
-    const button = named(host, 'button', 'Mes tâches en retard');
+    const button: HTMLElement = named(host, 'button', 'Mes tâches en retard');
     expect(button.getAttribute('aria-haspopup')).toBe('menu');
     button.click();
     await fixture.whenStable();
 
-    const menu = menuNamed('Filtres enregistrés');
+    const menu: HTMLElement = menuNamed('Filtres enregistrés');
     expect(menu.textContent).toContain('Mes filtres');
     expect(
       named(menu, '[role="menuitem"]', 'Mes tâches en retard').getAttribute('aria-current'),

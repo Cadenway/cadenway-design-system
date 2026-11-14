@@ -1,6 +1,12 @@
 import { Component } from '@angular/core';
 
-/** The actions of an empty state, centered and wrapping: one main action at most. */
+/**
+ * Class CwEmptyContent
+ * @class CwEmptyContent
+ *
+ * @description
+ * Groups the empty state's centered, wrapping actions; the composition has at most one main action.
+ */
 @Component({
   selector: 'cw-empty-content',
   host: { class: 'flex flex-wrap justify-center gap-2' },

@@ -7,8 +7,13 @@ import { CwStep } from './step/step.component';
 import { CwStepper } from './stepper.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Stepper, every state of its sheet in the Design System artifact, in the light and the dark
  * theme. Copy from the sheet ("Dans Cadenway": first installation, JSON import).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Stepper',
@@ -17,10 +22,29 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story configuration for stepper examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Selects the light theme copy for interaction checks.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the themed examples.
+ *
+ * @returns {HTMLElement} Light theme section used for interaction checks.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -43,9 +67,12 @@ export const Horizontal: Story = {
         <cw-step label="Premier espace" />
       </cw-stepper>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const list = scope.getByRole('list', { name: 'Première installation' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole(role: string, options?: { name?: string }): HTMLElement;
+      getByText(text: RegExp): HTMLElement;
+    } = within(light(canvasElement));
+    const list: HTMLElement = scope.getByRole('list', { name: 'Première installation' });
     await expect(within(list).getAllByRole('button')).toHaveLength(2);
     await expect(scope.getByText(/Étape 3 sur 5/)).toBeVisible();
 
@@ -118,10 +145,13 @@ export const Keyboard: Story = {
         <cw-step label="Résumé" />
       </cw-stepper>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const list = scope.getByRole('list', { name: "Création d'un espace" });
-    const [name, members] = within(list).getAllByRole('button');
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole(role: string, options?: { name?: string }): HTMLElement;
+      getByText(text: RegExp): HTMLElement;
+    } = within(light(canvasElement));
+    const list: HTMLElement = scope.getByRole('list', { name: "Création d'un espace" });
+    const [name, members]: HTMLElement[] = within(list).getAllByRole('button');
 
     await userEvent.tab();
     await expect(name).toHaveFocus();

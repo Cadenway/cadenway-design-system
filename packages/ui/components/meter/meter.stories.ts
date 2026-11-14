@@ -5,9 +5,14 @@ import { CwMeter } from './meter.component';
 import type { CwMeterFormat, CwMeterZone } from './meter.types';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Meter, every state of its sheet in the Design System artifact, in the light and the dark theme.
  * Copy from the sheet's "Dans Cadenway" section; the password strength from the mockup
  * (`Inscription.dc.html`).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Meter',
@@ -16,19 +21,78 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story configuration for meter examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Selects the light theme copy for interaction checks.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the themed examples.
+ *
+ * @returns {HTMLElement} Light theme section used for interaction checks.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
-const decimal = (value: number): string =>
+/**
+ * Function decimal
+ *
+ * @description
+ * Formats an amount in French with at most one decimal place.
+ *
+ * @param {number} value - Amount to format.
+ * @returns {string} Localized amount.
+ */
+const decimal: (value: number) => string = (value: number): string =>
   new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 }).format(value);
-const gigabytes: CwMeterFormat = (value, max) => `${decimal(value)} Go sur ${decimal(max)} Go`;
-const seats: CwMeterFormat = (value, max) => `${String(value)} sur ${String(max)}`;
-const points: CwMeterFormat = (value) => `${String(value)} pts`;
+/**
+ * Function gigabytes
+ *
+ * @description
+ * Formats current and maximum storage in gigabytes.
+ *
+ * @param {number} value - Current storage amount.
+ * @param {number} max - Maximum storage amount.
+ * @returns {string} Formatted storage usage.
+ */
+const gigabytes: CwMeterFormat = (value: number, max: number): string =>
+  `${decimal(value)} Go sur ${decimal(max)} Go`;
+/**
+ * Function seats
+ *
+ * @description
+ * Formats occupied and available seats.
+ *
+ * @param {number} value - Number of occupied seats.
+ * @param {number} max - Number of available seats.
+ * @returns {string} Formatted seat usage.
+ */
+const seats: CwMeterFormat = (value: number, max: number): string =>
+  `${String(value)} sur ${String(max)}`;
+/**
+ * Function points
+ *
+ * @description
+ * Formats a measured point count.
+ *
+ * @param {number} value - Number of points.
+ * @returns {string} Formatted point count.
+ */
+const points: CwMeterFormat = (value: number): string => `${String(value)} pts`;
 
 /** The three forms: a continuous bar, whole blocks, series in one track with their legend. */
 export const Variants: Story = {
@@ -64,9 +128,9 @@ export const Zones: Story = {
         <cw-meter label="Charge du sprint" [value]="40" [max]="45" [low]="30" [high]="45" [optimum]="40" [format]="points" note="Charge idéale" />
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = light(canvasElement);
-    const zones = Array.from(scope.querySelectorAll('cw-meter')).map((meter) =>
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: HTMLElement = light(canvasElement);
+    const zones: (string | null)[] = Array.from(scope.querySelectorAll('cw-meter')).map((meter) =>
       meter.getAttribute('data-zone'),
     );
     await expect(zones).toEqual(['normal', 'high', 'critical', 'optimum']);
@@ -82,7 +146,7 @@ export const ThresholdAndOverrun: Story = {
         <cw-meter label="Charge du sprint 14" [value]="52" [max]="60" [threshold]="45" [format]="points" [formatAmount]="amount" />
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     await expect(within(light(canvasElement)).getByRole('meter')).toHaveAttribute(
       'aria-valuetext',
       '52 pts, +7',
@@ -138,12 +202,42 @@ export const InTable: Story = {
   }),
 };
 
-const levels = ['Trop court', 'Faible', 'Moyen', 'Bon', 'Excellent'] as const;
-// Meter sheet, "Dans Cadenway": four notches grenat, balise, foreground, jade. A low score is the bad
-// one, the reverse of a quota, so the zone is given rather than derived from the value.
+/**
+ * Constant levels
+ *
+ * @description
+ * Password strength labels ordered by the number of matched rules.
+ *
+ * @type {readonly ['Trop court', 'Faible', 'Moyen', 'Bon', 'Excellent']}
+ */
+const levels: readonly ['Trop court', 'Faible', 'Moyen', 'Bon', 'Excellent'] = [
+  'Trop court',
+  'Faible',
+  'Moyen',
+  'Bon',
+  'Excellent',
+] as const;
+
+/**
+ * Constant strengthZones
+ *
+ * @description
+ * Explicit zones for password strength, where low scores are undesirable.
+ *
+ * @type {readonly CwMeterZone[]}
+ */
 const strengthZones: readonly CwMeterZone[] = ['critical', 'critical', 'high', 'normal', 'optimum'];
 
-/** The four rules of the mockup (`Inscription.dc.html`), one point each. */
+/**
+ * Function score
+ *
+ * @description
+ * Counts the four password strength rules satisfied by a password.
+ *
+ * @param {string} password - Password to evaluate against the example rules.
+ *
+ * @returns {number} Number of satisfied strength rules.
+ */
 function score(password: string): number {
   return [
     password.length >= 12,
@@ -194,11 +288,16 @@ export const PasswordStrength: Story = {
         <cw-meter variant="segmented" size="sm" [segments]="4" [max]="4" [value]="notches(password)" [zone]="zone(password)" [format]="formatFor(password)" ariaLabel="Robustesse du mot de passe" />
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const field = scope.getByLabelText('Mot de passe');
-    const meters = scope.getAllByRole('meter', { name: 'Robustesse du mot de passe' });
-    const live = meters.at(-1);
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByLabelText(label: string): HTMLElement;
+      getAllByRole(role: string, options?: { name?: string }): HTMLElement[];
+    } = within(light(canvasElement));
+    const field: HTMLElement = scope.getByLabelText('Mot de passe');
+    const meters: HTMLElement[] = scope.getAllByRole('meter', {
+      name: 'Robustesse du mot de passe',
+    });
+    const live: HTMLElement | undefined = meters.at(-1);
 
     await userEvent.type(field, 'cadenway');
     await expect(live).toHaveAttribute('aria-valuetext', 'Trop court');
@@ -218,8 +317,10 @@ export const States: Story = {
         <cw-meter label="Non mesuré" [value]="null" note="Aucune donnée pour cette période" />
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole(role: string, options?: { name?: string }): HTMLElement } = within(
+      light(canvasElement),
+    );
     await expect(scope.getByRole('meter', { name: 'Non mesuré' })).toHaveAttribute(
       'aria-valuetext',
       'Aucune mesure',

@@ -1,12 +1,27 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { FormField, form, required } from '@angular/forms/signals';
+import { FormField, form, required, type FieldTree } from '@angular/forms/signals';
 
 import { CwSwitch } from './switch.component';
 
+/**
+ * Function control
+ *
+ * @description
+ * Finds a test switch by its aria-label or associated native label text.
+ *
+ * @param {HTMLElement} host - Container holding the switches and labels.
+ * @param {string} name - Exact accessible name to match.
+ *
+ * @returns {HTMLButtonElement} First matching switch button.
+ *
+ * @throws {Error} When no switch has the requested name.
+ */
 function control(host: HTMLElement, name: string): HTMLButtonElement {
-  const found = Array.from(host.querySelectorAll<HTMLButtonElement>('[role="switch"]')).find(
+  const found: HTMLButtonElement | undefined = Array.from(
+    host.querySelectorAll<HTMLButtonElement>('[role="switch"]'),
+  ).find(
     (element) =>
       element.getAttribute('aria-label') === name ||
       host.querySelector(`label[for="${element.id}"]`)?.textContent.trim() === name,
@@ -15,6 +30,13 @@ function control(host: HTMLElement, name: string): HTMLButtonElement {
   return found;
 }
 
+/**
+ * Class ModelHost
+ * @class ModelHost
+ *
+ * @description
+ * Test host with a mutable switch model and a disabled labelled switch.
+ */
 @Component({
   imports: [CwSwitch],
   template: `
@@ -28,8 +50,31 @@ function control(host: HTMLElement, name: string): HTMLButtonElement {
   `,
 })
 class ModelHost {
-  readonly mail = signal(false);
-  readonly changes = signal(0);
+  // #region Properties
+  /**
+   * Property mail
+   * @readonly
+   *
+   * @description
+   * Two-way checked model for the email notifications switch.
+   *
+   * @type {WritableSignal<boolean>}
+   * @default false
+   */
+  public readonly mail: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property changes
+   * @readonly
+   *
+   * @description
+   * Counts checked-change events from the email switch.
+   *
+   * @type {WritableSignal<number>}
+   * @default 0
+   */
+  public readonly changes: WritableSignal<number> = signal(0);
+  // #endregion
 }
 
 describe('CwSwitch', () => {
@@ -46,7 +91,7 @@ describe('CwSwitch', () => {
     });
 
     it('toggles the checked model on click and emits checkedChange', async () => {
-      const mail = control(host, 'Notifications par e-mail');
+      const mail: HTMLButtonElement = control(host, 'Notifications par e-mail');
       expect(mail.getAttribute('aria-checked')).toBe('false');
 
       mail.click();
@@ -74,20 +119,41 @@ describe('CwSwitch', () => {
   });
 
   it('is the value accessor of a reactive form control and reports its invalid state', async () => {
+    /**
+     * Class ReactiveHost
+     * @class ReactiveHost
+     *
+     * @description
+     * Test host binding a required-true reactive control to the switch.
+     */
     @Component({
       imports: [CwSwitch, ReactiveFormsModule],
       template: `<cw-switch [formControl]="sync" ariaLabel="Synchroniser le calendrier" />`,
     })
     class ReactiveHost {
-      readonly sync = new FormControl(false, {
+      // #region Properties
+      /**
+       * Property sync
+       * @readonly
+       *
+       * @description
+       * Non-nullable boolean control validating that calendar synchronization is enabled.
+       *
+       * @type {FormControl<boolean>}
+       */
+      public readonly sync: FormControl<boolean> = new FormControl<boolean>(false, {
         nonNullable: true,
         validators: [(control) => Validators.requiredTrue(control)],
       });
+      // #endregion
     }
 
-    const fixture = TestBed.createComponent(ReactiveHost);
+    const fixture: ComponentFixture<ReactiveHost> = TestBed.createComponent(ReactiveHost);
     fixture.autoDetectChanges();
-    const sync = control(fixture.nativeElement as HTMLElement, 'Synchroniser le calendrier');
+    const sync: HTMLButtonElement = control(
+      fixture.nativeElement as HTMLElement,
+      'Synchroniser le calendrier',
+    );
 
     fixture.componentInstance.sync.setValue(true);
     await fixture.whenStable();
@@ -105,21 +171,43 @@ describe('CwSwitch', () => {
   });
 
   it('works with ngModel', async () => {
+    /**
+     * Class TemplateHost
+     * @class TemplateHost
+     *
+     * @description
+     * Test host binding the daily digest setting through template-driven `ngModel`.
+     */
     @Component({
       imports: [CwSwitch, FormsModule],
       template: `<cw-switch [(ngModel)]="digest" ariaLabel="Résumé quotidien" />`,
     })
     class TemplateHost {
-      readonly digest = signal(true);
+      // #region Properties
+      /**
+       * Property digest
+       * @readonly
+       *
+       * @description
+       * Boolean model updated by the template-driven switch.
+       *
+       * @type {WritableSignal<boolean>}
+       * @default true
+       */
+      public readonly digest: WritableSignal<boolean> = signal(true);
+      // #endregion
     }
 
-    const fixture = TestBed.createComponent(TemplateHost);
+    const fixture: ComponentFixture<TemplateHost> = TestBed.createComponent(TemplateHost);
     fixture.autoDetectChanges();
     await fixture.whenStable();
     // NgModel writes its value in a microtask after the first check.
     await new Promise((resolve) => setTimeout(resolve));
     await fixture.whenStable();
-    const digest = control(fixture.nativeElement as HTMLElement, 'Résumé quotidien');
+    const digest: HTMLButtonElement = control(
+      fixture.nativeElement as HTMLElement,
+      'Résumé quotidien',
+    );
     expect(digest.getAttribute('aria-checked')).toBe('true');
 
     digest.click();
@@ -128,20 +216,51 @@ describe('CwSwitch', () => {
   });
 
   it('is a Signal Forms checkbox control', async () => {
+    /**
+     * Class SignalHost
+     * @class SignalHost
+     *
+     * @description
+     * Test host binding a Signal Forms privacy field to the switch.
+     */
     @Component({
       imports: [CwSwitch, FormField],
       template: `<cw-switch [formField]="settings.private" ariaLabel="Espace privé" />`,
     })
     class SignalHost {
-      readonly model = signal({ private: false });
-      readonly settings = form(this.model, (path) => {
+      // #region Properties
+      /**
+       * Property model
+       * @readonly
+       *
+       * @description
+       * Writable settings model containing the privacy flag.
+       *
+       * @type {WritableSignal<{ private: boolean }>}
+       */
+      public readonly model: WritableSignal<{ private: boolean }> = signal({ private: false });
+
+      /**
+       * Property settings
+       * @readonly
+       *
+       * @description
+       * Signal Forms tree that marks the privacy field as required.
+       *
+       * @type {FieldTree<{ private: boolean }>}
+       */
+      public readonly settings: FieldTree<{ private: boolean }> = form(this.model, (path) => {
         required(path.private);
       });
+      // #endregion
     }
 
-    const fixture = TestBed.createComponent(SignalHost);
+    const fixture: ComponentFixture<SignalHost> = TestBed.createComponent(SignalHost);
     fixture.autoDetectChanges();
-    const privateSpace = control(fixture.nativeElement as HTMLElement, 'Espace privé');
+    const privateSpace: HTMLButtonElement = control(
+      fixture.nativeElement as HTMLElement,
+      'Espace privé',
+    );
 
     privateSpace.click();
     await fixture.whenStable();

@@ -33,10 +33,15 @@ import { CwToolbarSpacer } from './toolbar-spacer/toolbar-spacer.component';
 import { CwToolbar } from './toolbar.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Toolbar (Toolbar sheet of the Design System artifact), in the light and the dark theme: the
  * view bar of the mockup's Liste screen (`App.dc.html`, « Outils de la vue »), in both sizes, then
  * narrowed so that the movable controls go into the « Plus » menu. Copy from the mockup and the
  * sheet's preview.
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Toolbar',
@@ -78,21 +83,59 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story configuration for toolbar examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Selects the light theme copy for interaction checks.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the themed examples.
+ *
+ * @returns {HTMLElement} Light theme section used for interaction checks.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
 /* The filter count is hidden from screen readers: the number is in the button's name (sheet,
    "Accessibilité"). */
-const COUNT =
+/**
+ * Constant COUNT
+ *
+ * @description
+ * Classes for the decorative active-filter counter.
+ *
+ * @type {string}
+ */
+const COUNT: string =
   'inline-flex h-4 min-w-4 items-center justify-center rounded-sm bg-secondary px-1 text-[11px] leading-none font-semibold tabular-nums text-secondary-foreground';
 
+/**
+ * Function bar
+ *
+ * @description
+ * Builds shared toolbar controls at the requested size and search width.
+ *
+ * @param {'default' | 'sm'} size - Control size for the toolbar.
+ * @param {string} search - Classes controlling search field width.
+ *
+ * @returns {string} Markup for the shared toolbar controls.
+ */
 function bar(size: 'default' | 'sm', search: string): string {
-  const button = size === 'sm' ? 'sm' : 'default';
+  const button: 'sm' | 'default' = size === 'sm' ? 'sm' : 'default';
   return `
     <cw-toolbar-group ariaLabel="Affichage">
       <button cwButton variant="outline" size="${button}" cwToolbarItem pinned aria-label="Filtrer, 2 filtres actifs">
@@ -118,7 +161,16 @@ function bar(size: 'default' | 'sm', search: string): string {
     </cw-input-group>`;
 }
 
-const CREATE = (size: 'default' | 'sm'): string => `
+/**
+ * Function CREATE
+ *
+ * @description
+ * Builds the overflow control and pinned creation button for a given size.
+ *
+ * @param {'default' | 'sm'} size - Size of the creation button.
+ * @returns {string} Markup for the overflow and creation controls.
+ */
+const CREATE: (size: 'default' | 'sm') => string = (size: 'default' | 'sm'): string => `
   <cw-toolbar-overflow />
   <button cwButton size="${size}" cwToolbarItem pinned><ng-icon name="phosphorPlusBold" /> Créer une tâche</button>`;
 
@@ -160,8 +212,10 @@ export const Disabled: Story = {
         ${CREATE('default')}
       </cw-toolbar>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole(role: string, options?: { name?: string }): HTMLElement } = within(
+      light(canvasElement),
+    );
     scope.getByRole('button', { name: 'Trier' }).focus();
     await userEvent.keyboard('{ArrowRight}');
     await expect(scope.getByRole('button', { name: 'Créer une tâche' })).toHaveFocus();
@@ -193,16 +247,21 @@ export const Overflow: Story = {
       </cw-toolbar>
       <p class="text-xs text-muted-foreground">{{ count }} élément(s) dans « Plus »</p>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const more = await scope.findByRole('button', { name: 'Plus d’options' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole(role: string, options?: { name?: string }): HTMLElement;
+      findByRole(role: string, options?: { name?: string }): Promise<HTMLElement>;
+    } = within(light(canvasElement));
+    const more: HTMLElement = await scope.findByRole('button', { name: 'Plus d’options' });
     await waitFor(() => expect(more).toBeVisible());
     await expect(scope.getByRole('toolbar')).toHaveAttribute('data-overflowing');
     await expect(scope.getByRole('button', { name: 'Filtrer' })).toBeVisible();
 
     await userEvent.click(more);
     await expect(more).toHaveAttribute('aria-expanded', 'true');
-    const menu = await within(document.body).findByRole('menu', { name: 'Plus d’options' });
+    const menu: HTMLElement = await within(document.body).findByRole('menu', {
+      name: 'Plus d’options',
+    });
     await expect(
       within(menu).getByRole('menuitem', { name: 'Exporter en CSV' }),
     ).toBeInTheDocument();
@@ -231,10 +290,12 @@ export const Keyboard: Story = {
         ${CREATE('default')}
       </cw-toolbar>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const filter = scope.getByRole('button', { name: 'Filtrer' });
-    const create = scope.getByRole('button', { name: 'Créer une tâche' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole(role: string, options?: { name?: string }): HTMLElement } = within(
+      light(canvasElement),
+    );
+    const filter: HTMLElement = scope.getByRole('button', { name: 'Filtrer' });
+    const create: HTMLElement = scope.getByRole('button', { name: 'Créer une tâche' });
     filter.focus();
 
     await userEvent.keyboard('{ArrowRight}');

@@ -4,22 +4,38 @@ import { phosphorCaretDownBold } from '@ng-icons/phosphor-icons/bold';
 
 import { type BreadcrumbItemHandle, CW_BREADCRUMB_ITEM } from '../breadcrumb.token';
 
-/* Literal class strings (Breadcrumb sheet and preview of the Design System artifact), so Tailwind
-   finds them in the compiled package. A leading icon is an `ng-icon` of 16 px. */
-const LINK =
+/**
+ * Constant LINK
+ *
+ * @description
+ * Literal breadcrumb link classes from the sheet, including 16-pixel leading icons and focus styling.
+ *
+ * @type {string}
+ */
+const LINK: string =
   'inline-flex items-center gap-1.5 rounded-sm transition-colors motion-reduce:transition-none hover:text-foreground ' +
   'outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ' +
   '[&>ng-icon]:shrink-0 [&>ng-icon]:[--ng-icon__size:1rem]';
 
-/* Level with a menu (anatomy 5): the label and a `caret-down` on a hover veil, selected while the
-   menu of the sibling levels is open (`data-state` set by `[cwMenuTriggerFor]`). */
-const MENU_LEVEL =
+/**
+ * Constant MENU_LEVEL
+ *
+ * @description
+ * Literal classes for a menu trigger level, including the selected state when its menu is open.
+ *
+ * @type {string}
+ */
+const MENU_LEVEL: string =
   'relative isolate -mx-1 inline-flex items-center gap-1 overflow-hidden rounded-md px-1 transition-colors motion-reduce:transition-none ' +
   'hover:bg-accent hover:text-foreground data-[state=open]:bg-selected data-[state=open]:text-foreground ' +
   'outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ' +
   '[&>ng-icon]:shrink-0 [&>ng-icon]:[--ng-icon__size:1rem]';
 
 /**
+ * Class CwBreadcrumbLink
+ * @class CwBreadcrumbLink
+ *
+ * @description
  * A clickable level of a breadcrumb: the space, the list, the parent task (Breadcrumb sheet of the
  * Design System artifact, anatomy 2). Write it directly inside `nav[cwBreadcrumb]`.
  *
@@ -30,9 +46,6 @@ const MENU_LEVEL =
  * of « … », which clicks it: its `routerLink` or `href` and its `(click)` keep working.
  */
 @Component({
-  // A component on a native element (attribute selector), as its sheet requires: the element keeps
-  // its native role, focus and navigation. The lint rule only knows element selectors.
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'a[cwBreadcrumbLink], button[cwBreadcrumbLink]',
   imports: [NgIcon],
   providers: [
@@ -46,16 +59,65 @@ const MENU_LEVEL =
   templateUrl: './breadcrumb-link.component.html',
 })
 export class CwBreadcrumbLink implements BreadcrumbItemHandle {
-  /** The link or button element. */
-  readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
-  /** Always false: a link is never the current page. */
-  readonly isPage = false;
+  // #region Properties
+  /**
+   * Property element
+   * @readonly
+   *
+   * @description
+   * Native link or button element projected into the breadcrumb list.
+   *
+   * @type {HTMLElement}
+   */
+  public readonly element: HTMLElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
 
-  protected readonly isButton = this.element.tagName === 'BUTTON';
-  protected readonly classes = this.isButton ? MENU_LEVEL : LINK;
+  /**
+   * Property isPage
+   * @readonly
+   *
+   * @description
+   * Always false because this handle represents a clickable level rather than the current page.
+   *
+   * @type {false}
+   * @default false
+   */
+  public readonly isPage: false = false;
 
-  /** The visible text of the level. */
-  label(): string {
+  /**
+   * Property isButton
+   * @readonly
+   *
+   * @description
+   * Whether the host is a button used as a menu trigger.
+   *
+   * @type {boolean}
+   */
+  protected readonly isButton: boolean = this.element.tagName === 'BUTTON';
+
+  /**
+   * Property classes
+   * @readonly
+   *
+   * @description
+   * Initial host classes selected for a link or menu button.
+   *
+   * @type {string}
+   */
+  protected readonly classes: string = this.isButton ? MENU_LEVEL : LINK;
+  // #endregion
+
+  // #region Methods
+  /**
+   * Method label
+   * @method label
+   *
+   * @description
+   * Reads the level's visible text for the folded-level menu.
+   *
+   * @returns {string} Host text with leading and trailing whitespace removed.
+   */
+  public label(): string {
     return this.element.textContent.trim();
   }
+  // #endregion
 }

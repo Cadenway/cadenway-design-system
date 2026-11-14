@@ -1,4 +1,4 @@
-import { signal } from '@angular/core';
+import { signal, type WritableSignal } from '@angular/core';
 import { CwButton } from '@cadenway/ui/components/button';
 import { CwField, CwFieldLabel } from '@cadenway/ui/components/field';
 import { CwInput } from '@cadenway/ui/components/input';
@@ -22,11 +22,16 @@ import { CwDialogTrigger } from './dialog-trigger/dialog-trigger.directive';
 import { CwDialog } from './dialog.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Dialog, every state of its sheet in the Design System artifact, in the light and the dark theme.
  * The open window renders in a CDK overlay on the page body, outside the theme scopes: the visual
  * states are static renderings of the preview (the window in a framed page), the interactive
  * stories open the real dialog in their play function and close it again. Copy from the mockup
  * (`App.dc.html`) and the sheet.
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Dialog',
@@ -54,16 +59,43 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story for dialog examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Returns the light-theme story container.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing theme scopes.
+ *
+ * @returns {HTMLElement} Container for the light theme.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
 // The page behind the static window, from the preview: a framed view under the backdrop.
-const PAGE = `
+/**
+ * Constant PAGE
+ *
+ * @description
+ * Framed page shown behind static dialog examples.
+ *
+ * @type {string}
+ */
+const PAGE: string = `
   <div class="flex h-full" aria-hidden="true">
     <div class="w-36 shrink-0 space-y-2.5 border-r p-3">
       <div class="h-2.5 w-16 rounded-full bg-secondary"></div>
@@ -137,10 +169,14 @@ export const Keyboard: Story = {
         </cw-dialog-footer>
       </cw-dialog>`,
   }),
-  play: async ({ canvasElement }) => {
-    const trigger = within(light(canvasElement)).getByRole('button', { name: 'Renommer' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const trigger: HTMLElement = within(light(canvasElement)).getByRole('button', {
+      name: 'Renommer',
+    });
     await userEvent.click(trigger);
-    const dialog = await within(document.body).findByRole('dialog', { name: 'Renommer la liste' });
+    const dialog: HTMLElement = await within(document.body).findByRole('dialog', {
+      name: 'Renommer la liste',
+    });
     await waitFor(() => expect(within(dialog).getByRole('textbox', { name: 'Nom' })).toHaveFocus());
 
     await userEvent.keyboard('{Escape}');
@@ -185,11 +221,13 @@ export const ScrollableWithoutClose: Story = {
         </cw-dialog-footer>
       </cw-dialog>`,
   }),
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     await userEvent.click(
       within(light(canvasElement)).getByRole('button', { name: 'Raccourcis clavier' }),
     );
-    const dialog = await within(document.body).findByRole('dialog', { name: 'Raccourcis clavier' });
+    const dialog: HTMLElement = await within(document.body).findByRole('dialog', {
+      name: 'Raccourcis clavier',
+    });
     await expect(within(dialog).queryAllByRole('button', { name: 'Fermer' })).toHaveLength(1);
 
     await userEvent.click(within(dialog).getByRole('button', { name: 'Fermer' }));
@@ -217,9 +255,11 @@ export const Sizes: Story = {
         }
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     await userEvent.click(within(light(canvasElement)).getByRole('button', { name: 'lg' }));
-    const dialog = await within(document.body).findByRole('dialog', { name: 'Taille lg' });
+    const dialog: HTMLElement = await within(document.body).findByRole('dialog', {
+      name: 'Taille lg',
+    });
     await expect(dialog.firstElementChild).toHaveAttribute('data-size', 'lg');
 
     await userEvent.keyboard('{Escape}');
@@ -230,9 +270,9 @@ export const Sizes: Story = {
 /** While `pending`, Escape and the close buttons are ignored; the consumer closes it when done. */
 export const Pending: Story = {
   render: () => {
-    const pending = signal(false);
+    const pending: WritableSignal<boolean> = signal(false);
     // The consumer's submission: pending for a moment, then it closes the window itself.
-    const save = (dialog: CwDialog): void => {
+    const save: (dialog: CwDialog) => void = (dialog: CwDialog): void => {
       pending.set(true);
       setTimeout(() => {
         pending.set(false);
@@ -254,9 +294,11 @@ export const Pending: Story = {
       </cw-dialog>`,
     };
   },
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     await userEvent.click(within(light(canvasElement)).getByRole('button', { name: 'Renommer' }));
-    const dialog = await within(document.body).findByRole('dialog', { name: 'Renommer la liste' });
+    const dialog: HTMLElement = await within(document.body).findByRole('dialog', {
+      name: 'Renommer la liste',
+    });
     await userEvent.click(within(dialog).getByRole('button', { name: 'Renommer' }));
     await waitFor(() => expect(dialog.firstElementChild).toHaveAttribute('aria-busy', 'true'));
 

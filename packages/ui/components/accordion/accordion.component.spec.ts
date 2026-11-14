@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CwAccordionContent } from './accordion-content/accordion-content.component';
@@ -7,6 +7,13 @@ import { CwAccordionTrigger } from './accordion-trigger/accordion-trigger.compon
 import { CwAccordion } from './accordion.component';
 import type { CwAccordionValue } from './accordion.types';
 
+/**
+ * Class Host
+ * @class Host
+ *
+ * @description
+ * Hosts single and multiple accordions for interaction tests.
+ */
 @Component({
   imports: [CwAccordion, CwAccordionItem, CwAccordionTrigger, CwAccordionContent],
   template: `
@@ -38,31 +45,104 @@ import type { CwAccordionValue } from './accordion.types';
   `,
 })
 class Host {
-  readonly faq = signal<CwAccordionValue>('sauvegarde');
-  readonly sections = signal<CwAccordionValue>([]);
-  readonly collapsible = signal(true);
+  // #region Properties
+  /**
+   * Property faq
+   * @readonly
+   *
+   * @description
+   * Selected FAQ section.
+   *
+   * @type {WritableSignal<CwAccordionValue>}
+   */
+  public readonly faq: WritableSignal<CwAccordionValue> = signal<CwAccordionValue>('sauvegarde');
+
+  /**
+   * Property sections
+   * @readonly
+   *
+   * @description
+   * Selected multiple-mode sections.
+   *
+   * @type {WritableSignal<CwAccordionValue>}
+   */
+  public readonly sections: WritableSignal<CwAccordionValue> = signal<CwAccordionValue>([]);
+
+  /**
+   * Property collapsible
+   * @readonly
+   *
+   * @description
+   * Whether the FAQ permits closing its selected section.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly collapsible: WritableSignal<boolean> = signal(true);
+  // #endregion
 }
 
+/**
+ * Function trigger
+ *
+ * @description
+ * Finds a trigger by its visible text.
+ *
+ * @param {HTMLElement} host - Fixture containing the triggers.
+ * @param {string} name - Visible trigger text.
+ *
+ * @returns {HTMLButtonElement} Matching trigger button.
+ */
 function trigger(host: HTMLElement, name: string): HTMLButtonElement {
-  const found = Array.from(host.querySelectorAll('button')).find(
+  const found: HTMLButtonElement | undefined = Array.from(host.querySelectorAll('button')).find(
     (element) => element.textContent.trim() === name,
   );
   if (!found) throw new Error(`No trigger named ${name}`);
   return found;
 }
 
+/**
+ * Function region
+ *
+ * @description
+ * Finds the region controlled by the named trigger.
+ *
+ * @param {HTMLElement} host - Fixture containing the controlled regions.
+ * @param {string} name - Visible text of the controlling trigger.
+ *
+ * @returns {HTMLElement} Region controlled by the named trigger.
+ */
 function region(host: HTMLElement, name: string): HTMLElement {
-  const id = trigger(host, name).getAttribute('aria-controls') ?? '';
-  const found = host.querySelector<HTMLElement>(`#${id}`);
+  const id: string = trigger(host, name).getAttribute('aria-controls') ?? '';
+  const found: HTMLElement | null = host.querySelector<HTMLElement>(`#${id}`);
   if (!found) throw new Error(`No region for ${name}`);
   return found;
 }
 
-// The CDK key manager reads `keyCode`, which the KeyboardEvent constructor leaves at 0.
+/**
+ * Constant KEY_CODES
+ *
+ * @description
+ * Key codes read by the CDK keyboard manager.
+ *
+ * @type {Record<string, number>}
+ */
 const KEY_CODES: Record<string, number> = { End: 35, Home: 36, ArrowUp: 38, ArrowDown: 40 };
 
+/**
+ * Function press
+ *
+ * @description
+ * Dispatches a keyboard event with the key code expected by the CDK.
+ *
+ * @param {HTMLElement} target - Element receiving the keyboard event.
+ * @param {string} key - Keyboard key to dispatch.
+ */
 function press(target: HTMLElement, key: string): void {
-  const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+  const event: KeyboardEvent = new KeyboardEvent('keydown', {
+    key,
+    bubbles: true,
+    cancelable: true,
+  });
   Object.defineProperty(event, 'keyCode', { value: KEY_CODES[key] });
   target.dispatchEvent(event);
 }
@@ -83,8 +163,8 @@ describe('CwAccordion', () => {
   });
 
   it('wires each trigger, in a heading, to its named region', () => {
-    const backup = trigger(host, 'Comment sauvegarder mon instance ?');
-    const content = region(host, 'Comment sauvegarder mon instance ?');
+    const backup: HTMLButtonElement = trigger(host, 'Comment sauvegarder mon instance ?');
+    const content: HTMLElement = region(host, 'Comment sauvegarder mon instance ?');
 
     expect(backup.parentElement?.tagName).toBe('H3');
     expect(backup.getAttribute('aria-expanded')).toBe('true');
@@ -123,7 +203,7 @@ describe('CwAccordion', () => {
     await fixture.whenStable();
     expect(fixture.componentInstance.sections()).toEqual(['champs', 'historique']);
 
-    const automations = trigger(host, 'Automatisations');
+    const automations: HTMLButtonElement = trigger(host, 'Automatisations');
     expect(automations.disabled).toBe(true);
 
     trigger(host, 'Champs personnalisés').click();
@@ -132,8 +212,8 @@ describe('CwAccordion', () => {
   });
 
   it('moves between triggers with the arrows, Home and End, skipping disabled ones', async () => {
-    const fields = trigger(host, 'Champs personnalisés');
-    const history = trigger(host, 'Historique');
+    const fields: HTMLButtonElement = trigger(host, 'Champs personnalisés');
+    const history: HTMLButtonElement = trigger(host, 'Historique');
     fields.focus();
 
     press(fields, 'ArrowDown');

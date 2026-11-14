@@ -1,7 +1,13 @@
 import type { CwAvatarSize } from './avatar.types';
 
-/* Literal class strings (Avatar sheet and preview of the Design System artifact), so Tailwind finds
-   them in the compiled package. */
+/**
+ * Constant SIZES
+ *
+ * @description
+ * Literal avatar size classes, discoverable by Tailwind in the compiled package.
+ *
+ * @type {Record<CwAvatarSize, string>}
+ */
 export const SIZES: Record<CwAvatarSize, string> = {
   xs: 'size-5',
   sm: 'size-6',
@@ -9,7 +15,14 @@ export const SIZES: Record<CwAvatarSize, string> = {
   lg: 'size-10',
 };
 
-/* The fallback icon and the « Non assigné » icon: `size-3` to `size-5` of the sheet. */
+/**
+ * Constant ICON_SIZES
+ *
+ * @description
+ * Fallback and unassigned icon sizes for each avatar size.
+ *
+ * @type {Record<CwAvatarSize, string>}
+ */
 export const ICON_SIZES: Record<CwAvatarSize, string> = {
   xs: '0.75rem',
   sm: '0.875rem',

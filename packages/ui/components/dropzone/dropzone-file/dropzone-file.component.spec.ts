@@ -1,10 +1,17 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
+import type { Mock } from 'vitest';
 
 import type { CwDropzoneFileState } from '../dropzone.types';
 import { CwDropzoneFile } from './dropzone-file.component';
 
+/**
+ * Class Host
+ *
+ * @description
+ * Hosts an upload row with controllable state and captured actions.
+ */
 @Component({
   imports: [CwDropzoneFile],
   template: `
@@ -24,14 +31,67 @@ import { CwDropzoneFile } from './dropzone-file.component';
   `,
 })
 class Host {
-  readonly state = signal<CwDropzoneFileState>('uploading');
-  readonly error = signal('');
-  readonly retryable = signal(false);
-  readonly events = signal<string[]>([]);
+  // #region Properties
+  /**
+   * Property state
+   * @readonly
+   *
+   * @description
+   * Current upload state.
+   *
+   * @type {WritableSignal<CwDropzoneFileState>}
+   */
+  public readonly state: WritableSignal<CwDropzoneFileState> =
+    signal<CwDropzoneFileState>('uploading');
+
+  /**
+   * Property error
+   * @readonly
+   *
+   * @description
+   * Current upload error message.
+   *
+   * @type {WritableSignal<string>}
+   */
+  public readonly error: WritableSignal<string> = signal('');
+
+  /**
+   * Property retryable
+   * @readonly
+   *
+   * @description
+   * Whether retry is available.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly retryable: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property events
+   * @readonly
+   *
+   * @description
+   * Recorded upload actions.
+   *
+   * @type {WritableSignal<string[]>}
+   */
+  public readonly events: WritableSignal<string[]> = signal<string[]>([]);
+  // #endregion
 }
 
+/**
+ * Function button
+ *
+ * @description
+ * Finds a file action by its accessible name.
+ *
+ * @param {HTMLElement} host - Fixture containing file actions.
+ * @param {string} name - Accessible action name.
+ *
+ * @returns {HTMLButtonElement} Matching action button.
+ */
 function button(host: HTMLElement, name: string): HTMLButtonElement {
-  const found = Array.from(host.querySelectorAll('button')).find(
+  const found: HTMLButtonElement | undefined = Array.from(host.querySelectorAll('button')).find(
     (element) => element.getAttribute('aria-label') === name,
   );
   if (!found) throw new Error(`No button named ${name}`);
@@ -51,7 +111,7 @@ describe('CwDropzoneFile', () => {
   });
 
   it('is a list item with a named progress bar and a cancel button while uploading', () => {
-    const bar = host.querySelector('[role="progressbar"]');
+    const bar: Element | null = host.querySelector('[role="progressbar"]');
 
     expect(host.querySelector('[role="listitem"]')).not.toBeNull();
     expect(bar?.getAttribute('aria-label')).toBe('Envoi de export-taches.csv');
@@ -71,7 +131,10 @@ describe('CwDropzoneFile', () => {
   });
 
   it('announces the end of the upload and offers to remove the file', async () => {
-    const announce = vi.spyOn(TestBed.inject(LiveAnnouncer), 'announce');
+    const announce: Mock<LiveAnnouncer['announce']> = vi.spyOn(
+      TestBed.inject(LiveAnnouncer),
+      'announce',
+    );
     component.state.set('done');
     await fixture.whenStable();
 

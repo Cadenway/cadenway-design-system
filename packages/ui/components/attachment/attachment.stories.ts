@@ -4,8 +4,13 @@ import { expect, userEvent, within } from 'storybook/test';
 import { CwAttachment } from './attachment.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Attachment, every state of its sheet in the Design System artifact, in the light and the dark
  * theme. Copy from the mockup (`App.dc.html`, attachments tab and comments).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Attachment',
@@ -14,10 +19,30 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story for the attachment examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Returns the light-theme story container.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the theme scopes.
+ * @returns {HTMLElement} Container for the light theme.
+ *
+ * @throws {Error} When the light-theme container is missing.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -83,8 +108,10 @@ export const Keyboard: Story = {
   render: () => ({
     template: `<cw-attachment class="max-w-xs" name="specs-export.pdf" [fileSize]="2516582" href="#specs" />`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options: { name: string }) => HTMLElement;
+    } = within(light(canvasElement));
     await userEvent.tab();
     await expect(scope.getByRole('link', { name: 'specs-export.pdf' })).toHaveFocus();
     await userEvent.tab();

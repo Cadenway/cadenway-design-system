@@ -32,10 +32,15 @@ import { CwCommandLoading } from './command-loading/command-loading.component';
 import { CwCommandSeparator } from './command-separator/command-separator.component';
 
 /**
- * Command, every state of its sheet in the Design System artifact, in the light and the dark theme.
+ * Constant meta
+ *
+ * @description
+ * Command states from the design system sheet in light and dark themes.
  * The palette renders in a CDK dialog on the page body, outside the theme scopes: the visual states
  * use the inline command; the palette story opens the real one with Ctrl K in its play function.
  * Copy from the mockup (`App.dc.html`, the palette) and the sheet.
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Command',
@@ -76,17 +81,51 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration for command examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Finds the light theme section of the story canvas.
+ *
+ * @param {HTMLElement} canvasElement - Canvas containing the themed examples.
+ * @returns {HTMLElement} Light theme section.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
-const PLACEHOLDER = 'Rechercher une tâche, un espace ou une action…';
+/**
+ * Constant PLACEHOLDER
+ *
+ * @description
+ * Search prompt used by command examples.
+ *
+ * @type {string}
+ */
+const PLACEHOLDER: string = 'Rechercher une tâche, un espace ou une action…';
 
-const SUGGESTIONS = `
+/**
+ * Constant SUGGESTIONS
+ *
+ * @description
+ * Shared command groups and items used by the example templates.
+ *
+ * @type {string}
+ */
+const SUGGESTIONS: string = `
   <cw-command-group heading="Suggestions">
     <cw-command-item><ng-icon name="phosphorPlusBold" class="text-muted-foreground" aria-hidden="true" />Créer une tâche<kbd cwKbd>C</kbd></cw-command-item>
     <cw-command-item><ng-icon name="phosphorSquaresFourBold" class="text-muted-foreground" aria-hidden="true" />Afficher le tableau<kbd cwKbd>V</kbd></cw-command-item>
@@ -181,12 +220,13 @@ export const Keyboard: Story = {
         <cw-command-list>${SUGGESTIONS}</cw-command-list>
       </cw-command>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
-    const field = scope.getByRole('combobox', { name: 'Commande' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole: (role: string, options: { name: string | RegExp }) => HTMLElement } =
+      within(light(canvasElement));
+    const field: HTMLElement = scope.getByRole('combobox', { name: 'Commande' });
     await userEvent.click(field);
     await userEvent.keyboard('{ArrowDown}{ArrowDown}');
-    const active = field.getAttribute('aria-activedescendant') ?? '';
+    const active: string = field.getAttribute('aria-activedescendant') ?? '';
     await expect(light(canvasElement).querySelector(`#${active}`)).toHaveTextContent('CAD-482');
 
     await userEvent.type(field, 'csv');
@@ -211,10 +251,13 @@ export const Palette: Story = {
       <p class="text-sm text-muted-foreground">Appuyez sur <kbd cwKbd>Ctrl</kbd> <kbd cwKbd>K</kbd>.</p>`,
   }),
   play: async () => {
-    const body = within(document.body);
+    const body: {
+      findByRole: (role: string, options: { name: string }) => Promise<HTMLElement>;
+      queryByRole: (role: string) => HTMLElement | null;
+    } = within(document.body);
     await userEvent.keyboard('{Control>}k{/Control}');
-    const palette = await body.findByRole('dialog', { name: 'Palette de commandes' });
-    const field = within(palette).getByRole('combobox');
+    const palette: HTMLElement = await body.findByRole('dialog', { name: 'Palette de commandes' });
+    const field: HTMLElement = within(palette).getByRole('combobox');
     await waitFor(() => expect(field).toHaveFocus());
 
     await userEvent.type(field, 'tableau');

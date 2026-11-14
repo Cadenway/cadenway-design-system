@@ -1,6 +1,12 @@
 import { Component } from '@angular/core';
 
-/** A run of welded boxes inside `cw-input-otp` (3 + 3 for six digits, 4 + 4 for a recovery code). */
+/**
+ * Class CwInputOtpGroup
+ * @class CwInputOtpGroup
+ *
+ * @description
+ * A run of adjacent code boxes inside an OTP field.
+ */
 @Component({
   selector: 'cw-input-otp-group',
   host: { class: 'flex items-center' },

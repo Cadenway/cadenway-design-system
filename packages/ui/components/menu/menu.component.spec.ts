@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CwMenuGroup } from './menu-group/menu-group.component';
@@ -12,6 +12,12 @@ import { CwMenuShortcut } from './menu-shortcut/menu-shortcut.component';
 import { CwMenuTriggerFor } from './menu-trigger-for/menu-trigger-for.directive';
 import { CwMenu } from './menu.component';
 
+/**
+ * Component Host
+ *
+ * @description
+ * Hosts menus and records their actions for interaction tests.
+ */
 @Component({
   imports: [
     CwMenu,
@@ -64,12 +70,59 @@ import { CwMenu } from './menu.component';
   `,
 })
 class Host {
-  readonly log = signal<string[]>([]);
-  readonly closedCount = signal(0);
-  readonly subtasks = signal(true);
-  readonly groupBy = signal('statut');
+  // #region Properties
+  /**
+   * Property log
+   *
+   * @description
+   * Action names captured by the fixture.
+   *
+   * @type {WritableSignal<string[]>}
+   * @readonly
+   */
+  public readonly log: WritableSignal<string[]> = signal<string[]>([]);
+
+  /**
+   * Property closedCount
+   *
+   * @description
+   * Number of menu close events.
+   *
+   * @type {WritableSignal<number>}
+   * @readonly
+   */
+  public readonly closedCount: WritableSignal<number> = signal(0);
+
+  /**
+   * Property subtasks
+   *
+   * @description
+   * Checked state of the subtask display option.
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  public readonly subtasks: WritableSignal<boolean> = signal(true);
+
+  /**
+   * Property groupBy
+   *
+   * @description
+   * Selected grouping option.
+   *
+   * @type {WritableSignal<string>}
+   * @readonly
+   */
+  public readonly groupBy: WritableSignal<string> = signal('statut');
+  // #endregion
 }
 
+/**
+ * Component InlineHost
+ *
+ * @description
+ * Hosts an inline menu for keyboard interaction tests.
+ */
 @Component({
   imports: [CwMenu, CwMenuItem],
   template: `
@@ -80,11 +133,33 @@ class Host {
   `,
 })
 class InlineHost {
-  readonly count = signal(0);
+  // #region Properties
+  /**
+   * Property count
+   *
+   * @description
+   * Number of inline-menu activations.
+   *
+   * @type {WritableSignal<number>}
+   * @readonly
+   */
+  public readonly count: WritableSignal<number> = signal(0);
+  // #endregion
 }
 
+/**
+ * Function key
+ *
+ * @description
+ * Dispatches a keyboard event to an element.
+ *
+ * @param {Element} target - Element receiving the event.
+ * @param {string} value - Keyboard key to dispatch.
+ * @param {KeyboardEventInit} init - Additional keyboard event options.
+ * @returns {KeyboardEvent} Dispatched keyboard event.
+ */
 function key(target: Element, value: string, init: KeyboardEventInit = {}): KeyboardEvent {
-  const event = new KeyboardEvent('keydown', {
+  const event: KeyboardEvent = new KeyboardEvent('keydown', {
     key: value,
     bubbles: true,
     cancelable: true,
@@ -94,15 +169,31 @@ function key(target: Element, value: string, init: KeyboardEventInit = {}): Keyb
   return event;
 }
 
+/**
+ * Function menus
+ *
+ * @description
+ * Finds open menu panels in the document.
+ * @returns {HTMLElement[]} Open menu panels.
+ */
 function menus(): HTMLElement[] {
   return Array.from(document.querySelectorAll<HTMLElement>('[role="menu"]'));
 }
 
+/**
+ * Function menuNamed
+ *
+ * @description
+ * Finds an open menu by accessible name.
+ *
+ * @param {string} name - Accessible name or visible text to match.
+ * @returns {HTMLElement} Matching menu panel.
+ */
 function menuNamed(name: string): HTMLElement {
-  const found = menus().find((menu) => {
-    const labelledBy = menu.getAttribute('aria-labelledby');
-    const label = labelledBy ? document.getElementById(labelledBy) : null;
-    const accessible =
+  const found: HTMLElement | undefined = menus().find((menu: HTMLElement) => {
+    const labelledBy: string | null = menu.getAttribute('aria-labelledby');
+    const label: HTMLElement | null = labelledBy ? document.getElementById(labelledBy) : null;
+    const accessible: string | undefined =
       menu.getAttribute('aria-label') ??
       label?.getAttribute('aria-label') ??
       label?.textContent.trim();
@@ -112,19 +203,42 @@ function menuNamed(name: string): HTMLElement {
   return found;
 }
 
+/**
+ * Function item
+ *
+ * @description
+ * Finds an item in a menu by visible text.
+ *
+ * @param {ParentNode} container - Menu containing the item.
+ * @param {string} name - Accessible name or visible text to match.
+ * @returns {HTMLElement} Matching menu item.
+ */
 function item(container: ParentNode, name: string): HTMLElement {
-  const found = Array.from(
+  const found: HTMLElement | undefined = Array.from(
     container.querySelectorAll<HTMLElement>(
       '[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]',
     ),
-  ).find((element) => element.textContent.trim().startsWith(name));
+  ).find((element: HTMLElement) => element.textContent.trim().startsWith(name));
   if (!found) throw new Error(`No menu item named ${name}`);
   return found;
 }
 
+/**
+ * Function button
+ *
+ * @description
+ * Finds a fixture button by accessible label or text.
+ *
+ * @param {HTMLElement} host - Fixture containing the button.
+ * @param {string} name - Accessible name or visible text to match.
+ * @returns {HTMLElement} Matching fixture button.
+ */
 function button(host: HTMLElement, name: string): HTMLElement {
-  const found = Array.from(host.querySelectorAll<HTMLElement>('button')).find(
-    (element) => (element.getAttribute('aria-label') ?? element.textContent.trim()) === name,
+  const found: HTMLElement | undefined = Array.from(
+    host.querySelectorAll<HTMLElement>('button'),
+  ).find(
+    (element: HTMLElement) =>
+      (element.getAttribute('aria-label') ?? element.textContent.trim()) === name,
   );
   if (!found) throw new Error(`No button named ${name}`);
   return found;
@@ -147,14 +261,14 @@ describe('CwMenu', () => {
   });
 
   it('opens from its trigger, named by it, and toggles closed on a second click', async () => {
-    const trigger = button(host, 'Actions de la tâche');
+    const trigger: HTMLElement = button(host, 'Actions de la tâche');
     expect(trigger.getAttribute('aria-haspopup')).toBe('menu');
     expect(trigger.getAttribute('aria-expanded')).toBe('false');
 
     trigger.click();
     await fixture.whenStable();
 
-    const panel = menuNamed('Actions de la tâche');
+    const panel: HTMLElement = menuNamed('Actions de la tâche');
     expect(trigger.getAttribute('aria-expanded')).toBe('true');
     expect(trigger.dataset['state']).toBe('open');
     expect(trigger.getAttribute('aria-controls')).toBe(panel.id);
@@ -167,10 +281,10 @@ describe('CwMenu', () => {
   });
 
   it('moves through the items with the arrows in a loop, skipping disabled ones', async () => {
-    const trigger = button(host, 'Actions de la tâche');
+    const trigger: HTMLElement = button(host, 'Actions de la tâche');
     key(trigger, 'ArrowDown');
     await fixture.whenStable();
-    const panel = menuNamed('Actions de la tâche');
+    const panel: HTMLElement = menuNamed('Actions de la tâche');
 
     expect(document.activeElement).toBe(item(panel, 'Renommer'));
     expect(item(panel, 'Renommer').hasAttribute('data-highlighted')).toBe(true);
@@ -199,7 +313,7 @@ describe('CwMenu', () => {
   it('highlights the next item starting with the typed letter', async () => {
     key(button(host, 'Actions de la tâche'), 'ArrowDown');
     await fixture.whenStable();
-    const panel = menuNamed('Actions de la tâche');
+    const panel: HTMLElement = menuNamed('Actions de la tâche');
 
     key(document.activeElement ?? panel, 'd');
     expect(document.activeElement).toBe(item(panel, 'Dupliquer'));
@@ -208,8 +322,18 @@ describe('CwMenu', () => {
     expect(document.activeElement).toBe(item(panel, 'Dupliquer'));
   });
 
+  it('finds accented item labels using unaccented typeahead', async () => {
+    key(button(host, 'Actions de la tâche'), 'ArrowDown');
+    await fixture.whenStable();
+    const panel: HTMLElement = menuNamed('Actions de la tâche');
+
+    key(document.activeElement ?? panel, 'd');
+    key(document.activeElement ?? panel, 'e');
+    expect(document.activeElement).toBe(item(panel, 'Déplacer vers…'));
+  });
+
   it('emits triggered and closes every menu on activation, focus back on the trigger', async () => {
-    const trigger = button(host, 'Actions de la tâche');
+    const trigger: HTMLElement = button(host, 'Actions de la tâche');
     trigger.click();
     await fixture.whenStable();
 
@@ -233,11 +357,11 @@ describe('CwMenu', () => {
   });
 
   it('closes on Escape and gives the focus back to the trigger', async () => {
-    const trigger = button(host, 'Actions de la tâche');
+    const trigger: HTMLElement = button(host, 'Actions de la tâche');
     key(trigger, 'ArrowDown');
     await fixture.whenStable();
 
-    const escape = key(document.activeElement ?? document.body, 'Escape');
+    const escape: KeyboardEvent = key(document.activeElement ?? document.body, 'Escape');
     await fixture.whenStable();
 
     expect(escape.defaultPrevented).toBe(true);
@@ -246,10 +370,10 @@ describe('CwMenu', () => {
   });
 
   it('closes every menu on Tab', async () => {
-    const trigger = button(host, 'Actions de la tâche');
+    const trigger: HTMLElement = button(host, 'Actions de la tâche');
     key(trigger, 'ArrowDown');
     await fixture.whenStable();
-    const moveItem = item(menuNamed('Actions de la tâche'), 'Déplacer');
+    const moveItem: HTMLElement = item(menuNamed('Actions de la tâche'), 'Déplacer');
     moveItem.focus();
     key(moveItem, 'ArrowRight');
     await fixture.whenStable();
@@ -286,15 +410,15 @@ describe('CwMenu', () => {
   it('opens a submenu with ArrowRight and closes it with ArrowLeft', async () => {
     key(button(host, 'Actions de la tâche'), 'ArrowDown');
     await fixture.whenStable();
-    const panel = menuNamed('Actions de la tâche');
-    const moveItem = item(panel, 'Déplacer');
+    const panel: HTMLElement = menuNamed('Actions de la tâche');
+    const moveItem: HTMLElement = item(panel, 'Déplacer');
     expect(moveItem.getAttribute('aria-haspopup')).toBe('menu');
 
     moveItem.focus();
     key(moveItem, 'ArrowRight');
     await fixture.whenStable();
 
-    const submenu = menuNamed('Déplacer vers…');
+    const submenu: HTMLElement = menuNamed('Déplacer vers…');
     expect(moveItem.getAttribute('aria-expanded')).toBe('true');
     // « Sprint 14 » is disabled: the first enabled item takes the focus.
     expect(document.activeElement).toBe(item(submenu, 'Backlog'));
@@ -308,7 +432,7 @@ describe('CwMenu', () => {
   });
 
   it('activates a submenu item and closes the whole chain', async () => {
-    const trigger = button(host, 'Actions de la tâche');
+    const trigger: HTMLElement = button(host, 'Actions de la tâche');
     trigger.click();
     await fixture.whenStable();
     item(menuNamed('Actions de la tâche'), 'Déplacer').click();
@@ -325,7 +449,7 @@ describe('CwMenu', () => {
   it('toggles a checkbox item and keeps the menu open', async () => {
     button(host, 'Affichage').click();
     await fixture.whenStable();
-    const subtasks = item(menuNamed('Affichage'), 'Sous-tâches');
+    const subtasks: HTMLElement = item(menuNamed('Affichage'), 'Sous-tâches');
     expect(subtasks.getAttribute('aria-checked')).toBe('true');
 
     subtasks.click();
@@ -339,7 +463,7 @@ describe('CwMenu', () => {
   it('chooses a radio item through its group and keeps the menu open', async () => {
     button(host, 'Affichage').click();
     await fixture.whenStable();
-    const panel = menuNamed('Affichage');
+    const panel: HTMLElement = menuNamed('Affichage');
 
     item(panel, 'Assigné').click();
     await fixture.whenStable();
@@ -353,21 +477,25 @@ describe('CwMenu', () => {
   it('names its groups by their labels', async () => {
     button(host, 'Affichage').click();
     await fixture.whenStable();
-    const groups = Array.from(menuNamed('Affichage').querySelectorAll('[role="group"]'));
+    const groups: Element[] = Array.from(menuNamed('Affichage').querySelectorAll('[role="group"]'));
 
-    const names = groups.map(
-      (group) => document.getElementById(group.getAttribute('aria-labelledby') ?? '')?.textContent,
+    const names: (string | undefined)[] = groups.map(
+      (group: Element) =>
+        document.getElementById(group.getAttribute('aria-labelledby') ?? '')?.textContent,
     );
-    expect(names.map((name) => name?.trim())).toEqual(['Afficher', 'Grouper par']);
+    expect(names.map((name: string | undefined) => name?.trim())).toEqual([
+      'Afficher',
+      'Grouper par',
+    ]);
   });
 });
 
 describe('CwMenu inline', () => {
   it('renders the panel in place, navigable and never closing', async () => {
-    const fixture = TestBed.createComponent(InlineHost);
+    const fixture: ComponentFixture<InlineHost> = TestBed.createComponent(InlineHost);
     fixture.autoDetectChanges();
-    const host = fixture.nativeElement as HTMLElement;
-    const panel = host.querySelector<HTMLElement>('[role="menu"]');
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    const panel: HTMLElement | null = host.querySelector<HTMLElement>('[role="menu"]');
     if (!panel) throw new Error('Inline panel missing');
 
     expect(panel.getAttribute('aria-label')).toBe('Actions de la tâche');

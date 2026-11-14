@@ -53,6 +53,8 @@ apps/storybook/
   secondary entry point (`@cadenway/ui/components/<brick>`, folder `packages/ui/components/<brick>/`),
   shared internals in `core/` (`@cadenway/ui/core`).
 - `apps/storybook`: stories, interaction tests, accessibility checks.
+- `tests/architecture`: checks of the design system's library boundaries, using
+  `@cadenway/angular-testing` from cadenway-tooling.
 
 ## Boundaries (hard rules)
 
@@ -89,8 +91,16 @@ narrowest check that covers the change first, then widen:
 | Any change to a package         | a changeset (`pnpm changeset`)                                    |
 | Docs or agent instructions only | Scoped formatting and link review                                 |
 
+For `packages/ui`, apply the comment convention in the matching `.codex/rules/comments.md` or
+`.claude/rules/comments.md`, including explicit types, member access and regions. Run
+`pnpm lint:ui` and `pnpm format:ui:check`; when editing the UI lint rules or configuration, also run
+`pnpm test:ui-lint`. These checks validate structure, so review the meaning of comments separately.
+
 Report the commands you actually ran and their results; a check you did not run is reported as not
 run.
+
+Run `pnpm test:architecture` after changing entry points, test layout or architecture checks once
+the [published checker is installed](docs/architecture.md#architecture-check-rollout).
 
 ## Git and branch flow
 

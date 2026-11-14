@@ -17,15 +17,23 @@ import {
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 
 import { CwFilterBar } from './filter-bar.component';
-import type { CwFilter, CwFilterBarLabels, CwFilterField, CwSavedFilter } from './filter-bar.types';
+import type {
+  CwFilter,
+  CwFilterBarLabels,
+  CwFilterField,
+  CwFilterOperator,
+  CwSavedFilter,
+} from './filter-bar.types';
 import { CwFilterChip } from './filter-chip/filter-chip.component';
 import { CwFilterOptionDef } from './filter-option/filter-option.directive';
 
 /**
- * Filter Bar (Filter Bar sheet of the Design System artifact), in the light and the dark theme. The
- * fields are the mockup's (`App.dc.html`: Statut, Priorité, Assigné, Échéance, Étiquette), given
- * as data like an app would: the bar itself knows none of them. Status icons and avatars come
- * from `ng-template[cwFilterOption]`.
+ * Constant meta
+ *
+ * @description
+ * Filter bar examples in light and dark themes with mockup fields and consumer-provided media.
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/FilterBar',
@@ -49,17 +57,59 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration for filter bar examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Finds the light theme section of the story canvas.
+ *
+ * @param {HTMLElement} canvasElement - Canvas containing the themed examples.
+ * @returns {HTMLElement} Light theme section.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
-const IS = { value: 'is', label: 'est' };
-const IS_NOT = { value: 'not', label: 'n’est pas' };
+/**
+ * Constant IS
+ *
+ * @description
+ * Equality operator used by the sample fields.
+ *
+ * @type {CwFilterOperator}
+ */
+const IS: CwFilterOperator = { value: 'is', label: 'est' };
+/**
+ * Constant IS_NOT
+ *
+ * @description
+ * Inequality operator used by the sample fields.
+ *
+ * @type {CwFilterOperator}
+ */
+const IS_NOT: CwFilterOperator = { value: 'not', label: 'n’est pas' };
 
+/**
+ * Constant FIELDS
+ *
+ * @description
+ * Sample fields and their available filter operators and values.
+ *
+ * @type {CwFilterField[]}
+ */
 const FIELDS: CwFilterField[] = [
   {
     key: 'status',
@@ -126,12 +176,28 @@ const FIELDS: CwFilterField[] = [
   },
 ];
 
+/**
+ * Constant SPRINT
+ *
+ * @description
+ * Active filters for the sample sprint view.
+ *
+ * @type {CwFilter[]}
+ */
 const SPRINT: CwFilter[] = [
   { field: 'status', operator: 'is', value: ['progress', 'blocked'] },
   { field: 'people', operator: 'is', value: ['CM'] },
   { field: 'due', operator: 'before', value: '2026-11-30' },
 ];
 
+/**
+ * Constant SAVED
+ *
+ * @description
+ * Saved filter presets for the sample view.
+ *
+ * @type {CwSavedFilter[]}
+ */
 const SAVED: CwSavedFilter[] = [
   {
     id: 'late',
@@ -151,14 +217,40 @@ const SAVED: CwSavedFilter[] = [
 
 /* The mockup counts tasks (« Aucun filtre · 64 tâches »); the region names differ per theme so
    the two copies of each story keep unique landmarks. */
-const total = (count: number): string => `${String(count)} ${count > 1 ? 'tâches' : 'tâche'}`;
+/**
+ * Function total
+ *
+ * @description
+ * Formats the result count displayed by the filter bar.
+ *
+ * @param {number} count - Number of results.
+ * @returns {string} Localized count label.
+ */
+const total: (count: number) => string = (count: number): string =>
+  `${String(count)} ${count > 1 ? 'tâches' : 'tâche'}`;
+/**
+ * Constant LABELS
+ *
+ * @description
+ * Labels for the light and dark theme examples.
+ *
+ * @type {Record<'light' | 'dark', Partial<CwFilterBarLabels>>}
+ */
 const LABELS: Record<'light' | 'dark', Partial<CwFilterBarLabels>> = {
   light: { total },
   dark: { total, region: 'Filtres actifs, thème sombre' },
 };
 
 /* Status icons and avatars: the consumer's media for its own fields. */
-const MEDIA = `
+/**
+ * Constant MEDIA
+ *
+ * @description
+ * Consumer-provided status icons and avatars for filter options.
+ *
+ * @type {string}
+ */
+const MEDIA: string = `
   <ng-template cwFilterOption="status" let-option>
     <cw-status-icon [status]="option.value" size="3.5" />
   </ng-template>
@@ -166,6 +258,15 @@ const MEDIA = `
     <cw-avatar size="xs" [name]="option.label" />
   </ng-template>`;
 
+/**
+ * Function bar
+ *
+ * @description
+ * Builds the filter bar template used by the stories.
+ *
+ * @param {string} attributes - Attributes applied to the filter bar.
+ * @returns {string} Filter bar template markup.
+ */
 function bar(attributes: string): string {
   return `
     <cw-filter-bar class="w-full" [fields]="fields" [labels]="labels[cwTheme]" ${attributes}>
@@ -219,14 +320,18 @@ export const AddFilter: Story = {
     props: { fields: FIELDS, filters: [SPRINT[0]], labels: LABELS },
     template: bar('[(filters)]="filters"'),
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+      findByRole: (role: string, options?: { name?: string | RegExp }) => Promise<HTMLElement>;
+      queryByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement | null;
+    } = within(light(canvasElement));
     await userEvent.click(scope.getByRole('button', { name: 'Filtre' }));
-    const fields = await within(document.body).findByRole('menu', { name: 'Champs' });
+    const fields: HTMLElement = await within(document.body).findByRole('menu', { name: 'Champs' });
     await userEvent.click(within(fields).getByRole('menuitem', { name: 'Priorité' }));
 
-    const chip = await scope.findByRole('group', { name: 'Filtre Priorité' });
-    const values = await within(document.body).findByRole('menu', {
+    const chip: HTMLElement = await scope.findByRole('group', { name: 'Filtre Priorité' });
+    const values: HTMLElement = await within(document.body).findByRole('menu', {
       name: 'Valeurs du filtre Priorité',
     });
     await waitFor(() =>
@@ -245,13 +350,15 @@ export const Values: Story = {
     props: { fields: FIELDS, filters: [SPRINT[0]], labels: LABELS },
     template: bar('[(filters)]="filters"'),
   }),
-  play: async ({ canvasElement }) => {
-    const chip = within(light(canvasElement)).getByRole('group', { name: 'Filtre Statut' });
-    const value = within(chip).getByRole('button', { name: 'En cours, Bloqué' });
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const chip: HTMLElement = within(light(canvasElement)).getByRole('group', {
+      name: 'Filtre Statut',
+    });
+    const value: HTMLElement = within(chip).getByRole('button', { name: 'En cours, Bloqué' });
     await userEvent.click(value);
     await expect(value).toHaveAttribute('aria-expanded', 'true');
 
-    const menu = await within(document.body).findByRole('menu', {
+    const menu: HTMLElement = await within(document.body).findByRole('menu', {
       name: 'Valeurs du filtre Statut',
     });
     await userEvent.click(within(menu).getByRole('menuitemcheckbox', { name: 'À faire' }));
@@ -266,10 +373,16 @@ export const SavedFilters: Story = {
     props: { fields: FIELDS, filters: SAVED[0].filters, saved: SAVED, labels: LABELS },
     template: bar('[(filters)]="filters" [savedFilters]="saved"'),
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+      findByRole: (role: string, options?: { name?: string | RegExp }) => Promise<HTMLElement>;
+      queryByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement | null;
+    } = within(light(canvasElement));
     await userEvent.click(scope.getByRole('button', { name: 'Mes tâches en retard' }));
-    const menu = await within(document.body).findByRole('menu', { name: 'Filtres enregistrés' });
+    const menu: HTMLElement = await within(document.body).findByRole('menu', {
+      name: 'Filtres enregistrés',
+    });
     await expect(
       within(menu).getByRole('menuitem', { name: 'Mes tâches en retard' }),
     ).toHaveAttribute('aria-current', 'true');
@@ -286,17 +399,21 @@ export const Keyboard: Story = {
     props: { fields: FIELDS, filters: SPRINT, labels: LABELS },
     template: bar('[(filters)]="filters"'),
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+      findByRole: (role: string, options?: { name?: string | RegExp }) => Promise<HTMLElement>;
+      queryByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement | null;
+    } = within(light(canvasElement));
     scope.getByRole('button', { name: 'Retirer le filtre Statut' }).focus();
     await userEvent.keyboard('{Backspace}');
 
     await waitFor(() => expect(scope.queryByRole('group', { name: 'Filtre Statut' })).toBeNull());
-    const people = scope.getByRole('group', { name: 'Filtre Assigné' });
+    const people: HTMLElement = scope.getByRole('group', { name: 'Filtre Assigné' });
     await expect(within(people).getByRole('button', { name: 'Opérateur : est' })).toHaveFocus();
 
     await userEvent.keyboard('{Enter}');
-    const operators = await within(document.body).findByRole('menu');
+    const operators: HTMLElement = await within(document.body).findByRole('menu');
     await waitFor(() =>
       expect(within(operators).getByRole('menuitem', { name: 'est' })).toHaveFocus(),
     );

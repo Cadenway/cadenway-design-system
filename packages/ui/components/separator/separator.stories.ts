@@ -4,8 +4,13 @@ import { expect, within } from 'storybook/test';
 import { CwSeparator } from './separator.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Separator, every state of its sheet in the Design System artifact, in the light and the dark
  * theme. Copy from the sheet and the mockup (`App.dc.html`, task panel and activity feed).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/Separator',
@@ -14,10 +19,31 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook configuration used for the separator examples and interactions.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Locates the light-theme copy rendered by the shared Storybook preview decorator.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing the theme examples.
+ *
+ * @returns {HTMLElement} Element containing the light-theme example.
+ *
+ * @throws {Error} When the expected light-theme scope is missing.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
@@ -66,8 +92,8 @@ export const WithLabel: Story = {
         <cw-separator [decorative]="false">ou</cw-separator>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const separators = within(light(canvasElement)).getAllByRole('separator');
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const separators: HTMLElement[] = within(light(canvasElement)).getAllByRole('separator');
     await expect(separators).toHaveLength(2);
   },
 };

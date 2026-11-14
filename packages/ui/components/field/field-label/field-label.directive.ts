@@ -1,9 +1,25 @@
-import { Directive, ElementRef, computed, inject, input } from '@angular/core';
+import {
+  Directive,
+  ElementRef,
+  computed,
+  inject,
+  input,
+  type InputSignal,
+  type Signal,
+} from '@angular/core';
 
 import { FieldContext, registerFieldPart } from '../field-context/field-context.service';
 import type { CwFieldLabelVariant } from '../field.types';
 
 /* Literal class strings (Field and Label sheets of the Design System artifact). */
+/**
+ * Constant VARIANTS
+ *
+ * @description
+ * Label classes by visual variant.
+ *
+ * @type {Record<CwFieldLabelVariant, string>}
+ */
 const VARIANTS: Record<CwFieldLabelVariant, string> = {
   // In a horizontal field the label shares the 20 px first line of its control.
   default:
@@ -12,6 +28,9 @@ const VARIANTS: Record<CwFieldLabelVariant, string> = {
 };
 
 /**
+ * Directive CwFieldLabel
+ *
+ * @description
  * The visible name of a field's control (the Label look). Inside a `cw-field` without its own `for`,
  * it is pointed at the field's control. With `variant="card"` it wraps its control and texts into a
  * choice card: bordered, `bg-accent` on hover, `bg-selected` with a `foreground/40` border once
@@ -25,17 +44,46 @@ const VARIANTS: Record<CwFieldLabelVariant, string> = {
   },
 })
 export class CwFieldLabel {
-  /** Plain label, or a choice card that wraps its control. */
-  readonly variant = input<CwFieldLabelVariant>('default');
+  // #region Properties
+  /**
+   * Property variant
+   * @readonly
+   *
+   * @description
+   * Plain label or choice card appearance.
+   *
+   * @type {InputSignal<CwFieldLabelVariant>}
+   */
+  public readonly variant: InputSignal<CwFieldLabelVariant> = input<CwFieldLabelVariant>('default');
 
-  protected readonly classes = computed(() => VARIANTS[this.variant()]);
+  /**
+   * Property classes
+   * @readonly
+   *
+   * @description
+   * Classes for the current label variant.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly classes: Signal<string> = computed(() => VARIANTS[this.variant()]);
+  // #endregion
 
-  constructor() {
-    const context = inject(FieldContext, { optional: true });
-    const element = inject<ElementRef<HTMLLabelElement>>(ElementRef).nativeElement;
+  // #region Constructor
+  /**
+   * Constructor
+   * @constructor
+   *
+   * @description
+   * Registers the label with the parent field.
+   */
+  public constructor() {
+    const context: FieldContext | null = inject(FieldContext, { optional: true });
+    const element: HTMLLabelElement =
+      inject<ElementRef<HTMLLabelElement>>(ElementRef).nativeElement;
     // Static attributes exist at creation: a `for` here is the consumer's own.
     if (context) {
       registerFieldPart(context.labels, { element, explicit: element.hasAttribute('for') });
     }
   }
+  // #endregion
 }

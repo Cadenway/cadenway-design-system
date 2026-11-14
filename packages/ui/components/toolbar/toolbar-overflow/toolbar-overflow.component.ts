@@ -1,12 +1,30 @@
-import { Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  computed,
+  inject,
+  signal,
+  viewChild,
+  type Signal,
+  type WritableSignal,
+} from '@angular/core';
 import { CwButton } from '@cadenway/ui/components/button';
 import { CwMenu, CwMenuItem, CwMenuTriggerFor } from '@cadenway/ui/components/menu';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorDotsThreeBold } from '@ng-icons/phosphor-icons/bold';
 
-import { CW_TOOLBAR, CW_TOOLBAR_ITEM, type ToolbarItemHandle } from '../toolbar.token';
+import {
+  CW_TOOLBAR,
+  CW_TOOLBAR_ITEM,
+  type ToolbarHandle,
+  type ToolbarItemHandle,
+} from '../toolbar.token';
 
 /**
+ * Class CwToolbarOverflow
+ * @class CwToolbarOverflow
+ *
+ * @description
  * Where the « Plus » button of a `cw-toolbar` sits, usually right before the primary action
  * (Toolbar sheet of the Design System artifact). Without it, the toolbar puts the button at its
  * end.
@@ -28,62 +46,217 @@ import { CW_TOOLBAR, CW_TOOLBAR_ITEM, type ToolbarItemHandle } from '../toolbar.
   templateUrl: './toolbar-overflow.component.html',
 })
 export class CwToolbarOverflow implements ToolbarItemHandle {
-  protected readonly toolbar = inject(CW_TOOLBAR);
-  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
-  private readonly button = viewChild.required<string, ElementRef<HTMLElement>>('button', {
+  // #region Properties
+  /**
+   * Property toolbar
+   * @readonly
+   *
+   * @description
+   * Containing toolbar providing size, label and menu entries.
+   *
+   * @type {ToolbarHandle}
+   */
+  protected readonly toolbar: ToolbarHandle = inject(CW_TOOLBAR);
+
+  /**
+   * Property host
+   * @readonly
+   *
+   * @description
+   * Host element shown when controls overflow.
+   *
+   * @type {HTMLElement}
+   */
+  private readonly host: HTMLElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+
+  /**
+   * Property button
+   * @readonly
+   *
+   * @description
+   * Overflow button used for focus and activation.
+   *
+   * @type {Signal<ElementRef<HTMLElement>>}
+   */
+  private readonly button: Signal<ElementRef<HTMLElement>> = viewChild.required<
+    string,
+    ElementRef<HTMLElement>
+  >('button', {
     read: ElementRef,
   });
 
-  private readonly shown = signal(false);
+  /**
+   * Property shown
+   * @readonly
+   *
+   * @description
+   * Whether the overflow button is visible.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  private readonly shown: WritableSignal<boolean> = signal(false);
 
-  /** The overflow button is never hidden by the measure; `setOverflowed(true)` shows it. */
-  readonly overflowed = signal(false).asReadonly();
-  readonly pinned = true;
+  /**
+   * Property overflowed
+   * @readonly
+   *
+   * @description
+   * Read-only overflow state of the control.
+   *
+   * @type {Signal<boolean>}
+   */
+  public readonly overflowed: Signal<boolean> = signal(false).asReadonly();
 
-  protected readonly label = computed(() => this.toolbar.overflowLabel());
-  protected readonly buttonSize = computed(() =>
+  /**
+   * Property pinned
+   * @readonly
+   *
+   * @description
+   * Keeps the overflow button out of its own menu.
+   *
+   * @type {true}
+   */
+  public readonly pinned: true = true;
+
+  /**
+   * Property label
+   * @readonly
+   *
+   * @description
+   * Accessible label supplied by the toolbar.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly label: Signal<string> = computed(() => this.toolbar.overflowLabel());
+
+  /**
+   * Property buttonSize
+   * @readonly
+   *
+   * @description
+   * Button size matching the toolbar.
+   *
+   * @type {Signal<'icon-sm' | 'icon'>}
+   */
+  protected readonly buttonSize: Signal<'icon-sm' | 'icon'> = computed(() =>
     this.toolbar.size() === 'sm' ? 'icon-sm' : 'icon',
   );
+  // #endregion
 
-  constructor() {
+  // #region Constructor
+  /**
+   * Constructor
+   * @constructor
+   *
+   * @description
+   * Initially hides the overflow host until it is needed.
+   */
+  public constructor() {
     this.host.style.setProperty('display', 'none');
   }
+  // #endregion
 
-  get element(): HTMLElement {
+  // #region Properties
+  /**
+   * Property element
+   *
+   * @description
+   * Native overflow button used for navigation.
+   *
+   * @returns {HTMLElement} Overflow button element.
+   */
+  public get element(): HTMLElement {
     return this.button().nativeElement;
   }
 
-  get disabled(): boolean {
+  /**
+   * Property disabled
+   *
+   * @description
+   * Whether keyboard navigation should skip the hidden button.
+   *
+   * @returns {boolean} Whether the button is hidden.
+   */
+  public get disabled(): boolean {
     return !this.shown();
   }
+  // #endregion
 
+  // #region Methods
   /**
-   * Shows the button (`true`: some controls moved into the menu) or hides it, at once, for the
-   * width measure. Not public API.
+   * Method setOverflowed
+   * @method setOverflowed
+   *
+   * @description
+   * Synchronously shows or hides the overflow control.
+   *
+   * @param {boolean} show - Whether the overflow control should be shown.
    */
-  setOverflowed(show: boolean): void {
+  public setOverflowed(show: boolean): void {
     if (show) this.host.style.removeProperty('display');
     else this.host.style.setProperty('display', 'none');
     this.shown.set(show);
   }
 
-  menuLabel(): string {
+  /**
+   * Method menuLabel
+   * @method menuLabel
+   *
+   * @description
+   * Returns the overflow button label.
+   *
+   * @returns {string} Overflow button label.
+   */
+  public menuLabel(): string {
     return this.label();
   }
 
-  menuIcon(): string | null {
+  /**
+   * Method menuIcon
+   * @method menuIcon
+   *
+   * @description
+   * Returns the overflow button icon name.
+   *
+   * @returns {string | null} Overflow icon name, or null when absent.
+   */
+  public menuIcon(): string | null {
     return 'phosphorDotsThreeBold';
   }
 
-  activate(): void {
+  /**
+   * Method activate
+   * @method activate
+   *
+   * @description
+   * Activates the overflow button.
+   */
+  public activate(): void {
     this.element.click();
   }
 
-  focus(): void {
+  /**
+   * Method focus
+   * @method focus
+   *
+   * @description
+   * Moves focus to the overflow button.
+   */
+  public focus(): void {
     this.element.focus();
   }
 
-  getLabel(): string {
+  /**
+   * Method getLabel
+   * @method getLabel
+   *
+   * @description
+   * Returns the label for keyboard navigation.
+   *
+   * @returns {string} Label used for keyboard navigation.
+   */
+  public getLabel(): string {
     return this.label();
   }
+  // #endregion
 }

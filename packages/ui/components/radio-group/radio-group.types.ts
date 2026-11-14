@@ -1,5 +1,19 @@
-/** Layout of a radio group: options stacked, or in a row for two or three short options. */
+/**
+ * Type CwRadioGroupOrientation
+ *
+ * @description
+ * Layout of options in a stacked or horizontal radio group.
+ *
+ * @type {'vertical' | 'horizontal'}
+ */
 export type CwRadioGroupOrientation = 'vertical' | 'horizontal';
 
-/** Look of an option: a bare 16 px radio, or a choice card that wraps the radio and its texts. */
+/**
+ * Type CwRadioGroupItemVariant
+ *
+ * @description
+ * Option rendered as a bare radio or a choice card.
+ *
+ * @type {'default' | 'card'}
+ */
 export type CwRadioGroupItemVariant = 'default' | 'card';

@@ -32,6 +32,22 @@ apps/storybook/
   secondary entry point (`@cadenway/ui/components/<brick>`, folder `packages/ui/components/<brick>/`),
   shared internals in `core/` (`@cadenway/ui/core`).
 - `apps/storybook`: stories, interaction tests, accessibility checks.
+- `tests/architecture`: design-system entry point, test layout and dependency checks. The shared
+  verifier and its reference fixtures live in
+  [cadenway-tooling](https://github.com/Cadenway/cadenway-tooling/tree/main/packages/angular-testing).
+
+### Architecture check rollout
+
+The design system's `pnpm test:architecture` script consumes the published
+`@cadenway/angular-testing/architecture` entry point. After the first cadenway-tooling release,
+grant this repository read access to the package in GitHub Packages, install the dependency
+with `pnpm add -Dw @cadenway/angular-testing`, and commit the updated lockfile.
+
+Run `pnpm install --frozen-lockfile` and `pnpm test:architecture`. In the same change, add that
+script after `test:ui-lint` in `quality` and in the CI quality job. Set `packages: read` on that
+job, configure `setup-node` with the `@cadenway` scope and GitHub Packages registry, and provide
+the workflow `GITHUB_TOKEN` to pnpm as `NODE_AUTH_TOKEN` at install. The remaining quality checks
+run throughout the transfer.
 
 ## Boundaries
 

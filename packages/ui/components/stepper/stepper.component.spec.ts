@@ -1,10 +1,16 @@
 import { LiveAnnouncer } from '@angular/cdk/a11y';
-import { Component, signal, viewChild } from '@angular/core';
+import { Component, signal, viewChild, type Signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CwStep } from './step/step.component';
 import { CwStepper } from './stepper.component';
 
+/**
+ * Class Host
+ *
+ * @description
+ * Hosts horizontal and vertical installation journeys for interaction tests.
+ */
 @Component({
   imports: [CwStepper, CwStep],
   template: `
@@ -39,41 +45,143 @@ import { CwStepper } from './stepper.component';
   `,
 })
 class Host {
-  readonly setup = viewChild.required<CwStepper>('setup');
-  readonly step = signal(2);
-  readonly verticalStep = signal(2);
-  readonly adminValid = signal<boolean | undefined>(true);
-  readonly smtpError = signal<string | null>(null);
+  // #region Properties
+  /**
+   * Property setup
+   * @readonly
+   *
+   * @description
+   * Stepper instance controlled by the fixture.
+   *
+   * @type {Signal<CwStepper>}
+   */
+  public readonly setup: Signal<CwStepper> = viewChild.required<CwStepper>('setup');
+
+  /**
+   * Property step
+   * @readonly
+   *
+   * @description
+   * Selected horizontal step.
+   *
+   * @type {WritableSignal<number>}
+   */
+  public readonly step: WritableSignal<number> = signal(2);
+
+  /**
+   * Property verticalStep
+   * @readonly
+   *
+   * @description
+   * Selected vertical step.
+   *
+   * @type {WritableSignal<number>}
+   */
+  public readonly verticalStep: WritableSignal<number> = signal(2);
+
+  /**
+   * Property adminValid
+   * @readonly
+   *
+   * @description
+   * Completion state of the administrator step.
+   *
+   * @type {WritableSignal<boolean | undefined>}
+   */
+  public readonly adminValid: WritableSignal<boolean | undefined> = signal<boolean | undefined>(
+    true,
+  );
+
+  /**
+   * Property smtpError
+   * @readonly
+   *
+   * @description
+   * Optional SMTP error message.
+   *
+   * @type {WritableSignal<string | null>}
+   */
+  public readonly smtpError: WritableSignal<string | null> = signal<string | null>(null);
+  // #endregion
 }
 
+/**
+ * Function list
+ *
+ * @description
+ * Finds a step list by its accessible name.
+ *
+ * @param {HTMLElement} host - Fixture containing the step lists.
+ * @param {string} name - Accessible name of the list.
+ *
+ * @returns {HTMLElement} Matching step list.
+ */
 function list(host: HTMLElement, name: string): HTMLElement {
-  const found = host.querySelector<HTMLElement>(`ol[aria-label="${name}"]`);
+  const found: HTMLElement | null = host.querySelector<HTMLElement>(`ol[aria-label="${name}"]`);
   if (!found) throw new Error(`No list named ${name}`);
   return found;
 }
 
-/** The text a screen reader reads in `node`, skipping what is `aria-hidden`. */
+/**
+ * Function readable
+ *
+ * @description
+ * Reads text while skipping nodes hidden from assistive technology.
+ *
+ * @param {Node} node - Node whose accessible text is read.
+ *
+ * @returns {string} Text excluding nodes hidden from assistive technology.
+ */
 function readable(node: Node): string {
   if (node instanceof Element && node.getAttribute('aria-hidden') === 'true') return '';
   if (node.nodeType === Node.TEXT_NODE) return node.textContent ?? '';
   return Array.from(node.childNodes, readable).join(' ');
 }
 
-/** The steps a screen reader lists, with their hidden state. */
+/**
+ * Function steps
+ *
+ * @description
+ * Returns the accessible text of each visible step.
+ *
+ * @param {HTMLElement} ol - Step list to inspect.
+ *
+ * @returns {string[]} Accessible text of each visible step.
+ */
 function steps(ol: HTMLElement): string[] {
   return Array.from(ol.children)
     .filter((li) => li.getAttribute('aria-hidden') !== 'true')
     .map((li) => readable(li).replace(/\s+/g, ' ').replace(/ ,/g, ',').trim());
 }
 
+/**
+ * Function stepButton
+ *
+ * @description
+ * Finds a reachable step button by its label.
+ *
+ * @param {HTMLElement} ol - Step list containing the button.
+ * @param {string} label - Visible step label.
+ *
+ * @returns {HTMLButtonElement} Matching step button.
+ */
 function stepButton(ol: HTMLElement, label: string): HTMLButtonElement {
-  const found = Array.from(ol.querySelectorAll<HTMLButtonElement>('button')).find((button) =>
-    button.textContent.trim().startsWith(label),
-  );
+  const found: HTMLButtonElement | undefined = Array.from(
+    ol.querySelectorAll<HTMLButtonElement>('button'),
+  ).find((button) => button.textContent.trim().startsWith(label));
   if (!found) throw new Error(`No step button ${label}`);
   return found;
 }
 
+/**
+ * Function key
+ *
+ * @description
+ * Dispatches a keyboard event to a fixture element.
+ *
+ * @param {Element} target - Element receiving the event.
+ * @param {string} value - Keyboard key to dispatch.
+ */
 function key(target: Element, value: string): void {
   target.dispatchEvent(
     new KeyboardEvent('keydown', { key: value, bubbles: true, cancelable: true }),
@@ -109,7 +217,7 @@ describe('CwStepper', () => {
   });
 
   it('lists the steps with their state in hidden text', () => {
-    const ol = list(host, 'Première installation');
+    const ol: HTMLElement = list(host, 'Première installation');
 
     expect(steps(ol)).toEqual([
       'Instance — étape 1, terminée',
@@ -118,12 +226,12 @@ describe('CwStepper', () => {
       'Serveur e-mail — étape 4, à venir (optionnelle)',
       'Premier espace — étape 5, à venir',
     ]);
-    const current = ol.querySelector('[aria-current="step"]');
+    const current: Element | null = ol.querySelector('[aria-current="step"]');
     expect(current?.textContent).toContain('Équipe');
   });
 
   it('makes the done steps buttons and leaves the steps to come as text', () => {
-    const ol = list(host, 'Première installation');
+    const ol: HTMLElement = list(host, 'Première installation');
 
     expect(Array.from(ol.querySelectorAll('button')).map((b) => b.textContent.trim())).toEqual([
       'Instance — étape 1, terminée',
@@ -135,7 +243,7 @@ describe('CwStepper', () => {
     expect(host.textContent).toContain(
       'Étape 3 sur 5 — invitez les personnes avec qui vous travaillez.',
     );
-    const panel = host.querySelector<HTMLElement>('[role="group"]');
+    const panel: HTMLElement | null = host.querySelector<HTMLElement>('[role="group"]');
     expect(panel?.getAttribute('aria-labelledby')).toBeTruthy();
     expect(document.getElementById(panel?.getAttribute('aria-labelledby') ?? '')?.textContent).toBe(
       'Équipe',
@@ -154,7 +262,7 @@ describe('CwStepper', () => {
   });
 
   it('moves on with next() from the panel and counts the step as done', async () => {
-    const next = Array.from(host.querySelectorAll('button')).find(
+    const next: HTMLButtonElement | undefined = Array.from(host.querySelectorAll('button')).find(
       (button) => button.textContent.trim() === 'Continuer',
     );
     next?.click();
@@ -186,7 +294,7 @@ describe('CwStepper', () => {
     await fixture.whenStable();
 
     // Compte administrateur is completed: reachable; Équipe was never passed: plain text.
-    const ol = list(host, 'Première installation');
+    const ol: HTMLElement = list(host, 'Première installation');
     expect(Array.from(ol.querySelectorAll('button')).map((b) => b.textContent.trim())).toEqual([
       'Compte administrateur — étape 2, terminée',
     ]);
@@ -203,9 +311,9 @@ describe('CwStepper', () => {
   });
 
   it('moves the focus between reachable steps with the arrows, Home and End', () => {
-    const ol = list(host, 'Première installation');
-    const first = stepButton(ol, 'Instance');
-    const second = stepButton(ol, 'Compte administrateur');
+    const ol: HTMLElement = list(host, 'Première installation');
+    const first: HTMLButtonElement = stepButton(ol, 'Instance');
+    const second: HTMLButtonElement = stepButton(ol, 'Compte administrateur');
     first.focus();
 
     key(first, 'ArrowRight');
@@ -220,7 +328,7 @@ describe('CwStepper', () => {
     component.smtpError.set('Connexion SMTP refusée.');
     await fixture.whenStable();
 
-    const alert = host.querySelector('cw-stepper [role="alert"]');
+    const alert: Element | null = host.querySelector('cw-stepper [role="alert"]');
     expect(alert?.textContent.trim()).toBe('Connexion SMTP refusée.');
     expect(steps(list(host, 'Première installation'))[3]).toBe(
       'Serveur e-mail — étape 4, en erreur (optionnelle)',
@@ -228,8 +336,8 @@ describe('CwStepper', () => {
   });
 
   it('unfolds the current panel under its label in a vertical stepper', () => {
-    const ol = list(host, 'Installation guidée');
-    const items = Array.from(ol.children);
+    const ol: HTMLElement = list(host, 'Installation guidée');
+    const items: Element[] = Array.from(ol.children);
 
     expect(ol.parentElement?.getAttribute('data-orientation')).toBe('vertical');
     expect(items[2].getAttribute('aria-current')).toBe('step');

@@ -2,5 +2,14 @@ import { InjectionToken } from '@angular/core';
 
 import type { CwTabsConfig } from './tabs.types';
 
-/** The defaults `provideCwTabs` gives to the tab sets below it. Not exported from the entry point. */
-export const TABS_CONFIG = new InjectionToken<CwTabsConfig>('TABS_CONFIG');
+/**
+ * Constant TABS_CONFIG
+ *
+ * @description
+ * Internal token for tab defaults provided to descendant tab sets.
+ *
+ * @type {InjectionToken<CwTabsConfig>}
+ */
+export const TABS_CONFIG: InjectionToken<CwTabsConfig> = new InjectionToken<CwTabsConfig>(
+  'TABS_CONFIG',
+);

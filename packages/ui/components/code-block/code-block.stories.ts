@@ -10,8 +10,13 @@ import { expect, userEvent, within } from 'storybook/test';
 import { CwCodeBlock } from './code-block.component';
 
 /**
+ * Constant meta
+ *
+ * @description
  * Code Block, every state of its sheet in the Design System artifact, in the light and the dark
  * theme. Copy from the sheet's preview (Docker Compose diff, automation log, install guide).
+ *
+ * @type {Meta}
  */
 const meta: Meta = {
   title: 'UI/CodeBlock',
@@ -20,15 +25,42 @@ const meta: Meta = {
 
 export default meta;
 
+/**
+ * Type Story
+ *
+ * @description
+ * Storybook story for code block examples.
+ *
+ * @type {StoryObj}
+ */
 type Story = StoryObj;
 
+/**
+ * Function light
+ *
+ * @description
+ * Returns the light-theme story container.
+ *
+ * @param {HTMLElement} canvasElement - Story canvas containing theme scopes.
+ *
+ * @returns {HTMLElement} Container for the light theme.
+ */
 function light(canvasElement: HTMLElement): HTMLElement {
-  const scope = canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
+  const scope: HTMLElement | null =
+    canvasElement.querySelector<HTMLElement>('[data-theme="light"]');
   if (!scope) throw new Error('Light theme scope missing');
   return scope;
 }
 
-const compose = [
+/**
+ * Constant compose
+ *
+ * @description
+ * Compose diff displayed in the example.
+ *
+ * @type {string}
+ */
+const compose: string = [
   '# Cadenway — instance de production',
   'services:',
   '  cadenway:',
@@ -40,7 +72,15 @@ const compose = [
   '      DATABASE_URL: postgres://cadenway@db/cadenway',
 ].join('\n');
 
-const install =
+/**
+ * Constant install
+ *
+ * @description
+ * Installation command displayed in the example.
+ *
+ * @type {string}
+ */
+const install: string =
   'curl -fsSL https://cadenway.exemple.fr/install.sh | CADENWAY_VERSION=1.4.0 sh -s -- --data /srv/cadenway';
 
 /** Header, line numbers, a comment, a diff and a line put forward. */
@@ -81,8 +121,12 @@ export const LongLine: Story = {
         <cw-code-block size="sm" [lineNumbers]="false" filename="install.sh" wrap ariaLabel="install.sh replié, 1 ligne" [code]="install" />
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options: { name: string }) => HTMLElement;
+      getAllByRole: (role: string, options: { name: string }) => HTMLElement[];
+      getByText: (text: string) => HTMLElement;
+    } = within(light(canvasElement));
     await userEvent.tab();
     await expect(scope.getAllByRole('button', { name: 'Copier le code' })[0]).toHaveFocus();
     await userEvent.tab();
@@ -107,8 +151,12 @@ export const Copy: Story = {
         <p class="text-sm text-muted-foreground">{{ copies }} copie(s)</p>
       </div>`,
   }),
-  play: async ({ canvasElement }) => {
-    const scope = within(light(canvasElement));
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options: { name: string }) => HTMLElement;
+      getAllByRole: (role: string, options: { name: string }) => HTMLElement[];
+      getByText: (text: string) => HTMLElement;
+    } = within(light(canvasElement));
     await userEvent.tab();
     await userEvent.keyboard('{Enter}');
     await expect(scope.getByRole('button', { name: 'Copié' })).toHaveAttribute(

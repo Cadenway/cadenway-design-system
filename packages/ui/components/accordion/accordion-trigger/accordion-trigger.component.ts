@@ -1,5 +1,5 @@
 import type { FocusableOption } from '@angular/cdk/a11y';
-import { Component, ElementRef, computed, forwardRef, inject } from '@angular/core';
+import { Component, ElementRef, computed, forwardRef, inject, type Signal } from '@angular/core';
 import { CwRipple, ɵFOCUS_INSET } from '@cadenway/ui/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorCaretDownBold } from '@ng-icons/phosphor-icons/bold';
@@ -9,20 +9,37 @@ import { ACCORDION_TRIGGER } from '../accordion-trigger.token';
 import type { CwAccordion } from '../accordion.component';
 import type { CwAccordionVariant } from '../accordion.types';
 
-/* Literal class strings (Accordion sheet and preview of the Design System artifact): a 40 px row,
-   inset focus ring like every row; a leading icon is muted, 16 px. */
-const BASE =
+/**
+ * Constant BASE
+ *
+ * @description
+ * Literal Accordion sheet classes for a 40-pixel trigger row, inset focus ring and leading icon.
+ *
+ * @type {string}
+ */
+const BASE: string =
   'relative isolate flex w-full flex-1 items-center gap-2 overflow-hidden py-2.5 text-left text-sm font-medium transition-colors hover:bg-accent ' +
   'disabled:pointer-events-none disabled:opacity-50 [&_ng-icon]:shrink-0 [&_ng-icon]:[--ng-icon__size:1rem] [&>ng-icon]:text-muted-foreground ' +
   ɵFOCUS_INSET;
 
-// `card` triggers span the framed card edge to edge.
+/**
+ * Constant VARIANTS
+ *
+ * @description
+ * Trigger padding and radius by accordion variant; card triggers span the framed card.
+ *
+ * @type {Record<CwAccordionVariant, string>}
+ */
 const VARIANTS: Record<CwAccordionVariant, string> = {
   default: 'rounded-md px-2',
   card: 'rounded-none px-3',
 };
 
 /**
+ * Class CwAccordionTrigger
+ * @class CwAccordionTrigger
+ *
+ * @description
  * The button that opens and closes a `cw-accordion-item` (Accordion sheet of the Design System
  * artifact): title, optional leading icon and count, chevron pushed to the right.
  *
@@ -32,9 +49,6 @@ const VARIANTS: Record<CwAccordionVariant, string> = {
  * it. A count reads with the title (« Pièces jointes 3 »); the chevron is `aria-hidden`.
  */
 @Component({
-  // A component on a native element (attribute selector), as its sheet requires: the button keeps
-  // its native role, focus and activation. The lint rule only knows element selectors.
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'button[cwAccordionTrigger]',
   imports: [NgIcon],
   hostDirectives: [CwRipple],
@@ -56,21 +70,78 @@ const VARIANTS: Record<CwAccordionVariant, string> = {
   templateUrl: './accordion-trigger.component.html',
 })
 export class CwAccordionTrigger implements FocusableOption {
-  protected readonly item = inject(CwAccordionItem);
-  /** The accordion the trigger belongs to, for its arrow keys. */
-  readonly accordion: CwAccordion = this.item.accordion;
-  /** The host button, focused by the arrow keys. */
-  readonly element = inject<ElementRef<HTMLButtonElement>>(ElementRef).nativeElement;
+  // #region Properties
+  /**
+   * Property item
+   * @readonly
+   *
+   * @description
+   * Parent section supplying its state, identifiers and toggle action.
+   *
+   * @type {CwAccordionItem}
+   */
+  protected readonly item: CwAccordionItem = inject(CwAccordionItem);
 
-  protected readonly classes = computed(() => `${BASE} ${VARIANTS[this.accordion.variant()]}`);
+  /**
+   * Property accordion
+   * @readonly
+   *
+   * @description
+   * Parent accordion used to scope arrow-key navigation and select the variant.
+   *
+   * @type {CwAccordion}
+   */
+  public readonly accordion: CwAccordion = this.item.accordion;
 
-  /** Whether the arrow keys skip the trigger (its section is disabled). */
-  get disabled(): boolean {
+  /**
+   * Property element
+   * @readonly
+   *
+   * @description
+   * Native host button focused by the accordion's keyboard manager.
+   *
+   * @type {HTMLButtonElement}
+   */
+  public readonly element: HTMLButtonElement =
+    inject<ElementRef<HTMLButtonElement>>(ElementRef).nativeElement;
+
+  /**
+   * Property classes
+   * @readonly
+   *
+   * @description
+   * Base and variant classes applied to the trigger button.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly classes: Signal<string> = computed(
+    () => `${BASE} ${VARIANTS[this.accordion.variant()]}`,
+  );
+
+  /**
+   * Property disabled
+   *
+   * @description
+   * Whether the focus manager should skip the trigger because its section is disabled.
+   *
+   * @type {boolean}
+   * @returns {boolean} Whether the section is disabled.
+   */
+  public get disabled(): boolean {
     return this.item.disabled();
   }
+  // #endregion
 
-  /** Moves the focus to the trigger (the arrow keys call it). */
-  focus(): void {
+  // #region Methods
+  /**
+   * Method focus
+   * @method focus
+   *
+   * @description
+   * Moves focus to the host button when requested by the keyboard manager.
+   */
+  public focus(): void {
     this.element.focus();
   }
+  // #endregion
 }
