@@ -35,6 +35,7 @@ checks during bootstrap.
 pnpm format:check
 pnpm lint
 pnpm typecheck
+pnpm test:architecture
 pnpm test:coverage
 pnpm storybook:build
 pnpm test:storybook           # interaction and accessibility checks
