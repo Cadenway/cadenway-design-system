@@ -27,6 +27,14 @@ apps/storybook/
 - `packages/ui`: generic bricks and the two business icons; one folder per brick.
 - `apps/storybook`: stories, interaction tests, accessibility checks.
 
+- `tests/architecture`: design-system entry point, test layout and dependency checks. The shared
+  verifier and its reference fixtures live in
+  [cadenway-tooling](https://github.com/Cadenway/cadenway-tooling/tree/main/packages/angular-testing).
+
+### Architecture check
+
+Run `pnpm test:architecture` to check the library source layout, file names and import boundaries with `@cadenway/angular-testing/architecture`. Both `pnpm quality` and the CI quality gate run it. GitHub Packages grants this repository read access to `@cadenway/angular-testing` for Actions.
+
 ## Boundaries
 
 - No business logic, no API call, no knowledge of tasks beyond the display contracts of `cw-status-icon` and `cw-priority-icon`.

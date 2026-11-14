@@ -19,10 +19,11 @@
     "typecheck": "ngc --noEmit -p packages/icons/tsconfig.lib.json && ngc --noEmit -p packages/icons/tsconfig.spec.json && ngc --noEmit -p packages/ui/tsconfig.lib.json && ngc --noEmit -p packages/ui/tsconfig.spec.json && ngc --noEmit -p apps/storybook/tsconfig.json",
     "test": "ng test --no-watch",
     "test:coverage": "ng test --no-watch --coverage",
+    "test:architecture": "node --test tests/architecture/libraries.spec.mjs",
     "test:storybook": "pnpm --filter @cadenway/storybook run test:storybook",
     "build": "ng build icons && ng build ui",
     "changeset": "changeset",
-    "quality": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:coverage && pnpm storybook:build && pnpm test:storybook && pnpm build",
+    "quality": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:architecture && pnpm test:coverage && pnpm storybook:build && pnpm test:storybook && pnpm build",
     "release": "pnpm build && changeset publish"
   },
   "devDependencies": {
@@ -36,6 +37,7 @@
     "@angular/core": "catalog:",
     "@angular/forms": "catalog:",
     "@angular/platform-browser": "catalog:",
+    "@cadenway/angular-testing": "0.1.0",
     "@changesets/cli": "^3.0.0",
     "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^21.2.4",
