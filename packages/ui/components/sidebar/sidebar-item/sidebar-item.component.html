@@ -1,0 +1,27 @@
+<span
+  #tip
+  class="absolute inset-0"
+  aria-hidden="true"
+  cwTooltipSide="right"
+  [cwTooltip]="tooltipText()"
+  [cwTooltipDisabled]="!rail()"
+></span>
+@if (iconName(); as name) {
+  <ng-icon [name]="name" [class]="iconClasses()" aria-hidden="true" />
+}
+<span #label [class]="rail() ? 'sr-only' : 'truncate'"><ng-content /></span>
+@if (hasCount()) {
+  @if (rail()) {
+    <span
+      class="pointer-events-none absolute top-1.5 right-1.5 size-1.5 rounded-full bg-foreground"
+      aria-hidden="true"
+    ></span>
+  } @else {
+    <span
+      class="ml-auto text-xs whitespace-nowrap text-muted-foreground tabular-nums"
+      aria-hidden="true"
+      >{{ count() }}</span
+    >
+  }
+  <span class="sr-only">, {{ spokenCount() }}</span>
+}

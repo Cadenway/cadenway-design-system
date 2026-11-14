@@ -1,10 +1,10 @@
 # cadenway-design-system documentation
 
-Planned role: cadenway-design-system is the Angular design system taken from the mockup. It publishes `@cadenway/tokens`, `@cadenway/icons` and `@cadenway/ui` (pnpm monorepo, Changesets) and hosts Storybook as the visual reference. Consumers: cadenway-webapp and cadenway-website.
+cadenway-design-system is the Angular design system taken from the mockup. It publishes `@cadenway/tokens`, `@cadenway/icons` and `@cadenway/ui` (pnpm monorepo, Changesets) and hosts Storybook as the visual reference. Consumers: cadenway-webapp and cadenway-website.
 
 ## Current status
 
-At the time this documentation was written, this checkout has no `package.json`, application source tree, or GitHub workflow files. The target architecture, scripts, and workflows in this guide must be created and verified during bootstrap.
+The workspace is bootstrapped: `package.json` scripts, the three package skeletons, Storybook and the CI and release workflows exist. The packages are being filled from the Design System artifact and the mockup: `@cadenway/tokens` and `@cadenway/icons` first, then the `@cadenway/ui` bricks in waves.
 
 ## Read the guides
 

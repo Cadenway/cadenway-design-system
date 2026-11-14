@@ -1,0 +1,137 @@
+<ng-container *ngTemplateOutlet="list; context: { $implicit: blocks() }" />
+
+<ng-template #list let-blocks>
+  @for (block of asBlocks(blocks); track $index) {
+    @switch (block.kind) {
+      @case ('heading') {
+        @switch (block.level) {
+          @case (1) {
+            <h1 class="pt-4 text-2xl leading-tight font-semibold tracking-tight first:pt-0">
+              <cw-markdown-inline [nodes]="block.children" />
+            </h1>
+          }
+          @case (2) {
+            <h2 class="pt-3 text-xl leading-snug font-semibold first:pt-0">
+              <cw-markdown-inline [nodes]="block.children" />
+            </h2>
+          }
+          @case (3) {
+            <h3 class="pt-2 text-lg leading-7 font-semibold first:pt-0">
+              <cw-markdown-inline [nodes]="block.children" />
+            </h3>
+          }
+          @case (4) {
+            <h4 class="pt-2 text-base font-semibold first:pt-0">
+              <cw-markdown-inline [nodes]="block.children" />
+            </h4>
+          }
+          @case (5) {
+            <h5 class="pt-2 text-sm font-semibold first:pt-0">
+              <cw-markdown-inline [nodes]="block.children" />
+            </h5>
+          }
+          @default {
+            <h6 class="pt-2 text-sm font-semibold text-muted-foreground first:pt-0">
+              <cw-markdown-inline [nodes]="block.children" />
+            </h6>
+          }
+        }
+      }
+      @case ('paragraph') {
+        <p><cw-markdown-inline [nodes]="block.children" /></p>
+      }
+      @case ('text') {
+        <span><cw-markdown-inline [nodes]="block.children" /></span>
+      }
+      @case ('list') {
+        @if (block.task) {
+          <ul class="flex flex-col gap-1">
+            @for (item of block.items; track $index) {
+              <li class="flex items-start gap-2">
+                <input
+                  type="checkbox"
+                  disabled
+                  [checked]="item.checked"
+                  [attr.aria-label]="item.label"
+                  class="mt-[3px] size-4 shrink-0 accent-foreground"
+                />
+                <div
+                  class="flex min-w-0 flex-1 flex-col gap-1"
+                  [class.line-through]="item.checked"
+                  [class.text-muted-foreground]="item.checked"
+                >
+                  <ng-container *ngTemplateOutlet="list; context: { $implicit: item.children }" />
+                </div>
+              </li>
+            }
+          </ul>
+        } @else if (block.ordered) {
+          <ol
+            [attr.start]="block.start === 1 ? null : block.start"
+            class="flex list-decimal flex-col gap-1 pl-6 marker:text-muted-foreground marker:tabular-nums"
+          >
+            @for (item of block.items; track $index) {
+              <li class="pl-1">
+                <div class="flex min-w-0 flex-col gap-1">
+                  <ng-container *ngTemplateOutlet="list; context: { $implicit: item.children }" />
+                </div>
+              </li>
+            }
+          </ol>
+        } @else {
+          <ul class="flex list-disc flex-col gap-1 pl-6 marker:text-muted-foreground">
+            @for (item of block.items; track $index) {
+              <li class="pl-1">
+                <div class="flex min-w-0 flex-col gap-1">
+                  <ng-container *ngTemplateOutlet="list; context: { $implicit: item.children }" />
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      }
+      @case ('blockquote') {
+        <blockquote
+          class="flex flex-col gap-2 border-l-2 border-line-control pl-3 text-muted-foreground"
+        >
+          <ng-container *ngTemplateOutlet="list; context: { $implicit: block.children }" />
+        </blockquote>
+      }
+      @case ('code') {
+        <cw-code-block [code]="block.text" [language]="block.language" [lineNumbers]="false" />
+      }
+      @case ('hr') {
+        <hr class="my-2 h-px border-0 bg-border" />
+      }
+      @case ('table') {
+        <div class="max-w-full overflow-x-auto">
+          <table class="w-full border-collapse text-sm">
+            <thead>
+              <tr>
+                @for (cell of block.header; track $index) {
+                  <th
+                    [class]="align[cell.align]"
+                    class="border-b border-border px-2 py-1.5 font-medium text-muted-foreground"
+                  >
+                    <cw-markdown-inline [nodes]="cell.children" />
+                  </th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of block.rows; track $index) {
+                <tr>
+                  @for (cell of row; track $index) {
+                    <td [class]="align[cell.align]" class="border-b border-border px-2 py-1.5">
+                      <cw-markdown-inline [nodes]="cell.children" />
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+  }
+</ng-template>

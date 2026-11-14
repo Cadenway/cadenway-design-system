@@ -1,0 +1,21 @@
+<button
+  #box
+  type="button"
+  role="checkbox"
+  [id]="id()"
+  [attr.aria-checked]="indeterminate() ? 'mixed' : checked()"
+  [attr.aria-label]="ariaLabel() || null"
+  [attr.aria-invalid]="isInvalid() ? 'true' : null"
+  [attr.aria-required]="required() ? 'true' : null"
+  [attr.data-state]="state()"
+  [disabled]="isDisabled()"
+  (click)="toggle()"
+  (blur)="markTouched()"
+  class="peer grid size-4 shrink-0 place-content-center rounded-[4px] border border-line-control text-background transition-colors outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:border-transparent data-[state=checked]:bg-foreground data-[state=indeterminate]:border-transparent data-[state=indeterminate]:bg-foreground aria-invalid:border-destructive"
+>
+  @if (indeterminate()) {
+    <ng-icon name="phosphorMinusBold" size="0.75rem" aria-hidden="true" />
+  } @else if (checked()) {
+    <ng-icon name="phosphorCheckBold" size="0.75rem" aria-hidden="true" />
+  }
+</button>

@@ -1,0 +1,20 @@
+<svg:circle
+  cx="12"
+  cy="12"
+  r="9.5"
+  stroke="currentColor"
+  [attr.stroke-width]="size() === 'page' ? 2 : 2.5"
+  [class]="solid() ? 'opacity-25' : 'opacity-20'"
+/>
+<svg:circle
+  cx="12"
+  cy="12"
+  r="9.5"
+  stroke="currentColor"
+  [attr.stroke-width]="size() === 'page' ? 2 : 2.5"
+  stroke-linecap="round"
+  pathLength="100"
+  stroke-dasharray="30 200"
+  transform="rotate(-90 12 12)"
+  class="animate-spinner-arc motion-reduce:animate-none"
+/>

@@ -5,17 +5,17 @@
 
 @AGENTS.md
 
-> **Read on demand, deliberately not `@`-imported**: `docs/maquette/source/StatutTache.dc.html`, `PrioriteTache.dc.html` and `styles/app.css`, the [integration guide](https://claude.ai/artifact/CpJHVCiFfF9j3KbHQ2S1Et), sections "Fondations", "Composants de base", "Composants métier", "Comportements transverses". Importing them would
+> **Read on demand, deliberately not `@`-imported**: the brick's sheet in the [Design System artifact](https://claude.ai/artifact/Xrfx4ccwixnRpFgVYvrCcZ) (`project/components/<Name>/README.md`, `project/tokens.json`, `project/tailwind/cadenway.css`), the source of truth for values and APIs; `docs/maquette/source/StatutTache.dc.html`, `PrioriteTache.dc.html` and `styles/app.css`; the [integration guide](https://claude.ai/artifact/CpJHVCiFfF9j3KbHQ2S1Et), sections "Composants métier" and "Comportements transverses". Importing them would
 > cost context in every session. The path-scoped rules in `.claude/rules/` load automatically when
 > you open a matching file and carry the few things that must never be got wrong there.
 
 ## TL;DR for every task
 
 1. Three packages: `@cadenway/tokens` (CSS variables and the Tailwind 4 `@theme`), `@cadenway/icons` (`provideCadenwayIcons()`), `@cadenway/ui` (Angular bricks).
-2. Bricks reproduce the mockup exactly; behaviors (keyboard, ARIA, placement) come from Angular Aria and the CDK, styling stays ours.
+2. Bricks follow their Design System artifact sheet (API, variants, values) and the mockup (behavior, copy); behaviors (keyboard, ARIA, placement) come from Angular Aria and the CDK, styling stays ours.
 3. Angular 22 conventions: no suffix, `cw-` selectors, signal inputs, outputs and models.
 4. Every brick has stories for each state, in light and dark, and passes the accessibility checks.
-5. Public API through explicit `public-api.ts` exports; a removal or rename is a major version with a deprecation first.
+5. One secondary entry point per brick (`@cadenway/ui/components/<brick>`), explicit `public-api.ts` exports; no `class` input; a removal or rename is a major version with a deprecation first.
 6. Changesets describe every change; the release workflow publishes.
 
 ## Boundaries (hard rules)
@@ -33,6 +33,7 @@ checks during bootstrap.
 
 ```bash
 pnpm format:check
+pnpm test:ui-lint
 pnpm lint
 pnpm typecheck
 pnpm test:architecture

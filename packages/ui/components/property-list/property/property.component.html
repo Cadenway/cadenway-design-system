@@ -1,0 +1,41 @@
+<dl class="contents">
+  <dt [id]="labelId" [class]="labelClasses()">
+    @if (icon(); as name) {
+      <ng-icon [name]="name" size="1rem" class="shrink-0" aria-hidden="true" />
+    }
+    <span class="truncate">{{ label() }}</span>
+  </dt>
+  <dd [class]="valueClasses()">
+    @if (isReadonly()) {
+      <div [class]="readonlyClasses()" [title]="readonlyLabel()">
+        <ng-container [ngTemplateOutlet]="content" />
+        <ng-icon
+          name="phosphorLockSimpleBold"
+          [size]="lockSize()"
+          class="shrink-0 text-muted-foreground"
+          aria-hidden="true"
+        />
+        <span class="sr-only">{{ readonlyLabel() }}</span>
+      </div>
+    } @else if (!hasControl() && empty()) {
+      <div [class]="staticClasses()">
+        <span class="text-muted-foreground">{{ emptyText() }}</span>
+      </div>
+    } @else {
+      <ng-container [ngTemplateOutlet]="content" />
+    }
+    @if (error(); as message) {
+      <p
+        [id]="errorId"
+        class="flex items-start gap-1 px-2 pt-1 text-xs font-medium text-destructive"
+      >
+        <span class="flex h-4 shrink-0 items-center">
+          <ng-icon name="phosphorWarningCircleFill" size="0.875rem" aria-hidden="true" />
+        </span>
+        <span>{{ message }}</span>
+      </p>
+    }
+  </dd>
+</dl>
+
+<ng-template #content><ng-content /></ng-template>

@@ -1,0 +1,85 @@
+<input
+  #picker
+  type="file"
+  class="hidden"
+  tabindex="-1"
+  aria-hidden="true"
+  [accept]="accept()"
+  [multiple]="pickMultiple()"
+  [disabled]="inert()"
+  (change)="picked()"
+/>
+<ng-template #browseButton>
+  <button
+    type="button"
+    class="rounded-sm font-medium text-primary outline-none hover:underline focus-visible:underline"
+    [attr.aria-label]="browseAria()"
+    [disabled]="inert()"
+    (click)="browse()"
+  >
+    {{ browseLabel() }}
+  </button>
+</ng-template>
+@if (size() === 'compact') {
+  <ng-icon
+    [name]="state() === 'reject' ? 'phosphorWarningCircleFill' : 'phosphorUploadSimpleBold'"
+    size="1rem"
+    [class]="compactIconClasses()"
+    aria-hidden="true"
+  />
+  <span class="min-w-0 truncate">
+    @switch (state()) {
+      @case ('over') {
+        {{ text().drop }} {{ countText() }}
+      }
+      @case ('reject') {
+        {{ text().reject }}
+      }
+      @default {
+        @if (limitReached()) {
+          {{ limitText() }}
+        } @else {
+          {{ title() }} {{ text().or }} <ng-container [ngTemplateOutlet]="browseButton" />
+        }
+      }
+    }
+  </span>
+  <span class="ml-auto shrink-0 text-xs text-muted-foreground">{{ hintText() }}</span>
+} @else {
+  <div [class]="tileClasses()">
+    <ng-icon
+      [name]="state() === 'reject' ? 'phosphorWarningCircleFill' : 'phosphorUploadSimpleBold'"
+      size="1.25rem"
+      aria-hidden="true"
+    />
+  </div>
+  <div class="text-sm font-medium">
+    @switch (state()) {
+      @case ('over') {
+        {{ text().drop }}
+      }
+      @case ('reject') {
+        {{ text().reject }}
+      }
+      @default {
+        {{ limitReached() ? limitText() : title() }}
+      }
+    }
+  </div>
+  <p class="text-xs" [class.text-muted-foreground]="state() !== 'reject'">
+    @switch (state()) {
+      @case ('over') {
+        {{ countText() }}
+      }
+      @case ('reject') {
+        {{ hintText() }}
+      }
+      @default {
+        {{ text().or }} <ng-container [ngTemplateOutlet]="browseButton" /> · {{ hintText() }}
+      }
+    }
+  </p>
+}
+<span class="sr-only" aria-live="polite">{{
+  state() === 'over' ? text().drop + ' ' + countText() : ''
+}}</span>

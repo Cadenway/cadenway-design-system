@@ -2,15 +2,17 @@
 
 [Documentation index](README.md) · [Repository overview](../.github/README.md) · [Repository instructions](../AGENTS.md)
 
-## Bootstrap status
+## Status
 
-At the time this documentation was written, this checkout has no `package.json`, application source tree, or GitHub workflow files. The target architecture, scripts, and workflows in this guide must be created and verified during bootstrap.
+The workspace is bootstrapped: `package.json` scripts, the three package skeletons, Storybook and the CI and release workflows exist. The packages are being filled from the Design System artifact and the mockup: `@cadenway/tokens` and `@cadenway/icons` first, then the `@cadenway/ui` bricks in waves.
 
-The commands below are the documented **target workflow**, copied from the repository overview and instructions. They are not proof that scripts, infrastructure, CI, or dependencies currently exist. Inspect the repository's actual manifests and files before running them, and report unavailable checks rather than inventing replacements. Run Git, pnpm, build, and test commands with this repository as the working directory, never from the parent workspace.
+The commands below are the scripts of `package.json`. Report a check you did not run as not run. Run Git, pnpm, build, and test commands with this repository as the working directory, never from the parent workspace.
 
 ## Before making a change
 
-- The mockup bricks in `docs/maquette/source/` and their section in the [integration guide](https://claude.ai/artifact/CpJHVCiFfF9j3KbHQ2S1Et).
+- The brick's sheet in the [Design System artifact](https://claude.ai/artifact/Xrfx4ccwixnRpFgVYvrCcZ) (`project/components/<Name>/README.md`): it is the source of truth
+  for values, variants and APIs.
+- The mockup screens in `docs/maquette/source/` that use the brick: behavior, states and copy.
 - The existing brick closest to the one you touch, and its stories.
 - `package.json` for versions and scripts once the repository is bootstrapped. Do not restate
   versions elsewhere: a copy goes stale.
@@ -50,6 +52,7 @@ The following commands match the planned local gate. Run `/cw-quality` in Claude
 
 ```bash
 pnpm format:check
+pnpm test:ui-lint
 pnpm lint
 pnpm typecheck
 pnpm test:architecture

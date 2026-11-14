@@ -1,0 +1,4 @@
+@if (loading()) {
+  <svg cwSpinner [size]="spinnerSize()" [solid]="variant() === 'default'"></svg>
+}
+<ng-content />

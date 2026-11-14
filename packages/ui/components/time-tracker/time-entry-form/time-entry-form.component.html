@@ -1,0 +1,93 @@
+<div role="group" [attr.aria-labelledby]="titleId" class="grid gap-3">
+  <h3 [id]="titleId" class="text-sm font-semibold">{{ text().title }}</h3>
+
+  @if (quickDurations().length) {
+    <div class="grid grid-cols-4 gap-1.5">
+      @for (duration of quickDurations(); track duration) {
+        <button
+          type="button"
+          [class]="quickClasses"
+          [disabled]="isDisabled()"
+          (click)="addQuick(duration)"
+        >
+          {{ formatQuick(duration) }}
+        </button>
+      }
+    </div>
+  }
+
+  <div class="grid grid-cols-2 gap-3">
+    <div class="grid content-start gap-1.5">
+      <label [for]="durationId" [class]="labelClasses">{{ text().duration }}</label>
+      <input
+        type="text"
+        autocomplete="off"
+        [class]="durationClasses"
+        [id]="durationId"
+        [value]="durationText()"
+        [placeholder]="text().durationPlaceholder"
+        [disabled]="isDisabled()"
+        [attr.aria-invalid]="unreadable() || missing() ? 'true' : null"
+        [attr.aria-describedby]="hintId"
+        (input)="onDurationInput($event)"
+        (blur)="onFieldBlur()"
+      />
+      @if (unreadable() || missing()) {
+        <p [id]="hintId" class="flex items-start gap-1 text-xs font-medium text-destructive">
+          <span class="flex h-4 shrink-0 items-center">
+            <ng-icon name="phosphorWarningCircleFill" size="0.875rem" aria-hidden="true" />
+          </span>
+          <span>{{ hint() }}</span>
+        </p>
+      } @else {
+        <p [id]="hintId" class="text-xs text-muted-foreground">{{ hint() }}</p>
+      }
+    </div>
+    <div class="grid content-start gap-1.5">
+      <label [for]="dateId" [class]="labelClasses">{{ text().date }}</label>
+      <cw-date-picker
+        [id]="dateId"
+        [clearable]="false"
+        [value]="value().date"
+        [disabled]="isDisabled()"
+        (valueChange)="onDate($event)"
+        (touch)="onFieldBlur()"
+      />
+    </div>
+  </div>
+
+  <div class="grid gap-1.5">
+    <label [for]="noteId" [class]="labelClasses">{{ text().note }}</label>
+    <input
+      cwInput
+      type="text"
+      autocomplete="off"
+      [id]="noteId"
+      [value]="value().note"
+      [placeholder]="text().notePlaceholder"
+      [disabled]="isDisabled()"
+      (input)="onNote($event)"
+      (blur)="onFieldBlur()"
+    />
+  </div>
+
+  <div class="flex items-center gap-2 text-sm">
+    <cw-checkbox
+      [id]="billableId"
+      [checked]="value().billable"
+      [disabled]="isDisabled()"
+      (checkedChange)="onBillable($event)"
+      (touch)="onFieldBlur()"
+    />
+    <label [for]="billableId">{{ text().billable }}</label>
+  </div>
+
+  <div class="flex justify-end gap-2">
+    <button cwButton variant="ghost" size="sm" [disabled]="isDisabled()" (click)="cancel.emit()">
+      {{ text().cancel }}
+    </button>
+    <button cwButton size="sm" [disabled]="isDisabled()" (click)="add()">
+      {{ text().submit }}
+    </button>
+  </div>
+</div>

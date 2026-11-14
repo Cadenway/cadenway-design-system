@@ -1,0 +1,133 @@
+@if (variant() === 'input') {
+  <cw-input-group class="w-full" [size]="size()">
+    <input
+      #trigger
+      type="text"
+      inputmode="numeric"
+      autocomplete="off"
+      [class]="fieldClass"
+      [id]="id()"
+      [value]="fieldText()"
+      [placeholder]="inputPlaceholder()"
+      [disabled]="isDisabled()"
+      [attr.aria-label]="ariaLabel() ? ariaLabel() + ' (' + inputPlaceholder() + ')' : null"
+      [attr.aria-invalid]="isInvalid() ? 'true' : null"
+      [attr.aria-required]="required() ? 'true' : null"
+      (input)="onFieldInput($event)"
+      (change)="onFieldChange($event)"
+      (keydown)="onFieldKeydown($event)"
+      (blur)="markTouched()"
+    />
+    <cw-input-group-addon align="inline-end">
+      <button
+        #calendarButton
+        cwInputGroupButton
+        size="icon-xs"
+        aria-haspopup="dialog"
+        [attr.aria-label]="openCalendarLabel()"
+        [attr.aria-expanded]="open()"
+        [attr.aria-controls]="open() ? panelId : null"
+        [disabled]="isDisabled()"
+        (click)="toggle()"
+      >
+        <ng-icon name="phosphorCalendarBlankBold" aria-hidden="true" />
+      </button>
+    </cw-input-group-addon>
+  </cw-input-group>
+} @else {
+  <button
+    #trigger
+    type="button"
+    cwRipple
+    aria-haspopup="dialog"
+    [class]="triggerClass()"
+    [id]="id()"
+    [disabled]="isDisabled()"
+    [attr.aria-label]="triggerLabel()"
+    [attr.aria-expanded]="open()"
+    [attr.aria-controls]="open() ? panelId : null"
+    [attr.aria-invalid]="isInvalid() ? 'true' : null"
+    [attr.data-placeholder]="display() ? null : ''"
+    (click)="toggle()"
+    (keydown)="onTriggerKeydown($event)"
+    (blur)="markTouched()"
+  >
+    <ng-icon name="phosphorCalendarBlankBold" class="text-muted-foreground" aria-hidden="true" />
+    <span class="truncate">{{ display() || placeholder() }}</span>
+  </button>
+}
+
+<ng-template #panel>
+  <div
+    role="dialog"
+    cdkTrapFocus
+    [class]="panelClass"
+    [id]="panelId"
+    [attr.aria-label]="dialogLabel()"
+    [attr.data-state]="overlay.closing() ? 'closed' : 'open'"
+  >
+    <div class="flex">
+      @if (showPresets()) {
+        <div [class]="presetsClass">
+          @for (row of presetRows(); track row.preset.label) {
+            <button
+              type="button"
+              cwRipple
+              [class]="presetClass"
+              [attr.aria-pressed]="row.selected"
+              (click)="pickPreset(row.preset)"
+            >
+              {{ row.preset.label }}
+              @if (row.hint) {
+                <span class="ml-auto pl-2 text-xs text-muted-foreground">{{ row.hint }}</span>
+              }
+              @if (row.selected) {
+                <ng-icon
+                  name="phosphorCheckBold"
+                  aria-hidden="true"
+                  [class]="row.hint ? '' : 'ml-auto'"
+                />
+              }
+            </button>
+          }
+        </div>
+      }
+      <cw-calendar
+        [mode]="mode()"
+        [selected]="draft()"
+        [min]="minDay()"
+        [max]="maxDay()"
+        [disabledDates]="disabledDates()"
+        [locale]="locale()"
+        (selectedChange)="onCalendarChange($event)"
+      />
+    </div>
+    @if (clearable() || (withTime() && mode() === 'single')) {
+      <div class="flex items-center justify-between gap-2 border-t p-2">
+        @if (clearable()) {
+          <button cwButton variant="ghost" size="sm" (click)="clear()">{{ clearLabel() }}</button>
+        } @else {
+          <span></span>
+        }
+        @if (withTime() && mode() === 'single') {
+          @if (timeShown()) {
+            <input
+              cwInput
+              size="sm"
+              type="time"
+              class="w-28 tabular-nums"
+              [attr.aria-label]="timeLabel()"
+              [value]="time()"
+              (change)="onTimeChange($event)"
+            />
+          } @else {
+            <button cwButton variant="ghost" size="sm" (click)="showTime()">
+              <ng-icon name="phosphorClockBold" aria-hidden="true" />
+              {{ addTimeLabel() }}
+            </button>
+          }
+        }
+      </div>
+    }
+  </div>
+</ng-template>

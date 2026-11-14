@@ -1,0 +1,4 @@
+<ng-content />
+@if (count() !== undefined) {
+  <span class="sr-only">, </span><span [class]="countClasses()">{{ count() }}</span>
+}

@@ -1,0 +1,20 @@
+<button
+  #button
+  cwButton
+  variant="ghost"
+  [size]="buttonSize()"
+  [attr.aria-label]="label()"
+  [cwMenuTriggerFor]="menu"
+>
+  <ng-icon name="phosphorDotsThreeBold" />
+</button>
+<cw-menu #menu align="end" [ariaLabel]="label()">
+  @for (item of toolbar.overflowItems(); track item) {
+    <button cwMenuItem (triggered)="item.activate()">
+      @if (item.menuIcon(); as icon) {
+        <ng-icon [name]="icon" />
+      }
+      {{ item.menuLabel() }}
+    </button>
+  }
+</cw-menu>

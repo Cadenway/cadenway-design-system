@@ -1,0 +1,10 @@
+@if (iconName()) {
+  <span
+    class="flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground"
+    aria-hidden="true"
+  >
+    <ng-icon [name]="iconName()" size="1rem" />
+  </span>
+} @else {
+  <ng-content />
+}

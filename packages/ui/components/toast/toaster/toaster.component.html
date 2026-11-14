@@ -1,0 +1,41 @@
+<section
+  #region
+  tabindex="-1"
+  [class]="regionClasses()"
+  [attr.aria-label]="ariaLabel()"
+  [attr.data-expanded]="expanded() ? '' : null"
+  [attr.data-position]="position()"
+  (pointerenter)="onPointer(true)"
+  (pointerleave)="onPointer(false)"
+  (focusin)="onFocusIn()"
+  (focusout)="onFocusOut($event)"
+  (keydown.escape)="onEscape()"
+>
+  @if (waiting() > 0) {
+    <div class="flex h-5 justify-end">
+      <span [class]="counterClasses">{{ counter() }}</span>
+    </div>
+  }
+  <ol [class]="listClasses()">
+    @for (toast of shown(); track toast.id; let index = $index) {
+      <li
+        cdkDrag
+        cdkDragLockAxis="x"
+        [class]="itemClasses(index)"
+        [attr.data-index]="rank(index)"
+        [attr.data-state]="toast.state"
+        (cdkDragEnded)="onSwipe($event, toast)"
+      >
+        <cw-toast-item
+          [toast]="toast"
+          [folded]="!expanded() && rank(index) > 0"
+          [closeButton]="closeButton()"
+          [closeLabel]="closeLabel()"
+          (dismissed)="service.dismiss(toast.id)"
+          (acted)="run(toast)"
+          (removed)="remove(toast)"
+        />
+      </li>
+    }
+  </ol>
+</section>

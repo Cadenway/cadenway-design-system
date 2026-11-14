@@ -1,0 +1,16 @@
+<ng-content />
+@if (!custom()) {
+  @if (questionnaire.step() > 0) {
+    <button cwButton variant="outline" (click)="questionnaire.previous()">
+      <ng-icon name="phosphorCaretLeftBold" aria-hidden="true" />{{ previousLabel() }}
+    </button>
+  }
+  <span class="ml-auto flex gap-2">
+    @if (canSkip()) {
+      <button cwButton variant="outline" (click)="questionnaire.skip()">{{ skipLabel() }}</button>
+    }
+    <button cwButton (click)="questionnaire.next()">
+      {{ questionnaire.isLast() ? submitLabel() : nextLabel() }}
+    </button>
+  </span>
+}

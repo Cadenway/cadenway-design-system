@@ -1,0 +1,6 @@
+<ng-content />
+@if (hasSubmenu()) {
+  <ng-icon class="ml-auto text-muted-foreground" name="phosphorCaretRightBold" aria-hidden="true" />
+} @else if (selected()) {
+  <ng-icon class="ml-auto text-foreground!" name="phosphorCheckBold" aria-hidden="true" />
+}

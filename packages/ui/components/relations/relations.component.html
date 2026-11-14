@@ -1,0 +1,171 @@
+<div class="flex h-8 items-center gap-2 px-2">
+  <h3 class="text-sm font-semibold">{{ text().title }}</h3>
+  <span class="text-xs text-muted-foreground tabular-nums">{{ count() }}</span>
+  @if (!readonly()) {
+    <span class="ml-auto">
+      <button
+        cwButton
+        variant="ghost"
+        size="xs"
+        class="text-muted-foreground hover:text-foreground"
+        [cwPopoverTrigger]="picker"
+      >
+        <ng-icon name="phosphorPlusBold" aria-hidden="true" />{{ text().add }}
+      </button>
+    </span>
+  }
+</div>
+
+@if (groups().length) {
+  <div class="flex flex-col gap-1">
+    @for (group of groups(); track group.type.id) {
+      <div role="group" [attr.aria-labelledby]="group.titleId">
+        <h4
+          [id]="group.titleId"
+          class="flex h-7 items-center gap-1.5 px-2 text-xs font-medium text-muted-foreground"
+        >
+          {{ group.type.label }}<span class="tabular-nums">{{ group.relations.length }}</span>
+        </h4>
+        <ul class="flex flex-col">
+          @for (relation of group.relations; track relation.id) {
+            <li
+              [class]="rowClasses"
+              [attr.data-type]="relation.type"
+              [attr.data-blocking]="relation.warning ? '' : null"
+              [attr.data-external]="relation.item.path ? '' : null"
+            >
+              @if (leading(); as template) {
+                <ng-container
+                  [ngTemplateOutlet]="template"
+                  [ngTemplateOutletContext]="{ $implicit: relation.item }"
+                />
+              }
+              @if (relation.item.reference) {
+                <span class="w-[4.5rem] shrink-0 font-mono text-xs text-muted-foreground">{{
+                  relation.item.reference
+                }}</span>
+              }
+              <span class="flex min-w-0 flex-1 items-center gap-1.5">
+                @if (relation.item.href) {
+                  <a
+                    data-cw-relation-open
+                    [class]="titleClasses"
+                    [href]="relation.item.href"
+                    (click)="onOpen(relation.item, $event)"
+                    (keydown)="onTitleKeydown($event, relation)"
+                    >{{ relation.item.title }}</a
+                  >
+                } @else {
+                  <button
+                    type="button"
+                    data-cw-relation-open
+                    [class]="titleClasses"
+                    (click)="onOpen(relation.item)"
+                    (keydown)="onTitleKeydown($event, relation)"
+                  >
+                    {{ relation.item.title }}
+                  </button>
+                }
+                @if (relation.item.path) {
+                  <span class="truncate text-xs text-muted-foreground">{{
+                    relation.item.path
+                  }}</span>
+                }
+              </span>
+              @if (relation.warning) {
+                <span class="flex shrink-0 items-center gap-1 text-xs font-medium">
+                  <ng-icon
+                    name="phosphorWarningFill"
+                    size="0.875rem"
+                    class="shrink-0 text-balise"
+                    aria-hidden="true"
+                  />{{ relation.warning }}
+                </span>
+              }
+              @if (relation.item.assignee; as person) {
+                <cw-avatar
+                  size="xs"
+                  [name]="person.name"
+                  [src]="person.src ?? null"
+                  [title]="person.name"
+                />
+              }
+              @if (!readonly()) {
+                <span [class]="revealClasses">
+                  <button
+                    cwButton
+                    variant="ghost"
+                    size="icon-xs"
+                    data-cw-relation-menu
+                    class="text-muted-foreground hover:text-foreground"
+                    [cwMenuTriggerFor]="rowMenu"
+                    [attr.aria-label]="
+                      text().actions(relation.item.reference ?? relation.item.title)
+                    "
+                  >
+                    <ng-icon name="phosphorDotsThreeBold" size="1rem" aria-hidden="true" />
+                  </button>
+                  <cw-menu #rowMenu align="end">
+                    <button cwMenuItem (triggered)="open.emit(relation.item)">
+                      <ng-icon name="phosphorArrowSquareOutBold" aria-hidden="true" />{{
+                        text().open
+                      }}
+                    </button>
+                    <button cwMenuItem [cwMenuTriggerFor]="typeMenu">
+                      <ng-icon name="phosphorArrowsLeftRightBold" aria-hidden="true" />{{
+                        text().changeType
+                      }}
+                    </button>
+                    @if (relation.item.href) {
+                      <button cwMenuItem (triggered)="copy(relation.item)">
+                        <ng-icon name="phosphorLinkSimpleBold" aria-hidden="true" />{{
+                          text().copyLink
+                        }}
+                      </button>
+                    }
+                    <cw-menu-separator />
+                    <button cwMenuItem variant="destructive" (triggered)="removeRelation(relation)">
+                      <ng-icon name="phosphorXBold" aria-hidden="true" />{{ text().remove }}
+                    </button>
+                  </cw-menu>
+                  <cw-menu #typeMenu side="right">
+                    @for (type of types(); track type.id) {
+                      <button
+                        cwMenuItem
+                        [selected]="type.id === relation.type"
+                        (triggered)="retype(relation, type.id)"
+                      >
+                        {{ type.label }}
+                      </button>
+                    }
+                  </cw-menu>
+                </span>
+              }
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  </div>
+} @else {
+  <p class="px-2 py-1 text-sm text-muted-foreground">{{ text().empty }}</p>
+  @if (!readonly()) {
+    <button type="button" [class]="emptyAddClasses" [cwPopoverTrigger]="picker">
+      <ng-icon name="phosphorPlusBold" size="1rem" aria-hidden="true" />{{ text().addRelation }}
+    </button>
+  }
+}
+
+<cw-popover #picker side="bottom" align="end" size="lg" modal [ariaLabel]="text().picker">
+  <cw-relation-picker
+    [types]="types()"
+    [defaultType]="defaultType()"
+    [results]="results()"
+    [loading]="loading()"
+    [linkedIds]="linkedIds()"
+    [leading]="leading()"
+    [labels]="labels()"
+    (search)="search.emit($event)"
+    (add)="onAdd($event)"
+  />
+</cw-popover>

@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@floating-ui/dom": "^1.8.0",
+    "@ng-icons/phosphor-icons": "^36.0.0",
     "@tiptap/core": "^3.33.1",
     "@tiptap/extension-list": "^3.33.1",
     "@tiptap/extensions": "^3.33.1",

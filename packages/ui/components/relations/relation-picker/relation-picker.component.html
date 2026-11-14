@@ -1,0 +1,43 @@
+<div class="flex items-center gap-2">
+  <label [for]="typeId" class="w-12 shrink-0 text-xs font-medium text-muted-foreground">{{
+    text().type
+  }}</label>
+  <cw-select size="sm" class="min-w-0 flex-1" [id]="typeId" [(value)]="type">
+    @for (option of types(); track option.id) {
+      <cw-select-option [value]="option.id">{{ option.label }}</cw-select-option>
+    }
+  </cw-select>
+</div>
+<cw-combobox
+  [ariaLabel]="text().search"
+  [placeholder]="text().search"
+  [searchPlaceholder]="text().searchPlaceholder"
+  [emptyText]="text().noResult"
+  [loading]="loading()"
+  [value]="chosen()"
+  (valueChange)="onChoose($event)"
+  (search)="search.emit($event)"
+>
+  @for (item of results(); track item.id) {
+    <cw-combobox-option
+      [value]="item"
+      [keywords]="keywords(item)"
+      [disabled]="isLinked(item)"
+      [disabledLabel]="text().alreadyLinked"
+    >
+      @if (leadingTemplate(); as template) {
+        <ng-container
+          [ngTemplateOutlet]="template"
+          [ngTemplateOutletContext]="{ $implicit: item }"
+        />
+      }
+      @if (item.reference) {
+        <span class="shrink-0 font-mono text-xs text-muted-foreground">{{ item.reference }}</span>
+      }
+      <span data-cw-combobox-label class="min-w-0 flex-1 truncate">{{ item.title }}</span>
+      @if (item.path) {
+        <span class="shrink-0 truncate text-xs text-muted-foreground">{{ item.path }}</span>
+      }
+    </cw-combobox-option>
+  }
+</cw-combobox>

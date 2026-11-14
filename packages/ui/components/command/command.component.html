@@ -1,0 +1,13 @@
+<div class="flex h-11 items-center gap-2 border-b px-3">
+  <ng-icon
+    name="phosphorMagnifyingGlassBold"
+    size="1rem"
+    class="shrink-0 text-muted-foreground"
+    aria-hidden="true"
+  />
+  <ng-content select="input[cwCommandInput]" />
+  @if (loading()) {
+    <svg cwSpinner></svg>
+  }
+</div>
+<ng-content />

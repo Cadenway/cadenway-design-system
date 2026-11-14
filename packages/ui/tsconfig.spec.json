@@ -3,7 +3,12 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "../../out-tsc/ui/spec",
-    "types": ["vitest/globals"]
+    "types": ["vitest/globals"],
+    "paths": {
+      "@cadenway/ui/core": ["./core/public-api.ts"],
+      "@cadenway/ui/components/*": ["./components/*/public-api.ts"]
+    }
   },
-  "include": ["src/**/*.d.ts", "src/**/*.spec.ts"]
+  "include": ["**/*.spec.ts"],
+  "exclude": ["node_modules", "dist"]
 }

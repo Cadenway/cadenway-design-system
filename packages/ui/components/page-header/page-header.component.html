@@ -1,0 +1,22 @@
+<div data-slot="breadcrumb" [class]="breadcrumbClasses()">
+  <ng-content select="cw-breadcrumb, nav[cwBreadcrumb]" />
+</div>
+@if (size() === 'compact') {
+  <ng-icon
+    name="phosphorCaretRightBold"
+    aria-hidden="true"
+    class="hidden shrink-0 [--ng-icon__color:var(--muted-foreground)] [--ng-icon__size:0.875rem] [[data-slot=breadcrumb]:not(:empty)+&]:inline-flex"
+  />
+}
+<div [class]="mainRowClasses()">
+  <div [class]="headingClasses()">
+    <div [class]="titleRowClasses()">
+      <ng-content select="cw-page-header-title" />
+      <ng-content select="cw-page-header-favorite" />
+    </div>
+    <ng-content select="cw-page-header-description" />
+  </div>
+  <ng-content select="cw-page-header-actions" />
+</div>
+<ng-content select="cw-page-header-tabs" />
+<ng-content />

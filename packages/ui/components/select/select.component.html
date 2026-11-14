@@ -1,0 +1,58 @@
+<button
+  #trigger
+  type="button"
+  role="combobox"
+  aria-haspopup="listbox"
+  cwRipple
+  [id]="id()"
+  [class]="triggerClasses()"
+  [disabled]="isDisabled()"
+  [attr.aria-expanded]="open()"
+  [attr.aria-controls]="overlay.attached() ? listboxId : null"
+  [attr.aria-activedescendant]="open() ? activeId() : null"
+  [attr.aria-label]="ariaLabel() || null"
+  [attr.aria-invalid]="isInvalid() ? 'true' : null"
+  [attr.aria-required]="required() ? 'true' : null"
+  [attr.data-placeholder]="selectedOption() ? null : ''"
+  [attr.data-state]="open() ? 'open' : 'closed'"
+  [attr.data-size]="size()"
+  (pointerdown)="onPointerDown()"
+  (click)="onClick()"
+  (keydown)="onKeydown($event)"
+  (blur)="onBlur()"
+>
+  <span class="flex min-w-0 items-center gap-2" [cwSwap]="selectedLabel()">
+    @if (selectedOption()) {
+      <span #display class="contents"></span>
+    } @else {
+      <span class="truncate">{{ placeholder() }}</span>
+    }
+  </span>
+  <ng-icon
+    name="phosphorCaretDownBold"
+    size="1rem"
+    aria-hidden="true"
+    class="text-muted-foreground transition-transform duration-300 ease-snap group-aria-expanded/trigger:rotate-180 motion-reduce:transition-none"
+  />
+</button>
+
+<ng-template #panelTemplate>
+  <div
+    #panel
+    [class]="panelClass"
+    [style.min-width.px]="overlay.originWidth()"
+    [attr.data-state]="overlay.closing() ? 'closed' : 'open'"
+    (mousedown)="$event.preventDefault()"
+  >
+    <div role="listbox" class="block" [id]="listboxId" [attr.aria-label]="listboxLabel()">
+      <ng-content />
+    </div>
+    @if (options().length === 0) {
+      @if (hasCustomEmpty()) {
+        <ng-content select="cw-select-empty" />
+      } @else {
+        <div [class]="emptyClass">{{ emptyText() }}</div>
+      }
+    }
+  </div>
+</ng-template>

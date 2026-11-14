@@ -1,0 +1,114 @@
+<button
+  #trigger
+  type="button"
+  role="combobox"
+  aria-haspopup="listbox"
+  cwRipple
+  [id]="id()"
+  [class]="triggerClasses()"
+  [disabled]="isDisabled()"
+  [attr.aria-expanded]="open()"
+  [attr.aria-controls]="overlay.attached() ? listboxId : null"
+  [attr.aria-label]="ariaLabel() || null"
+  [attr.aria-invalid]="isInvalid() ? 'true' : null"
+  [attr.aria-required]="required() ? 'true' : null"
+  [attr.data-placeholder]="selectedOptions().length ? null : ''"
+  [attr.data-state]="open() ? 'open' : 'closed'"
+  [attr.data-size]="size()"
+  (pointerdown)="onPointerDown()"
+  (click)="onTriggerClick()"
+  (keydown)="onTriggerKeydown($event)"
+  (blur)="onTriggerBlur()"
+>
+  <span class="flex min-w-0 items-center gap-2">
+    @if (selectedOptions().length === 1) {
+      <span #display class="contents"></span>
+    } @else if (selectedOptions().length > 1) {
+      <span class="truncate">{{ summary()(selectedOptions().length) }}</span>
+    } @else {
+      <span class="truncate">{{ placeholder() }}</span>
+    }
+  </span>
+  <ng-icon
+    name="phosphorCaretUpDownBold"
+    size="1rem"
+    aria-hidden="true"
+    class="text-muted-foreground"
+  />
+</button>
+
+<ng-template #panelTemplate>
+  <div
+    #panel
+    [class]="panelClass"
+    [style.min-width.px]="overlay.originWidth()"
+    [attr.data-state]="overlay.closing() ? 'closed' : 'open'"
+    (mousedown)="onPanelMousedown($event)"
+    (focusout)="onPanelFocusout($event)"
+  >
+    <div class="flex h-9 shrink-0 items-center gap-2 border-b px-2.5">
+      <ng-icon
+        name="phosphorMagnifyingGlassBold"
+        size="1rem"
+        aria-hidden="true"
+        class="shrink-0 text-muted-foreground"
+      />
+      <input
+        #searchField
+        type="text"
+        role="combobox"
+        aria-autocomplete="list"
+        aria-expanded="true"
+        autocomplete="off"
+        spellcheck="false"
+        class="h-9 w-full min-w-0 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+        [attr.aria-controls]="listboxId"
+        [attr.aria-activedescendant]="activeId()"
+        [attr.aria-label]="searchPlaceholder()"
+        [placeholder]="searchPlaceholder()"
+        [value]="query()"
+        (input)="onSearchInput($event)"
+        (keydown)="onSearchKeydown($event)"
+      />
+    </div>
+    @if (loading()) {
+      <div class="flex items-center gap-2 px-3 py-2.5 text-sm text-muted-foreground">
+        <svg cwSpinner></svg>{{ loadingText() }}
+      </div>
+    } @else if (visibleOptions().length === 0) {
+      @if (hasCustomEmpty()) {
+        <ng-content select="cw-combobox-empty" />
+      } @else {
+        <div [class]="emptyClass">{{ emptyMessage() }}</div>
+      }
+    }
+    <div
+      role="listbox"
+      class="block min-h-0 overflow-y-auto p-1"
+      [hidden]="loading() || (visibleOptions().length === 0 && !showCreate())"
+      [id]="listboxId"
+      [attr.aria-label]="listboxLabel()"
+      [attr.aria-multiselectable]="multiple() ? 'true' : null"
+      [attr.aria-busy]="loading() ? 'true' : null"
+    >
+      <ng-content />
+      @if (showCreate()) {
+        <div
+          role="option"
+          tabindex="-1"
+          aria-selected="false"
+          [id]="createId"
+          [class]="optionClass"
+          [attr.data-highlighted]="createActive() ? '' : null"
+          (mousedown)="$event.preventDefault()"
+          (keydown.enter)="onCreateClick()"
+          (click)="onCreateClick()"
+          (pointermove)="onCreatePointerMove()"
+        >
+          <ng-icon name="phosphorPlusBold" aria-hidden="true" />
+          <span class="truncate">{{ createLabel()(query().trim()) }}</span>
+        </div>
+      }
+    </div>
+  </div>
+</ng-template>

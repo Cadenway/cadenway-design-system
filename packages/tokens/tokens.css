@@ -1,24 +1,24 @@
 /*
- * @cadenway/tokens: the design tokens of the mockup as CSS custom properties.
+ * @cadenway/tokens: the design tokens of Cadenway as CSS custom properties.
  *
- * What belongs here (AGENTS.md, "Architectural ownership"): colors in light and dark, typography,
- * radii, shadows, motion variables and keyframes, plus the `@font-face` rules for the files of
- * `fonts/`. This file is the only source of those values: bricks and applications read the
- * variables, they never repeat a value.
+ * Source: the Design System artifact (https://claude.ai/artifact/Xrfx4ccwixnRpFgVYvrCcZ),
+ * `project/tokens.json` version 17, plus the eight hues the mockup adds for statuses, priorities,
+ * spaces and labels (cornaline … ardoise), with the mockup's values. This file is the only source of
+ * those values: bricks and applications read the variables, they never repeat a value.
  *
  * The theme is selected by `data-theme="light|dark"` on the root element, never by a class
- * (.claude/skills/cw-tokens-and-theme). Semantic tokens are declared once per theme below; tokens
- * that do not depend on the theme go under `:root`.
+ * (.claude/skills/cw-tokens-and-theme). Light is also the default without the attribute.
  *
- * Structure only for now: no value has been transcribed yet. They come from the integration guide,
- * section "Fondations", and from `docs/maquette/source/styles/app.css`.
+ * The text scale and the radii override the Tailwind 4 theme variables of the same name: Tailwind
+ * declares them in its `theme` layer, these unlayered declarations win.
+ *
+ * A consumer stylesheet imports, in this order: `tailwindcss`, `@cadenway/tokens/tokens.css`,
+ * `@cadenway/tokens/theme.css`.
  */
 
-:root {
-}
-
-[data-theme='light'] {
-}
-
-[data-theme='dark'] {
-}
+/* Order matters: the light values are the defaults, the dark block overrides them under
+   `[data-theme='dark']`. */
+@import './src/fonts.css';
+@import './src/scale.css';
+@import './src/light.css';
+@import './src/dark.css';

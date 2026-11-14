@@ -1,0 +1,10 @@
+<div class="min-h-0 overflow-hidden">
+  <div
+    role="region"
+    [id]="item.contentId"
+    [attr.aria-labelledby]="item.triggerId"
+    [class]="regionClasses()"
+  >
+    <ng-content />
+  </div>
+</div>

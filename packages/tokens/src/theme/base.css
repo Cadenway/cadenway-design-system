@@ -1,0 +1,39 @@
+/* @cadenway/tokens: base layer and reduced motion (imported by theme.css). */
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+    outline-color: color-mix(in oklab, var(--color-ring) 50%, transparent);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Thin scrollbars: thumb `track`, `line-control` on hover (integration guide, "Fondations"). */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-track) transparent;
+  }
+
+  *:hover {
+    scrollbar-color: var(--color-line-control) transparent;
+  }
+}
+
+/* Reduced motion turns every animation and transition off. The compiled mockup left menu-in,
+   item-in, pop-in, fade-in and the spinner running; this rule closes that gap for every brick. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

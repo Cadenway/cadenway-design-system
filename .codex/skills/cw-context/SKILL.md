@@ -1,6 +1,6 @@
 ---
 name: cw-context
-description: "What Cadenway is, where the mockup, the integration guide and the repository map live, the product vocabulary (spaces, lists, sprints, tasks, statuses, milestones) and the multi-repository ownership rules. Load it before any decision that depends on the product or on another repository."
+description: "What Cadenway is, where the Design System artifact, the mockup, the integration guide and the repository map live, the product vocabulary (spaces, lists, sprints, tasks, statuses, milestones) and the multi-repository ownership rules. Load it before any decision that depends on the product or on another repository."
 ---
 
 # Cadenway context
@@ -14,8 +14,9 @@ and the demo sprint is **Sprint 14** (3 to 17 November).
 
 | Source | What it settles |
 | --- | --- |
+| [Design System artifact](https://claude.ai/artifact/Xrfx4ccwixnRpFgVYvrCcZ) (tokens v17, 82 component sheets) | Token values, the Tailwind 4 theme, and each brick's API, variants, sizes, states, keyboard and accessibility. When it and the mockup or the guide disagree on a value or an API, the artifact wins (decision of 2026-11-13). |
 | [Interactive mockup](https://claude.ai/artifact/KYRM7AnsYLiBLBLKy8i4HE) (19 artboards) | Every screen, state and interaction. When this repository and the mockup disagree on behavior, the mockup wins until a decision says otherwise. |
-| [Integration guide](https://claude.ai/artifact/CpJHVCiFfF9j3KbHQ2S1Et) | Design tokens, data shapes, component names (`cw-*`), behaviors, Angular 22 mapping, what the mockup only simulates. |
+| [Integration guide](https://claude.ai/artifact/CpJHVCiFfF9j3KbHQ2S1Et) | Data shapes, screen components (`cw-*`), behaviors, Angular 22 mapping, what the mockup only simulates. Its color table and base-component APIs predate tokens v17: use the artifact for those. |
 | [Repositories and packages](https://claude.ai/artifact/BPinmYxoF3mbK8w9BMB43N) | The 18 repositories, their data, APIs, events, deployment (Docker Compose, Traefik, Ansible, Terraform, GitOps agent) and open decisions. |
 | `../cadenway-api-contracts` | The only definition of public routes (OpenAPI) and events (AsyncAPI). |
 

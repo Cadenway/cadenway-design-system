@@ -1,0 +1,7 @@
+@for (part of parts(); track $index) {
+  @if (part.match) {
+    <mark class="bg-transparent font-semibold text-foreground">{{ part.text }}</mark>
+  } @else {
+    <ng-container>{{ part.text }}</ng-container>
+  }
+}

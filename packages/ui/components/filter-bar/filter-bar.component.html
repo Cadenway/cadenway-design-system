@@ -1,0 +1,74 @@
+@for (entry of entries(); track entry.index) {
+  <cw-filter-chip
+    [filter]="entry.filter"
+    [field]="entry.field"
+    [labels]="labels()"
+    (filterChange)="update(entry.index, $event)"
+    (removed)="remove(entry.index, entry.field)"
+  />
+}
+
+<button
+  #addButton
+  cwButton
+  variant="ghost"
+  size="sm"
+  class="text-muted-foreground"
+  [cwMenuTriggerFor]="fieldMenu"
+>
+  <ng-icon name="phosphorPlusBold" aria-hidden="true" />
+  {{ empty() ? text().addFirst : text().add }}
+</button>
+<cw-menu #fieldMenu align="start" [ariaLabel]="text().fields">
+  @for (field of fields(); track field.key) {
+    <button cwMenuItem (triggered)="add(field)">
+      @if (field.icon; as icon) {
+        <ng-icon [name]="icon" aria-hidden="true" />
+      }
+      {{ field.label }}
+    </button>
+  }
+</cw-menu>
+
+@if (empty() && summary(); as line) {
+  <span class="text-xs whitespace-nowrap text-muted-foreground tabular-nums">{{ line }}</span>
+}
+
+<span class="flex-1" aria-hidden="true"></span>
+
+@if (savedFilters().length > 0) {
+  <button cwButton variant="outline" size="sm" [cwMenuTriggerFor]="savedMenu">
+    <ng-icon name="phosphorFunnelSimpleBold" aria-hidden="true" />
+    {{ applied()?.label ?? text().savedFilters }}
+    <ng-icon name="phosphorCaretDownBold" aria-hidden="true" />
+  </button>
+  <cw-menu #savedMenu align="end" [ariaLabel]="text().savedFilters">
+    <cw-menu-label>{{ text().savedGroup }}</cw-menu-label>
+    @for (saved of savedFilters(); track saved.id) {
+      <button cwMenuItem [selected]="applied() === saved" (triggered)="apply(saved)">
+        <ng-icon name="phosphorFunnelSimpleBold" aria-hidden="true" />
+        {{ saved.label }}
+      </button>
+    }
+    <cw-menu-separator />
+    <button cwMenuItem (triggered)="saveFilter.emit(filters())">
+      <ng-icon name="phosphorFloppyDiskBold" aria-hidden="true" />
+      {{ text().saveCurrent }}
+    </button>
+    <button cwMenuItem (triggered)="manageSaved.emit()">
+      <ng-icon name="phosphorGearBold" aria-hidden="true" />
+      {{ text().manageSaved }}
+    </button>
+  </cw-menu>
+}
+
+@if (!empty()) {
+  <button cwButton variant="ghost" size="sm" (click)="clear()">{{ text().clear }}</button>
+}
+
+@if (dirty()) {
+  <button cwButton variant="outline" size="sm" (click)="saveView.emit(filters())">
+    <ng-icon name="phosphorBookmarkSimpleBold" aria-hidden="true" />
+    {{ text().saveView }}
+  </button>
+}

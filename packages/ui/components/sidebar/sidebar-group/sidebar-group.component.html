@@ -1,0 +1,12 @@
+@if (label()) {
+  <div [class]="headingClasses()">
+    <span [id]="labelId">{{ label() }}</span>
+    <span [class]="sidebar.rail() ? 'hidden' : 'flex items-center'">
+      <ng-content select="[cwSidebarGroupAction]" />
+    </span>
+  </div>
+}
+@if (sidebar.rail()) {
+  <div class="my-1 h-px w-6 shrink-0 bg-border" aria-hidden="true"></div>
+}
+<ng-content />

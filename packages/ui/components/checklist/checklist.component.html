@@ -1,0 +1,76 @@
+<div class="flex h-8 min-w-0 items-center gap-2 pr-1 pl-0.5">
+  <button
+    type="button"
+    cwRipple
+    [class]="triggerClasses"
+    [attr.aria-expanded]="expanded()"
+    [attr.aria-controls]="bodyId"
+    (click)="toggle()"
+  >
+    <span class="flex size-5 shrink-0 items-center justify-center">
+      <ng-icon
+        name="phosphorCaretRightBold"
+        size="0.875rem"
+        aria-hidden="true"
+        class="text-muted-foreground transition-transform duration-300 ease-snap group-data-[state=open]/col:rotate-90 motion-reduce:transition-none"
+      />
+    </span>
+    <span [id]="titleId" class="truncate">{{ title() }}</span>
+  </button>
+  <span
+    class="shrink-0 text-xs tabular-nums"
+    [class.text-jade-text]="complete()"
+    [class.text-muted-foreground]="!complete()"
+    >{{ done() }} / {{ total() }}</span
+  >
+  <div
+    role="progressbar"
+    class="h-1.5 w-10 shrink-0 overflow-hidden rounded-full bg-track"
+    aria-valuemin="0"
+    [attr.aria-label]="text().progress(title())"
+    [attr.aria-valuemax]="total()"
+    [attr.aria-valuenow]="done()"
+    [attr.aria-valuetext]="text().progressValue(done(), total())"
+  >
+    <div
+      class="h-full rounded-full bg-jade transition-[width] duration-300 ease-snap motion-reduce:transition-none"
+      [style.width.%]="percent()"
+    ></div>
+  </div>
+  <span class="ml-auto flex shrink-0 items-center gap-0.5">
+    <button
+      cwButton
+      variant="ghost"
+      size="icon-xs"
+      class="text-muted-foreground hover:text-foreground aria-pressed:bg-selected aria-pressed:text-foreground"
+      [attr.aria-pressed]="hideCompleted()"
+      [attr.aria-label]="text().hideCompleted"
+      [title]="text().hideCompleted"
+      (click)="toggleHide()"
+    >
+      <ng-icon name="phosphorEyeSlashBold" size="0.875rem" aria-hidden="true" />
+    </button>
+    <ng-content select="[cwChecklistActions]" />
+  </span>
+</div>
+
+<div
+  [id]="bodyId"
+  class="grid transition-[grid-template-rows,opacity] duration-300 ease-snap group-data-[state=closed]/col:grid-rows-[0fr] group-data-[state=closed]/col:opacity-0 group-data-[state=open]/col:grid-rows-[1fr] motion-reduce:transition-none"
+  [inert]="!expanded()"
+>
+  <div class="min-h-0 overflow-hidden">
+    <ul data-cw-checklist-items class="flex flex-col" [attr.aria-labelledby]="titleId">
+      <ng-content select="cw-checklist-item" />
+    </ul>
+    @if (hiddenCount() > 0) {
+      <button type="button" cwRipple [class]="footerClasses" (click)="showCompleted()">
+        <span class="size-5 shrink-0" aria-hidden="true"></span>
+        <ng-icon name="phosphorEyeBold" size="0.875rem" class="shrink-0" aria-hidden="true" />
+        {{ text().showCompleted(hiddenCount()) }}
+      </button>
+    }
+    <ng-content />
+    <p [id]="helpId" class="sr-only">{{ text().moveHelp }}</p>
+  </div>
+</div>

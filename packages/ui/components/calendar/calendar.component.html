@@ -1,0 +1,134 @@
+<div class="flex h-8 items-center justify-between gap-2">
+  <button
+    cwButton
+    variant="ghost"
+    size="icon-sm"
+    [attr.aria-label]="previousMonthLabel()"
+    [disabled]="previousDisabled()"
+    (click)="showMonth(-1)"
+  >
+    <ng-icon name="phosphorCaretLeftBold" aria-hidden="true" />
+  </button>
+  @if (captionLayout() === 'dropdown') {
+    <div class="flex items-center gap-1">
+      <span class="relative inline-flex">
+        <select
+          [class]="selectClass"
+          [attr.aria-label]="monthListLabel()"
+          [disabled]="isDisabled()"
+          (change)="pickMonth($event)"
+        >
+          @for (option of monthOptions(); track option.value) {
+            <option [value]="option.value" [selected]="option.value === shownMonth().getMonth()">
+              {{ option.label }}
+            </option>
+          }
+        </select>
+        <ng-icon
+          name="phosphorCaretDownBold"
+          size="1rem"
+          aria-hidden="true"
+          class="pointer-events-none absolute end-1.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+        />
+      </span>
+      <span class="relative inline-flex">
+        <select
+          [class]="selectClass"
+          [attr.aria-label]="yearListLabel()"
+          [disabled]="isDisabled()"
+          (change)="pickYear($event)"
+        >
+          @for (option of yearOptions(); track option.value) {
+            <option [value]="option.value" [selected]="option.value === shownMonth().getFullYear()">
+              {{ option.label }}
+            </option>
+          }
+        </select>
+        <ng-icon
+          name="phosphorCaretDownBold"
+          size="1rem"
+          aria-hidden="true"
+          class="pointer-events-none absolute end-1.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+        />
+      </span>
+      <span class="sr-only" aria-live="polite">{{ title() }}</span>
+    </div>
+  } @else {
+    <div class="text-sm font-medium" aria-live="polite">{{ title() }}</div>
+  }
+  <button
+    cwButton
+    variant="ghost"
+    size="icon-sm"
+    [attr.aria-label]="nextMonthLabel()"
+    [disabled]="nextDisabled()"
+    (click)="showMonth(1)"
+  >
+    <ng-icon name="phosphorCaretRightBold" aria-hidden="true" />
+  </button>
+</div>
+<table
+  role="grid"
+  class="mt-2 border-collapse"
+  [attr.aria-label]="title()"
+  [attr.aria-multiselectable]="mode() === 'range' ? 'true' : null"
+  [attr.aria-disabled]="isDisabled() ? 'true' : null"
+>
+  <thead>
+    <tr>
+      @if (showWeekNumbers()) {
+        <th scope="col" class="w-8 pb-1 text-xs font-normal text-muted-foreground">
+          <abbr class="no-underline" [attr.title]="weekLabel()">{{ weekShortLabel() }}</abbr>
+        </th>
+      }
+      @for (weekday of weekdays(); track $index) {
+        <th
+          scope="col"
+          class="w-8 pb-1 text-xs font-normal text-muted-foreground"
+          [attr.aria-label]="weekday.long"
+        >
+          {{ weekday.short }}
+        </th>
+      }
+    </tr>
+  </thead>
+  <tbody>
+    @for (week of weeks(); track $index) {
+      <tr>
+        @if (showWeekNumbers()) {
+          <td
+            class="w-8 p-0 text-center text-xs text-muted-foreground tabular-nums"
+            [attr.aria-label]="weekLabel() + ' ' + week.number"
+          >
+            {{ week.number }}
+          </td>
+        }
+        @for (day of week.days; track day.key) {
+          <td [class]="day.cellClass" [attr.aria-selected]="day.hidden ? null : day.selected">
+            @if (!day.hidden) {
+              <button
+                type="button"
+                cwRipple
+                [class]="day.dayClass"
+                [attr.data-day]="day.key"
+                [attr.tabindex]="day.key === tabStop() ? 0 : -1"
+                [attr.aria-label]="day.label"
+                [attr.aria-current]="day.today ? 'date' : null"
+                [attr.data-selected]="day.selected ? '' : null"
+                [attr.data-outside]="day.outside ? '' : null"
+                [attr.data-range-start]="day.rangeStart ? '' : null"
+                [attr.data-range-middle]="day.rangeMiddle ? '' : null"
+                [attr.data-range-end]="day.rangeEnd ? '' : null"
+                [disabled]="day.disabled"
+                (focus)="onDayFocus(day)"
+                (click)="pick(day)"
+              >
+                {{ day.number }}
+              </button>
+            }
+          </td>
+        }
+      </tr>
+    }
+  </tbody>
+</table>

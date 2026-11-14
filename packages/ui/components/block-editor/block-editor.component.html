@@ -1,0 +1,226 @@
+@if (toolbar()) {
+  <div [class]="toolbarFrame">
+    <cw-toolbar size="sm" [ariaLabel]="text().toolbar">
+      <button
+        cwButton
+        cwToolbarItem
+        pinned
+        variant="ghost"
+        size="sm"
+        [class]="toolStyle"
+        [disabled]="isDisabled()"
+        [cwMenuTriggerFor]="typeMenu"
+        [attr.aria-label]="text().blockType + ' : ' + typeLabel()"
+        (mousedown)="$event.preventDefault()"
+      >
+        <span>{{ typeLabel() }}</span>
+        <ng-icon name="phosphorCaretDownBold" class="text-muted-foreground" aria-hidden="true" />
+      </button>
+      <cw-toolbar-separator />
+      @for (button of marks; track button.mark) {
+        <button
+          cwButton
+          cwToolbarItem
+          variant="ghost"
+          size="icon-sm"
+          [class]="toolStyle"
+          [disabled]="isDisabled()"
+          [attr.aria-label]="button.label"
+          [attr.aria-pressed]="isMarkActive(button.mark)"
+          [cwTooltip]="button.label"
+          [cwTooltipShortcut]="button.shortcut"
+          [overflowIcon]="button.icon"
+          (mousedown)="$event.preventDefault()"
+          (click)="toggleMark(button.mark)"
+        >
+          <ng-icon [name]="button.icon" aria-hidden="true" />
+        </button>
+      }
+      <button
+        cwButton
+        cwToolbarItem
+        variant="ghost"
+        size="icon-sm"
+        aria-haspopup="dialog"
+        [class]="toolStyle"
+        [disabled]="isDisabled()"
+        [attr.aria-label]="text().link"
+        [attr.aria-expanded]="link() !== null"
+        [cwTooltip]="text().link"
+        [cwTooltipShortcut]="['Ctrl', 'K']"
+        overflowIcon="phosphorLinkSimpleBold"
+        (mousedown)="$event.preventDefault()"
+        (click)="openLink()"
+      >
+        <ng-icon name="phosphorLinkSimpleBold" aria-hidden="true" />
+      </button>
+      <cw-toolbar-separator />
+      @for (type of toolbarBlocks(); track type.kind) {
+        <button
+          cwButton
+          cwToolbarItem
+          variant="ghost"
+          size="icon-sm"
+          [class]="toolStyle"
+          [disabled]="isDisabled()"
+          [attr.aria-label]="type.label"
+          [attr.aria-pressed]="type.kind === 'hr' ? null : activeBlock() === type.kind"
+          [cwTooltip]="type.label"
+          [overflowIcon]="type.icon ?? null"
+          (mousedown)="$event.preventDefault()"
+          (click)="setBlock(type.kind)"
+        >
+          <ng-icon [name]="type.icon ?? 'phosphorTextTBold'" aria-hidden="true" />
+        </button>
+      }
+    </cw-toolbar>
+  </div>
+  <cw-menu #typeMenu [ariaLabel]="text().blockType" (closed)="refocus()">
+    <cw-menu-radio-group [value]="activeBlock()" (valueChange)="onTypeChosen($event)">
+      @for (type of typeEntries; track type.kind) {
+        <button cwMenuItemRadio [value]="type.kind">
+          @if (type.icon) {
+            <ng-icon [name]="type.icon" class="text-muted-foreground" aria-hidden="true" />
+          }
+          {{ type.label }}
+        </button>
+      }
+    </cw-menu-radio-group>
+  </cw-menu>
+}
+
+<div
+  #surface
+  [class]="surfaceClasses()"
+  [class.cursor-not-allowed]="isDisabled()"
+  [class.opacity-50]="isDisabled()"
+></div>
+
+<div
+  #menuPanel
+  class="z-50 w-max max-w-sm min-w-56 overflow-hidden rounded-lg border bg-popover text-popover-foreground shadow-md animate-menu-in motion-reduce:animate-none"
+  [hidden]="menu() === null"
+  [style.position]="'fixed'"
+  [style.left.px]="menuPosition()?.x ?? 0"
+  [style.top.px]="menuPosition()?.y ?? 0"
+  [style.visibility]="menuPosition() ? null : 'hidden'"
+  [style.--menu-from]="menuFrom()"
+>
+  @if (menu(); as state) {
+    <div class="p-1">
+      <div [id]="ids.menuTitle" class="px-2 py-1.5 text-xs font-medium text-muted-foreground">
+        {{ state.kind === 'mention' ? text().mentionMenu : text().blockMenu }}
+      </div>
+      <div
+        role="listbox"
+        [id]="ids.listbox"
+        [attr.aria-labelledby]="ids.menuTitle"
+        [class]="listboxClasses"
+      >
+        @if (state.kind === 'block') {
+          @for (type of state.items; track type.kind; let index = $index) {
+            <div
+              role="option"
+              tabindex="-1"
+              [id]="optionId(index)"
+              [attr.aria-selected]="index === state.active"
+              [attr.data-highlighted]="index === state.active ? '' : null"
+              class="relative flex cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-hidden transition-colors select-none hover:bg-accent data-highlighted:bg-selected [&_ng-icon]:[--ng-icon__size:1rem]"
+              (mousedown)="$event.preventDefault()"
+              (pointermove)="highlight(index)"
+              (keydown.enter)="choose(index)"
+              (click)="choose(index)"
+            >
+              @if (type.icon) {
+                <ng-icon
+                  [name]="type.icon"
+                  class="shrink-0 text-muted-foreground"
+                  aria-hidden="true"
+                />
+              }
+              <span class="truncate">{{ type.label }}</span>
+              @if (type.hint) {
+                <span class="ml-auto pl-2 font-mono text-[11px] text-muted-foreground">{{
+                  type.hint
+                }}</span>
+              }
+            </div>
+          }
+        } @else {
+          @for (person of state.items; track person.id; let index = $index) {
+            <div
+              role="option"
+              tabindex="-1"
+              [id]="optionId(index)"
+              [attr.aria-selected]="index === state.active"
+              [attr.data-highlighted]="index === state.active ? '' : null"
+              class="relative flex cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-hidden transition-colors select-none hover:bg-accent data-highlighted:bg-selected"
+              (mousedown)="$event.preventDefault()"
+              (pointermove)="highlight(index)"
+              (keydown.enter)="choose(index)"
+              (click)="choose(index)"
+            >
+              <cw-avatar
+                size="xs"
+                [name]="person.name"
+                [src]="person.src ?? null"
+                aria-hidden="true"
+              />
+              @let parts = nameParts(person.name, state.query);
+              <span class="truncate"
+                >{{ parts.before
+                }}<mark class="bg-transparent font-semibold text-foreground">{{ parts.match }}</mark
+                >{{ parts.after }}</span
+              >
+              @if (person.role) {
+                <span class="ml-auto pl-2 text-xs text-muted-foreground"
+                  ><span class="sr-only">, </span>{{ person.role }}</span
+                >
+              }
+            </div>
+          }
+        }
+      </div>
+      @if (state.items.length === 0 && !(state.kind === 'mention' && state.loading)) {
+        <p class="px-2 py-1.5 text-sm text-muted-foreground">{{ text().noResults }}</p>
+      }
+    </div>
+    @if (state.kind === 'mention') {
+      <p
+        class="flex flex-wrap items-center gap-1 border-t px-2.5 py-1.5 text-xs text-muted-foreground"
+      >
+        <kbd cwKbd [attr.aria-label]="text().up">↑</kbd>
+        <kbd cwKbd [attr.aria-label]="text().down">↓</kbd>
+        {{ text().choose }} ·
+        <kbd cwKbd>{{ text().enter }}</kbd>
+        {{ text().insert }}
+      </p>
+    }
+  }
+</div>
+
+<div
+  #linkPanel
+  role="dialog"
+  class="z-50 flex w-72 items-center gap-1.5 rounded-lg border bg-popover p-1 text-popover-foreground shadow-md animate-menu-in motion-reduce:animate-none"
+  [attr.aria-label]="text().linkPanel"
+  [hidden]="link() === null"
+  [style.position]="'fixed'"
+  [style.left.px]="link()?.x ?? 0"
+  [style.top.px]="link()?.y ?? 0"
+  [style.--menu-from]="linkFrom()"
+>
+  <input
+    #linkInput
+    cwInput
+    size="sm"
+    type="url"
+    class="min-w-0 flex-1"
+    [attr.aria-label]="text().linkUrl"
+    [placeholder]="text().linkPlaceholder"
+    [value]="linkUrl()"
+    (input)="onLinkInput($event)"
+    (keydown)="onLinkKeydown($event)"
+  />
+  <button cwButton size="sm" (click)="applyLink()">{{ text().linkApply }}</button>
+</div>

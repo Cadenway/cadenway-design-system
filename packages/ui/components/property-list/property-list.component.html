@@ -1,0 +1,49 @@
+@if (orientation() === 'inline') {
+  <div class="flex flex-wrap items-center gap-1.5">
+    <div [class]="rowsClasses()"><ng-container [ngTemplateOutlet]="rows" /></div>
+    <ng-container [ngTemplateOutlet]="rest" />
+    @if (showAdd()) {
+      <button
+        cwButton
+        variant="ghost"
+        size="icon-sm"
+        [attr.aria-label]="addFieldLabel()"
+        [title]="addFieldLabel()"
+        (click)="addField.emit()"
+      >
+        <ng-icon name="phosphorPlusBold" aria-hidden="true" />
+      </button>
+    }
+  </div>
+} @else {
+  <div [class]="rowsClasses()"><ng-container [ngTemplateOutlet]="rows" /></div>
+  <ng-container [ngTemplateOutlet]="rest" />
+  @if (showToggle()) {
+    <button
+      type="button"
+      cwRipple
+      [class]="footerButton"
+      [attr.aria-expanded]="showEmpty()"
+      [attr.data-state]="showEmpty() ? 'open' : 'closed'"
+      (click)="toggleEmpty()"
+    >
+      <ng-icon
+        name="phosphorCaretRightBold"
+        size="1rem"
+        aria-hidden="true"
+        class="shrink-0 transition-transform duration-300 ease-snap motion-reduce:transition-none"
+        [class.rotate-90]="showEmpty()"
+      />
+      {{ emptyFieldsLabel() }}<span class="tabular-nums">{{ emptyCount() }}</span>
+    </button>
+  }
+  @if (showAdd()) {
+    <button type="button" cwRipple [class]="footerButton" (click)="addField.emit()">
+      <ng-icon name="phosphorPlusBold" size="1rem" aria-hidden="true" class="shrink-0" />
+      {{ addFieldLabel() }}
+    </button>
+  }
+}
+
+<ng-template #rows><ng-content select="cw-property" /></ng-template>
+<ng-template #rest><ng-content /></ng-template>

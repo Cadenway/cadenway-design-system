@@ -11,4 +11,10 @@ This project mirrors the repository's `.claude/` tooling using Codex-native form
 
 Check the applicable repository instructions and run the relevant quality gate. Never use a hook refusal as a reason to bypass policy.
 
+For `packages/ui`, read [the comment convention](rules/comments.md) before editing declarations.
+Run `pnpm lint:ui` and `pnpm format:ui:check` after UI changes. The shared quality gate also runs
+`pnpm test:ui-lint` to verify the custom ESLint rules. These commands check structure; review the
+meaning and accuracy of docblocks separately. The corresponding Claude rule and quality command
+must describe the same behavior. Rules and shared skills are checked for parity in CI.
+
 Angular MCP prefers the project-local Angular CLI and falls back to a globally installed `ng` when the project has no local CLI. The fallback can have a different version and is intended for bootstrapping only.

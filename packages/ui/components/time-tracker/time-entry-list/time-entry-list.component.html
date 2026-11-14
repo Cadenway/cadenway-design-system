@@ -1,0 +1,105 @@
+<div [class]="header" aria-hidden="true">
+  <span>{{ text().person }}</span>
+  <span>{{ text().date }}</span>
+  <span>{{ text().note }}</span>
+  <span class="flex justify-center" [title]="text().billable">
+    <ng-icon name="phosphorCurrencyEurBold" size="0.875rem" />
+  </span>
+  <span class="text-right">{{ text().duration }}</span>
+  <span></span>
+</div>
+
+@if (entries().length) {
+  <ul [class]="listClasses" [attr.aria-label]="text().list">
+    @for (entry of entries(); track entry.id) {
+      <li
+        [class]="rowClasses"
+        [attr.data-running]="entry.running ? '' : null"
+        [attr.data-billable]="entry.billable ? '' : null"
+      >
+        @if (!readonly()) {
+          <button
+            type="button"
+            [class]="openClasses"
+            [attr.aria-label]="text().edit(entry.person.name, date(entry), duration(entry))"
+            (click)="entryEdit.emit(entry)"
+          ></button>
+        }
+        <span class="flex min-w-0 items-center gap-1.5">
+          <cw-avatar
+            size="xs"
+            aria-hidden="true"
+            [name]="entry.person.name"
+            [src]="entry.person.src ?? null"
+          />
+          <span class="truncate">{{ entry.person.name }}</span>
+        </span>
+        <span class="truncate text-muted-foreground">{{ date(entry) }}</span>
+        <span class="flex min-w-0 items-center gap-2">
+          @if (entry.running) {
+            <span
+              class="size-2 shrink-0 animate-pulse rounded-full bg-jade motion-reduce:animate-none"
+              aria-hidden="true"
+            ></span>
+            <span class="shrink-0 text-xs font-medium">{{ text().running }}</span>
+          }
+          <span class="truncate" [class.text-muted-foreground]="!entry.note">{{
+            entry.note || text().noNote
+          }}</span>
+        </span>
+        <span class="flex justify-center">
+          @if (entry.billable) {
+            <span class="flex" [title]="text().billable">
+              <ng-icon name="phosphorCurrencyEurBold" size="1rem" aria-hidden="true" />
+              <span class="sr-only">{{ text().billable }}</span>
+            </span>
+          }
+        </span>
+        <span class="text-right font-medium tabular-nums">{{ duration(entry) }}</span>
+        <span [class]="revealClasses">
+          @if (!readonly()) {
+            <button
+              cwButton
+              variant="ghost"
+              size="icon-xs"
+              [cwMenuTriggerFor]="menu"
+              [attr.aria-label]="text().actions(entry.person.name)"
+            >
+              <ng-icon name="phosphorDotsThreeBold" size="1rem" aria-hidden="true" />
+            </button>
+            <cw-menu #menu align="end">
+              <button cwMenuItem (triggered)="entryEdit.emit(entry)">
+                <ng-icon name="phosphorPencilSimpleBold" aria-hidden="true" />{{
+                  text().editAction
+                }}
+              </button>
+              <button cwMenuItem (triggered)="entryDuplicate.emit(entry)">
+                <ng-icon name="phosphorCopyBold" aria-hidden="true" />{{ text().duplicate }}
+              </button>
+              <cw-menu-separator />
+              <button cwMenuItem variant="destructive" (triggered)="entryRemove.emit(entry)">
+                <ng-icon name="phosphorTrashBold" aria-hidden="true" />{{ text().remove }}
+              </button>
+            </cw-menu>
+          }
+        </span>
+      </li>
+    }
+  </ul>
+  <p
+    class="flex items-center justify-end gap-3 px-2 pt-2 text-xs text-muted-foreground tabular-nums"
+  >
+    <span
+      >{{ text().total }}
+      <span class="font-medium text-foreground">{{ format(total()) }}</span></span
+    >
+    @if (billableTotal() > 0) {
+      <span
+        >{{ text().billable }}
+        <span class="font-medium text-foreground">{{ format(billableTotal()) }}</span></span
+      >
+    }
+  </p>
+} @else {
+  <p class="px-2 py-3 text-sm text-muted-foreground">{{ text().empty }}</p>
+}

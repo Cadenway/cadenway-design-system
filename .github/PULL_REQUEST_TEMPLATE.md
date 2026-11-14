@@ -20,7 +20,7 @@ Fixes: CAD-
 - [ ] `pnpm format:check`
 - [ ] `pnpm lint`
 - [ ] `pnpm typecheck`
-- [ ] `pnpm test --include packages/ui/src/lib/<brick>`
+- [ ] `pnpm test --include packages/ui/components/<brick>`
 - [ ] `pnpm test:coverage`
 - [ ] `pnpm storybook:build`
 - [ ] `pnpm test:storybook`

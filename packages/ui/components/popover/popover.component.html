@@ -1,0 +1,23 @@
+<ng-template #panel>
+  <div
+    role="dialog"
+    tabindex="-1"
+    [id]="panelId"
+    [attr.aria-modal]="modal() ? 'true' : null"
+    [attr.aria-label]="ariaLabel() ?? null"
+    [attr.aria-labelledby]="ariaLabelledby() ?? null"
+    [attr.data-state]="state()"
+    [attr.data-side]="placement().side"
+    [attr.data-align]="placement().align"
+    [style.--menu-from]="menuFrom()"
+    [class]="panelClasses()"
+    (focusout)="onFocusOut($event)"
+  >
+    @if (arrow()) {
+      <cw-popover-arrow [side]="placement().side" [align]="placement().align" />
+    }
+    <div [class]="contentClasses()">
+      <ng-content />
+    </div>
+  </div>
+</ng-template>

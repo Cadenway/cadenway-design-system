@@ -1,0 +1,24 @@
+@if (open()) {
+  <div class="flex min-h-8 min-w-0 items-center gap-2 pr-1 pl-0.5">
+    <span class="size-5 shrink-0" aria-hidden="true"></span>
+    <span class="flex size-4 shrink-0 items-center justify-center text-muted-foreground">
+      <ng-icon name="phosphorPlusBold" size="1rem" aria-hidden="true" />
+    </span>
+    <input
+      #field
+      type="text"
+      autocomplete="off"
+      [class]="fieldClasses"
+      [placeholder]="placeholder()"
+      [attr.aria-label]="checklist.text().newItem"
+      (keydown)="onKeydown($event)"
+      (blur)="onBlur($event)"
+    />
+  </div>
+} @else {
+  <button #trigger type="button" cwRipple [class]="triggerClasses" (click)="start()">
+    <span class="size-5 shrink-0" aria-hidden="true"></span>
+    <ng-icon name="phosphorPlusBold" size="1rem" class="shrink-0" aria-hidden="true" />
+    {{ checklist.addLabel() }}
+  </button>
+}

@@ -1,0 +1,27 @@
+<ol [class]="listClasses()">
+  @for (item of items(); track item; let index = $index, last = $last) {
+    <li
+      [cwBreadcrumbSlot]="item.element"
+      [class]="item.isPage ? 'inline-flex min-w-0 items-center' : 'inline-flex items-center'"
+      [hidden]="isHidden(index)"
+    ></li>
+    @if (index === 0 && collapsed()) {
+      <li aria-hidden="true" class="flex items-center">
+        <cw-breadcrumb-separator [variant]="separator()" [size]="size()" />
+      </li>
+      <li class="inline-flex items-center">
+        <cw-breadcrumb-ellipsis [menu]="hiddenMenu" [label]="ellipsisLabel()" />
+      </li>
+    }
+    @if (!last && !isHidden(index)) {
+      <li aria-hidden="true" class="flex items-center">
+        <cw-breadcrumb-separator [variant]="separator()" [size]="size()" />
+      </li>
+    }
+  }
+</ol>
+<cw-menu #hiddenMenu>
+  @for (item of hiddenItems(); track item) {
+    <button cwMenuItem (triggered)="item.element.click()">{{ item.label() }}</button>
+  }
+</cw-menu>

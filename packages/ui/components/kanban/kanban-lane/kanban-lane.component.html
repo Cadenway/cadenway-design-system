@@ -1,0 +1,37 @@
+@let lane = model().lane;
+<button
+  type="button"
+  cwRipple
+  [class]="header"
+  [attr.aria-expanded]="!model().collapsed"
+  (click)="board.toggleLane(lane.id)"
+  (keydown)="onKeydown($event)"
+>
+  <ng-icon name="phosphorCaretDownBold" [class]="chevron()" aria-hidden="true" />
+  @if (board.laneMarkerTemplate(); as template) {
+    <ng-container [ngTemplateOutlet]="template" [ngTemplateOutletContext]="{ $implicit: lane }" />
+  }
+  <span class="font-medium">{{ lane.label }}</span>
+  <span [class]="counter">
+    <span aria-hidden="true">{{ model().countText }}</span>
+    <span class="sr-only">{{ model().countLabel }}</span>
+  </span>
+</button>
+<div [class]="body()">
+  <div class="min-h-0 overflow-hidden" [attr.inert]="model().collapsed ? '' : null">
+    <div class="flex gap-2 pt-0.5 pb-2">
+      @for (slot of model().cells; track $index) {
+        @if (slot.cell; as cell) {
+          <cw-kanban-cell
+            [cell]="cell"
+            inLane
+            class="flex min-h-[34px] shrink-0 flex-col gap-1.5 px-1.5"
+            [style.width.px]="slot.width"
+          />
+        } @else {
+          <div class="shrink-0" [style.width.px]="slot.width"></div>
+        }
+      }
+    </div>
+  </div>
+</div>

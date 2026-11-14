@@ -1,0 +1,337 @@
+<ng-template #nameTemplate>
+  @if (href()) {
+    <a
+      data-name
+      [href]="href()"
+      [attr.target]="isLink() ? '_blank' : null"
+      [attr.rel]="isLink() ? 'noopener noreferrer' : null"
+      [class]="nameClasses()"
+      (click)="opened($event)"
+      (keydown)="key($event)"
+      >{{ name() }}</a
+    >
+  } @else {
+    <button
+      data-name
+      type="button"
+      [class]="nameClasses()"
+      (click)="opened($event)"
+      (keydown)="key($event)"
+    >
+      {{ name() }}
+    </button>
+  }
+</ng-template>
+
+<ng-template #progressTemplate>
+  <div
+    role="progressbar"
+    [attr.aria-label]="text().progress + ' ' + name()"
+    aria-valuemin="0"
+    aria-valuemax="100"
+    [attr.aria-valuenow]="percent()"
+    class="h-1 w-full flex-1 overflow-hidden rounded-full bg-track"
+  >
+    <div
+      class="h-full rounded-full bg-foreground transition-[width] duration-300 ease-snap motion-reduce:transition-none"
+      [style.width.%]="percent()"
+    ></div>
+  </div>
+</ng-template>
+
+<ng-template #mainAction>
+  @if (href()) {
+    <a
+      cwButton
+      variant="ghost"
+      size="icon-xs"
+      class="text-muted-foreground hover:text-foreground"
+      [href]="href()"
+      [attr.download]="isLink() ? null : ''"
+      [attr.target]="isLink() ? '_blank' : null"
+      [attr.rel]="isLink() ? 'noopener noreferrer' : null"
+      [attr.aria-label]="(isLink() ? text().open : text().download) + ' ' + name()"
+    >
+      <ng-icon
+        [name]="isLink() ? 'phosphorArrowSquareOutBold' : 'phosphorDownloadSimpleBold'"
+        size="1rem"
+        aria-hidden="true"
+      />
+    </a>
+  }
+</ng-template>
+
+<ng-template #removeAction>
+  @if (removable()) {
+    <button
+      cwButton
+      variant="ghost"
+      size="icon-xs"
+      class="text-muted-foreground hover:text-foreground"
+      [attr.aria-label]="removeLabel() + ' ' + name()"
+      (click)="remove.emit()"
+    >
+      <ng-icon
+        name="phosphorXBold"
+        [size]="layout() === 'chip' ? '0.875rem' : '1rem'"
+        aria-hidden="true"
+      />
+    </button>
+  }
+</ng-template>
+
+<ng-template #cancelAction>
+  <button
+    cwButton
+    variant="ghost"
+    size="icon-xs"
+    class="text-muted-foreground hover:text-foreground"
+    [attr.aria-label]="text().cancel + ' ' + name()"
+    (click)="cancel.emit()"
+  >
+    <ng-icon
+      name="phosphorXBold"
+      [size]="layout() === 'chip' ? '0.875rem' : '1rem'"
+      aria-hidden="true"
+    />
+  </button>
+</ng-template>
+
+<ng-template #retryAction>
+  <button
+    cwButton
+    variant="ghost"
+    size="icon-xs"
+    class="text-muted-foreground hover:text-foreground"
+    [attr.aria-label]="text().retry + ' ' + name()"
+    (click)="retry.emit()"
+  >
+    <ng-icon name="phosphorArrowClockwiseBold" size="1rem" aria-hidden="true" />
+  </button>
+</ng-template>
+
+@switch (layout()) {
+  @case ('card') {
+    <div
+      class="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg text-muted-foreground"
+      [class.bg-muted]="state() !== 'error'"
+      [class.bg-grenat-soft]="state() === 'error'"
+    >
+      @if (state() === 'processing') {
+        <svg cwSpinner size="lg" [label]="text().working"></svg>
+      } @else if (state() === 'error') {
+        <ng-icon
+          name="phosphorWarningCircleFill"
+          size="1.25rem"
+          class="text-destructive"
+          aria-hidden="true"
+        />
+      } @else if (thumbnail()) {
+        <img [src]="thumbnail()" alt="" class="size-full bg-secondary object-cover" />
+      } @else {
+        <ng-icon [name]="icon()" size="1.25rem" aria-hidden="true" />
+      }
+    </div>
+    <div class="grid min-w-0 flex-1 gap-0.5">
+      <ng-container [ngTemplateOutlet]="nameTemplate" />
+      @switch (state()) {
+        @case ('uploading') {
+          <span class="flex h-4 items-center gap-2">
+            <ng-container [ngTemplateOutlet]="progressTemplate" />
+            <span class="text-xs tabular-nums text-muted-foreground">{{ percent() }} %</span>
+          </span>
+        }
+        @case ('processing') {
+          <span class="block truncate text-xs leading-4 text-muted-foreground">{{
+            text().processing
+          }}</span>
+        }
+        @case ('error') {
+          <span class="block truncate text-xs leading-4 text-destructive">{{ error() }}</span>
+        }
+        @default {
+          <span class="block truncate text-xs leading-4 text-muted-foreground">{{ meta() }}</span>
+        }
+      }
+    </div>
+    <div class="relative z-10 flex shrink-0 items-center">
+      @switch (state()) {
+        @case ('uploading') {
+          <ng-container [ngTemplateOutlet]="cancelAction" />
+        }
+        @case ('processing') {
+          <ng-container [ngTemplateOutlet]="removeAction" />
+        }
+        @case ('error') {
+          <ng-container [ngTemplateOutlet]="retryAction" />
+          <ng-container [ngTemplateOutlet]="removeAction" />
+        }
+        @default {
+          <span
+            class="hidden items-center group-hover/attachment:flex group-focus-within/attachment:flex"
+          >
+            <ng-container [ngTemplateOutlet]="mainAction" />
+            <ng-container [ngTemplateOutlet]="removeAction" />
+          </span>
+        }
+      }
+    </div>
+  }
+  @case ('chip') {
+    @if (state() === 'uploading' || state() === 'processing') {
+      <svg
+        cwSpinner
+        size="sm"
+        class="text-muted-foreground"
+        [label]="state() === 'uploading' ? text().sending : text().working"
+      ></svg>
+    } @else if (state() === 'error') {
+      <ng-icon
+        name="phosphorWarningCircleFill"
+        size="0.875rem"
+        class="shrink-0 text-destructive"
+        aria-hidden="true"
+      />
+    } @else {
+      <ng-icon
+        [name]="icon()"
+        size="0.875rem"
+        class="shrink-0 text-muted-foreground"
+        aria-hidden="true"
+      />
+    }
+    <ng-container [ngTemplateOutlet]="nameTemplate" />
+    <span
+      class="shrink-0 tabular-nums"
+      [class.text-muted-foreground]="state() !== 'error'"
+      [class.text-destructive]="state() === 'error'"
+    >
+      @switch (state()) {
+        @case ('uploading') {
+          {{ percent() }} %
+        }
+        @case ('processing') {
+          {{ text().processingShort }}
+        }
+        @case ('error') {
+          {{ text().failed }}
+        }
+        @default {
+          {{ chipMeta() }}
+        }
+      }
+    </span>
+    <span class="relative z-10 flex shrink-0">
+      @if (state() === 'uploading') {
+        <ng-container [ngTemplateOutlet]="cancelAction" />
+      } @else {
+        <ng-container [ngTemplateOutlet]="removeAction" />
+      }
+    </span>
+  }
+  @case ('tile') {
+    <div class="relative aspect-[4/3] w-full overflow-hidden border-b bg-muted">
+      <span class="flex size-full" [class.opacity-50]="state() === 'uploading'">
+        @if (state() === 'error') {
+          <span
+            aria-hidden="true"
+            class="flex size-full items-center justify-center bg-grenat-soft"
+          >
+            <ng-icon name="phosphorWarningCircleFill" size="1.75rem" class="text-destructive" />
+          </span>
+        } @else if (state() === 'processing') {
+          <span
+            class="flex size-full items-center justify-center bg-secondary text-muted-foreground"
+          >
+            <svg cwSpinner size="xl" [label]="text().working"></svg>
+          </span>
+        } @else if (thumbnail()) {
+          <img [src]="thumbnail()" alt="" class="size-full bg-secondary object-cover" />
+        } @else {
+          <span
+            aria-hidden="true"
+            class="flex size-full items-center justify-center bg-secondary text-muted-foreground"
+          >
+            <ng-icon [name]="icon()" size="1.75rem" />
+          </span>
+        }
+      </span>
+      <span class="absolute top-1.5 right-1.5 z-10 flex gap-1">
+        @switch (state()) {
+          @case ('uploading') {
+            <button
+              type="button"
+              cwRipple
+              class="relative isolate inline-flex size-6 shrink-0 items-center justify-center overflow-hidden rounded-md border border-input bg-popover text-muted-foreground transition-colors outline-hidden hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              [attr.aria-label]="text().cancel + ' ' + name()"
+              (click)="cancel.emit()"
+            >
+              <ng-icon name="phosphorXBold" size="0.875rem" aria-hidden="true" />
+            </button>
+          }
+          @case ('error') {
+            <button
+              type="button"
+              cwRipple
+              class="relative isolate inline-flex size-6 shrink-0 items-center justify-center overflow-hidden rounded-md border border-input bg-popover text-muted-foreground transition-colors outline-hidden hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              [attr.aria-label]="text().retry + ' ' + name()"
+              (click)="retry.emit()"
+            >
+              <ng-icon name="phosphorArrowClockwiseBold" size="0.875rem" aria-hidden="true" />
+            </button>
+            @if (removable()) {
+              <button
+                type="button"
+                cwRipple
+                class="relative isolate inline-flex size-6 shrink-0 items-center justify-center overflow-hidden rounded-md border border-input bg-popover text-muted-foreground transition-colors outline-hidden hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                [attr.aria-label]="removeLabel() + ' ' + name()"
+                (click)="remove.emit()"
+              >
+                <ng-icon name="phosphorXBold" size="0.875rem" aria-hidden="true" />
+              </button>
+            }
+          }
+          @default {
+            @if (removable()) {
+              <button
+                type="button"
+                cwRipple
+                class="relative isolate inline-flex size-6 shrink-0 items-center justify-center overflow-hidden rounded-md border border-input bg-popover text-muted-foreground opacity-0 transition-opacity outline-hidden group-focus-within/attachment:opacity-100 group-hover/attachment:opacity-100 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
+                [attr.aria-label]="removeLabel() + ' ' + name()"
+                (click)="remove.emit()"
+              >
+                <ng-icon name="phosphorXBold" size="0.875rem" aria-hidden="true" />
+              </button>
+            }
+          }
+        }
+      </span>
+      @if (state() === 'uploading') {
+        <span class="absolute inset-x-2.5 bottom-2.5 flex">
+          <ng-container [ngTemplateOutlet]="progressTemplate" />
+        </span>
+      }
+    </div>
+    <div class="grid gap-0.5 px-2.5 py-2">
+      <ng-container [ngTemplateOutlet]="nameTemplate" />
+      @switch (state()) {
+        @case ('uploading') {
+          <span class="truncate text-xs leading-4 text-muted-foreground"
+            >{{ text().uploading }} {{ percent() }} %</span
+          >
+        }
+        @case ('processing') {
+          <span class="truncate text-xs leading-4 text-muted-foreground">{{
+            text().processing
+          }}</span>
+        }
+        @case ('error') {
+          <span class="truncate text-xs leading-4 text-destructive">{{ error() }}</span>
+        }
+        @default {
+          <span class="truncate text-xs leading-4 text-muted-foreground">{{ meta() }}</span>
+        }
+      }
+    </div>
+  }
+}

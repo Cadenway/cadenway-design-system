@@ -1,0 +1,101 @@
+@if (readonly()) {
+  <div [class]="staticClasses()">
+    <span class="min-w-0 truncate" [class.text-muted-foreground]="value() === ''">{{
+      value() || placeholder()
+    }}</span>
+    @if (text().readonly) {
+      <span class="flex h-lh shrink-0 items-center text-muted-foreground" [title]="text().readonly">
+        <ng-icon name="phosphorLockSimpleBold" size="0.875rem" aria-hidden="true" />
+        <span class="sr-only">{{ text().readonly }}</span>
+      </span>
+    }
+  </div>
+} @else if (editing()) {
+  <div class="grid gap-1.5">
+    @if (multiline()) {
+      <textarea
+        #field
+        rows="1"
+        [class]="fieldClasses()"
+        [value]="draft()"
+        [placeholder]="placeholder()"
+        [attr.maxlength]="maxLength() ?? null"
+        [attr.aria-label]="ariaLabel() || null"
+        [attr.aria-invalid]="isInvalid() ? 'true' : null"
+        [attr.aria-required]="required() ? 'true' : null"
+        [attr.aria-describedby]="message() ? errorId : helpId"
+        (input)="onFieldInput($event)"
+        (keydown)="onFieldKeydown($event)"
+        (blur)="onFieldBlur()"
+      ></textarea>
+    } @else {
+      <input
+        #field
+        type="text"
+        autocomplete="off"
+        [class]="fieldClasses()"
+        [value]="draft()"
+        [placeholder]="placeholder()"
+        [attr.maxlength]="maxLength() ?? null"
+        [attr.aria-label]="ariaLabel() || null"
+        [attr.aria-invalid]="isInvalid() ? 'true' : null"
+        [attr.aria-required]="required() ? 'true' : null"
+        [attr.aria-describedby]="message() ? errorId : helpId"
+        (input)="onFieldInput($event)"
+        (keydown)="onFieldKeydown($event)"
+        (blur)="onFieldBlur()"
+      />
+    }
+    @if (message()) {
+      <p [id]="errorId" class="flex items-center gap-1 text-xs font-normal text-destructive">
+        <ng-icon name="phosphorWarningCircleFill" size="0.875rem" aria-hidden="true" />{{
+          message()
+        }}
+      </p>
+    } @else if (multiline()) {
+      <p
+        [id]="helpId"
+        class="flex flex-wrap items-center gap-1 text-xs font-normal text-muted-foreground"
+      >
+        <kbd cwKbd>{{ text().controlKey }}</kbd
+        ><kbd cwKbd>{{ text().enterKey }}</kbd> {{ text().submitMultiline }} ·
+        <kbd cwKbd>{{ text().escapeKey }}</kbd>
+        {{ text().cancelMultiline }}
+      </p>
+    } @else {
+      <p
+        [id]="helpId"
+        class="flex flex-wrap items-center gap-1 text-xs font-normal text-muted-foreground"
+      >
+        <kbd cwKbd>{{ text().enterKey }}</kbd> {{ text().submit }} ·
+        <kbd cwKbd>{{ text().escapeKey }}</kbd> {{ text().cancel }}
+      </p>
+    }
+  </div>
+} @else if (saving()) {
+  <div aria-busy="true" [class]="staticClasses()">
+    <span class="min-w-0 truncate">{{ value() || placeholder() }}</span>
+    <span class="flex h-lh shrink-0 items-center gap-1.5 text-xs font-normal text-muted-foreground">
+      <svg cwSpinner></svg>{{ text().saving }}
+    </span>
+  </div>
+} @else {
+  <button
+    #readButton
+    type="button"
+    [class]="readClasses()"
+    [class.text-muted-foreground]="value() === ''"
+    [disabled]="isDisabled()"
+    [attr.aria-describedby]="hintId"
+    (click)="open(true)"
+    (keydown)="onReadKeydown($event)"
+  >
+    <span class="min-w-0" [class.truncate]="!multiline()">{{ value() || placeholder() }}</span>
+    <span
+      class="flex h-lh shrink-0 items-center text-muted-foreground opacity-0 transition-opacity group-hover/edit:opacity-100 group-focus-visible/edit:opacity-100 motion-reduce:transition-none"
+    >
+      <ng-icon name="phosphorPencilSimpleBold" size="1rem" aria-hidden="true" />
+    </span>
+  </button>
+  <span [id]="hintId" class="sr-only">{{ text().editHint }}</span>
+}

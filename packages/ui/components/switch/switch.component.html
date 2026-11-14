@@ -1,0 +1,17 @@
+<button
+  #track
+  type="button"
+  role="switch"
+  [id]="id()"
+  [attr.aria-checked]="checked()"
+  [attr.aria-label]="ariaLabel() || null"
+  [attr.aria-invalid]="isInvalid() ? 'true' : null"
+  [attr.aria-required]="required() ? 'true' : null"
+  [attr.data-state]="state()"
+  [disabled]="isDisabled()"
+  [class]="trackClasses()"
+  (click)="toggle()"
+  (blur)="markTouched()"
+>
+  <span [attr.data-state]="state()" [class]="thumbClasses()"></span>
+</button>

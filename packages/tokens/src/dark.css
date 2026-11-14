@@ -1,0 +1,45 @@
+/* @cadenway/tokens: the dark theme (imported by tokens.css). */
+
+/* Dark theme: cold grays lightly tinted with indigo; elevation reads through lightness. */
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --canvas: #0d0d10;
+  --surface: #151518;
+  --surface-muted: #1d1d22;
+  --surface-overlay: #1e1e23;
+  --stone: #27272d;
+
+  --hover: #e6e8ff0b;
+  --selected: #e6e8ff18;
+  --focus: #a78bfa;
+  --line: #e6e8ff0c;
+  --line-strong: #e6e8ff18;
+  --line-control: #e6e8ff2c;
+  --track: #e6e8ff27;
+
+  --shadow-contact: #00000073;
+  --shadow-ambient: #00000059;
+  --shadow-edge: #ffffff0f;
+
+  --ink: #ececee;
+  --ink-muted: #9c9ea6;
+
+  --grenat: #ff5c61;
+  --grenat-soft: #3b1517;
+  --grenat-text: #ff9396;
+  --amethyste: #a78bfa;
+  --balise: #ffc21a;
+  --jade: #33d17a;
+  --jade-soft: #0f2e1d;
+  --jade-text: #7ee5a8;
+
+  --cornaline: #fb923c;
+  --indigo: #818cf8;
+  --azur: #60a5fa;
+  --lagon: #22d3ee;
+  --olive: #a3e635;
+  --rose: #f472b6;
+  --fuchsia: #e879f9;
+  --ardoise: #94a3b8;
+}

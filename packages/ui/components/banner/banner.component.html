@@ -1,0 +1,20 @@
+<ng-icon [name]="iconName()" [class]="iconClasses()" size="1rem" aria-hidden="true" />
+<p [class]="messageClasses()">
+  <span [class]="titleClasses()">{{ title() }}</span>
+  @if (description()) {
+    {{ ' ' }}<span [class]="descriptionClasses()">{{ description() }}</span>
+  }
+</p>
+<ng-content select="cw-banner-actions" />
+@if (dismissible()) {
+  <button
+    cwButton
+    variant="ghost"
+    size="icon-sm"
+    [class]="closeClasses()"
+    [attr.aria-label]="closeLabel()"
+    (click)="dismiss()"
+  >
+    <ng-icon name="phosphorXBold" aria-hidden="true" />
+  </button>
+}

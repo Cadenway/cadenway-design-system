@@ -1,0 +1,403 @@
+<ng-content select="[cwDataTableToolbar]" />
+
+<div class="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border">
+  <div class="relative flex min-h-0 flex-1 flex-col">
+    <div #scroller class="relative min-h-0 flex-1 overflow-auto">
+      <table
+        #table
+        role="grid"
+        tabindex="-1"
+        [attr.aria-label]="ariaLabel()"
+        [attr.aria-multiselectable]="selectable() ? 'true' : null"
+        [attr.aria-rowcount]="ariaRowCount()"
+        [attr.aria-colcount]="colCount()"
+        [attr.aria-busy]="loading() ? 'true' : null"
+        [attr.data-density]="density()"
+        class="w-full table-fixed text-sm max-md:block"
+        (keydown)="onKeydown($event)"
+        (focusin)="onFocusin($event)"
+      >
+        <colgroup>
+          @if (selectable()) {
+            <col class="w-9" />
+          }
+          @for (column of visibleColumns(); track column.key) {
+            <col [style.width.px]="widthOf(column)" />
+          }
+        </colgroup>
+
+        <thead class="sticky top-0 z-10 bg-background max-md:hidden">
+          <tr
+            role="row"
+            [attr.data-cw-row]="headerKey"
+            aria-rowindex="1"
+            class="group/head h-9 border-b"
+            [attr.data-resizing]="resizing() ? '' : null"
+            cdkDropList
+            cdkDropListOrientation="horizontal"
+            cdkDropListLockAxis="x"
+            [cdkDropListDisabled]="!reorderableColumns()"
+            [cdkDropListSortPredicate]="firstFixed"
+            (cdkDropListDropped)="onColumnDrop($event)"
+          >
+            @if (selectable()) {
+              <th
+                role="columnheader"
+                scope="col"
+                data-cw-cell
+                [attr.data-cw-col]="selectKey"
+                aria-colindex="1"
+                [class]="selectHeadClasses"
+              >
+                <cw-checkbox
+                  class="align-middle"
+                  [checked]="headerState() === 'checked'"
+                  [indeterminate]="headerState() === 'indeterminate'"
+                  [ariaLabel]="copy().selectAll"
+                  (checkedChange)="toggleAll($event)"
+                />
+              </th>
+            }
+            @for (
+              column of visibleColumns();
+              track column.key;
+              let index = $index;
+              let first = $first
+            ) {
+              <th
+                role="columnheader"
+                scope="col"
+                data-cw-cell
+                [attr.data-cw-col]="column.key"
+                [attr.aria-colindex]="index + (selectable() ? 2 : 1)"
+                [attr.aria-sort]="ariaSort(column)"
+                [class]="headClasses(column)"
+                cdkDrag
+                [cdkDragDisabled]="first || !reorderableColumns()"
+                cdkDragPreviewClass="bg-popover shadow-lg"
+              >
+                @if (column.sortable) {
+                  <button
+                    type="button"
+                    cwRipple
+                    [class]="sortButtonClasses(column)"
+                    (click)="onSortClick($event, column)"
+                    (keydown)="onSortKeydown($event, column)"
+                  >
+                    <span [class.sr-only]="column.headerHidden">{{ column.header }}</span>
+                    @switch (sortDir(column.key)) {
+                      @case ('asc') {
+                        <ng-icon name="phosphorArrowUpBold" aria-hidden="true" />
+                      }
+                      @case ('desc') {
+                        <ng-icon name="phosphorArrowDownBold" aria-hidden="true" />
+                      }
+                      @default {
+                        <ng-icon
+                          name="phosphorArrowsDownUpBold"
+                          class="opacity-60"
+                          aria-hidden="true"
+                        />
+                      }
+                    }
+                    @if (sortRank(column.key) > 0) {
+                      @if (sort().length > 1) {
+                        <span
+                          class="text-[10px] leading-none text-muted-foreground tabular-nums"
+                          aria-hidden="true"
+                          >{{ sortRank(column.key) }}</span
+                        >
+                      }
+                      <span class="sr-only">{{
+                        copy().sortState(sortDir(column.key) ?? 'asc', sortRank(column.key))
+                      }}</span>
+                    }
+                  </button>
+                } @else {
+                  <span [class.sr-only]="column.headerHidden">{{ column.header }}</span>
+                }
+                @if (resizableColumns() && column.resizable) {
+                  @if (resizing()?.key === column.key) {
+                    <span
+                      aria-hidden="true"
+                      class="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 rounded-md bg-foreground px-1.5 py-0.5 text-[11px] leading-4 font-medium text-background tabular-nums dark:border dark:bg-popover dark:text-popover-foreground"
+                      >{{ resizing()?.width }} px</span
+                    >
+                  }
+                  <div
+                    role="separator"
+                    tabindex="0"
+                    aria-orientation="vertical"
+                    data-cw-resize
+                    [attr.aria-label]="copy().columnWidth(column.header)"
+                    [attr.aria-valuenow]="widthOf(column)"
+                    [attr.aria-valuemin]="column.minWidth"
+                    [attr.aria-valuemax]="column.maxWidth"
+                    [attr.data-active]="resizing()?.key === column.key ? '' : null"
+                    class="group/rh absolute inset-y-0 -right-1 z-10 flex w-2 cursor-col-resize touch-none justify-center rounded-full outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                    (pointerdown)="onResizeStart($event, column)"
+                    (pointermove)="onResizeMove($event, column)"
+                    (pointerup)="onResizeEnd(column)"
+                    (pointercancel)="onResizeEnd(column)"
+                    (mousedown)="stopDrag($event)"
+                    (touchstart)="stopDrag($event)"
+                    (dblclick)="fitColumn(column)"
+                    (keydown)="onResizeKeydown($event, column)"
+                  >
+                    <span
+                      class="my-auto h-4 w-px rounded-full bg-border opacity-0 transition-[height,opacity,background-color] duration-150 group-hover/head:opacity-100 group-hover/rh:h-full group-hover/rh:bg-line-control group-focus-visible/rh:opacity-100 group-data-[resizing]/head:opacity-100 motion-reduce:transition-none"
+                    ></span>
+                  </div>
+                }
+              </th>
+            }
+          </tr>
+        </thead>
+
+        @if (bannerState(); as banner) {
+          <tbody role="rowgroup" class="max-md:block">
+            <tr role="row" data-cw-row="banner" class="h-9 border-b bg-muted max-md:block">
+              <td
+                role="gridcell"
+                data-cw-cell
+                data-cw-col="banner"
+                [attr.colspan]="colCount()"
+                [class]="bannerCellClasses"
+              >
+                @if (banner === 'offer') {
+                  <span class="text-muted-foreground">{{ copy().selected(pageIds().length) }}</span>
+                  ·
+                  <button type="button" [class]="linkClasses" (click)="selectAllMatching()">
+                    {{ copy().selectAllMatching(totalCount()) }}
+                  </button>
+                } @else {
+                  <span class="text-muted-foreground">{{ copy().allSelected(totalCount()) }}</span>
+                  ·
+                  <button type="button" [class]="linkClasses" (click)="clearSelection()">
+                    {{ copy().clearSelection }}
+                  </button>
+                }
+              </td>
+            </tr>
+          </tbody>
+        }
+
+        @if (loading()) {
+          <tbody role="rowgroup" class="max-md:block">
+            @for (index of skeletonRows; track index) {
+              <tr
+                role="row"
+                class="border-b max-md:flex max-md:h-auto max-md:gap-3 max-md:p-3"
+                [class]="rowHeight()"
+              >
+                @if (selectable()) {
+                  <td role="gridcell" class="w-9 pr-1 pl-3 align-middle max-md:p-0">
+                    <div cwSkeleton animation="shimmer" class="size-4 rounded-[4px]"></div>
+                  </td>
+                }
+                @for (column of visibleColumns(); track column.key; let columnIndex = $index) {
+                  <td role="gridcell" class="px-3 align-middle max-md:flex-1 max-md:p-0">
+                    <div
+                      cwSkeleton
+                      animation="shimmer"
+                      class="h-2.5 rounded-full"
+                      [class]="skeletonWidths[(index + columnIndex) % skeletonWidths.length]"
+                    ></div>
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        } @else if (error()) {
+          <tbody role="rowgroup" class="max-md:block">
+            <tr role="row" data-cw-row="state" class="max-md:block">
+              <td
+                role="gridcell"
+                data-cw-cell
+                data-cw-col="state"
+                [attr.colspan]="colCount()"
+                [class]="stateCellClasses"
+              >
+                <cw-alert variant="destructive">
+                  <cw-alert-title>{{ error() }}</cw-alert-title>
+                  <cw-alert-actions>
+                    <button cwButton variant="outline" size="sm" (click)="retry.emit()">
+                      {{ copy().retry }}
+                    </button>
+                  </cw-alert-actions>
+                </cw-alert>
+              </td>
+            </tr>
+          </tbody>
+        } @else if (isEmpty()) {
+          <tbody role="rowgroup" class="max-md:block">
+            <tr role="row" data-cw-row="state" class="max-md:block">
+              <td
+                role="gridcell"
+                data-cw-cell
+                data-cw-col="state"
+                [attr.colspan]="colCount()"
+                [class]="stateCellClasses"
+              >
+                <ng-content select="[cwDataTableEmpty]" />
+                @if (!hasProjectedEmpty()) {
+                  <cw-empty size="sm" role="status">
+                    <cw-empty-header>
+                      <cw-empty-title>{{ emptyText() }}</cw-empty-title>
+                    </cw-empty-header>
+                  </cw-empty>
+                }
+              </td>
+            </tr>
+          </tbody>
+        } @else {
+          @for (group of groups(); track group.rowKey) {
+            <tbody
+              role="rowgroup"
+              class="group/col max-md:block"
+              [class]="bodyMotion"
+              [attr.data-collapsible]="group.key === null ? null : ''"
+              [attr.data-state]="group.key === null ? null : group.collapsed ? 'closed' : 'open'"
+            >
+              @if (group.key !== null) {
+                <tr
+                  role="row"
+                  [attr.data-cw-row]="group.rowKey"
+                  [attr.aria-rowindex]="group.rowIndex"
+                  class="border-b bg-muted max-md:block"
+                  [class]="groupHeight()"
+                >
+                  <td
+                    role="gridcell"
+                    data-cw-cell
+                    data-cw-col="group"
+                    [attr.colspan]="colCount()"
+                    [class]="groupCellClasses"
+                  >
+                    <div class="flex items-center gap-2">
+                      <button
+                        type="button"
+                        cwRipple
+                        [attr.aria-expanded]="!group.collapsed"
+                        [class]="groupButtonClasses"
+                        (click)="toggleGroup(group)"
+                      >
+                        <ng-icon
+                          name="phosphorCaretDownBold"
+                          aria-hidden="true"
+                          class="text-muted-foreground transition-transform duration-300 ease-snap group-data-[state=closed]/col:-rotate-90 motion-reduce:transition-none"
+                        />
+                        @if (groupHeader(); as template) {
+                          <ng-container
+                            [ngTemplateOutlet]="template"
+                            [ngTemplateOutletContext]="groupContext(group)"
+                          />
+                        } @else {
+                          <span class="font-medium">{{ group.label }}</span>
+                        }
+                        <span class="text-xs font-medium text-muted-foreground tabular-nums">{{
+                          group.count
+                        }}</span>
+                      </button>
+                      @if (groupAddable() && editable()) {
+                        <button
+                          cwButton
+                          variant="ghost"
+                          size="icon-xs"
+                          class="ml-auto"
+                          [attr.aria-label]="copy().groupAdd(group.label)"
+                          (click)="groupAdd.emit(group.key)"
+                        >
+                          <ng-icon name="phosphorPlusBold" aria-hidden="true" />
+                        </button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+              @for (entry of group.rows; track entry.key) {
+                <tr
+                  role="row"
+                  [attr.data-cw-row]="entry.key"
+                  [attr.aria-rowindex]="entry.rowIndex"
+                  [attr.aria-selected]="selectable() ? isSelected(entry.id) : null"
+                  [class]="rowClasses()"
+                  (click)="onRowClick($event, entry)"
+                >
+                  @if (selectable()) {
+                    <td
+                      role="gridcell"
+                      data-cw-cell
+                      [attr.data-cw-col]="selectKey"
+                      aria-colindex="1"
+                      [class]="selectCellClasses"
+                    >
+                      <cw-checkbox
+                        data-cw-select
+                        class="align-middle"
+                        [checked]="isSelected(entry.id)"
+                        [ariaLabel]="copy().selectRow(labelOf(entry))"
+                        (checkedChange)="toggleRow(entry.id, $event)"
+                      />
+                    </td>
+                  }
+                  @for (
+                    column of visibleColumns();
+                    track column.key;
+                    let index = $index;
+                    let first = $first
+                  ) {
+                    <td
+                      role="gridcell"
+                      data-cw-cell
+                      [attr.data-cw-col]="column.key"
+                      [attr.aria-colindex]="index + (selectable() ? 2 : 1)"
+                      [attr.data-editing]="isEditing(entry, column) ? '' : null"
+                      [class]="cellClasses(column, first)"
+                      (dblclick)="onCellDblclick(entry, column)"
+                    >
+                      @if (isEditing(entry, column) && column.editor) {
+                        <ng-container
+                          [ngTemplateOutlet]="column.editor"
+                          [ngTemplateOutletContext]="editorContext(entry, column)"
+                        />
+                      } @else if (column.cell) {
+                        <ng-container
+                          [ngTemplateOutlet]="column.cell"
+                          [ngTemplateOutletContext]="cellContext(entry, column)"
+                        />
+                      } @else {
+                        {{ display(entry, column) }}
+                      }
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          }
+        }
+      </table>
+
+      @if (bulkBarVisible()) {
+        <div class="h-14" aria-hidden="true"></div>
+      }
+
+      @if (resizing(); as state) {
+        <div
+          aria-hidden="true"
+          class="pointer-events-none absolute inset-y-0 z-20 w-0.5 bg-foreground"
+          [style.left.px]="state.guide"
+        ></div>
+      }
+    </div>
+
+    <ng-content select="cw-data-table-bulk-bar" />
+    @if (!projectedBulkBar() && bulkActions().length > 0) {
+      <cw-data-table-bulk-bar />
+    }
+  </div>
+
+  @if (page() !== null) {
+    <cw-data-table-pagination />
+  }
+</div>

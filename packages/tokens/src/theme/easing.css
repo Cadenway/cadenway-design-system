@@ -1,0 +1,51 @@
+/* @cadenway/tokens: easings (imported by theme.css). */
+
+/* Easings are emitted even when no utility uses them (`static`): the status and priority icons
+   and other component styles read them with var(). */
+@theme static {
+  --ease-snap: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Mockup `styles/app.css`: the spring of the status and priority icon morphs. */
+  --ease-spring: linear(
+    0,
+    0.0215,
+    0.0763,
+    0.1522,
+    0.2398,
+    0.3319,
+    0.4236,
+    0.5111,
+    0.5922,
+    0.6656,
+    0.7305,
+    0.7869,
+    0.835,
+    0.8753,
+    0.9086,
+    0.9357,
+    0.9572,
+    0.974,
+    0.9868,
+    0.9963,
+    1.0031,
+    1.0077,
+    1.0107,
+    1.0123,
+    1.0129,
+    1.0128,
+    1.0123,
+    1.0113,
+    1.0103,
+    1.0091,
+    1.0079,
+    1.0067,
+    1.0056,
+    1.0047,
+    1.0038,
+    1.003,
+    1.0023,
+    1.0018,
+    1.0013,
+    1.0009,
+    1
+  );
+}

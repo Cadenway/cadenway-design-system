@@ -1,0 +1,104 @@
+@let column = model().column;
+@if (model().collapsed) {
+  @if (headerOnly()) {
+    <button
+      type="button"
+      cwRipple
+      aria-expanded="false"
+      [class]="headerButton"
+      [attr.aria-label]="model().expandLabel"
+      [attr.data-kanban-toggle]="column.id"
+      (click)="board.toggleColumn(column.id)"
+    >
+      <ng-icon name="phosphorArrowsOutLineHorizontalBold" aria-hidden="true" />
+    </button>
+  } @else {
+    <button
+      type="button"
+      cwRipple
+      aria-expanded="false"
+      [class]="foldedButton"
+      [attr.data-kanban-toggle]="column.id"
+      (click)="board.toggleColumn(column.id)"
+    >
+      <ng-icon
+        name="phosphorArrowsOutLineHorizontalBold"
+        class="text-muted-foreground"
+        aria-hidden="true"
+      />
+      @if (column.status) {
+        <cw-status-icon [status]="column.status" size="4" />
+      }
+      <span class="sr-only">{{ model().expandBefore }}</span>
+      <span class="order-last font-medium whitespace-nowrap [writing-mode:vertical-rl]">{{
+        column.label
+      }}</span>
+      <span class="sr-only">{{ model().expandBetween }}</span>
+      <span class="text-xs font-medium text-muted-foreground tabular-nums"
+        >{{ model().count }}<span class="sr-only">{{ model().countSuffix }}</span></span
+      >
+    </button>
+  }
+} @else {
+  <div [class]="headerOnly() ? 'contents' : 'flex h-7 shrink-0 items-center gap-2 pl-1.5'">
+    @if (column.status) {
+      <cw-status-icon [status]="column.status" size="4" class="shrink-0" />
+    }
+    <span class="min-w-0 truncate text-sm font-medium">{{ column.label }}</span>
+    <span [class]="counterClass()">
+      <span aria-hidden="true">{{ model().counter }}</span>
+      <span class="sr-only">{{ model().countLabel }}</span>
+    </span>
+    <span class="flex-1"></span>
+    @if (!headerOnly() && !board.readonly()) {
+      <button
+        type="button"
+        cwRipple
+        [class]="headerButton"
+        [attr.aria-label]="model().addLabel"
+        (click)="board.openQuickAdd(column.id, null)"
+      >
+        <ng-icon name="phosphorPlusBold" aria-hidden="true" />
+      </button>
+    }
+    <button
+      type="button"
+      cwRipple
+      aria-expanded="true"
+      [class]="headerButton"
+      [attr.aria-label]="model().collapseLabel"
+      [attr.data-kanban-toggle]="column.id"
+      (click)="board.toggleColumn(column.id)"
+    >
+      <ng-icon name="phosphorArrowsInLineHorizontalBold" aria-hidden="true" />
+    </button>
+  </div>
+  @if (model().over && !headerOnly()) {
+    <p
+      role="status"
+      class="-mt-1 flex items-center gap-1 px-1.5 text-xs font-medium text-grenat-text [&_ng-icon]:[--ng-icon__size:0.875rem]"
+    >
+      <ng-icon
+        name="phosphorWarningCircleFill"
+        class="shrink-0 text-destructive"
+        aria-hidden="true"
+      />
+      {{ model().alert }}
+    </p>
+  }
+  @if (model().cell; as cell) {
+    <cw-kanban-cell [cell]="cell" class="flex min-h-0 flex-1 flex-col gap-2" />
+    @if (showFooter()) {
+      <button
+        type="button"
+        cwRipple
+        [class]="footerButton"
+        [attr.data-kanban-add]="column.id"
+        (click)="board.openQuickAdd(column.id, null)"
+      >
+        <ng-icon name="phosphorPlusBold" aria-hidden="true" />
+        {{ board.texts().add }}
+      </button>
+    }
+  }
+}

@@ -1,0 +1,15 @@
+<span class="sr-only">{{ spoken() }}</span>
+<span class="inline-flex items-center gap-1" aria-hidden="true">
+  @for (step of steps(); track $index) {
+    @if (!$first) {
+      <span [class]="variant() === 'inverse' ? 'text-xs' : 'text-xs text-muted-foreground'">{{
+        thenLabel()
+      }}</span>
+    }
+    <kbd cwKbdGroup>
+      @for (key of step; track $index) {
+        <kbd cwKbd [variant]="variant()" [size]="size()">{{ key.label }}</kbd>
+      }
+    </kbd>
+  }
+</span>

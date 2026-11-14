@@ -1,0 +1,143 @@
+@if (variant() === 'compact') {
+  <button
+    type="button"
+    cwRipple
+    [class]="chipClasses"
+    [disabled]="readonly()"
+    [attr.aria-label]="compactLabel()"
+    (click)="onMain()"
+  >
+    @switch (state()) {
+      @case ('running') {
+        <span [class]="dotClasses" aria-hidden="true"></span>{{ clock() }}
+      }
+      @case ('paused') {
+        <ng-icon
+          name="phosphorPauseBold"
+          size="0.875rem"
+          class="shrink-0 text-muted-foreground"
+          aria-hidden="true"
+        />{{ clock() }}
+      }
+      @default {
+        <ng-icon name="phosphorPlayBold" size="0.875rem" class="shrink-0" aria-hidden="true" />{{
+          totalText()
+        }}
+      }
+    }
+  </button>
+} @else {
+  <div class="grid gap-4">
+    @if (!readonly()) {
+      <div [class]="timerClasses">
+        <button
+          type="button"
+          cwRipple
+          [class]="mainClasses()"
+          [attr.aria-label]="mainLabel()"
+          (click)="onMain()"
+        >
+          <ng-icon
+            [name]="state() === 'running' ? 'phosphorStopFill' : 'phosphorPlayFill'"
+            size="0.875rem"
+            aria-hidden="true"
+          />
+        </button>
+        @if (state() === 'running') {
+          <span [class]="dotClasses" aria-hidden="true"></span>
+        } @else if (state() === 'paused') {
+          <ng-icon
+            name="phosphorPauseBold"
+            size="0.875rem"
+            class="shrink-0 text-muted-foreground"
+            aria-hidden="true"
+          />
+        }
+        <span
+          role="timer"
+          class="text-sm font-medium tabular-nums"
+          [class.text-muted-foreground]="state() !== 'running'"
+          [attr.aria-label]="text().elapsed"
+          >{{ clock() }}</span
+        >
+        <span class="ml-auto flex items-center gap-1.5 text-xs text-muted-foreground">
+          @switch (state()) {
+            @case ('running') {
+              {{ since() }}
+              <button
+                cwButton
+                variant="ghost"
+                size="icon-xs"
+                [attr.aria-label]="text().pause"
+                [title]="text().pause"
+                (click)="onPause()"
+              >
+                <ng-icon name="phosphorPauseBold" size="0.875rem" aria-hidden="true" />
+              </button>
+            }
+            @case ('paused') {
+              {{ text().paused }}
+              <button
+                cwButton
+                variant="ghost"
+                size="icon-xs"
+                [attr.aria-label]="text().stopShort"
+                [title]="text().stopShort"
+                (click)="finish()"
+              >
+                <ng-icon name="phosphorStopBold" size="0.875rem" aria-hidden="true" />
+              </button>
+            }
+            @default {
+              {{ text().total }}
+              <span class="font-medium text-foreground tabular-nums">{{ totalText() }}</span>
+            }
+          }
+        </span>
+      </div>
+    }
+
+    @if (estimate() !== null) {
+      <cw-meter
+        [label]="text().tracked"
+        [value]="total()"
+        [max]="meterMax()"
+        [threshold]="over() > 0 ? (estimate() ?? undefined) : undefined"
+        [thresholdLabel]="text().estimate"
+        [zone]="over() > 0 ? 'critical' : 'normal'"
+        [format]="meterFormat"
+        [formatAmount]="formatAmount"
+        [note]="meterNote()"
+      />
+    }
+
+    @if (billableTotal() > 0) {
+      <p class="flex items-center gap-2 border-t pt-3 text-sm">
+        <ng-icon
+          name="phosphorCurrencyEurBold"
+          size="1rem"
+          class="shrink-0 text-muted-foreground"
+          aria-hidden="true"
+        />
+        <span>{{ text().billable }}</span>
+        <span class="ml-auto text-muted-foreground tabular-nums"
+          ><span class="font-medium text-foreground">{{ billableText() }}</span> {{ text().of }}
+          {{ totalText() }}</span
+        >
+      </p>
+    }
+
+    <ng-content />
+
+    @if (!readonly() && hasForm()) {
+      <div>
+        <button cwButton variant="outline" size="sm" [cwPopoverTrigger]="addPopover">
+          <ng-icon name="phosphorPlusBold" aria-hidden="true" />{{ text().addTime }}
+        </button>
+      </div>
+    }
+    <cw-popover #addPopover side="bottom" align="start" size="lg" [ariaLabel]="text().addTime">
+      <ng-content select="cw-time-entry-form" />
+    </cw-popover>
+  </div>
+}

@@ -1,0 +1,43 @@
+@switch (state()) {
+  @case ('done') {
+    <ng-icon name="phosphorCheckBold" [size]="glyphSize()" />
+  }
+  @case ('error') {
+    <ng-icon name="phosphorExclamationMarkBold" [size]="glyphSize()" />
+  }
+  @case ('todo') {
+    @if (size() === 'sm') {
+      <svg viewBox="0 0 16 16" class="absolute inset-0 size-full" aria-hidden="true">
+        <circle
+          cx="8"
+          cy="8"
+          r="7.25"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-dasharray="2.69 3"
+          stroke-linecap="round"
+          transform="rotate(-90 8 8)"
+        />
+      </svg>
+    } @else {
+      <svg viewBox="0 0 20 20" class="absolute inset-0 size-full" aria-hidden="true">
+        <circle
+          cx="10"
+          cy="10"
+          r="9.25"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-dasharray="4.27 3"
+          stroke-linecap="round"
+          transform="rotate(-90 10 10)"
+        />
+      </svg>
+    }
+    {{ number() }}
+  }
+  @default {
+    {{ number() }}
+  }
+}

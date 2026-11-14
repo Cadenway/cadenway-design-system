@@ -1,0 +1,29 @@
+<ng-template #panel>
+  <div
+    [class]="panelClasses()"
+    [attr.data-state]="state()"
+    [attr.data-size]="size()"
+    [attr.aria-busy]="pending() ? 'true' : null"
+  >
+    <ng-content select="cw-dialog-header" />
+    <div [class]="bodyClasses()" [attr.tabindex]="scrollable() ? 0 : null">
+      <ng-content />
+    </div>
+    <ng-content select="cw-dialog-footer" />
+    @if (showClose()) {
+      <span class="absolute top-3 right-3 flex">
+        <button
+          cwButton
+          variant="ghost"
+          size="icon-sm"
+          class="text-muted-foreground"
+          [attr.aria-label]="closeLabel()"
+          [disabled]="pending()"
+          (click)="requestClose('close')"
+        >
+          <ng-icon name="phosphorXBold" aria-hidden="true" />
+        </button>
+      </span>
+    }
+  </div>
+</ng-template>

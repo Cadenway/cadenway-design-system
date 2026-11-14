@@ -1,0 +1,33 @@
+<ng-template #radio>
+  <button
+    #control
+    type="button"
+    role="radio"
+    [id]="id()"
+    [class]="radioClasses()"
+    [attr.aria-checked]="checked()"
+    [attr.aria-invalid]="group.isInvalid() ? 'true' : null"
+    [attr.data-state]="checked() ? 'checked' : 'unchecked'"
+    [attr.data-disabled]="isDisabled() ? '' : null"
+    [disabled]="isDisabled()"
+    [tabIndex]="group.tabStop() === this ? 0 : -1"
+    (click)="group.select(this)"
+  >
+    @if (checked()) {
+      <svg viewBox="0 0 8 8" class="size-2 fill-foreground" aria-hidden="true">
+        <circle cx="4" cy="4" r="4" />
+      </svg>
+    }
+  </button>
+</ng-template>
+@if (variant() === 'card') {
+  <label
+    [for]="id()"
+    class="flex w-full cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors hover:bg-accent has-[[data-state=checked]]:border-foreground/40 has-[[data-state=checked]]:bg-selected has-disabled:cursor-not-allowed motion-reduce:transition-none"
+  >
+    <ng-container [ngTemplateOutlet]="radio" />
+    <span class="flex min-w-0 flex-col gap-0.5"><ng-content /></span>
+  </label>
+} @else {
+  <ng-container [ngTemplateOutlet]="radio" />
+}

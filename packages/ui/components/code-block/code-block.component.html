@@ -1,0 +1,54 @@
+@if (hasHeader()) {
+  <div [class]="headerClasses()">
+    @if (variant() === 'destructive') {
+      <ng-icon
+        name="phosphorWarningCircleFill"
+        class="shrink-0"
+        size="0.875rem"
+        aria-hidden="true"
+      />
+      @if (filename()) {
+        <span class="truncate">{{ filename() }}</span>
+      }
+      @if (language()) {
+        <span class="ml-auto shrink-0 font-normal text-muted-foreground tabular-nums">{{
+          language()
+        }}</span>
+      }
+    } @else {
+      @if (filename()) {
+        <span class="truncate font-mono text-xs text-muted-foreground">{{ filename() }}</span>
+      }
+      @if (language()) {
+        <span class="shrink-0 text-xs text-muted-foreground"
+          >{{ filename() ? '· ' : '' }}{{ language() }}</span
+        >
+      }
+    }
+    @if (copyable()) {
+      <button
+        cwButton
+        variant="ghost"
+        [size]="copiedNow() ? 'xs' : 'icon-xs'"
+        [class]="copyClasses()"
+        [attr.aria-label]="copiedNow() ? null : copyLabel()"
+        [attr.data-state]="copiedNow() ? 'copied' : 'idle'"
+        (click)="copy()"
+      >
+        @if (copiedNow()) {
+          <ng-icon name="phosphorCheckBold" class="text-jade" aria-hidden="true" />
+          {{ copiedLabel() }}
+        } @else {
+          <ng-icon name="phosphorCopyBold" aria-hidden="true" />
+        }
+      </button>
+    }
+  </div>
+}
+<pre
+  #area
+  role="group"
+  [class]="areaClasses()"
+  [attr.aria-label]="areaLabel()"
+  [attr.tabindex]="overflowing() ? 0 : null"
+><code [class]="codeClasses()">@for (line of lines(); track $index) {<span [class]="line.rowClasses" [attr.data-line]="line.kind === 'default' || line.kind === 'comment' ? null : line.kind">@if (lineNumbers()) {<span [class]="numberClasses" aria-hidden="true">{{ line.number }}</span>}@if (diff()) {<span [class]="signClasses">@if (line.kind === 'added') {<span class="text-jade-text" aria-hidden="true">+</span><span class="sr-only">{{ addedLabel() }}</span>} @else if (line.kind === 'removed') {<span class="text-grenat-text" aria-hidden="true">−</span><span class="sr-only">{{ removedLabel() }}</span>}</span>}<span [class]="line.textClasses">{{ line.text }}</span></span>}</code></pre>

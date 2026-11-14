@@ -1,0 +1,62 @@
+<ng-container *ngTemplateOutlet="pieces; context: { $implicit: nodes() }" />
+
+<ng-template #pieces let-list>
+  @for (node of asNodes(list); track $index) {
+    @switch (node.kind) {
+      @case ('text') {
+        <ng-container>{{ node.text }}</ng-container>
+      }
+      @case ('strong') {
+        <strong class="font-semibold"
+          ><ng-container *ngTemplateOutlet="pieces; context: { $implicit: node.children }"
+        /></strong>
+      }
+      @case ('em') {
+        <em class="italic"
+          ><ng-container *ngTemplateOutlet="pieces; context: { $implicit: node.children }"
+        /></em>
+      }
+      @case ('underline') {
+        <u class="underline underline-offset-2"
+          ><ng-container *ngTemplateOutlet="pieces; context: { $implicit: node.children }"
+        /></u>
+      }
+      @case ('del') {
+        <del class="line-through"
+          ><ng-container *ngTemplateOutlet="pieces; context: { $implicit: node.children }"
+        /></del>
+      }
+      @case ('code') {
+        <code class="rounded-[4px] bg-muted px-1 py-px font-mono text-[0.85em]">{{
+          node.text
+        }}</code>
+      }
+      @case ('link') {
+        @if (node.href) {
+          <a
+            [href]="node.href"
+            [attr.title]="node.title"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="rounded-sm text-primary underline decoration-primary/40 underline-offset-2 outline-none hover:decoration-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            ><ng-container *ngTemplateOutlet="pieces; context: { $implicit: node.children }"
+          /></a>
+        } @else {
+          <ng-container *ngTemplateOutlet="pieces; context: { $implicit: node.children }" />
+        }
+      }
+      @case ('br') {
+        <br />
+      }
+      @case ('mention') {
+        <span
+          data-mention
+          [attr.data-id]="node.id"
+          class="rounded-sm bg-secondary px-1 py-px font-medium whitespace-nowrap text-secondary-foreground"
+          ><span class="sr-only">{{ context.mentionLabel() }} </span
+          ><span aria-hidden="true">&#64;</span>{{ node.label }}</span
+        >
+      }
+    }
+  }
+</ng-template>

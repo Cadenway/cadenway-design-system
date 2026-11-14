@@ -9,7 +9,9 @@ and [Codex](.codex/README.md) for agents, skills, commands and hooks.
 
 ## First read
 
-- The mockup bricks in `docs/maquette/source/` and their section in the [integration guide](https://claude.ai/artifact/CpJHVCiFfF9j3KbHQ2S1Et).
+- The brick's sheet in the [Design System artifact](https://claude.ai/artifact/Xrfx4ccwixnRpFgVYvrCcZ) (`project/components/<Name>/README.md`): it is the source of truth
+  for values, variants and APIs.
+- The mockup screens in `docs/maquette/source/` that use the brick: behavior, states and copy.
 - The existing brick closest to the one you touch, and its stories.
 - `package.json` for versions and scripts once the repository is bootstrapped. Do not restate
   versions elsewhere: a copy goes stale.
@@ -22,9 +24,13 @@ cadenway-design-system is the Angular design system taken from the mockup. It pu
 
 ```text
 packages/
-├─ tokens/   → @cadenway/tokens (tokens.css, theme.css)
-├─ icons/    → @cadenway/icons (provideCadenwayIcons)
-└─ ui/       → @cadenway/ui (src/lib/<brick>/, public-api.ts)
+├─ tokens/   → @cadenway/tokens: tokens.css and theme.css (entry files) importing src/ partials
+│              (fonts, scale, light, dark; theme/ colors, easing, elevation, motion, base), fonts/
+├─ icons/    → @cadenway/icons: provideCadenwayIcons(), one icon family per file in src/lib/sets/
+└─ ui/       → @cadenway/ui
+   ├─ core/          @cadenway/ui/core: shared internals (a11y, dates, format, motion, overlay, styles)
+   └─ components/    @cadenway/ui/components/<brick>: one entry point per brick, its main declaration
+                     at the root of its folder, one subfolder per other declaration
 apps/storybook/
 ```
 
@@ -43,8 +49,12 @@ apps/storybook/
 
 - `packages/tokens`: colors (light and dark), typography, radii, shadows, motion variables and keyframes.
 - `packages/icons`: the Phosphor, svgl and flag icons the apps use.
-- `packages/ui`: generic bricks and the two business icons; one folder per brick.
+- `packages/ui`: generic bricks and the two business icons; one folder per brick, each its own
+  secondary entry point (`@cadenway/ui/components/<brick>`, folder `packages/ui/components/<brick>/`),
+  shared internals in `core/` (`@cadenway/ui/core`).
 - `apps/storybook`: stories, interaction tests, accessibility checks.
+- `tests/architecture`: checks of the design system's library boundaries, using
+  `@cadenway/angular-testing` from cadenway-tooling.
 
 ## Boundaries (hard rules)
 
@@ -81,8 +91,16 @@ narrowest check that covers the change first, then widen:
 | Any change to a package         | a changeset (`pnpm changeset`)                                    |
 | Docs or agent instructions only | Scoped formatting and link review                                 |
 
+For `packages/ui`, apply the comment convention in the matching `.codex/rules/comments.md` or
+`.claude/rules/comments.md`, including explicit types, member access and regions. Run
+`pnpm lint:ui` and `pnpm format:ui:check`; when editing the UI lint rules or configuration, also run
+`pnpm test:ui-lint`. These checks validate structure, so review the meaning of comments separately.
+
 Report the commands you actually ran and their results; a check you did not run is reported as not
 run.
+
+Run `pnpm test:architecture` after changing entry points, test layout or architecture checks. See the
+[architecture check](docs/architecture.md#architecture-check).
 
 ## Git and branch flow
 
@@ -135,5 +153,5 @@ not to find another way around it.
 
 ## References
 
-- [Interactive mockup](https://claude.ai/artifact/KYRM7AnsYLiBLBLKy8i4HE), [integration guide](https://claude.ai/artifact/CpJHVCiFfF9j3KbHQ2S1Et) and
+- [Design System artifact](https://claude.ai/artifact/Xrfx4ccwixnRpFgVYvrCcZ), [interactive mockup](https://claude.ai/artifact/KYRM7AnsYLiBLBLKy8i4HE), [integration guide](https://claude.ai/artifact/CpJHVCiFfF9j3KbHQ2S1Et) and
   [repositories and packages](https://claude.ai/artifact/BPinmYxoF3mbK8w9BMB43N) (living documents).

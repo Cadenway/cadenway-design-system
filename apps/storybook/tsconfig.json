@@ -6,12 +6,19 @@
     "rootDir": "../..",
     "outDir": "../../out-tsc/storybook",
     /* Declares the stylesheet imports of the preview (`import '../src/styles.css'`). */
-    "types": ["vite/client"]
+    "types": ["vite/client"],
+    /* The entry points of @cadenway/ui, from their sources. */
+    "paths": {
+      "@cadenway/ui/core": ["../../packages/ui/core/public-api.ts"],
+      "@cadenway/ui/components/*": ["../../packages/ui/components/*/public-api.ts"]
+    }
   },
   "include": [
     ".storybook/*.ts",
     "src/**/*.ts",
     "vitest.config.ts",
-    "../../packages/*/src/**/*.stories.ts"
-  ]
+    "../../packages/*/src/**/*.stories.ts",
+    "../../packages/ui/components/*/**/*.stories.ts"
+  ],
+  "exclude": ["../../packages/*/node_modules", "../../packages/*/dist"]
 }

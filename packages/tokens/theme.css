@@ -1,17 +1,24 @@
 /*
  * @cadenway/tokens: the Tailwind 4 theme of Cadenway.
  *
- * What belongs here: the `@theme` variables that map Tailwind utilities (colors, font sizes, radii,
- * shadows, easings, animations) onto the custom properties of `tokens.css`, so a utility such as
- * `bg-muted` resolves to a token and follows `data-theme`. No value is written twice: this file
- * references the tokens, `tokens.css` defines them.
+ * Maps Tailwind utilities onto the custom properties of `tokens.css`, so `bg-muted`, `text-jade`
+ * or `border-line-control` resolve to a token and follow `data-theme`. Taken from the Design
+ * System artifact (`project/tailwind/cadenway.css`), with the theme selected by attribute only and
+ * the mockup's behavior animations added (exits, skeleton pulse, row move, `--ease-spring`).
  *
- * A consumer stylesheet imports, in this order: `tailwindcss`, `@cadenway/tokens/tokens.css`,
- * `@cadenway/tokens/theme.css`.
+ * A consumer stylesheet imports, in this order:
  *
- * Structure only for now: the mapping comes with the token values (integration guide, section
- * "Fondations").
+ *   @import 'tailwindcss';
+ *   @import '@cadenway/tokens/tokens.css';
+ *   @import '@cadenway/tokens/theme.css';
+ *   @source '<path to node_modules>/@cadenway/ui';
+ *
+ * The `@source` line lets Tailwind find the classes of the compiled bricks; the bricks only use
+ * literal class names for that reason. The text scale and the radii live in `tokens.css`.
  */
 
-@theme {
-}
+@import './src/theme/colors.css';
+@import './src/theme/easing.css';
+@import './src/theme/elevation.css';
+@import './src/theme/motion.css';
+@import './src/theme/base.css';

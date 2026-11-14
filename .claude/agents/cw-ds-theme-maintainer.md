@@ -1,6 +1,6 @@
 ---
 name: cw-ds-theme-maintainer
-description: "Use to change @cadenway/tokens: color tokens in light and dark, the 8 extra mockup colors, typography, radii, shadows, motion variables and keyframes, and the Tailwind 4 @theme mapping."
+description: "Use to change @cadenway/tokens: color tokens in light and dark, the 8 extra mockup hues, typography, radii, shadows, motion variables and keyframes, and the Tailwind 4 @theme mapping."
 tools: Skill, Read, Grep, Glob, Edit, Write, Bash
 model: sonnet
 effort: high
@@ -49,7 +49,7 @@ Load them with the `Skill` tool when their subject comes up (if the tool is unav
 
 ## Procedure
 
-1. Change the semantic token, never a consumer value.
+1. Take values from the Design System artifact (`project/tokens.json`, `project/tailwind/cadenway.css`); change the semantic token, never a consumer value.
 2. Every token has its light and dark value.
 3. Check contrast for text tokens.
 

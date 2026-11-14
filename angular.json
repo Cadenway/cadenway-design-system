@@ -11,7 +11,7 @@
       "projectType": "library",
       "root": "packages/icons",
       "sourceRoot": "packages/icons/src",
-      "prefix": "wp",
+      "prefix": "cw",
       "architect": {
         "build": {
           "builder": "@angular/build:ng-packagr",
@@ -36,8 +36,8 @@
     "ui": {
       "projectType": "library",
       "root": "packages/ui",
-      "sourceRoot": "packages/ui/src",
-      "prefix": "wp",
+      "sourceRoot": "packages/ui",
+      "prefix": "cw",
       "architect": {
         "build": {
           "builder": "@angular/build:ng-packagr",

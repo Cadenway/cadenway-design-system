@@ -1,0 +1,75 @@
+@if (sidebar.rail()) {
+  <button
+    type="button"
+    cwRipple
+    cwTooltipSide="right"
+    [cwTooltip]="name()"
+    [attr.aria-label]="name()"
+    [attr.data-active]="hasActive() ? 'true' : null"
+    [class]="railClasses"
+    (click)="openFromRail()"
+  >
+    <ng-container *ngTemplateOutlet="mark" />
+  </button>
+} @else {
+  <div class="group/sprow relative flex items-center">
+    <button
+      #trigger
+      type="button"
+      cwRipple
+      [id]="triggerId"
+      [attr.aria-expanded]="expanded()"
+      [attr.aria-controls]="contentId"
+      [attr.data-state]="state()"
+      [class]="triggerClasses"
+      (click)="toggle()"
+      (keydown)="onKeydown($event)"
+    >
+      <ng-icon
+        name="phosphorCaretRightBold"
+        class="text-muted-foreground transition-transform duration-300 ease-snap [--ng-icon__size:0.75rem] motion-reduce:transition-none"
+        [class.rotate-90]="expanded()"
+        aria-hidden="true"
+      />
+      <ng-container *ngTemplateOutlet="mark" />
+      <span class="truncate font-medium">{{ name() }}</span>
+      @if (hasCount()) {
+        <span
+          class="ml-auto text-xs whitespace-nowrap text-muted-foreground tabular-nums transition-opacity group-hover/sprow:opacity-0"
+          >{{ count() }}</span
+        >
+      }
+    </button>
+    <span
+      class="absolute right-1 flex items-center gap-0.5 opacity-0 transition-opacity group-hover/sprow:opacity-100 focus-within:opacity-100"
+    >
+      <ng-content select="[cwSidebarSpaceAction]" />
+    </span>
+  </div>
+}
+<div
+  [id]="contentId"
+  [attr.data-state]="state()"
+  [attr.inert]="expanded() && !sidebar.rail() ? null : ''"
+  [class]="contentClasses()"
+>
+  <div class="min-h-0 overflow-hidden">
+    <div
+      role="group"
+      [attr.aria-labelledby]="sidebar.rail() ? null : triggerId"
+      class="ml-4 flex min-w-0 flex-col gap-px border-l border-sidebar-border py-0.5 pl-2"
+    >
+      <ng-content />
+    </div>
+  </div>
+</div>
+
+<ng-template #mark>
+  <span [class]="markClasses()" aria-hidden="true">
+    @if (icon(); as iconName) {
+      <ng-icon [name]="iconName" />
+    } @else {
+      {{ initial() }}
+    }
+  </span>
+</ng-template>
