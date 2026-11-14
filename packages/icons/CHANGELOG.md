@@ -1,5 +1,12 @@
 # @cadenway/icons
 
+## 0.3.0
+
+### Minor Changes
+
+- 1f32819: `provideCadenwayIcons()` registers every icon of the mockup: 217 Phosphor Bold, 57 Phosphor Fill,
+  7 svgl logos (the GitHub logo follows the text color) and 4 flags.
+
 ## 0.2.0
 
 ### Minor Changes

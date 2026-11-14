@@ -1,5 +1,0 @@
----
-'@cadenway/ui': minor
----
-
-Add the `@cadenway/ui/components/data-table` entry point: `cw-data-table`, a grid of generic rows (`data`, `columns` or `cw-data-table-column` children with `ng-template[cwCell]` and `ng-template[cwCellEditor]`, `trackBy`) with multi-column sorting (`[(sort)]`, Shift + click), selection (`[(selection)]`, header checkbox with the mixed state, Shift ranges, `'all'` beyond the page), collapsible groups (`groupBy`, `groupOrder`, `[(collapsed)]`, `ng-template[cwDataTableGroup]`), three densities, skeleton rows, empty (`[cwDataTableEmpty]`) and error states, a single-tab-stop keyboard grid (arrows, Home / End, Page keys, Space, Enter, F2, Escape), inline editors (`cellEdit`), the selection bar `cw-data-table-bulk-bar` driven by the consumer's `bulkActions` (`bulkAction`), resizable, reorderable and hideable columns (`[(columnWidths)]`, `[(columnOrder)]`, `[(columnVisibility)]`), the `cw-data-table-pagination` footer built on `cw-pagination`, and cards under 768 px. Its French texts are `CW_DATA_TABLE_TEXTS`, overridable through `texts`.
