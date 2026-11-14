@@ -37,6 +37,7 @@
     "@angular/core": "catalog:",
     "@angular/forms": "catalog:",
     "@angular/platform-browser": "catalog:",
+    "@cadenway/angular-testing": "0.1.0",
     "@changesets/cli": "^3.0.0",
     "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^21.2.4",
