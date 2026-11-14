@@ -99,8 +99,8 @@ For `packages/ui`, apply the comment convention in the matching `.codex/rules/co
 Report the commands you actually ran and their results; a check you did not run is reported as not
 run.
 
-Run `pnpm test:architecture` after changing entry points, test layout or architecture checks once
-the [published checker is installed](docs/architecture.md#architecture-check-rollout).
+Run `pnpm test:architecture` after changing entry points, test layout or architecture checks. See the
+[architecture check](docs/architecture.md#architecture-check).
 
 ## Git and branch flow
 

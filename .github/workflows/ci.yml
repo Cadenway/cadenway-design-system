@@ -19,6 +19,7 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: read
+      packages: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -28,12 +29,16 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
+          registry-url: https://npm.pkg.github.com
+          scope: '@cadenway'
       - run: pnpm install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: pnpm format:check
       - run: pnpm test:ui-lint
-      # Restore test:architecture with the published dependency as described in docs/architecture.md.
       - run: pnpm lint
       - run: pnpm typecheck
+      - run: pnpm test:architecture
       - run: pnpm test:coverage
       - run: pnpm storybook:build
       # The stories run as browser tests in headless Chromium.
@@ -78,6 +83,7 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: read
+      packages: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -88,7 +94,11 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
+          registry-url: https://npm.pkg.github.com
+          scope: '@cadenway'
       - run: pnpm install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # The pull request title becomes the squash commit on main.
       - run: printf '%s\n' "$PR_TITLE" | pnpm exec commitlint
         env:

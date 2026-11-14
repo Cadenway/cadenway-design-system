@@ -52,8 +52,10 @@ The following commands match the planned local gate. Run `/cw-quality` in Claude
 
 ```bash
 pnpm format:check
+pnpm test:ui-lint
 pnpm lint
 pnpm typecheck
+pnpm test:architecture
 pnpm test:coverage
 pnpm storybook:build
 pnpm test:storybook           # interaction and accessibility checks

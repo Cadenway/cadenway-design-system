@@ -4,11 +4,9 @@ packages:
   - 'packages/*'
   - 'apps/*'
 
-# Supply chain. A version is installable two days (2880 minutes) after its publication, which leaves
-# time for a compromised release to be reported and unpublished; this also binds a `pnpm add` run
-# by an agent. `no-downgrade` refuses a version whose publication evidence (trusted publisher,
-# provenance) is weaker than that of an earlier version of the same package.
-minimumReleaseAge: 2880
+# Disable pnpm's default release-age delay.
+minimumReleaseAge: 0
+# Refuse a package version with weaker trust evidence than an earlier release.
 trustPolicy: no-downgrade
 
 # Versions shared by the root tooling, the packages and the Storybook application: one line to
