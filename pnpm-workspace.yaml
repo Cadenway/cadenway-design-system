@@ -9,6 +9,11 @@ minimumReleaseAge: 0
 # Refuse a package version with weaker trust evidence than an earlier release.
 trustPolicy: no-downgrade
 
+# Keep the Oxc WASI binding compatible with the emnapi alpha it pins.
+# Remove when Angular no longer ships this binding version.
+overrides:
+  '@oxc-parser/binding-wasm32-wasi@0.156.0>@napi-rs/wasm-runtime': 1.2.5
+
 # Versions shared by the root tooling, the packages and the Storybook application: one line to
 # change, so two packages never compile against two Angular or Vitest lines.
 #
