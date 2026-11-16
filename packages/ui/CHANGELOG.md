@@ -1,5 +1,11 @@
 # @cadenway/ui
 
+## 0.3.1
+
+### Patch Changes
+
+- fc97fac: Share the Markdown grammar between the renderer and Block Editor through UI core. The Markdown entry point continues to re-export the existing compatibility symbols.
+
 ## 0.3.0
 
 ### Minor Changes
