@@ -1,11 +1,51 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { verifyAngularArchitecture } from '@cadenway/angular-testing/architecture';
+import ts from 'typescript';
 
-const rootDir = fileURLToPath(new URL('../..', import.meta.url));
+const rootUrl = new URL('../../', import.meta.url);
+const rootDir = fileURLToPath(rootUrl);
+const markdownEntry = 'packages/ui/components/markdown/public-api.ts';
+
+function markdownCompatibilityLines() {
+  const source = ts.createSourceFile(
+    markdownEntry,
+    readFileSync(new URL(markdownEntry, rootUrl), 'utf8'),
+    ts.ScriptTarget.Latest,
+  );
+  const declarations = source.statements.map((statement) => {
+    assert.ok(ts.isExportDeclaration(statement));
+    assert.ok(statement.moduleSpecifier && ts.isStringLiteral(statement.moduleSpecifier));
+    assert.ok(statement.exportClause && ts.isNamedExports(statement.exportClause));
+    return {
+      from: statement.moduleSpecifier.text,
+      typeOnly: statement.isTypeOnly,
+      symbols: statement.exportClause.elements.map(({ name, propertyName, isTypeOnly }) => {
+        assert.equal(propertyName, undefined);
+        assert.equal(isTypeOnly, false);
+        return name.text;
+      }),
+    };
+  });
+  assert.deepEqual(declarations, [
+    { from: './markdown.component', typeOnly: false, symbols: ['CwMarkdown'] },
+    { from: './markdown.marked', typeOnly: false, symbols: ['ɵcreateMarked'] },
+    { from: '@cadenway/ui/core', typeOnly: false, symbols: ['ɵwriteMention'] },
+    { from: '@cadenway/ui/core', typeOnly: true, symbols: ['ɵMentionToken', 'ɵUnderlineToken'] },
+  ]);
+  return new Set(
+    source.statements
+      .slice(1)
+      .map(
+        (statement) => source.getLineAndCharacterOfPosition(statement.getStart(source)).line + 1,
+      ),
+  );
+}
 
 test('UI entry points and test layout respect the library architecture', () => {
+  const compatibilityLines = markdownCompatibilityLines();
   assert.deepEqual(
     verifyAngularArchitecture({
       rootDir,
@@ -18,13 +58,15 @@ test('UI entry points and test layout respect the library architecture', () => {
           rule: 'spec-colocation',
           reason: 'The compatibility suite checks the forms integration of multiple UI bricks.',
         },
-        {
-          file: 'packages/ui/components/markdown/public-api.ts',
-          rule: 'private-library-symbol',
-          reason: 'Existing private Markdown grammar helpers are shared with the block editor.',
-        },
       ],
-    }),
+    }).filter(
+      ({ file, rule, line }) =>
+        !(
+          file === markdownEntry &&
+          rule === 'private-library-symbol' &&
+          compatibilityLines.has(line)
+        ),
+    ),
     [],
   );
 });

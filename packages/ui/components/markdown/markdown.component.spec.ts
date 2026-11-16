@@ -1,9 +1,8 @@
-import type { TokensList } from 'marked';
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
+import { ɵwriteMention } from '@cadenway/ui/core';
 
 import { CwMarkdown } from './markdown.component';
-import { ɵcreateMarked, ɵwriteMention } from './markdown.marked';
 
 /**
  * Component Host
@@ -161,24 +160,5 @@ describe('CwMarkdown', () => {
     expect(root.textContent.trim()).toBe('Avant');
     root = await render('Après');
     expect(root.textContent.trim()).toBe('Après');
-  });
-});
-
-describe('ɵcreateMarked and ɵwriteMention', () => {
-  it('round-trips a mention with special characters', () => {
-    const written: string = ɵwriteMention('id (1)', 'Léa [Design]');
-    const tokens: TokensList = ɵcreateMarked().lexer(written);
-    const paragraph: { tokens: { type: string; id?: string; label?: string }[] } = tokens[0] as {
-      tokens: { type: string; id?: string; label?: string }[];
-    };
-    expect(paragraph.tokens[0]).toMatchObject({
-      type: 'mention',
-      id: 'id (1)',
-      label: 'Léa [Design]',
-    });
-  });
-
-  it('returns a new instance on each call', () => {
-    expect(ɵcreateMarked()).not.toBe(ɵcreateMarked());
   });
 });

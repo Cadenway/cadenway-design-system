@@ -17,6 +17,7 @@ describe('@cadenway/ui/core public API', () => {
       'ɵaddDays',
       'ɵaddMonths',
       'ɵafterExitAnimation',
+      'ɵcreateMarkdownLexer',
       'ɵdayKey',
       'ɵdaysBetween',
       'ɵdaysInMonth',
@@ -35,6 +36,7 @@ describe('@cadenway/ui/core public API', () => {
       'ɵstartOfDay',
       'ɵstartOfMonth',
       'ɵstartOfWeek',
+      'ɵwriteMention',
     ]);
   });
 });
