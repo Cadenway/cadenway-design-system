@@ -45,6 +45,19 @@ jobs:
       - run: pnpm --filter @cadenway/storybook exec playwright install --with-deps chromium
       - run: pnpm test:storybook
       - run: pnpm build
+      - run: pnpm test:packaging
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Select the minimum supported Node version
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24.15.0'
+          registry-url: https://npm.pkg.github.com
+          scope: '@cadenway'
+      - name: Test archives on the minimum supported Node version
+        run: pnpm test:packaging
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   tooling:
     name: Agent tooling copies

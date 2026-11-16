@@ -5,8 +5,7 @@
  */
 
 import type { Token, Tokens } from 'marked';
-
-import type { ɵMentionToken } from './markdown.marked';
+import type { ɵMentionToken } from '@cadenway/ui/core';
 
 /**
  * Type MarkdownInline

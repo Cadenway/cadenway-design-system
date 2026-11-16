@@ -176,14 +176,14 @@ All generic (see the boundary adaptations above); full inputs in the sheets.
 - `marked` only tokenizes (`marked.lexer`). An Angular template renders the token tree, one branch
   per token type. No `innerHTML`, no `bypassSecurityTrust*`, no `marked.parse()`: an `html` token is
   never injected into the page.
-- Same grammar as the editor: `cw-markdown` owns the `marked` instance and the editor receives it
-  through `Markdown.configure({ marked })`, so one parser reads everything. `@tiptap/markdown` still
+- Markdown and Block Editor use the shared grammar in `core/markdown/`. Each creates a parser instance
+  and the editor supplies its instance through `Markdown.configure({ marked })`. `@tiptap/markdown` still
   depends on an older major of `marked`, which stays installed next to ours until Tiptap moves (the
   catalog in `pnpm-workspace.yaml` states the range). Its `marked` option is typed against that
   older major: our instance works at run time but TypeScript refuses it (TS2322), so the editor
   passes it through one documented cast, in one place, removed when the two majors meet.
 - Shared `__underline__` rule: CommonMark reads `__text__` as strong; Cadenway reads and writes it
-  as underline, and bold is `**text**` only. The rule is one `marked` inline extension, defined once
-  next to `cw-markdown` and given to the editor through `Markdown.configure({ marked })`. Out of the
+  as underline, and bold is `**text**` only. The rule is one `marked` inline extension, defined in
+  `core/markdown/` and given to the editor through `Markdown.configure({ marked })`. Out of the
   box Tiptap does the opposite on both sides (Underline writes `<u>…</u>`, Bold accepts `__`): the
   editor overrides both so that what it saves is what `cw-markdown` displays.

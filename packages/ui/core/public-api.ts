@@ -36,3 +36,5 @@ export {
 } from './dates/dates';
 export { ɵextensionOf, ɵformatFileSize } from './format/files';
 export { ɵfold } from './format/text';
+export { ɵcreateMarkdownLexer, ɵwriteMention } from './markdown/markdown.marked';
+export type { ɵMentionToken, ɵUnderlineToken } from './markdown/markdown.marked';

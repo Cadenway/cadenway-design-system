@@ -4,7 +4,7 @@
  * point.
  */
 
-import { ɵcreateMarked, ɵwriteMention } from '@cadenway/ui/components/markdown';
+import { ɵcreateMarkdownLexer, ɵwriteMention } from '@cadenway/ui/core';
 import {
   type AnyExtension,
   type ChainedCommands,
@@ -25,6 +25,7 @@ import type { Node as ProseMirrorNode } from '@tiptap/pm/model';
 import { PluginKey } from '@tiptap/pm/state';
 import { StarterKit } from '@tiptap/starter-kit';
 import { Suggestion, type SuggestionKeyDownProps, type SuggestionProps } from '@tiptap/suggestion';
+import { Marked } from 'marked';
 
 import type { CwBlockKind, CwBlockType, CwMentionPerson } from './block-editor.types';
 
@@ -546,7 +547,8 @@ function cadenwayBehavior(hooks: EditorHooks): AnyExtension {
  * Function createExtensions
  *
  * @description
- * The extensions of the editor: StarterKit (Link and Underline configured, Bold and Underline following the Cadenway grammar), task lists, placeholder, character count, mentions, the « / » and « @ » menus, and Markdown storage through the `marked` instance of `@cadenway/ui/components/markdown`.
+ * Assembles the editor extensions for formatting, task lists, mentions and menus. Markdown
+ * storage uses a fresh parser configured with the shared grammar from `@cadenway/ui/core`.
  *
  * @param {EditorHooks} hooks - Callbacks and settings supplied by the editor.
  * @returns {AnyExtension[]} Extensions used by the editor.
@@ -572,7 +574,7 @@ export function createExtensions(hooks: EditorHooks): AnyExtension[] {
       // TS2322: @tiptap/markdown types this option against its own, older major of `marked`; our
       // instance works at run time. Remove this cast when the two majors meet (pnpm-workspace.yaml,
       // `marked` in the catalog).
-      marked: ɵcreateMarked() as unknown as MarkdownExtensionOptions['marked'],
+      marked: ɵcreateMarkdownLexer(Marked) as unknown as MarkdownExtensionOptions['marked'],
     }),
   ];
 }
