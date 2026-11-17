@@ -1,6 +1,7 @@
 ---
 name: cw-quality
-description: Run the local quality gate, stopping at the first failure.
+description: Run the local quality gate or a focused Angular test check.
 ---
 
-Run in order and stop at the first failure: `pnpm format:check`, `pnpm test:ui-lint`, `pnpm lint`, `pnpm typecheck`, `pnpm test:architecture`, `pnpm test:coverage`, `pnpm storybook:build`, `pnpm test:storybook`, `pnpm build`, `pnpm changeset status`. A missing script is reported as **not available**. End with one line per step: PASS, FAIL, not run or not available.
+Run the [quality procedure](../../../docs/development.md#full-local-quality-gate) yourself from this checkout.
+Use a supplied spec glob as one argument for the focused check. Otherwise run the full gate.

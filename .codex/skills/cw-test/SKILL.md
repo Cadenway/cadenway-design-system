@@ -3,6 +3,6 @@ name: cw-test
 description: Write unit tests.
 ---
 
-Use the **cw-ds-unit-test-writer** specialist for this task when delegation is available and authorized; otherwise read `.codex/agents/cw-ds-unit-test-writer.toml` and follow its instructions directly: the user-provided arguments
-
-The agent carries its own procedure and rules; do not restate them.
+Delegate the user's arguments to **cw-ds-unit-test-writer** if delegation is available and authorized.
+Otherwise read and follow `.codex/agents/cw-ds-unit-test-writer.toml` directly with those arguments.
+Do not restate its rules or procedure.

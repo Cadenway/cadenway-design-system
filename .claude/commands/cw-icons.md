@@ -3,6 +3,4 @@ description: "Add or remove registered icons."
 argument-hint: "<icons>"
 ---
 
-Delegate to the **cw-ds-icon-maintainer** subagent: $ARGUMENTS
-
-The agent carries its own procedure and rules; do not restate them.
+Delegate to subagent **cw-ds-icon-maintainer** without restating its rules or procedure: $ARGUMENTS
