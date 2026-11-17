@@ -1,8 +1,7 @@
 # cadenway-design-system: Claude Code tooling
 
-This `.claude/` folder ships the Claude Code tooling of cadenway-design-system: **12 agents**,
-13 slash commands, 9 rules, 12 skills, 3 hooks, the project
-settings and launch configuration. The application launch requires the planned package scripts.
+This folder holds the Claude Code agents, commands, rules, skills, hooks and project settings for
+cadenway-design-system.
 
 Start from [AGENTS.md](../AGENTS.md) (the rules every assistant follows) and [CLAUDE.md](../CLAUDE.md)
 (the Claude entry point).
@@ -77,7 +76,7 @@ check that writes files. No agent delegates further.
 | `/cw-package-review` | Review exports and dependencies. | `cw-ds-package-reviewer` |
 | `/cw-arch-review` | Review boundaries. | `cw-ds-architecture-reviewer` |
 | `/cw-github` | Change workflows, templates or community files in .github/. | `cw-ds-github-maintainer` |
-| `/cw-quality` | Run the local quality gate, stopping at the first failure. | runs the commands itself |
+| [`/cw-quality`](commands/cw-quality.md) | Run the full local gate or check a selected Angular spec glob. | runs the commands itself |
 
 ## Rules
 

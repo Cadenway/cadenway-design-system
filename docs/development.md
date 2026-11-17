@@ -30,38 +30,21 @@ Consumers install the published packages; never link this folder into another re
 
 ## Minimum checks by change
 
-The scripts below are this repository's contract. While the repository is being bootstrapped,
-create them with these exact names; afterwards, use them and never an ad-hoc equivalent. Run the
-narrowest check that covers the change first, then widen:
+Start with the [checks by change](../AGENTS.md#commands-and-quality-gates).
 
-| Changed                         | Minimum check                                                     |
-| ------------------------------- | ----------------------------------------------------------------- |
-| A brick                         | `pnpm test --include <brick>`, its stories, `pnpm test:storybook` |
-| Tokens                          | `pnpm build`, the token stories in light and dark                 |
-| Public API                      | `pnpm build` and `cw-ds-package-reviewer`                         |
-| Any change to a package         | a changeset (`pnpm changeset`)                                    |
-| Docs or agent instructions only | Scoped formatting and link review                                 |
+## Full local quality gate
 
-Report the commands you actually ran and their results; a check you did not run is reported as not
-run.
+Use [`/cw-quality`](../.claude/commands/cw-quality.md) in Claude Code or
+[`$cw-quality`](../.codex/skills/cw-quality/SKILL.md) in Codex.
 
-## Planned full check list
+- With a spec glob, run only `pnpm test --include "<spec-glob>"`, passing the glob as one argument.
+  When no tests execute, report `0 tests executed` and mark the behavior as unverified.
+- Without a glob, run `pnpm quality` from this checkout. Its steps are declared in
+  [package.json](../package.json) and stop at the first failure.
+  The gate includes Storybook interaction tests, library builds and package validation. For package changes,
+  run `pnpm changeset status` after the gate passes.
 
-The following commands match the planned local gate. Run `/cw-quality` in Claude Code or
-`$cw-quality` in Codex without arguments. Verify CI coverage once workflows exist.
-
-```bash
-pnpm format:check
-pnpm test:ui-lint
-pnpm lint
-pnpm typecheck
-pnpm test:architecture
-pnpm test:coverage
-pnpm storybook:build
-pnpm test:storybook           # interaction and accessibility checks
-pnpm build                    # every package
-pnpm changeset status
-```
+Report the commands and their results, including checks that did not run or are unavailable.
 
 ## Collaboration and release
 

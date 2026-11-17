@@ -14,3 +14,8 @@ paths:
   `@cadenway/ui/core`; those that are not public API carry the `ɵ` prefix.
 - Angular and the CDK are peer dependencies.
 - Removing or renaming an export: deprecate in a minor, remove in the next major.
+
+## Review example
+
+For example, relocating a menu helper inside the package should preserve the supported entry-point
+imports. Use the public export spec to verify the supported names when changing the entry point.

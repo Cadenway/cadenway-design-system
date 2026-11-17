@@ -1,38 +1,28 @@
 # cadenway-design-system: agent instructions
 
-These instructions are mandatory for every AI assistant working in this repository, whatever the
-vendor. [CLAUDE.md](CLAUDE.md) imports them for Claude Code. Explicit user instructions take
-precedence over procedures, never over the hard limits below.
-
-This file states the **rules**. See the tooling guides for [Claude Code](.claude/README.md)
-and [Codex](.codex/README.md) for agents, skills, commands and hooks.
+Apply these instructions in every assistant. Explicit user instructions take precedence over
+procedures, within the hard limits below. Follow the rules for the affected paths and load only
+the skills relevant to the task.
 
 ## First read
 
-- The brick's sheet in the [Design System artifact](https://claude.ai/artifact/Xrfx4ccwixnRpFgVYvrCcZ) (`project/components/<Name>/README.md`): it is the source of truth
-  for values, variants and APIs.
-- The mockup screens in `docs/maquette/source/` that use the brick: behavior, states and copy.
-- The existing brick closest to the one you touch, and its stories.
-- `package.json` for versions and scripts once the repository is bootstrapped. Do not restate
-  versions elsewhere: a copy goes stale.
+- Before changing a brick, read its [Design System artifact](https://claude.ai/artifact/Xrfx4ccwixnRpFgVYvrCcZ)
+  sheet (`project/components/<Name>/README.md`) for values, variants and APIs. Compare the closest
+  existing brick, its stories and the mockup screens that use it for behavior, states and copy.
+- For token or theme work, use `cw-tokens-and-theme` and consult `project/tokens.json`,
+  `project/tailwind/cadenway.css` and `docs/maquette/source/styles/app.css` as relevant.
+- For status or priority display, consult `docs/maquette/source/StatutTache.dc.html` or
+  `docs/maquette/source/PrioriteTache.dc.html` and the integration guide sections
+  “Composants métier” and “Comportements transverses”.
+- For brick behavior, apply the brick, public API and story rules. Verify the accessibility checks.
+- Get versions and scripts from `package.json`. Keep version declarations there.
 
 ## What this repository is
 
-The structure and workflows below describe the bootstrap target. Check the checkout for available files and commands.
-
-cadenway-design-system is the Angular design system taken from the mockup. It publishes `@cadenway/tokens`, `@cadenway/icons` and `@cadenway/ui` (pnpm monorepo, Changesets) and hosts Storybook as the visual reference. Consumers: cadenway-webapp and cadenway-website.
-
-```text
-packages/
-├─ tokens/   → @cadenway/tokens: tokens.css and theme.css (entry files) importing src/ partials
-│              (fonts, scale, light, dark; theme/ colors, easing, elevation, motion, base), fonts/
-├─ icons/    → @cadenway/icons: provideCadenwayIcons(), one icon family per file in src/lib/sets/
-└─ ui/       → @cadenway/ui
-   ├─ core/          @cadenway/ui/core: shared internals (a11y, dates, format, motion, overlay, styles)
-   └─ components/    @cadenway/ui/components/<brick>: one entry point per brick, its main declaration
-                     at the root of its folder, one subfolder per other declaration
-apps/storybook/
-```
+The Angular design system publishes `@cadenway/tokens`, `@cadenway/icons` and `@cadenway/ui`
+for the webapp and public site. Storybook is its visual reference. See the
+[target package layout](docs/architecture.md#purpose-and-target-structure) and check the
+checkout for available files and commands.
 
 ## Language
 
@@ -65,53 +55,57 @@ apps/storybook/
 
 ## GitHub files (`.github/`)
 
-This repository carries everything GitHub reads from it; Cadenway has no organization `.github`
-repository and nothing is inherited.
+Use the `github.md` rule for this checkout's [GitHub homepage](.github/README.md), community
+files, templates, owners and workflows. Cadenway has no organization `.github` repository.
+Keep complete CI and release workflows here, without reusable workflows from siblings.
+Keep Renovate local without a shared preset. Apply common changes through a PR in each affected
+repository.
 
-- [`.github/README.md`](.github/README.md) is the repository home page; `CONTRIBUTING.md`,
-  `CODE_OF_CONDUCT.md`, `SECURITY.md`, `SUPPORT.md`, `PULL_REQUEST_TEMPLATE.md`, `ISSUE_TEMPLATE/` and
-  `CODEOWNERS` sit next to it.
-- `.github/workflows/` holds this repository's complete CI, release workflows: no reusable
-  workflow from another repository. The Renovate configuration is complete here too, with no shared
-  preset.
-- The parts shared with the other repositories are duplicated on purpose; a change to them is repeated
-  in each repository through its own pull request.
+## Code quality
+
+- Read the affected entry point, its callers, and its relevant tests before editing.
+  Preserve the behavior callers rely on unless the task changes it.
+- Keep the diff focused. Use names that express intent and reuse existing code when
+  it preserves the required behavior. Extract code when it clarifies a responsibility.
+- Keep business decisions with their owning module. Validate external inputs at the
+  boundary and use documented public interfaces across modules and repositories.
+- For writes that can fail, overlap, or be retried, verify the resulting state.
+  Check transaction boundaries, tenant scope, and repeated delivery where relevant.
+- For collections and repeated work, check what grows with input size. Measure or
+  inspect the bottleneck before adding an index, cache, worker, or replica.
+- Run the repository checks that cover the affected behavior. Report the commands
+  and their results, including checks that did not run and tests that selected zero cases.
 
 ## Commands and quality gates
 
-The scripts below are this repository's contract. While the repository is being bootstrapped,
-create them with these exact names; afterwards, use them and never an ad-hoc equivalent. Run the
-narrowest check that covers the change first, then widen:
+Use the scripts declared in [package.json](package.json). Start with the narrowest check that
+covers the change, then widen where needed.
 
-| Changed                         | Minimum check                                                     |
-| ------------------------------- | ----------------------------------------------------------------- |
-| A brick                         | `pnpm test --include <brick>`, its stories, `pnpm test:storybook` |
-| Tokens                          | `pnpm build`, the token stories in light and dark                 |
-| Public API                      | `pnpm build` and `cw-ds-package-reviewer`                         |
-| Any change to a package         | a changeset (`pnpm changeset`)                                    |
-| Docs or agent instructions only | Scoped formatting and link review                                 |
+| Changed                         | Minimum check                                                           |
+| ------------------------------- | ----------------------------------------------------------------------- |
+| A brick                         | `pnpm test --include "<spec-glob>"`, its stories, `pnpm test:storybook` |
+| Tokens                          | `pnpm build`, the token stories in light and dark                       |
+| Public API                      | `pnpm build`, `pnpm test:packaging` and `cw-ds-package-reviewer`        |
+| Any change to a package         | a changeset (`pnpm changeset`)                                          |
+| Docs or agent instructions only | Scoped formatting and link review                                       |
 
 For `packages/ui`, apply the comment convention in the matching `.codex/rules/comments.md` or
 `.claude/rules/comments.md`, including explicit types, member access and regions. Run
 `pnpm lint:ui` and `pnpm format:ui:check`; when editing the UI lint rules or configuration, also run
 `pnpm test:ui-lint`. These checks validate structure, so review the meaning of comments separately.
 
-Report the commands you actually ran and their results; a check you did not run is reported as not
-run.
-
 Run `pnpm test:architecture` after changing entry points, test layout or architecture checks. See the
 [architecture check](docs/architecture.md#architecture-check).
 
+See the [full local quality gate](docs/development.md#full-local-quality-gate) for the shared
+Codex and Claude Code procedure.
+
 ## Git and branch flow
 
-- Trunk-based: work branches come from `main`, named `<type>/<lowercase-kebab-description>` with a
-  type among `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`,
-  `revert`; put the Cadenway task id first when there is one (`feat/cad-482-sso-screen`). Never an
-  agent name as a prefix. Validate with `git check-ref-format --branch <name>`.
-- Commits and PR titles follow Conventional Commits: `type(scope): subject`, English, imperative,
-  lowercase subject, no trailing period, at most 100 characters; `!` only for a breaking change.
-- Pull requests target `main` and are squash-merged after review and green CI. Changesets: each PR adds a changeset; the "Version Packages" pull request bumps versions; its merge publishes to the npm registry from CI.
-- Stage only the files of your task; preserve other people's changes in the working tree.
+Use the `git-and-commits.md` rule for work off `main`, branch names and Conventional
+Commits. Validate a branch name with `git check-ref-format --branch <name>`. Target `main` with
+reviewed PRs and squash-merge after green CI. Changesets describes package changes, and CI publishes after the Version Packages PR merges. Stage only task files and
+preserve existing changes.
 
 ## Hard limits (never without the user's explicit request in this conversation)
 
@@ -130,14 +124,10 @@ not to find another way around it.
 
 ## Agent tooling
 
-- **Claude Code**: [CLAUDE.md](CLAUDE.md) and [.claude/README.md](.claude/README.md): the
-  `cw-ds-*` agents, the `/cw-*` commands (`/cw-quality` runs the whole local gate),
-  path-scoped rules and hooks.
-- **Codex**: [.codex/README.md](.codex/README.md) covers the specialists, `$cw-*` skills, rules and hooks.
-- **Builders** (assigned writes): `cw-ds-component-builder`, `cw-ds-story-writer`, `cw-ds-theme-maintainer`, `cw-ds-icon-maintainer`, `cw-ds-unit-test-writer`, `cw-ds-release-manager`, `cw-ds-github-maintainer`.
-- **Reviewers** (read-only): `cw-ds-a11y-auditor`, `cw-ds-motion-reviewer`, `cw-ds-design-reviewer`, `cw-ds-package-reviewer`, `cw-ds-architecture-reviewer`.
-- Specialists are available, not mandatory. Delegate a bounded responsibility with explicit files and
-  checks, assign disjoint files to parallel agents and integrate their results yourself.
+Use the [Codex](.codex/README.md) and [Claude Code](.claude/README.md) guides for rules,
+skills, hooks and the [specialist inventory](.claude/README.md#agents). Builders have
+assigned write scopes and reviewers are read-only. Specialists are optional. When delegating,
+assign disjoint files and explicit checks, then integrate the results yourself.
 
 ## Repository hygiene
 
