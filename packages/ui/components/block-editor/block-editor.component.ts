@@ -849,28 +849,30 @@ export class CwBlockEditor implements FormValueControl<string>, ControlValueAcce
    * Property toolbarBlocks
    *
    * @description
-   * Block types displayed in the toolbar.
+   * Block types displayed in the toolbar, from the provided block types (as before, the
+   * `blockTypes` input only shapes the slash menu, so an empty input disables that menu alone).
    *
    * @type {Signal<CwBlockType[]>}
    * @readonly
    */
   protected readonly toolbarBlocks: Signal<CwBlockType[]> = computed(() =>
-    CW_TOOLBAR_BLOCKS.map((kind) => this.blockTypes().find((type) => type.kind === kind)).filter(
-      (type): type is CwBlockType => type !== undefined,
-    ),
+    CW_TOOLBAR_BLOCKS.map((kind) =>
+      this.providedLabels.blockTypes.find((type) => type.kind === kind),
+    ).filter((type): type is CwBlockType => type !== undefined),
   );
 
   /**
    * Property typeEntries
    *
    * @description
-   * Block type choices excluding the separator.
+   * Block type choices of the toolbar's type menu, excluding the separator, from the provided
+   * block types.
    *
    * @type {Signal<CwBlockType[]>}
    * @readonly
    */
   protected readonly typeEntries: Signal<CwBlockType[]> = computed(() =>
-    this.blockTypes().filter((type) => type.kind !== 'hr'),
+    this.providedLabels.blockTypes.filter((type) => type.kind !== 'hr'),
   );
 
   /**

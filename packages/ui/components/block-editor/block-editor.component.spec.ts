@@ -582,18 +582,14 @@ describe('provideCwBlockEditorLabels', () => {
 });
 
 describe('block editor block type input', () => {
-  it('uses the input in the type menu and slash suggestions', async () => {
+  it('shapes the slash suggestions while the toolbar keeps the provided block types', async () => {
     const fixture: ComponentFixture<CwBlockEditor> = TestBed.createComponent(CwBlockEditor);
     fixture.componentRef.setInput('blockTypes', [{ kind: 'p', label: 'Custom text' }]);
     fixture.autoDetectChanges();
     await fixture.whenStable();
     await settle();
     const host: HTMLElement = fixture.nativeElement as HTMLElement;
-    button(host, 'Type de bloc : Custom text').click();
-    await fixture.whenStable();
-    expect(document.body.querySelector('[role="menu"]')?.textContent).toContain('Custom text');
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-    await fixture.whenStable();
+    expect(() => button(host, 'Type de bloc : Custom text')).toThrow();
     const surface: HTMLElement = textbox(host, 'Contenu du document');
     typeText(surface, '/');
     await fixture.whenStable();
@@ -601,6 +597,21 @@ describe('block editor block type input', () => {
     const options: NodeListOf<Element> = host.querySelectorAll('[role="option"]');
     expect(options).toHaveLength(1);
     expect(options[0].textContent).toContain('Custom text');
+    fixture.destroy();
+  });
+
+  it('disables only the slash menu with an empty input', async () => {
+    const fixture: ComponentFixture<CwBlockEditor> = TestBed.createComponent(CwBlockEditor);
+    fixture.componentRef.setInput('blockTypes', []);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    await settle();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.querySelector('[role="toolbar"]')).not.toBeNull();
+    typeText(textbox(host, 'Contenu du document'), '/');
+    await fixture.whenStable();
+    await settle();
+    expect(host.querySelectorAll('[role="option"]')).toHaveLength(0);
     fixture.destroy();
   });
 });
