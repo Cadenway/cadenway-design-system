@@ -1,0 +1,25 @@
+<span
+  #tip
+  class="absolute inset-0 z-10"
+  aria-hidden="true"
+  cwTooltipSide="right"
+  [cwTooltip]="tooltipText()"
+  [cwTooltipShortcut]="shortcut()"
+></span>
+@if (iconName(); as name) {
+  <ng-icon [name]="name" aria-hidden="true" />
+} @else {
+  <span class="contents" aria-hidden="true"><ng-content select="[cwAppRailItemMedia]" /></span>
+}
+<span #label class="sr-only"><ng-content /></span>
+@if (hasBadge()) {
+  <span class="sr-only">, {{ spokenBadge() }}</span>
+  <span
+    class="pointer-events-none absolute top-0.5 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-foreground px-1 text-[10px] leading-none font-semibold whitespace-nowrap text-background tabular-nums"
+    aria-hidden="true"
+    >{{ badge() }}</span
+  >
+}
+@if (description(); as text) {
+  <span [id]="descriptionId" hidden>{{ text }}</span>
+}
