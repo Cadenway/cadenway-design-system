@@ -503,6 +503,36 @@ describe('CwSidebar on a tablet', () => {
     expect(fixture.componentInstance.state()).toBe('collapsed');
   });
 
+  it('gives the focus back to its opener when Escape or the backdrop closes it', async () => {
+    await render('lg');
+    const toggle: HTMLButtonElement = button(host, 'Déplier la barre latérale');
+    toggle.focus();
+    toggle.click();
+    await fixture.whenStable();
+    link(host, 'Accueil').focus();
+    press(document.body, 'Escape');
+    await fixture.whenStable();
+    expect(document.activeElement).toBe(toggle);
+
+    toggle.click();
+    await fixture.whenStable();
+    link(host, 'Accueil').focus();
+    button(host, 'Fermer la barre latérale').click();
+    await fixture.whenStable();
+    expect(document.activeElement).toBe(toggle);
+  });
+
+  it('falls back to a toggle outside it when it was opened without one', async () => {
+    await render('lg');
+    fixture.componentInstance.state.set('expanded');
+    await fixture.whenStable();
+    link(host, 'Accueil').focus();
+    press(document.body, 'Escape');
+    await fixture.whenStable();
+
+    expect(document.activeElement).toBe(button(host, 'Déplier la barre latérale'));
+  });
+
   it('closes on Escape but stays open when an item is followed', async () => {
     await render('lg');
     fixture.componentInstance.state.set('expanded');

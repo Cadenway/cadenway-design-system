@@ -330,6 +330,28 @@ export class CwSidebar {
   private readonly mobile: Signal<boolean> = watchMedia(MOBILE);
 
   /**
+   * Property document
+   *
+   * @description
+   * The document holding the sidebar, for the focus moves of the floating layouts.
+   *
+   * @type {Document}
+   * @readonly
+   */
+  private readonly document: Document = inject(DOCUMENT);
+
+  /**
+   * Property opener
+   *
+   * @description
+   * The element that had the focus when a floating sidebar was expanded, given the focus back when
+   * it closes while the focus is inside it; null otherwise.
+   *
+   * @type {HTMLElement | null}
+   */
+  private opener: HTMLElement | null = null;
+
+  /**
    * Property tablet
    *
    * @description
@@ -535,9 +557,15 @@ export class CwSidebar {
    * Method expand
    *
    * @description
-   * Shows the labels (opens the drawer on a phone).
+   * Shows the labels (opens the drawer on a phone). A floating sidebar remembers the element that
+   * had the focus, to give it back when it closes.
    */
   public expand(): void {
+    if (this.floating() && this.collapsed()) {
+      const active: Element | null = this.document.activeElement;
+      this.opener =
+        active instanceof HTMLElement && !this.navElement()?.contains(active) ? active : null;
+    }
     this.state.set('expanded');
   }
 
@@ -545,10 +573,50 @@ export class CwSidebar {
    * Method collapse
    *
    * @description
-   * Reduces the sidebar to its rail, or hides it; nothing for a `none` sidebar.
+   * Reduces the sidebar to its rail, or hides it; nothing for a `none` sidebar. When a floating
+   * sidebar closes (Escape, its backdrop, a followed item, a toggle) with the focus inside it, the
+   * focus goes back to the element that opened it, or else to a toggle outside it
+   * (`aria-controls`), since the hidden sidebar becomes `inert`.
    */
   public collapse(): void {
-    if (this.collapsible() !== 'none') this.state.set('collapsed');
+    if (this.collapsible() === 'none') return;
+    const nav: HTMLElement | null = this.navElement();
+    const active: Element | null = this.document.activeElement;
+    const restore: boolean = this.floating() && !this.collapsed() && nav?.contains(active) === true;
+    this.state.set('collapsed');
+    if (restore && nav) this.restoreFocus(nav);
+    this.opener = null;
+  }
+
+  /**
+   * Method navElement
+   *
+   * @description
+   * The rendered `nav` of the sidebar, found by its id.
+   *
+   * @returns {HTMLElement | null} The navigation element, or null before it is rendered.
+   */
+  private navElement(): HTMLElement | null {
+    return this.document.getElementById(this.id);
+  }
+
+  /**
+   * Method restoreFocus
+   *
+   * @description
+   * Gives the focus back to the opener when it is still in the document, or else to the first
+   * toggle of this sidebar outside it.
+   *
+   * @param {HTMLElement} nav - The navigation the focus leaves.
+   */
+  private restoreFocus(nav: HTMLElement): void {
+    const target: HTMLElement | undefined =
+      this.opener?.isConnected === true
+        ? this.opener
+        : Array.from(
+            this.document.querySelectorAll<HTMLElement>(`[aria-controls="${this.id}"]`),
+          ).find((toggle: HTMLElement) => !nav.contains(toggle));
+    target?.focus();
   }
 
   /**
