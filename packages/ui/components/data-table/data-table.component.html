@@ -16,6 +16,7 @@
         class="w-full table-fixed text-sm max-md:block"
         (keydown)="onKeydown($event)"
         (focusin)="onFocusin($event)"
+        (focusout)="onFocusout($event)"
       >
         <colgroup>
           @if (selectable()) {
@@ -251,15 +252,35 @@
             </tr>
           </tbody>
         } @else {
-          @for (group of groups(); track group.rowKey) {
+          @if (virtual()) {
+            <tbody aria-hidden="true" class="max-md:block">
+              <tr class="max-md:block">
+                <td
+                  class="max-md:block"
+                  [attr.colspan]="colCount()"
+                  [style.height.px]="virtualSegments().top"
+                ></td>
+              </tr>
+            </tbody>
+          }
+          @for (group of displayedGroups(); track group.rowKey) {
             <tbody
               role="rowgroup"
               class="group/col max-md:block"
-              [class]="bodyMotion"
+              [class]="bodyMotion()"
               [attr.data-collapsible]="group.key === null ? null : ''"
               [attr.data-state]="group.key === null ? null : group.collapsed ? 'closed' : 'open'"
             >
-              @if (group.key !== null) {
+              @if (virtual() && virtualSegments().middleKey === group.rowKey) {
+                <tr aria-hidden="true" class="max-md:block">
+                  <td
+                    class="max-md:block"
+                    [attr.colspan]="colCount()"
+                    [style.height.px]="virtualSegments().middle"
+                  ></td>
+                </tr>
+              }
+              @if (group.key !== null && (!virtual() || visibleLineKeys().has(group.rowKey))) {
                 <tr
                   role="row"
                   [attr.data-cw-row]="group.rowKey"
@@ -316,6 +337,15 @@
                 </tr>
               }
               @for (entry of group.rows; track entry.key) {
+                @if (virtual() && virtualSegments().middleKey === entry.key) {
+                  <tr aria-hidden="true" class="max-md:block">
+                    <td
+                      class="max-md:block"
+                      [attr.colspan]="colCount()"
+                      [style.height.px]="virtualSegments().middle"
+                    ></td>
+                  </tr>
+                }
                 <tr
                   role="row"
                   [attr.data-cw-row]="entry.key"
@@ -373,6 +403,17 @@
                   }
                 </tr>
               }
+            </tbody>
+          }
+          @if (virtual()) {
+            <tbody aria-hidden="true" class="max-md:block">
+              <tr class="max-md:block">
+                <td
+                  class="max-md:block"
+                  [attr.colspan]="colCount()"
+                  [style.height.px]="virtualSegments().bottom"
+                ></td>
+              </tr>
             </tbody>
           }
         }

@@ -18,7 +18,7 @@ import {
   applicationConfig,
   moduleMetadata,
 } from '@storybook/angular-vite';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 
 import { CwCellDef } from './cell/cell.directive';
 import { CwCellEditorDef } from './cell-editor/cell-editor.directive';
@@ -335,6 +335,44 @@ export const Grouped: Story = {
     await userEvent.click(todo);
     await expect(todo).toHaveAttribute('aria-expanded', 'true');
     await expect(scope.getByRole('checkbox', { name: 'Sélectionner CAD-488' })).toBeInTheDocument();
+  },
+};
+
+/** A long list with windowed rows and keyboard navigation. */
+export const Virtual: Story = {
+  render: () => ({
+    props: {
+      tasks: Array.from({ length: 2000 }, (_, index: number) => ({
+        id: `CAD-${String(index + 1)}`,
+        name: `Préparer la tâche ${String(index + 1)}`,
+        status: 'En cours',
+      })),
+    },
+    template: `
+      <div class="flex h-96 flex-col">
+        <cw-data-table class="flex min-h-0 flex-1 flex-col" ariaLabel="Toutes les tâches" [data]="tasks" [page]="null" virtual>
+          <cw-data-table-column key="name" header="Nom" />
+          <cw-data-table-column key="status" header="Statut" />
+        </cw-data-table>
+      </div>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+    } = within(light(canvasElement));
+    const grid: HTMLElement = scope.getByRole('grid', { name: 'Toutes les tâches' });
+    const first: HTMLElement | null = grid.querySelector(
+      '[role="row"][aria-rowindex="2"] [role="gridcell"]',
+    );
+    if (!first) throw new Error('First body cell missing');
+    first.focus();
+    await userEvent.keyboard('{Control>}{End}{/Control}');
+    await waitFor(async () => {
+      await expect(
+        document.activeElement?.closest('[role="row"]')?.getAttribute('aria-rowindex'),
+      ).toBe(grid.getAttribute('aria-rowcount'));
+    });
+    await expect(grid.querySelectorAll('tr[role="row"]').length).toBeLessThan(100);
   },
 };
 

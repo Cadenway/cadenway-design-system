@@ -112,6 +112,7 @@ const ACTIONS: readonly CwBulkAction[] = [
     <cw-data-table
       ariaLabel="Tâches de Produit"
       [data]="data()"
+      [virtual]="virtual()"
       [groupBy]="groupBy()"
       [groupLabel]="groupLabel"
       [(page)]="page"
@@ -167,6 +168,17 @@ class Host {
    * @readonly
    */
   public readonly data: WritableSignal<readonly Task[]> = signal<readonly Task[]>(TASKS);
+
+  /**
+   * Property virtual
+   *
+   * @description
+   * Enables windowed rendering in the fixture.
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  public readonly virtual: WritableSignal<boolean> = signal(false);
 
   /**
    * Property groupBy
@@ -546,6 +558,180 @@ describe('CwDataTable', () => {
         'Estimation',
         'Statut',
       ]);
+    });
+  });
+
+  describe('virtual rendering', () => {
+    it('windows a long list and preserves its full estimated height while scrolling', async () => {
+      component.data.set(
+        Array.from({ length: 2000 }, (_, index): Task => ({
+          id: String(index),
+          name: String(index),
+          status: 'a',
+          estimate: index,
+        })),
+      );
+      component.virtual.set(true);
+      await stable();
+      expect(dataRows(host).length).toBeLessThan(50);
+      expect(dataRows(host)[0].getAttribute('aria-rowindex')).toBe('2');
+      const grid: HTMLElement = one(host, 'grid', 'Tâches de Produit');
+      const scroller: HTMLElement = required(grid.parentElement);
+      Object.defineProperty(scroller, 'clientHeight', { configurable: true, value: 360 });
+      Object.defineProperty(scroller, 'scrollTop', {
+        configurable: true,
+        writable: true,
+        value: 36000,
+      });
+      scroller.dispatchEvent(new Event('scroll'));
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => {
+          resolve();
+        }),
+      );
+      await stable();
+      const rows: HTMLElement[] = dataRows(host);
+      expect(rows.length).toBeLessThan(50);
+      expect(Number(rows[0].getAttribute('aria-rowindex'))).toBeGreaterThan(900);
+      expect(Number(rows[0].getAttribute('aria-rowindex'))).toBeLessThan(1010);
+      const spacers: HTMLElement[] = Array.from(
+        grid.querySelectorAll<HTMLElement>('tbody[aria-hidden="true"] td'),
+      );
+      expect(spacers).toHaveLength(2);
+      expect(
+        spacers.reduce((sum: number, cell: HTMLElement) => sum + parseFloat(cell.style.height), 0) +
+          rows.length * 36,
+      ).toBe(2000 * 36);
+    });
+
+    it('navigates to the last row and retains focus when scrolled away', async () => {
+      component.data.set(
+        Array.from({ length: 2000 }, (_, index): Task => ({
+          id: String(index),
+          name: String(index),
+          status: 'a',
+          estimate: index,
+        })),
+      );
+      component.virtual.set(true);
+      await stable();
+      const scroller: HTMLElement = required(one(host, 'grid', 'Tâches de Produit').parentElement);
+      Object.defineProperty(scroller, 'clientHeight', { configurable: true, value: 360 });
+      Object.defineProperty(scroller, 'scrollTop', {
+        configurable: true,
+        writable: true,
+        value: 0,
+      });
+      scroller.dispatchEvent(new Event('scroll'));
+      await new Promise<void>((resolve) => {
+        requestAnimationFrame(() => {
+          resolve();
+        });
+      });
+      await stable();
+      const first: HTMLElement = byRole(dataRows(host)[0], 'gridcell')[0];
+      first.focus();
+      key(first, { key: 'End', ctrlKey: true });
+      await stable();
+      expect(document.activeElement?.closest('[role="row"]')?.getAttribute('aria-rowindex')).toBe(
+        '2001',
+      );
+      expect(scroller.scrollTop).toBeGreaterThan(0);
+      const focused: Element | null = document.activeElement;
+      scroller.scrollTop = 0;
+      scroller.dispatchEvent(new Event('scroll'));
+      await new Promise<void>((resolve) => {
+        requestAnimationFrame(() => {
+          resolve();
+        });
+      });
+      await stable();
+      expect(document.activeElement).toBe(focused);
+      expect(focused?.isConnected).toBe(true);
+      const spacerCells: HTMLElement[] = Array.from(
+        host.querySelectorAll<HTMLElement>(
+          'tr[aria-hidden="true"] td, tbody[aria-hidden="true"] td',
+        ),
+      );
+      expect(
+        spacerCells.reduce(
+          (sum: number, cell: HTMLElement) => sum + parseFloat(cell.style.height),
+          0,
+        ) +
+          dataRows(host).length * 36,
+      ).toBe(2000 * 36);
+    });
+
+    it('moves and extends selection across a window edge', async () => {
+      component.data.set(
+        Array.from({ length: 2000 }, (_, index): Task => ({
+          id: String(index),
+          name: String(index),
+          status: 'a',
+          estimate: index,
+        })),
+      );
+      component.virtual.set(true);
+      await stable();
+      const scroller: HTMLElement = required(one(host, 'grid', 'Tâches de Produit').parentElement);
+      Object.defineProperty(scroller, 'clientHeight', { configurable: true, value: 360 });
+      Object.defineProperty(scroller, 'scrollTop', {
+        configurable: true,
+        writable: true,
+        value: 0,
+      });
+      scroller.dispatchEvent(new Event('scroll'));
+      await new Promise<void>((resolve) => {
+        requestAnimationFrame(() => {
+          resolve();
+        });
+      });
+      await stable();
+      const rows: HTMLElement[] = dataRows(host);
+      const last: HTMLElement = rows[rows.length - 1];
+      const index: number = Number(last.getAttribute('aria-rowindex'));
+      const cell: HTMLElement = byRole(last, 'gridcell')[0];
+      cell.focus();
+      key(cell, { key: 'ArrowDown' });
+      await stable();
+      expect(document.activeElement?.closest('[role="row"]')?.getAttribute('aria-rowindex')).toBe(
+        String(index + 1),
+      );
+      cell.focus();
+      key(cell, { key: 'ArrowDown', shiftKey: true });
+      await stable();
+      expect(document.activeElement?.closest('[role="row"]')?.getAttribute('aria-rowindex')).toBe(
+        String(index + 1),
+      );
+      expect(component.selection()).toEqual([String(index - 2), String(index - 1)]);
+    });
+
+    it('omits rows of collapsed groups and renders every row when disabled', async () => {
+      component.data.set(
+        Array.from({ length: 100 }, (_, index): Task => ({
+          id: String(index),
+          name: String(index),
+          status: index < 50 ? 'a' : 'b',
+          estimate: index,
+        })),
+      );
+      component.groupBy.set('status');
+      component.collapsed.set(['a']);
+      component.virtual.set(true);
+      await stable();
+      expect(
+        dataRows(host).every(
+          (row: HTMLElement) => Number(row.textContent.trim().split(/\s+/)[0]) >= 50,
+        ),
+      ).toBe(true);
+      expect(button(host, 'a').getAttribute('aria-expanded')).toBe('false');
+      component.virtual.set(false);
+      await stable();
+      expect(dataRows(host)).toHaveLength(50);
+      component.collapsed.set([]);
+      component.groupBy.set(null);
+      await stable();
+      expect(dataRows(host)).toHaveLength(100);
     });
   });
 
