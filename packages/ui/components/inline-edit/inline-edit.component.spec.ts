@@ -3,6 +3,7 @@ import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { FormField, form, required, type FieldTree } from '@angular/forms/signals';
 
+import { provideCwInlineEditLabels } from './inline-edit.providers';
 import { CwInlineEdit } from './inline-edit.component';
 
 /**
@@ -399,5 +400,19 @@ describe('CwInlineEdit', () => {
     await signalFixture.whenStable();
 
     expect(signalFixture.componentInstance.model().name).toBe('À valider');
+  });
+});
+
+describe('provideCwInlineEditLabels', () => {
+  it('replaces the default text below the provider', async () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwInlineEditLabels({ readonly: 'Read only' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.textContent).toContain('Read only');
+    fixture.destroy();
   });
 });

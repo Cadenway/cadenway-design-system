@@ -9,3 +9,7 @@ export { CwMarkdown } from './markdown.component';
 export { ɵcreateMarked } from './markdown.marked';
 export { ɵwriteMention } from '@cadenway/ui/core';
 export type { ɵMentionToken, ɵUnderlineToken } from '@cadenway/ui/core';
+
+export { CW_MARKDOWN_LABELS } from './markdown.constants';
+export { provideCwMarkdownLabels } from './markdown.providers';
+export type { CwMarkdownLabels } from './markdown.types';

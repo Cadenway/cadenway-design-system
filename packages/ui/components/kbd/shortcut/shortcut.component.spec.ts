@@ -1,6 +1,7 @@
 import { Component, viewChild, type Signal } from '@angular/core';
 import { TestBed, type ComponentFixture } from '@angular/core/testing';
 
+import { provideCwKbdLabels } from '../kbd.providers';
 import { CwShortcut } from './shortcut.component';
 
 /**
@@ -86,5 +87,17 @@ describe('CwShortcut', () => {
 
     expect(close.querySelector('kbd[cwKbd]')?.textContent).toBe('Échap');
     expect(close.querySelector('kbd[cwKbd]')?.getAttribute('data-size')).toBe('sm');
+  });
+});
+
+describe('provideCwKbdLabels', () => {
+  it('renders provided text', () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwKbdLabels({ escape: 'Escape', then: 'then' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Escape');
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('then');
   });
 });

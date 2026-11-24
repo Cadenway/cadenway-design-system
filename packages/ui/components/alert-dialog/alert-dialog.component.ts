@@ -27,6 +27,7 @@ import {
 import { ɵFOCUS_INSET, ɵModalOverlay } from '@cadenway/ui/core';
 import { CwInput } from '@cadenway/ui/components/input';
 
+import { ALERT_DIALOG_LABELS } from './alert-dialog-labels.token';
 import { CwAlertDialogDescription } from './alert-dialog-description/alert-dialog-description.directive';
 import { CW_ALERT_DIALOG_MAX_ITEMS } from './alert-dialog.constants';
 import { CW_ALERT_DIALOG, type CwAlertDialogContext } from './alert-dialog.token';
@@ -188,7 +189,9 @@ export class CwAlertDialog implements CwAlertDialogContext {
    *
    * @type {InputSignal<string>}
    */
-  public readonly confirmLabel: InputSignal<string> = input('Pour confirmer, saisissez');
+  public readonly confirmLabel: InputSignal<string> = input<string>(
+    inject(ALERT_DIALOG_LABELS).confirm,
+  );
 
   /**
    * Property pending
@@ -225,7 +228,7 @@ export class CwAlertDialog implements CwAlertDialogContext {
    */
   public readonly moreLabel: InputSignal<(count: number) => string> = input<
     (count: number) => string
-  >((count) => `+ ${String(count)} autres`);
+  >(inject(ALERT_DIALOG_LABELS).more);
 
   /**
    * Property confirm

@@ -3,6 +3,7 @@ import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormField, form, required, type FieldTree } from '@angular/forms/signals';
 
+import { provideCwSelectLabels } from './select.providers';
 import { CwSelectEmpty } from './select-empty/select-empty.component';
 import { CwSelectGroup } from './select-group/select-group.component';
 import { CwSelectOption } from './select-option/select-option.component';
@@ -489,5 +490,19 @@ describe('CwSelect', () => {
     fixture.componentInstance.model.set({ priority: 'haute' });
     await fixture.whenStable();
     expect(trigger.textContent.trim()).toBe('Haute');
+  });
+});
+
+describe('provideCwSelectLabels', () => {
+  it('uses provided texts in the rendered fixture', async () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwSelectLabels({ placeholder: 'Choose…' })],
+    });
+    const fixture: ComponentFixture<ModelHost> = TestBed.createComponent(ModelHost);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.textContent).toContain('Choose…');
+    expect(host.textContent).not.toContain('Choisir…');
   });
 });

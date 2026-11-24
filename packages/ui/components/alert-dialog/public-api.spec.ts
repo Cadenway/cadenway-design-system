@@ -5,6 +5,7 @@ describe('@cadenway/ui/alert-dialog public API', () => {
   // (.claude/rules/public-api.md): the runtime names are pinned here.
   it('exports exactly the pinned names', () => {
     expect(Object.keys(publicApi).sort()).toEqual([
+      'CW_ALERT_DIALOG_LABELS',
       'CwAlertDialog',
       'CwAlertDialogAction',
       'CwAlertDialogCancel',
@@ -12,6 +13,7 @@ describe('@cadenway/ui/alert-dialog public API', () => {
       'CwAlertDialogMedia',
       'CwAlertDialogTitle',
       'CwAlertDialogTrigger',
+      'provideCwAlertDialogLabels',
     ]);
   });
 });

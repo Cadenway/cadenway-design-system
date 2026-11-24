@@ -1,6 +1,7 @@
-import { Component, input, type InputSignal } from '@angular/core';
+import { Component, inject, input, type InputSignal } from '@angular/core';
+import { CwKbd, injectCwKbdLabels, type CwKbdLabels } from '@cadenway/ui/components/kbd';
 
-import { CwKbd } from '@cadenway/ui/components/kbd';
+import { COMMAND_LABELS } from '../command-labels.token';
 
 /**
  * Component CwCommandFooter
@@ -19,6 +20,17 @@ import { CwKbd } from '@cadenway/ui/components/kbd';
 export class CwCommandFooter {
   // #region Properties
   /**
+   * Property keyLabels
+   *
+   * @description
+   * Keyboard names shown in the default footer.
+   *
+   * @type {CwKbdLabels}
+   * @readonly
+   */
+  protected readonly keyLabels: CwKbdLabels = injectCwKbdLabels();
+
+  /**
    * Property navigateLabel
    *
    * @description
@@ -27,7 +39,7 @@ export class CwCommandFooter {
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly navigateLabel: InputSignal<string> = input('naviguer');
+  public readonly navigateLabel: InputSignal<string> = input(inject(COMMAND_LABELS).navigateLabel);
 
   /**
    * Property runLabel
@@ -38,7 +50,7 @@ export class CwCommandFooter {
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly runLabel: InputSignal<string> = input('ouvrir');
+  public readonly runLabel: InputSignal<string> = input(inject(COMMAND_LABELS).runLabel);
 
   /**
    * Property closeLabel
@@ -49,6 +61,6 @@ export class CwCommandFooter {
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly closeLabel: InputSignal<string> = input('fermer');
+  public readonly closeLabel: InputSignal<string> = input(inject(COMMAND_LABELS).closeLabel);
   // #endregion
 }

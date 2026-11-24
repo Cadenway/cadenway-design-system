@@ -28,6 +28,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorXBold } from '@ng-icons/phosphor-icons/bold';
 
 import { CwDialogDescription } from './dialog-description/dialog-description.directive';
+import { DIALOG_LABELS } from './dialog-labels.token';
 import { CW_DIALOG, type CwDialogContext } from './dialog.token';
 import type { CwDialogCloseReason, CwDialogSize } from './dialog.types';
 
@@ -217,11 +218,12 @@ export class CwDialog implements CwDialogContext {
    * @readonly
    *
    * @description
-   * Accessible name of the close button.
+   * Accessible name of the close button; by default the `close` text of `provideCwDialogLabels`
+   * (« Fermer »).
    *
    * @type {InputSignal<string>}
    */
-  public readonly closeLabel: InputSignal<string> = input('Fermer');
+  public readonly closeLabel: InputSignal<string> = input<string>(inject(DIALOG_LABELS).close);
 
   /**
    * Property closed

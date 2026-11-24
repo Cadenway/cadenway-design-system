@@ -9,6 +9,7 @@ export { CW_CHECKLIST_LABELS } from './checklist.constants';
 export type {
   CwChecklistAddEvent,
   CwChecklistLabels,
+  CwChecklistProvidedLabels,
   CwChecklistMoveEvent,
   CwChecklistPerson,
   CwChecklistVariant,
@@ -16,3 +17,5 @@ export type {
 export { CwChecklistAdd } from './checklist-add/checklist-add.component';
 export { CwChecklistItem } from './checklist-item/checklist-item.component';
 export { CwChecklistItemMenu } from './checklist-item-menu/checklist-item-menu.directive';
+
+export { provideCwChecklistLabels } from './checklist.providers';

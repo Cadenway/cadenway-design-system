@@ -30,6 +30,8 @@ import { ɵnavigateList } from '@cadenway/ui/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorWarningCircleBold } from '@ng-icons/phosphor-icons/bold';
 
+import type { CwStepperProvidedLabels } from './stepper.types';
+import { STEPPER_LABELS } from './stepper-labels.token';
 import { CwStepIndicator } from './step-indicator/step-indicator.component';
 import { CwStep } from './step/step.component';
 import type {
@@ -38,25 +40,6 @@ import type {
   CwStepperOrientation,
   CwStepperSize,
 } from './stepper.types';
-
-/**
- * Constant LABELS
- *
- * @description
- * Default French stepper labels and state words.
- *
- * @type {CwStepperLabels}
- */
-const LABELS: CwStepperLabels = {
-  step: 'étape',
-  done: 'terminée',
-  current: 'en cours',
-  todo: 'à venir',
-  error: 'en erreur',
-  optional: '(optionnelle)',
-  position: 'Étape',
-  of: 'sur',
-};
 
 /* Literal class strings (Stepper sheet and preview of the Design System artifact). */
 /**
@@ -277,6 +260,17 @@ interface StepView {
 export class CwStepper {
   // #region Properties
   /**
+   * Property providedLabels
+   *
+   * @description
+   * Texts inherited from the nearest labels provider.
+   *
+   * @type {CwStepperProvidedLabels}
+   * @readonly
+   */
+  private readonly providedLabels: CwStepperProvidedLabels = inject(STEPPER_LABELS);
+
+  /**
    * Property orientation
    * @readonly
    *
@@ -332,7 +326,7 @@ export class CwStepper {
    *
    * @type {InputSignal<string>}
    */
-  public readonly ariaLabel: InputSignal<string> = input('Progression');
+  public readonly ariaLabel: InputSignal<string> = input<string>(inject(STEPPER_LABELS).ariaLabel);
 
   /**
    * Property labels
@@ -485,10 +479,10 @@ export class CwStepper {
    * @description
    * Default labels merged with consumer overrides.
    *
-   * @type {Signal<CwStepperLabels>}
+   * @type {Signal<CwStepperProvidedLabels>}
    */
-  protected readonly text: Signal<CwStepperLabels> = computed(() => ({
-    ...LABELS,
+  protected readonly text: Signal<CwStepperProvidedLabels> = computed(() => ({
+    ...this.providedLabels,
     ...this.labels(),
   }));
 

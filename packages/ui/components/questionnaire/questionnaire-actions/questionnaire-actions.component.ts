@@ -11,6 +11,7 @@ import { CwButton } from '@cadenway/ui/components/button';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorCaretLeftBold } from '@ng-icons/phosphor-icons/bold';
 
+import { QUESTIONNAIRE_LABELS } from '../questionnaire-labels.token';
 import { QUESTIONNAIRE, type QuestionnaireRef } from '../questionnaire.token';
 
 /**
@@ -40,7 +41,9 @@ export class CwQuestionnaireActions {
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly previousLabel: InputSignal<string> = input('Précédent');
+  public readonly previousLabel: InputSignal<string> = input<string>(
+    inject(QUESTIONNAIRE_LABELS).previousLabel,
+  );
 
   /**
    * Property skipLabel
@@ -51,7 +54,9 @@ export class CwQuestionnaireActions {
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly skipLabel: InputSignal<string> = input('Passer');
+  public readonly skipLabel: InputSignal<string> = input<string>(
+    inject(QUESTIONNAIRE_LABELS).skipLabel,
+  );
 
   /**
    * Property nextLabel
@@ -62,7 +67,9 @@ export class CwQuestionnaireActions {
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly nextLabel: InputSignal<string> = input('Suivant');
+  public readonly nextLabel: InputSignal<string> = input<string>(
+    inject(QUESTIONNAIRE_LABELS).nextLabel,
+  );
 
   /**
    * Property submitLabel
@@ -73,7 +80,9 @@ export class CwQuestionnaireActions {
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly submitLabel: InputSignal<string> = input('Envoyer');
+  public readonly submitLabel: InputSignal<string> = input<string>(
+    inject(QUESTIONNAIRE_LABELS).submitLabel,
+  );
 
   /**
    * Property questionnaire

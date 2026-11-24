@@ -16,3 +16,7 @@ export type {
   CwChartType,
   CwChartValueFormat,
 } from './chart.types';
+
+export { CW_CHART_LABELS } from './chart.constants';
+export { provideCwChartLabels } from './chart.providers';
+export type { CwChartLabels } from './chart.types';

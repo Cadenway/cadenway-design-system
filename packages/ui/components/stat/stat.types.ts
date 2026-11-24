@@ -103,3 +103,35 @@ export type CwStatSparklineType = 'line' | 'bar';
  * @type {Readonly<Record<CwStatTrend, string>>}
  */
 export type CwStatTrendLabels = Readonly<Record<CwStatTrend, string>>;
+
+/**
+ * Interface CwStatLabels
+ *
+ * @description
+ * Text used for statistic trends, refresh state and goals.
+ */
+export interface CwStatLabels extends CwStatTrendLabels {
+  // #region Properties
+  /**
+   * Property refreshing
+   *
+   * @description
+   * Accessible name of the refresh spinner.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly refreshing: string;
+
+  /**
+   * Property goalOf
+   *
+   * @description
+   * Separator between the current and target goal values.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly goalOf: string;
+  // #endregion
+}

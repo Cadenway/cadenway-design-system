@@ -442,3 +442,57 @@ export interface CwBlockEditorLabels {
   readonly task: string;
   // #endregion
 }
+
+/**
+ * Interface CwBlockEditorProvidedLabels
+ *
+ * @description
+ * Complete default texts accepted by the provider, including dedicated input defaults.
+ */
+export interface CwBlockEditorProvidedLabels extends CwBlockEditorLabels {
+  // #region Properties
+  /**
+   * Property placeholder
+   *
+   * @description
+   * Editor placeholder.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly placeholder: string;
+
+  /**
+   * Property ariaLabel
+   *
+   * @description
+   * Accessible name of the editor.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly ariaLabel: string;
+
+  /**
+   * Property blockTypes
+   *
+   * @description
+   * Default block menu entries.
+   *
+   * @type {readonly CwBlockType[]}
+   * @readonly
+   */
+  readonly blockTypes: readonly CwBlockType[];
+
+  /**
+   * Property inlineMarks
+   *
+   * @description
+   * Default formatting controls.
+   *
+   * @type {readonly CwInlineMarkButton[]}
+   * @readonly
+   */
+  readonly inlineMarks: readonly CwInlineMarkButton[];
+  // #endregion
+}

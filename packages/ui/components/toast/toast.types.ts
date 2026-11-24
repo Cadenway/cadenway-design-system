@@ -285,3 +285,53 @@ export interface CwToast {
   readonly state: 'open' | 'closed';
   // #endregion
 }
+
+/**
+ * Interface CwToastLabels
+ *
+ * @description
+ * Replaceable texts used by the toast entry point.
+ */
+export interface CwToastLabels {
+  // #region Properties
+  /**
+   * Property undo
+   *
+   * @description
+   * Label of the undo action.
+   *
+   * @type {string}
+   */
+  undo: string;
+
+  /**
+   * Property close
+   *
+   * @description
+   * Accessible name of a notification close button.
+   *
+   * @type {string}
+   */
+  close: string;
+
+  /**
+   * Property ariaLabel
+   *
+   * @description
+   * Accessible name of the notification region.
+   *
+   * @type {string}
+   */
+  ariaLabel: string;
+
+  /**
+   * Property older
+   *
+   * @description
+   * Text of the waiting notification count.
+   *
+   * @type {(count: number) => string}
+   */
+  older: (count: number) => string;
+  // #endregion
+}

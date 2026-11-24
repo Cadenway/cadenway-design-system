@@ -356,3 +356,46 @@ export interface CwCommentComposerLabels {
   readonly sendKeys: readonly string[];
   // #endregion
 }
+
+/**
+ * Interface CwCommentComposerProvidedLabels
+ *
+ * @description
+ * Complete default texts accepted by the provider, including dedicated input defaults.
+ */
+export interface CwCommentComposerProvidedLabels extends CwCommentComposerLabels {
+  // #region Properties
+  /**
+   * Property placeholder
+   *
+   * @description
+   * Comment field placeholder.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly placeholder: string;
+
+  /**
+   * Property disabledText
+   *
+   * @description
+   * Text shown when comments are disabled.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly disabledText: string;
+
+  /**
+   * Property commands
+   *
+   * @description
+   * Default block menu entries.
+   *
+   * @type {readonly CwComposerCommand[]}
+   * @readonly
+   */
+  readonly commands: readonly CwComposerCommand[];
+  // #endregion
+}

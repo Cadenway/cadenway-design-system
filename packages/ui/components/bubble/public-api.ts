@@ -12,6 +12,7 @@ export { CwBubbleReactions } from './bubble-reactions/bubble-reactions.component
 export { CW_BUBBLE_DEFAULTS } from './bubble.token';
 export type {
   CwBubbleAlign,
+  CwBubbleLabels,
   CwBubbleDefaults,
   CwBubblePosition,
   CwBubbleSize,
@@ -19,3 +20,6 @@ export type {
   CwBubbleToneLabels,
   CwBubbleVariant,
 } from './bubble.types';
+
+export { CW_BUBBLE_LABELS } from './bubble.constants';
+export { provideCwBubbleLabels } from './bubble.providers';

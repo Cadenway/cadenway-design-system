@@ -24,7 +24,13 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorCheckBold, phosphorCopyBold } from '@ng-icons/phosphor-icons/bold';
 import { phosphorWarningCircleFill } from '@ng-icons/phosphor-icons/fill';
 
-import type { CwCodeBlockLineKind, CwCodeBlockSize, CwCodeBlockVariant } from './code-block.types';
+import { CODE_BLOCK_LABELS } from './code-block-labels.token';
+import type {
+  CwCodeBlockLabels,
+  CwCodeBlockLineKind,
+  CwCodeBlockSize,
+  CwCodeBlockVariant,
+} from './code-block.types';
 
 /**
  * Interface Line
@@ -345,7 +351,18 @@ export class CwCodeBlock {
    *
    * @type {InputSignal<string>}
    */
-  public readonly copyLabel: InputSignal<string> = input('Copier le code');
+  public readonly copyLabel: InputSignal<string> = input(inject(CODE_BLOCK_LABELS).copyLabel);
+
+  /**
+   * Property providedLabels
+   *
+   * @description
+   * Accessible area names resolved from the current injector.
+   *
+   * @type {CwCodeBlockLabels}
+   * @readonly
+   */
+  private readonly providedLabels: CwCodeBlockLabels = inject(CODE_BLOCK_LABELS);
 
   /**
    * Property copiedLabel
@@ -356,7 +373,7 @@ export class CwCodeBlock {
    *
    * @type {InputSignal<string>}
    */
-  public readonly copiedLabel: InputSignal<string> = input('Copié');
+  public readonly copiedLabel: InputSignal<string> = input(inject(CODE_BLOCK_LABELS).copiedLabel);
 
   /**
    * Property addedLabel
@@ -367,7 +384,7 @@ export class CwCodeBlock {
    *
    * @type {InputSignal<string>}
    */
-  public readonly addedLabel: InputSignal<string> = input('ajouté');
+  public readonly addedLabel: InputSignal<string> = input(inject(CODE_BLOCK_LABELS).addedLabel);
 
   /**
    * Property removedLabel
@@ -378,7 +395,7 @@ export class CwCodeBlock {
    *
    * @type {InputSignal<string>}
    */
-  public readonly removedLabel: InputSignal<string> = input('retiré');
+  public readonly removedLabel: InputSignal<string> = input(inject(CODE_BLOCK_LABELS).removedLabel);
 
   /**
    * Property ariaLabel
@@ -630,8 +647,8 @@ export class CwCodeBlock {
     const given: string | null = this.ariaLabel();
     if (given) return given;
     const count: number = this.lines().length;
-    const name: string = this.filename() ?? this.language() ?? 'Code';
-    return `${name}, ${String(count)} ${count > 1 ? 'lignes' : 'ligne'}`;
+    const name: string = this.filename() ?? this.language() ?? this.providedLabels.code;
+    return `${name}, ${this.providedLabels.lines(count)}`;
   });
   // #endregion
 

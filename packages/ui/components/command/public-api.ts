@@ -17,3 +17,7 @@ export { CwCommandItem } from './command-item/command-item.component';
 export { CwCommandList } from './command-list/command-list.component';
 export { CwCommandLoading } from './command-loading/command-loading.component';
 export { CwCommandSeparator } from './command-separator/command-separator.component';
+
+export { CW_COMMAND_LABELS } from './command.constants';
+export { provideCwCommandLabels } from './command.providers';
+export type { CwCommandLabels } from './command.types';

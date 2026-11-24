@@ -29,27 +29,9 @@ import {
 } from '@ng-icons/phosphor-icons/bold';
 import { phosphorCheckCircleFill } from '@ng-icons/phosphor-icons/fill';
 
+import { DROPZONE_FILE_LABELS } from '../dropzone-file-labels.token';
 import { fileIcon } from '../dropzone.format';
 import type { CwDropzoneFileLabels, CwDropzoneFileState } from '../dropzone.types';
-
-/**
- * Constant LABELS
- *
- * @description
- * Default French labels for upload file rows.
- *
- * @type {CwDropzoneFileLabels}
- */
-const LABELS: CwDropzoneFileLabels = {
-  queued: 'En attente',
-  of: 'sur',
-  progress: 'Envoi de',
-  sending: 'Envoi en cours',
-  cancel: "Annuler l'envoi de",
-  retry: "Réessayer l'envoi de",
-  remove: 'Retirer',
-  done: 'joint',
-};
 
 /**
  * Class CwDropzoneFile
@@ -93,6 +75,17 @@ const LABELS: CwDropzoneFileLabels = {
 })
 export class CwDropzoneFile {
   // #region Properties
+  /**
+   * Property providedLabels
+   *
+   * @description
+   * Texts resolved from the current injector.
+   *
+   * @type {CwDropzoneFileLabels}
+   * @readonly
+   */
+  private readonly providedLabels: CwDropzoneFileLabels = inject(DROPZONE_FILE_LABELS);
+
   /**
    * Property name
    * @readonly
@@ -170,7 +163,7 @@ export class CwDropzoneFile {
    * @readonly
    *
    * @description
-   * Replaces some of the French texts.
+   * Replaces some of the provided texts.
    *
    * @type {InputSignal<Partial<CwDropzoneFileLabels>>}
    */
@@ -232,7 +225,7 @@ export class CwDropzoneFile {
    * @type {Signal<CwDropzoneFileLabels>}
    */
   protected readonly text: Signal<CwDropzoneFileLabels> = computed(() => ({
-    ...LABELS,
+    ...this.providedLabels,
     ...this.labels(),
   }));
 

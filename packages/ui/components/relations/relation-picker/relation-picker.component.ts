@@ -22,8 +22,8 @@ import { NgTemplateOutlet } from '@angular/common';
 import { CwCombobox, CwComboboxOption } from '@cadenway/ui/components/combobox';
 import { CwSelect, CwSelectOption } from '@cadenway/ui/components/select';
 
+import { RELATIONS_LABELS } from '../relations-labels.token';
 import { CwRelationLeading } from '../relation-leading/relation-leading.directive';
-import { CW_RELATIONS_LABELS } from '../relations.constants';
 import type {
   CwRelationAddEvent,
   CwRelationItem,
@@ -122,7 +122,7 @@ export class CwRelationPicker {
    * Property labels
    *
    * @description
-   * French texts, any of them overridden (`CW_RELATIONS_LABELS`).
+   * Texts, with individual overrides (`CW_RELATIONS_LABELS`).
    *
    * @type {InputSignal<Partial<CwRelationsLabels>>}
    * @readonly
@@ -199,10 +199,21 @@ export class CwRelationPicker {
   protected readonly typeId: string = inject(_IdGenerator).getId('cw-relation-picker-type-');
 
   /**
+   * Property providedLabels
+   *
+   * @description
+   * Texts inherited from the injector.
+   *
+   * @type {CwRelationsLabels}
+   * @readonly
+   */
+  private readonly providedLabels: CwRelationsLabels = inject(RELATIONS_LABELS);
+
+  /**
    * Property text
    *
    * @description
-   * Default labels merged with consumer overrides.
+   * Provided labels merged with consumer overrides.
    *
    * @type {Signal<{ title: string; add: string; addRelation: string; empty: string; actions: (reference: string) => string; open: string; changeType: string; copyLink: string; remove: string; removed: string; added: (type: string, reference: string) => string; picker: string; type: string; search: string; searchPlaceholder: string; alreadyLinked: string; noResult: string; }>}
    * @readonly
@@ -225,7 +236,7 @@ export class CwRelationPicker {
     searchPlaceholder: string;
     alreadyLinked: string;
     noResult: string;
-  }> = computed(() => ({ ...CW_RELATIONS_LABELS, ...this.labels() }));
+  }> = computed(() => ({ ...this.providedLabels, ...this.labels() }));
 
   /**
    * Property type

@@ -1,6 +1,7 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { provideCwMeterLabels } from './meter.providers';
 import { CwMeter } from './meter.component';
 import type { CwMeterFormat, CwMeterSeries } from './meter.types';
 
@@ -226,5 +227,23 @@ describe('CwMeter', () => {
 
     expect(calls?.getAttribute('aria-busy')).toBe('true');
     expect(calls?.querySelector('[role="meter"]')).toBeNull();
+  });
+});
+
+describe('provideCwMeterLabels', () => {
+  it('renders provided text', () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideCwMeterLabels({ threshold: 'Capacity', free: 'Free', unmeasured: 'Not measured' }),
+      ],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.textContent).toContain('Capacity');
+    expect(host.textContent).toContain('Free');
+    expect(meterNamed(host, 'Charge de Léa Martin').getAttribute('aria-valuetext')).toBe(
+      'Not measured',
+    );
   });
 });

@@ -27,3 +27,9 @@ export type {
   CwTimeTrackerState,
   CwTimeTrackerVariant,
 } from './time-tracker.types';
+
+export { provideCwTimeTrackerLabels } from './time-tracker.providers';
+
+export { provideCwTimeEntryFormLabels } from './time-tracker.providers';
+
+export { provideCwTimeEntryListLabels } from './time-tracker.providers';

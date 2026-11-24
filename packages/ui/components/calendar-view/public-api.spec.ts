@@ -8,6 +8,7 @@ describe('@cadenway/ui/calendar-view public API', () => {
       'CW_CALENDAR_VIEW_LABELS',
       'CwCalendarItemDef',
       'CwCalendarView',
+      'provideCwCalendarViewLabels',
     ]);
   });
 });

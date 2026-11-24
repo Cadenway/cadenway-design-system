@@ -6,4 +6,5 @@
 
 export { CwPriorityIcon } from './priority-icon.component';
 export { CW_PRIORITY_LABELS } from './priority-icon.constants';
-export type { CwPriorityIconSize, CwPriorityKey } from './priority-icon.types';
+export { injectCwPriorityLabels, provideCwPriorityLabels } from './priority-icon.providers';
+export type { CwPriorityIconSize, CwPriorityKey, CwPriorityLabels } from './priority-icon.types';

@@ -5,10 +5,12 @@ describe('@cadenway/ui/autocomplete public API', () => {
   // (.claude/rules/public-api.md): the runtime names are pinned here.
   it('exports exactly the pinned names', () => {
     expect(Object.keys(publicApi).sort()).toEqual([
+      'CW_AUTOCOMPLETE_LABELS',
       'CwAutocomplete',
       'CwAutocompleteGroup',
       'CwAutocompleteOption',
       'CwAutocompleteTrigger',
+      'provideCwAutocompleteLabels',
     ]);
   });
 });

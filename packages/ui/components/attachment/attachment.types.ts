@@ -201,3 +201,24 @@ export interface CwAttachmentLabels {
   readonly done: string;
   // #endregion
 }
+
+/**
+ * Interface CwAttachmentProvidedLabels
+ *
+ * @description
+ * Complete default texts accepted by the provider, including dedicated input defaults.
+ */
+export interface CwAttachmentProvidedLabels extends CwAttachmentLabels {
+  // #region Properties
+  /**
+   * Property remove
+   *
+   * @description
+   * Accessible name prefix of the remove action.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly remove: string;
+  // #endregion
+}

@@ -9,6 +9,7 @@ describe('@cadenway/ui/relations public API', () => {
       'CwRelationLeading',
       'CwRelationPicker',
       'CwRelations',
+      'provideCwRelationsLabels',
     ]);
   });
 });

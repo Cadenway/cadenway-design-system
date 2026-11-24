@@ -1,6 +1,7 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { provideCwToastLabels } from '../toast.providers';
 import { CwToastService } from '../toast.service';
 import type { CwToastDurations } from '../toast.types';
 import { CwToaster } from './toaster.component';
@@ -226,5 +227,32 @@ describe('CwToaster', () => {
     await fixture.whenStable();
 
     expect(live()).toEqual([]);
+  });
+});
+
+describe('provideCwToastLabels', () => {
+  it('replaces the region, close and undo labels', () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideCwToastLabels({
+          ariaLabel: 'Notifications',
+          close: 'Close notification',
+          undo: 'Undo',
+        }),
+      ],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.componentInstance.closeButton.set(true);
+    const service: CwToastService = TestBed.inject(CwToastService);
+    service.show('Saved', { undo: vi.fn() });
+    fixture.detectChanges();
+    const element: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(element.querySelector('section[aria-label="Notifications"]')).not.toBeNull();
+    expect(element.querySelector('button[aria-label="Close notification"]')).not.toBeNull();
+    expect(
+      Array.from(element.querySelectorAll('button')).some(
+        (button) => button.textContent.trim() === 'Undo',
+      ),
+    ).toBe(true);
   });
 });

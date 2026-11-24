@@ -6,4 +6,5 @@
 
 export { CwStatusIcon } from './status-icon.component';
 export { CW_STATUS_LABELS } from './status-icon.constants';
-export type { CwStatusIconSize, CwStatusKey } from './status-icon.types';
+export { injectCwStatusLabels, provideCwStatusLabels } from './status-icon.providers';
+export type { CwStatusIconSize, CwStatusKey, CwStatusLabels } from './status-icon.types';

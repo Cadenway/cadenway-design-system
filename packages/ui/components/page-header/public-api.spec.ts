@@ -5,12 +5,14 @@ describe('@cadenway/ui/page-header public API', () => {
   // (.claude/rules/public-api.md): the runtime names are pinned here.
   it('exports exactly the pinned names', () => {
     expect(Object.keys(publicApi).sort()).toEqual([
+      'CW_PAGE_HEADER_LABELS',
       'CwPageHeader',
       'CwPageHeaderActions',
       'CwPageHeaderDescription',
       'CwPageHeaderFavorite',
       'CwPageHeaderTabs',
       'CwPageHeaderTitle',
+      'provideCwPageHeaderLabels',
     ]);
   });
 });

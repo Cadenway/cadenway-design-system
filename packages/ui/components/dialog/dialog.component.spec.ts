@@ -9,6 +9,7 @@ import { CwDialogHeader } from './dialog-header/dialog-header.component';
 import { CwDialogTitle } from './dialog-title/dialog-title.directive';
 import { CwDialogTrigger } from './dialog-trigger/dialog-trigger.directive';
 import { CwDialog } from './dialog.component';
+import { provideCwDialogLabels } from './dialog.providers';
 import type { CwDialogCloseReason } from './dialog.types';
 
 /**
@@ -339,5 +340,21 @@ describe('CwDialog', () => {
     const window: HTMLElement = await openFromTrigger();
 
     expect(() => button(window, 'Fermer')).toThrow();
+  });
+});
+
+describe('provideCwDialogLabels', () => {
+  it('names the close button of the dialogs below it', async () => {
+    TestBed.configureTestingModule({ providers: [provideCwDialogLabels({ close: 'Close' })] });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    button(fixture.nativeElement as HTMLElement, 'Renommer').click();
+    await fixture.whenStable();
+    const window: HTMLElement | null = dialog();
+    if (!window) throw new Error('Dialog not open');
+
+    expect(button(window, 'Close')).toBeTruthy();
+    expect(() => button(window, 'Fermer')).toThrow();
+    fixture.destroy();
   });
 });

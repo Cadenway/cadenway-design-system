@@ -1,8 +1,10 @@
-import { Component, input, type InputSignal } from '@angular/core';
+import { Component, inject, input, type InputSignal } from '@angular/core';
 import { CwButton } from '@cadenway/ui/components/button';
 import { type CwMenu, CwMenuTriggerFor } from '@cadenway/ui/components/menu';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorDotsThreeBold } from '@ng-icons/phosphor-icons/bold';
+
+import { BREADCRUMB_LABELS } from '../breadcrumb-labels.token';
 
 /**
  * Class CwBreadcrumbEllipsis
@@ -47,6 +49,6 @@ export class CwBreadcrumbEllipsis {
    * @type {InputSignal<string>}
    * @default 'Niveaux masqués'
    */
-  public readonly label: InputSignal<string> = input('Niveaux masqués');
+  public readonly label: InputSignal<string> = input<string>(inject(BREADCRUMB_LABELS).ellipsis);
   // #endregion
 }

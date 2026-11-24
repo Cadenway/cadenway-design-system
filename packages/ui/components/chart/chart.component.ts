@@ -22,6 +22,7 @@ import { CwSkeleton } from '@cadenway/ui/components/skeleton';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorChartBarBold } from '@ng-icons/phosphor-icons/bold';
 
+import { CHART_LABELS } from './chart-labels.token';
 import {
   areaPath,
   labelWidth,
@@ -1054,7 +1055,7 @@ export class CwChart {
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly emptyText: InputSignal<string> = input<string>('Aucune donnée sur la période');
+  public readonly emptyText: InputSignal<string> = input<string>(inject(CHART_LABELS).emptyText);
 
   /**
    * Property emptyDescription
@@ -1111,7 +1112,9 @@ export class CwChart {
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly categoryHeader: InputSignal<string> = input<string>('Catégorie');
+  public readonly categoryHeader: InputSignal<string> = input<string>(
+    inject(CHART_LABELS).categoryHeader,
+  );
 
   /**
    * Property unit
@@ -1150,7 +1153,9 @@ export class CwChart {
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly capacityLabel: InputSignal<string> = input<string>('Capacité');
+  public readonly capacityLabel: InputSignal<string> = input<string>(
+    inject(CHART_LABELS).capacityLabel,
+  );
 
   /**
    * Property categorySelect

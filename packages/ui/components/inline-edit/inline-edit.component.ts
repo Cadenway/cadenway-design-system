@@ -30,7 +30,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorLockSimpleBold, phosphorPencilSimpleBold } from '@ng-icons/phosphor-icons/bold';
 import { phosphorWarningCircleFill } from '@ng-icons/phosphor-icons/fill';
 
-import { CW_INLINE_EDIT_LABELS } from './inline-edit.constants';
+import { INLINE_EDIT_LABELS } from './inline-edit-labels.token';
 import type { CwInlineEditLabels, CwInlineEditState } from './inline-edit.types';
 
 /* Literal class strings (Inline Edit sheet and preview of the Design System artifact). The text does
@@ -150,6 +150,17 @@ function optionalLength(value: unknown): number | undefined {
 })
 export class CwInlineEdit implements FormValueControl<string>, ControlValueAccessor {
   // #region Properties
+  /**
+   * Property providedLabels
+   *
+   * @description
+   * Texts inherited from the nearest labels provider.
+   *
+   * @type {CwInlineEditLabels}
+   * @readonly
+   */
+  private readonly providedLabels: CwInlineEditLabels = inject(INLINE_EDIT_LABELS);
+
   /**
    * Property value
    * @readonly
@@ -556,7 +567,7 @@ export class CwInlineEdit implements FormValueControl<string>, ControlValueAcces
    * @type {Signal<CwInlineEditLabels>}
    */
   protected readonly text: Signal<CwInlineEditLabels> = computed(() => ({
-    ...CW_INLINE_EDIT_LABELS,
+    ...this.providedLabels,
     ...this.labels(),
   }));
 

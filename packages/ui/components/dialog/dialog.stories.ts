@@ -20,6 +20,7 @@ import { CwDialogHeader } from './dialog-header/dialog-header.component';
 import { CwDialogTitle } from './dialog-title/dialog-title.directive';
 import { CwDialogTrigger } from './dialog-trigger/dialog-trigger.directive';
 import { CwDialog } from './dialog.component';
+import { provideCwDialogLabels } from './dialog.providers';
 
 /**
  * Constant meta
@@ -311,5 +312,33 @@ export const Pending: Story = {
     await waitFor(() => expect(document.body.querySelector('[role="dialog"]')).toBeNull(), {
       timeout: 3000,
     });
+  },
+};
+
+/**
+ * Provided labels: an application that writes its source copy in English provides the texts once
+ * (`provideCwDialogLabels`, translated with `$localize`); the close button is then « Close ».
+ */
+export const ProvidedLabels: Story = {
+  decorators: [applicationConfig({ providers: [provideCwDialogLabels({ close: 'Close' })] })],
+  render: () => ({
+    template: `
+      <button cwButton variant="outline" [cwDialogTrigger]="rename">Rename</button>
+      <cw-dialog #rename>
+        <cw-dialog-header>
+          <h2 cwDialogTitle>Rename the list</h2>
+        </cw-dialog-header>
+        <cw-dialog-footer>
+          <button cwButton (click)="rename.close()">Rename</button>
+        </cw-dialog-footer>
+      </cw-dialog>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    await userEvent.click(within(light(canvasElement)).getByRole('button', { name: 'Rename' }));
+    const dialog: HTMLElement = await within(document.body).findByRole('dialog', {
+      name: 'Rename the list',
+    });
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Close' }));
+    await waitFor(() => expect(document.body.querySelector('[role="dialog"]')).toBeNull());
   },
 };

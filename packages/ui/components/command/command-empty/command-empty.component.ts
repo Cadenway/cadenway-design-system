@@ -2,6 +2,7 @@ import { Component, computed, inject, input, type InputSignal, type Signal } fro
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorMagnifyingGlassBold } from '@ng-icons/phosphor-icons/bold';
 
+import { COMMAND_LABELS } from '../command-labels.token';
 import { CommandState } from '../command-state/command-state.service';
 
 /**
@@ -31,7 +32,7 @@ export class CwCommandEmpty {
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly emptyText: InputSignal<string> = input('Aucun résultat pour « {search} »');
+  public readonly emptyText: InputSignal<string> = input(inject(COMMAND_LABELS).emptyText);
 
   /**
    * Property state

@@ -2,6 +2,7 @@ import {
   Component,
   computed,
   contentChildren,
+  inject,
   input,
   numberAttribute,
   type InputSignal,
@@ -10,6 +11,7 @@ import {
 } from '@angular/core';
 import { CwMenu, CwMenuItem } from '@cadenway/ui/components/menu';
 
+import { BREADCRUMB_LABELS } from './breadcrumb-labels.token';
 import { CwBreadcrumbEllipsis } from './breadcrumb-ellipsis/breadcrumb-ellipsis.component';
 import { CwBreadcrumbSeparator } from './breadcrumb-separator/breadcrumb-separator.component';
 import { CwBreadcrumbSlot } from './breadcrumb-slot/breadcrumb-slot.directive';
@@ -107,7 +109,7 @@ export class CwBreadcrumb {
    * @type {InputSignal<string>}
    * @default "Fil d'Ariane"
    */
-  public readonly ariaLabel: InputSignal<string> = input("Fil d'Ariane");
+  public readonly ariaLabel: InputSignal<string> = input<string>(inject(BREADCRUMB_LABELS).aria);
 
   /**
    * Property ellipsisLabel
@@ -119,7 +121,9 @@ export class CwBreadcrumb {
    * @type {InputSignal<string>}
    * @default 'Niveaux masqués'
    */
-  public readonly ellipsisLabel: InputSignal<string> = input('Niveaux masqués');
+  public readonly ellipsisLabel: InputSignal<string> = input<string>(
+    inject(BREADCRUMB_LABELS).ellipsis,
+  );
 
   /**
    * Property items

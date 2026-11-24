@@ -4,6 +4,13 @@ describe('@cadenway/ui/dropzone public API', () => {
   // Removing or renaming an export is a major version, after a deprecation in a minor
   // (.claude/rules/public-api.md): the runtime names are pinned here.
   it('exports exactly the pinned names', () => {
-    expect(Object.keys(publicApi).sort()).toEqual(['CwDropzone', 'CwDropzoneFile']);
+    expect(Object.keys(publicApi).sort()).toEqual([
+      'CW_DROPZONE_FILE_LABELS',
+      'CW_DROPZONE_LABELS',
+      'CwDropzone',
+      'CwDropzoneFile',
+      'provideCwDropzoneFileLabels',
+      'provideCwDropzoneLabels',
+    ]);
   });
 });

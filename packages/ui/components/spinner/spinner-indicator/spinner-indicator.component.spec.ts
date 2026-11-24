@@ -1,6 +1,7 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { TestBed, type ComponentFixture } from '@angular/core/testing';
 
+import { provideCwSpinnerLabels } from '../spinner.providers';
 import { CwSpinnerIndicator } from './spinner-indicator.component';
 
 /**
@@ -59,5 +60,23 @@ describe('CwSpinnerIndicator', () => {
     vi.advanceTimersByTime(300);
     fixture.detectChanges();
     expect(indicator()).toBeNull();
+  });
+});
+
+describe('provideCwSpinnerLabels', () => {
+  it('replaces the loading indicator accessible name', () => {
+    vi.useFakeTimers();
+    TestBed.configureTestingModule({ providers: [provideCwSpinnerLabels({ loading: 'Loading' })] });
+    TestBed.overrideComponent(Host, { set: { template: `<cw-spinner />` } });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    vi.advanceTimersByTime(300);
+    fixture.detectChanges();
+    expect(
+      (fixture.nativeElement as HTMLElement)
+        .querySelector('svg[role="status"]')
+        ?.getAttribute('aria-label'),
+    ).toBe('Loading');
+    vi.useRealTimers();
   });
 });

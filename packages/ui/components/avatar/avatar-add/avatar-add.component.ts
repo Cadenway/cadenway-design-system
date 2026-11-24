@@ -11,6 +11,7 @@ import { CwRipple } from '@cadenway/ui/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorUserBold } from '@ng-icons/phosphor-icons/bold';
 
+import { AVATAR_LABELS } from '../avatar-labels.token';
 import { CwAvatarGroup } from '../avatar-group/avatar-group.component';
 import { ICON_SIZES, SIZES } from '../avatar.styles';
 import type { CwAvatarSize } from '../avatar.types';
@@ -76,7 +77,7 @@ export class CwAvatarAdd {
    *
    * @type {InputSignal<string>}
    */
-  public readonly ariaLabel: InputSignal<string> = input('Assigner');
+  public readonly ariaLabel: InputSignal<string> = input<string>(inject(AVATAR_LABELS).add);
 
   /**
    * Property group

@@ -3,6 +3,7 @@ import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import type { Mock } from 'vitest';
 
+import { provideCwDropzoneFileLabels } from '../dropzone.providers';
 import type { CwDropzoneFileState } from '../dropzone.types';
 import { CwDropzoneFile } from './dropzone-file.component';
 
@@ -156,5 +157,19 @@ describe('CwDropzoneFile', () => {
     await fixture.whenStable();
     button(host, "Réessayer l'envoi de export-taches.csv").click();
     expect(component.events()).toEqual(['retry']);
+  });
+});
+
+describe('provideCwDropzoneFileLabels', () => {
+  it('replaces the accessible action name', async () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwDropzoneFileLabels({ cancel: 'Cancel upload of' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    expect(
+      button(fixture.nativeElement as HTMLElement, 'Cancel upload of export-taches.csv'),
+    ).toBeTruthy();
   });
 });

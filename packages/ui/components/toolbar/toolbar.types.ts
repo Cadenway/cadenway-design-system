@@ -9,3 +9,23 @@
  * @type {'default' | 'sm'}
  */
 export type CwToolbarSize = 'default' | 'sm';
+
+/**
+ * Interface CwToolbarLabels
+ *
+ * @description
+ * Replaceable texts used by the toolbar entry point.
+ */
+export interface CwToolbarLabels {
+  // #region Properties
+  /**
+   * Property overflow
+   *
+   * @description
+   * Accessible name of the overflow button and menu.
+   *
+   * @type {string}
+   */
+  overflow: string;
+  // #endregion
+}

@@ -6,11 +6,13 @@ describe('@cadenway/ui/bubble public API', () => {
   it('exports exactly the pinned names', () => {
     expect(Object.keys(publicApi).sort()).toEqual([
       'CW_BUBBLE_DEFAULTS',
+      'CW_BUBBLE_LABELS',
       'CwBubble',
       'CwBubbleGroup',
       'CwBubbleQuote',
       'CwBubbleReaction',
       'CwBubbleReactions',
+      'provideCwBubbleLabels',
     ]);
   });
 });

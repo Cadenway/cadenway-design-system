@@ -2,6 +2,7 @@ import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { Component, signal, viewChild, type Signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { provideCwStepperLabels } from './stepper.providers';
 import { CwStep } from './step/step.component';
 import { CwStepper } from './stepper.component';
 
@@ -353,5 +354,18 @@ describe('CwStepper', () => {
     await fixture.whenStable();
 
     expect(component.verticalStep()).toBe(1);
+  });
+});
+
+describe('provideCwStepperLabels', () => {
+  it('uses supplied text in the hosted declarations', () => {
+    TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [provideCwStepperLabels({ optional: '(optional)' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.textContent).toContain('(optional)');
   });
 });

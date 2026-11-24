@@ -3,6 +3,7 @@ import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 
+import { provideCwAttachmentLabels } from './attachment.providers';
 import { CwAttachment } from './attachment.component';
 import type { CwAttachmentSize, CwAttachmentState } from './attachment.types';
 
@@ -179,5 +180,18 @@ describe('CwAttachment', () => {
     );
 
     expect(component.events()).toEqual(['remove']);
+  });
+});
+
+describe('provideCwAttachmentLabels', () => {
+  it('uses supplied text in the hosted declarations', () => {
+    TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [provideCwAttachmentLabels({ download: 'Download' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.querySelector('[aria-label="Download specs-export.pdf"]')).not.toBeNull();
   });
 });

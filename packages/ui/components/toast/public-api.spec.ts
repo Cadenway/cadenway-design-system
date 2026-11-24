@@ -6,8 +6,10 @@ describe('@cadenway/ui/toast public API', () => {
   it('exports exactly the pinned names', () => {
     expect(Object.keys(publicApi).sort()).toEqual([
       'CW_TOAST_DURATIONS',
+      'CW_TOAST_LABELS',
       'CwToastService',
       'CwToaster',
+      'provideCwToastLabels',
     ]);
   });
 });

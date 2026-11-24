@@ -8,6 +8,7 @@ describe('@cadenway/ui/comment-composer public API', () => {
       'CW_COMMENT_COMPOSER_LABELS',
       'CW_COMPOSER_COMMANDS',
       'CwCommentComposer',
+      'provideCwCommentComposerLabels',
     ]);
   });
 });

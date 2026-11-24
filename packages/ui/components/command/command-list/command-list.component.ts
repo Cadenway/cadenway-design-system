@@ -1,5 +1,6 @@
 import { Component, inject, input, type InputSignal } from '@angular/core';
 
+import { COMMAND_LABELS } from '../command-labels.token';
 import { CommandState } from '../command-state/command-state.service';
 
 // The rows enter one by one, 60 ms then 30 ms more each, twelve at most (cw-motion-tokens), at
@@ -39,7 +40,7 @@ export class CwCommandList {
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly ariaLabel: InputSignal<string> = input('Résultats');
+  public readonly ariaLabel: InputSignal<string> = input(inject(COMMAND_LABELS).listLabel);
 
   /**
    * Property state

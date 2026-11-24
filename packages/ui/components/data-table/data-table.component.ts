@@ -45,7 +45,8 @@ import { CwDataTableColumn } from './data-table-column/data-table-column.compone
 import { CwDataTableEmpty } from './data-table-empty/data-table-empty.directive';
 import { CwDataTableGroup } from './data-table-group/data-table-group.directive';
 import { CwDataTablePagination } from './data-table-pagination/data-table-pagination.component';
-import { CW_DATA_TABLE_PAGE_SIZES, CW_DATA_TABLE_TEXTS } from './data-table.constants';
+import { DATA_TABLE_TEXTS } from './data-table-texts.token';
+import { CW_DATA_TABLE_PAGE_SIZES } from './data-table.constants';
 import { ɵCW_DATA_TABLE, type ɵCwDataTableContext } from './data-table.token';
 import type {
   CwBulkAction,
@@ -59,6 +60,7 @@ import type {
   CwDataTableDensity,
   CwDataTableSelection,
   CwDataTableTexts,
+  CwDataTableProvidedTexts,
   CwGroupContext,
   CwSort,
   CwSortDirection,
@@ -883,6 +885,17 @@ function defaultTrackBy(row: unknown): string {
 export class CwDataTable<T> implements ɵCwDataTableContext {
   // #region Properties
   /**
+   * Property providedTexts
+   *
+   * @description
+   * Table texts resolved from the current injector.
+   *
+   * @type {CwDataTableProvidedTexts}
+   * @readonly
+   */
+  private readonly providedTexts: CwDataTableProvidedTexts = inject(DATA_TABLE_TEXTS);
+
+  /**
    * Property data
    *
    * @description
@@ -1216,13 +1229,13 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly emptyText: InputSignal<string> = input('Aucune tâche ne correspond');
+  public readonly emptyText: InputSignal<string> = input<string>(this.providedTexts.emptyText);
 
   /**
    * Property texts
    *
    * @description
-   * Overrides of the French texts (`CW_DATA_TABLE_TEXTS`).
+   * Overrides of the provided texts (`CW_DATA_TABLE_TEXTS`).
    *
    * @type {InputSignal<Partial<CwDataTableTexts>>}
    * @readonly
@@ -1641,13 +1654,13 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * Property copy
    *
    * @description
-   * The French texts, defaults merged with `texts`.
+   * Provided texts merged with `texts`.
    *
    * @type {Signal<CwDataTableTexts>}
    * @readonly
    */
   public readonly copy: Signal<CwDataTableTexts> = computed<CwDataTableTexts>(() => ({
-    ...CW_DATA_TABLE_TEXTS,
+    ...this.providedTexts,
     ...this.texts(),
   }));
 

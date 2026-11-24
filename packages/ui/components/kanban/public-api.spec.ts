@@ -10,6 +10,7 @@ describe('@cadenway/ui/kanban public API', () => {
       'CwKanbanCardDef',
       'CwKanbanEmptyDef',
       'CwKanbanLaneMarkerDef',
+      'provideCwKanbanLabels',
     ]);
   });
 });

@@ -586,7 +586,7 @@ export interface CwGroupContext {
  * Interface CwDataTableTexts
  *
  * @description
- * The French texts of the table, overridable one by one through the `texts` input. Defaults name tasks, as the mockup does (`App.dc.html`); another list passes its own nouns.
+ * The table texts, configurable by provider and overridable through the `texts` input. Defaults name tasks, as the mockup does (`App.dc.html`); another list passes its own nouns.
  */
 export interface CwDataTableTexts {
   // #region Properties
@@ -798,5 +798,26 @@ export interface CwDataTableTexts {
    * @readonly
    */
   readonly range: (first: number, last: number, total: number) => string;
+  // #endregion
+}
+
+/**
+ * Interface CwDataTableProvidedTexts
+ *
+ * @description
+ * Complete provider texts, including the empty-state label.
+ */
+export interface CwDataTableProvidedTexts extends CwDataTableTexts {
+  // #region Properties
+  /**
+   * Property emptyText
+   *
+   * @description
+   * Text shown when the table has no rows.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly emptyText: string;
   // #endregion
 }

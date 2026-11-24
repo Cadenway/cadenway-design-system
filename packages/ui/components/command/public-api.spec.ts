@@ -5,6 +5,7 @@ describe('@cadenway/ui/command public API', () => {
   // (.claude/rules/public-api.md): the runtime names are pinned here.
   it('exports exactly the pinned names', () => {
     expect(Object.keys(publicApi).sort()).toEqual([
+      'CW_COMMAND_LABELS',
       'CwCommand',
       'CwCommandDialog',
       'CwCommandEmpty',
@@ -17,6 +18,7 @@ describe('@cadenway/ui/command public API', () => {
       'CwCommandLoading',
       'CwCommandSeparator',
       'cwCommandFuzzyFilter',
+      'provideCwCommandLabels',
     ]);
   });
 });

@@ -1,6 +1,9 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { provideCwTimeEntryListLabels } from './time-tracker.providers';
+import { provideCwTimeEntryFormLabels } from './time-tracker.providers';
+import { provideCwTimeTrackerLabels } from './time-tracker.providers';
 import { CwTimeEntryForm } from './time-entry-form/time-entry-form.component';
 import { CwTimeEntryList } from './time-entry-list/time-entry-list.component';
 import { CwTimeTracker } from './time-tracker.component';
@@ -416,5 +419,41 @@ describe('CwTimeEntryList', () => {
     await fixture.whenStable();
 
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('Aucun temps saisi');
+  });
+});
+
+describe('provideCwTimeTrackerLabels', () => {
+  it('renders the provided text', async () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwTimeTrackerLabels({ start: 'Start timer' })],
+    });
+    const fixture: ComponentFixture<TrackerHost> = TestBed.createComponent(TrackerHost);
+    await fixture.whenStable();
+    const element: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(element.querySelector('[aria-label="Start timer"]')).toBeTruthy();
+  });
+});
+
+describe('provideCwTimeEntryFormLabels', () => {
+  it('renders the provided text', async () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwTimeEntryFormLabels({ title: 'Add time' })],
+    });
+    const fixture: ComponentFixture<CwTimeEntryForm> = TestBed.createComponent(CwTimeEntryForm);
+    await fixture.whenStable();
+    const element: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(element.textContent).toContain('Add time');
+  });
+});
+
+describe('provideCwTimeEntryListLabels', () => {
+  it('renders the provided text', async () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwTimeEntryListLabels({ empty: 'No time entries' })],
+    });
+    const fixture: ComponentFixture<CwTimeEntryList> = TestBed.createComponent(CwTimeEntryList);
+    await fixture.whenStable();
+    const element: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(element.textContent).toContain('No time entries');
   });
 });

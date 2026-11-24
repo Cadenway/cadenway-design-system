@@ -71,3 +71,46 @@ export interface CwAvatarLabels {
   readonly disabled: string;
   // #endregion
 }
+
+/**
+ * Interface CwAvatarProvidedLabels
+ *
+ * @description
+ * Complete default texts accepted by the provider, including dedicated input defaults.
+ */
+export interface CwAvatarProvidedLabels extends CwAvatarLabels {
+  // #region Properties
+  /**
+   * Property group
+   *
+   * @description
+   * Accessible name of the avatar group.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly group: string;
+
+  /**
+   * Property othersPrefix
+   *
+   * @description
+   * Word before the number of other people.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly othersPrefix: string;
+
+  /**
+   * Property add
+   *
+   * @description
+   * Accessible name of the add button.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly add: string;
+  // #endregion
+}

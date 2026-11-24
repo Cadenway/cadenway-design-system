@@ -5,6 +5,7 @@ describe('@cadenway/ui/sidebar public API', () => {
   // (.claude/rules/public-api.md): the runtime names are pinned here.
   it('exports exactly the pinned names', () => {
     expect(Object.keys(publicApi).sort()).toEqual([
+      'CW_SIDEBAR_LABELS',
       'CwSidebar',
       'CwSidebarFooter',
       'CwSidebarGroup',
@@ -12,6 +13,7 @@ describe('@cadenway/ui/sidebar public API', () => {
       'CwSidebarItem',
       'CwSidebarSpace',
       'CwSidebarToggle',
+      'provideCwSidebarLabels',
     ]);
   });
 });

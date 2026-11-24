@@ -1,6 +1,7 @@
 import {
   Component,
   computed,
+  inject,
   input,
   model,
   numberAttribute,
@@ -23,6 +24,8 @@ import {
   phosphorHeartFill,
   phosphorThumbsUpFill,
 } from '@ng-icons/phosphor-icons/fill';
+
+import { BUBBLE_LABELS } from '../bubble-labels.token';
 
 /**
  * Class CwBubbleReaction
@@ -110,7 +113,7 @@ export class CwBubbleReaction {
    *
    * @type {InputSignal<string>}
    */
-  public readonly youLabel: InputSignal<string> = input('dont vous');
+  public readonly youLabel: InputSignal<string> = input<string>(inject(BUBBLE_LABELS).you);
 
   /**
    * Property pressed

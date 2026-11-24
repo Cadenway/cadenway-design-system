@@ -16,6 +16,7 @@ import {
   phosphorWarningFill,
 } from '@ng-icons/phosphor-icons/fill';
 
+import { BUBBLE_LABELS } from './bubble-labels.token';
 import {
   BUBBLE,
   BUBBLE_GROUP,
@@ -25,6 +26,7 @@ import {
 } from './bubble.token';
 import type {
   CwBubbleAlign,
+  CwBubbleLabels,
   CwBubbleDefaults,
   CwBubblePosition,
   CwBubbleSize,
@@ -32,21 +34,6 @@ import type {
   CwBubbleToneLabels,
   CwBubbleVariant,
 } from './bubble.types';
-
-/**
- * Constant TONE_LABELS
- *
- * @description
- * Default French labels announced for non-default tones.
- *
- * @type {CwBubbleToneLabels}
- */
-const TONE_LABELS: CwBubbleToneLabels = {
-  info: 'Information',
-  success: 'Succès',
-  warning: 'Avertissement',
-  error: 'Erreur',
-};
 
 /**
  * Constant SURFACE
@@ -170,6 +157,17 @@ const TONE_ICONS: Record<Exclude<CwBubbleTone, 'default'>, { name: string; color
 export class CwBubble implements BubbleRef {
   // #region Properties
   /**
+   * Property providedLabels
+   *
+   * @description
+   * Texts inherited from the nearest labels provider.
+   *
+   * @type {CwBubbleLabels}
+   * @readonly
+   */
+  private readonly providedLabels: CwBubbleLabels = inject(BUBBLE_LABELS);
+
+  /**
    * Property variant
    * @readonly
    *
@@ -231,7 +229,7 @@ export class CwBubble implements BubbleRef {
    * @readonly
    *
    * @description
-   * Overrides for the French tone words.
+   * Overrides for the provided tone words.
    *
    * @type {InputSignal<Partial<CwBubbleToneLabels>>}
    */
@@ -371,7 +369,7 @@ export class CwBubble implements BubbleRef {
    */
   protected readonly toneWord: Signal<string> = computed(() => {
     const tone: CwBubbleTone = this.tone();
-    return tone === 'default' ? '' : { ...TONE_LABELS, ...this.toneLabels() }[tone];
+    return tone === 'default' ? '' : { ...this.providedLabels, ...this.toneLabels() }[tone];
   });
 
   /**

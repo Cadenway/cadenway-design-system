@@ -4,6 +4,7 @@ import { provideIcons } from '@ng-icons/core';
 import { phosphorHouseBold, phosphorTrayBold } from '@ng-icons/phosphor-icons/bold';
 import { phosphorHouseFill, phosphorTrayFill } from '@ng-icons/phosphor-icons/fill';
 
+import { provideCwSidebarLabels } from './sidebar.providers';
 import { CwSidebarFooter } from './sidebar-footer/sidebar-footer.component';
 import { CwSidebarGroup } from './sidebar-group/sidebar-group.component';
 import { CwSidebarHeader } from './sidebar-header/sidebar-header.component';
@@ -370,5 +371,21 @@ describe('CwSidebar on a phone', () => {
     home.click();
     await fixture.whenStable();
     expect(fixture.componentInstance.state()).toBe('collapsed');
+  });
+});
+
+describe('provideCwSidebarLabels', () => {
+  it('uses provided texts in the rendered fixture', async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideCwSidebarLabels({ ariaLabel: 'Main navigation', collapseLabel: 'Collapse sidebar' }),
+      ],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.querySelector('[aria-label="Main navigation"]')).not.toBeNull();
+    expect(host.querySelector('[aria-label="Collapse sidebar"]')).not.toBeNull();
   });
 });

@@ -10,3 +10,7 @@ export { CwSelectGroup } from './select-group/select-group.component';
 export { CwSelectOption } from './select-option/select-option.component';
 export { CwSelectSeparator } from './select-separator/select-separator.component';
 export type { CwSelectCompareWith, CwSelectSize } from './select.types';
+
+export { CW_SELECT_LABELS } from './select.constants';
+export { provideCwSelectLabels } from './select.providers';
+export type { CwSelectLabels } from './select.types';

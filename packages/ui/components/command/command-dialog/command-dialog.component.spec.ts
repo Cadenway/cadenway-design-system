@@ -1,6 +1,8 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideCwKbdLabels } from '@cadenway/ui/components/kbd';
 
+import { provideCwCommandLabels } from '../command.providers';
 import { CwCommandFooter } from '../command-footer/command-footer.component';
 import { CwCommandGroup } from '../command-group/command-group.component';
 import { CwCommandInput } from '../command-input/command-input.directive';
@@ -190,5 +192,32 @@ describe('CwCommandDialog', () => {
     document.querySelector<HTMLElement>('.cdk-overlay-backdrop')?.click();
     await fixture.whenStable();
     expect(component.open()).toBe(false);
+  });
+});
+
+describe('provideCwCommandLabels in the dialog', () => {
+  it('renders the provided dialog and keyboard texts', async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideCwKbdLabels({ enter: 'Enter', escape: 'Escape' }),
+        provideCwCommandLabels({
+          dialogLabel: 'Command palette',
+          navigateLabel: 'navigate',
+          runLabel: 'open',
+          closeLabel: 'close',
+        }),
+      ],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.componentInstance.open.set(true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const dialog: HTMLElement | null = palette();
+    expect(dialog?.getAttribute('aria-label')).toBe('Command palette');
+    expect(dialog?.textContent).toContain('Enter');
+    expect(dialog?.textContent).toContain('Escape');
+    expect(dialog?.textContent).toContain('navigate');
+    expect(dialog?.textContent).toContain('open');
+    expect(dialog?.textContent).toContain('close');
   });
 });

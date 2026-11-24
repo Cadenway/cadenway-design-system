@@ -3,6 +3,7 @@ import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormField, form, type FieldTree } from '@angular/forms/signals';
 
+import { provideCwAutocompleteLabels } from './autocomplete.providers';
 import { CwAutocompleteGroup } from './autocomplete-group/autocomplete-group.component';
 import { CwAutocompleteOption } from './autocomplete-option/autocomplete-option.component';
 import { CwAutocompleteTrigger } from './autocomplete-trigger/autocomplete-trigger.directive';
@@ -475,5 +476,28 @@ describe('CwAutocomplete', () => {
     option('Lyon').click();
     await signalFixture.whenStable();
     expect(signalFixture.componentInstance.model().city).toBe('Lyon');
+  });
+});
+
+describe('provideCwAutocompleteLabels', () => {
+  it('replaces the default texts below its injector', async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideCwAutocompleteLabels({
+          aria: 'Suggestions in English',
+          empty: (query) => `No results for ${query}`,
+        }),
+      ],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    type(field(fixture.nativeElement as HTMLElement, 'Nom du sprint'), 'sprint');
+    await fixture.whenStable();
+    expect(listbox()?.getAttribute('aria-label')).toBe('Suggestions in English');
+    type(field(fixture.nativeElement as HTMLElement, 'Nom du sprint'), 'unknown');
+    await fixture.whenStable();
+    expect(document.body.textContent).toContain('No results for unknown');
+    fixture.destroy();
   });
 });

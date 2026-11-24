@@ -9,3 +9,7 @@ export { CwAlertDescription } from './alert-description/alert-description.compon
 export { CwAlertTitle } from './alert-title/alert-title.component';
 export { CwAlert } from './alert.component';
 export type { CwAlertSize, CwAlertVariant } from './alert.types';
+
+export { CW_ALERT_LABELS } from './alert.constants';
+export { provideCwAlertLabels } from './alert.providers';
+export type { CwAlertLabels } from './alert.types';

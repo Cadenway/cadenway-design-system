@@ -9,6 +9,10 @@ export { CwStep } from './step/step.component';
 export type {
   CwStepState,
   CwStepperLabels,
+  CwStepperProvidedLabels,
   CwStepperOrientation,
   CwStepperSize,
 } from './stepper.types';
+
+export { CW_STEPPER_LABELS } from './stepper.constants';
+export { provideCwStepperLabels } from './stepper.providers';
