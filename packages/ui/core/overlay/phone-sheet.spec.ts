@@ -56,4 +56,14 @@ describe('ɵphoneSheet', () => {
     expect(sheet?.width).toBe('calc(100% - 8px)');
     expect(sheet?.maxHeight).toBe('calc(100dvh - 12px)');
   });
+
+  it('keeps the defaults for options given as undefined', () => {
+    emulateScreen(true);
+    TestBed.configureTestingModule({
+      providers: [provideCwPhoneSheets({ bottom: undefined, gutter: undefined })],
+    });
+    const sheet: ɵPhoneSheet | null = ɵphoneSheet(TestBed.inject(Injector), null);
+
+    expect(sheet?.maxHeight).toBe('calc(100dvh - 72px)');
+  });
 });

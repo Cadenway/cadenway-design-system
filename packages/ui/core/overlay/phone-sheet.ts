@@ -231,15 +231,19 @@ export const ɵPHONE_SHEET: InjectionToken<Required<CwPhoneSheetConfig> | null> 
  * full width between two gutters, instead of next to their trigger (mockup `App.dc.html`: the menus
  * of the rail, `max-md:fixed max-md:inset-x-2 max-md:bottom-16`). The choice is made each time a
  * panel opens; keyboard, focus, tab order, theme scope, Escape and outside clicks are unchanged
- * (the panel stays a native popover inserted after its trigger). Without this provider the bricks
- * behave as before on every screen.
+ * (popover, select and combobox panels stay native popovers inserted after their trigger; menus
+ * stay in the overlay container, as on a large screen). Without this provider the bricks behave as
+ * before on every screen.
  *
  * @param {CwPhoneSheetConfig} [config] - Bottom offset and gutters, in px.
  *
  * @returns {Provider} Provider enabling the phone sheet placement.
  */
 export function provideCwPhoneSheets(config: CwPhoneSheetConfig = {}): Provider {
-  return { provide: ɵPHONE_SHEET, useValue: { bottom: 64, gutter: 8, ...config } };
+  return {
+    provide: ɵPHONE_SHEET,
+    useValue: { bottom: config.bottom ?? 64, gutter: config.gutter ?? 8 },
+  };
 }
 
 /**
