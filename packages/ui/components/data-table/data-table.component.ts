@@ -6,6 +6,7 @@ import {
   computed,
   contentChild,
   contentChildren,
+  effect,
   ElementRef,
   inject,
   Injector,
@@ -13,6 +14,7 @@ import {
   model,
   output,
   signal,
+  untracked,
   type TemplateRef,
   viewChild,
   type InputSignalWithTransform,
@@ -22,7 +24,8 @@ import {
   type WritableSignal,
   type Signal,
 } from '@angular/core';
-import { NgTemplateOutlet } from '@angular/common';
+import { isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
+import { PLATFORM_ID } from '@angular/core';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { CdkDrag, type CdkDragDrop, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import { CwAlert, CwAlertActions, CwAlertTitle } from '@cadenway/ui/components/alert';
@@ -521,6 +524,16 @@ interface ActiveCell {
  */
 const SELECT: string = '__select';
 /**
+ * Constant HEADER_HEIGHT
+ *
+ * @description
+ * Desktop sticky header height in pixels, matching the h-9 header row.
+ *
+ * @type {number}
+ */
+const HEADER_HEIGHT: number = 36;
+
+/**
  * Constant HEADER
  *
  * @description
@@ -660,6 +673,200 @@ const GROUP_HEIGHTS: Record<CwDataTableDensity, string> = {
   compact: 'h-7',
   default: 'h-8',
   comfortable: 'h-9',
+};
+
+/**
+ * Interface VirtualViewport
+ *
+ * @description
+ * Scroller measurements and mobile estimates in pixels.
+ */
+interface VirtualViewport {
+  // #region Properties
+  /**
+   * Property top
+   *
+   * @description
+   * Scroll offset.
+   *
+   * @type {number}
+   */
+  top: number;
+
+  /**
+   * Property height
+   *
+   * @description
+   * Scroller height.
+   *
+   * @type {number}
+   */
+  height: number;
+
+  /**
+   * Property mobile
+   *
+   * @description
+   * Whether cards are displayed.
+   *
+   * @type {boolean}
+   */
+  mobile: boolean;
+
+  /**
+   * Property banner
+   *
+   * @description
+   * Selection banner height.
+   *
+   * @type {number}
+   */
+  banner: number;
+  // #endregion
+}
+
+/**
+ * Interface VirtualLine
+ *
+ * @description
+ * A navigable body line and its estimated height.
+ */
+interface VirtualLine<T> {
+  // #region Properties
+  /**
+   * Property group
+   *
+   * @description
+   * Containing group.
+   *
+   * @type {GroupEntry<T>}
+   */
+  group: GroupEntry<T>;
+
+  /**
+   * Property entry
+   *
+   * @description
+   * Data row, or null for a group header.
+   *
+   * @type {RowEntry<T> | null}
+   */
+  entry: RowEntry<T> | null;
+
+  /**
+   * Property key
+   *
+   * @description
+   * Navigation key.
+   *
+   * @type {string}
+   */
+  key: string;
+
+  /**
+   * Property height
+   *
+   * @description
+   * Estimated height in pixels.
+   *
+   * @type {number}
+   */
+  height: number;
+  // #endregion
+}
+
+/**
+ * Interface VirtualModel
+ *
+ * @description
+ * Ordered lines and their cumulative offsets.
+ */
+interface VirtualModel<T> {
+  // #region Properties
+  /**
+   * Property lines
+   *
+   * @description
+   * Navigable body lines.
+   *
+   * @type {VirtualLine<T>[]}
+   */
+  lines: VirtualLine<T>[];
+
+  /**
+   * Property offsets
+   *
+   * @description
+   * Cumulative pixel heights.
+   *
+   * @type {number[]}
+   */
+  offsets: number[];
+  // #endregion
+}
+
+/**
+ * Interface VirtualWindow
+ *
+ * @description
+ * Window bounds and spacer heights.
+ */
+interface VirtualWindow {
+  // #region Properties
+  /**
+   * Property start
+   *
+   * @description
+   * Inclusive first line.
+   *
+   * @type {number}
+   */
+  start: number;
+
+  /**
+   * Property end
+   *
+   * @description
+   * Exclusive final line.
+   *
+   * @type {number}
+   */
+  end: number;
+
+  /**
+   * Property top
+   *
+   * @description
+   * Leading spacer height in pixels.
+   *
+   * @type {number}
+   */
+  top: number;
+
+  /**
+   * Property bottom
+   *
+   * @description
+   * Trailing spacer height in pixels.
+   *
+   * @type {number}
+   */
+  bottom: number;
+  // #endregion
+}
+
+/**
+ * Constant VIRTUAL_HEIGHTS
+ *
+ * @description
+ * Pixel estimates must stay in sync with ROW_HEIGHTS and GROUP_HEIGHTS.
+ *
+ * @type {Record<CwDataTableDensity, { row: number; group: number }>}
+ */
+const VIRTUAL_HEIGHTS: Record<CwDataTableDensity, { row: number; group: number }> = {
+  compact: { row: 32, group: 28 },
+  default: { row: 36, group: 32 },
+  comfortable: { row: 44, group: 36 },
 };
 
 /* Under 768 px the table becomes cards (mockup `styles/app.css`, `.cw-cards`): the header row
@@ -911,6 +1118,26 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * @readonly
    */
   public readonly data: InputSignal<readonly T[]> = input.required<readonly T[]>();
+
+  /**
+   * Property virtual
+   *
+   * @description
+   * Renders visible lines and ten lines of overscan, with the active, focused and editing lines
+   * retained. Give the table a bounded height, such as a fixed height or a flex parent with
+   * `min-h-0`, so its scroller does not grow to the full list. Rendered rows and group headers
+   * are measured and observed for later size changes, with scroll anchoring. Unmeasured desktop
+   * rows use 32, 36 or 44 px and group rows 28, 32 or 36 px by density; below 48rem, unmeasured
+   * lines use the mean height of measured lines of the same kind.
+   * Keyboard navigation reaches all expanded lines and the selection banner. Rows entering the
+   * window have no entry motion; column auto-fit measures only rendered cells.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   * @readonly
+   */
+  public readonly virtual: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
 
   /**
    * Property columns
@@ -1550,12 +1777,14 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * Property bodyMotion
    *
    * @description
-   * Row entry animation classes.
+   * Suppresses entry animation in virtual mode so recycled rows do not replay it.
    *
-   * @type {string}
+   * @type {Signal<string>}
    * @readonly
    */
-  protected readonly bodyMotion: string = BODY_MOTION;
+  protected readonly bodyMotion: Signal<string> = computed(() =>
+    this.virtual() ? '' : BODY_MOTION,
+  );
 
   /**
    * Property skeletonRows
@@ -2013,6 +2242,281 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
   );
 
   /**
+   * Property scheduleVirtualMeasurement
+   *
+   * @description
+   * Schedules browser measurements after rendered density or window changes.
+   *
+   * @type {(() => void) | null}
+   */
+  private scheduleVirtualMeasurement: (() => void) | null = null;
+
+  /**
+   * Property viewport
+   *
+   * @description
+   * Last coalesced scroller measurements in pixels and responsive layout state.
+   *
+   * @type {WritableSignal<VirtualViewport>}
+   * @readonly
+   */
+  private readonly viewport: WritableSignal<VirtualViewport> = signal({
+    top: 0,
+    height: 0,
+    mobile: false,
+    banner: 0,
+  });
+
+  /**
+   * Property mobileLayout
+   *
+   * @description
+   * Responsive layout state isolated from scroll position.
+   *
+   * @type {Signal<boolean>}
+   * @readonly
+   */
+  private readonly mobileLayout: Signal<boolean> = computed(() => this.viewport().mobile);
+
+  /**
+   * Property measuredHeights
+   *
+   * @description
+   * Measured line heights in pixels, keyed by navigation identity.
+   *
+   * @type {WritableSignal<ReadonlyMap<string, number>>}
+   * @readonly
+   */
+  private readonly measuredHeights: WritableSignal<ReadonlyMap<string, number>> = signal<
+    ReadonlyMap<string, number>
+  >(new Map<string, number>());
+
+  /**
+   * Property focusedRow
+   *
+   * @description
+   * Row containing browser focus, retained while it lies outside the window.
+   *
+   * @type {WritableSignal<string | null>}
+   * @readonly
+   */
+  private readonly focusedRow: WritableSignal<string | null> = signal<string | null>(null);
+
+  /**
+   * Property lineIndices
+   *
+   * @description
+   * Model positions by navigation key, rebuilt only when the line model changes.
+   *
+   * @type {Signal<Map<string, number>>}
+   * @readonly
+   */
+  private readonly lineIndices: Signal<Map<string, number>> = computed(
+    () => new Map(this.virtualModel().lines.map((line, index) => [line.key, index])),
+  );
+
+  /**
+   * Property virtualModel
+   *
+   * @description
+   * Ordered lines and cumulative pixel offsets, rebuilt only when groups or height estimates change.
+   *
+   * @type {Signal<VirtualModel<T>>}
+   * @readonly
+   */
+  private readonly virtualModel: Signal<VirtualModel<T>> = computed(() => {
+    const mobile: boolean = this.mobileLayout();
+    const measured: ReadonlyMap<string, number> = this.measuredHeights();
+    const heights: { row: number; group: number } = VIRTUAL_HEIGHTS[this.density()];
+    const lines: {
+      group: GroupEntry<T>;
+      entry: RowEntry<T> | null;
+      key: string;
+      height: number;
+    }[] = [];
+    const offsets: number[] = [0];
+    for (const group of this.groups()) {
+      if (group.key !== null)
+        lines.push({
+          group,
+          entry: null,
+          key: group.rowKey,
+          height: heights.group,
+        });
+      for (const entry of group.rows)
+        lines.push({
+          group,
+          entry,
+          key: entry.key,
+          height: heights.row,
+        });
+    }
+    if (mobile && measured.size > 0) {
+      let rowSum: number = 0;
+      let rowCount: number = 0;
+      let groupSum: number = 0;
+      let groupCount: number = 0;
+      for (const line of lines) {
+        const height: number | undefined = measured.get(line.key);
+        if (height === undefined) continue;
+        if (line.entry) {
+          rowSum += height;
+          rowCount += 1;
+        } else {
+          groupSum += height;
+          groupCount += 1;
+        }
+      }
+      for (const line of lines)
+        line.height =
+          measured.get(line.key) ??
+          (line.entry
+            ? rowCount
+              ? rowSum / rowCount
+              : heights.row
+            : groupCount
+              ? groupSum / groupCount
+              : heights.group);
+    }
+    if (!mobile) {
+      for (const line of lines) line.height = measured.get(line.key) ?? line.height;
+    }
+    for (const line of lines) offsets.push(offsets[offsets.length - 1] + line.height);
+    return { lines, offsets };
+  });
+
+  /**
+   * Property virtualWindow
+   *
+   * @description
+   * Window boundaries and spacer heights, found by binary search over cumulative heights.
+   *
+   * @type {Signal<VirtualWindow>}
+   * @readonly
+   */
+  protected readonly virtualWindow: Signal<VirtualWindow> = computed(
+    () => {
+      const { lines, offsets }: VirtualModel<T> = this.virtualModel();
+      const viewport: VirtualViewport = this.viewport();
+      const top: number = Math.max(0, viewport.top - viewport.banner);
+      const bottom: number = Math.max(
+        top,
+        viewport.top + viewport.height - (viewport.mobile ? 0 : HEADER_HEIGHT) - viewport.banner,
+      );
+      const find: (value: number) => number = (value: number): number => {
+        let low: number = 0;
+        let high: number = lines.length;
+        while (low < high) {
+          const mid: number = Math.floor((low + high) / 2);
+          if (offsets[mid + 1] <= value) low = mid + 1;
+          else high = mid;
+        }
+        return low;
+      };
+      const start: number = Math.max(0, find(top) - 10);
+      const end: number = Math.min(lines.length, Math.max(start + 20, find(bottom) + 11));
+      return { start, end, top: offsets[start], bottom: offsets[lines.length] - offsets[end] };
+    },
+    {
+      equal: (a, b) =>
+        a.start === b.start && a.end === b.end && a.top === b.top && a.bottom === b.bottom,
+    },
+  );
+
+  /**
+   * Property virtualSegments
+   *
+   * @description
+   * Ordered window and pinned lines, with the gaps before each disjoint line.
+   *
+   * @type {Signal<{ indices: number[]; top: number; gaps: Map<string, number>; bottom: number }>}
+   * @readonly
+   */
+  protected readonly virtualSegments: Signal<{
+    indices: number[];
+    top: number;
+    gaps: Map<string, number>;
+    bottom: number;
+  }> = computed(() => {
+    const model: VirtualModel<T> = this.virtualModel();
+    const window: VirtualWindow = this.virtualWindow();
+    const editing: EditState | null = this.editing();
+    const keys: (string | null | undefined)[] = [
+      this.focusedRow(),
+      this.active()?.row,
+      editing ? `r:${editing.rowId}` : null,
+    ];
+    const pinned: number[] = [
+      ...new Set(
+        keys
+          .map((key) => (key == null ? undefined : this.lineIndices().get(key)))
+          .filter(
+            (index): index is number =>
+              index !== undefined && (index < window.start || index >= window.end),
+          ),
+      ),
+    ].sort((a, b) => a - b);
+    const indices: number[] = pinned.filter((index) => index < window.start);
+    for (let index: number = window.start; index < window.end; index += 1) indices.push(index);
+    indices.push(...pinned.filter((index) => index >= window.end));
+    const gaps: Map<string, number> = new Map<string, number>();
+    for (let index: number = 1; index < indices.length; index += 1) {
+      if (indices[index] > indices[index - 1] + 1)
+        gaps.set(
+          model.lines[indices[index]].key,
+          model.offsets[indices[index]] - model.offsets[indices[index - 1] + 1],
+        );
+    }
+    const first: number = indices[0] ?? 0;
+    const last: number = indices.at(-1) ?? -1;
+    return {
+      indices,
+      top: model.offsets[first],
+      gaps,
+      bottom: model.offsets[model.lines.length] - model.offsets[last + 1],
+    };
+  });
+
+  /**
+   * Property visibleLineKeys
+   *
+   * @description
+   * Keys in the window and the focused line.
+   *
+   * @type {Signal<Set<string>>}
+   * @readonly
+   */
+  protected readonly visibleLineKeys: Signal<Set<string>> = computed(
+    () =>
+      new Set(this.virtualSegments().indices.map((index) => this.virtualModel().lines[index].key)),
+  );
+
+  /**
+   * Property displayedGroups
+   *
+   * @description
+   * Groups restricted to visible and focused lines, preserving rowgroup structure.
+   *
+   * @type {Signal<readonly GroupEntry<T>[]>}
+   * @readonly
+   */
+  protected readonly displayedGroups: Signal<readonly GroupEntry<T>[]> = computed(() => {
+    if (!this.virtual()) return this.groups();
+    const lines: VirtualLine<T>[] = this.virtualModel().lines;
+    const groups: GroupEntry<T>[] = [];
+    for (const index of this.virtualSegments().indices) {
+      const line: VirtualLine<T> = lines[index];
+      let group: GroupEntry<T> | undefined = groups.at(-1);
+      if (group?.rowKey !== line.group.rowKey) {
+        group = { ...line.group, rows: [] };
+        groups.push(group);
+      }
+      if (line.entry) (group.rows as RowEntry<T>[]).push(line.entry);
+    }
+    return groups;
+  });
+
+  /**
    * Property renderedRows
    *
    * @description
@@ -2212,11 +2716,153 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * Constructor
    *
    * @description
-   * Maintains grid focus and handles range selection.
+   * Maintains grid focus and range selection, and wires virtual scrolling and measurements.
    *
    * @constructor
    */
   public constructor() {
+    if (isPlatformBrowser(inject(PLATFORM_ID))) {
+      afterNextRender(() => {
+        effect(
+          (onCleanup) => {
+            if (!this.virtual()) return;
+            const scroller: HTMLElement = this.scroller().nativeElement;
+            let frame: number = 0;
+            let layout: string = '';
+            let lastData: readonly T[] | null = null;
+            let lastWidths: Readonly<Record<string, number>> | null = null;
+            const observed: Set<HTMLElement> = new Set<HTMLElement>();
+            const update: () => void = (): void => {
+              frame = 0;
+              const view: Partial<Window> | null = scroller.ownerDocument.defaultView;
+              const mobile: boolean =
+                typeof view?.matchMedia === 'function' &&
+                view.matchMedia('(width < 48rem)').matches;
+              const signature: string = JSON.stringify([
+                mobile,
+                this.density(),
+                scroller.clientWidth,
+                this.visibleColumns().map((column) => column.key),
+              ]);
+              const old: VirtualViewport = this.viewport();
+              const model: VirtualModel<T> = this.virtualModel();
+              const scrollTop: number = scroller.scrollTop;
+              const banner: number =
+                scroller.querySelector<HTMLElement>('tr[data-cw-row="banner"]')?.offsetHeight ?? 0;
+              const current: ReadonlyMap<string, number> = this.measuredHeights();
+              // New data or column widths can change the height of rows that are not rendered, which
+              // the row observer cannot see: drop every cached height and measure again.
+              const data: readonly T[] = this.data();
+              const widths: Readonly<Record<string, number>> = this.columnWidths();
+              const reset: boolean =
+                signature !== layout || data !== lastData || widths !== lastWidths;
+              layout = signature;
+              lastData = data;
+              lastWidths = widths;
+              let measured: Map<string, number> | null = reset ? new Map<string, number>() : null;
+              const rows: HTMLElement[] = Array.from(
+                scroller.querySelectorAll<HTMLElement>(
+                  'tr[data-cw-row^="r:"], tr[data-cw-row^="g:"]',
+                ),
+              );
+              const currentRows: Set<HTMLElement> = new Set<HTMLElement>(rows);
+              for (const row of observed) {
+                if (!currentRows.has(row)) {
+                  observer?.unobserve(row);
+                  observed.delete(row);
+                }
+              }
+              for (const row of rows) {
+                if (!observed.has(row)) {
+                  observer?.observe(row);
+                  observed.add(row);
+                }
+                const key: string | undefined = row.dataset['cwRow'];
+                const height: number = row.offsetHeight;
+                if (!key || height <= 0) continue;
+                const estimate: number = key.startsWith('g:')
+                  ? VIRTUAL_HEIGHTS[this.density()].group
+                  : VIRTUAL_HEIGHTS[this.density()].row;
+                const previous: number = (measured ?? current).get(key) ?? (mobile ? 0 : estimate);
+                if (Math.abs(height - previous) >= 1) {
+                  measured ??= new Map<string, number>(current);
+                  if (!mobile && Math.abs(height - estimate) < 1) measured.delete(key);
+                  else measured.set(key, height);
+                }
+              }
+              const changed: boolean = reset
+                ? current.size > 0 || (measured?.size ?? 0) > 0
+                : measured !== null;
+              let anchor: number = 0;
+              if (changed || mobile !== old.mobile) {
+                const position: number = Math.max(0, scrollTop - old.banner);
+                let high: number = model.lines.length;
+                while (anchor < high) {
+                  const middle: number = Math.floor((anchor + high) / 2);
+                  if (model.offsets[middle + 1] <= position) anchor = middle + 1;
+                  else high = middle;
+                }
+              }
+              if (changed && measured) this.measuredHeights.set(measured);
+              const next: VirtualViewport = {
+                top: scrollTop,
+                height: scroller.clientHeight,
+                mobile,
+                banner,
+              };
+              if (
+                Object.keys(next).some(
+                  (key) => next[key as keyof VirtualViewport] !== old[key as keyof VirtualViewport],
+                )
+              )
+                this.viewport.set(next);
+              if ((changed || mobile !== old.mobile) && anchor < model.lines.length) {
+                const updated: VirtualModel<T> = this.virtualModel();
+                const delta: number = updated.offsets[anchor] - model.offsets[anchor];
+                if (delta !== 0) {
+                  scroller.scrollTop = Math.max(0, scrollTop + delta);
+                  this.viewport.update((viewport) => ({ ...viewport, top: scroller.scrollTop }));
+                }
+              }
+            };
+            const schedule: () => void = (): void => {
+              if (!frame) frame = requestAnimationFrame(update);
+            };
+            this.scheduleVirtualMeasurement = schedule;
+            scroller.addEventListener('scroll', schedule, { passive: true });
+            scroller.ownerDocument.defaultView?.addEventListener('resize', schedule);
+            const observer: ResizeObserver | null =
+              typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(schedule);
+            observer?.observe(scroller);
+            untracked(update);
+            onCleanup(() => {
+              this.scheduleVirtualMeasurement = null;
+              scroller.removeEventListener('scroll', schedule);
+              scroller.ownerDocument.defaultView?.removeEventListener('resize', schedule);
+              observer?.disconnect();
+              observed.clear();
+              if (frame) cancelAnimationFrame(frame);
+            });
+          },
+          { injector: this.injector },
+        );
+      });
+    }
+    afterRenderEffect({
+      read: () => {
+        if (!this.virtual()) return;
+        this.density();
+        this.virtualSegments();
+        this.visibleColumns();
+        this.columnWidths();
+        this.data();
+        this.bannerState();
+        this.loading();
+        this.error();
+        this.isEmpty();
+        this.scheduleVirtualMeasurement?.();
+      },
+    });
     // Shift + click on a row checkbox selects a range: caught in the capture phase, before the
     // checkbox toggles itself, so the box never shows a state the selection does not have.
     this.host.addEventListener(
@@ -2241,6 +2887,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
     afterRenderEffect({
       write: () => {
         this.groups();
+        if (this.virtual()) this.virtualSegments();
         this.visibleColumns();
         this.loading();
         this.error();
@@ -2743,6 +3390,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
     if (next === this.page()) return;
     this.page.set(next);
     this.scroller().nativeElement.scrollTop = 0;
+    if (this.virtual()) this.viewport.update((viewport) => ({ ...viewport, top: 0 }));
   }
 
   /**
@@ -2758,6 +3406,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
     this.pageSize.set(size);
     if (this.page() !== null) this.page.set(1);
     this.scroller().nativeElement.scrollTop = 0;
+    if (this.virtual()) this.viewport.update((viewport) => ({ ...viewport, top: 0 }));
   }
 
   /**
@@ -2774,14 +3423,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
     if (!column.editable || this.loading()) return false;
     this.session += 1;
     this.editing.set({ rowId: entry.id, key: column.key, session: this.session });
-    this.active.set({ row: entry.key, col: column.key });
-    afterNextRender(
-      () => {
-        const cell: HTMLElement | null = this.cellElement({ row: entry.key, col: column.key });
-        cell?.querySelector<HTMLElement>(FOCUSABLE)?.focus();
-      },
-      { injector: this.injector },
-    );
+    this.revealAndFocus({ row: entry.key, col: column.key }, true);
     return true;
   }
 
@@ -3104,8 +3746,26 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
     const row: string | undefined = cell?.closest<HTMLElement>('[data-cw-row]')?.dataset['cwRow'];
     const col: string | undefined = cell?.dataset['cwCol'];
     if (!cell || row === undefined || col === undefined) return;
+    this.focusedRow.set(row);
     const active: ActiveCell | null = this.active();
+    if (active?.row === row && (row.startsWith('g:') || row === 'banner')) return;
     if (active?.row !== row || active.col !== col) this.active.set({ row, col });
+  }
+
+  /**
+   * Method onFocusout
+   *
+   * @description
+   * Releases the pinned row when focus leaves the grid.
+   *
+   * @param {FocusEvent} event - Focus transition from the grid.
+   */
+  protected onFocusout(event: FocusEvent): void {
+    if (
+      !(event.relatedTarget instanceof Node) ||
+      !this.tableRef().nativeElement.contains(event.relatedTarget)
+    )
+      this.focusedRow.set(null);
   }
 
   /**
@@ -3275,6 +3935,8 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * @returns {boolean} Whether the keyboard event was handled.
    */
   private navigate(event: KeyboardEvent, rowKey: string, colKey: string): boolean {
+    if (this.virtual() && !this.loading() && !this.error() && !this.isEmpty())
+      return this.navigateVirtual(event, rowKey, colKey);
     const rows: HTMLElement[] = this.navRows();
     const rowIndex: number = rows.findIndex((row) => row.dataset['cwRow'] === rowKey);
     if (rowIndex < 0) return false;
@@ -3366,6 +4028,110 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
   }
 
   /**
+   * Method navigateVirtual
+   *
+   * @description
+   * Resolves keyboard movement against the complete expanded line model.
+   *
+   * @param {KeyboardEvent} event - Keyboard interaction.
+   * @param {string} rowKey - Current row key.
+   * @param {string} colKey - Current column key.
+   * @returns {boolean} Whether the key was handled.
+   */
+  private navigateVirtual(event: KeyboardEvent, rowKey: string, colKey: string): boolean {
+    const model: VirtualModel<T> = this.virtualModel();
+    const banner: boolean = this.bannerState() !== null;
+    const offset: number = banner ? 2 : 1;
+    const index: number =
+      rowKey === HEADER
+        ? 0
+        : rowKey === 'banner' && banner
+          ? 1
+          : (this.lineIndices().get(rowKey) ?? -offset - 1) + offset;
+    if (index < 0) return false;
+    const ctrl: boolean = event.ctrlKey || event.metaKey;
+    if (event.altKey || (ctrl && event.key.startsWith('Arrow'))) return false;
+    const columns: string[] = [
+      ...(this.selectable() ? [SELECT] : []),
+      ...this.visibleColumns().map((column) => column.key),
+    ];
+    const currentGroup: boolean = index >= offset && model.lines[index - offset].entry === null;
+    const currentSingle: boolean = currentGroup || (banner && index === 1);
+    const currentColumns: string[] = currentSingle ? ['group'] : columns;
+    const rememberedCol: string =
+      currentSingle && this.active()?.row === rowKey ? (this.active()?.col ?? colKey) : colKey;
+    const columnIndex: number = Math.max(0, currentColumns.indexOf(colKey));
+    const rtl: boolean =
+      this.host.ownerDocument.dir === 'rtl' || getComputedStyle(this.host).direction === 'rtl';
+    let next: number = index;
+    let column: number | 'first' | 'last' | null = null;
+    switch (event.key) {
+      case 'ArrowDown':
+        next += 1;
+        break;
+      case 'ArrowUp':
+        next -= 1;
+        break;
+      case 'PageDown':
+        next += PAGE_STEP;
+        break;
+      case 'PageUp':
+        next -= PAGE_STEP;
+        break;
+      case 'Home':
+        if (ctrl) next = 0;
+        column = 'first';
+        break;
+      case 'End':
+        if (ctrl) next = model.lines.length + offset - 1;
+        column = 'last';
+        break;
+      case 'ArrowRight':
+        if (event.shiftKey) return false;
+        column = columnIndex + (rtl ? -1 : 1);
+        break;
+      case 'ArrowLeft':
+        if (event.shiftKey) return false;
+        column = columnIndex + (rtl ? 1 : -1);
+        break;
+      default:
+        return false;
+    }
+    next = Math.max(0, Math.min(model.lines.length + offset - 1, next));
+    const nextKey: string =
+      next === 0 ? HEADER : banner && next === 1 ? 'banner' : model.lines[next - offset].key;
+    const targetGroup: boolean =
+      (banner && next === 1) || (next >= offset && model.lines[next - offset].entry === null);
+    const targetColumns: string[] = targetGroup ? ['group'] : columns;
+    if (targetColumns.length === 0) return true;
+    let targetCol: string = rememberedCol;
+    if (column === 'first') targetCol = targetColumns[0];
+    else if (column === 'last') targetCol = targetColumns[targetColumns.length - 1];
+    else if (column !== null)
+      targetCol = targetColumns[Math.max(0, Math.min(targetColumns.length - 1, column))];
+    else if (!targetGroup && !targetColumns.includes(targetCol))
+      targetCol = targetColumns[Math.min(columnIndex, targetColumns.length - 1)];
+    if (
+      event.shiftKey &&
+      (event.key === 'ArrowDown' || event.key === 'ArrowUp') &&
+      this.selectable()
+    ) {
+      const from: RowEntry<T> | undefined = this.rowByKey().get(rowKey);
+      const to: RowEntry<T> | undefined = this.rowByKey().get(nextKey);
+      if (from && to) {
+        const ids: Set<string> = new Set<string>(this.currentIds());
+        ids.add(from.id);
+        ids.add(to.id);
+        this.anchor.set(this.anchor() ?? from.id);
+        this.setSelection([...ids]);
+      }
+    }
+    const cell: ActiveCell = { row: nextKey, col: targetCol };
+    this.revealAndFocus(cell, false);
+    return true;
+  }
+
+  /**
    * Method navRows
    *
    * @description
@@ -3410,6 +4176,23 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * @returns {ActiveCell | null} First body cell, or null.
    */
   private firstBodyCell(): ActiveCell | null {
+    if (this.virtual() && !this.loading() && !this.error() && !this.isEmpty()) {
+      if (this.bannerState()) return { row: 'banner', col: 'banner' };
+      const line: VirtualLine<T> | undefined = this.virtualModel().lines.at(0);
+      return line ? { row: line.key, col: line.entry ? this.firstHeaderKey() : 'group' } : null;
+    }
+    return this.firstRenderedBodyCell();
+  }
+
+  /**
+   * Method firstRenderedBodyCell
+   *
+   * @description
+   * Finds the first body cell present in the DOM, in document order.
+   *
+   * @returns {ActiveCell | null} First rendered body cell, or null.
+   */
+  private firstRenderedBodyCell(): ActiveCell | null {
     const first: HTMLElement | undefined = this.navRows().find(
       (row) => row.dataset['cwRow'] !== HEADER,
     );
@@ -3425,12 +4208,16 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * Method defaultCell
    *
    * @description
-   * Finds the default grid focus target.
+   * Finds the default grid focus target: the first body cell, else (in `virtual` mode, once that
+   * line has left the window) the first rendered body cell, else the header. The rendered fallback
+   * keeps a reachable tab stop below 48rem, where the header row is hidden.
+   *
    * @returns {HTMLElement | null} Default focus target, or null.
    */
   private defaultCell(): HTMLElement | null {
     return (
       this.cellElement(this.firstBodyCell()) ??
+      (this.virtual() ? this.cellElement(this.firstRenderedBodyCell()) : null) ??
       this.cellElement({ row: HEADER, col: this.firstHeaderKey() })
     );
   }
@@ -3456,8 +4243,53 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    */
   private focusCell(cell: ActiveCell | null): void {
     if (!cell) return;
+    if (this.virtual()) {
+      this.revealAndFocus(cell, false);
+    } else {
+      this.active.set(cell);
+      this.cellElement(cell)?.focus();
+    }
+  }
+
+  /**
+   * Method revealAndFocus
+   *
+   * @description
+   * Reveals a virtual line and focuses its cell or editor after rendering.
+   *
+   * @param {ActiveCell} cell - Grid cell to reveal.
+   * @param {boolean} editor - Whether to focus the editor inside the cell.
+   */
+  private revealAndFocus(cell: ActiveCell, editor: boolean): void {
+    if (this.virtual()) {
+      const index: number | undefined = this.lineIndices().get(cell.row);
+      if (index !== undefined) {
+        const model: VirtualModel<T> = this.virtualModel();
+        const viewport: VirtualViewport = this.viewport();
+        const scroller: HTMLElement = this.scroller().nativeElement;
+        const header: number = viewport.mobile ? 0 : HEADER_HEIGHT;
+        const top: number = model.offsets[index] + viewport.banner;
+        const bottom: number =
+          model.offsets[index + 1] + viewport.banner + header - viewport.height;
+        const scrollTop: number = Math.max(
+          0,
+          top < viewport.top ? top : bottom > viewport.top ? bottom : viewport.top,
+        );
+        if (scrollTop !== viewport.top) {
+          scroller.scrollTop = scrollTop;
+          this.viewport.set({ ...viewport, top: scroller.scrollTop });
+        }
+      }
+    }
     this.active.set(cell);
-    this.cellElement(cell)?.focus();
+    afterNextRender(
+      () => {
+        const target: HTMLElement | null = this.cellElement(cell);
+        if (editor) target?.querySelector<HTMLElement>(FOCUSABLE)?.focus();
+        else target?.focus();
+      },
+      { injector: this.injector },
+    );
   }
 
   /**
