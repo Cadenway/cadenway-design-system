@@ -64,6 +64,7 @@ tasks beyond the display contracts of `cw-status-icon` and `cw-priority-icon`"):
 | Button | `button` | `button[cwButton]`, `a[cwButton]` | `variant`: default, destructive, outline, secondary, ghost, link; `size`: xs, sm, default, lg, icon-xs, icon-sm, icon, icon-lg; `loading`; `disabled`; sets `type="button"` | native; `CwRipple` from `core` |
 | Spinner | `spinner` | `svg[cwSpinner]`, `cw-spinner`, `[cwLoadingOverlay]` | `size`: xs, sm, default, lg, xl, page; `label` = Chargement; `showLabel`; `solid`; `delay` 300; `minDuration` 500 | — |
 | ButtonGroup | `button-group` | `cw-button-group`, `-separator`, `-text` | `orientation`; `ariaLabel` (required) | `role="group"` |
+| SplitButton (mockup `App.dc.html`, task status; no sheet) | `split-button` | `cw-split-button` (+ a projected `cw-menu`) | `label` (required: the main half's name and tooltip, its action); content = the main half's visual; out `advance`; `advanceable` = true (→ hint on hover and focus); `menuLabel` = Plus d’options (caret name); `disabled`. 28 px, both halves their own Tab stop | `CwMenuTriggerFor` on the caret |
 | Kbd | `kbd` | `kbd[cwKbd]`, `kbd[cwKbdGroup]`, `cw-shortcut` | `size`: sm, default, lg; `variant`: default, inverse; `keys` (shortcut) | — |
 | Label | `label` | `label[cwLabel]` | — | native |
 | Separator | `separator` | `cw-separator` | `orientation`; `decorative` = true | — |

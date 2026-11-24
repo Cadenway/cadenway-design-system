@@ -1,0 +1,33 @@
+<button
+  type="button"
+  [class]="mainClasses"
+  [attr.aria-label]="label()"
+  [title]="label()"
+  [disabled]="disabled()"
+  (click)="advance.emit()"
+>
+  <ng-content />
+  @if (advanceable()) {
+    <ng-icon
+      name="phosphorArrowRightBold"
+      class="-ml-0.5 size-3 shrink-0 text-muted-foreground opacity-0 transition-all group-hover/advance:translate-x-0.5 group-hover/advance:opacity-100 group-focus-visible/advance:opacity-100 motion-reduce:transition-none"
+      aria-hidden="true"
+    />
+  }
+</button>
+<span class="w-px shrink-0 bg-input" aria-hidden="true"></span>
+<button
+  type="button"
+  [class]="toggleClasses"
+  [cwMenuTriggerFor]="menu()"
+  [attr.aria-label]="menuLabel()"
+  [title]="menuLabel()"
+  [disabled]="disabled()"
+>
+  <ng-icon
+    name="phosphorCaretDownBold"
+    class="size-3 transition-transform duration-[420ms] ease-spring group-aria-expanded/toggle:rotate-180 motion-reduce:transition-none"
+    aria-hidden="true"
+  />
+</button>
+<ng-content select="cw-menu" />
