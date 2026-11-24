@@ -1,6 +1,7 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { provideCwBubbleLabels } from './bubble.providers';
 import { CwBubble } from './bubble.component';
 import { CW_BUBBLE_DEFAULTS } from './bubble.token';
 import { CwBubbleGroup } from './bubble-group/bubble-group.component';
@@ -188,5 +189,18 @@ describe('CwBubble', () => {
     expect(bubble?.dataset['variant']).toBe('secondary');
     expect(bubble?.dataset['align']).toBe('end');
     expect(bubble?.dataset['position']).toBe('last');
+  });
+});
+
+describe('provideCwBubbleLabels', () => {
+  it('uses supplied text in the hosted declarations', () => {
+    TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [provideCwBubbleLabels({ addReaction: 'Add reaction' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.querySelector('[aria-label="Add reaction"]')).not.toBeNull();
   });
 });

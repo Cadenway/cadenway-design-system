@@ -7,8 +7,9 @@ import { FormField, form, required, type FieldTree } from '@angular/forms/signal
 import { of } from 'rxjs';
 import { provideCwLocale } from '@cadenway/ui/core';
 
+import { provideCwBlockEditorLabels } from './block-editor.providers';
 import { CwBlockEditor } from './block-editor.component';
-import type { CwMentionPerson, CwMentionSearch } from './block-editor.types';
+import type { CwBlockType, CwMentionPerson, CwMentionSearch } from './block-editor.types';
 
 /* jsdom has no layout: the engine measures the caret when it scrolls it into view, Floating UI
    watches sizes. These stand-ins only answer with empty boxes. */
@@ -607,5 +608,96 @@ describe('provideCwLocale', () => {
       option.textContent.trim(),
     );
     expect(options.some((option) => option.startsWith('Titre 1'))).toBe(true);
+  });
+});
+
+describe('provideCwBlockEditorLabels', () => {
+  it('replaces the default text below the provider', async () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwBlockEditorLabels({ toolbar: 'Formatting' })],
+    });
+    const fixture: ComponentFixture<ModelHost> = TestBed.createComponent(ModelHost);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.querySelector('[role="toolbar"]')?.getAttribute('aria-label')).toBe('Formatting');
+    fixture.destroy();
+  });
+});
+
+describe('block editor block type input', () => {
+  /**
+   * Component BlockTypesHost
+   *
+   * @description
+   * Holds an editor given only `blockTypes`. A host keeps the editor inside a TestBed root that
+   * teardown removes: the editor clears its host `id`, so as the root it would stay in the document
+   * and leak into the next spec files of the worker.
+   */
+  @Component({
+    imports: [CwBlockEditor],
+    template: '<cw-block-editor [blockTypes]="types()" />',
+  })
+  class BlockTypesHost {
+    // #region Properties
+    /**
+     * Property types
+     *
+     * @description
+     * Block types given to the editor.
+     *
+     * @type {WritableSignal<readonly CwBlockType[]>}
+     * @readonly
+     */
+    public readonly types: WritableSignal<readonly CwBlockType[]> = signal<readonly CwBlockType[]>(
+      [],
+    );
+    // #endregion
+  }
+
+  /**
+   * Function render
+   *
+   * @description
+   * Renders the editor with the given block types.
+   *
+   * @param {readonly CwBlockType[]} types - Block types given to the `blockTypes` input.
+   *
+   * @returns {Promise<ComponentFixture<BlockTypesHost>>} The rendered host.
+   */
+  async function render(types: readonly CwBlockType[]): Promise<ComponentFixture<BlockTypesHost>> {
+    const fixture: ComponentFixture<BlockTypesHost> = TestBed.createComponent(BlockTypesHost);
+    fixture.componentInstance.types.set(types);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    await settle();
+    return fixture;
+  }
+
+  it('shapes the slash suggestions while the toolbar keeps the provided block types', async () => {
+    const fixture: ComponentFixture<BlockTypesHost> = await render([
+      { kind: 'p', label: 'Custom text' },
+    ]);
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(() => button(host, 'Type de bloc : Custom text')).toThrow();
+    const surface: HTMLElement = textbox(host, 'Contenu du document');
+    typeText(surface, '/');
+    await fixture.whenStable();
+    await settle();
+    const options: NodeListOf<Element> = host.querySelectorAll('[role="option"]');
+    expect(options).toHaveLength(1);
+    expect(options[0].textContent).toContain('Custom text');
+    fixture.destroy();
+  });
+
+  it('disables only the slash menu with an empty input', async () => {
+    const fixture: ComponentFixture<BlockTypesHost> = await render([]);
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.querySelector('[role="toolbar"]')).not.toBeNull();
+    typeText(textbox(host, 'Contenu du document'), '/');
+    await fixture.whenStable();
+    await settle();
+    expect(host.querySelectorAll('[role="option"]')).toHaveLength(0);
+    fixture.destroy();
   });
 });

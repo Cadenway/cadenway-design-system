@@ -2,12 +2,13 @@
  * Type CwLogoVariant
  *
  * @description
- * Form of the logo. Only the mark ships for now: the horizontal (`lockup`) and stacked lockups
- * come once their vector logotype is redrawn, and will widen this type.
+ * Form of the logo: the `mark` alone, or the horizontal `lockup` (the mark followed by the
+ * « Cadenway » wordmark, mockup `Main.dc.html`). The stacked lockup comes once its logotype is
+ * redrawn, and will widen this type.
  *
- * @type {'mark'}
+ * @type {'mark' | 'lockup'}
  */
-export type CwLogoVariant = 'mark';
+export type CwLogoVariant = 'mark' | 'lockup';
 
 /**
  * Type CwLogoTone

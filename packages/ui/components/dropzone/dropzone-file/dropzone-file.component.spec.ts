@@ -4,6 +4,7 @@ import { LiveAnnouncer } from '@angular/cdk/a11y';
 import type { Mock } from 'vitest';
 import { provideCwLocale } from '@cadenway/ui/core';
 
+import { provideCwDropzoneFileLabels } from '../dropzone.providers';
 import type { CwDropzoneFileState } from '../dropzone.types';
 import { CwDropzoneFile } from './dropzone-file.component';
 
@@ -172,5 +173,19 @@ describe('provideCwLocale', () => {
     expect((fixture.nativeElement as HTMLElement).textContent).toContain(
       '64 % · 312 KB sur 488 KB',
     );
+  });
+});
+
+describe('provideCwDropzoneFileLabels', () => {
+  it('replaces the accessible action name', async () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwDropzoneFileLabels({ cancel: 'Cancel upload of' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    expect(
+      button(fixture.nativeElement as HTMLElement, 'Cancel upload of export-taches.csv'),
+    ).toBeTruthy();
   });
 });

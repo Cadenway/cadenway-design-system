@@ -492,3 +492,24 @@ export interface CwCalendarViewLabels {
   readonly cancelled: string;
   // #endregion
 }
+
+/**
+ * Interface CwCalendarViewProvidedLabels
+ *
+ * @description
+ * Complete default texts accepted by the provider, including dedicated input defaults.
+ */
+export interface CwCalendarViewProvidedLabels extends CwCalendarViewLabels {
+  // #region Properties
+  /**
+   * Property ariaLabel
+   *
+   * @description
+   * Accessible name of the calendar.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly ariaLabel: string;
+  // #endregion
+}

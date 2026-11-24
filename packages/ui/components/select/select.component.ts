@@ -42,6 +42,7 @@ import {
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorCaretDownBold } from '@ng-icons/phosphor-icons/bold';
 
+import { SELECT_LABELS } from './select-labels.token';
 import { CwSelectEmpty } from './select-empty/select-empty.component';
 import { CwSelectOption } from './select-option/select-option.component';
 import { EMPTY } from './select.styles';
@@ -87,7 +88,10 @@ const SIZES: Record<CwSelectSize, string> = {
  * @type {string}
  */
 const PANEL: string =
-  'block max-h-80 max-w-sm overflow-y-auto rounded-lg border bg-popover p-1 text-popover-foreground shadow-md animate-menu-in data-[state=closed]:animate-menu-out motion-reduce:animate-none';
+  'block max-h-80 max-w-sm overflow-y-auto rounded-lg border bg-popover p-1 text-popover-foreground shadow-md animate-menu-in data-[state=closed]:animate-menu-out motion-reduce:animate-none ' +
+  // A phone sheet (`provideCwPhoneSheets`) fills the width of its pane; the trigger-width minimum
+  // (an inline style) must not push it past the gutters.
+  'in-data-[presentation=sheet]:w-full in-data-[presentation=sheet]:max-w-none in-data-[presentation=sheet]:min-w-0!';
 
 /* Typeahead: the letters typed within this delay add up to one search (WAI-ARIA listbox pattern). */
 /**
@@ -178,6 +182,10 @@ function keyOptionOf(option: CwSelectOption): KeyOption {
  * values. The select works with Signal Forms (`[formField]`, it is a `FormValueControl`) and with
  * Reactive or template-driven forms (it is the control's value accessor); `aria-invalid` is set
  * when the control is invalid and touched. Name it with a `<label for>` (its `id`) or `ariaLabel`.
+ *
+ * With `provideCwPhoneSheets` (`@cadenway/ui/core`), below 768 px the panel opens as a sheet docked
+ * above the bottom tab bar, full width between gutters (mockup `App.dc.html`); the keyboard, the focus,
+ * Escape and outside clicks behave the same.
  */
 @Component({
   selector: 'cw-select',
@@ -228,7 +236,9 @@ export class CwSelect<T = unknown>
    *
    * @type {InputSignal<string>}
    */
-  public readonly placeholder: InputSignal<string> = input('Choisir…');
+  public readonly placeholder: InputSignal<string> = input<string>(
+    inject(SELECT_LABELS).placeholder,
+  );
 
   /**
    * Property size
@@ -276,7 +286,7 @@ export class CwSelect<T = unknown>
    *
    * @type {InputSignal<string>}
    */
-  public readonly emptyText: InputSignal<string> = input('Aucune option');
+  public readonly emptyText: InputSignal<string> = input<string>(inject(SELECT_LABELS).emptyText);
 
   /**
    * Property ariaLabel
@@ -1067,6 +1077,7 @@ export class CwSelect<T = unknown>
         // A press on the trigger toggles the panel through its own click.
         if (!event.composedPath().includes(trigger)) this.hide();
       },
+      phoneSheet: true,
     });
   }
 

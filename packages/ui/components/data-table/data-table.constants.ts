@@ -1,4 +1,8 @@
-import type { CwDataTableTexts, CwSortDirection } from './data-table.types';
+import type {
+  CwDataTableProvidedTexts,
+  CwDataTableTexts,
+  CwSortDirection,
+} from './data-table.types';
 
 /**
  * Constant CW_DATA_TABLE_TEXTS
@@ -41,6 +45,19 @@ export const CW_DATA_TABLE_TEXTS: CwDataTableTexts = {
   pagination: 'Pagination',
   range: (first, last, total) =>
     total === 0 ? '0 tâche' : `${String(first)}–${String(last)} sur ${String(total)} tâches`,
+};
+
+/**
+ * Constant CW_DATA_TABLE_PROVIDED_TEXTS
+ *
+ * @description
+ * Complete provider defaults, including the empty-state text.
+ *
+ * @type {CwDataTableProvidedTexts}
+ */
+export const CW_DATA_TABLE_PROVIDED_TEXTS: CwDataTableProvidedTexts = {
+  ...CW_DATA_TABLE_TEXTS,
+  emptyText: 'Aucune tâche ne correspond',
 };
 
 /**

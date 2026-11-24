@@ -5,6 +5,7 @@ import { provideCwLocale } from '@cadenway/ui/core';
 import { CwStatGroup } from './stat-group/stat-group.component';
 import { CwStatSparkline } from './stat-sparkline/stat-sparkline.component';
 import { CwStat } from './stat.component';
+import { provideCwStatLabels } from './stat.providers';
 import type { CwStatGoal } from './stat.types';
 
 /**
@@ -182,5 +183,23 @@ describe('provideCwLocale', () => {
     expect(host.querySelector('[role="progressbar"]')?.getAttribute('aria-valuetext')).toBe(
       '1,234.5 sur 2,500 engagés · 49 %',
     );
+  });
+});
+
+describe('provideCwStatLabels', () => {
+  it('replaces trend, goal and refresh texts', async () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwStatLabels({ up: 'rising', goalOf: 'of', refreshing: 'Refreshing' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.componentInstance.refreshing.set(true);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.textContent).toContain('rising');
+    expect(host.querySelector('[role="progressbar"]')?.getAttribute('aria-valuetext')).toContain(
+      '34 of 50',
+    );
+    expect(host.querySelector('[aria-label="Refreshing"]')).not.toBeNull();
   });
 });

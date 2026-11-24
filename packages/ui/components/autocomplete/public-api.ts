@@ -8,3 +8,7 @@ export { CwAutocomplete } from './autocomplete.component';
 export { CwAutocompleteGroup } from './autocomplete-group/autocomplete-group.component';
 export { CwAutocompleteOption } from './autocomplete-option/autocomplete-option.component';
 export { CwAutocompleteTrigger } from './autocomplete-trigger/autocomplete-trigger.directive';
+
+export { CW_AUTOCOMPLETE_LABELS } from './autocomplete.constants';
+export { provideCwAutocompleteLabels } from './autocomplete.providers';
+export type { CwAutocompleteLabels } from './autocomplete.types';

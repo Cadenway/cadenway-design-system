@@ -28,7 +28,7 @@ import { ɵLOCALE, ɵperLocale } from '@cadenway/ui/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorXBold } from '@ng-icons/phosphor-icons/bold';
 
-import { CW_FILTER_BAR_LABELS } from '../filter-bar.constants';
+import { FILTER_BAR_LABELS } from '../filter-bar-labels.token';
 import { CW_FILTER_TEMPLATES, type FilterTemplates } from '../filter-bar.token';
 import type {
   CwFilter,
@@ -223,7 +223,7 @@ export class CwFilterChip {
    * Property labels
    *
    * @description
-   * French texts to override (`CwFilterBarLabels`).
+   * Texts to override (`CwFilterBarLabels`).
    *
    * @type {InputSignal<Partial<CwFilterBarLabels>>}
    * @readonly
@@ -390,16 +390,27 @@ export class CwFilterChip {
     viewChild<CwPopover>('valuePopover');
 
   /**
+   * Property providedLabels
+   *
+   * @description
+   * Texts inherited from the injector.
+   *
+   * @type {CwFilterBarLabels}
+   * @readonly
+   */
+  private readonly providedLabels: CwFilterBarLabels = inject(FILTER_BAR_LABELS);
+
+  /**
    * Property text
    *
    * @description
-   * Default labels merged with consumer overrides.
+   * Provided labels merged with consumer overrides.
    *
    * @type {Signal<CwFilterBarLabels>}
    * @readonly
    */
   protected readonly text: Signal<CwFilterBarLabels> = computed<CwFilterBarLabels>(() => ({
-    ...CW_FILTER_BAR_LABELS,
+    ...this.providedLabels,
     ...this.labels(),
   }));
 

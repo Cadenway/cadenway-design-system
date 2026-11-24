@@ -3,6 +3,7 @@ import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { CwInlineEdit } from '@cadenway/ui/components/inline-edit';
 import { CwSelect, CwSelectOption } from '@cadenway/ui/components/select';
 
+import { provideCwPropertyListLabels } from './property-list.providers';
 import { CwProperty } from './property/property.component';
 import { CwPropertyGroup } from './property-group/property-group.component';
 import { CwPropertyList } from './property-list.component';
@@ -270,5 +271,19 @@ describe('CwPropertyList', () => {
       ?.click();
 
     expect(component.added()).toBe(1);
+  });
+});
+
+describe('provideCwPropertyListLabels', () => {
+  it('uses provided texts in the rendered fixture', async () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwPropertyListLabels({ addFieldLabel: 'Add field' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.textContent).toContain('Add field');
+    expect(host.textContent).not.toContain('Ajouter un champ');
   });
 });

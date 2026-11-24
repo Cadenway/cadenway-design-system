@@ -8,6 +8,11 @@ import { CwMessage } from './message.component';
 import { CwMessageAvatar } from './message-avatar/message-avatar.component';
 import { CwMessageGroup } from './message-group/message-group.component';
 import { CwMessageThread } from './message-thread/message-thread.component';
+import {
+  provideCwMessageLabels,
+  provideCwMessageThreadLabels,
+  provideCwMessageToneLabels,
+} from './message.providers';
 import type { CwMessageStatus, CwMessageTimeFormatter } from './message.types';
 
 /**
@@ -367,5 +372,24 @@ describe('provideCwLocale', () => {
     expect(first.querySelector('cw-message-thread')?.textContent).toContain(
       'Dernière yesterday 11:05 AM',
     );
+  });
+});
+
+describe('message label providers', () => {
+  it('replaces message, thread and tone text', async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideCwMessageLabels({ edited: 'edited' }),
+        provideCwMessageThreadLabels({ replies: 'replies' }),
+        provideCwMessageToneLabels({ warning: 'Warning' }),
+      ],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const text: string = (fixture.nativeElement as HTMLElement).textContent;
+    expect(text).toContain('edited');
+    expect(text).toContain('3 replies');
+    expect(text).toContain('Warning');
   });
 });

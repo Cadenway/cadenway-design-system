@@ -27,10 +27,16 @@ building. The mockup settles behavior and copy.
   (the webapp); the pattern is settled on `cw-checkbox` first.
 - Style hooks: `data-state`, `data-disabled`, `data-orientation`, `data-side`, `data-variant`,
   `data-size` and `aria-*` only. French default texts, overridable by inputs.
+- Texts: every French default of an entry lives in its `CW_<ENTRY>_LABELS` constant, read through
+  an internal `<ENTRY>_LABELS` token (`ɵlabelsToken` from `core/labels/`) and replaced for an
+  application or a subtree with `provideCw<Entry>Labels(partial | () => partial)`; a brick's text
+  inputs and `labels` input still override what is provided. A new text goes into that constant,
+  never inline.
 - Locale: every `Intl` format (dates, numbers, relative times, file sizes, collation, case
   mapping) reads `ɵLOCALE` from `@cadenway/ui/core`, set by `provideCwLocale` (`fr-FR` by
   default); never hard-code a locale. Build module-level formatters with `ɵperLocale`; a `locale`
-  input defaults to `inject(ɵLOCALE)`. Texts are not part of the locale.
+  input defaults to `inject(ɵLOCALE)`. Texts are not part of the locale; a label function that
+  writes dates takes the locale as a parameter (timeline `range`, `move`).
 - Behavior: Angular Aria where a pattern exists (Menu, Listbox, Combobox, Tabs, Toolbar, Tree,
   Grid, Accordion), CDK otherwise. The sheets only name CDK pieces (`@angular/cdk/menu`,
   `FocusKeyManager`, `ActiveDescendantKeyManager`, overlay, drag-drop, stepper, scrolling): where
@@ -66,7 +72,7 @@ tasks beyond the display contracts of `cw-status-icon` and `cw-priority-icon`"):
 | Skeleton | `skeleton` | `div[cwSkeleton]` | `animation`: pulse, shimmer, none | — |
 | Card | `card` | `cw-card`, `-header`, `-title`, `-description`, `-action`, `-content`, `-footer` | `size`: default, sm; `interactive`; `selected` | — |
 | Item | `item` | `cw-item`, `a` or `button[cwItem]`, `cw-item-media`, `-content`, `-title`, `-description`, `-actions`, `-group`, `-separator` | `variant`: default, outline, muted; `size`: default, sm, xs; `selected` (model); `disabled`; `unread`; media `variant`: default, icon, image | roving focus in a group |
-| Logo | `logo` | `cw-logo` | `variant`: lockup, stacked, mark; `tone`: auto, mono; `size` = 28; `decorative`. Mark only until the lockups are redrawn | — |
+| Logo | `logo` | `cw-logo` | `variant`: lockup, stacked, mark; `tone`: auto, mono; `size` = 28; `decorative`. Mark and lockup (mark plus the « Cadenway » wordmark); stacked once its logotype is redrawn | — |
 | Field | `field` | `fieldset[cwFieldSet]`, `legend[cwFieldLegend]`, `cw-field-group`, `cw-field`, `label[cwFieldLabel]`, `cw-field-content`, `-title`, `-description`, `-error`, `-separator` | `orientation`: vertical, horizontal; `invalid`, `disabled` deduced from the control; `errors` | wires `id`, `for`, `aria-describedby` |
 | Input | `input` | `input[cwInput]` | `size`: sm, default, lg | native accessor |
 | Textarea | `textarea` | `textarea[cwTextarea]` | `autoResize` = true | `field-sizing: content` |
@@ -89,6 +95,10 @@ tasks beyond the display contracts of `cw-status-icon` and `cw-priority-icon`"):
 
 ## Wave 2: overlays and pickers
 
+Phone sheets are opt-in: with `provideCwPhoneSheets` from `@cadenway/ui/core`, Menu, Popover,
+Select and Combobox open their panel docked above the bottom tab bar below 768 px (mockup
+`App.dc.html`, `max-md:fixed max-md:inset-x-2 max-md:bottom-16`); without it nothing changes.
+
 | Brick | Entry | Selectors | API | Primitive |
 | --- | --- | --- | --- | --- |
 | Tooltip | `tooltip` | `[cwTooltip]` | `cwTooltip` (text or template); `cwTooltipShortcut`; `cwTooltipSide`, `cwTooltipAlign`; `cwTooltipArrow` = true; `cwTooltipOpenDelay` = 700; `cwTooltipDisabled`; `provideCwTooltip({ openDelay, skipDelay })` | CDK Overlay |
@@ -107,6 +117,7 @@ tasks beyond the display contracts of `cw-status-icon` and `cw-priority-icon`"):
 | Brick | Entry | Selectors | API | Primitive |
 | --- | --- | --- | --- | --- |
 | Dialog | `dialog` | `cw-dialog`, `[cwDialogTrigger]`, `cw-dialog-header`, `h2[cwDialogTitle]`, `p[cwDialogDescription]`, `cw-dialog-footer`, `button[cwDialogClose]` | `open` (model); `size`: sm, default, lg, full; `scrollable`; `showClose`; `closeOnEscape`; `closeOnOverlayClick`; `pending`; `closeLabel` = Fermer; out `closed` (escape, overlay, close, action). Full screen under 768 px | CDK Dialog and Overlay, focus trap |
+| Sheet | `sheet` | `cw-sheet`, `[cwSheetTrigger]`, `cw-sheet-header`, `h2[cwSheetTitle]`, `p[cwSheetDescription]`, `cw-sheet-body`, `cw-sheet-footer`, `button[cwSheetClose]` | `open` (model); `side`: right, left, top, bottom; `size`: sm, default, lg, full; `showClose`; `closeOnEscape`; `closeOnOverlayClick`; `closeLabel` = Fermer; out `closed` (escape, overlay, close, action). `right` enters with `animate-sheet-in`, `bottom` with `animate-drawer-in` | CDK Dialog docked by a global position, focus trap |
 | AlertDialog | `alert-dialog` | `cw-alert-dialog`, `[cwAlertDialogTrigger]`, `cw-alert-dialog-media`, `h2[cwAlertDialogTitle]`, `p[cwAlertDialogDescription]`, `button[cwAlertDialogCancel]`, `button[cwAlertDialogAction]` | `open` (model); `variant`: default, destructive; `size`: sm, default; `confirmText` (type the name to confirm); `confirmLabel`; `pending`; outs `confirm`, `cancel` | CDK Dialog (`role="alertdialog"`) |
 | Toast | `toast` | `cw-toaster`; `CwToastService` | `position` = bottom-right; `expand`; `visibleToasts` = 3; `duration` per tone (6 s in the mockup); `closeButton`; `hotkey` = F8; action and undo through `action.run()` | CDK Overlay; live region |
 

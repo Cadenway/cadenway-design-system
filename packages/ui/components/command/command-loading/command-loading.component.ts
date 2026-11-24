@@ -1,7 +1,7 @@
 import { Component, computed, inject, input, type InputSignal, type Signal } from '@angular/core';
-
 import { CwSpinner } from '@cadenway/ui/components/spinner';
 
+import { COMMAND_LABELS } from '../command-labels.token';
 import { CommandState } from '../command-state/command-state.service';
 
 /**
@@ -30,7 +30,7 @@ export class CwCommandLoading {
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly label: InputSignal<string> = input('Recherche…');
+  public readonly label: InputSignal<string> = input(inject(COMMAND_LABELS).loadingLabel);
 
   /**
    * Property state

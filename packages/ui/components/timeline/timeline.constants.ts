@@ -4,7 +4,8 @@
  * later `@angular/localize` extraction is mechanical (.claude/rules/language.md). Internal.
  */
 
-import type { CwTimelineScale } from './timeline.types';
+import { moveText, rangeText } from './timeline.dates';
+import type { CwTimelineLabels, CwTimelineScale } from './timeline.types';
 
 /**
  * Constant SCALES
@@ -31,26 +32,19 @@ function days(count: number): string {
 }
 
 /**
- * Constant TIMELINE_TEXTS
+ * Constant CW_TIMELINE_LABELS
  *
  * @description
- * French ruler labels and accessible timeline announcements.
+ * French ruler labels and accessible announcements from the Timeline sheet.
  *
- * @type {{ readonly week: (week: number) => string; readonly weekShort: (week: number) => string; readonly late: (count: number) => string; readonly lateLong: (count: number) => string; readonly conflict: (predecessor: string) => string; readonly conflictAnnounce: (successor: string, predecessor: string) => string; readonly milestone: (label: string, date: string) => string; readonly moved: (name: string, range: string) => string; readonly scale: (scale: CwTimelineScale) => string; readonly zoom: (percent: number) => string; readonly percent: (value: number) => string; }}
+ * @type {CwTimelineLabels}
  */
-export const TIMELINE_TEXTS: {
-  readonly week: (week: number) => string;
-  readonly weekShort: (week: number) => string;
-  readonly late: (count: number) => string;
-  readonly lateLong: (count: number) => string;
-  readonly conflict: (predecessor: string) => string;
-  readonly conflictAnnounce: (successor: string, predecessor: string) => string;
-  readonly milestone: (label: string, date: string) => string;
-  readonly moved: (name: string, range: string) => string;
-  readonly scale: (scale: CwTimelineScale) => string;
-  readonly zoom: (percent: number) => string;
-  readonly percent: (value: number) => string;
-} = {
+export const CW_TIMELINE_LABELS: CwTimelineLabels = {
+  range: rangeText,
+  move: moveText,
+  nameHeader: 'Tâche',
+  undatedLabel: 'Sans date',
+  scheduleLabel: 'Planifier',
   /** Ruler, day scale: « Semaine 46 ». */
   week: (week: number): string => `Semaine ${String(week)}`,
   /** Ruler, week scale: « S46 ». */
@@ -74,4 +68,4 @@ export const TIMELINE_TEXTS: {
   zoom: (percent: number): string => `Zoom : ${String(percent)} %`,
   /** Percentage of a bar: « 60 % ». */
   percent: (value: number): string => `${String(value)} %`,
-} as const;
+};

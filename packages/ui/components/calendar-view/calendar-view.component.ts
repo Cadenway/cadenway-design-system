@@ -57,6 +57,7 @@ import {
   type CwToggleGroupValue,
 } from '@cadenway/ui/components/toggle-group';
 
+import type { CwCalendarViewProvidedLabels } from './calendar-view.types';
 import { CalendarDayPart } from './calendar-day/calendar-day.component';
 import { CwCalendarItemDef } from './calendar-item-def/calendar-item-def.directive';
 import {
@@ -69,7 +70,7 @@ import {
   type DropData,
   type ItemView,
 } from './calendar-view.token';
-import { CW_CALENDAR_VIEW_LABELS } from './calendar-view.constants';
+import { CALENDAR_VIEW_LABELS } from './calendar-view-labels.token';
 import { addDays, atMinutes, formatTime, minutesOf } from './calendar-view.dates';
 import type {
   CwCalendarCreate,
@@ -735,6 +736,17 @@ function toSlot(value: unknown): CwCalendarSlotMinutes {
 export class CwCalendarView<T> implements CalendarViewHost {
   // #region Properties
   /**
+   * Property providedLabels
+   *
+   * @description
+   * Texts inherited from the nearest labels provider.
+   *
+   * @type {CwCalendarViewProvidedLabels}
+   * @readonly
+   */
+  private readonly providedLabels: CwCalendarViewProvidedLabels = inject(CALENDAR_VIEW_LABELS);
+
+  /**
    * Property items
    *
    * @description
@@ -909,7 +921,7 @@ export class CwCalendarView<T> implements CalendarViewHost {
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly ariaLabel: InputSignal<string> = input('Calendrier');
+  public readonly ariaLabel: InputSignal<string> = input<string>(this.providedLabels.ariaLabel);
 
   /**
    * Property locale
@@ -927,7 +939,7 @@ export class CwCalendarView<T> implements CalendarViewHost {
    * Property labels
    *
    * @description
-   * Overrides of the French texts.
+   * Overrides of the provided texts.
    *
    * @type {InputSignal<Partial<CwCalendarViewLabels>>}
    * @readonly
@@ -1041,15 +1053,16 @@ export class CwCalendarView<T> implements CalendarViewHost {
    * Property texts
    *
    * @description
-   * The French texts with the `labels` overrides.
+   * The provided texts with the `labels` overrides.
    *
-   * @type {Signal<CwCalendarViewLabels>}
+   * @type {Signal<CwCalendarViewProvidedLabels>}
    * @readonly
    */
-  public readonly texts: Signal<CwCalendarViewLabels> = computed<CwCalendarViewLabels>(() => ({
-    ...CW_CALENDAR_VIEW_LABELS,
-    ...this.labels(),
-  }));
+  public readonly texts: Signal<CwCalendarViewProvidedLabels> =
+    computed<CwCalendarViewProvidedLabels>(() => ({
+      ...this.providedLabels,
+      ...this.labels(),
+    }));
 
   /**
    * Property classes

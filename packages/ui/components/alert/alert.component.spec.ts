@@ -2,6 +2,7 @@ import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { CwButton } from '@cadenway/ui/components/button';
 
+import { provideCwAlertLabels } from './alert.providers';
 import { CwAlertActions } from './alert-actions/alert-actions.component';
 import { CwAlertDescription } from './alert-description/alert-description.component';
 import { CwAlertTitle } from './alert-title/alert-title.component';
@@ -156,5 +157,17 @@ describe('CwAlert', () => {
     await fixture.whenStable();
 
     expect(info.hasAttribute('hidden')).toBe(false);
+  });
+});
+
+describe('provideCwAlertLabels', () => {
+  it('replaces the default texts below its injector', async () => {
+    TestBed.configureTestingModule({ providers: [provideCwAlertLabels({ close: 'Close' })] });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    expect(buttonNamed(fixture.nativeElement as HTMLElement, 'Close')).toBeTruthy();
+    expect(() => buttonNamed(fixture.nativeElement as HTMLElement, 'Fermer')).toThrow();
+    fixture.destroy();
   });
 });

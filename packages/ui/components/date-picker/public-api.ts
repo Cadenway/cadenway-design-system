@@ -12,3 +12,7 @@ export type {
   CwDatePickerVariant,
   CwDatePreset,
 } from './date-picker.types';
+
+export { CW_DATE_PICKER_LABELS } from './date-picker.constants';
+export { provideCwDatePickerLabels } from './date-picker.providers';
+export type { CwDatePickerLabels } from './date-picker.types';

@@ -1,5 +1,6 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideCwPhoneSheets } from '@cadenway/ui/core';
 
 import { CwPopoverClose } from './popover-close/popover-close.directive';
 import { CwPopoverTrigger } from './popover-trigger/popover-trigger.directive';
@@ -256,5 +257,44 @@ describe('CwPopover', () => {
     );
     await fixture.whenStable();
     expect(dialog('Aide')).toBeDefined();
+  });
+});
+
+/**
+ * Function emulatePhone
+ *
+ * @description
+ * Gives the test DOM a `matchMedia` where the phone query matches, which jsdom lacks.
+ */
+function emulatePhone(): void {
+  Object.defineProperty(window, 'matchMedia', {
+    configurable: true,
+    value: (query: string): Pick<MediaQueryList, 'matches' | 'media'> => ({
+      matches: true,
+      media: query,
+    }),
+  });
+}
+
+describe('CwPopover on a phone', () => {
+  afterEach(() => {
+    Reflect.deleteProperty(window, 'matchMedia');
+  });
+
+  it('opens as a sheet without arrow with provideCwPhoneSheets', async () => {
+    emulatePhone();
+    TestBed.configureTestingModule({ providers: [provideCwPhoneSheets()] });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    await fixture.whenStable();
+    button(fixture.nativeElement as HTMLElement, 'Partager').click();
+    await fixture.whenStable();
+    const panel: HTMLElement = within('Partager « Sprint 14 »');
+    const pane: HTMLElement | null = panel.closest<HTMLElement>('[data-presentation]');
+
+    expect(pane?.getAttribute('data-presentation')).toBe('sheet');
+    expect(pane?.style.width).toBe('calc(100% - 16px)');
+    expect(panel.dataset['side']).toBe('top');
+    expect(panel.contains(document.activeElement)).toBe(true);
+    fixture.destroy();
   });
 });

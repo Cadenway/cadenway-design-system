@@ -16,29 +16,11 @@ import {
   untracked,
   type WritableSignal,
 } from '@angular/core';
-
 import { ɵnavigateList } from '@cadenway/ui/core';
 
+import { COMMAND_LABELS } from '../command-labels.token';
+import type { CwCommandLabels } from '../command.types';
 import type { CwCommandFilter } from '../command.types';
-
-/* Announced after each search (Command sheet, "Accessibilité": « 3 résultats »). */
-/**
- * Constant RESULTS
- *
- * @description
- * French result-count announcements for a command search.
- *
- * @type {{ readonly none: "Aucun résultat"; readonly one: "1 résultat"; readonly many: (count: number) => string; }}
- */
-const RESULTS: {
-  readonly none: 'Aucun résultat';
-  readonly one: '1 résultat';
-  readonly many: (count: number) => string;
-} = {
-  none: 'Aucun résultat',
-  one: '1 résultat',
-  many: (count: number) => `${String(count)} résultats`,
-} as const;
 
 /**
  * Interface CommandHost
@@ -182,6 +164,17 @@ export interface CommandOption extends Highlightable {
 @Service({ autoProvided: false })
 export class CommandState {
   // #region Properties
+  /**
+   * Property labels
+   *
+   * @description
+   * Texts used for result-count announcements.
+   *
+   * @type {CwCommandLabels}
+   * @readonly
+   */
+  private readonly labels: CwCommandLabels = inject(COMMAND_LABELS);
+
   /**
    * Property listId
    *
@@ -388,7 +381,11 @@ export class CommandState {
       const count: number = this.visible().length;
       if (!search || this.loading()) return;
       const message: string =
-        count === 0 ? RESULTS.none : count === 1 ? RESULTS.one : RESULTS.many(count);
+        count === 0
+          ? this.labels.resultsNone
+          : count === 1
+            ? this.labels.resultsOne
+            : this.labels.resultsMany(count);
       untracked(() => void this.announcer.announce(message, 'polite'));
     });
   }

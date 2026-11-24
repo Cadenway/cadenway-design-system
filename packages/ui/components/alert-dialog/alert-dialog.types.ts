@@ -27,3 +27,33 @@ export type CwAlertDialogSize = 'sm' | 'default';
  * @type {'button' | 'escape'}
  */
 export type CwAlertDialogCancelReason = 'button' | 'escape';
+
+/**
+ * Interface CwAlertDialogLabels
+ *
+ * @description
+ * Texts used by AlertDialog instances.
+ */
+export interface CwAlertDialogLabels {
+  // #region Properties
+  /**
+   * Property confirm
+   *
+   * @description
+   * Prompt before the confirmation text.
+   *
+   * @type {string}
+   */
+  confirm: string;
+
+  /**
+   * Property more
+   *
+   * @description
+   * Overflow item count.
+   *
+   * @type {(count: number) => string}
+   */
+  more: (count: number) => string;
+  // #endregion
+}

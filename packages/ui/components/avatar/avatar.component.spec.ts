@@ -2,6 +2,7 @@ import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideCwLocale } from '@cadenway/ui/core';
 
+import { provideCwAvatarLabels } from './avatar.providers';
 import { CwAvatar } from './avatar.component';
 import type { CwAvatarPresence } from './avatar.types';
 
@@ -164,5 +165,18 @@ describe('provideCwLocale', () => {
 
     expect(host.querySelector('[aria-hidden="true"]')?.textContent.trim()).toBe('İŞ');
     expect(spoken(host)).toBe('ilker şahin');
+  });
+});
+
+describe('provideCwAvatarLabels', () => {
+  it('uses supplied text in the hosted declarations', () => {
+    TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [provideCwAvatarLabels({ unknown: 'Unknown user' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.textContent).toContain('Unknown user');
   });
 });

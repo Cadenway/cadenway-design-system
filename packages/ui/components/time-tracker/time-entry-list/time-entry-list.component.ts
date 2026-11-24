@@ -28,8 +28,8 @@ import {
   phosphorTrashBold,
 } from '@ng-icons/phosphor-icons/bold';
 
+import { TIME_ENTRY_LIST_LABELS } from '../time-entry-list-labels.token';
 import { formatDuration } from '../duration';
-import { CW_TIME_ENTRY_LIST_LABELS } from '../time-tracker.constants';
 import type { CwTimeEntry, CwTimeEntryListLabels } from '../time-tracker.types';
 
 /* Literal class strings (Time Tracker sheet and preview of the Design System artifact): one grid for
@@ -178,7 +178,7 @@ export class CwTimeEntryList {
    * Property labels
    *
    * @description
-   * French texts, any of them overridden (`CW_TIME_ENTRY_LIST_LABELS`).
+   * Texts, with individual overrides (`CW_TIME_ENTRY_LIST_LABELS`).
    *
    * @type {InputSignal<Partial<CwTimeEntryListLabels>>}
    * @readonly
@@ -276,10 +276,21 @@ export class CwTimeEntryList {
   protected readonly revealClasses: string = REVEAL;
 
   /**
+   * Property providedLabels
+   *
+   * @description
+   * Texts inherited from the injector.
+   *
+   * @type {CwTimeEntryListLabels}
+   * @readonly
+   */
+  private readonly providedLabels: CwTimeEntryListLabels = inject(TIME_ENTRY_LIST_LABELS);
+
+  /**
    * Property text
    *
    * @description
-   * Default labels merged with consumer overrides.
+   * Provided labels merged with consumer overrides.
    *
    * @type {Signal<{ list: string; person: string; date: string; note: string; billable: string; duration: string; running: string; noNote: string; empty: string; today: string; yesterday: string; total: string; edit: (person: string, date: string, duration: string) => string; actions: (person: string) => string; editAction: string; duplicate: string; remove: string; }>}
    * @readonly
@@ -302,7 +313,7 @@ export class CwTimeEntryList {
     editAction: string;
     duplicate: string;
     remove: string;
-  }> = computed(() => ({ ...CW_TIME_ENTRY_LIST_LABELS, ...this.labels() }));
+  }> = computed(() => ({ ...this.providedLabels, ...this.labels() }));
 
   /**
    * Property total

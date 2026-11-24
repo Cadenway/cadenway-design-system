@@ -2,6 +2,7 @@ import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { ɵwriteMention } from '@cadenway/ui/core';
 
+import { provideCwMarkdownLabels } from './markdown.providers';
 import { CwMarkdown } from './markdown.component';
 
 /**
@@ -160,5 +161,18 @@ describe('CwMarkdown', () => {
     expect(root.textContent.trim()).toBe('Avant');
     root = await render('Après');
     expect(root.textContent.trim()).toBe('Après');
+  });
+});
+
+describe('provideCwMarkdownLabels', () => {
+  it('renders provided text', () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwMarkdownLabels({ mention: 'mentioned' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    fixture.componentInstance.source.set('@[Karim Benali](u-1)');
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('mentioned @Karim Benali');
   });
 });

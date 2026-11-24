@@ -2,6 +2,7 @@ import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideCwLocale } from '@cadenway/ui/core';
 
+import { provideCwChartLabels } from './chart.providers';
 import { CwChart } from './chart.component';
 import type {
   CwChartCategorySelect,
@@ -312,5 +313,16 @@ describe('provideCwLocale', () => {
       'table',
     );
     expect(table?.textContent).toContain('1,234.5');
+  });
+});
+
+describe('provideCwChartLabels', () => {
+  it('renders provided text', async () => {
+    TestBed.configureTestingModule({ providers: [provideCwChartLabels({ emptyText: 'No data' })] });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    fixture.componentInstance.data.set([]);
+    await fixture.whenStable();
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('No data');
   });
 });

@@ -18,6 +18,7 @@ import {
   type WritableSignal,
 } from '@angular/core';
 
+import { TOAST_LABELS } from '../toast-labels.token';
 import { CwToastItem } from '../toast-item/toast-item.component';
 import { CW_TOAST_DURATIONS } from '../toast.constants';
 import { CwToastService } from '../toast.service';
@@ -254,7 +255,7 @@ export class CwToaster {
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly ariaLabel: InputSignal<string> = input('Notifications (F8)');
+  public readonly ariaLabel: InputSignal<string> = input<string>(inject(TOAST_LABELS).ariaLabel);
 
   /**
    * Property closeLabel
@@ -265,7 +266,7 @@ export class CwToaster {
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly closeLabel: InputSignal<string> = input('Fermer la notification');
+  public readonly closeLabel: InputSignal<string> = input<string>(inject(TOAST_LABELS).close);
 
   /**
    * Property olderLabel
@@ -278,7 +279,7 @@ export class CwToaster {
    */
   public readonly olderLabel: InputSignal<(count: number) => string> = input<
     (count: number) => string
-  >((count) => `+${String(count)} plus anciennes`);
+  >(inject(TOAST_LABELS).older);
 
   /**
    * Property service

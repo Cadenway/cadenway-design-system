@@ -14,6 +14,9 @@ describe('@cadenway/ui/time-tracker public API', () => {
       'CwTimeTracker',
       'formatDuration',
       'parseDuration',
+      'provideCwTimeEntryFormLabels',
+      'provideCwTimeEntryListLabels',
+      'provideCwTimeTrackerLabels',
     ]);
   });
 });

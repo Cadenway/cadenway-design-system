@@ -32,7 +32,6 @@ import {
   phosphorCheckBold,
   phosphorClockBold,
 } from '@ng-icons/phosphor-icons/bold';
-
 import { CwButton } from '@cadenway/ui/components/button';
 import {
   CwCalendar,
@@ -57,6 +56,8 @@ import {
   CwInputGroupButton,
 } from '@cadenway/ui/components/input-group';
 
+import { DATE_PICKER_LABELS } from './date-picker-labels.token';
+import { CW_DATE_PICKER_LABELS } from './date-picker.constants';
 import type {
   CwDatePickerRange,
   CwDatePickerSize,
@@ -465,7 +466,9 @@ export class CwDatePicker implements FormValueControl<CwDatePickerValue>, Contro
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly placeholder: InputSignal<string> = input('Choisir une date');
+  public readonly placeholder: InputSignal<string> = input<string>(
+    inject(DATE_PICKER_LABELS).placeholder,
+  );
 
   /**
    * Property format
@@ -679,7 +682,9 @@ export class CwDatePicker implements FormValueControl<CwDatePickerValue>, Contro
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly dialogLabel: InputSignal<string> = input('Choisir une date');
+  public readonly dialogLabel: InputSignal<string> = input<string>(
+    inject(DATE_PICKER_LABELS).dialog,
+  );
 
   /**
    * Property clearLabel
@@ -690,7 +695,7 @@ export class CwDatePicker implements FormValueControl<CwDatePickerValue>, Contro
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly clearLabel: InputSignal<string> = input('Effacer');
+  public readonly clearLabel: InputSignal<string> = input<string>(inject(DATE_PICKER_LABELS).clear);
 
   /**
    * Property addTimeLabel
@@ -701,7 +706,9 @@ export class CwDatePicker implements FormValueControl<CwDatePickerValue>, Contro
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly addTimeLabel: InputSignal<string> = input('Ajouter une heure');
+  public readonly addTimeLabel: InputSignal<string> = input<string>(
+    inject(DATE_PICKER_LABELS).addTime,
+  );
 
   /**
    * Property timeLabel
@@ -712,7 +719,7 @@ export class CwDatePicker implements FormValueControl<CwDatePickerValue>, Contro
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly timeLabel: InputSignal<string> = input('Heure');
+  public readonly timeLabel: InputSignal<string> = input<string>(inject(DATE_PICKER_LABELS).time);
 
   /**
    * Property openCalendarLabel
@@ -723,27 +730,56 @@ export class CwDatePicker implements FormValueControl<CwDatePickerValue>, Contro
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly openCalendarLabel: InputSignal<string> = input('Ouvrir le calendrier');
+  public readonly openCalendarLabel: InputSignal<string> = input<string>(
+    inject(DATE_PICKER_LABELS).openCalendar,
+  );
+
+  /**
+   * Property labelHint
+   *
+   * @description
+   * Format hint given by `provideCwDatePickerLabels`; the French default of `CW_DATE_PICKER_LABELS`
+   * when nothing is provided, in which case the hint follows the locale instead.
+   *
+   * @type {string}
+   * @readonly
+   */
+  private readonly labelHint: string = inject(DATE_PICKER_LABELS).inputPlaceholder;
+
+  /**
+   * Property hintFollowsLocale
+   *
+   * @description
+   * Whether no labels provider gave a hint, so that the default hint is derived from the locale.
+   *
+   * @type {boolean}
+   * @readonly
+   */
+  private readonly hintFollowsLocale: boolean =
+    this.labelHint === CW_DATE_PICKER_LABELS.inputPlaceholder;
 
   /**
    * Property providedHint
    *
    * @description
-   * Format hint of the locale given by `provideCwLocale` (« jj/mm/aaaa » in `fr-FR`): the default
-   * of `inputPlaceholder`, declared before it.
+   * Default of `inputPlaceholder`, declared before it: the hint given by `provideCwDatePickerLabels`,
+   * else the hint of the locale given by `provideCwLocale` (« jj/mm/aaaa » in `fr-FR`).
    *
    * @type {string}
    * @readonly
    */
-  private readonly providedHint: string = TYPED_HINT(inject(ɵLOCALE));
+  private readonly providedHint: string = this.hintFollowsLocale
+    ? TYPED_HINT(inject(ɵLOCALE))
+    : this.labelHint;
 
   /**
    * Property inputPlaceholder
    *
    * @description
    * Expected format of the `input` variant, its placeholder, also read after `ariaLabel` in the
-   * field's name. Left to its default, the hint follows the effective `locale` (« jj/mm/aaaa » in
-   * `fr-FR`, « mm/dd/yyyy » in `en-US`), the order the field parses.
+   * field's name. Without this input or a hint given by `provideCwDatePickerLabels`, the hint
+   * follows the effective `locale` (« jj/mm/aaaa » in `fr-FR`, « mm/dd/yyyy » in `en-US`), the
+   * order the field parses.
    *
    * @type {InputSignal<string>}
    * @readonly
@@ -1137,8 +1173,8 @@ export class CwDatePicker implements FormValueControl<CwDatePickerValue>, Contro
    * Property hint
    *
    * @description
-   * The shown format hint: `inputPlaceholder` when it was given, else the hint of the effective
-   * `locale`, so that a `locale` input changes the hint together with the parsed order (a user
+   * The shown format hint: `inputPlaceholder`, or the hint of `provideCwDatePickerLabels`, when one
+   * was given, else the hint of the effective `locale`, so that a `locale` input changes the hint together with the parsed order (a user
    * following a day-first hint in a month-first field would save another date).
    *
    * @type {Signal<string>}
@@ -1146,7 +1182,9 @@ export class CwDatePicker implements FormValueControl<CwDatePickerValue>, Contro
    */
   protected readonly hint: Signal<string> = computed(() => {
     const placeholder: string = this.inputPlaceholder();
-    return placeholder === this.providedHint ? TYPED_HINT(this.locale()) : placeholder;
+    return this.hintFollowsLocale && placeholder === this.providedHint
+      ? TYPED_HINT(this.locale())
+      : placeholder;
   });
 
   /**

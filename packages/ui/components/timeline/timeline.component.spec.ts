@@ -2,6 +2,7 @@ import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideCwLocale } from '@cadenway/ui/core';
 
+import { provideCwTimelineLabels } from './timeline.providers';
 import { CwTimeline } from './timeline.component';
 import type {
   CwDependency,
@@ -568,5 +569,18 @@ describe('provideCwLocale', () => {
         "Corriger l'export CSV, 40 %, En cours, du Nov 10 au Nov 13",
     );
     expect(bar).toBeDefined();
+  });
+});
+
+describe('provideCwTimelineLabels', () => {
+  it('renders the provided text', async () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwTimelineLabels({ nameHeader: 'Task', range: () => 'custom range' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    await fixture.whenStable();
+    const element: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(element.textContent).toContain('Task');
+    expect(element.querySelector('[aria-label*="custom range"]')).toBeTruthy();
   });
 });

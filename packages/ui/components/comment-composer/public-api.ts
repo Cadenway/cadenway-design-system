@@ -10,9 +10,12 @@ export { CW_COMMENT_COMPOSER_LABELS, CW_COMPOSER_COMMANDS } from './comment-comp
 export type {
   CwAttachmentDraft,
   CwCommentComposerLabels,
+  CwCommentComposerProvidedLabels,
   CwCommentComposerMode,
   CwCommentComposerVariant,
   CwCommentSubmit,
   CwComposerCommand,
   CwPerson,
 } from './comment-composer.types';
+
+export { provideCwCommentComposerLabels } from './comment-composer.providers';

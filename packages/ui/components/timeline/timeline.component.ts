@@ -34,7 +34,11 @@ import {
   ɵstartOfMonth,
   ɵstartOfWeek,
 } from '@cadenway/ui/core';
-import { CW_STATUS_LABELS, CwStatusIcon } from '@cadenway/ui/components/status-icon';
+import {
+  CwStatusIcon,
+  injectCwStatusLabels,
+  type CwStatusLabels,
+} from '@cadenway/ui/components/status-icon';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorCalendarPlusBold, phosphorCaretDownBold } from '@ng-icons/phosphor-icons/bold';
 import { phosphorDiamondFill, phosphorWarningCircleFill } from '@ng-icons/phosphor-icons/fill';
@@ -44,13 +48,11 @@ import {
   dayMonth,
   isWeekend,
   monthShort,
-  moveText,
   periodText,
-  rangeText,
   weekdayShort,
   workingDaysBetween,
 } from './timeline.dates';
-import { TIMELINE_TEXTS as TEXTS } from './timeline.texts';
+import { TIMELINE_LABELS } from './timeline-labels.token';
 import type {
   CwDependency,
   CwMilestone,
@@ -58,6 +60,7 @@ import type {
   CwTimelineGroup,
   CwTimelineItem,
   CwTimelineItemChange,
+  CwTimelineLabels,
   CwTimelineRange,
   CwTimelineScale,
   CwTimelineSchedule,
@@ -1699,7 +1702,9 @@ export class CwTimeline {
    *
    * @type {InputSignal<string>}
    */
-  public readonly nameHeader: InputSignal<string> = input<string>('Tâche');
+  public readonly nameHeader: InputSignal<string> = input<string>(
+    inject(TIMELINE_LABELS).nameHeader,
+  );
 
   /**
    * Property undatedLabel
@@ -1710,7 +1715,9 @@ export class CwTimeline {
    *
    * @type {InputSignal<string>}
    */
-  public readonly undatedLabel: InputSignal<string> = input<string>('Sans date');
+  public readonly undatedLabel: InputSignal<string> = input<string>(
+    inject(TIMELINE_LABELS).undatedLabel,
+  );
 
   /**
    * Property scheduleLabel
@@ -1721,7 +1728,9 @@ export class CwTimeline {
    *
    * @type {InputSignal<string>}
    */
-  public readonly scheduleLabel: InputSignal<string> = input<string>('Planifier');
+  public readonly scheduleLabel: InputSignal<string> = input<string>(
+    inject(TIMELINE_LABELS).scheduleLabel,
+  );
 
   /**
    * Property itemChange
@@ -1823,6 +1832,29 @@ export class CwTimeline {
    * @readonly
    */
   private readonly locale: string = inject(ɵLOCALE);
+
+  /**
+   * Property providedLabels
+   *
+   * @description
+   * Timeline texts inherited from the injector.
+   *
+   * @type {CwTimelineLabels}
+   * @readonly
+   */
+  private readonly providedLabels: CwTimelineLabels = inject(TIMELINE_LABELS);
+
+  /**
+   * Property statusLabels
+   *
+   * @description
+   * Status words given by `provideCwStatusLabels`, or the French defaults, written in the bars'
+   * accessible names.
+   *
+   * @type {CwStatusLabels}
+   * @readonly
+   */
+  private readonly statusLabels: CwStatusLabels = injectCwStatusLabels();
 
   /**
    * Property now
@@ -2209,7 +2241,7 @@ export class CwTimeline {
       );
       if (!row?.bar || !row.dates || row.top === null) return null;
       return {
-        text: moveText(row.dates.start, row.dates.end, this.locale),
+        text: this.providedLabels.move(row.dates.start, row.dates.end, this.locale),
         x: this.nameColumnWidth() + row.bar.x + row.bar.width / 2,
         y: row.top >= 30 ? row.top - 28 : row.top + ROW_HEIGHT + 2,
       };
@@ -2523,14 +2555,14 @@ export class CwTimeline {
    * @method statusLabel
    *
    * @description
-   * Returns the French label for an item status.
+   * Returns the provided word for an item status (`provideCwStatusLabels`, French by default).
    *
    * @param {CwTimelineItem} item - Item whose status is labeled.
    *
-   * @returns {string} French status label.
+   * @returns {string} Status word, empty without a status.
    */
   protected statusLabel(item: CwTimelineItem): string {
-    return item.status ? CW_STATUS_LABELS[item.status] : '';
+    return item.status ? this.statusLabels[item.status] : '';
   }
 
   /**
@@ -2545,7 +2577,7 @@ export class CwTimeline {
    * @returns {string} Formatted completion percentage.
    */
   protected percentOf(item: CwTimelineItem): string {
-    return TEXTS.percent(clampProgress(item.progress));
+    return this.providedLabels.percent(clampProgress(item.progress));
   }
 
   /**
@@ -2597,7 +2629,7 @@ export class CwTimeline {
           key: monday,
           x: column.x,
           width: column.width,
-          label: TEXTS.week(ɵisoWeek(column.date)),
+          label: this.providedLabels.week(ɵisoWeek(column.date)),
           sub: periodText(column.date, column.date, this.locale),
           separator: bands.length > 0,
         });
@@ -2647,7 +2679,7 @@ export class CwTimeline {
         date: monday,
         x: columns.length * unit,
         width: unit,
-        label: TEXTS.weekShort(ɵisoWeek(monday)),
+        label: this.providedLabels.weekShort(ɵisoWeek(monday)),
         sub: dayMonth(monday, this.locale),
         today: offset >= 0 && offset < 7,
         weekend: false,
@@ -2866,7 +2898,7 @@ export class CwTimeline {
       // Near the right edge the label goes left of the diamond (sheet, "Jalon").
       before: x > axis.width - 160,
       dateText: dayMonth(date, this.locale),
-      ariaLabel: TEXTS.milestone(mark.label, dayMonth(date, this.locale)),
+      ariaLabel: this.providedLabels.milestone(mark.label, dayMonth(date, this.locale)),
     };
   }
 
@@ -2931,11 +2963,11 @@ export class CwTimeline {
     // visible text (WCAG 2.5.3, Label in Name); the sheet puts the status before it.
     const parts: string[] = [
       item.name,
-      item.progress === undefined ? null : TEXTS.percent(progress),
-      item.status ? CW_STATUS_LABELS[item.status] : null,
-      rangeText(dates.start, dates.end, this.locale),
-      lateDays ? TEXTS.lateLong(lateDays) : null,
-      predecessor ? TEXTS.conflict(predecessor) : null,
+      item.progress === undefined ? null : this.providedLabels.percent(progress),
+      item.status ? this.statusLabels[item.status] : null,
+      this.providedLabels.range(dates.start, dates.end, this.locale),
+      lateDays ? this.providedLabels.lateLong(lateDays) : null,
+      predecessor ? this.providedLabels.conflict(predecessor) : null,
     ].filter((part) => part !== null);
     const readonly: boolean = this.readonly();
     const classes: string = [
@@ -2956,11 +2988,11 @@ export class CwTimeline {
       progress: progress > 0 && progress < 100 ? progress : null,
       percent:
         span.width >= PERCENT_INSIDE && item.progress !== undefined
-          ? TEXTS.percent(progress)
+          ? this.providedLabels.percent(progress)
           : null,
       nameInside,
       outside: outsideNeeded ? { x: before ? span.x - 4 : span.x + span.width + 4, before } : null,
-      late: lateDays ? TEXTS.late(lateDays) : null,
+      late: lateDays ? this.providedLabels.late(lateDays) : null,
       conflict: predecessor !== null,
       dragging,
       resizing: dragging && (drag?.mode === 'start' || drag?.mode === 'end'),
@@ -3077,7 +3109,7 @@ export class CwTimeline {
     }
     if (ctrl && event.key === '0') {
       this.zoom.set(1);
-      void this.announcer.announce(TEXTS.zoom(100), 'polite');
+      void this.announcer.announce(this.providedLabels.zoom(100), 'polite');
       return true;
     }
     if (event.key === 'Escape') {
@@ -3237,7 +3269,10 @@ export class CwTimeline {
         previous: change.own,
       });
       messages.push(
-        TEXTS.moved(change.item.name, rangeText(change.next.start, change.next.end, this.locale)),
+        this.providedLabels.moved(
+          change.item.name,
+          this.providedLabels.range(change.next.start, change.next.end, this.locale),
+        ),
       );
     }
     const ids: Set<string> = new Set<string>(moved.map((change) => change.item.id));
@@ -3255,7 +3290,7 @@ export class CwTimeline {
       if (overlapDays > 0 && overlap(before) <= 0) {
         this.conflict.emit({ dependency, overlapDays });
         messages.push(
-          TEXTS.conflictAnnounce(
+          this.providedLabels.conflictAnnounce(
             byId.get(dependency.to)?.name ?? dependency.to,
             byId.get(dependency.from)?.name ?? dependency.from,
           ),
@@ -3310,12 +3345,12 @@ export class CwTimeline {
       this.zoom.set(zoom);
       // Keep the middle of the period in view when the scale changes (mockup `App.dc.html`, `go`).
       this.range.set(rangeFor(scale, middle));
-      void this.announcer.announce(TEXTS.scale(scale), 'polite');
+      void this.announcer.announce(this.providedLabels.scale(scale), 'polite');
       return;
     }
     if (zoom === this.zoom()) return;
     this.zoom.set(zoom);
-    void this.announcer.announce(TEXTS.zoom(Math.round(zoom * 100)), 'polite');
+    void this.announcer.announce(this.providedLabels.zoom(Math.round(zoom * 100)), 'polite');
   }
   // #endregion
 }

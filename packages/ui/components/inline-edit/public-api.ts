@@ -7,3 +7,5 @@
 export { CwInlineEdit } from './inline-edit.component';
 export { CW_INLINE_EDIT_LABELS } from './inline-edit.constants';
 export type { CwInlineEditLabels, CwInlineEditState } from './inline-edit.types';
+
+export { provideCwInlineEditLabels } from './inline-edit.providers';

@@ -26,7 +26,7 @@ import {
 
 import { KanbanColumnPart } from './kanban-column/kanban-column.component';
 import { CwKanbanCardDef } from './kanban-card-def/kanban-card-def.directive';
-import { CW_KANBAN_LABELS } from './kanban.constants';
+import { KANBAN_LABELS } from './kanban-labels.token';
 import { CwKanbanEmptyDef } from './kanban-empty-def/kanban-empty-def.directive';
 import { KanbanLanePart } from './kanban-lane/kanban-lane.component';
 import { CwKanbanLaneMarkerDef } from './kanban-lane-marker-def/kanban-lane-marker-def.directive';
@@ -427,7 +427,8 @@ export class CwKanban<T> implements KanbanBoard {
    * Property labels
    *
    * @description
-   * Overrides of the French texts.
+   * Overrides of the texts for this board, over the ones given by `provideCwKanbanLabels` and the
+   * French defaults (`CW_KANBAN_LABELS`).
    *
    * @type {InputSignal<Partial<CwKanbanLabels>>}
    * @readonly
@@ -536,6 +537,17 @@ export class CwKanban<T> implements KanbanBoard {
   private readonly announcer: LiveAnnouncer = inject(LiveAnnouncer);
 
   /**
+   * Property providedLabels
+   *
+   * @description
+   * Texts given by `provideCwKanbanLabels` above this board, or the French defaults.
+   *
+   * @type {CwKanbanLabels}
+   * @readonly
+   */
+  private readonly providedLabels: CwKanbanLabels = inject(KANBAN_LABELS);
+
+  /**
    * Property cardDef
    *
    * @description
@@ -610,13 +622,13 @@ export class CwKanban<T> implements KanbanBoard {
    * Property texts
    *
    * @description
-   * The French texts with the `labels` overrides.
+   * The provided texts with the `labels` overrides.
    *
    * @type {Signal<CwKanbanLabels>}
    * @readonly
    */
   public readonly texts: Signal<CwKanbanLabels> = computed<CwKanbanLabels>(() => ({
-    ...CW_KANBAN_LABELS,
+    ...this.providedLabels,
     ...this.labels(),
   }));
 

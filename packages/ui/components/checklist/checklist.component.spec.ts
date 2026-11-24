@@ -2,6 +2,7 @@ import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideCwLocale } from '@cadenway/ui/core';
 
+import { provideCwChecklistLabels } from './checklist.providers';
 import { CwChecklistAdd } from './checklist-add/checklist-add.component';
 import { CwChecklist } from './checklist.component';
 import type { CwChecklistAddEvent, CwChecklistMoveEvent } from './checklist.types';
@@ -380,5 +381,19 @@ describe('provideCwLocale', () => {
     fixture.detectChanges();
 
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('Nov 18');
+  });
+});
+
+describe('provideCwChecklistLabels', () => {
+  it('replaces the default text below the provider', async () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwChecklistLabels({ addLabel: 'Add item' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.textContent).toContain('Add item');
+    fixture.destroy();
   });
 });

@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { FocusKeyManager } from '@angular/cdk/a11y';
 import { CwRipple, ɵFOCUS, ɵnavigateList } from '@cadenway/ui/core';
-import { CwKbd } from '@cadenway/ui/components/kbd';
+import { CwKbd, injectCwKbdLabels, type CwKbdLabels } from '@cadenway/ui/components/kbd';
 import { NgIcon } from '@ng-icons/core';
 
 import { ɵCW_DATA_TABLE, type ɵCwDataTableContext } from '../data-table.token';
@@ -42,22 +42,6 @@ const ACTION: string =
 const VARIANTS: Record<NonNullable<CwBulkAction['variant']>, string> = {
   default: '',
   destructive: 'text-destructive',
-};
-
-/* French names of the keys the bar shows in its `kbd` (sheet DataTableComplete: « Suppr », « Échap »). */
-/**
- * Constant KEY_LABELS
- *
- * @description
- * French names of keyboard shortcuts.
- *
- * @type {Readonly<Record<string, string>>}
- */
-const KEY_LABELS: Readonly<Record<string, string>> = {
-  Delete: 'Suppr',
-  Escape: 'Échap',
-  Backspace: 'Retour',
-  Enter: 'Entrée',
 };
 
 /**
@@ -118,6 +102,17 @@ interface FocusableButton {
 })
 export class CwDataTableBulkBar {
   // #region Properties
+  /**
+   * Property shortcutTexts
+   *
+   * @description
+   * Keyboard names resolved from the current injector.
+   *
+   * @type {CwKbdLabels}
+   * @readonly
+   */
+  private readonly shortcutTexts: CwKbdLabels = injectCwKbdLabels();
+
   /**
    * Property ariaLabel
    *
@@ -236,7 +231,14 @@ export class CwDataTableBulkBar {
    * @returns {string} Displayed keyboard shortcut.
    */
   protected keyLabel(key: string): string {
-    return KEY_LABELS[key] ?? key.toUpperCase();
+    const texts: CwKbdLabels = this.shortcutTexts;
+    const labels: Readonly<Record<string, string>> = {
+      Delete: texts.delete,
+      Escape: texts.escape,
+      Backspace: texts.backspace,
+      Enter: texts.enter,
+    };
+    return labels[key] ?? key.toUpperCase();
   }
 
   /**

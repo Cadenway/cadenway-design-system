@@ -3,10 +3,10 @@ import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { FormField, form, type FieldTree } from '@angular/forms/signals';
-
 import type { CwCalendarMode } from '@cadenway/ui/components/calendar';
 import { provideCwLocale } from '@cadenway/ui/core';
 
+import { provideCwDatePickerLabels } from './date-picker.providers';
 import { CwDatePicker } from './date-picker.component';
 import type { CwDatePickerValue, CwDatePickerVariant, CwDatePreset } from './date-picker.types';
 
@@ -568,5 +568,16 @@ describe('locale input', () => {
 
     expect(field.placeholder).toBe('mm/dd/yyyy');
     expect(named(host, 'Rappel (MM/DD/YYYY)', 'input')).toBeTruthy();
+  });
+});
+
+describe('provideCwDatePickerLabels', () => {
+  it('renders provided text', () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwDatePickerLabels({ placeholder: 'Choose a date' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Choose a date');
   });
 });

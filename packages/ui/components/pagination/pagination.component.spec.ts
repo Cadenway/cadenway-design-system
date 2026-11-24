@@ -3,6 +3,7 @@ import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideCwLocale } from '@cadenway/ui/core';
 
+import { provideCwPaginationLabels } from './pagination.providers';
 import { CwPaginationLink } from './pagination-link/pagination-link.component';
 import { CwPagination } from './pagination.component';
 
@@ -350,5 +351,18 @@ describe('provideCwLocale', () => {
     fixture.detectChanges();
 
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('1–25 sur 1,240');
+  });
+});
+
+describe('provideCwPaginationLabels', () => {
+  it('uses supplied text in the hosted declarations', () => {
+    TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [provideCwPaginationLabels({ previousText: 'Previous' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.textContent).toContain('Previous');
   });
 });

@@ -515,3 +515,191 @@ export interface CwTimelineBarContext {
   readonly width: number;
   // #endregion
 }
+
+/**
+ * Interface CwTimelineLabels
+ *
+ * @description
+ * Texts used by the timeline, including accessible announcements.
+ */
+export interface CwTimelineLabels {
+  // #region Properties
+  /**
+   * Property range
+   *
+   * @description
+   * Formats an inclusive date range for accessible names and announcements. `locale` is the
+   * locale given by `provideCwLocale` (`fr-FR` by default), for the dates of the sentence.
+   *
+   * @type {(start: Date, end: Date, locale: string) => string}
+   * @readonly
+   */
+  readonly range: (start: Date, end: Date, locale: string) => string;
+
+  /**
+   * Property move
+   *
+   * @description
+   * Formats the date range and day count shown while moving a bar. `locale` is the locale given
+   * by `provideCwLocale` (`fr-FR` by default), for the dates of the text.
+   *
+   * @type {(start: Date, end: Date, locale: string) => string}
+   * @readonly
+   */
+  readonly move: (start: Date, end: Date, locale: string) => string;
+
+  /**
+   * Property nameHeader
+   *
+   * @description
+   * Name column header.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly nameHeader: string;
+
+  /**
+   * Property undatedLabel
+   *
+   * @description
+   * Label for an undated item.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly undatedLabel: string;
+
+  /**
+   * Property scheduleLabel
+   *
+   * @description
+   * Scheduling button label.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly scheduleLabel: string;
+
+  /**
+   * Property week
+   *
+   * @description
+   * Text for week in the timeline.
+   *
+   * @type {(week: number) => string}
+   * @readonly
+   */
+  readonly week: (week: number) => string;
+
+  /**
+   * Property weekShort
+   *
+   * @description
+   * Text for weekShort in the timeline.
+   *
+   * @type {(week: number) => string}
+   * @readonly
+   */
+  readonly weekShort: (week: number) => string;
+
+  /**
+   * Property late
+   *
+   * @description
+   * Text for late in the timeline.
+   *
+   * @type {(count: number) => string}
+   * @readonly
+   */
+  readonly late: (count: number) => string;
+
+  /**
+   * Property lateLong
+   *
+   * @description
+   * Text for lateLong in the timeline.
+   *
+   * @type {(count: number) => string}
+   * @readonly
+   */
+  readonly lateLong: (count: number) => string;
+
+  /**
+   * Property conflict
+   *
+   * @description
+   * Text for conflict in the timeline.
+   *
+   * @type {(predecessor: string) => string}
+   * @readonly
+   */
+  readonly conflict: (predecessor: string) => string;
+
+  /**
+   * Property conflictAnnounce
+   *
+   * @description
+   * Text for conflictAnnounce in the timeline.
+   *
+   * @type {(successor: string, predecessor: string) => string}
+   * @readonly
+   */
+  readonly conflictAnnounce: (successor: string, predecessor: string) => string;
+
+  /**
+   * Property milestone
+   *
+   * @description
+   * Text for milestone in the timeline.
+   *
+   * @type {(label: string, date: string) => string}
+   * @readonly
+   */
+  readonly milestone: (label: string, date: string) => string;
+
+  /**
+   * Property moved
+   *
+   * @description
+   * Text for moved in the timeline.
+   *
+   * @type {(name: string, range: string) => string}
+   * @readonly
+   */
+  readonly moved: (name: string, range: string) => string;
+
+  /**
+   * Property scale
+   *
+   * @description
+   * Text for scale in the timeline.
+   *
+   * @type {(scale: CwTimelineScale) => string}
+   * @readonly
+   */
+  readonly scale: (scale: CwTimelineScale) => string;
+
+  /**
+   * Property zoom
+   *
+   * @description
+   * Text for zoom in the timeline.
+   *
+   * @type {(percent: number) => string}
+   * @readonly
+   */
+  readonly zoom: (percent: number) => string;
+
+  /**
+   * Property percent
+   *
+   * @description
+   * Text for percent in the timeline.
+   *
+   * @type {(value: number) => string}
+   * @readonly
+   */
+  readonly percent: (value: number) => string;
+  // #endregion
+}

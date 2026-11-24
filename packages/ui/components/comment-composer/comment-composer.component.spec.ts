@@ -3,9 +3,10 @@ import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, FormsModule, NgModel, ReactiveFormsModule } from '@angular/forms';
 import { FormField, form, type FieldTree } from '@angular/forms/signals';
 import { By } from '@angular/platform-browser';
-import type { CwMentionSearch } from '@cadenway/ui/components/block-editor';
+import { CwBlockEditor, type CwMentionSearch } from '@cadenway/ui/components/block-editor';
 import { of } from 'rxjs';
 
+import { provideCwCommentComposerLabels } from './comment-composer.providers';
 import { CwCommentComposer } from './comment-composer.component';
 import type {
   CwAttachmentDraft,
@@ -644,5 +645,49 @@ describe('CwCommentComposer', () => {
       expect(element.textContent).toContain('Commentaires désactivés');
       reactive.destroy();
     });
+  });
+});
+
+describe('provideCwCommentComposerLabels', () => {
+  it('replaces the default text below the provider', async () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwCommentComposerLabels({ send: 'Send' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.textContent).toContain('Send');
+    fixture.destroy();
+  });
+});
+
+/**
+ * Component ExplicitPlaceholderHost
+ *
+ * @description
+ * Holds a composer given an explicit placeholder. A host keeps the composer inside a TestBed root
+ * that teardown removes: the composer clears its host `id`, so as the root it would stay in the
+ * document and leak into the next spec files of the worker.
+ */
+@Component({
+  imports: [CwCommentComposer],
+  template: '<cw-comment-composer placeholder="Explicit" />',
+})
+class ExplicitPlaceholderHost {}
+
+describe('comment composer placeholder precedence', () => {
+  it('uses the explicit placeholder over the provided value', async () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwCommentComposerLabels({ placeholder: 'Provided' })],
+    });
+    const fixture: ComponentFixture<ExplicitPlaceholderHost> =
+      TestBed.createComponent(ExplicitPlaceholderHost);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const editor: CwBlockEditor = fixture.debugElement.query(By.directive(CwBlockEditor))
+      .componentInstance as CwBlockEditor;
+    expect(editor.placeholder()).toBe('Explicit');
+    fixture.destroy();
   });
 });

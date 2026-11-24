@@ -16,3 +16,7 @@ export type {
   CwAlertDialogSize,
   CwAlertDialogVariant,
 } from './alert-dialog.types';
+
+export { CW_ALERT_DIALOG_LABELS } from './alert-dialog.constants';
+export { provideCwAlertDialogLabels } from './alert-dialog.providers';
+export type { CwAlertDialogLabels } from './alert-dialog.types';

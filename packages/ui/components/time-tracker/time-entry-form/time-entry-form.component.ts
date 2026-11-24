@@ -25,8 +25,9 @@ import { CwInput } from '@cadenway/ui/components/input';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorWarningCircleFill } from '@ng-icons/phosphor-icons/fill';
 
+import { TIME_ENTRY_FORM_LABELS } from '../time-entry-form-labels.token';
 import { formatDuration, parseDuration } from '../duration';
-import { CW_TIME_ENTRY_FORM_LABELS, CW_TIME_QUICK_DURATIONS } from '../time-tracker.constants';
+import { CW_TIME_QUICK_DURATIONS } from '../time-tracker.constants';
 import type { CwTimeEntryDraft, CwTimeEntryFormLabels } from '../time-tracker.types';
 
 /* Literal class strings (Time Tracker sheet and preview of the Design System artifact; the quick
@@ -132,7 +133,7 @@ export class CwTimeEntryForm implements FormValueControl<CwTimeEntryDraft>, Cont
    * Property labels
    *
    * @description
-   * French texts, any of them overridden (`CW_TIME_ENTRY_FORM_LABELS`).
+   * Texts, with individual overrides (`CW_TIME_ENTRY_FORM_LABELS`).
    *
    * @type {InputSignal<Partial<CwTimeEntryFormLabels>>}
    * @readonly
@@ -329,10 +330,21 @@ export class CwTimeEntryForm implements FormValueControl<CwTimeEntryDraft>, Cont
   protected readonly durationClasses: string = DURATION;
 
   /**
+   * Property providedLabels
+   *
+   * @description
+   * Texts inherited from the injector.
+   *
+   * @type {CwTimeEntryFormLabels}
+   * @readonly
+   */
+  private readonly providedLabels: CwTimeEntryFormLabels = inject(TIME_ENTRY_FORM_LABELS);
+
+  /**
    * Property text
    *
    * @description
-   * Default labels merged with consumer overrides.
+   * Provided labels merged with consumer overrides.
    *
    * @type {Signal<{ title: string; duration: string; durationPlaceholder: string; interpreted: (duration: string) => string; hint: string; invalid: string; quick: (duration: string) => string; date: string; note: string; notePlaceholder: string; billable: string; cancel: string; submit: string; }>}
    * @readonly
@@ -351,7 +363,7 @@ export class CwTimeEntryForm implements FormValueControl<CwTimeEntryDraft>, Cont
     billable: string;
     cancel: string;
     submit: string;
-  }> = computed(() => ({ ...CW_TIME_ENTRY_FORM_LABELS, ...this.labels() }));
+  }> = computed(() => ({ ...this.providedLabels, ...this.labels() }));
 
   /**
    * Property isDisabled

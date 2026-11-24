@@ -5,9 +5,11 @@ describe('@cadenway/ui/timeline public API', () => {
   // (.claude/rules/public-api.md): the runtime names are pinned here.
   it('exports exactly the pinned names', () => {
     expect(Object.keys(publicApi).sort()).toEqual([
+      'CW_TIMELINE_LABELS',
       'CwTimeline',
       'CwTimelineBarDef',
       'CwTimelineToolbar',
+      'provideCwTimelineLabels',
     ]);
   });
 });

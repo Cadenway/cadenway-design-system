@@ -10,6 +10,7 @@ describe('@cadenway/ui/block-editor public API', () => {
       'CW_INLINE_MARKS',
       'CW_TOOLBAR_BLOCKS',
       'CwBlockEditor',
+      'provideCwBlockEditorLabels',
     ]);
   });
 });

@@ -24,6 +24,7 @@ import {
 } from '@angular/core';
 import { ɵnavigateList } from '@cadenway/ui/core';
 
+import { TOOLBAR_LABELS } from './toolbar-labels.token';
 import { CwToolbarGroup } from './toolbar-group/toolbar-group.component';
 import { CwToolbarOverflow } from './toolbar-overflow/toolbar-overflow.component';
 import { CwToolbarSeparator } from './toolbar-separator/toolbar-separator.component';
@@ -155,7 +156,9 @@ export class CwToolbar implements ToolbarHandle {
    *
    * @type {InputSignal<string>}
    */
-  public readonly overflowLabel: InputSignal<string> = input('Plus d’options');
+  public readonly overflowLabel: InputSignal<string> = input<string>(
+    inject(TOOLBAR_LABELS).overflow,
+  );
 
   /**
    * Property overflowChange

@@ -2,6 +2,7 @@ import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideCwLocale } from '@cadenway/ui/core';
 
+import { provideCwMeterLabels } from './meter.providers';
 import { CwMeter } from './meter.component';
 import type { CwMeterFormat, CwMeterSeries } from './meter.types';
 
@@ -244,5 +245,23 @@ describe('provideCwLocale', () => {
 
     expect(legend).toContain('4.1');
     expect(legend).toContain('3.6');
+  });
+});
+
+describe('provideCwMeterLabels', () => {
+  it('renders provided text', () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideCwMeterLabels({ threshold: 'Capacity', free: 'Free', unmeasured: 'Not measured' }),
+      ],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.textContent).toContain('Capacity');
+    expect(host.textContent).toContain('Free');
+    expect(meterNamed(host, 'Charge de Léa Martin').getAttribute('aria-valuetext')).toBe(
+      'Not measured',
+    );
   });
 });

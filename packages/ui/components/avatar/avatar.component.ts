@@ -16,25 +16,12 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorUserBold } from '@ng-icons/phosphor-icons/bold';
 import { ɵLOCALE } from '@cadenway/ui/core';
 
+import type { CwAvatarProvidedLabels } from './avatar.types';
+import { AVATAR_LABELS } from './avatar-labels.token';
 import type { CwAvatarGroup } from './avatar-group/avatar-group.component';
 import { AVATAR_GROUP } from './avatar-group.token';
 import { ICON_SIZES, SIZES } from './avatar.styles';
 import type { CwAvatarLabels, CwAvatarPresence, CwAvatarSize } from './avatar.types';
-
-/**
- * Constant LABELS
- *
- * @description
- * Default French text used for accessible avatar descriptions.
- *
- * @type {CwAvatarLabels}
- */
-const LABELS: CwAvatarLabels = {
-  unknown: 'Utilisateur inconnu',
-  online: 'en ligne',
-  away: 'absent',
-  disabled: 'désactivé',
-};
 
 /**
  * Constant INITIALS
@@ -160,6 +147,17 @@ function initialsOf(name: string, locale: string): string {
 export class CwAvatar {
   // #region Properties
   /**
+   * Property providedLabels
+   *
+   * @description
+   * Texts inherited from the nearest labels provider.
+   *
+   * @type {CwAvatarProvidedLabels}
+   * @readonly
+   */
+  private readonly providedLabels: CwAvatarProvidedLabels = inject(AVATAR_LABELS);
+
+  /**
    * Property name
    * @readonly
    *
@@ -223,7 +221,7 @@ export class CwAvatar {
    * @readonly
    *
    * @description
-   * Accessible text overrides merged over the French defaults.
+   * Accessible text overrides merged over the provided defaults.
    *
    * @type {InputSignal<Partial<CwAvatarLabels>>}
    */
@@ -326,7 +324,7 @@ export class CwAvatar {
    * @type {Signal<string>}
    */
   public readonly spoken: Signal<string> = computed(() => {
-    const labels: CwAvatarLabels = { ...LABELS, ...this.labels() };
+    const labels: CwAvatarProvidedLabels = { ...this.providedLabels, ...this.labels() };
     const presence: CwAvatarPresence | null = this.presence();
     const name: string = this.name()?.trim() ?? '';
     let text: string = name === '' ? labels.unknown : name;

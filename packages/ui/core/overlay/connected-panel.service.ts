@@ -1,6 +1,7 @@
 import {
   type OverlayRef,
   type FlexibleConnectedPositionStrategy,
+  type PositionStrategy,
   createFlexibleConnectedPositionStrategy,
   createOverlayRef,
   createRepositionScrollStrategy,
@@ -18,6 +19,7 @@ import {
 
 import { ɵafterExitAnimation } from '../motion/exit-animation';
 import { ɵmenuFrom, ɵpanelPositions } from './overlay-positions';
+import { ɵphoneSheet, type ɵPhoneSheet } from './phone-sheet';
 
 /**
  * Constant CLOSE_FALLBACK_MS
@@ -122,6 +124,19 @@ export interface ɵConnectedPanelConfig {
    * @type {boolean | undefined}
    */
   readonly flexibleDimensions?: boolean;
+
+  /**
+   * Property phoneSheet
+   * @readonly
+   *
+   * @description
+   * Whether the panel opens as a sheet docked at the bottom of a phone screen when the application
+   * opted in with `provideCwPhoneSheets`; defaults to false. The pane then carries
+   * `data-presentation="sheet"` and the panel fills its width.
+   *
+   * @type {boolean | undefined}
+   */
+  readonly phoneSheet?: boolean;
   // #endregion
 }
 
@@ -249,32 +264,39 @@ export class ɵConnectedPanel {
     if (this.overlayRef?.hasAttached()) return;
 
     this.originWidth.set(config.origin.getBoundingClientRect().width);
-    const strategy: FlexibleConnectedPositionStrategy = createFlexibleConnectedPositionStrategy(
-      this.injector,
-      config.origin,
-    )
-      .withPositions(ɵpanelPositions('bottom', 'start'))
-      .withFlexibleDimensions(config.flexibleDimensions ?? false)
-      .withPush(false)
-      .withViewportMargin(8);
-    if (config.inline ?? true) strategy.withPopoverLocation('inline');
+    const sheet: ɵPhoneSheet | null = config.phoneSheet
+      ? ɵphoneSheet(this.injector, (config.inline ?? true) ? config.origin : null)
+      : null;
+    const strategy: FlexibleConnectedPositionStrategy | null = sheet
+      ? null
+      : this.connectedStrategy(config);
+    const positionStrategy: PositionStrategy | null = sheet?.strategy ?? strategy;
+    if (!positionStrategy) return;
     const overlayRef: OverlayRef = createOverlayRef(this.injector, {
-      positionStrategy: strategy,
+      positionStrategy,
       scrollStrategy: createRepositionScrollStrategy(this.injector),
+      ...(sheet ? { width: sheet.width, maxHeight: sheet.maxHeight } : {}),
     });
     this.overlayRef = overlayRef;
     this.subscriptions = [
-      // The panel opens from the corner of the trigger it is attached to (`animate-menu-in`).
-      strategy.positionChanges.subscribe((change) => {
-        overlayRef.overlayElement.style.setProperty(
-          '--menu-from',
-          ɵmenuFrom(change.connectionPair),
-        );
-      }),
       overlayRef.outsidePointerEvents().subscribe((event) => {
         config.outsideClick(event);
       }),
     ];
+    if (sheet) {
+      overlayRef.overlayElement.setAttribute('data-presentation', 'sheet');
+      overlayRef.overlayElement.style.setProperty('--menu-from', sheet.menuFrom);
+    } else if (strategy) {
+      this.subscriptions.push(
+        // The panel opens from the corner of the trigger it is attached to (`animate-menu-in`).
+        strategy.positionChanges.subscribe((change) => {
+          overlayRef.overlayElement.style.setProperty(
+            '--menu-from',
+            ɵmenuFrom(change.connectionPair),
+          );
+        }),
+      );
+    }
     const keydown: ((event: KeyboardEvent) => void) | undefined = config.keydown;
     if (keydown) this.subscriptions.push(overlayRef.keydownEvents().subscribe(keydown));
     overlayRef.attach(new TemplatePortal(config.template, config.viewContainerRef));
@@ -345,6 +367,30 @@ export class ɵConnectedPanel {
     this.overlayRef?.dispose();
     this.overlayRef = null;
     this.attached.set(false);
+  }
+
+  /**
+   * Method connectedStrategy
+   * @method connectedStrategy
+   *
+   * @description
+   * Places the panel below the trigger, start-aligned, flipping above it without room.
+   *
+   * @param {ɵConnectedPanelConfig} config - Trigger and placement options of the panel.
+   *
+   * @returns {FlexibleConnectedPositionStrategy} Strategy attached to the trigger.
+   */
+  private connectedStrategy(config: ɵConnectedPanelConfig): FlexibleConnectedPositionStrategy {
+    const strategy: FlexibleConnectedPositionStrategy = createFlexibleConnectedPositionStrategy(
+      this.injector,
+      config.origin,
+    )
+      .withPositions(ɵpanelPositions('bottom', 'start'))
+      .withFlexibleDimensions(config.flexibleDimensions ?? false)
+      .withPush(false)
+      .withViewportMargin(8);
+    if (config.inline ?? true) strategy.withPopoverLocation('inline');
+    return strategy;
   }
 
   /**

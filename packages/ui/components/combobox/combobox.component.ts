@@ -53,6 +53,7 @@ import {
   phosphorPlusBold,
 } from '@ng-icons/phosphor-icons/bold';
 
+import { COMBOBOX_LABELS } from './combobox-labels.token';
 import { CwComboboxEmpty } from './combobox-empty/combobox-empty.component';
 import { CwComboboxOption } from './combobox-option/combobox-option.component';
 import { EMPTY, OPTION } from './combobox.styles';
@@ -97,7 +98,10 @@ const SIZES: Record<CwComboboxSize, string> = {
  * @type {string}
  */
 const PANEL: string =
-  'flex max-h-80 max-w-sm flex-col overflow-hidden rounded-lg border bg-popover text-popover-foreground shadow-md animate-menu-in data-[state=closed]:animate-menu-out motion-reduce:animate-none';
+  'flex max-h-80 max-w-sm flex-col overflow-hidden rounded-lg border bg-popover text-popover-foreground shadow-md animate-menu-in data-[state=closed]:animate-menu-out motion-reduce:animate-none ' +
+  // A phone sheet (`provideCwPhoneSheets`) fills the width of its pane; the trigger-width minimum
+  // (an inline style) must not push it past the gutters.
+  'in-data-[presentation=sheet]:w-full in-data-[presentation=sheet]:max-w-none in-data-[presentation=sheet]:min-w-0!';
 
 /**
  * Interface KeyOption
@@ -178,6 +182,10 @@ function defaultFilter(
  * and with Reactive or template-driven forms (it is the control's value accessor); `aria-invalid`
  * is set when the control is invalid and touched. Name it with a `<label for>` (its `id`) or
  * `ariaLabel`.
+ *
+ * With `provideCwPhoneSheets` (`@cadenway/ui/core`), below 768 px the panel opens as a sheet docked
+ * above the bottom tab bar, full width between gutters (mockup `App.dc.html`); the keyboard, the focus,
+ * Escape and outside clicks behave the same.
  */
 @Component({
   selector: 'cw-combobox',
@@ -243,7 +251,7 @@ export class CwCombobox<T = unknown>
    *
    * @type {InputSignal<string>}
    */
-  public readonly placeholder: InputSignal<string> = input('Choisir…');
+  public readonly placeholder: InputSignal<string> = input(inject(COMBOBOX_LABELS).placeholder);
 
   /**
    * Property searchPlaceholder
@@ -254,7 +262,9 @@ export class CwCombobox<T = unknown>
    *
    * @type {InputSignal<string>}
    */
-  public readonly searchPlaceholder: InputSignal<string> = input('Rechercher…');
+  public readonly searchPlaceholder: InputSignal<string> = input(
+    inject(COMBOBOX_LABELS).searchPlaceholder,
+  );
 
   /**
    * Property emptyText
@@ -267,7 +277,7 @@ export class CwCombobox<T = unknown>
    */
   public readonly emptyText: InputSignal<string | ((query: string) => string)> = input<
     string | ((query: string) => string)
-  >('Aucun résultat');
+  >(inject(COMBOBOX_LABELS).emptyText);
 
   /**
    * Property creatable
@@ -293,7 +303,7 @@ export class CwCombobox<T = unknown>
    */
   public readonly createLabel: InputSignal<(query: string) => string> = input<
     (query: string) => string
-  >((query) => `Créer « ${query} »`);
+  >(inject(COMBOBOX_LABELS).createLabel);
 
   /**
    * Property loading
@@ -317,7 +327,7 @@ export class CwCombobox<T = unknown>
    *
    * @type {InputSignal<string>}
    */
-  public readonly loadingText: InputSignal<string> = input('Recherche…');
+  public readonly loadingText: InputSignal<string> = input(inject(COMBOBOX_LABELS).loadingText);
 
   /**
    * Property filter
@@ -342,7 +352,7 @@ export class CwCombobox<T = unknown>
    */
   public readonly summary: InputSignal<(count: number) => string> = input<
     (count: number) => string
-  >((count) => `${String(count)} sélectionnés`);
+  >(inject(COMBOBOX_LABELS).summary);
 
   /**
    * Property resultsLabel
@@ -355,7 +365,7 @@ export class CwCombobox<T = unknown>
    */
   public readonly resultsLabel: InputSignal<(count: number) => string> = input<
     (count: number) => string
-  >((count) => (count === 1 ? '1 résultat' : `${String(count)} résultats`));
+  >(inject(COMBOBOX_LABELS).resultsLabel);
 
   /**
    * Property size
@@ -1532,6 +1542,7 @@ export class CwCombobox<T = unknown>
         // A press on the trigger toggles the panel through its own click.
         if (!event.composedPath().includes(trigger)) this.hide(false);
       },
+      phoneSheet: true,
     });
     // The search field takes the focus once the panel is in the page (sheet, "Anatomie"), also
     // when the panel reopens during its closing animation and was never removed.

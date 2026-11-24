@@ -10,6 +10,7 @@ import { CwRipple } from '@cadenway/ui/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorSmileyBold } from '@ng-icons/phosphor-icons/bold';
 
+import { BUBBLE_LABELS } from '../bubble-labels.token';
 import { BUBBLE, type BubbleRef } from '../bubble.token';
 
 /**
@@ -54,7 +55,7 @@ export class CwBubbleReactions {
    *
    * @type {InputSignal<string>}
    */
-  public readonly addLabel: InputSignal<string> = input('Ajouter une réaction');
+  public readonly addLabel: InputSignal<string> = input<string>(inject(BUBBLE_LABELS).addReaction);
 
   /**
    * Property bubble

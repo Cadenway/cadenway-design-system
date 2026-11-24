@@ -1,4 +1,4 @@
-import type { CwChecklistLabels } from './checklist.types';
+import type { CwChecklistLabels, CwChecklistProvidedLabels } from './checklist.types';
 
 /**
  * Constant CW_CHECKLIST_LABELS
@@ -37,3 +37,29 @@ export const CW_CHECKLIST_LABELS: CwChecklistLabels = {
   nest: 'imbriquer',
   due: (date) => `Échéance : ${date}`,
 };
+
+/**
+ * Constant PROVIDED_LABELS
+ *
+ * @description
+ * Complete French defaults used by the labels provider and token.
+ *
+ * @type {CwChecklistProvidedLabels}
+ */
+const PROVIDED_LABELS: CwChecklistProvidedLabels = {
+  ...CW_CHECKLIST_LABELS,
+  addLabel: 'Ajouter un élément',
+  addPlaceholder: 'Élément de checklist (Entrée pour ajouter, Échap pour terminer)',
+};
+
+/**
+ * Function getProvidedLabels
+ *
+ * @description
+ * Returns the complete French defaults for the provider and token.
+ *
+ * @returns {CwChecklistProvidedLabels} Complete default texts.
+ */
+export function getProvidedLabels(): CwChecklistProvidedLabels {
+  return PROVIDED_LABELS;
+}

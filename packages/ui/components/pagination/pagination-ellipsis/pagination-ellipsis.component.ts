@@ -1,7 +1,8 @@
-import { Component, computed, input, type InputSignal, type Signal } from '@angular/core';
+import { Component, computed, inject, input, type InputSignal, type Signal } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorDotsThreeBold } from '@ng-icons/phosphor-icons/bold';
 
+import { PAGINATION_LABELS } from '../pagination-labels.token';
 import type { CwPaginationSize } from '../pagination.types';
 
 /**
@@ -57,7 +58,7 @@ export class CwPaginationEllipsis {
    *
    * @type {InputSignal<string>}
    */
-  public readonly label: InputSignal<string> = input('Pages masquées');
+  public readonly label: InputSignal<string> = input<string>(inject(PAGINATION_LABELS).hiddenPages);
 
   /**
    * Property box

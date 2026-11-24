@@ -1,6 +1,9 @@
+import type { MockInstance } from 'vitest';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { provideCwCommandLabels } from './command.providers';
 import { CwCommand } from './command.component';
 import { cwCommandFuzzyFilter } from './command.constants';
 import type { CwCommandFilter } from './command.types';
@@ -314,5 +317,36 @@ describe('CwCommand', () => {
     expect(loading?.hidden).toBe(false);
     expect(loading?.textContent.trim()).toBe('Recherche…');
     expect(host.querySelector<HTMLElement>('cw-command-empty')?.hidden).toBe(true);
+  });
+});
+
+describe('provideCwCommandLabels', () => {
+  it('renders provided text', async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideCwCommandLabels({
+          listLabel: 'Results',
+          emptyText: 'No matches for {search}',
+          loadingLabel: 'Searching',
+          resultsNone: 'No results',
+        }),
+      ],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.querySelector('[role="listbox"][aria-label="Results"]')).not.toBeNull();
+    const announcer: LiveAnnouncer = TestBed.inject(LiveAnnouncer);
+    const announce: MockInstance<LiveAnnouncer['announce']> = vi.spyOn(announcer, 'announce');
+    fixture.componentInstance.search.set('no matching command');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(host.textContent).toContain('No matches for no matching command');
+    expect(announce).toHaveBeenCalledWith('No results', 'polite');
+    fixture.componentInstance.loading.set(true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(host.textContent).toContain('Searching');
   });
 });

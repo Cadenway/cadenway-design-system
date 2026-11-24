@@ -14,6 +14,8 @@ export { ɵFOCUS, ɵFOCUS_FIELD, ɵFOCUS_FIELD_WITHIN, ɵFOCUS_INSET } from './s
 export { ɵmenuFrom, ɵpanelPositions, ɵplacementOf } from './overlay/overlay-positions';
 export { ɵConnectedPanel } from './overlay/connected-panel.service';
 export type { ɵConnectedPanelConfig } from './overlay/connected-panel.service';
+export { provideCwPhoneSheets, ɵphoneSheet } from './overlay/phone-sheet';
+export type { CwPhoneSheetConfig, ɵPhoneSheet } from './overlay/phone-sheet';
 export { ɵModalOverlay } from './overlay/modal-overlay.service';
 export type { ɵModalOverlayConfig } from './overlay/modal-overlay.service';
 export { ɵPanelStack } from './overlay/panel-stack.service';
@@ -37,5 +39,7 @@ export {
 export { ɵextensionOf, ɵformatFileSize, ɵformatFileSizeIn } from './format/files';
 export { provideCwLocale, ɵLOCALE, ɵperLocale } from './locale/locale';
 export { ɵfold } from './format/text';
+export { ɵlabelsToken, ɵprovideLabels } from './labels/labels';
+export type { ɵLabelsOverrides } from './labels/labels';
 export { ɵcreateMarkdownLexer, ɵwriteMention } from './markdown/markdown.marked';
 export type { ɵMentionToken, ɵUnderlineToken } from './markdown/markdown.marked';

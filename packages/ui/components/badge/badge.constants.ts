@@ -1,4 +1,4 @@
-import type { CwBadgeSize, CwBadgeVariant } from './badge.types';
+import type { CwBadgeLabels, CwBadgeSize, CwBadgeVariant } from './badge.types';
 
 /**
  * Constant BADGE_BASE
@@ -46,4 +46,19 @@ export const BADGE_VARIANTS: Record<CwBadgeVariant, string> = {
 export const BADGE_SIZES: Record<CwBadgeSize, string> = {
   default: 'rounded-md px-2 py-0.5 text-xs [&>svg]:size-3 [&_ng-icon]:[--ng-icon__size:0.75rem]',
   sm: 'h-[18px] px-1.5 text-[11px] leading-none [&>svg]:size-2.5 [&_ng-icon]:[--ng-icon__size:0.625rem]',
+};
+
+/**
+ * Constant CW_BADGE_LABELS
+ *
+ * @description
+ * Default accessible names for icon-only priority badges (Badge sheet).
+ *
+ * @type {CwBadgeLabels}
+ */
+export const CW_BADGE_LABELS: CwBadgeLabels = {
+  urgente: 'Priorité urgente',
+  haute: 'Priorité haute',
+  moyenne: 'Priorité moyenne',
+  basse: 'Priorité basse',
 };

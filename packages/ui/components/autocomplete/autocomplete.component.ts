@@ -32,6 +32,7 @@ import { ɵConnectedPanel, ɵnavigateList, ɵPanelStack, type ɵStackedPanel } f
 import type { Subscription } from 'rxjs';
 import { CwSpinner } from '@cadenway/ui/components/spinner';
 
+import { AUTOCOMPLETE_LABELS } from './autocomplete-labels.token';
 import { CwAutocompleteOption } from './autocomplete-option/autocomplete-option.component';
 import { EMPTY } from './autocomplete.styles';
 import { AUTOCOMPLETE_HOST, type AutocompleteHost } from './autocomplete.token';
@@ -123,7 +124,9 @@ export class CwAutocomplete<T = unknown> implements AutocompleteHost {
    *
    * @type {InputSignal<string>}
    */
-  public readonly loadingText: InputSignal<string> = input('Recherche…');
+  public readonly loadingText: InputSignal<string> = input<string>(
+    inject(AUTOCOMPLETE_LABELS).loading,
+  );
 
   /**
    * Property emptyText
@@ -136,7 +139,7 @@ export class CwAutocomplete<T = unknown> implements AutocompleteHost {
    */
   public readonly emptyText: InputSignal<(query: string) => string> = input<
     (query: string) => string
-  >((query) => `Aucune suggestion : Entrée garde « ${query} ».`);
+  >(inject(AUTOCOMPLETE_LABELS).empty);
 
   /**
    * Property highlight
@@ -160,7 +163,7 @@ export class CwAutocomplete<T = unknown> implements AutocompleteHost {
    *
    * @type {InputSignal<string>}
    */
-  public readonly ariaLabel: InputSignal<string> = input('Suggestions');
+  public readonly ariaLabel: InputSignal<string> = input<string>(inject(AUTOCOMPLETE_LABELS).aria);
 
   /**
    * Property resultsLabel
@@ -173,7 +176,7 @@ export class CwAutocomplete<T = unknown> implements AutocompleteHost {
    */
   public readonly resultsLabel: InputSignal<(count: number) => string> = input<
     (count: number) => string
-  >((count) => (count === 1 ? '1 suggestion' : `${String(count)} suggestions`));
+  >(inject(AUTOCOMPLETE_LABELS).results);
 
   /**
    * Property optionSelected

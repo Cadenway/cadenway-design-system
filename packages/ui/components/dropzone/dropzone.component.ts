@@ -22,30 +22,14 @@ import { phosphorWarningCircleFill } from '@ng-icons/phosphor-icons/fill';
 
 import { ɵextensionOf, ɵformatFileSizeIn, ɵLOCALE } from '@cadenway/ui/core';
 
+import { DROPZONE_LABELS } from './dropzone-labels.token';
 import type {
   CwDropzoneLabels,
+  CwDropzoneProvidedLabels,
   CwDropzoneRejection,
   CwDropzoneSize,
   CwDropzoneState,
 } from './dropzone.types';
-
-/**
- * Constant LABELS
- *
- * @description
- * Default French labels for dropzone states and limits.
- *
- * @type {CwDropzoneLabels}
- */
-const LABELS: CwDropzoneLabels = {
-  or: 'ou',
-  browseAria: 'les fichiers',
-  drop: 'Relâchez pour joindre',
-  reject: 'Type non accepté',
-  limit: 'Limite atteinte',
-  file: 'fichier',
-  files: 'fichiers',
-};
 
 /* Literal class strings (Dropzone sheet and preview of the Design System artifact), so Tailwind finds
    them in the compiled package. The ring follows the keyboard focus of the browse button
@@ -194,6 +178,17 @@ export class CwDropzone {
   private readonly locale: string = inject(ɵLOCALE);
 
   /**
+   * Property providedLabels
+   *
+   * @description
+   * Texts resolved from the current injector.
+   *
+   * @type {CwDropzoneProvidedLabels}
+   * @readonly
+   */
+  private readonly providedLabels: CwDropzoneProvidedLabels = inject(DROPZONE_LABELS);
+
+  /**
    * Property accept
    * @readonly
    *
@@ -287,7 +282,7 @@ export class CwDropzone {
    *
    * @type {InputSignal<string>}
    */
-  public readonly title: InputSignal<string> = input('Déposez des fichiers');
+  public readonly title: InputSignal<string> = input<string>(this.providedLabels.title);
 
   /**
    * Property browseLabel
@@ -298,7 +293,7 @@ export class CwDropzone {
    *
    * @type {InputSignal<string>}
    */
-  public readonly browseLabel: InputSignal<string> = input('parcourez');
+  public readonly browseLabel: InputSignal<string> = input<string>(this.providedLabels.browse);
 
   /**
    * Property hint
@@ -316,7 +311,7 @@ export class CwDropzone {
    * @readonly
    *
    * @description
-   * Replaces some of the other French texts.
+   * Replaces some of the provided texts.
    *
    * @type {InputSignal<Partial<CwDropzoneLabels>>}
    */
@@ -402,7 +397,7 @@ export class CwDropzone {
    * @type {Signal<CwDropzoneLabels>}
    */
   protected readonly text: Signal<CwDropzoneLabels> = computed(() => ({
-    ...LABELS,
+    ...this.providedLabels,
     ...this.labels(),
   }));
 
@@ -457,7 +452,9 @@ export class CwDropzone {
    * @type {Signal<string>}
    */
   protected readonly hintText: Signal<string> = computed(
-    () => this.hint() || `${ɵformatFileSizeIn(this.maxSize(), this.locale)} max.`,
+    () =>
+      this.hint() ||
+      `${ɵformatFileSizeIn(this.maxSize(), this.locale)} ${this.providedLabels.max}.`,
   );
 
   /**

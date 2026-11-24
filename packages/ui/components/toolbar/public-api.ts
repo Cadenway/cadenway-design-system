@@ -11,3 +11,7 @@ export { CwToolbarOverflow } from './toolbar-overflow/toolbar-overflow.component
 export { CwToolbarSeparator } from './toolbar-separator/toolbar-separator.component';
 export { CwToolbarSpacer } from './toolbar-spacer/toolbar-spacer.component';
 export type { CwToolbarSize } from './toolbar.types';
+
+export { CW_TOOLBAR_LABELS } from './toolbar.constants';
+export { provideCwToolbarLabels } from './toolbar.providers';
+export type { CwToolbarLabels } from './toolbar.types';

@@ -153,3 +153,46 @@ export interface CwChartCategorySelect {
   readonly values: Readonly<Record<string, number>>;
   // #endregion
 }
+
+/**
+ * Interface CwChartLabels
+ *
+ * @description
+ * Texts used by the chart controls and their accessible descriptions.
+ */
+export interface CwChartLabels {
+  // #region Properties
+  /**
+   * Property emptyText
+   *
+   * @description
+   * Message shown when there is no data.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly emptyText: string;
+
+  /**
+   * Property categoryHeader
+   *
+   * @description
+   * Header for categories in the data table.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly categoryHeader: string;
+
+  /**
+   * Property capacityLabel
+   *
+   * @description
+   * Label for the capacity reference.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly capacityLabel: string;
+  // #endregion
+}

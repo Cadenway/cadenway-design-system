@@ -17,3 +17,57 @@ export type CwBadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline'
  * @type {'default' | 'sm'}
  */
 export type CwBadgeSize = 'default' | 'sm';
+
+/**
+ * Interface CwBadgeLabels
+ *
+ * @description
+ * Accessible names used for icon-only priority badges.
+ */
+export interface CwBadgeLabels {
+  // #region Properties
+  /**
+   * Property urgente
+   *
+   * @description
+   * Accessible name for urgent priority.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly urgente: string;
+
+  /**
+   * Property haute
+   *
+   * @description
+   * Accessible name for high priority.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly haute: string;
+
+  /**
+   * Property moyenne
+   *
+   * @description
+   * Accessible name for medium priority.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly moyenne: string;
+
+  /**
+   * Property basse
+   *
+   * @description
+   * Accessible name for low priority.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly basse: string;
+  // #endregion
+}

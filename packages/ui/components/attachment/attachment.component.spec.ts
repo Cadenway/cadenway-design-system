@@ -4,6 +4,7 @@ import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { provideCwLocale } from '@cadenway/ui/core';
 
+import { provideCwAttachmentLabels } from './attachment.providers';
 import { CwAttachment } from './attachment.component';
 import type { CwAttachmentSize, CwAttachmentState } from './attachment.types';
 
@@ -195,5 +196,18 @@ describe('provideCwLocale', () => {
 
     expect(host.textContent).toContain('2.4 MB · PDF');
     expect(host.textContent).toContain('312 KB · Image');
+  });
+});
+
+describe('provideCwAttachmentLabels', () => {
+  it('uses supplied text in the hosted declarations', () => {
+    TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [provideCwAttachmentLabels({ download: 'Download' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.querySelector('[aria-label="Download specs-export.pdf"]')).not.toBeNull();
   });
 });

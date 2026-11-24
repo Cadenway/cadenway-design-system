@@ -1,8 +1,12 @@
+import type { MockInstance } from 'vitest';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormField, form, required, type FieldTree } from '@angular/forms/signals';
+import { provideCwPhoneSheets } from '@cadenway/ui/core';
 
+import { provideCwComboboxLabels } from './combobox.providers';
 import { CwComboboxEmpty } from './combobox-empty/combobox-empty.component';
 import { CwComboboxGroup } from './combobox-group/combobox-group.component';
 import { CwComboboxOption } from './combobox-option/combobox-option.component';
@@ -498,5 +502,73 @@ describe('CwCombobox in forms', () => {
     fixture.componentInstance.model.set({ assignees: ['lea'] });
     await fixture.whenStable();
     expect(assignees.textContent.trim()).toBe('Léa Martin');
+  });
+});
+
+/**
+ * Function emulatePhone
+ *
+ * @description
+ * Gives the test DOM a `matchMedia` where the phone query matches, which jsdom lacks.
+ */
+function emulatePhone(): void {
+  Object.defineProperty(window, 'matchMedia', {
+    configurable: true,
+    value: (query: string): Pick<MediaQueryList, 'matches' | 'media'> => ({
+      matches: true,
+      media: query,
+    }),
+  });
+}
+
+describe('CwCombobox on a phone', () => {
+  afterEach(() => {
+    Reflect.deleteProperty(window, 'matchMedia');
+  });
+
+  it('opens its search and options as a sheet with provideCwPhoneSheets', async () => {
+    emulatePhone();
+    TestBed.configureTestingModule({ providers: [provideCwPhoneSheets()] });
+    const fixture: ComponentFixture<ModelHost> = TestBed.createComponent(ModelHost);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    trigger(fixture.nativeElement as HTMLElement, 'Responsable').click();
+    await fixture.whenStable();
+    const pane: HTMLElement | null | undefined =
+      listbox()?.closest<HTMLElement>('[data-presentation]');
+
+    expect(pane?.getAttribute('data-presentation')).toBe('sheet');
+    expect(document.activeElement).toBe(searchField());
+    fixture.destroy();
+  });
+});
+
+describe('provideCwComboboxLabels', () => {
+  it('renders provided text', async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideCwComboboxLabels({
+          placeholder: 'Choose…',
+          searchPlaceholder: 'Search…',
+          disabledLabel: 'Disabled',
+          resultsLabel: (count: number) => `${String(count)} results`,
+        }),
+      ],
+    });
+    const fixture: ComponentFixture<ModelHost> = TestBed.createComponent(ModelHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.textContent).toContain('Choose…');
+    const announcer: LiveAnnouncer = TestBed.inject(LiveAnnouncer);
+    const announce: MockInstance<LiveAnnouncer['announce']> = vi.spyOn(announcer, 'announce');
+    trigger(host, 'Responsable').click();
+    await fixture.whenStable();
+    expect(searchField().getAttribute('aria-label')).toBe('Search…');
+    expect(option('Samuel Roux').textContent).toContain('Disabled');
+    type(searchField(), 'ines');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(announce).toHaveBeenCalledWith('1 results', 'polite');
   });
 });

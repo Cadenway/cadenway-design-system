@@ -4,6 +4,12 @@ describe('@cadenway/ui/badge public API', () => {
   // Removing or renaming an export is a major version, after a deprecation in a minor
   // (.claude/rules/public-api.md): the runtime names are pinned here.
   it('exports exactly the pinned names', () => {
-    expect(Object.keys(publicApi).sort()).toEqual(['CwBadge', 'CwPriorityBadge', 'CwStatusBadge']);
+    expect(Object.keys(publicApi).sort()).toEqual([
+      'CW_BADGE_LABELS',
+      'CwBadge',
+      'CwPriorityBadge',
+      'CwStatusBadge',
+      'provideCwBadgeLabels',
+    ]);
   });
 });

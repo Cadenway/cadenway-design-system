@@ -2,8 +2,14 @@
   <span class="flex items-center gap-1.5">
     <kbd cwKbd>↑</kbd><kbd cwKbd>↓</kbd>{{ navigateLabel() }}
   </span>
-  <span class="flex items-center gap-1.5"><kbd cwKbd>Entrée</kbd>{{ runLabel() }}</span>
+  <span class="flex items-center gap-1.5"
+    ><kbd cwKbd>{{ keyLabels.enter }}</kbd
+    >{{ runLabel() }}</span
+  >
   @if (closeLabel()) {
-    <span class="ml-auto flex items-center gap-1.5"><kbd cwKbd>Échap</kbd>{{ closeLabel() }}</span>
+    <span class="ml-auto flex items-center gap-1.5"
+      ><kbd cwKbd>{{ keyLabels.escape }}</kbd
+      >{{ closeLabel() }}</span
+    >
   }
 </ng-content>

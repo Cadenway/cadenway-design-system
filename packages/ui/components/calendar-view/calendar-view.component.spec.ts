@@ -6,6 +6,7 @@ import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideCwLocale } from '@cadenway/ui/core';
 
+import { provideCwCalendarViewLabels } from './calendar-view.providers';
 import { CwCalendarItemDef } from './calendar-item-def/calendar-item-def.directive';
 import { CwCalendarView } from './calendar-view.component';
 import type { DropData } from './calendar-view.token';
@@ -617,5 +618,19 @@ describe('provideCwLocale', () => {
     expect(cell(host, 'Thursday, November 12, 2026, 4 tâches').getAttribute('aria-current')).toBe(
       'date',
     );
+  });
+});
+
+describe('provideCwCalendarViewLabels', () => {
+  it('replaces the default text below the provider', async () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwCalendarViewLabels({ today: 'Today' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.textContent).toContain('Today');
+    fixture.destroy();
   });
 });

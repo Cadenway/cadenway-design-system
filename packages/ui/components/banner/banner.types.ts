@@ -17,3 +17,23 @@ export type CwBannerTone = 'info' | 'success' | 'warning' | 'error' | 'neutral';
  * @type {'inline' | 'top'}
  */
 export type CwBannerPlacement = 'inline' | 'top';
+
+/**
+ * Interface CwBannerLabels
+ *
+ * @description
+ * Texts used by Banner instances.
+ */
+export interface CwBannerLabels {
+  // #region Properties
+  /**
+   * Property close
+   *
+   * @description
+   * Dismiss button accessible name.
+   *
+   * @type {string}
+   */
+  close: string;
+  // #endregion
+}

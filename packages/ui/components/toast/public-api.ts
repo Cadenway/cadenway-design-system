@@ -17,3 +17,7 @@ export type {
   CwToastPromiseMessages,
   CwToastTone,
 } from './toast.types';
+
+export { CW_TOAST_LABELS } from './toast.constants';
+export { provideCwToastLabels } from './toast.providers';
+export type { CwToastLabels } from './toast.types';

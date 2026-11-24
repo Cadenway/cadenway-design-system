@@ -9,3 +9,7 @@ export { CwInputOtpSeparator } from './input-otp-separator/input-otp-separator.c
 export { CwInputOtpSlot } from './input-otp-slot/input-otp-slot.component';
 export { CwInputOtp } from './input-otp.component';
 export type { CwInputOtpCharset } from './input-otp.types';
+
+export { CW_INPUT_OTP_LABELS } from './input-otp.constants';
+export { provideCwInputOtpLabels } from './input-otp.providers';
+export type { CwInputOtpLabels } from './input-otp.types';

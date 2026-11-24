@@ -5,6 +5,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { FormField, form, type FieldTree } from '@angular/forms/signals';
 import { provideCwLocale } from '@cadenway/ui/core';
 
+import { provideCwCalendarLabels } from './calendar.providers';
 import { CwCalendar } from './calendar.component';
 import type { CwCalendarMode, CwCalendarSelection, CwDateDisabledFn } from './calendar.types';
 
@@ -436,5 +437,19 @@ describe('provideCwLocale', () => {
     expect(grid(fixture.nativeElement as HTMLElement).getAttribute('aria-label')).toBe(
       'novembre 2026',
     );
+  });
+});
+
+describe('provideCwCalendarLabels', () => {
+  it('replaces the default texts below its injector', async () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwCalendarLabels({ previousMonth: 'Previous month' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    expect(button(fixture.nativeElement as HTMLElement, 'Previous month')).toBeTruthy();
+    expect(() => button(fixture.nativeElement as HTMLElement, 'Mois précédent')).toThrow();
+    fixture.destroy();
   });
 });

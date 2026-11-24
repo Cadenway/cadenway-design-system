@@ -148,3 +148,35 @@ export interface CwBubbleDefaults {
   readonly position: Signal<CwBubblePosition | null>;
   // #endregion
 }
+
+/**
+ * Interface CwBubbleLabels
+ *
+ * @description
+ * Texts for bubble tones and reaction controls, replaceable through a provider.
+ */
+export interface CwBubbleLabels extends CwBubbleToneLabels {
+  // #region Properties
+  /**
+   * Property addReaction
+   *
+   * @description
+   * Accessible name of the add reaction button.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly addReaction: string;
+
+  /**
+   * Property you
+   *
+   * @description
+   * Suffix identifying the current user in a reaction.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly you: string;
+  // #endregion
+}

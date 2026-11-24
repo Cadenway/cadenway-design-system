@@ -4,6 +4,7 @@ import type { Mock } from 'vitest';
 import { provideCwLocale } from '@cadenway/ui/core';
 
 import { CwDropzone } from './dropzone.component';
+import { provideCwDropzoneLabels } from './dropzone.providers';
 import type { CwDropzoneRejection } from './dropzone.types';
 
 /**
@@ -306,5 +307,17 @@ describe('provideCwLocale', () => {
     expect(host.querySelector('button')?.getAttribute('aria-label')).toBe(
       'parcourez les fichiers (50 MB max.)',
     );
+  });
+});
+
+describe('provideCwDropzoneLabels', () => {
+  it('replaces the zone title', async () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwDropzoneLabels({ title: 'Drop files' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Drop files');
   });
 });

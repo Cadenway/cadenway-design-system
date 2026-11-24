@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   input,
+  inject,
   type InputSignal,
   type InputSignalWithTransform,
   type Signal,
@@ -10,12 +11,15 @@ import {
 import {
   CW_PRIORITY_LABELS,
   CwPriorityIcon,
+  injectCwPriorityLabels,
+  type CwPriorityLabels,
   type CwPriorityIconSize,
   type CwPriorityKey,
 } from '@cadenway/ui/components/priority-icon';
 
+import { BADGE_LABELS } from '../badge-labels.token';
 import { BADGE_BASE } from '../badge.constants';
-import type { CwBadgeSize } from '../badge.types';
+import type { CwBadgeLabels, CwBadgeSize } from '../badge.types';
 
 /**
  * Constant PRIORITY_SIZES
@@ -39,21 +43,6 @@ const PRIORITY_SIZES: Record<CwBadgeSize, string> = {
  * @type {Record<CwBadgeSize, CwPriorityIconSize>}
  */
 const PRIORITY_ICON_SIZES: Record<CwBadgeSize, CwPriorityIconSize> = { default: '4', sm: '3' };
-
-/**
- * Constant PRIORITY_IMAGE_LABELS
- *
- * @description
- * French accessible names used when a priority badge is rendered without visible text.
- *
- * @type {Record<CwPriorityKey, string>}
- */
-const PRIORITY_IMAGE_LABELS: Record<CwPriorityKey, string> = {
-  urgente: 'Priorité urgente',
-  haute: 'Priorité haute',
-  moyenne: 'Priorité moyenne',
-  basse: 'Priorité basse',
-};
 
 /**
  * Class CwPriorityBadge
@@ -84,6 +73,28 @@ const PRIORITY_IMAGE_LABELS: Record<CwPriorityKey, string> = {
 })
 export class CwPriorityBadge {
   // #region Properties
+  /**
+   * Property priorityLabels
+   *
+   * @description
+   * Priority words resolved from the current injector.
+   *
+   * @type {CwPriorityLabels}
+   * @readonly
+   */
+  private readonly priorityLabels: CwPriorityLabels = injectCwPriorityLabels();
+
+  /**
+   * Property badgeLabels
+   *
+   * @description
+   * Accessible badge names resolved from the current injector.
+   *
+   * @type {CwBadgeLabels}
+   * @readonly
+   */
+  private readonly badgeLabels: CwBadgeLabels = inject(BADGE_LABELS);
+
   /**
    * Property priority
    * @readonly
@@ -128,7 +139,7 @@ export class CwPriorityBadge {
    * @readonly
    *
    * @description
-   * Replacement word for the priority; null or undefined uses the standard French label.
+   * Replacement word for the priority; null or undefined uses the provided priority label.
    *
    * @type {InputSignal<string | null | undefined>}
    * @default undefined
@@ -208,12 +219,12 @@ export class CwPriorityBadge {
    * @readonly
    *
    * @description
-   * Custom label when supplied, otherwise the French word for the validated priority.
+   * Custom label when supplied, otherwise the provided word for the validated priority.
    *
    * @type {Signal<string>}
    */
   protected readonly text: Signal<string> = computed(
-    () => this.label() ?? CW_PRIORITY_LABELS[this.current()],
+    () => this.label() ?? this.priorityLabels[this.current()],
   );
 
   /**
@@ -226,7 +237,7 @@ export class CwPriorityBadge {
    * @type {Signal<string>}
    */
   protected readonly imageLabel: Signal<string> = computed(
-    () => this.ariaLabel() ?? PRIORITY_IMAGE_LABELS[this.current()],
+    () => this.ariaLabel() ?? this.badgeLabels[this.current()],
   );
   // #endregion
 }

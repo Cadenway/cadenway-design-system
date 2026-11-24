@@ -6,3 +6,7 @@
 
 export { CwCodeBlock } from './code-block.component';
 export type { CwCodeBlockLineKind, CwCodeBlockSize, CwCodeBlockVariant } from './code-block.types';
+
+export { CW_CODE_BLOCK_LABELS } from './code-block.constants';
+export { provideCwCodeBlockLabels } from './code-block.providers';
+export type { CwCodeBlockLabels } from './code-block.types';
