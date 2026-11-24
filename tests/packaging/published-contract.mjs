@@ -218,6 +218,13 @@ function compatibleMember(checker, released, candidate, bindings) {
   );
 }
 
+function optionalMember(member) {
+  return (
+    (ts.isPropertySignature(member) || ts.isMethodSignature(member)) &&
+    member.questionToken !== undefined
+  );
+}
+
 function projectedMembers(checker, released, candidate) {
   const releasedMembers = contractMembers(released);
   const candidateMembers = contractMembers(candidate);
@@ -226,7 +233,8 @@ function projectedMembers(checker, released, candidate) {
   const bindings = new Set(
     ts.isClassDeclaration(candidate) ? [...bindingNames(released), ...bindingNames(candidate)] : [],
   );
-  return releasedMembers.flatMap((member) => {
+  const shown = new Set();
+  const kept = releasedMembers.flatMap((member) => {
     const text = print(member);
     if (candidateTexts.has(text)) return [text];
     const counterparts = candidateMembers.filter(
@@ -240,8 +248,18 @@ function projectedMembers(checker, released, candidate) {
     ) {
       return [text];
     }
+    for (const other of counterparts) shown.add(other);
     return counterparts.map(print);
   });
+  // Consumers build objects of a released interface, so a member it gains must be optional: a new
+  // required property, method, overload, call, construct or index signature breaks them.
+  const required = ts.isInterfaceDeclaration(candidate)
+    ? candidateMembers.filter(
+        (member) =>
+          !releasedTexts.has(print(member)) && !shown.has(member) && !optionalMember(member),
+      )
+    : [];
+  return [...kept, ...required.map(print)];
 }
 
 function sameTypeParameters(released, candidate) {
@@ -301,8 +319,8 @@ function exportedDeclarations(program, checker, path) {
  * Lists the released exports whose candidate declarations break the published contract.
  *
  * Every released export must still exist. A class or an interface keeps every released member with
- * the same printed text and may add members; private members, and the protected members of
- * components and directives, are not compared. A type alias may widen, a constant and a readonly
+ * the same printed text; a class may add members and an interface optional ones. Private members,
+ * and the protected members of components and directives, are not compared. A type alias may widen, a constant and a readonly
  * class property that is not an Angular binding may narrow, and Angular metadata may add optional
  * inputs and outputs, all checked with the TypeScript checker. Any other declaration prints
  * identically.

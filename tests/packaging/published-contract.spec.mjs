@@ -47,10 +47,23 @@ export type B = 'b';`,
     candidate: `export type A = 'a';`,
     changed: ['B'],
   },
-  'accepts a new optional interface member': {
+  'accepts new optional interface members': {
     released: `export interface Config { readonly a: string; }`,
-    candidate: `export interface Config { readonly a: string; readonly b?: number; }`,
+    candidate: `export interface Config { readonly a: string; readonly b?: number; c?(): void; }`,
     changed: [],
+  },
+  'reports a new required interface member': {
+    released: `export interface Config { a: string; }
+export interface Handler { a(): void; }
+export interface Overloaded { a(value: string): void; }
+export interface Callable { (value: string): void; }
+export interface Indexed { a: string; }`,
+    candidate: `export interface Config { a: string; required: number; }
+export interface Handler { a(): void; b(): void; }
+export interface Overloaded { a(value: string): void; a(value: number): void; }
+export interface Callable { (value: string): void; (value: number): void; }
+export interface Indexed { a: string; [key: string]: string; }`,
+    changed: ['Callable', 'Config', 'Handler', 'Indexed', 'Overloaded'],
   },
   'reports a removed or changed interface member, even a narrower one': {
     released: `export interface Removed { a: string; b: string; }
@@ -252,6 +265,24 @@ describe('the published type contract', () => {
     ]);
     assert.deepEqual(actual, [
       { declaration: 'class A {\n}', members: ['readonly a: number;', 'b(): void;'] },
+    ]);
+  });
+
+  it('reports the new required member after the released ones', () => {
+    const { actual, expected } = changes.find(
+      ({ label, symbol }) =>
+        label === 'reports a new required interface member' && symbol === 'Config',
+    );
+    assert.deepEqual(expected, [{ declaration: 'interface Config {\n}', members: ['a: string;'] }]);
+    assert.deepEqual(actual, [
+      { declaration: 'interface Config {\n}', members: ['a: string;', 'required: number;'] },
+    ]);
+  });
+
+  it('reports a changed interface member once', () => {
+    const { actual } = changes.find(({ symbol }) => symbol === 'Narrowed');
+    assert.deepEqual(actual, [
+      { declaration: 'interface Narrowed {\n}', members: ["readonly mode: 'a';"] },
     ]);
   });
 });
