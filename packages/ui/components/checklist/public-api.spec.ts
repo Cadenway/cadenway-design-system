@@ -10,6 +10,7 @@ describe('@cadenway/ui/checklist public API', () => {
       'CwChecklistAdd',
       'CwChecklistItem',
       'CwChecklistItemMenu',
+      'provideCwChecklistLabels',
     ]);
   });
 });

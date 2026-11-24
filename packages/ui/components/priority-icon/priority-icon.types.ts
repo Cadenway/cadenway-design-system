@@ -19,3 +19,13 @@ export type CwPriorityKey = 'urgente' | 'haute' | 'moyenne' | 'basse';
  * @type {'3' | '3.5' | '4' | '5'}
  */
 export type CwPriorityIconSize = '3' | '3.5' | '4' | '5';
+
+/**
+ * Type CwPriorityLabels
+ *
+ * @description
+ * Words displayed beside priority icons, configurable for an injector subtree.
+ *
+ * @type {Readonly<Record<CwPriorityKey, string>>}
+ */
+export type CwPriorityLabels = Readonly<Record<CwPriorityKey, string>>;

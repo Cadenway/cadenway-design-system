@@ -6,6 +6,7 @@ import { CwCellEditorDef } from './cell-editor/cell-editor.directive';
 import { CwDataTableColumn } from './data-table-column/data-table-column.component';
 import { CwDataTableEmpty } from './data-table-empty/data-table-empty.directive';
 import { CwDataTable } from './data-table.component';
+import { provideCwDataTableTexts } from './data-table.providers';
 import type {
   CwBulkAction,
   CwBulkActionEvent,
@@ -875,5 +876,18 @@ describe('CwDataTable', () => {
       expect(component.selection()).toBe('all');
       expect(host.textContent).toContain('Les 4 tâches sont sélectionnées');
     });
+  });
+});
+
+describe('provideCwDataTableTexts', () => {
+  it('replaces the empty state', async () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwDataTableTexts({ emptyText: 'No rows' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.componentInstance.data.set([]);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('No rows');
   });
 });

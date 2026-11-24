@@ -3,6 +3,7 @@ import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import type { Mock } from 'vitest';
 
 import { CwDropzone } from './dropzone.component';
+import { provideCwDropzoneLabels } from './dropzone.providers';
 import type { CwDropzoneRejection } from './dropzone.types';
 
 /**
@@ -288,5 +289,17 @@ describe('CwDropzone', () => {
     zone.dispatchEvent(dragEvent('drop', [file('a.png', 1, 'image/png')]));
     await fixture.whenStable();
     expect(component.added()).toEqual([]);
+  });
+});
+
+describe('provideCwDropzoneLabels', () => {
+  it('replaces the zone title', async () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwDropzoneLabels({ title: 'Drop files' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Drop files');
   });
 });

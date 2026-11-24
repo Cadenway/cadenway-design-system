@@ -4,6 +4,7 @@ import {
   computed,
   contentChildren,
   forwardRef,
+  inject,
   input,
   model,
   output,
@@ -19,6 +20,7 @@ import { CwRipple } from '@cadenway/ui/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorCaretRightBold, phosphorPlusBold } from '@ng-icons/phosphor-icons/bold';
 
+import { PROPERTY_LIST_LABELS } from './property-list-labels.token';
 import { CwProperty } from './property/property.component';
 import { CwPropertyGroup } from './property-group/property-group.component';
 import { PROPERTY_LIST, type PropertyListHost } from './property-list.token';
@@ -165,7 +167,9 @@ export class CwPropertyList implements PropertyListHost {
    *
    * @type {InputSignal<string>}
    */
-  public readonly emptyFieldsLabel: InputSignal<string> = input('Champs vides');
+  public readonly emptyFieldsLabel: InputSignal<string> = input<string>(
+    inject(PROPERTY_LIST_LABELS).emptyFieldsLabel,
+  );
 
   /**
    * Property addFieldLabel
@@ -176,7 +180,9 @@ export class CwPropertyList implements PropertyListHost {
    *
    * @type {InputSignal<string>}
    */
-  public readonly addFieldLabel: InputSignal<string> = input('Ajouter un champ');
+  public readonly addFieldLabel: InputSignal<string> = input<string>(
+    inject(PROPERTY_LIST_LABELS).addFieldLabel,
+  );
 
   /**
    * Property addField

@@ -3,6 +3,7 @@ import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { FormField, form, required, type FieldTree } from '@angular/forms/signals';
 
+import { provideCwQuestionnaireLabels } from './questionnaire.providers';
 import { CwQuestionnaire } from './questionnaire.component';
 import { CwQuestionnaireActions } from './questionnaire-actions/questionnaire-actions.component';
 import { CwQuestionnaireChoice } from './questionnaire-choice/questionnaire-choice.component';
@@ -366,5 +367,19 @@ describe('CwQuestionnaire', () => {
     radio(element, 'Liste').click();
     await signalHost.whenStable();
     expect(signalHost.componentInstance.model().views).toEqual(['board', 'list']);
+  });
+});
+
+describe('provideCwQuestionnaireLabels', () => {
+  it('uses provided texts in the rendered fixture', async () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwQuestionnaireLabels({ nextLabel: 'Next' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.textContent).toContain('Next');
+    expect(host.textContent).not.toContain('Suivant');
   });
 });

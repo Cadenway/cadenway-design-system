@@ -125,3 +125,24 @@ export interface CwStepperLabels {
   readonly of: string;
   // #endregion
 }
+
+/**
+ * Interface CwStepperProvidedLabels
+ *
+ * @description
+ * Complete default texts accepted by the provider, including dedicated input defaults.
+ */
+export interface CwStepperProvidedLabels extends CwStepperLabels {
+  // #region Properties
+  /**
+   * Property ariaLabel
+   *
+   * @description
+   * Accessible name of the step list.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly ariaLabel: string;
+  // #endregion
+}

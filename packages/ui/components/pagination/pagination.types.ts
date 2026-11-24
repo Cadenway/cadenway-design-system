@@ -137,3 +137,24 @@ export interface CwPaginationLabels {
   readonly pageSize: string;
   // #endregion
 }
+
+/**
+ * Interface CwPaginationProvidedLabels
+ *
+ * @description
+ * Complete default texts accepted by the provider, including dedicated input defaults.
+ */
+export interface CwPaginationProvidedLabels extends CwPaginationLabels {
+  // #region Properties
+  /**
+   * Property ariaLabel
+   *
+   * @description
+   * Accessible name of the navigation.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly ariaLabel: string;
+  // #endregion
+}

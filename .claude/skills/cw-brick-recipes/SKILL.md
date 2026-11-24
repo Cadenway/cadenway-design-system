@@ -27,6 +27,11 @@ building. The mockup settles behavior and copy.
   (the webapp); the pattern is settled on `cw-checkbox` first.
 - Style hooks: `data-state`, `data-disabled`, `data-orientation`, `data-side`, `data-variant`,
   `data-size` and `aria-*` only. French default texts, overridable by inputs.
+- Texts: every French default of an entry lives in its `CW_<ENTRY>_LABELS` constant, read through
+  an internal `<ENTRY>_LABELS` token (`ɵlabelsToken` from `core/labels/`) and replaced for an
+  application or a subtree with `provideCw<Entry>Labels(partial | () => partial)`; a brick's text
+  inputs and `labels` input still override what is provided. A new text goes into that constant,
+  never inline.
 - Behavior: Angular Aria where a pattern exists (Menu, Listbox, Combobox, Tabs, Toolbar, Tree,
   Grid, Accordion), CDK otherwise. The sheets only name CDK pieces (`@angular/cdk/menu`,
   `FocusKeyManager`, `ActiveDescendantKeyManager`, overlay, drag-drop, stepper, scrolling): where

@@ -4,6 +4,7 @@ import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { Clipboard } from '@angular/cdk/clipboard';
 
+import { provideCwCodeBlockLabels } from './code-block.providers';
 import { CwCodeBlock } from './code-block.component';
 
 /**
@@ -216,5 +217,19 @@ describe('CwCodeBlock', () => {
     fixture.detectChanges();
 
     expect(area(host, 'bash, 1 ligne').parentElement?.querySelectorAll('button')).toHaveLength(0);
+  });
+});
+
+describe('provideCwCodeBlockLabels', () => {
+  it('renders provided text', async () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwCodeBlockLabels({ copyLabel: 'Copy code' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('button[aria-label="Copy code"]'),
+    ).not.toBeNull();
   });
 });

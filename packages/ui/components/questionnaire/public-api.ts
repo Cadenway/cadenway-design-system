@@ -19,3 +19,7 @@ export type {
   CwQuestionnaireShortcuts,
   CwQuestionnaireSummaryItem,
 } from './questionnaire.types';
+
+export { CW_QUESTIONNAIRE_LABELS } from './questionnaire.constants';
+export { provideCwQuestionnaireLabels } from './questionnaire.providers';
+export type { CwQuestionnaireLabels } from './questionnaire.types';

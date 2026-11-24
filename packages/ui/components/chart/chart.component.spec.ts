@@ -1,6 +1,7 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { provideCwChartLabels } from './chart.providers';
 import { CwChart } from './chart.component';
 import type {
   CwChartCategorySelect,
@@ -294,5 +295,16 @@ describe('CwChart', () => {
 
     expect(host.querySelector('cw-chart')?.getAttribute('aria-busy')).toBe('true');
     expect(host.querySelector('[role="img"][tabindex="0"]')).toBeNull();
+  });
+});
+
+describe('provideCwChartLabels', () => {
+  it('renders provided text', async () => {
+    TestBed.configureTestingModule({ providers: [provideCwChartLabels({ emptyText: 'No data' })] });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    fixture.componentInstance.data.set([]);
+    await fixture.whenStable();
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('No data');
   });
 });

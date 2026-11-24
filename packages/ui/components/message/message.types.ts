@@ -42,7 +42,7 @@ export type CwMessageTimeFormatter = (time: Date, now: Date) => string;
  * Interface CwMessageLabels
  *
  * @description
- * French message labels that callers can override through the labels input.
+ * Message texts, configurable by provider and overridden through the labels input.
  */
 export interface CwMessageLabels {
   // #region Properties
@@ -216,7 +216,7 @@ export interface CwMessageToneLabels {
  * Interface CwMessageThreadLabels
  *
  * @description
- * French thread summary labels that callers can override through the labels input.
+ * Thread summary texts, configurable by provider and overridden through the labels input.
  */
 export interface CwMessageThreadLabels {
   // #region Properties

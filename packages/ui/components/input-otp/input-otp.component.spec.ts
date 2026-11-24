@@ -3,6 +3,7 @@ import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormField, form, required, type FieldTree } from '@angular/forms/signals';
 
+import { provideCwInputOtpLabels } from './input-otp.providers';
 import { CwInputOtpGroup } from './input-otp-group/input-otp-group.component';
 import { CwInputOtpSeparator } from './input-otp-separator/input-otp-separator.component';
 import { CwInputOtpSlot } from './input-otp-slot/input-otp-slot.component';
@@ -367,5 +368,18 @@ describe('CwInputOtp', () => {
     fixture.componentInstance.model.set({ code: '91' });
     await fixture.whenStable();
     expect(shown(code)).toBe('91');
+  });
+});
+
+describe('provideCwInputOtpLabels', () => {
+  it('renders provided text', () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwInputOtpLabels({ ariaLabel: 'One-time code' })],
+    });
+    const fixture: ComponentFixture<CwInputOtp> = TestBed.createComponent(CwInputOtp);
+    fixture.detectChanges();
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('input')?.getAttribute('aria-label'),
+    ).toBe('One-time code');
   });
 });

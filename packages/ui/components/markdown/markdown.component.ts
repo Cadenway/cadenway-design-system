@@ -1,6 +1,7 @@
 import type { Marked } from 'marked';
-import { Component, computed, input, type InputSignal, type Signal } from '@angular/core';
+import { Component, inject, computed, input, type InputSignal, type Signal } from '@angular/core';
 
+import { MARKDOWN_LABELS } from './markdown-labels.token';
 import { CwMarkdownBlocks } from './markdown-blocks/markdown-blocks.component';
 import { ɵcreateMarked } from './markdown.marked';
 import { MARKDOWN_CONTEXT, type MarkdownContext } from './markdown.token';
@@ -50,7 +51,9 @@ export class CwMarkdown implements MarkdownContext {
    *
    * @type {InputSignal<string>}
    */
-  public readonly mentionLabel: InputSignal<string> = input('mention');
+  public readonly mentionLabel: InputSignal<string> = input<string>(
+    inject(MARKDOWN_LABELS).mention,
+  );
 
   /**
    * Property marked

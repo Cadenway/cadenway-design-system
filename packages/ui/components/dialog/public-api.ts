@@ -11,4 +11,6 @@ export { CwDialogFooter } from './dialog-footer/dialog-footer.component';
 export { CwDialogHeader } from './dialog-header/dialog-header.component';
 export { CwDialogTitle } from './dialog-title/dialog-title.directive';
 export { CwDialogTrigger } from './dialog-trigger/dialog-trigger.directive';
-export type { CwDialogCloseReason, CwDialogSize } from './dialog.types';
+export { CW_DIALOG_LABELS } from './dialog.constants';
+export { provideCwDialogLabels } from './dialog.providers';
+export type { CwDialogCloseReason, CwDialogLabels, CwDialogSize } from './dialog.types';

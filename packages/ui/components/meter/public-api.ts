@@ -12,3 +12,7 @@ export type {
   CwMeterVariant,
   CwMeterZone,
 } from './meter.types';
+
+export { CW_METER_LABELS } from './meter.constants';
+export { provideCwMeterLabels } from './meter.providers';
+export type { CwMeterLabels } from './meter.types';

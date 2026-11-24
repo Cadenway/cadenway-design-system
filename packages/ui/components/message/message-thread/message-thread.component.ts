@@ -1,4 +1,4 @@
-import { Component, computed, input, numberAttribute, output } from '@angular/core';
+import { Component, computed, inject, input, numberAttribute, output } from '@angular/core';
 import type {
   InputSignal,
   InputSignalWithTransform,
@@ -10,6 +10,7 @@ import { CwRipple, ɵsameDay } from '@cadenway/ui/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorCaretRightBold } from '@ng-icons/phosphor-icons/bold';
 
+import { MESSAGE_THREAD_LABELS } from '../message-thread-labels.token';
 import { clockTime, messageTime } from '../message.format';
 import type { CwMessageThreadLabels, CwMessageTimeFormatter } from '../message.types';
 
@@ -27,27 +28,11 @@ type ReplyCountInput = InputSignalWithTransform<number, unknown>;
  * Type ThreadText
  *
  * @description
- * Reactive French labels used by the thread summary.
+ * Reactive labels used by the thread summary.
  *
  * @type {Signal<CwMessageThreadLabels>}
  */
 type ThreadText = Signal<CwMessageThreadLabels>;
-
-/**
- * Constant LABELS
- *
- * @description
- * Default French text used in the thread summary.
- *
- * @type {CwMessageThreadLabels}
- */
-const LABELS: CwMessageThreadLabels = {
-  reply: 'réponse',
-  replies: 'réponses',
-  last: 'Dernière',
-  at: 'à',
-  justNow: "à l'instant",
-};
 
 /**
  * Component CwMessageThread
@@ -69,6 +54,17 @@ const LABELS: CwMessageThreadLabels = {
 })
 export class CwMessageThread {
   // #region Properties
+  /**
+   * Property providedLabels
+   *
+   * @description
+   * Texts resolved from the current injector.
+   *
+   * @type {CwMessageThreadLabels}
+   * @readonly
+   */
+  private readonly providedLabels: CwMessageThreadLabels = inject(MESSAGE_THREAD_LABELS);
+
   /**
    * Property count
    * @readonly
@@ -121,7 +117,7 @@ export class CwMessageThread {
    * @readonly
    *
    * @description
-   * Overrides for the default French summary text.
+   * Overrides for the provided summary text.
    *
    * @type {InputSignal<Partial<CwMessageThreadLabels>>}
    * @default {}
@@ -150,7 +146,10 @@ export class CwMessageThread {
    *
    * @type {ThreadText}
    */
-  protected readonly text: ThreadText = computed(() => ({ ...LABELS, ...this.labels() }));
+  protected readonly text: ThreadText = computed(() => ({
+    ...this.providedLabels,
+    ...this.labels(),
+  }));
 
   /**
    * Property shown

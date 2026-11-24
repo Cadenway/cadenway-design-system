@@ -1,5 +1,5 @@
 import { matchScore } from './command.match';
-import type { CwCommandFilter } from './command.types';
+import type { CwCommandFilter, CwCommandLabels } from './command.types';
 
 /**
  * Function cwCommandFuzzyFilter
@@ -23,3 +23,26 @@ export const cwCommandFuzzyFilter: CwCommandFilter = (
     matchScore(value, search),
     ...keywords.map((keyword) => matchScore(keyword, search) * 0.9),
   );
+
+/**
+ * Constant CW_COMMAND_LABELS
+ *
+ * @description
+ * Default texts from the Command sheet of the Design System artifact.
+ *
+ * @type {CwCommandLabels}
+ */
+export const CW_COMMAND_LABELS: CwCommandLabels = {
+  dialogLabel: 'Palette de commandes',
+  emptyText: 'Aucun résultat pour « {search} »',
+  navigateLabel: 'naviguer',
+  runLabel: 'ouvrir',
+  closeLabel: 'fermer',
+  enterKey: 'Entrée',
+  escapeKey: 'Échap',
+  listLabel: 'Résultats',
+  loadingLabel: 'Recherche…',
+  resultsNone: 'Aucun résultat',
+  resultsOne: '1 résultat',
+  resultsMany: (count: number) => `${String(count)} résultats`,
+};

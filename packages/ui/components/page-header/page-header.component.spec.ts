@@ -3,6 +3,7 @@ import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { CwButton } from '@cadenway/ui/components/button';
 import { CwTab, CwTabs, CwTabsList } from '@cadenway/ui/components/tabs';
 
+import { provideCwPageHeaderLabels } from './page-header.providers';
 import { CwPageHeaderActions } from './page-header-actions/page-header-actions.component';
 import { CwPageHeader } from './page-header.component';
 import { CwPageHeaderDescription } from './page-header-description/page-header-description.component';
@@ -207,5 +208,18 @@ describe('CwPageHeader', () => {
       'Ajouter aux favoris',
     );
     expect(star.getAttribute('aria-pressed')).toBe('true');
+  });
+});
+
+describe('provideCwPageHeaderLabels', () => {
+  it('renders provided text', () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwPageHeaderLabels({ favorite: 'Favorite' })],
+    });
+    const fixture: ComponentFixture<ViewHeaderHost> = TestBed.createComponent(ViewHeaderHost);
+    fixture.detectChanges();
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('button[aria-label=Favorite]'),
+    ).not.toBeNull();
   });
 });

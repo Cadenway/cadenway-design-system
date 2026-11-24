@@ -16,7 +16,11 @@ export type {
   CwTimelineGroup,
   CwTimelineItem,
   CwTimelineItemChange,
+  CwTimelineLabels,
   CwTimelineRange,
   CwTimelineScale,
   CwTimelineSchedule,
 } from './timeline.types';
+
+export { CW_TIMELINE_LABELS } from './timeline.constants';
+export { provideCwTimelineLabels } from './timeline.providers';

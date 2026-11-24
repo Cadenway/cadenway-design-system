@@ -14,3 +14,7 @@ export type {
   CwComboboxFilterOption,
   CwComboboxSize,
 } from './combobox.types';
+
+export { CW_COMBOBOX_LABELS } from './combobox.constants';
+export { provideCwComboboxLabels } from './combobox.providers';
+export type { CwComboboxLabels } from './combobox.types';

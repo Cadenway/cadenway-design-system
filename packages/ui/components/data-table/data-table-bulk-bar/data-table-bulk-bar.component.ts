@@ -15,8 +15,9 @@ import { CwRipple, ɵFOCUS, ɵnavigateList } from '@cadenway/ui/core';
 import { CwKbd } from '@cadenway/ui/components/kbd';
 import { NgIcon } from '@ng-icons/core';
 
+import { DATA_TABLE_TEXTS } from '../data-table-texts.token';
 import { ɵCW_DATA_TABLE, type ɵCwDataTableContext } from '../data-table.token';
-import type { CwBulkAction } from '../data-table.types';
+import type { CwBulkAction, CwDataTableProviderTexts } from '../data-table.types';
 
 /* Literal class strings (DataTableComplete sheet and preview, "Barre d'actions de sélection"). */
 /**
@@ -42,22 +43,6 @@ const ACTION: string =
 const VARIANTS: Record<NonNullable<CwBulkAction['variant']>, string> = {
   default: '',
   destructive: 'text-destructive',
-};
-
-/* French names of the keys the bar shows in its `kbd` (sheet DataTableComplete: « Suppr », « Échap »). */
-/**
- * Constant KEY_LABELS
- *
- * @description
- * French names of keyboard shortcuts.
- *
- * @type {Readonly<Record<string, string>>}
- */
-const KEY_LABELS: Readonly<Record<string, string>> = {
-  Delete: 'Suppr',
-  Escape: 'Échap',
-  Backspace: 'Retour',
-  Enter: 'Entrée',
 };
 
 /**
@@ -118,6 +103,17 @@ interface FocusableButton {
 })
 export class CwDataTableBulkBar {
   // #region Properties
+  /**
+   * Property shortcutTexts
+   *
+   * @description
+   * Keyboard names resolved from the current injector.
+   *
+   * @type {CwDataTableProviderTexts}
+   * @readonly
+   */
+  private readonly shortcutTexts: CwDataTableProviderTexts = inject(DATA_TABLE_TEXTS);
+
   /**
    * Property ariaLabel
    *
@@ -236,7 +232,14 @@ export class CwDataTableBulkBar {
    * @returns {string} Displayed keyboard shortcut.
    */
   protected keyLabel(key: string): string {
-    return KEY_LABELS[key] ?? key.toUpperCase();
+    const texts: CwDataTableProviderTexts = this.shortcutTexts;
+    const labels: Readonly<Record<string, string>> = {
+      Delete: texts.keyDelete,
+      Escape: texts.keyEscape,
+      Backspace: texts.keyBackspace,
+      Enter: texts.keyEnter,
+    };
+    return labels[key] ?? key.toUpperCase();
   }
 
   /**

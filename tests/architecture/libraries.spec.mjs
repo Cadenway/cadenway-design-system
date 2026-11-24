@@ -34,6 +34,9 @@ function markdownCompatibilityLines() {
     { from: './markdown.marked', typeOnly: false, symbols: ['ɵcreateMarked'] },
     { from: '@cadenway/ui/core', typeOnly: false, symbols: ['ɵwriteMention'] },
     { from: '@cadenway/ui/core', typeOnly: true, symbols: ['ɵMentionToken', 'ɵUnderlineToken'] },
+    { from: './markdown.constants', typeOnly: false, symbols: ['CW_MARKDOWN_LABELS'] },
+    { from: './markdown.providers', typeOnly: false, symbols: ['provideCwMarkdownLabels'] },
+    { from: './markdown.types', typeOnly: true, symbols: ['CwMarkdownLabels'] },
   ]);
   return new Set(
     source.statements

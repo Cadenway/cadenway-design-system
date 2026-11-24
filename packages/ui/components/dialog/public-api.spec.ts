@@ -5,6 +5,7 @@ describe('@cadenway/ui/dialog public API', () => {
   // (.claude/rules/public-api.md): the runtime names are pinned here.
   it('exports exactly the pinned names', () => {
     expect(Object.keys(publicApi).sort()).toEqual([
+      'CW_DIALOG_LABELS',
       'CwDialog',
       'CwDialogClose',
       'CwDialogDescription',
@@ -12,6 +13,7 @@ describe('@cadenway/ui/dialog public API', () => {
       'CwDialogHeader',
       'CwDialogTitle',
       'CwDialogTrigger',
+      'provideCwDialogLabels',
     ]);
   });
 });

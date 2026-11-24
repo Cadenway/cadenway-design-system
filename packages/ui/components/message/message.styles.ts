@@ -4,7 +4,7 @@
  * always filled; yellow is never a text color.
  */
 
-import type { CwMessageTone, CwMessageToneLabels } from './message.types';
+import type { CwMessageTone } from './message.types';
 
 /**
  * Constant TONE_ICONS
@@ -22,21 +22,6 @@ export const TONE_ICONS: Record<
   success: { name: 'phosphorCheckCircleFill', color: 'shrink-0 text-jade' },
   warning: { name: 'phosphorWarningFill', color: 'shrink-0 text-balise' },
   error: { name: 'phosphorWarningCircleFill', color: 'shrink-0 text-destructive' },
-};
-
-/**
- * Constant TONE_LABELS
- *
- * @description
- * Default French tone words read before a notice or note.
- *
- * @type {CwMessageToneLabels}
- */
-export const TONE_LABELS: CwMessageToneLabels = {
-  info: 'Information',
-  success: 'Succès',
-  warning: 'Avertissement',
-  error: 'Erreur',
 };
 
 /**

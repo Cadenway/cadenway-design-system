@@ -17,6 +17,7 @@ import {
   phosphorWarningFill,
 } from '@ng-icons/phosphor-icons/fill';
 
+import { METER_LABELS } from './meter-labels.token';
 import type {
   CwMeterFormat,
   CwMeterSeries,
@@ -371,7 +372,9 @@ export class CwMeter {
    *
    * @type {InputSignal<string>}
    */
-  public readonly thresholdLabel: InputSignal<string> = input('Capacité');
+  public readonly thresholdLabel: InputSignal<string> = input<string>(
+    inject(METER_LABELS).threshold,
+  );
 
   /**
    * Property zone

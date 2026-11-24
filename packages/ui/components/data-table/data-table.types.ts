@@ -586,7 +586,7 @@ export interface CwGroupContext {
  * Interface CwDataTableTexts
  *
  * @description
- * The French texts of the table, overridable one by one through the `texts` input. Defaults name tasks, as the mockup does (`App.dc.html`); another list passes its own nouns.
+ * The table texts, configurable by provider and overridable through the `texts` input. Defaults name tasks, as the mockup does (`App.dc.html`); another list passes its own nouns.
  */
 export interface CwDataTableTexts {
   // #region Properties
@@ -798,5 +798,70 @@ export interface CwDataTableTexts {
    * @readonly
    */
   readonly range: (first: number, last: number, total: number) => string;
+  // #endregion
+}
+
+/**
+ * Interface CwDataTableProviderTexts
+ *
+ * @description
+ * Complete provider texts, including empty-state and keyboard shortcut labels.
+ */
+export interface CwDataTableProviderTexts extends CwDataTableTexts {
+  // #region Properties
+  /**
+   * Property emptyText
+   *
+   * @description
+   * Text shown when the table has no rows.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly emptyText: string;
+
+  /**
+   * Property keyDelete
+   *
+   * @description
+   * Displayed name of the Delete key.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly keyDelete: string;
+
+  /**
+   * Property keyEscape
+   *
+   * @description
+   * Displayed name of the Escape key.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly keyEscape: string;
+
+  /**
+   * Property keyBackspace
+   *
+   * @description
+   * Displayed name of the Backspace key.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly keyBackspace: string;
+
+  /**
+   * Property keyEnter
+   *
+   * @description
+   * Displayed name of the Enter key.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly keyEnter: string;
   // #endregion
 }

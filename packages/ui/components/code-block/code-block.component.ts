@@ -24,6 +24,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorCheckBold, phosphorCopyBold } from '@ng-icons/phosphor-icons/bold';
 import { phosphorWarningCircleFill } from '@ng-icons/phosphor-icons/fill';
 
+import { CODE_BLOCK_LABELS } from './code-block-labels.token';
 import type { CwCodeBlockLineKind, CwCodeBlockSize, CwCodeBlockVariant } from './code-block.types';
 
 /**
@@ -345,7 +346,7 @@ export class CwCodeBlock {
    *
    * @type {InputSignal<string>}
    */
-  public readonly copyLabel: InputSignal<string> = input('Copier le code');
+  public readonly copyLabel: InputSignal<string> = input(inject(CODE_BLOCK_LABELS).copyLabel);
 
   /**
    * Property copiedLabel
@@ -356,7 +357,7 @@ export class CwCodeBlock {
    *
    * @type {InputSignal<string>}
    */
-  public readonly copiedLabel: InputSignal<string> = input('Copié');
+  public readonly copiedLabel: InputSignal<string> = input(inject(CODE_BLOCK_LABELS).copiedLabel);
 
   /**
    * Property addedLabel
@@ -367,7 +368,7 @@ export class CwCodeBlock {
    *
    * @type {InputSignal<string>}
    */
-  public readonly addedLabel: InputSignal<string> = input('ajouté');
+  public readonly addedLabel: InputSignal<string> = input(inject(CODE_BLOCK_LABELS).addedLabel);
 
   /**
    * Property removedLabel
@@ -378,7 +379,7 @@ export class CwCodeBlock {
    *
    * @type {InputSignal<string>}
    */
-  public readonly removedLabel: InputSignal<string> = input('retiré');
+  public readonly removedLabel: InputSignal<string> = input(inject(CODE_BLOCK_LABELS).removedLabel);
 
   /**
    * Property ariaLabel

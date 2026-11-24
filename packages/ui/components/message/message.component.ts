@@ -37,7 +37,9 @@ import { CwMessageActions } from './message-actions/message-actions.component';
 import { CwMessageFooter } from './message-footer/message-footer.component';
 import { messageTime } from './message.format';
 import { CwMessageNote } from './message-note/message-note.component';
-import { TONE_ICONS, TONE_LABELS, phosphorName, toneRole } from './message.styles';
+import { MESSAGE_LABELS } from './message-labels.token';
+import { MESSAGE_TONE_LABELS } from './message-tone-labels.token';
+import { TONE_ICONS, phosphorName, toneRole } from './message.styles';
 import { MESSAGE, MESSAGE_GROUP, type MessagePlace, type MessageRef } from './message.token';
 import type { MessageGroupRef } from './message.token';
 import type {
@@ -63,7 +65,7 @@ type MessageFlag = InputSignalWithTransform<boolean, unknown>;
  * Type MessageText
  *
  * @description
- * Reactive French labels used by a message.
+ * Reactive labels used by a message.
  *
  * @type {Signal<CwMessageLabels>}
  */
@@ -78,27 +80,6 @@ type MessageText = Signal<CwMessageLabels>;
  * @type {'alert' | 'status' | 'article' | null}
  */
 type MessageRole = 'alert' | 'status' | 'article' | null;
-
-/**
- * Constant LABELS
- *
- * @description
- * Default French labels for message actions, state and relative time.
- *
- * @type {CwMessageLabels}
- */
-const LABELS: CwMessageLabels = {
-  edited: 'modifié',
-  sending: 'Envoi…',
-  failed: "Échec de l'envoi",
-  retry: 'Réessayer',
-  remove: 'Supprimer',
-  actions: 'Actions du message',
-  react: 'Réagir',
-  reply: 'Répondre',
-  more: "Plus d'actions",
-  justNow: "à l'instant",
-};
 
 /* Literal class strings (Message sheet and preview of the Design System artifact), so Tailwind
    finds them in the compiled package. */
@@ -224,6 +205,28 @@ const SPACING: Record<'none' | 'run' | 'gap', string> = {
 })
 export class CwMessage implements MessageRef {
   // #region Properties
+  /**
+   * Property providedLabels
+   *
+   * @description
+   * Texts resolved from the current injector.
+   *
+   * @type {CwMessageLabels}
+   * @readonly
+   */
+  private readonly providedLabels: CwMessageLabels = inject(MESSAGE_LABELS);
+
+  /**
+   * Property providedToneLabels
+   *
+   * @description
+   * Texts resolved from the current injector.
+   *
+   * @type {CwMessageToneLabels}
+   * @readonly
+   */
+  private readonly providedToneLabels: CwMessageToneLabels = inject(MESSAGE_TONE_LABELS);
+
   /**
    * Property variant
    * @readonly
@@ -397,7 +400,7 @@ export class CwMessage implements MessageRef {
    * @readonly
    *
    * @description
-   * Overrides for the default French message text.
+   * Overrides for the provided message text.
    *
    * @type {InputSignal<Partial<CwMessageLabels>>}
    * @default {}
@@ -411,7 +414,7 @@ export class CwMessage implements MessageRef {
    * @readonly
    *
    * @description
-   * Overrides for the default French tone words.
+   * Overrides for the provided tone words.
    *
    * @type {InputSignal<Partial<CwMessageToneLabels>>}
    * @default {}
@@ -553,7 +556,10 @@ export class CwMessage implements MessageRef {
    *
    * @type {MessageText}
    */
-  protected readonly text: MessageText = computed(() => ({ ...LABELS, ...this.labels() }));
+  protected readonly text: MessageText = computed(() => ({
+    ...this.providedLabels,
+    ...this.labels(),
+  }));
 
   /**
    * Property place
@@ -698,7 +704,7 @@ export class CwMessage implements MessageRef {
    */
   protected readonly toneWord: Signal<string> = computed(() => {
     const tone: CwMessageTone = this.tone();
-    return tone === 'default' ? '' : { ...TONE_LABELS, ...this.toneLabels() }[tone];
+    return tone === 'default' ? '' : { ...this.providedToneLabels, ...this.toneLabels() }[tone];
   });
 
   /**

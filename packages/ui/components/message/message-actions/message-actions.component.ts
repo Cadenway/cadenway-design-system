@@ -3,6 +3,8 @@ import { FocusKeyManager, type FocusableOption } from '@angular/cdk/a11y';
 import { Directionality } from '@angular/cdk/bidi';
 import { ɵnavigateList } from '@cadenway/ui/core';
 
+import { MESSAGE_LABELS } from '../message-labels.token';
+
 /**
  * Component CwMessageActions
  *
@@ -38,7 +40,7 @@ export class CwMessageActions {
    * @type {InputSignal<string>}
    * @default 'Actions du message'
    */
-  public readonly ariaLabel: InputSignal<string> = input('Actions du message');
+  public readonly ariaLabel: InputSignal<string> = input<string>(inject(MESSAGE_LABELS).actions);
 
   /**
    * Property host

@@ -91,3 +91,90 @@ export interface CwDatePreset {
   readonly date: Date | null;
   // #endregion
 }
+
+/**
+ * Interface CwDatePickerLabels
+ *
+ * @description
+ * Text defaults replaceable for an application or subtree with `provideCwDatePickerLabels`.
+ */
+export interface CwDatePickerLabels {
+  // #region Properties
+  /**
+   * Property placeholder
+   *
+   * @description
+   * Placeholder shown when no date is selected.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly placeholder: string;
+
+  /**
+   * Property dialog
+   *
+   * @description
+   * Accessible name of the calendar dialog.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly dialog: string;
+
+  /**
+   * Property clear
+   *
+   * @description
+   * Text of the clear button.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly clear: string;
+
+  /**
+   * Property addTime
+   *
+   * @description
+   * Text of the button that reveals the time field.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly addTime: string;
+
+  /**
+   * Property time
+   *
+   * @description
+   * Accessible name of the time field.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly time: string;
+
+  /**
+   * Property openCalendar
+   *
+   * @description
+   * Accessible name of the calendar button.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly openCalendar: string;
+
+  /**
+   * Property inputPlaceholder
+   *
+   * @description
+   * Placeholder and date format hint for the typed date field.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly inputPlaceholder: string;
+  // #endregion
+}

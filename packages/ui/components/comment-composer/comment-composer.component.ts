@@ -39,7 +39,8 @@ import {
 } from '@ng-icons/phosphor-icons/bold';
 import { phosphorWarningCircleFill } from '@ng-icons/phosphor-icons/fill';
 
-import { CW_COMMENT_COMPOSER_LABELS, CW_COMPOSER_COMMANDS } from './comment-composer.constants';
+import type { CwCommentComposerProvidedLabels } from './comment-composer.types';
+import { COMMENT_COMPOSER_LABELS } from './comment-composer-labels.token';
 import type {
   CwAttachmentDraft,
   CwCommentComposerLabels,
@@ -139,6 +140,18 @@ const TOOL: 'text-muted-foreground hover:text-foreground aria-pressed:bg-selecte
 export class CwCommentComposer implements FormValueControl<string>, ControlValueAccessor {
   // #region Properties
   /**
+   * Property providedLabels
+   *
+   * @description
+   * Texts inherited from the nearest labels provider.
+   *
+   * @type {CwCommentComposerProvidedLabels}
+   * @readonly
+   */
+  private readonly providedLabels: CwCommentComposerProvidedLabels =
+    inject(COMMENT_COMPOSER_LABELS);
+
+  /**
    * Property value
    *
    * @description
@@ -181,7 +194,7 @@ export class CwCommentComposer implements FormValueControl<string>, ControlValue
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly placeholder: InputSignal<string> = input('Écrire un commentaire…');
+  public readonly placeholder: InputSignal<string> = input<string>(this.providedLabels.placeholder);
 
   /**
    * Property author
@@ -215,8 +228,9 @@ export class CwCommentComposer implements FormValueControl<string>, ControlValue
    * @type {InputSignal<readonly CwComposerCommand[]>}
    * @readonly
    */
-  public readonly commands: InputSignal<readonly CwComposerCommand[]> =
-    input<readonly CwComposerCommand[]>(CW_COMPOSER_COMMANDS);
+  public readonly commands: InputSignal<readonly CwComposerCommand[]> = input<
+    readonly CwComposerCommand[]
+  >(this.providedLabels.commands);
 
   /**
    * Property attachments
@@ -253,7 +267,9 @@ export class CwCommentComposer implements FormValueControl<string>, ControlValue
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly disabledText: InputSignal<string> = input('Commentaires désactivés');
+  public readonly disabledText: InputSignal<string> = input<string>(
+    this.providedLabels.disabledText,
+  );
 
   /**
    * Property sending
@@ -283,7 +299,7 @@ export class CwCommentComposer implements FormValueControl<string>, ControlValue
    * Property labels
    *
    * @description
-   * French texts, overridable one by one.
+   * Texts, overridable one by one.
    *
    * @type {InputSignal<Partial<CwCommentComposerLabels>>}
    * @readonly
@@ -490,26 +506,13 @@ export class CwCommentComposer implements FormValueControl<string>, ControlValue
    * @description
    * Default labels merged with consumer overrides.
    *
-   * @type {Signal<{ editor: string; toolbar: string; formatting: string; bold: string; italic: string; link: string; bulletList: string; code: string; mention: string; attach: string; send: string; save: string; cancel: string; retry: string; sendKeys: readonly string[]; }>}
+   * @type {Signal<CwCommentComposerProvidedLabels>}
    * @readonly
    */
-  protected readonly text: Signal<{
-    editor: string;
-    toolbar: string;
-    formatting: string;
-    bold: string;
-    italic: string;
-    link: string;
-    bulletList: string;
-    code: string;
-    mention: string;
-    attach: string;
-    send: string;
-    save: string;
-    cancel: string;
-    retry: string;
-    sendKeys: readonly string[];
-  }> = computed(() => ({ ...CW_COMMENT_COMPOSER_LABELS, ...this.labels() }));
+  protected readonly text: Signal<CwCommentComposerProvidedLabels> = computed(() => ({
+    ...this.providedLabels,
+    ...this.labels(),
+  }));
 
   /**
    * Property isDisabled

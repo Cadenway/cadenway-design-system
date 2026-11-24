@@ -43,3 +43,57 @@ export type CwSidebarSpaceColor =
   | 'rose'
   | 'fuchsia'
   | 'ardoise';
+
+/**
+ * Interface CwSidebarLabels
+ *
+ * @description
+ * Default texts replaced for an application or subtree with `provideCwSidebarLabels`.
+ */
+export interface CwSidebarLabels {
+  // #region Properties
+  /**
+   * Property ariaLabel
+   *
+   * @description
+   * Default text for the `ariaLabel` input.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly ariaLabel: string;
+
+  /**
+   * Property closeLabel
+   *
+   * @description
+   * Default text for the `closeLabel` input.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly closeLabel: string;
+
+  /**
+   * Property collapseLabel
+   *
+   * @description
+   * Default text for the `collapseLabel` input.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly collapseLabel: string;
+
+  /**
+   * Property expandLabel
+   *
+   * @description
+   * Default text for the `expandLabel` input.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly expandLabel: string;
+  // #endregion
+}

@@ -3,6 +3,7 @@ import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorCheckBold } from '@ng-icons/phosphor-icons/bold';
 
+import { QUESTIONNAIRE_LABELS } from '../questionnaire-labels.token';
 import { QUESTIONNAIRE, type QuestionnaireRef } from '../questionnaire.token';
 import type { CwQuestionnaireSummaryItem } from '../questionnaire.types';
 
@@ -34,7 +35,7 @@ export class CwQuestionnaireDone {
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly title: InputSignal<string> = input('Demande envoyée');
+  public readonly title: InputSignal<string> = input<string>(inject(QUESTIONNAIRE_LABELS).title);
 
   /**
    * Property summary

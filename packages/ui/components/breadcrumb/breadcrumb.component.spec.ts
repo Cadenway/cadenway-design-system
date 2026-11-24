@@ -3,6 +3,7 @@ import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { CwMenu, CwMenuItem } from '@cadenway/ui/components/menu';
 import { CwMenuTriggerFor } from '@cadenway/ui/components/menu';
 
+import { provideCwBreadcrumbLabels } from './breadcrumb.providers';
 import { CwBreadcrumbLink } from './breadcrumb-link/breadcrumb-link.component';
 import { CwBreadcrumbPage } from './breadcrumb-page/breadcrumb-page.component';
 import { CwBreadcrumb } from './breadcrumb.component';
@@ -233,5 +234,23 @@ describe('CwBreadcrumb', () => {
     expect(level?.getAttribute('type')).toBe('button');
     expect(level?.getAttribute('aria-haspopup')).toBe('menu');
     expect(level?.querySelector('ng-icon')).not.toBeNull();
+  });
+});
+
+describe('provideCwBreadcrumbLabels', () => {
+  it('replaces the default texts below its injector', async () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwBreadcrumbLabels({ aria: 'Breadcrumb', ellipsis: 'Hidden levels' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('nav[aria-label="Breadcrumb"]'),
+    ).toBeTruthy();
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('button[aria-label="Hidden levels"]'),
+    ).toBeTruthy();
+    fixture.destroy();
   });
 });

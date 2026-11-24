@@ -33,8 +33,9 @@ import {
   phosphorEyeSlashBold,
 } from '@ng-icons/phosphor-icons/bold';
 
+import type { CwChecklistProvidedLabels } from './checklist.types';
 import { CwChecklistItem } from './checklist-item/checklist-item.component';
-import { CW_CHECKLIST_LABELS } from './checklist.constants';
+import { CHECKLIST_LABELS } from './checklist-labels.token';
 import { CHECKLIST, type ChecklistHost, type ChecklistItemNode } from './checklist.token';
 import type {
   CwChecklistAddEvent,
@@ -150,6 +151,17 @@ interface Place {
 export class CwChecklist implements ChecklistHost {
   // #region Properties
   /**
+   * Property providedLabels
+   *
+   * @description
+   * Texts inherited from the nearest labels provider.
+   *
+   * @type {CwChecklistProvidedLabels}
+   * @readonly
+   */
+  private readonly providedLabels: CwChecklistProvidedLabels = inject(CHECKLIST_LABELS);
+
+  /**
    * Property title
    * @readonly
    *
@@ -241,14 +253,14 @@ export class CwChecklist implements ChecklistHost {
    *
    * @type {InputSignal<string>}
    */
-  public readonly addLabel: InputSignal<string> = input('Ajouter un élément');
+  public readonly addLabel: InputSignal<string> = input<string>(this.providedLabels.addLabel);
 
   /**
    * Property labels
    * @readonly
    *
    * @description
-   * French texts, any of them overridden (`CW_CHECKLIST_LABELS`).
+   * Texts, any of them overridden (`CW_CHECKLIST_LABELS`).
    *
    * @type {InputSignal<Partial<CwChecklistLabels>>}
    */
@@ -409,10 +421,10 @@ export class CwChecklist implements ChecklistHost {
    * @description
    * Default checklist labels merged with overrides.
    *
-   * @type {Signal<CwChecklistLabels>}
+   * @type {Signal<CwChecklistProvidedLabels>}
    */
-  public readonly text: Signal<CwChecklistLabels> = computed(() => ({
-    ...CW_CHECKLIST_LABELS,
+  public readonly text: Signal<CwChecklistProvidedLabels> = computed(() => ({
+    ...this.providedLabels,
     ...this.labels(),
   }));
 

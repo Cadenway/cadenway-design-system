@@ -21,6 +21,7 @@ import { _IdGenerator } from '@angular/cdk/a11y';
 import { type ControlValueAccessor, NgControl } from '@angular/forms';
 import type { FormValueControl } from '@angular/forms/signals';
 
+import { INPUT_OTP_LABELS } from './input-otp-labels.token';
 import type { CwInputOtpCharset } from './input-otp.types';
 
 /* Keeps the accepted characters only, upper-cased for a recovery code, at most `length` of them. */
@@ -175,7 +176,9 @@ export class CwInputOtp implements FormValueControl<string>, ControlValueAccesso
    *
    * @type {InputSignal<string>}
    */
-  public readonly ariaLabel: InputSignal<string> = input('Code à usage unique');
+  public readonly ariaLabel: InputSignal<string> = input<string>(
+    inject(INPUT_OTP_LABELS).ariaLabel,
+  );
 
   /**
    * Property ariaDescribedBy

@@ -1,4 +1,8 @@
-import type { CwDataTableTexts, CwSortDirection } from './data-table.types';
+import type {
+  CwDataTableProviderTexts,
+  CwDataTableTexts,
+  CwSortDirection,
+} from './data-table.types';
 
 /**
  * Constant CW_DATA_TABLE_TEXTS
@@ -41,6 +45,23 @@ export const CW_DATA_TABLE_TEXTS: CwDataTableTexts = {
   pagination: 'Pagination',
   range: (first, last, total) =>
     total === 0 ? '0 tâche' : `${String(first)}–${String(last)} sur ${String(total)} tâches`,
+};
+
+/**
+ * Constant CW_DATA_TABLE_PROVIDER_TEXTS
+ *
+ * @description
+ * Complete provider defaults, including shortcut names from the DataTableComplete sheet.
+ *
+ * @type {CwDataTableProviderTexts}
+ */
+export const CW_DATA_TABLE_PROVIDER_TEXTS: CwDataTableProviderTexts = {
+  ...CW_DATA_TABLE_TEXTS,
+  emptyText: 'Aucune tâche ne correspond',
+  keyDelete: 'Suppr',
+  keyEscape: 'Échap',
+  keyBackspace: 'Retour',
+  keyEnter: 'Entrée',
 };
 
 /**

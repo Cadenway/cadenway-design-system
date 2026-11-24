@@ -401,3 +401,35 @@ export interface CwChecklistLabels {
   readonly due: (date: string) => string;
   // #endregion
 }
+
+/**
+ * Interface CwChecklistProvidedLabels
+ *
+ * @description
+ * Complete default texts accepted by the provider, including dedicated input defaults.
+ */
+export interface CwChecklistProvidedLabels extends CwChecklistLabels {
+  // #region Properties
+  /**
+   * Property addLabel
+   *
+   * @description
+   * Label of the add row.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly addLabel: string;
+
+  /**
+   * Property addPlaceholder
+   *
+   * @description
+   * Placeholder of the add field.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly addPlaceholder: string;
+  // #endregion
+}

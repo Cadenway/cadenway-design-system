@@ -26,6 +26,7 @@ import {
   phosphorWarningFill,
 } from '@ng-icons/phosphor-icons/fill';
 
+import { TOAST_LABELS } from '../toast-labels.token';
 import type { CwToast, CwToastTone } from '../toast.types';
 
 /* Literal class strings (Toast sheet and preview of the Design System artifact): every tone on
@@ -171,7 +172,7 @@ export class CwToastItem {
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly closeLabel: InputSignal<string> = input('Fermer la notification');
+  public readonly closeLabel: InputSignal<string> = input<string>(inject(TOAST_LABELS).close);
 
   /**
    * Property dismissed

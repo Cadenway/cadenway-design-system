@@ -1,6 +1,7 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { provideCwAvatarLabels } from './avatar.providers';
 import { CwAvatar } from './avatar.component';
 import type { CwAvatarPresence } from './avatar.types';
 
@@ -147,5 +148,18 @@ describe('CwAvatar', () => {
     expect(component.errors()).toBe(1);
     expect(ines.querySelector('img')).toBeNull();
     expect(ines.textContent).toContain('ID');
+  });
+});
+
+describe('provideCwAvatarLabels', () => {
+  it('uses supplied text in the hosted declarations', () => {
+    TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [provideCwAvatarLabels({ unknown: 'Unknown user' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.textContent).toContain('Unknown user');
   });
 });

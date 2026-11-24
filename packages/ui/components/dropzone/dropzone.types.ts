@@ -64,7 +64,7 @@ export interface CwDropzoneRejection {
  * Interface CwDropzoneLabels
  *
  * @description
- * The French texts of a drop zone; each one can be replaced through the `labels` input.
+ * Drop zone texts, configurable by provider and overridden through the `labels` input.
  */
 export interface CwDropzoneLabels {
   // #region Properties
@@ -161,7 +161,7 @@ export type CwDropzoneFileState = 'queued' | 'uploading' | 'done' | 'error';
  * Interface CwDropzoneFileLabels
  *
  * @description
- * The French texts of a file row; each one can be replaced through the `labels` input.
+ * File row texts, configurable by provider and overridden through the `labels` input.
  */
 export interface CwDropzoneFileLabels {
   // #region Properties
@@ -252,5 +252,48 @@ export interface CwDropzoneFileLabels {
    * @type {string}
    */
   readonly done: string;
+  // #endregion
+}
+
+/**
+ * Interface CwDropzoneProviderLabels
+ *
+ * @description
+ * Complete provider texts, including defaults for the separate title and browse inputs.
+ */
+export interface CwDropzoneProviderLabels extends CwDropzoneLabels {
+  // #region Properties
+  /**
+   * Property title
+   *
+   * @description
+   * Default title of the drop zone.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly title: string;
+
+  /**
+   * Property browse
+   *
+   * @description
+   * Default browse button text.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly browse: string;
+
+  /**
+   * Property max
+   *
+   * @description
+   * Maximum size suffix.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly max: string;
   // #endregion
 }

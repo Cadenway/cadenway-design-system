@@ -4,6 +4,7 @@ import { Component, signal, type DebugElement, type WritableSignal } from '@angu
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 
+import { provideCwCalendarViewLabels } from './calendar-view.providers';
 import { CwCalendarItemDef } from './calendar-item-def/calendar-item-def.directive';
 import { CwCalendarView } from './calendar-view.component';
 import type { DropData } from './calendar-view.token';
@@ -594,5 +595,19 @@ describe('CwCalendarView', () => {
     expect(grid().getAttribute('aria-label')).toBe('Novembre 2026');
     button(host, 'Sans date 1').click();
     expect(component.unscheduled).toBe(1);
+  });
+});
+
+describe('provideCwCalendarViewLabels', () => {
+  it('replaces the default text below the provider', async () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwCalendarViewLabels({ today: 'Today' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.textContent).toContain('Today');
+    fixture.destroy();
   });
 });

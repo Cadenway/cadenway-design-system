@@ -69,3 +69,24 @@ export interface CwMeterSeries {
  * @type {(value: number, max: number) => string}
  */
 export type CwMeterFormat = (value: number, max: number) => string;
+
+/**
+ * Interface CwMeterLabels
+ *
+ * @description
+ * Text defaults replaceable for an application or subtree with `provideCwMeterLabels`.
+ */
+export interface CwMeterLabels {
+  // #region Properties
+  /**
+   * Property threshold
+   *
+   * @description
+   * Text identifying the threshold on the meter.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly threshold: string;
+  // #endregion
+}

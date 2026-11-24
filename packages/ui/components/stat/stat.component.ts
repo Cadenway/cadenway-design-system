@@ -18,10 +18,11 @@ import {
 } from '@ng-icons/phosphor-icons/bold';
 
 import { CwStatGroup } from './stat-group/stat-group.component';
-import { CW_STAT_TREND_LABELS } from './stat.constants';
+import { STAT_LABELS } from './stat-labels.token';
 import type {
   CwStatDeltaVariant,
   CwStatGoal,
+  CwStatLabels,
   CwStatSentiment,
   CwStatSize,
   CwStatTrend,
@@ -126,16 +127,6 @@ const ICONS: Record<CwStatTrend, string> = {
 };
 
 /**
- * Constant GOAL_OF
- *
- * @description
- * French separator between current and target goal values.
- *
- * @type {string}
- */
-const GOAL_OF: string = 'sur';
-
-/**
  * Constant NUMBER
  *
  * @description
@@ -181,6 +172,17 @@ const NUMBER: Intl.NumberFormat = new Intl.NumberFormat('fr-FR', { maximumFracti
 })
 export class CwStat {
   // #region Properties
+  /**
+   * Property providedLabels
+   *
+   * @description
+   * Statistic texts resolved from the current injector.
+   *
+   * @type {CwStatLabels}
+   * @readonly
+   */
+  private readonly providedLabels: CwStatLabels = inject(STAT_LABELS);
+
   /**
    * Property label
    * @readonly
@@ -316,7 +318,9 @@ export class CwStat {
    *
    * @type {InputSignal<string>}
    */
-  public readonly refreshingLabel: InputSignal<string> = input<string>('Actualisation');
+  public readonly refreshingLabel: InputSignal<string> = input<string>(
+    this.providedLabels.refreshing,
+  );
 
   /**
    * Property trendLabels
@@ -327,8 +331,11 @@ export class CwStat {
    *
    * @type {InputSignal<CwStatTrendLabels>}
    */
-  public readonly trendLabels: InputSignal<CwStatTrendLabels> =
-    input<CwStatTrendLabels>(CW_STAT_TREND_LABELS);
+  public readonly trendLabels: InputSignal<CwStatTrendLabels> = input<CwStatTrendLabels>({
+    up: this.providedLabels.up,
+    down: this.providedLabels.down,
+    flat: this.providedLabels.flat,
+  });
 
   /**
    * Property group
@@ -469,7 +476,7 @@ export class CwStat {
     if (!goal) return '';
     const unit: string = goal.unit ? ` ${goal.unit}` : '';
     const percent: string = NUMBER.format(Math.round(this.goalPercent()));
-    return `${NUMBER.format(goal.value)} ${GOAL_OF} ${NUMBER.format(goal.max)}${unit} · ${percent} %`;
+    return `${NUMBER.format(goal.value)} ${this.providedLabels.goalOf} ${NUMBER.format(goal.max)}${unit} · ${percent} %`;
   });
   // #endregion
 }

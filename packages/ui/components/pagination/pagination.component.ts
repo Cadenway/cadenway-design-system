@@ -26,30 +26,11 @@ import {
   phosphorCaretRightBold,
 } from '@ng-icons/phosphor-icons/bold';
 
+import type { CwPaginationProvidedLabels } from './pagination.types';
+import { PAGINATION_LABELS } from './pagination-labels.token';
 import { CwPaginationEllipsis } from './pagination-ellipsis/pagination-ellipsis.component';
 import { CwPaginationLink } from './pagination-link/pagination-link.component';
 import type { CwPaginationLabels, CwPaginationSize, CwPaginationVariant } from './pagination.types';
-
-/**
- * Constant LABELS
- *
- * @description
- * Default French navigation and page-size labels.
- *
- * @type {CwPaginationLabels}
- */
-const LABELS: CwPaginationLabels = {
-  first: 'Première page',
-  previous: 'Page précédente',
-  previousText: 'Précédent',
-  next: 'Page suivante',
-  nextText: 'Suivant',
-  last: 'Dernière page',
-  page: 'Page',
-  of: 'sur',
-  hiddenPages: 'Pages masquées',
-  pageSize: 'Lignes par page',
-};
 
 /**
  * Constant STEP_BASE
@@ -151,6 +132,17 @@ type Entry =
 })
 export class CwPagination {
   // #region Properties
+  /**
+   * Property providedLabels
+   *
+   * @description
+   * Texts inherited from the nearest labels provider.
+   *
+   * @type {CwPaginationProvidedLabels}
+   * @readonly
+   */
+  private readonly providedLabels: CwPaginationProvidedLabels = inject(PAGINATION_LABELS);
+
   /**
    * Property page
    * @readonly
@@ -269,7 +261,9 @@ export class CwPagination {
    *
    * @type {InputSignal<string>}
    */
-  public readonly ariaLabel: InputSignal<string> = input('Pagination');
+  public readonly ariaLabel: InputSignal<string> = input<string>(
+    inject(PAGINATION_LABELS).ariaLabel,
+  );
 
   /**
    * Property labels
@@ -334,12 +328,12 @@ export class CwPagination {
    * @readonly
    *
    * @description
-   * French labels merged with consumer overrides.
+   * Provided labels merged with consumer overrides.
    *
-   * @type {Signal<CwPaginationLabels>}
+   * @type {Signal<CwPaginationProvidedLabels>}
    */
-  protected readonly text: Signal<CwPaginationLabels> = computed(() => ({
-    ...LABELS,
+  protected readonly text: Signal<CwPaginationProvidedLabels> = computed(() => ({
+    ...this.providedLabels,
     ...this.labels(),
   }));
 

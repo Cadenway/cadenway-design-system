@@ -12,6 +12,7 @@ import {
   type WritableSignal,
 } from '@angular/core';
 
+import { SPINNER_LABELS } from '../spinner-labels.token';
 import { CwSpinner } from '../spinner.component';
 import type { CwSpinnerSize } from '../spinner.types';
 
@@ -74,7 +75,7 @@ export class CwSpinnerIndicator {
    * @type {InputSignal<string>}
    * @default 'Chargement'
    */
-  public readonly label: InputSignal<string> = input('Chargement');
+  public readonly label: InputSignal<string> = input<string>(inject(SPINNER_LABELS).loading);
 
   /**
    * Property showLabel

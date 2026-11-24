@@ -24,6 +24,7 @@ import {
   phosphorWarningFill,
 } from '@ng-icons/phosphor-icons/fill';
 
+import { ALERT_LABELS } from './alert-labels.token';
 import type { CwAlertSize, CwAlertVariant } from './alert.types';
 
 /**
@@ -220,7 +221,7 @@ export class CwAlert {
    * @type {InputSignal<string>}
    * @default 'Fermer'
    */
-  public readonly closeLabel: InputSignal<string> = input('Fermer');
+  public readonly closeLabel: InputSignal<string> = input<string>(inject(ALERT_LABELS).close);
 
   /**
    * Property dismissed

@@ -281,7 +281,7 @@ export interface CwRelationLeadingContext {
  * Interface CwRelationsLabels
  *
  * @description
- * The French texts of `cw-relations` and `cw-relation-picker` (Relations sheet).
+ * The texts of `cw-relations` and `cw-relation-picker` (Relations sheet).
  */
 export interface CwRelationsLabels {
   // #region Properties
