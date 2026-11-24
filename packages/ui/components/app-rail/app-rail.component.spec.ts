@@ -15,6 +15,7 @@ import { CwAppRailGroup } from './app-rail-group/app-rail-group.component';
 import { CwAppRailItem } from './app-rail-item/app-rail-item.component';
 import { CwAppRailSeparator } from './app-rail-separator/app-rail-separator.component';
 import { CwAppRail } from './app-rail.component';
+import type { CwAppRailPhoneLayout } from './app-rail.types';
 
 /**
  * Component Host
@@ -35,7 +36,7 @@ import { CwAppRail } from './app-rail.component';
     }),
   ],
   template: `
-    <nav cwAppRail ariaLabel="Applications">
+    <nav cwAppRail ariaLabel="Applications" [phoneLayout]="phoneLayout()">
       <cw-app-rail-group desktopOnly>
         <button cwAppRailItem variant="primary">
           <span cwAppRailItemMedia>AN</span>Atelier Nord
@@ -85,6 +86,18 @@ class Host {
    * @readonly
    */
   public readonly unread: WritableSignal<number | null> = signal<number | null>(3);
+
+  /**
+   * Property phoneLayout
+   *
+   * @description
+   * Layout of the rail below 768 px.
+   *
+   * @type {WritableSignal<CwAppRailPhoneLayout>}
+   * @readonly
+   */
+  public readonly phoneLayout: WritableSignal<CwAppRailPhoneLayout> =
+    signal<CwAppRailPhoneLayout>('tab-bar');
   // #endregion
 }
 
@@ -178,6 +191,48 @@ describe('CwAppRail', () => {
     expect(item(host, 'Accueil').hasAttribute('data-desktop-only')).toBe(false);
     expect(host.querySelector('cw-app-rail-group')?.getAttribute('data-desktop-only')).toBe('true');
     expect(host.querySelector('cw-app-rail-separator')?.getAttribute('aria-hidden')).toBe('true');
+  });
+
+  it('turns into the bottom tab bar below 768 px by default', () => {
+    const nav: HTMLElement | null = host.querySelector('nav');
+
+    expect(nav?.getAttribute('data-phone-layout')).toBe('tab-bar');
+    // The parts' phone classes target this named group: without it none would apply.
+    expect(nav?.classList.contains('group/rail')).toBe(true);
+    expect(nav?.classList.contains('max-md:fixed')).toBe(true);
+    expect(
+      host
+        .querySelector('cw-app-rail-separator')
+        ?.classList.contains('max-md:group-data-[phone-layout=tab-bar]/rail:hidden'),
+    ).toBe(true);
+    expect(
+      item(host, 'Thème sombre').classList.contains(
+        'max-md:group-data-[phone-layout=tab-bar]/rail:hidden',
+      ),
+    ).toBe(true);
+  });
+
+  it('keeps a scrolling column below 768 px with phoneLayout="column"', async () => {
+    fixture.componentInstance.phoneLayout.set('column');
+    await fixture.whenStable();
+    const nav: HTMLElement | null = host.querySelector('nav');
+    const phoneClasses: string[] = Array.from(
+      host.querySelectorAll(
+        'nav, cw-app-rail-group, cw-app-rail-separator, cw-app-rail-footer, [cwAppRailItem]',
+      ),
+    ).flatMap((part: Element) =>
+      Array.from(part.classList).filter((name: string) => name.startsWith('max-md:')),
+    );
+
+    expect(nav?.getAttribute('data-phone-layout')).toBe('column');
+    expect(nav?.classList.contains('overflow-y-auto')).toBe(true);
+    expect(phoneClasses.length).toBeGreaterThan(0);
+    // The parts' phone classes all wait for a tab-bar rail, so none applies in a column rail.
+    expect(
+      phoneClasses.every((name: string) =>
+        name.startsWith('max-md:group-data-[phone-layout=tab-bar]/rail:'),
+      ),
+    ).toBe(true);
   });
 
   it('describes the item with what its tooltip adds to the label', () => {

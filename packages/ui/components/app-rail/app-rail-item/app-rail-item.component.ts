@@ -32,10 +32,19 @@ import type { CwAppRailItemVariant } from '../app-rail.types';
  */
 const BASE: string =
   'relative isolate inline-flex size-9 shrink-0 items-center justify-center rounded-lg whitespace-nowrap ' +
-  // The tab bar shares 320 px between up to nine items: they may narrow there rather than overflow.
-  'max-md:min-w-0 max-md:shrink ' +
   'transition-colors motion-reduce:transition-none [&_ng-icon]:shrink-0 [&_ng-icon]:[--ng-icon__size:18px] ' +
   ɵFOCUS;
+
+/**
+ * Constant TAB_BAR_ITEM
+ *
+ * @description
+ * The tab bar shares 320 px between up to nine items: they may narrow there rather than overflow.
+ *
+ * @type {string}
+ */
+const TAB_BAR_ITEM: string =
+  'max-md:group-data-[phone-layout=tab-bar]/rail:min-w-0 max-md:group-data-[phone-layout=tab-bar]/rail:shrink';
 
 /**
  * Constant VARIANTS
@@ -207,7 +216,7 @@ export class CwAppRailItem {
    * Property desktopOnly
    *
    * @description
-   * Hides the item in the tab bar below 768 px.
+   * Hides the item in the tab bar below 768 px (not in a `column` rail).
    *
    * @type {InputSignalWithTransform<boolean, unknown>}
    * @readonly
@@ -385,7 +394,10 @@ export class CwAppRailItem {
    * @readonly
    */
   protected readonly classes: Signal<string> = computed(
-    () => `${BASE} ${VARIANTS[this.variant()]}${this.desktopOnly() ? ' max-md:hidden' : ''}`,
+    () =>
+      `${BASE} ${TAB_BAR_ITEM} ${VARIANTS[this.variant()]}${
+        this.desktopOnly() ? ' max-md:group-data-[phone-layout=tab-bar]/rail:hidden' : ''
+      }`,
   );
   // #endregion
 

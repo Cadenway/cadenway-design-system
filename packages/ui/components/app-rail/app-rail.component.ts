@@ -1,4 +1,6 @@
-import { Component, input, type InputSignal } from '@angular/core';
+import { Component, computed, input, type InputSignal, type Signal } from '@angular/core';
+
+import type { CwAppRailPhoneLayout } from './app-rail.types';
 
 /**
  * Constant RAIL
@@ -9,8 +11,29 @@ import { Component, input, type InputSignal } from '@angular/core';
  *
  * @type {string}
  */
-const RAIL: string =
-  'relative z-30 flex w-14 shrink-0 flex-col items-center gap-1 py-2 ' +
+const RAIL: string = 'group/rail relative z-30 flex w-14 shrink-0 flex-col items-center gap-1 py-2';
+
+/**
+ * Constant COLUMN
+ *
+ * @description
+ * A column kept on a phone may be taller than a short or landscape screen: it scrolls, without a
+ * visible scrollbar in its 56 px (the tooltips live in an overlay, so they are not clipped).
+ *
+ * @type {string}
+ */
+const COLUMN: string = 'overflow-y-auto overscroll-contain [scrollbar-width:none]';
+
+/**
+ * Constant TAB_BAR
+ *
+ * @description
+ * Mockup `App.dc.html`: below 768 px the rail becomes a 56 px tab bar fixed at the bottom of the
+ * screen, its items in one row.
+ *
+ * @type {string}
+ */
+const TAB_BAR: string =
   'max-md:fixed max-md:inset-x-0 max-md:bottom-0 max-md:h-14 max-md:w-full max-md:flex-row max-md:justify-around ' +
   'max-md:gap-0 max-md:border-t max-md:border-border max-md:bg-background max-md:px-1 max-md:py-0';
 
@@ -26,12 +49,17 @@ const RAIL: string =
  * screen: the items of the groups and of the footer share one row, while separators, groups and
  * items marked `desktopOnly` are hidden. The page then keeps 56 px free at its bottom (`pb-14`), which
  * the consumer's layout owns. Items keep their natural tab order; the current page is the item with
- * `current`.
+ * `current`. With `phoneLayout="column"` the rail stays the 56 px column below 768 px, with every
+ * group, separator and item (`desktopOnly` included), as the settings screens of the mockup keep it
+ * (`Compte.dc.html`, `Organisation.dc.html`); that column scrolls when it is taller than the
+ * screen. The parts follow the layout through the rail's `data-phone-layout` attribute, so they may
+ * be projected through a wrapper component. Style hook: `data-phone-layout` on the host.
  */
 @Component({
   selector: 'nav[cwAppRail]',
   host: {
-    class: RAIL,
+    '[class]': 'classes()',
+    '[attr.data-phone-layout]': 'phoneLayout()',
     '[attr.aria-label]': 'ariaLabel()',
   },
   templateUrl: './app-rail.component.html',
@@ -49,5 +77,30 @@ export class CwAppRail {
    * @readonly
    */
   public readonly ariaLabel: InputSignal<string> = input.required<string>();
+
+  /**
+   * Property phoneLayout
+   *
+   * @description
+   * Layout below 768 px: the bottom `tab-bar` (the default) or the desktop `column`.
+   *
+   * @type {InputSignal<CwAppRailPhoneLayout>}
+   * @readonly
+   */
+  public readonly phoneLayout: InputSignal<CwAppRailPhoneLayout> =
+    input<CwAppRailPhoneLayout>('tab-bar');
+
+  /**
+   * Property classes
+   *
+   * @description
+   * Column classes, with the tab bar ones below 768 px unless the layout keeps the column.
+   *
+   * @type {Signal<string>}
+   * @readonly
+   */
+  protected readonly classes: Signal<string> = computed(() =>
+    this.phoneLayout() === 'column' ? `${RAIL} ${COLUMN}` : `${RAIL} ${TAB_BAR}`,
+  );
   // #endregion
 }

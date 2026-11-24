@@ -10,4 +10,4 @@ export { CwAppRailFooter } from './app-rail-footer/app-rail-footer.component';
 export { CwAppRailGroup } from './app-rail-group/app-rail-group.component';
 export { CwAppRailItem } from './app-rail-item/app-rail-item.component';
 export { CwAppRailSeparator } from './app-rail-separator/app-rail-separator.component';
-export type { CwAppRailItemVariant } from './app-rail.types';
+export type { CwAppRailItemVariant, CwAppRailPhoneLayout } from './app-rail.types';
