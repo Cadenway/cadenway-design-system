@@ -15,7 +15,7 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { CwButton } from '@cadenway/ui/components/button';
-import { CwRipple, ɵextensionOf, ɵformatFileSize } from '@cadenway/ui/core';
+import { CwRipple, ɵextensionOf, ɵformatFileSizeIn, ɵLOCALE } from '@cadenway/ui/core';
 import { CwSpinner } from '@cadenway/ui/components/spinner';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -363,6 +363,17 @@ export class CwAttachment {
   private readonly announcer: LiveAnnouncer = inject(LiveAnnouncer);
 
   /**
+   * Property locale
+   * @readonly
+   *
+   * @description
+   * Locale of the file size, given by `provideCwLocale` (`fr-FR` by default).
+   *
+   * @type {string}
+   */
+  private readonly locale: string = inject(ɵLOCALE);
+
+  /**
    * Property text
    * @readonly
    *
@@ -459,7 +470,7 @@ export class CwAttachment {
    */
   protected readonly sizeText: Signal<string> = computed(() => {
     const bytes: number | null = this.fileSize();
-    return bytes === null ? '' : ɵformatFileSize(bytes);
+    return bytes === null ? '' : ɵformatFileSizeIn(bytes, this.locale);
   });
 
   /**

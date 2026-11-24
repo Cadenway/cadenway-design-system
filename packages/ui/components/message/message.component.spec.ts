@@ -1,6 +1,8 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
+
 import { CwBubble } from '@cadenway/ui/components/bubble';
+import { provideCwLocale } from '@cadenway/ui/core';
 
 import { CwMessage } from './message.component';
 import { CwMessageAvatar } from './message-avatar/message-avatar.component';
@@ -343,6 +345,33 @@ describe('CwMessage', () => {
     buttonNamed(required(error), 'Réessayer').click();
 
     expect(component.events()).toEqual(['invite', 'reload']);
+  });
+});
+
+describe('provideCwLocale', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [provideCwLocale('en-US')] });
+  });
+
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 10, 13, 13));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('formats yesterday and the last reply time in English', () => {
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    const [first]: HTMLElement[] = articles(fixture.nativeElement as HTMLElement);
+
+    expect(first.querySelector('time')?.textContent.trim()).toBe('yesterday 10:42 AM');
+    expect(first.getAttribute('aria-label')).toBe('Karim Benali, yesterday 10:42 AM, modifié');
+    expect(first.querySelector('cw-message-thread')?.textContent).toContain(
+      'Dernière yesterday 11:05 AM',
+    );
   });
 });
 

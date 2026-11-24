@@ -10,6 +10,7 @@ import {
   type Signal,
 } from '@angular/core';
 import { _IdGenerator } from '@angular/cdk/a11y';
+import { ɵLOCALE, ɵperLocale } from '@cadenway/ui/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorCheckCircleFill,
@@ -179,28 +180,20 @@ function optionalNumber(value: unknown): number | undefined {
 }
 
 /**
- * Constant NUMBER
+ * Constant NUMBER_FORMAT
  *
  * @description
- * French number formatter for gauge amounts.
+ * Default amount format of a locale, at most two decimal places (« 4,1 » in French), built once
+ * per locale so that every meter of the page shares it.
  *
- * @type {Intl.NumberFormat}
+ * @type {(locale: string) => (value: number) => string}
  */
-const NUMBER: Intl.NumberFormat = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 2 });
-
-/**
- * Function formatNumber
- *
- * @description
- * Formats a gauge amount as a French number.
- *
- * @param {number} value - Amount to format.
- *
- * @returns {string} Amount formatted using French number conventions.
- */
-function formatNumber(value: number): string {
-  return NUMBER.format(value);
-}
+const NUMBER_FORMAT: (locale: string) => (value: number) => string = ɵperLocale(
+  (locale: string) => {
+    const number: Intl.NumberFormat = new Intl.NumberFormat(locale, { maximumFractionDigits: 2 });
+    return (value: number): string => number.format(value);
+  },
+);
 
 /**
  * Class CwMeter
@@ -243,6 +236,19 @@ function formatNumber(value: number): string {
 })
 export class CwMeter {
   // #region Properties
+  /**
+   * Property formatNumber
+   * @readonly
+   *
+   * @description
+   * Number format of the locale given by `provideCwLocale` (`fr-FR` by default): the default of
+   * `formatAmount` and the text of the amount over capacity. Declared first because the input
+   * default reads it.
+   *
+   * @type {(value: number) => string}
+   */
+  private readonly formatNumber: (value: number) => string = NUMBER_FORMAT(inject(ɵLOCALE));
+
   /**
    * Property value
    * @readonly
@@ -486,12 +492,14 @@ export class CwMeter {
    * @readonly
    *
    * @description
-   * Text of an amount on the legend and the capacity scale; a French number (« 4,1 »).
+   * Text of an amount on the legend and the capacity scale; by default a number of the locale given
+   * by `provideCwLocale` (« 4,1 » in `fr-FR`, the default).
    *
    * @type {InputSignal<(value: number) => string>}
    */
-  public readonly formatAmount: InputSignal<(value: number) => string> =
-    input<(value: number) => string>(formatNumber);
+  public readonly formatAmount: InputSignal<(value: number) => string> = input<
+    (value: number) => string
+  >(this.formatNumber);
 
   /**
    * Property note
@@ -699,7 +707,7 @@ export class CwMeter {
    *
    * @type {Signal<string>}
    */
-  protected readonly overText: Signal<string> = computed(() => formatNumber(this.over()));
+  protected readonly overText: Signal<string> = computed(() => this.formatNumber(this.over()));
 
   /**
    * Property valueText

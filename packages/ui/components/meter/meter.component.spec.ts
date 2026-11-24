@@ -1,5 +1,6 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideCwLocale } from '@cadenway/ui/core';
 
 import { provideCwMeterLabels } from './meter.providers';
 import { CwMeter } from './meter.component';
@@ -227,6 +228,23 @@ describe('CwMeter', () => {
 
     expect(calls?.getAttribute('aria-busy')).toBe('true');
     expect(calls?.querySelector('[role="meter"]')).toBeNull();
+  });
+});
+
+describe('provideCwLocale', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [provideCwLocale('en-US')] });
+  });
+
+  it('formats stacked legend amounts in English', () => {
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    const legend: string =
+      gauge(meterNamed(host, 'Stockage par type')).querySelector('ul')?.textContent ?? '';
+
+    expect(legend).toContain('4.1');
+    expect(legend).toContain('3.6');
   });
 });
 

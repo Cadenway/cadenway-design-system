@@ -1,5 +1,6 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideCwLocale } from '@cadenway/ui/core';
 
 import { CwStatGroup } from './stat-group/stat-group.component';
 import { CwStatSparkline } from './stat-sparkline/stat-sparkline.component';
@@ -162,6 +163,26 @@ describe('CwStat', () => {
     expect(open.querySelector('[role="status"]')?.getAttribute('aria-label')).toBe('Actualisation');
     expect(open.textContent).toContain('18');
     expect(open.getAttribute('aria-busy')).toBeNull();
+  });
+});
+
+describe('provideCwLocale', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [provideCwLocale('en-US')] });
+  });
+
+  it('formats numeric values and goal amounts in English', () => {
+    const fixture: ComponentFixture<CwStat> = TestBed.createComponent(CwStat);
+    fixture.componentRef.setInput('label', 'Points livrés');
+    fixture.componentRef.setInput('value', 1234.5);
+    fixture.componentRef.setInput('goal', { value: 1234.5, max: 2500, unit: 'engagés' });
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+
+    expect(host.textContent).toContain('1,234.5');
+    expect(host.querySelector('[role="progressbar"]')?.getAttribute('aria-valuetext')).toBe(
+      '1,234.5 sur 2,500 engagés · 49 %',
+    );
   });
 });
 

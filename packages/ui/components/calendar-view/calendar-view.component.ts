@@ -41,6 +41,7 @@ import {
 import { CwButton } from '@cadenway/ui/components/button';
 import {
   ɵFOCUS_INSET,
+  ɵLOCALE,
   ɵaddMonths,
   ɵdayKey,
   ɵdaysBetween,
@@ -926,12 +927,13 @@ export class CwCalendarView<T> implements CalendarViewHost {
    * Property locale
    *
    * @description
-   * Locale of the day and month names (`Intl.DateTimeFormat`).
+   * Locale of the day and month names (`Intl.DateTimeFormat`); by default the locale given by
+   * `provideCwLocale` (`fr-FR`).
    *
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly locale: InputSignal<string> = input('fr');
+  public readonly locale: InputSignal<string> = input<string>(inject(ɵLOCALE));
 
   /**
    * Property labels

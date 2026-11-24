@@ -32,6 +32,11 @@ building. The mockup settles behavior and copy.
   application or a subtree with `provideCw<Entry>Labels(partial | () => partial)`; a brick's text
   inputs and `labels` input still override what is provided. A new text goes into that constant,
   never inline.
+- Locale: every `Intl` format (dates, numbers, relative times, file sizes, collation, case
+  mapping) reads `ɵLOCALE` from `@cadenway/ui/core`, set by `provideCwLocale` (`fr-FR` by
+  default); never hard-code a locale. Build module-level formatters with `ɵperLocale`; a `locale`
+  input defaults to `inject(ɵLOCALE)`. Texts are not part of the locale; a label function that
+  writes dates takes the locale as a parameter (timeline `range`, `move`).
 - Behavior: Angular Aria where a pattern exists (Menu, Listbox, Combobox, Tabs, Toolbar, Tree,
   Grid, Accordion), CDK otherwise. The sheets only name CDK pieces (`@angular/cdk/menu`,
   `FocusKeyManager`, `ActiveDescendantKeyManager`, overlay, drag-drop, stepper, scrolling): where
@@ -104,7 +109,7 @@ Select and Combobox open their panel docked above the bottom tab bar below 768 p
 | Combobox | `combobox` | `cw-combobox`, `-group`, `-option`, `-empty` | `value` (model); `multiple`; `placeholder`; `searchPlaceholder` = Rechercher…; `emptyText` = Aucun résultat; `creatable`; `createLabel`; `loading`; `filter`; outs `search`, `create` | Aria Combobox |
 | Autocomplete | `autocomplete` | `input[cwAutocomplete]`, `cw-autocomplete`, `-group`, `-option` | `trigger`; `minLength` = 1; `loading`; `emptyText`; `highlight`; outs `optionSelected`, `query` | Aria Combobox |
 | Command | `command` | `cw-command`, `input[cwCommandInput]`, `cw-command-list`, `-group`, `-item`, `-separator`, `-empty`, `-loading`, `-footer`, `-dialog` | `search` (model); `filter`; `loading`; `loop`; dialog `open` (model); item out `selected` | Aria Listbox; CDK virtual scroll |
-| Calendar | `calendar` | `cw-calendar` | `mode`: single, range; `selected`, `month` (models); `min`, `max`, `disabled`; `weekStartsOn` = 1; `showOutsideDays`; `showWeekNumbers`; `captionLayout`; `locale` = fr | Aria Grid |
+| Calendar | `calendar` | `cw-calendar` | `mode`: single, range; `selected`, `month` (models); `min`, `max`, `disabled`; `weekStartsOn` = 1; `showOutsideDays`; `showWeekNumbers`; `captionLayout`; `locale` = provided locale (`fr-FR`) | Aria Grid |
 | DatePicker | `date-picker` | `cw-date-picker` | `value` (model); `mode`; `variant`: button, input; `placeholder` = Choisir une date; `format`; `presets` (the mockup's Aujourd'hui, Demain, Vendredi, Fin du sprint, Sans échéance); `clearable`; `withTime`; `open` (model) | Calendar in a Popover |
 
 ## Wave 3: dialogs and feedback
@@ -142,7 +147,7 @@ All generic (see the boundary adaptations above); full inputs in the sheets.
 | Kanban | `kanban` | `cw-kanban`, `-column`, `-lane`, `-quick-add`, `ng-template[cwKanbanCard]` | `columns`, `items`; `groupBy`; `swimlaneBy`; `wipLimits`; `density`, `collapsedColumns`, `collapsedLanes`, `selection` (models); outs `moved`, `created`, `wipExceeded`, `open` | CDK drag-drop |
 | CalendarView | `calendar-view` | `cw-calendar-view` | `items`; `view`: month, week (model); `date` (model); `weekStartsOn` = 1; `maxPerDay` = 2; `hours`; `slotMinutes`; outs `itemMove`, `create`, `open` | CDK drag-drop; Aria Grid |
 | Timeline | `timeline` | `cw-timeline` | `items`, `dependencies`, `milestones`; `scale`: day, week, month (model); `range` (model); `groupBy`; `showDependencies` (model); outs `itemChange`, `schedule`, `dependencyCreate`, `conflict` | pointer events + ← →; CDK drag-drop on the x axis |
-| Chart | `chart` | `cw-chart` | `type`: bar, line, area, donut; `data`, `x`, `series` (colors `chart-1` … `chart-5`); `stacked`; `orientation`; `legend`; `valueFormat` (fr-FR) | own SVG, no library |
+| Chart | `chart` | `cw-chart` | `type`: bar, line, area, donut; `data`, `x`, `series` (colors `chart-1` … `chart-5`); `stacked`; `orientation`; `legend`; `valueFormat` (provided locale, `fr-FR`) | own SVG, no library |
 | Stat | `stat` | `cw-stat`, `cw-stat-group`, `cw-stat-sparkline` | `label`, `value` (required); `delta`; `trend`; `sentiment`; `comparison`; `goal`; `size`; `loading` | — |
 | PropertyList | `property-list` | `cw-property-list`, `-group`, `cw-property`, `[cwPropertyValue]` | `orientation`: vertical, inline; `labelWidth`; `readonly`; `hideEmpty`; `showEmpty` (model); property `label`, `icon`, `emptyText` = Vide, `error` | wraps projected controls |
 | Relations | `relations` | `cw-relations`, `cw-relation-picker` | `relations`; `types` (given by the consumer); `search`; `readonly`; outs `add`, `remove`, `changeType`, `open` | Combobox |

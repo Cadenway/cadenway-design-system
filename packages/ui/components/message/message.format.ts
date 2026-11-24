@@ -1,9 +1,9 @@
 /*
- * Message times, internal to the entry point. Mockup `App.dc.html`: « à l'instant », « il y a 2 h »,
- * « hier »; Message sheet: « 10:42 », « hier 17:20 ».
+ * Message times in the provided locale, internal to the entry point. Mockup `App.dc.html`:
+ * « à l'instant », « il y a 2 h », « hier »; Message sheet: « 10:42 », « hier 17:20 ».
  */
 
-import { ɵsameDay } from '@cadenway/ui/core';
+import { ɵperLocale, ɵsameDay } from '@cadenway/ui/core';
 
 /**
  * Constant MINUTE
@@ -26,65 +26,87 @@ const MINUTE: number = 60_000;
 const HOUR: number = 60 * MINUTE;
 
 /**
- * Constant CLOCK
+ * Interface MessageFormats
  *
  * @description
- * French formatter for hours and minutes.
- *
- * @type {Intl.DateTimeFormat}
+ * The `Intl` formatters of the message times in one locale.
  */
-const CLOCK: Intl.DateTimeFormat = new Intl.DateTimeFormat('fr-FR', {
-  hour: '2-digit',
-  minute: '2-digit',
-});
+interface MessageFormats {
+  // #region Properties
+  /**
+   * Property clock
+   *
+   * @description
+   * Hours and minutes (« 10:42 » in French).
+   *
+   * @type {Intl.DateTimeFormat}
+   * @readonly
+   */
+  readonly clock: Intl.DateTimeFormat;
+
+  /**
+   * Property day
+   *
+   * @description
+   * Day and abbreviated month (« 12 nov. » in French).
+   *
+   * @type {Intl.DateTimeFormat}
+   * @readonly
+   */
+  readonly day: Intl.DateTimeFormat;
+
+  /**
+   * Property dayYear
+   *
+   * @description
+   * Day, abbreviated month and year, for a message of another year.
+   *
+   * @type {Intl.DateTimeFormat}
+   * @readonly
+   */
+  readonly dayYear: Intl.DateTimeFormat;
+
+  /**
+   * Property relative
+   *
+   * @description
+   * Short relative time for recent minutes (« il y a 5 min » in French).
+   *
+   * @type {Intl.RelativeTimeFormat}
+   * @readonly
+   */
+  readonly relative: Intl.RelativeTimeFormat;
+
+  /**
+   * Property relativeDay
+   *
+   * @description
+   * Relative time with calendar words (« hier » in French).
+   *
+   * @type {Intl.RelativeTimeFormat}
+   * @readonly
+   */
+  readonly relativeDay: Intl.RelativeTimeFormat;
+  // #endregion
+}
 
 /**
- * Constant DAY
+ * Constant FORMATS
  *
  * @description
- * French formatter for a day and abbreviated month.
+ * Formatters of a locale, built once per locale for every message of the page.
  *
- * @type {Intl.DateTimeFormat}
+ * @type {(locale: string) => MessageFormats}
  */
-const DAY: Intl.DateTimeFormat = new Intl.DateTimeFormat('fr-FR', {
-  day: 'numeric',
-  month: 'short',
-});
-
-/**
- * Constant DAY_YEAR
- *
- * @description
- * French formatter for a day, abbreviated month and year.
- *
- * @type {Intl.DateTimeFormat}
- */
-const DAY_YEAR: Intl.DateTimeFormat = new Intl.DateTimeFormat('fr-FR', {
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric',
-});
-/**
- * Constant RELATIVE
- *
- * @description
- * French short relative-time formatter for recent minutes.
- *
- * @type {Intl.RelativeTimeFormat}
- */
-const RELATIVE: Intl.RelativeTimeFormat = new Intl.RelativeTimeFormat('fr', { style: 'short' });
-
-/**
- * Constant RELATIVE_DAY
- *
- * @description
- * French relative-time formatter using calendar words such as yesterday.
- *
- * @type {Intl.RelativeTimeFormat}
- */
-const RELATIVE_DAY: Intl.RelativeTimeFormat = new Intl.RelativeTimeFormat('fr', {
-  numeric: 'auto',
-});
+const FORMATS: (locale: string) => MessageFormats = ɵperLocale(
+  (locale: string): MessageFormats => ({
+    clock: new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }),
+    day: new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short' }),
+    dayYear: new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric' }),
+    relative: new Intl.RelativeTimeFormat(locale, { style: 'short' }),
+    relativeDay: new Intl.RelativeTimeFormat(locale, { numeric: 'auto' }),
+  }),
+);
 
 /**
  * Function clockTime
@@ -93,11 +115,12 @@ const RELATIVE_DAY: Intl.RelativeTimeFormat = new Intl.RelativeTimeFormat('fr', 
  * Formats the local hour and minute for a message.
  *
  * @param {Date} time - Message timestamp to format.
+ * @param {string} locale - BCP 47 language tag of the time.
  *
- * @returns {string} French local time, for example « 10:42 ».
+ * @returns {string} Local time, for example « 10:42 » in French.
  */
-export function clockTime(time: Date): string {
-  return CLOCK.format(time);
+export function clockTime(time: Date, locale: string): string {
+  return FORMATS(locale).clock.format(time);
 }
 
 /**
@@ -106,24 +129,28 @@ export function clockTime(time: Date): string {
  * @description
  * The time shown in a message header: `justNow` under a minute, « il y a 5 min » under an hour,
  * « 10:42 » the same day, « hier 17:20 » the day before, « 12 nov. 10:42 » before that (with the
- * year when it differs).
+ * year when it differs); the words and formats are those of `locale`.
  *
  * @param {Date} time - Timestamp of the message.
  * @param {Date} now - Reference time used to determine the relative or calendar display.
  * @param {string} justNow - Text shown for a non-future timestamp less than one minute old.
+ * @param {string} locale - BCP 47 language tag of the relative and calendar times.
  *
- * @returns {string} French relative or calendar time for the message header.
+ * @returns {string} Relative or calendar time for the message header.
  */
-export function messageTime(time: Date, now: Date, justNow: string): string {
+export function messageTime(time: Date, now: Date, justNow: string, locale: string): string {
+  const formats: MessageFormats = FORMATS(locale);
   const elapsed: number = now.getTime() - time.getTime();
   if (elapsed >= 0 && elapsed < MINUTE) return justNow;
   if (elapsed >= 0 && elapsed < HOUR) {
-    return RELATIVE.format(-Math.floor(elapsed / MINUTE), 'minute');
+    return formats.relative.format(-Math.floor(elapsed / MINUTE), 'minute');
   }
-  if (ɵsameDay(time, now)) return clockTime(time);
+  const clock: string = formats.clock.format(time);
+  if (ɵsameDay(time, now)) return clock;
   const yesterday: Date = new Date(now);
   yesterday.setDate(now.getDate() - 1);
-  if (ɵsameDay(time, yesterday)) return `${RELATIVE_DAY.format(-1, 'day')} ${clockTime(time)}`;
-  const day: Intl.DateTimeFormat = time.getFullYear() === now.getFullYear() ? DAY : DAY_YEAR;
-  return `${day.format(time)} ${clockTime(time)}`;
+  if (ɵsameDay(time, yesterday)) return `${formats.relativeDay.format(-1, 'day')} ${clock}`;
+  const day: Intl.DateTimeFormat =
+    time.getFullYear() === now.getFullYear() ? formats.day : formats.dayYear;
+  return `${day.format(time)} ${clock}`;
 }

@@ -24,6 +24,7 @@ import {
   CwMenuTriggerFor,
 } from '@cadenway/ui/components/menu';
 import { CwPopover, CwPopoverTrigger } from '@cadenway/ui/components/popover';
+import { ɵLOCALE, ɵperLocale } from '@cadenway/ui/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorXBold } from '@ng-icons/phosphor-icons/bold';
 
@@ -125,14 +126,14 @@ const SHOWN_MEDIA: 3 = 3;
  * Constant DAY_FORMAT
  *
  * @description
- * French day-and-month formatter for the value segment.
+ * Day-and-month formatter of a locale for the value segment (« 18 nov. » in French), built once
+ * per locale for every chip of the page.
  *
- * @type {Intl.DateTimeFormat}
+ * @type {(locale: string) => Intl.DateTimeFormat}
  */
-const DAY_FORMAT: Intl.DateTimeFormat = new Intl.DateTimeFormat('fr-FR', {
-  day: 'numeric',
-  month: 'short',
-});
+const DAY_FORMAT: (locale: string) => Intl.DateTimeFormat = ɵperLocale(
+  (locale: string) => new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short' }),
+);
 
 /**
  * Function parseDay
@@ -298,6 +299,18 @@ export class CwFilterChip {
   private readonly barTemplates: FilterTemplates | null = inject(CW_FILTER_TEMPLATES, {
     optional: true,
   });
+
+  /**
+   * Property dayFormat
+   *
+   * @description
+   * Formatter of a date value in the locale given by `provideCwLocale` (`fr-FR` by default); the
+   * calendar of the chip reads the same locale.
+   *
+   * @type {Intl.DateTimeFormat}
+   * @readonly
+   */
+  private readonly dayFormat: Intl.DateTimeFormat = DAY_FORMAT(inject(ɵLOCALE));
 
   /**
    * Property ownValueTemplates
@@ -545,7 +558,7 @@ export class CwFilterChip {
     switch (this.kind()) {
       case 'date': {
         const day: Date | null = this.day();
-        return day ? DAY_FORMAT.format(day) : this.text().emptyValue;
+        return day ? this.dayFormat.format(day) : this.text().emptyValue;
       }
       case 'text':
         return this.typed() || this.text().emptyValue;

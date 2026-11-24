@@ -14,7 +14,7 @@ import type { InputSignal, InputSignalWithTransform, OutputEmitterRef } from '@a
 import { NgTemplateOutlet } from '@angular/common';
 import { CW_BUBBLE_DEFAULTS, type CwBubbleDefaults } from '@cadenway/ui/components/bubble';
 import { CwButton } from '@cadenway/ui/components/button';
-import { CwRipple } from '@cadenway/ui/core';
+import { CwRipple, ɵLOCALE } from '@cadenway/ui/core';
 import { type CwMenu, CwMenuTriggerFor } from '@cadenway/ui/components/menu';
 import { CwSpinner } from '@cadenway/ui/components/spinner';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -501,6 +501,17 @@ export class CwMessage implements MessageRef {
   private readonly group: MessageGroupRef | null = inject(MESSAGE_GROUP, { optional: true });
 
   /**
+   * Property locale
+   * @readonly
+   *
+   * @description
+   * Locale of the default message time, given by `provideCwLocale` (`fr-FR` by default).
+   *
+   * @type {string}
+   */
+  private readonly locale: string = inject(ɵLOCALE);
+
+  /**
    * Property moreButton
    * @readonly
    *
@@ -648,7 +659,7 @@ export class CwMessage implements MessageRef {
     if (!time) return '';
     const now: Date = new Date();
     const format: CwMessageTimeFormatter | null = this.formatTime();
-    return format ? format(time, now) : messageTime(time, now, this.text().justNow);
+    return format ? format(time, now) : messageTime(time, now, this.text().justNow, this.locale);
   });
 
   /**

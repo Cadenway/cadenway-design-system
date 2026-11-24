@@ -28,7 +28,7 @@ import { CdkDrag, type CdkDragDrop, CdkDropList, moveItemInArray } from '@angula
 import { CwAlert, CwAlertActions, CwAlertTitle } from '@cadenway/ui/components/alert';
 import { CwButton } from '@cadenway/ui/components/button';
 import { CwCheckbox } from '@cadenway/ui/components/checkbox';
-import { CwRipple, ɵFOCUS, ɵFOCUS_INSET } from '@cadenway/ui/core';
+import { CwRipple, ɵFOCUS, ɵFOCUS_INSET, ɵLOCALE, ɵperLocale } from '@cadenway/ui/core';
 import { CwEmpty, CwEmptyHeader, CwEmptyTitle } from '@cadenway/ui/components/empty';
 import { CwSkeleton } from '@cadenway/ui/components/skeleton';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -623,11 +623,14 @@ const INTERACTIVE: 'a, button, input, select, textarea, label, [role="checkbox"]
  * Constant COLLATOR
  *
  * @description
- * French collator used for local sorting.
+ * Collator of a locale used for local sorting (numbers in text compared by value, case and accents
+ * ignored), built once per locale for every table of the page.
  *
- * @type {Intl.Collator}
+ * @type {(locale: string) => Intl.Collator}
  */
-const COLLATOR: Intl.Collator = new Intl.Collator('fr', { numeric: true, sensitivity: 'base' });
+const COLLATOR: (locale: string) => Intl.Collator = ɵperLocale(
+  (locale: string) => new Intl.Collator(locale, { numeric: true, sensitivity: 'base' }),
+);
 
 /* Literal class strings (DataTable and DataTableComplete sheets and previews of the Design System
    artifact), so Tailwind finds them in the compiled package. */
@@ -794,36 +797,39 @@ function isEmpty(value: unknown): boolean {
  * Function compareValues
  *
  * @description
- * Compares values for local sorting.
+ * Compares values for local sorting: dates and numbers by value, text with the locale's collation.
  *
  * @param {unknown} a - First value to compare.
  * @param {unknown} b - Second value to compare.
+ * @param {Intl.Collator} collator - Collator of the text values.
  * @returns {number} Comparison result for the values.
  */
-function compareValues(a: unknown, b: unknown): number {
+function compareValues(a: unknown, b: unknown, collator: Intl.Collator): number {
   const left: unknown = a instanceof Date ? a.getTime() : a;
   const right: unknown = b instanceof Date ? b.getTime() : b;
   if (typeof left === 'number' && typeof right === 'number') return left - right;
   if (typeof left === 'boolean' && typeof right === 'boolean') return Number(left) - Number(right);
-  return COLLATOR.compare(String(left), String(right));
+  return collator.compare(String(left), String(right));
 }
 
 /**
  * Function toText
  *
  * @description
- * Formats a cell value for default display.
+ * Formats a cell value for default display; a date is written in the locale (« 18/11/2026 » in
+ * French).
  *
  * @param {unknown} value - Value to inspect or convert.
+ * @param {string} locale - BCP 47 language tag of the dates.
  * @returns {string} Formatted cell text.
  */
-function toText(value: unknown): string {
+function toText(value: unknown, locale: string): string {
   if (value === null || value === undefined) return '';
   if (typeof value === 'string') return value;
   if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') {
     return String(value);
   }
-  if (value instanceof Date) return value.toLocaleDateString('fr-FR');
+  if (value instanceof Date) return value.toLocaleDateString(locale);
   return JSON.stringify(value);
 }
 
@@ -1406,6 +1412,28 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
   private readonly announcer: LiveAnnouncer = inject(LiveAnnouncer);
 
   /**
+   * Property locale
+   *
+   * @description
+   * Locale of the default cell dates, given by `provideCwLocale` (`fr-FR` by default).
+   *
+   * @type {string}
+   * @readonly
+   */
+  private readonly locale: string = inject(ɵLOCALE);
+
+  /**
+   * Property collator
+   *
+   * @description
+   * Collation of the text values in local sorting, in the same locale.
+   *
+   * @type {Intl.Collator}
+   * @readonly
+   */
+  private readonly collator: Intl.Collator = COLLATOR(this.locale);
+
+  /**
    * Property injector
    *
    * @description
@@ -1853,7 +1881,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
           if (isEmpty(a) && isEmpty(b)) continue;
           return isEmpty(a) ? 1 : -1;
         }
-        const result: number = compareValues(a, b) * sign;
+        const result: number = compareValues(a, b, this.collator) * sign;
         if (result !== 0) return result;
       }
       return 0;
@@ -1874,7 +1902,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
   private groupKeyOf(row: T): string {
     const by: string | null = this.groupBy();
     const value: unknown = by === null ? undefined : (row as Record<string, unknown> | null)?.[by];
-    return toText(value);
+    return toText(value, this.locale);
   }
   // #endregion
 
@@ -2393,7 +2421,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * @returns {string} Formatted cell text.
    */
   protected display(entry: RowEntry<T>, column: ResolvedColumn<T>): string {
-    return toText(column.value(entry.row));
+    return toText(column.value(entry.row), this.locale);
   }
 
   /**

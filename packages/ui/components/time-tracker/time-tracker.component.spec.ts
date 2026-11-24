@@ -1,5 +1,6 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideCwLocale } from '@cadenway/ui/core';
 
 import { provideCwTimeEntryListLabels } from './time-tracker.providers';
 import { provideCwTimeEntryFormLabels } from './time-tracker.providers';
@@ -419,6 +420,46 @@ describe('CwTimeEntryList', () => {
     await fixture.whenStable();
 
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('Aucun temps saisi');
+  });
+});
+
+describe('provideCwLocale', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [provideCwLocale('en-US')] });
+  });
+
+  it('formats the running session start in English', () => {
+    const fixture: ComponentFixture<TrackerHost> = TestBed.createComponent(TrackerHost);
+    fixture.componentInstance.state.set('running');
+    fixture.detectChanges();
+
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('depuis 02:05 PM');
+  });
+
+  it('formats the date in the time entry edit button in English', () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 10, 13, 13));
+    try {
+      const fixture: ComponentFixture<CwTimeEntryList> = TestBed.createComponent(CwTimeEntryList);
+      fixture.componentRef.setInput('entries', [
+        {
+          id: '1',
+          person: { name: 'Karim Benali' },
+          date: new Date(2026, 10, 10),
+          duration: 90 * MINUTE,
+        },
+      ]);
+      fixture.detectChanges();
+
+      expect(
+        button(
+          fixture.nativeElement as HTMLElement,
+          "Modifier l'entrée de Karim Benali, Nov 10, 1 h 30",
+        ),
+      ).toBeTruthy();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 

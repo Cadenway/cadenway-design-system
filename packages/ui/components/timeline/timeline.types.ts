@@ -528,23 +528,25 @@ export interface CwTimelineLabels {
    * Property range
    *
    * @description
-   * Formats an inclusive date range for accessible names and announcements.
+   * Formats an inclusive date range for accessible names and announcements. `locale` is the
+   * locale given by `provideCwLocale` (`fr-FR` by default), for the dates of the sentence.
    *
-   * @type {(start: Date, end: Date) => string}
+   * @type {(start: Date, end: Date, locale: string) => string}
    * @readonly
    */
-  readonly range: (start: Date, end: Date) => string;
+  readonly range: (start: Date, end: Date, locale: string) => string;
 
   /**
    * Property move
    *
    * @description
-   * Formats the date range and day count shown while moving a bar.
+   * Formats the date range and day count shown while moving a bar. `locale` is the locale given
+   * by `provideCwLocale` (`fr-FR` by default), for the dates of the text.
    *
-   * @type {(start: Date, end: Date) => string}
+   * @type {(start: Date, end: Date, locale: string) => string}
    * @readonly
    */
-  readonly move: (start: Date, end: Date) => string;
+  readonly move: (start: Date, end: Date, locale: string) => string;
 
   /**
    * Property nameHeader

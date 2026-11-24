@@ -1,6 +1,7 @@
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideCwLocale } from '@cadenway/ui/core';
 
 import { provideCwPaginationLabels } from './pagination.providers';
 import { CwPaginationLink } from './pagination-link/pagination-link.component';
@@ -329,6 +330,27 @@ describe('CwPagination', () => {
     expect(link?.getAttribute('aria-disabled')).toBe('true');
     expect(link?.getAttribute('tabindex')).toBe('-1');
     expect(component.routed()).toBe(0);
+  });
+});
+
+describe('provideCwLocale', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideCwLocale('en-US'),
+        { provide: LiveAnnouncer, useValue: { announce: () => Promise.resolve() } },
+      ],
+    });
+  });
+
+  it('formats the total in the range in English', () => {
+    const fixture: ComponentFixture<CwPagination> = TestBed.createComponent(CwPagination);
+    fixture.componentRef.setInput('ariaLabel', "Journal d'audit");
+    fixture.componentRef.setInput('total', 1240);
+    fixture.componentRef.setInput('showRange', true);
+    fixture.detectChanges();
+
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('1–25 sur 1,240');
   });
 });
 

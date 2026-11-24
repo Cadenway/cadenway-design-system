@@ -1,7 +1,9 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
+
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { FormField, form, type FieldTree } from '@angular/forms/signals';
+import { provideCwLocale } from '@cadenway/ui/core';
 
 import { provideCwCalendarLabels } from './calendar.providers';
 import { CwCalendar } from './calendar.component';
@@ -406,6 +408,35 @@ describe('CwCalendar', () => {
     await signalFixture.whenStable();
     const start: CwCalendarSelection = signalFixture.componentInstance.model().start;
     expect(start instanceof Date && start.getDate()).toBe(23);
+  });
+});
+
+describe('provideCwLocale', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [provideCwLocale('en-US')] });
+  });
+
+  it('formats the calendar grid, days and weekdays in English', () => {
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+
+    expect(grid(host).getAttribute('aria-label')).toBe('November 2026');
+    expect(day(host, 'November 18, 2026')).toBeTruthy();
+    expect(
+      Array.from(grid(host).querySelectorAll('th')).map((header) => header.textContent.trim()),
+    ).toEqual(['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']);
+  });
+
+  it('gives the explicit locale input precedence over the provider', () => {
+    const fixture: ComponentFixture<CwCalendar> = TestBed.createComponent(CwCalendar);
+    fixture.componentRef.setInput('locale', 'fr');
+    fixture.componentRef.setInput('month', new Date(2026, 10, 1));
+    fixture.detectChanges();
+
+    expect(grid(fixture.nativeElement as HTMLElement).getAttribute('aria-label')).toBe(
+      'novembre 2026',
+    );
   });
 });
 

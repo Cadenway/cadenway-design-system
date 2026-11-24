@@ -1,5 +1,6 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideCwLocale } from '@cadenway/ui/core';
 
 import { provideCwChartLabels } from './chart.providers';
 import { CwChart } from './chart.component';
@@ -295,6 +296,23 @@ describe('CwChart', () => {
 
     expect(host.querySelector('cw-chart')?.getAttribute('aria-busy')).toBe('true');
     expect(host.querySelector('[role="img"][tabindex="0"]')).toBeNull();
+  });
+});
+
+describe('provideCwLocale', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [provideCwLocale('en-US')] });
+  });
+
+  it('formats chart table values in English', () => {
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.componentInstance.data.set([{ week: 'S46', done: 1234.5, late: 1 }]);
+    fixture.detectChanges();
+
+    const table: HTMLTableElement | null = (fixture.nativeElement as HTMLElement).querySelector(
+      'table',
+    );
+    expect(table?.textContent).toContain('1,234.5');
   });
 });
 

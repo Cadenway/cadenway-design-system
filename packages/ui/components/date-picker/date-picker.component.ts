@@ -42,7 +42,9 @@ import {
 import {
   CwRipple,
   ɵConnectedPanel,
+  ɵLOCALE,
   ɵPanelStack,
+  ɵperLocale,
   ɵsameDay,
   ɵstartOfDay,
   type ɵStackedPanel,
@@ -55,6 +57,7 @@ import {
 } from '@cadenway/ui/components/input-group';
 
 import { DATE_PICKER_LABELS } from './date-picker-labels.token';
+import { CW_DATE_PICKER_LABELS } from './date-picker.constants';
 import type {
   CwDatePickerRange,
   CwDatePickerSize,
@@ -153,14 +156,170 @@ const SHORT_DATE: Intl.DateTimeFormatOptions = {
 };
 
 /**
- * Constant TYPED
+ * Type TypedField
  *
  * @description
- * Pattern accepted for a typed day, month and four-digit year.
+ * A numeric field of a typed date.
+ *
+ * @type {'day' | 'month' | 'year'}
+ */
+type TypedField = 'day' | 'month' | 'year';
+
+/**
+ * Interface TypedPattern
+ *
+ * @description
+ * How a date is typed in a locale: the digits and separators accepted, and the order of the
+ * fields they capture.
+ */
+interface TypedPattern {
+  // #region Properties
+  /**
+   * Property pattern
+   *
+   * @description
+   * Whole-text pattern with one capture group per field.
+   *
+   * @type {RegExp}
+   * @readonly
+   */
+  readonly pattern: RegExp;
+
+  /**
+   * Property order
+   *
+   * @description
+   * The field captured by each group, in order.
+   *
+   * @type {readonly TypedField[]}
+   * @readonly
+   */
+  readonly order: readonly TypedField[];
+  // #endregion
+}
+
+/**
+ * Constant TYPED_DATE
+ *
+ * @description
+ * Options of the editable date of the `input` variant: two-digit day and month, four-digit year,
+ * always in the Gregorian calendar with Latin digits, so that what the field shows parses back into
+ * the same `Date` (a Thai locale would otherwise write the Buddhist year 2569, an Egyptian one
+ * Arabic-Indic digits). French output is unchanged (« 18/11/2026 »).
+ *
+ * @type {Intl.DateTimeFormatOptions}
+ */
+const TYPED_DATE: Intl.DateTimeFormatOptions = {
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+  calendar: 'gregory',
+  numberingSystem: 'latn',
+};
+
+/**
+ * Constant SAMPLE_DAY
+ *
+ * @description
+ * Day used to read the order and separators of a locale's numeric date; any day works.
+ *
+ * @type {Date}
+ */
+const SAMPLE_DAY: Date = new Date(2026, 10, 18);
+
+/**
+ * Constant FORMAT_MARKS
+ *
+ * @description
+ * Invisible format characters (right-to-left marks of Arabic dates, for instance) that `Intl`
+ * inserts between the fields: removed from the separators and from the typed text, since nobody
+ * types them.
  *
  * @type {RegExp}
  */
-const TYPED: RegExp = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
+const FORMAT_MARKS: RegExp = /\p{Cf}/gu;
+
+/**
+ * Constant FIELD_LETTERS
+ *
+ * @description
+ * Letters of the format hint when the locale's field names have no case (ideographs, Arabic, Thai):
+ * `yyyy/mm/dd` rather than a repeated ideograph.
+ *
+ * @type {Record<TypedField, string>}
+ */
+const FIELD_LETTERS: Record<TypedField, string> = { day: 'd', month: 'm', year: 'y' };
+
+/**
+ * Function typedPattern
+ *
+ * @description
+ * Derives the accepted typed date from the locale's numeric date, so that what the field shows
+ * can be typed back: « jj/mm/aaaa » in French (`/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/`, as before),
+ * « mm/dd/yyyy » in American English, « jj.mm.aaaa » in German. Day and month take one or two
+ * digits, the year four; a space in a separator is optional.
+ *
+ * @param {Intl.DateTimeFormat} format - Two-digit day and month, numeric year, in the locale.
+ *
+ * @returns {TypedPattern} The pattern and the order of its fields.
+ */
+function typedPattern(format: Intl.DateTimeFormat): TypedPattern {
+  const order: TypedField[] = [];
+  const source: string = format
+    .formatToParts(SAMPLE_DAY)
+    .map((part) => {
+      if (part.type === 'day' || part.type === 'month' || part.type === 'year') {
+        order.push(part.type);
+        return part.type === 'year' ? '(\\d{4})' : '(\\d{1,2})';
+      }
+      return part.value
+        .replace(FORMAT_MARKS, '')
+        .replace(/[.*+?^${}()|[\]\\/]/g, '\\$&')
+        .replace(/\s+/g, '\\s*');
+    })
+    .join('');
+  return { pattern: new RegExp(`^${source}$`), order };
+}
+
+/**
+ * Function typedHint
+ *
+ * @description
+ * The format hint of the `input` variant in a locale, written in the order and with the separators
+ * the field parses: each field is the first letter of its name in the locale (`Intl.DisplayNames`),
+ * so French reads « jj/mm/aaaa » (jour, mois, année, the mockup's), American English « mm/dd/yyyy »,
+ * German « tt.mm.jjjj ».
+ *
+ * @param {string} locale - BCP 47 language tag.
+ *
+ * @returns {string} Format hint, such as « jj/mm/aaaa ».
+ */
+function typedHint(locale: string): string {
+  const names: Intl.DisplayNames = new Intl.DisplayNames(locale, { type: 'dateTimeField' });
+  return new Intl.DateTimeFormat(locale, TYPED_DATE)
+    .formatToParts(SAMPLE_DAY)
+    .map((part) => {
+      if (part.type !== 'day' && part.type !== 'month' && part.type !== 'year') {
+        return part.value.replace(FORMAT_MARKS, '');
+      }
+      const first: string = Array.from(names.of(part.type) ?? '')[0] ?? '';
+      const lower: string = first.toLocaleLowerCase(locale);
+      const letter: string =
+        lower !== lower.toLocaleUpperCase(locale) ? lower : FIELD_LETTERS[part.type];
+      return letter.repeat(part.type === 'year' ? 4 : 2);
+    })
+    .join('');
+}
+
+/**
+ * Constant TYPED_HINT
+ *
+ * @description
+ * Format hint of a locale, built once per locale.
+ *
+ * @type {(locale: string) => string}
+ */
+const TYPED_HINT: (locale: string) => string = ɵperLocale(typedHint);
 
 /**
  * Function isRange
@@ -236,7 +395,7 @@ function pad(value: number): string {
  * Component CwDatePicker
  *
  * @description
- * A field that opens a Calendar in a floating panel, with shortcuts: the due date, the start date, the period of a sprint (Date Picker sheet of the Design System artifact). `[(value)]` holds a `Date` (`mode="single"`) or a complete `{ start, end }` period (`mode="range"`; the panel stays open until the end is picked). The picker is a Signal Forms value control (`[formField]`) and the value accessor of a Reactive or template-driven form control; `aria-invalid` follows the control once touched, and an unparsable typed date. `[(open)]` drives the panel, a CDK overlay placed under the trigger (flipped when needed) that opens from the trigger corner (`animate-menu-in`), traps the focus (`role="dialog"`) and closes on Escape or an outside click; the focus returns to the trigger after Escape or a pick. The `button` variant shows the short date (`format`, `Intl.DateTimeFormat` options in `locale`) or the placeholder; Enter, Space and ↓ open it on the picked day (or today). The `input` variant lets the user type « jj/mm/aaaa » and opens the calendar from its button. `presets` (single mode) list shortcuts with their date and a check on the current one; `clearable` adds « Effacer », `withTime` (single mode) « Ajouter une heure ». Name the trigger with `<label for>` (its `id`) or `ariaLabel`; the name then goes on with the visible text (« Échéance, mer. 18 nov. 2026 »).
+ * A field that opens a Calendar in a floating panel, with shortcuts: the due date, the start date, the period of a sprint (Date Picker sheet of the Design System artifact). `[(value)]` holds a `Date` (`mode="single"`) or a complete `{ start, end }` period (`mode="range"`; the panel stays open until the end is picked). The picker is a Signal Forms value control (`[formField]`) and the value accessor of a Reactive or template-driven form control; `aria-invalid` follows the control once touched, and an unparsable typed date. `[(open)]` drives the panel, a CDK overlay placed under the trigger (flipped when needed) that opens from the trigger corner (`animate-menu-in`), traps the focus (`role="dialog"`) and closes on Escape or an outside click; the focus returns to the trigger after Escape or a pick. The `button` variant shows the short date (`format`, `Intl.DateTimeFormat` options in `locale`) or the placeholder; Enter, Space and ↓ open it on the picked day (or today). The `input` variant lets the user type « jj/mm/aaaa » (the order and separators of the date in `locale`: « mm/dd/yyyy » in `en-US`) and opens the calendar from its button. `presets` (single mode) list shortcuts with their date and a check on the current one; `clearable` adds « Effacer », `withTime` (single mode) « Ajouter une heure ». Name the trigger with `<label for>` (its `id`) or `ariaLabel`; the name then goes on with the visible text (« Échéance, mer. 18 nov. 2026 »).
  */
 @Component({
   selector: 'cw-date-picker',
@@ -327,12 +486,13 @@ export class CwDatePicker implements FormValueControl<CwDatePickerValue>, Contro
    * Property locale
    *
    * @description
-   * Locale of the shown dates and of the calendar.
+   * Locale of the shown dates, of the typed date (its order of day, month and year) and of the
+   * calendar; by default the locale given by `provideCwLocale` (`fr-FR`).
    *
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly locale: InputSignal<string> = input('fr');
+  public readonly locale: InputSignal<string> = input<string>(inject(ɵLOCALE));
 
   /**
    * Property presets
@@ -575,17 +735,56 @@ export class CwDatePicker implements FormValueControl<CwDatePickerValue>, Contro
   );
 
   /**
+   * Property labelHint
+   *
+   * @description
+   * Format hint given by `provideCwDatePickerLabels`; the French default of `CW_DATE_PICKER_LABELS`
+   * when nothing is provided, in which case the hint follows the locale instead.
+   *
+   * @type {string}
+   * @readonly
+   */
+  private readonly labelHint: string = inject(DATE_PICKER_LABELS).inputPlaceholder;
+
+  /**
+   * Property hintFollowsLocale
+   *
+   * @description
+   * Whether no labels provider gave a hint, so that the default hint is derived from the locale.
+   *
+   * @type {boolean}
+   * @readonly
+   */
+  private readonly hintFollowsLocale: boolean =
+    this.labelHint === CW_DATE_PICKER_LABELS.inputPlaceholder;
+
+  /**
+   * Property providedHint
+   *
+   * @description
+   * Default of `inputPlaceholder`, declared before it: the hint given by `provideCwDatePickerLabels`,
+   * else the hint of the locale given by `provideCwLocale` (« jj/mm/aaaa » in `fr-FR`).
+   *
+   * @type {string}
+   * @readonly
+   */
+  private readonly providedHint: string = this.hintFollowsLocale
+    ? TYPED_HINT(inject(ɵLOCALE))
+    : this.labelHint;
+
+  /**
    * Property inputPlaceholder
    *
    * @description
-   * Expected format of the `input` variant, its placeholder.
+   * Expected format of the `input` variant, its placeholder, also read after `ariaLabel` in the
+   * field's name. Without this input or a hint given by `provideCwDatePickerLabels`, the hint
+   * follows the effective `locale` (« jj/mm/aaaa » in `fr-FR`, « mm/dd/yyyy » in `en-US`), the
+   * order the field parses.
    *
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly inputPlaceholder: InputSignal<string> = input<string>(
-    inject(DATE_PICKER_LABELS).inputPlaceholder,
-  );
+  public readonly inputPlaceholder: InputSignal<string> = input<string>(this.providedHint);
 
   /**
    * Property touch
@@ -966,9 +1165,40 @@ export class CwDatePicker implements FormValueControl<CwDatePickerValue>, Contro
         year: 'numeric',
       }),
       hint: new Intl.DateTimeFormat(locale, { weekday: 'short', day: 'numeric', month: 'short' }),
-      typed: new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit', year: 'numeric' }),
+      typed: new Intl.DateTimeFormat(locale, TYPED_DATE),
     };
   });
+
+  /**
+   * Property hint
+   *
+   * @description
+   * The shown format hint: `inputPlaceholder`, or the hint of `provideCwDatePickerLabels`, when one
+   * was given, else the hint of the effective `locale`, so that a `locale` input changes the hint together with the parsed order (a user
+   * following a day-first hint in a month-first field would save another date).
+   *
+   * @type {Signal<string>}
+   * @readonly
+   */
+  protected readonly hint: Signal<string> = computed(() => {
+    const placeholder: string = this.inputPlaceholder();
+    return this.hintFollowsLocale && placeholder === this.providedHint
+      ? TYPED_HINT(this.locale())
+      : placeholder;
+  });
+
+  /**
+   * Property typedPattern
+   *
+   * @description
+   * The typed date accepted by the `input` variant, in the order of the shown one.
+   *
+   * @type {Signal<TypedPattern>}
+   * @readonly
+   */
+  private readonly typedPattern: Signal<TypedPattern> = computed(() =>
+    typedPattern(this.formats().typed),
+  );
 
   /**
    * Property display
@@ -1399,14 +1629,17 @@ export class CwDatePicker implements FormValueControl<CwDatePickerValue>, Contro
       this.setValue(null);
       return;
     }
-    const match: RegExpExecArray | null = TYPED.exec(trimmed);
+    const typed: TypedPattern = this.typedPattern();
+    const match: RegExpExecArray | null = typed.pattern.exec(trimmed.replace(FORMAT_MARKS, ''));
+    const field: (name: TypedField) => number = (name: TypedField): number =>
+      Number(match?.[typed.order.indexOf(name) + 1]);
     const date: Date | null = match
-      ? new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1]))
+      ? new Date(field('year'), field('month') - 1, field('day'))
       : null;
     const valid: boolean =
       date !== null &&
-      date.getDate() === Number(match?.[1]) &&
-      date.getMonth() === Number(match?.[2]) - 1 &&
+      date.getDate() === field('day') &&
+      date.getMonth() === field('month') - 1 &&
       !this.unpickable(date);
     if (!valid) {
       // Date Picker sheet, "Accessibilité": an invalid typed date sets the error state.

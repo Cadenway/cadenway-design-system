@@ -2,6 +2,7 @@ import type { Mock } from 'vitest';
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
+import { provideCwLocale } from '@cadenway/ui/core';
 
 import { provideCwAttachmentLabels } from './attachment.providers';
 import { CwAttachment } from './attachment.component';
@@ -180,6 +181,21 @@ describe('CwAttachment', () => {
     );
 
     expect(component.events()).toEqual(['remove']);
+  });
+});
+
+describe('provideCwLocale', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [provideCwLocale('en-US')] });
+  });
+
+  it('formats attachment sizes in English', () => {
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+
+    expect(host.textContent).toContain('2.4 MB · PDF');
+    expect(host.textContent).toContain('312 KB · Image');
   });
 });
 

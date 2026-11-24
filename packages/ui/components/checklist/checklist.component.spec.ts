@@ -1,5 +1,6 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideCwLocale } from '@cadenway/ui/core';
 
 import { provideCwChecklistLabels } from './checklist.providers';
 import { CwChecklistAdd } from './checklist-add/checklist-add.component';
@@ -340,6 +341,46 @@ describe('CwChecklist', () => {
     expect(host.querySelectorAll('[aria-label^="Déplacer"]')).toHaveLength(0);
     expect(host.querySelectorAll('[aria-label^="Actions de"]')).toHaveLength(0);
     expect(host.querySelector('cw-checklist-add')?.hasAttribute('hidden')).toBe(true);
+  });
+});
+
+describe('provideCwLocale', () => {
+  /**
+   * Component DueDateHost
+   *
+   * @description
+   * Hosts a checklist item with a due date in its required checklist context.
+   */
+  @Component({
+    imports: [CwChecklist, CwChecklistItem],
+    template: `<cw-checklist title="Critères d'acceptation">
+      <cw-checklist-item itemId="a" label="Tester 10 000 lignes" [due]="due" />
+    </cw-checklist>`,
+  })
+  class DueDateHost {
+    // #region Properties
+    /**
+     * Property due
+     *
+     * @description
+     * Due date displayed by the checklist item.
+     *
+     * @type {Date}
+     * @readonly
+     */
+    public readonly due: Date = new Date(2026, 10, 18);
+    // #endregion
+  }
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [provideCwLocale('en-US')] });
+  });
+
+  it('formats an item due date in English', () => {
+    const fixture: ComponentFixture<DueDateHost> = TestBed.createComponent(DueDateHost);
+    fixture.detectChanges();
+
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Nov 18');
   });
 });
 

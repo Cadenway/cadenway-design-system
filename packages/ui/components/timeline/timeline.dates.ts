@@ -1,43 +1,137 @@
 /*
- * Working days and French date wording of `cw-timeline`. Internal: not exported by the entry point.
+ * Working days and date wording of `cw-timeline`, in the locale given by `provideCwLocale`
+ * (French by default). Internal: not exported by the entry point.
  * The day arithmetic comes from `@cadenway/ui/core`: days are local dates at midnight and
  * differences are counted in calendar days, so a daylight saving change never shifts a bar.
  */
 
-import { ɵaddDays, ɵdaysBetween, ɵsameDay } from '@cadenway/ui/core';
+import { ɵaddDays, ɵdaysBetween, ɵperLocale, ɵsameDay } from '@cadenway/ui/core';
 
 /**
- * Constant DAY_MONTH
+ * Interface TimelineFormats
  *
  * @description
- * French day and abbreviated month formatter.
- *
- * @type {Intl.DateTimeFormat}
+ * The `Intl` formatters of the timeline in one locale, and how it orders a day and a month.
  */
-const DAY_MONTH: Intl.DateTimeFormat = new Intl.DateTimeFormat('fr-FR', {
-  day: 'numeric',
-  month: 'short',
-});
+interface TimelineFormats {
+  // #region Properties
+  /**
+   * Property day
+   *
+   * @description
+   * Day of the month alone (« 12 » in French).
+   *
+   * @type {Intl.DateTimeFormat}
+   * @readonly
+   */
+  readonly day: Intl.DateTimeFormat;
+
+  /**
+   * Property dayMonth
+   *
+   * @description
+   * Day and abbreviated month (« 12 nov. » in French, « Nov 12 » in American English).
+   *
+   * @type {Intl.DateTimeFormat}
+   * @readonly
+   */
+  readonly dayMonth: Intl.DateTimeFormat;
+
+  /**
+   * Property month
+   *
+   * @description
+   * Abbreviated month.
+   *
+   * @type {Intl.DateTimeFormat}
+   * @readonly
+   */
+  readonly month: Intl.DateTimeFormat;
+
+  /**
+   * Property weekday
+   *
+   * @description
+   * Abbreviated weekday.
+   *
+   * @type {Intl.DateTimeFormat}
+   * @readonly
+   */
+  readonly weekday: Intl.DateTimeFormat;
+
+  /**
+   * Property dayFirst
+   *
+   * @description
+   * Whether the locale writes the day before the month: a range within one month then drops the
+   * first month (« 12 – 14 nov. »); otherwise both days keep it (« Nov 12 – Nov 14 »).
+   *
+   * @type {boolean}
+   * @readonly
+   */
+  readonly dayFirst: boolean;
+  // #endregion
+}
 
 /**
- * Constant MONTH
+ * Constant FORMATS
  *
  * @description
- * French abbreviated month formatter.
+ * Formatters of a locale, built once per locale for every timeline of the page.
  *
- * @type {Intl.DateTimeFormat}
+ * @type {(locale: string) => TimelineFormats}
  */
-const MONTH: Intl.DateTimeFormat = new Intl.DateTimeFormat('fr-FR', { month: 'short' });
+const FORMATS: (locale: string) => TimelineFormats = ɵperLocale(
+  (locale: string): TimelineFormats => {
+    const dayMonth: Intl.DateTimeFormat = new Intl.DateTimeFormat(locale, {
+      day: 'numeric',
+      month: 'short',
+    });
+    const order: string[] = dayMonth.formatToParts(new Date(2026, 10, 18)).map((part) => part.type);
+    return {
+      day: new Intl.DateTimeFormat(locale, { day: 'numeric' }),
+      dayMonth,
+      month: new Intl.DateTimeFormat(locale, { month: 'short' }),
+      weekday: new Intl.DateTimeFormat(locale, { weekday: 'short' }),
+      dayFirst: order.indexOf('day') < order.indexOf('month'),
+    };
+  },
+);
 
 /**
- * Constant WEEKDAY
+ * Function sameMonth
  *
  * @description
- * French abbreviated weekday formatter.
+ * Checks whether two days belong to the same month of the same year.
  *
- * @type {Intl.DateTimeFormat}
+ * @param {Date} start - First day.
+ * @param {Date} end - Second day.
+ *
+ * @returns {boolean} Whether both days share their month and year.
  */
-const WEEKDAY: Intl.DateTimeFormat = new Intl.DateTimeFormat('fr-FR', { weekday: 'short' });
+function sameMonth(start: Date, end: Date): boolean {
+  return start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear();
+}
+
+/**
+ * Function startText
+ *
+ * @description
+ * The first day of a range: its day alone when the range stays in one month and the locale writes
+ * the day first (« 12 » of « 12 – 14 nov. »), else its day and month.
+ *
+ * @param {Date} start - First day of the range.
+ * @param {Date} end - Last day of the range.
+ * @param {string} locale - BCP 47 language tag of the dates.
+ *
+ * @returns {string} Text of the first day.
+ */
+function startText(start: Date, end: Date, locale: string): string {
+  const formats: TimelineFormats = FORMATS(locale);
+  return sameMonth(start, end) && formats.dayFirst
+    ? formats.day.format(start)
+    : formats.dayMonth.format(start);
+}
 
 /**
  * Function isWeekend
@@ -84,98 +178,96 @@ export function workingDaysBetween(from: Date, to: Date): number {
  * Function dayMonth
  *
  * @description
- * Formats a day and abbreviated month in French.
+ * Formats a day and abbreviated month in a locale.
  *
  * @param {Date} date - Date to format.
+ * @param {string} locale - BCP 47 language tag of the date.
  *
- * @returns {string} French day and abbreviated month.
+ * @returns {string} Day and abbreviated month, « 12 nov. » in French.
  */
-export function dayMonth(date: Date): string {
-  return DAY_MONTH.format(date);
+export function dayMonth(date: Date, locale: string): string {
+  return FORMATS(locale).dayMonth.format(date);
 }
 
 /**
  * Function monthShort
  *
  * @description
- * Formats an abbreviated French month.
+ * Formats an abbreviated month in a locale.
  *
  * @param {Date} date - Date to format.
+ * @param {string} locale - BCP 47 language tag of the month.
  *
- * @returns {string} Abbreviated French month.
+ * @returns {string} Abbreviated month, « nov. » in French.
  */
-export function monthShort(date: Date): string {
-  return MONTH.format(date);
+export function monthShort(date: Date, locale: string): string {
+  return FORMATS(locale).month.format(date);
 }
 
 /**
  * Function weekdayShort
  *
  * @description
- * Returns the two-letter French weekday used on the ruler.
+ * Returns the two-letter weekday used on the ruler.
  *
  * @param {Date} date - Date to format.
+ * @param {string} locale - BCP 47 language tag of the weekday.
  *
- * @returns {string} Two-letter French weekday.
+ * @returns {string} Two-letter weekday, « je » in French, « Th » in English.
  */
-export function weekdayShort(date: Date): string {
-  return WEEKDAY.format(date).slice(0, 2);
+export function weekdayShort(date: Date, locale: string): string {
+  return FORMATS(locale).weekday.format(date).slice(0, 2);
 }
 
 /**
  * Function periodText
  *
  * @description
- * Formats a French date period, including both months when they differ.
+ * Formats a date period in a locale, including both months when they differ.
  *
  * @param {Date} start - First day of the period.
  * @param {Date} end - Last day of the period.
+ * @param {string} locale - BCP 47 language tag of the dates.
  *
- * @returns {string} French period text.
+ * @returns {string} Period text, « 12 – 14 nov. » in French.
  */
-export function periodText(start: Date, end: Date): string {
-  if (ɵsameDay(start, end)) return dayMonth(start);
-  const sameMonth: boolean =
-    start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear();
-  return sameMonth
-    ? `${String(start.getDate())} – ${dayMonth(end)}`
-    : `${dayMonth(start)} – ${dayMonth(end)}`;
+export function periodText(start: Date, end: Date, locale: string): string {
+  if (ɵsameDay(start, end)) return dayMonth(start, locale);
+  return `${startText(start, end, locale)} – ${dayMonth(end, locale)}`;
 }
 
 /**
  * Function rangeText
  *
  * @description
- * Formats a French date range or a single day.
+ * Formats a date range or a single day for the announcements, dates in a locale. The words
+ * (« le », « du », « au ») stay French: they are texts, not formats.
  *
  * @param {Date} start - First day of the range.
  * @param {Date} end - Last day of the range.
+ * @param {string} locale - BCP 47 language tag of the dates.
  *
- * @returns {string} French date range or single-day text.
+ * @returns {string} Date range or single-day text, « du 12 au 14 nov. » in French.
  */
-export function rangeText(start: Date, end: Date): string {
-  if (ɵsameDay(start, end)) return `le ${dayMonth(start)}`;
-  const sameMonth: boolean =
-    start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear();
-  return sameMonth
-    ? `du ${String(start.getDate())} au ${dayMonth(end)}`
-    : `du ${dayMonth(start)} au ${dayMonth(end)}`;
+export function rangeText(start: Date, end: Date, locale: string): string {
+  if (ɵsameDay(start, end)) return `le ${dayMonth(start, locale)}`;
+  return `du ${startText(start, end, locale)} au ${dayMonth(end, locale)}`;
 }
 
 /**
  * Function moveText
  *
  * @description
- * Formats the date range and inclusive day count for a moving bar.
+ * Formats the date range and inclusive day count for a moving bar, dates in a locale. The day
+ * unit (« j ») stays French: it is a text, not a format.
  *
  * @param {Date} start - First day of the moved bar.
  * @param {Date} end - Last day of the moved bar.
+ * @param {string} locale - BCP 47 language tag of the dates.
  *
- * @returns {string} Date range and inclusive day count.
+ * @returns {string} Date range and inclusive day count, « 12 → 14 nov. · 3 j » in French.
  */
-export function moveText(start: Date, end: Date): string {
-  const sameMonth: boolean =
-    start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear();
-  const from: string = sameMonth ? String(start.getDate()) : dayMonth(start);
-  return `${from} → ${dayMonth(end)} · ${String(ɵdaysBetween(start, end) + 1)} j`;
+export function moveText(start: Date, end: Date, locale: string): string {
+  const from: string = startText(start, end, locale);
+  return `${from} → ${dayMonth(end, locale)} · ${String(ɵdaysBetween(start, end) + 1)} j`;
 }

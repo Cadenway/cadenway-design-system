@@ -17,7 +17,7 @@ import {
   type Signal,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { CwRipple, ɵFOCUS } from '@cadenway/ui/core';
+import { CwRipple, ɵFOCUS, ɵLOCALE, ɵperLocale } from '@cadenway/ui/core';
 import { CwSkeleton } from '@cadenway/ui/components/skeleton';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorChartBarBold } from '@ng-icons/phosphor-icons/bold';
@@ -333,27 +333,18 @@ const RING_GAP: number = 2.5;
 const FALLBACK_WIDTH: number = 320;
 
 /**
- * Constant NUMBER
+ * Constant NUMBER_FORMAT
  *
  * @description
- * French number formatter used by default.
+ * Default value format of a locale, at most two decimal places (« 4,25 » in French), built once
+ * per locale so that every chart of the page shares it.
  *
- * @type {Intl.NumberFormat}
+ * @type {(locale: string) => CwChartValueFormat}
  */
-const NUMBER: Intl.NumberFormat = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 2 });
-
-/**
- * Function formatNumber
- *
- * @description
- * Formats chart values with the default French formatter.
- *
- * @param {number} value - Value to format or constrain.
- * @returns {string} Formatted value.
- */
-function formatNumber(value: number): string {
-  return NUMBER.format(value);
-}
+const NUMBER_FORMAT: (locale: string) => CwChartValueFormat = ɵperLocale((locale: string) => {
+  const number: Intl.NumberFormat = new Intl.NumberFormat(locale, { maximumFractionDigits: 2 });
+  return (value: number): string => number.format(value);
+});
 
 /**
  * Function identity
@@ -922,7 +913,7 @@ interface Tooltip {
  * Component CwChart
  *
  * @description
- * A dashboard chart drawn in SVG by Cadenway, without a third-party library: grouped or stacked bars, horizontal bars on a capacity track, lines, areas with a dashed reference, or a ring (Chart sheet of the Design System artifact). For one key figure use `cw-stat`; for exact values to compare row by row, `table[cwTable]`. `data` holds one entry per category, read by the `x` key; `series` lists the drawn keys in order, each with one of the five data colors (five series at most). The ring sums each series over `data` and shows the total with `unit` in its center. Values go through `valueFormat` (`Intl.NumberFormat('fr-FR')` by default) on the axis, the tooltip, the legend and the data table; categories through `categoryFormat` in the tooltip. Accessibility: the plot is one tab stop, a `role="img"` named by `ariaLabel` (a summary of the data); a visually hidden table repeats every value; ← → (↑ ↓ for horizontal bars), Home and End move the active category, announced politely (« S44 : Terminées 18, En retard 1 ») and shown in the tooltip; Escape closes the tooltip; Enter or a click emits `categorySelect`. The legend is a row of `aria-pressed` buttons that hide or show a series. `loading` draws skeletons with `aria-busy`; without any value, the empty state shows `emptyText`. No entry animation, the tooltip follows without transition. Style hooks: `data-type`, `data-size`, `aria-busy` on the host, `data-active` on the plot.
+ * A dashboard chart drawn in SVG by Cadenway, without a third-party library: grouped or stacked bars, horizontal bars on a capacity track, lines, areas with a dashed reference, or a ring (Chart sheet of the Design System artifact). For one key figure use `cw-stat`; for exact values to compare row by row, `table[cwTable]`. `data` holds one entry per category, read by the `x` key; `series` lists the drawn keys in order, each with one of the five data colors (five series at most). The ring sums each series over `data` and shows the total with `unit` in its center. Values go through `valueFormat` (`Intl.NumberFormat` in the locale of `provideCwLocale`, `fr-FR` by default) on the axis, the tooltip, the legend and the data table; categories through `categoryFormat` in the tooltip. Accessibility: the plot is one tab stop, a `role="img"` named by `ariaLabel` (a summary of the data); a visually hidden table repeats every value; ← → (↑ ↓ for horizontal bars), Home and End move the active category, announced politely (« S44 : Terminées 18, En retard 1 ») and shown in the tooltip; Escape closes the tooltip; Enter or a click emits `categorySelect`. The legend is a row of `aria-pressed` buttons that hide or show a series. `loading` draws skeletons with `aria-busy`; without any value, the empty state shows `emptyText`. No entry animation, the tooltip follows without transition. Style hooks: `data-type`, `data-size`, `aria-busy` on the host, `data-active` on the plot.
  */
 @Component({
   selector: 'cw-chart',
@@ -1083,13 +1074,15 @@ export class CwChart {
    * Property valueFormat
    *
    * @description
-   * Formats the values on the axis, the tooltip, the legend and the table.
+   * Formats the values on the axis, the tooltip, the legend and the table; by default a number of
+   * the locale given by `provideCwLocale` (`fr-FR`), at most two decimal places.
    *
    * @type {InputSignal<CwChartValueFormat>}
    * @readonly
    */
-  public readonly valueFormat: InputSignal<CwChartValueFormat> =
-    input<CwChartValueFormat>(formatNumber);
+  public readonly valueFormat: InputSignal<CwChartValueFormat> = input<CwChartValueFormat>(
+    NUMBER_FORMAT(inject(ɵLOCALE)),
+  );
 
   /**
    * Property categoryFormat

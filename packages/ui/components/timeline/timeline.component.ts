@@ -22,6 +22,7 @@ import {
 } from '@angular/core';
 import { CwAvatar } from '@cadenway/ui/components/avatar';
 import {
+  ɵLOCALE,
   ɵaddDays,
   ɵaddMonths,
   ɵdaysBetween,
@@ -1821,6 +1822,18 @@ export class CwTimeline {
   private readonly announcer: LiveAnnouncer = inject(LiveAnnouncer);
 
   /**
+   * Property locale
+   *
+   * @description
+   * Locale of the ruler, the periods and the announced dates, given by `provideCwLocale` (`fr-FR`
+   * by default).
+   *
+   * @type {string}
+   * @readonly
+   */
+  private readonly locale: string = inject(ɵLOCALE);
+
+  /**
    * Property providedLabels
    *
    * @description
@@ -2228,7 +2241,7 @@ export class CwTimeline {
       );
       if (!row?.bar || !row.dates || row.top === null) return null;
       return {
-        text: this.providedLabels.move(row.dates.start, row.dates.end),
+        text: this.providedLabels.move(row.dates.start, row.dates.end, this.locale),
         x: this.nameColumnWidth() + row.bar.x + row.bar.width / 2,
         y: row.top >= 30 ? row.top - 28 : row.top + ROW_HEIGHT + 2,
       };
@@ -2590,7 +2603,7 @@ export class CwTimeline {
         date: day,
         x: columns.length * unit,
         width: unit,
-        label: weekdayShort(day),
+        label: weekdayShort(day, this.locale),
         sub: String(day.getDate()),
         today: ɵsameDay(day, today),
         weekend: weekends && isWeekend(day),
@@ -2608,6 +2621,7 @@ export class CwTimeline {
           sub: periodText(
             ɵstartOfWeek(column.date) < range.start ? range.start : ɵstartOfWeek(column.date),
             column.date,
+            this.locale,
           ),
         };
       } else {
@@ -2616,7 +2630,7 @@ export class CwTimeline {
           x: column.x,
           width: column.width,
           label: this.providedLabels.week(ɵisoWeek(column.date)),
-          sub: periodText(column.date, column.date),
+          sub: periodText(column.date, column.date, this.locale),
           separator: bands.length > 0,
         });
       }
@@ -2666,7 +2680,7 @@ export class CwTimeline {
         x: columns.length * unit,
         width: unit,
         label: this.providedLabels.weekShort(ɵisoWeek(monday)),
-        sub: dayMonth(monday),
+        sub: dayMonth(monday, this.locale),
         today: offset >= 0 && offset < 7,
         weekend: false,
         separator: columns.length > 0,
@@ -2687,7 +2701,7 @@ export class CwTimeline {
         key: month.toDateString(),
         x,
         width: right - x,
-        label: monthShort(month),
+        label: monthShort(month, this.locale),
         sub: String(month.getFullYear()),
         separator: bands.length > 0,
       });
@@ -2718,7 +2732,7 @@ export class CwTimeline {
         date: month,
         x: columns.length * unit,
         width: unit,
-        label: monthShort(month),
+        label: monthShort(month, this.locale),
         sub: '',
         today: monthsBetween(month, today) === 0,
         weekend: false,
@@ -2818,7 +2832,7 @@ export class CwTimeline {
       top,
       group,
       expanded,
-      meta: first && last ? `${periodText(first, last)} · ${count}` : count,
+      meta: first && last ? `${periodText(first, last, this.locale)} · ${count}` : count,
       bar,
     };
   }
@@ -2883,8 +2897,8 @@ export class CwTimeline {
       x: inside ? x : null,
       // Near the right edge the label goes left of the diamond (sheet, "Jalon").
       before: x > axis.width - 160,
-      dateText: dayMonth(date),
-      ariaLabel: this.providedLabels.milestone(mark.label, dayMonth(date)),
+      dateText: dayMonth(date, this.locale),
+      ariaLabel: this.providedLabels.milestone(mark.label, dayMonth(date, this.locale)),
     };
   }
 
@@ -2951,7 +2965,7 @@ export class CwTimeline {
       item.name,
       item.progress === undefined ? null : this.providedLabels.percent(progress),
       item.status ? this.statusLabels[item.status] : null,
-      this.providedLabels.range(dates.start, dates.end),
+      this.providedLabels.range(dates.start, dates.end, this.locale),
       lateDays ? this.providedLabels.lateLong(lateDays) : null,
       predecessor ? this.providedLabels.conflict(predecessor) : null,
     ].filter((part) => part !== null);
@@ -3257,7 +3271,7 @@ export class CwTimeline {
       messages.push(
         this.providedLabels.moved(
           change.item.name,
-          this.providedLabels.range(change.next.start, change.next.end),
+          this.providedLabels.range(change.next.start, change.next.end, this.locale),
         ),
       );
     }

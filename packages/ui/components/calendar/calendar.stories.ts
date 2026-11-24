@@ -1,5 +1,11 @@
-import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vite';
+import {
+  applicationConfig,
+  type Meta,
+  type StoryObj,
+  moduleMetadata,
+} from '@storybook/angular-vite';
 import { expect, userEvent, within } from 'storybook/test';
+import { provideCwLocale } from '@cadenway/ui/core';
 
 import { CwCalendar } from './calendar.component';
 import type { CwDateDisabledFn } from './calendar.types';
@@ -150,5 +156,21 @@ export const Keyboard: Story = {
 
     await userEvent.keyboard('{Enter}');
     await expect(twelfth.closest('td')).toHaveAttribute('aria-selected', 'true');
+  },
+};
+
+/** `provideCwLocale('en-US')` around the calendar: English month, weekdays and day names. */
+export const ProvidedLocale: Story = {
+  decorators: [applicationConfig({ providers: [provideCwLocale('en-US')] })],
+  render: () => ({
+    props: { november, due: new Date(2026, 10, 18) },
+    template: `<cw-calendar [month]="november" [selected]="due" />`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole: (role: string, options: { name: string }) => HTMLElement } = within(
+      light(canvasElement),
+    );
+    await expect(scope.getByRole('grid', { name: 'November 2026' })).toBeInTheDocument();
+    await expect(scope.getByRole('button', { name: 'November 18, 2026' })).toBeInTheDocument();
   },
 };

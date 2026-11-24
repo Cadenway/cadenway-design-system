@@ -28,7 +28,7 @@ import { type ControlValueAccessor, NgControl } from '@angular/forms';
 import type { FormValueControl } from '@angular/forms/signals';
 import { CwAvatar } from '@cadenway/ui/components/avatar';
 import { CwButton } from '@cadenway/ui/components/button';
-import { ɵmenuFrom } from '@cadenway/ui/core';
+import { ɵLOCALE, ɵmenuFrom } from '@cadenway/ui/core';
 import { CwInput } from '@cadenway/ui/components/input';
 import { CwKbd } from '@cadenway/ui/components/kbd';
 import {
@@ -278,13 +278,17 @@ interface NameParts {
  * Function fold
  *
  * @description
- * Normalizes text for case- and accent-insensitive matching.
+ * Normalizes text for case- and accent-insensitive matching, with the case mapping of the locale.
+ * Each character is lowercased before its accents are dropped, so a Turkish « İ » stays an « i »
+ * (dropping its dot first would leave an « I », which Turkish lowercases to « ı »). One character
+ * in, one out: `splitName` maps the match back onto the original name.
  *
  * @param {string} text - Text to normalize.
+ * @param {string} locale - BCP 47 language tag of the case mapping.
  * @returns {string[]} Normalized characters.
  */
-function fold(text: string): string[] {
-  return Array.from(text).map((char) => char.normalize('NFD').charAt(0).toLocaleLowerCase('fr'));
+function fold(text: string, locale: string): string[] {
+  return Array.from(text).map((char) => char.toLocaleLowerCase(locale).normalize('NFD').charAt(0));
 }
 
 /**
@@ -295,12 +299,13 @@ function fold(text: string): string[] {
  *
  * @param {string} name - Name to search or attribute name.
  * @param {string} query - Query used to filter or highlight.
+ * @param {string} locale - BCP 47 language tag of the case mapping.
  * @returns {NameParts} Name segments around the match.
  */
-function splitName(name: string, query: string): NameParts {
+function splitName(name: string, query: string, locale: string): NameParts {
   const chars: string[] = Array.from(name);
-  const haystack: string = fold(name).join('');
-  const needle: string = fold(query).join('');
+  const haystack: string = fold(name, locale).join('');
+  const needle: string = fold(query, locale).join('');
   const index: number = needle === '' ? -1 : haystack.indexOf(needle);
   if (index < 0) return { before: name, match: '', after: '' };
   const length: number = Array.from(needle).length;
@@ -618,6 +623,18 @@ export class CwBlockEditor implements FormValueControl<string>, ControlValueAcce
    * @readonly
    */
   private readonly announcer: LiveAnnouncer = inject(LiveAnnouncer);
+
+  /**
+   * Property locale
+   *
+   * @description
+   * Locale of the case mapping used to match mentions and block types, given by
+   * `provideCwLocale` (`fr-FR` by default).
+   *
+   * @type {string}
+   * @readonly
+   */
+  private readonly locale: string = inject(ɵLOCALE);
 
   /**
    * Property ngControl
@@ -1376,7 +1393,7 @@ export class CwBlockEditor implements FormValueControl<string>, ControlValueAcce
    * @returns {NameParts} Name segments around the match.
    */
   protected nameParts(name: string, query: string): NameParts {
-    return splitName(name, query);
+    return splitName(name, query, this.locale);
   }
 
   /**
@@ -1644,11 +1661,11 @@ export class CwBlockEditor implements FormValueControl<string>, ControlValueAcce
    * @returns {CwBlockType[]} Block types matching the query.
    */
   private blockItems(query: string): CwBlockType[] {
-    const needle: string = fold(query.trim()).join('');
+    const needle: string = fold(query.trim(), this.locale).join('');
     return this.blockTypes().filter(
       (type) =>
         needle === '' ||
-        fold(type.label).join('').includes(needle) ||
+        fold(type.label, this.locale).join('').includes(needle) ||
         (type.hint ?? '').startsWith(query.trim()),
     );
   }

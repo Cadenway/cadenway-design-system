@@ -36,7 +36,8 @@ export {
   ɵstartOfMonth,
   ɵstartOfWeek,
 } from './dates/dates';
-export { ɵextensionOf, ɵformatFileSize } from './format/files';
+export { ɵextensionOf, ɵformatFileSize, ɵformatFileSizeIn } from './format/files';
+export { provideCwLocale, ɵLOCALE, ɵperLocale } from './locale/locale';
 export { ɵfold } from './format/text';
 export { ɵlabelsToken, ɵprovideLabels } from './labels/labels';
 export type { ɵLabelsOverrides } from './labels/labels';

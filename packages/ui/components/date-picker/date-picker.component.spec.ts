@@ -1,8 +1,10 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
+
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { FormField, form, type FieldTree } from '@angular/forms/signals';
 import type { CwCalendarMode } from '@cadenway/ui/components/calendar';
+import { provideCwLocale } from '@cadenway/ui/core';
 
 import { provideCwDatePickerLabels } from './date-picker.providers';
 import { CwDatePicker } from './date-picker.component';
@@ -424,6 +426,148 @@ describe('CwDatePicker', () => {
     named(panel, 'Effacer').click();
     await signalFixture.whenStable();
     expect(signalFixture.componentInstance.model().due).toBeNull();
+  });
+});
+
+describe('provideCwLocale', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [provideCwLocale('en-US')] });
+  });
+
+  it('shows the selected date in English on the button', () => {
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.componentInstance.value.set(new Date(2026, 10, 18));
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+
+    expect(named(host, 'Échéance, Wed, Nov 18, 2026').textContent.trim()).toBe('Wed, Nov 18, 2026');
+  });
+
+  it('displays and parses month-first input and rejects day-first input', async () => {
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.componentInstance.variant.set('input');
+    fixture.componentInstance.value.set(new Date(2026, 10, 18));
+    fixture.autoDetectChanges();
+    const field: HTMLInputElement = named(
+      fixture.nativeElement as HTMLElement,
+      'Échéance (mm/dd/yyyy)',
+      'input',
+    ) as HTMLInputElement;
+    expect(field.placeholder).toBe('mm/dd/yyyy');
+    expect(field.value).toBe('11/18/2026');
+
+    fixture.componentInstance.value.set(null);
+    await fixture.whenStable();
+    field.value = '11/18/2026';
+    field.dispatchEvent(new Event('change'));
+    await fixture.whenStable();
+    expect(fixture.componentInstance.value()).toEqual(new Date(2026, 10, 18));
+    expect(field.hasAttribute('aria-invalid')).toBe(false);
+
+    field.value = '18/11/2026';
+    field.dispatchEvent(new Event('change'));
+    await fixture.whenStable();
+    expect(field.getAttribute('aria-invalid')).toBe('true');
+  });
+});
+
+describe('provideCwLocale with another calendar or digits', () => {
+  /**
+   * Function commitShown
+   *
+   * @description
+   * Renders the `input` variant on 18 November 2026 in a locale, then commits the text the field
+   * shows, as a user pressing Enter on an untouched value would.
+   *
+   * @param {string} locale - Locale given to `provideCwLocale`.
+   * @param {string} name - Accessible name of the field, with the hint of the locale.
+   * @returns {Promise<{ shown: string; value: unknown; invalid: string | null }>} The shown text,
+   * the value after the commit and the field's `aria-invalid`.
+   */
+  async function commitShown(
+    locale: string,
+    name: string,
+  ): Promise<{ shown: string; value: unknown; invalid: string | null }> {
+    TestBed.configureTestingModule({ providers: [provideCwLocale(locale)] });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.componentInstance.variant.set('input');
+    fixture.componentInstance.value.set(new Date(2026, 10, 18));
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const field: HTMLInputElement = named(
+      fixture.nativeElement as HTMLElement,
+      name,
+      'input',
+    ) as HTMLInputElement;
+    const shown: string = field.value;
+    field.dispatchEvent(new Event('change'));
+    await fixture.whenStable();
+    return {
+      shown,
+      value: fixture.componentInstance.value(),
+      invalid: field.getAttribute('aria-invalid'),
+    };
+  }
+
+  it('keeps the Gregorian year of a Thai locale', async () => {
+    const result: { shown: string; value: unknown; invalid: string | null } = await commitShown(
+      'th-TH',
+      'Échéance (dd/mm/yyyy)',
+    );
+
+    expect(result.shown).toBe('18/11/2026');
+    expect(result.value).toEqual(new Date(2026, 10, 18));
+    expect(result.invalid).not.toBe('true');
+  });
+
+  it('writes Latin digits in an Arabic locale and parses its right-to-left marks back', async () => {
+    const result: { shown: string; value: unknown; invalid: string | null } = await commitShown(
+      'ar-EG',
+      'Échéance (dd/mm/yyyy)',
+    );
+
+    expect(result.shown).toBe('18‏/11‏/2026');
+    expect(result.value).toEqual(new Date(2026, 10, 18));
+    expect(result.invalid).not.toBe('true');
+  });
+});
+
+describe('locale input', () => {
+  /**
+   * Component LocaleHost
+   *
+   * @description
+   * Two typed pickers given only a `locale` input, one with its own hint. A host component keeps
+   * the pickers inside a TestBed root that teardown removes: a picker created as the root clears
+   * the root's `id` (`[attr.id]` is null on its host), and the leftover elements would leak into
+   * the next spec files of the worker.
+   */
+  @Component({
+    imports: [CwDatePicker],
+    template: `
+      <cw-date-picker ariaLabel="Échéance" variant="input" locale="en-US" />
+      <cw-date-picker
+        ariaLabel="Rappel"
+        variant="input"
+        locale="en-US"
+        inputPlaceholder="MM/DD/YYYY"
+      />
+    `,
+  })
+  class LocaleHost {}
+
+  it('gives the hint of the locale input, in the order the field parses, or keeps a given one', () => {
+    const fixture: ComponentFixture<LocaleHost> = TestBed.createComponent(LocaleHost);
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    const field: HTMLInputElement = named(
+      host,
+      'Échéance (mm/dd/yyyy)',
+      'input',
+    ) as HTMLInputElement;
+
+    expect(field.placeholder).toBe('mm/dd/yyyy');
+    expect(named(host, 'Rappel (MM/DD/YYYY)', 'input')).toBeTruthy();
   });
 });
 
