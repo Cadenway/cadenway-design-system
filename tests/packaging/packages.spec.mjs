@@ -15,7 +15,7 @@ import { createRequire } from 'node:module';
 import { dirname, join, resolve } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
-import ts from 'typescript';
+import { publishedTypeChanges } from './published-contract.mjs';
 
 const root = fileURLToPath(new URL('../..', import.meta.url));
 const packages = {
@@ -163,59 +163,8 @@ function manifests(directory) {
   );
 }
 
-function publicSurfaces(installed) {
-  const declarationFiles = Object.values(installed).flatMap(({ base, exports }) =>
-    Object.values(exports)
-      .filter((entry) => entry.types)
-      .map((entry) => resolve(base, entry.types)),
-  );
-  const program = ts.createProgram(declarationFiles, {
-    module: ts.ModuleKind.NodeNext,
-    skipLibCheck: true,
-  });
-  const checker = program.getTypeChecker();
-  const printer = ts.createPrinter({ removeComments: true });
-  const result = new Map();
-  for (const path of declarationFiles) {
-    const source = program.getSourceFile(path);
-    assert(source, `Missing type declarations: ${path}`);
-    const module = checker.getSymbolAtLocation(source);
-    assert(module, `Missing module declaration: ${path}`);
-    const symbols = checker.getExportsOfModule(module).map((exported) => {
-      const symbol =
-        exported.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(exported) : exported;
-      assert(symbol.declarations?.length, `Unresolved export ${exported.name} in ${path}`);
-      const shape = symbol.declarations.map((declaration) => {
-        let node = declaration;
-        if (ts.isClassDeclaration(declaration)) {
-          const publicMembers = declaration.members.filter(
-            (member) =>
-              !(ts.getCombinedModifierFlags(member) & ts.ModifierFlags.Private) &&
-              !(member.name && ts.isPrivateIdentifier(member.name)),
-          );
-          node = ts.factory.updateClassDeclaration(
-            declaration,
-            declaration.modifiers,
-            declaration.name,
-            declaration.typeParameters,
-            declaration.heritageClauses,
-            publicMembers,
-          );
-        }
-        return printer
-          .printNode(ts.EmitHint.Unspecified, node, declaration.getSourceFile())
-          .replace(/^(?:(?:export|declare|default) )+/u, '');
-      });
-      return [exported.name, shape];
-    });
-    result.set(path, new Map(symbols));
-  }
-  return result;
-}
-
 function checkPublishedContract(released, candidate) {
-  const releasedSurfaces = publicSurfaces(released);
-  const candidateSurfaces = publicSurfaces(candidate);
+  const declarations = [];
   for (const [name, published] of Object.entries(released)) {
     const installed = candidate[name];
     for (const [path, entry] of Object.entries(published.exports)) {
@@ -231,17 +180,20 @@ function checkPublishedContract(released, candidate) {
       }
       if (entry.types) {
         assert(actual.types, `${name} ${path} removed its types export.`);
-        const oldExports = releasedSurfaces.get(resolve(published.base, entry.types));
-        const newExports = candidateSurfaces.get(resolve(installed.base, actual.types));
-        for (const [symbol, shape] of oldExports) {
-          assert.deepEqual(newExports.get(symbol), shape, `${name} ${path} changed ${symbol}.`);
-        }
+        declarations.push({
+          label: `${name} ${path}`,
+          released: resolve(published.base, entry.types),
+          candidate: resolve(installed.base, actual.types),
+        });
       }
     }
     const leakedTests = readdirSync(installed.base, { recursive: true }).filter((name) =>
       /(?:^|[\\/])tests?[\\/]|\.(?:spec|test|stories)\.[cm]?[jt]s$|\.tsbuildinfo$/u.test(name),
     );
     assert.deepEqual(leakedTests, [], `${name} published test or build-cache files.`);
+  }
+  for (const { label, symbol, actual, expected } of publishedTypeChanges(declarations)) {
+    assert.deepEqual(actual, expected, `${label} changed ${symbol}.`);
   }
 }
 
