@@ -1125,9 +1125,10 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * @description
    * Renders visible lines and ten lines of overscan, with the active, focused and editing lines
    * retained. Give the table a bounded height, such as a fixed height or a flex parent with
-   * `min-h-0`, so its scroller does not grow to the full list. Desktop rows are 32, 36 or 44 px
-   * and group rows are 28, 32 or 36 px by density. Below 48rem each rendered card is measured;
-   * unmeasured lines use the mean height of measured lines of the same kind, with scroll anchoring.
+   * `min-h-0`, so its scroller does not grow to the full list. Rendered rows and group headers
+   * are measured and observed for later size changes, with scroll anchoring. Unmeasured desktop
+   * rows use 32, 36 or 44 px and group rows 28, 32 or 36 px by density; below 48rem, unmeasured
+   * lines use the mean height of measured lines of the same kind.
    * Keyboard navigation reaches all expanded lines and the selection banner. Rows entering the
    * window have no entry motion; column auto-fit measures only rendered cells.
    *
@@ -2281,7 +2282,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * Property measuredHeights
    *
    * @description
-   * Mobile line heights in pixels, keyed by navigation identity.
+   * Measured line heights in pixels, keyed by navigation identity.
    *
    * @type {WritableSignal<ReadonlyMap<string, number>>}
    * @readonly
@@ -2325,9 +2326,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    */
   private readonly virtualModel: Signal<VirtualModel<T>> = computed(() => {
     const mobile: boolean = this.mobileLayout();
-    const measured: ReadonlyMap<string, number> = mobile
-      ? this.measuredHeights()
-      : new Map<string, number>();
+    const measured: ReadonlyMap<string, number> = this.measuredHeights();
     const heights: { row: number; group: number } = VIRTUAL_HEIGHTS[this.density()];
     const lines: {
       group: GroupEntry<T>;
@@ -2378,6 +2377,9 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
             : groupCount
               ? groupSum / groupCount
               : heights.group);
+    }
+    if (!mobile) {
+      for (const line of lines) line.height = measured.get(line.key) ?? line.height;
     }
     for (const line of lines) offsets.push(offsets[offsets.length - 1] + line.height);
     return { lines, offsets };
@@ -2727,6 +2729,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
             const scroller: HTMLElement = this.scroller().nativeElement;
             let frame: number = 0;
             let layout: string = '';
+            const observed: Set<HTMLElement> = new Set<HTMLElement>();
             const update: () => void = (): void => {
               frame = 0;
               const view: Partial<Window> | null = scroller.ownerDocument.defaultView;
@@ -2748,19 +2751,34 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
               const reset: boolean = signature !== layout;
               layout = signature;
               let measured: Map<string, number> | null = reset ? new Map<string, number>() : null;
-              if (mobile) {
-                for (const row of Array.from(
-                  scroller.querySelectorAll<HTMLElement>(
-                    'tr[data-cw-row^="r:"], tr[data-cw-row^="g:"]',
-                  ),
-                )) {
-                  const key: string | undefined = row.dataset['cwRow'];
-                  const height: number = row.offsetHeight;
-                  const previous: number = key ? ((measured ?? current).get(key) ?? 0) : 0;
-                  if (key && height > 0 && Math.abs(height - previous) >= 1) {
-                    measured ??= new Map<string, number>(current);
-                    measured.set(key, height);
-                  }
+              const rows: HTMLElement[] = Array.from(
+                scroller.querySelectorAll<HTMLElement>(
+                  'tr[data-cw-row^="r:"], tr[data-cw-row^="g:"]',
+                ),
+              );
+              const currentRows: Set<HTMLElement> = new Set<HTMLElement>(rows);
+              for (const row of observed) {
+                if (!currentRows.has(row)) {
+                  observer?.unobserve(row);
+                  observed.delete(row);
+                }
+              }
+              for (const row of rows) {
+                if (!observed.has(row)) {
+                  observer?.observe(row);
+                  observed.add(row);
+                }
+                const key: string | undefined = row.dataset['cwRow'];
+                const height: number = row.offsetHeight;
+                if (!key || height <= 0) continue;
+                const estimate: number = key.startsWith('g:')
+                  ? VIRTUAL_HEIGHTS[this.density()].group
+                  : VIRTUAL_HEIGHTS[this.density()].row;
+                const previous: number = (measured ?? current).get(key) ?? (mobile ? 0 : estimate);
+                if (Math.abs(height - previous) >= 1) {
+                  measured ??= new Map<string, number>(current);
+                  if (!mobile && Math.abs(height - estimate) < 1) measured.delete(key);
+                  else measured.set(key, height);
                 }
               }
               const changed: boolean = reset
@@ -2813,6 +2831,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
               scroller.removeEventListener('scroll', schedule);
               scroller.ownerDocument.defaultView?.removeEventListener('resize', schedule);
               observer?.disconnect();
+              observed.clear();
               if (frame) cancelAnimationFrame(frame);
             });
           },
@@ -2827,6 +2846,9 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
         this.virtualSegments();
         this.visibleColumns();
         this.bannerState();
+        this.loading();
+        this.error();
+        this.isEmpty();
         this.scheduleVirtualMeasurement?.();
       },
     });

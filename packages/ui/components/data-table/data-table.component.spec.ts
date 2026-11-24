@@ -995,6 +995,166 @@ describe('CwDataTable', () => {
       outside.remove();
     });
 
+    it('measures and observes desktop rows as their projected content changes height', async () => {
+      let rowHeight: number = 80;
+      const heights: { mockRestore: () => void } = vi
+        .spyOn(HTMLElement.prototype, 'offsetHeight', 'get')
+        .mockImplementation(function (this: HTMLElement): number {
+          if (!this.hasAttribute('aria-selected')) return 0;
+          return this.getAttribute('aria-rowindex') === '2' ? rowHeight : 36;
+        });
+      const observed: Set<Element> = new Set<Element>();
+      let callback: ResizeObserverCallback | null = null;
+      vi.stubGlobal(
+        'ResizeObserver',
+        vi.fn().mockImplementation(function (handler: ResizeObserverCallback) {
+          callback = handler;
+          return {
+            observe: (element: Element): void => {
+              observed.add(element);
+            },
+            unobserve: (element: Element): void => {
+              observed.delete(element);
+            },
+            disconnect: (): void => {
+              observed.clear();
+            },
+          };
+        }),
+      );
+      try {
+        component.data.set(
+          Array.from({ length: 100 }, (_, index): Task => ({
+            id: String(index),
+            name: String(index),
+            status: 'a',
+            estimate: index,
+          })),
+        );
+        const grid: HTMLElement = one(host, 'grid', 'Tâches de Produit');
+        const scroller: HTMLElement = required(grid.parentElement);
+        Object.defineProperty(scroller, 'clientHeight', { configurable: true, value: 360 });
+        component.virtual.set(true);
+        await stable();
+        await new Promise<void>((resolve) => {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              resolve();
+            });
+          });
+        });
+        await stable();
+        const first: HTMLElement = dataRows(host)[0];
+        expect(observed.has(first)).toBe(true);
+        const total: () => number = (): number => {
+          const spacers: HTMLElement[] = Array.from(
+            grid.querySelectorAll<HTMLElement>(
+              'tr[aria-hidden="true"] td, tbody[aria-hidden="true"] td',
+            ),
+          );
+          return (
+            spacers.reduce(
+              (sum: number, cell: HTMLElement) => sum + parseFloat(cell.style.height),
+              0,
+            ) + dataRows(host).reduce((sum: number, row: HTMLElement) => sum + row.offsetHeight, 0)
+          );
+        };
+        expect(total()).toBe(100 * 36 + 44);
+        rowHeight = 120;
+        required<ResizeObserverCallback>(callback)([], {} as ResizeObserver);
+        await new Promise<void>((resolve) => {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              resolve();
+            });
+          });
+        });
+        await stable();
+        expect(total()).toBe(100 * 36 + 84);
+        Object.defineProperty(scroller, 'scrollTop', {
+          configurable: true,
+          writable: true,
+          value: 3000,
+        });
+        scroller.dispatchEvent(new Event('scroll'));
+        await new Promise<void>((resolve) => {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              resolve();
+            });
+          });
+        });
+        await stable();
+        expect(observed.has(first)).toBe(false);
+        expect(observed.has(dataRows(host)[0])).toBe(true);
+        expect(
+          [...observed]
+            .filter((element: Element) => element.tagName === 'TR')
+            .every((element: Element) => element.hasAttribute('aria-selected')),
+        ).toBe(true);
+      } finally {
+        heights.mockRestore();
+        vi.unstubAllGlobals();
+      }
+    });
+
+    it('does not rebuild the desktop model when rendered rows keep their density heights', async () => {
+      const heights: { mockRestore: () => void } = vi
+        .spyOn(HTMLElement.prototype, 'offsetHeight', 'get')
+        .mockImplementation(function (this: HTMLElement): number {
+          return this.hasAttribute('aria-selected') ? 36 : 0;
+        });
+      let callback: ResizeObserverCallback | null = null;
+      vi.stubGlobal(
+        'ResizeObserver',
+        vi.fn().mockImplementation(function (handler: ResizeObserverCallback) {
+          callback = handler;
+          return { observe: vi.fn(), unobserve: vi.fn(), disconnect: vi.fn() };
+        }),
+      );
+      try {
+        component.data.set(
+          Array.from({ length: 100 }, (_, index): Task => ({
+            id: String(index),
+            name: String(index),
+            status: 'a',
+            estimate: index,
+          })),
+        );
+        component.virtual.set(true);
+        await stable();
+        await new Promise<void>((resolve) => {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              resolve();
+            });
+          });
+        });
+        await stable();
+        const lookups: { mock: { calls: unknown[][] }; mockRestore: () => void } = vi.spyOn(
+          Map.prototype,
+          'get',
+        );
+        required<ResizeObserverCallback>(callback)([], {} as ResizeObserver);
+        await new Promise<void>((resolve) => {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              resolve();
+            });
+          });
+        });
+        await stable();
+        const unseen: number = lookups.mock.calls.filter(
+          (args: unknown[]) => args[0] === 'r:99',
+        ).length;
+        lookups.mockRestore();
+        expect(unseen).toBe(0);
+      } finally {
+        heights.mockRestore();
+        vi.unstubAllGlobals();
+      }
+    });
+
     it('measures mobile rows independently and anchors the viewport as heights change', async () => {
       const media: PropertyDescriptor | undefined = Object.getOwnPropertyDescriptor(
         window,
