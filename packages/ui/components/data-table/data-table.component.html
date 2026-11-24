@@ -2,7 +2,11 @@
 
 <div class="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border">
   <div class="relative flex min-h-0 flex-1 flex-col">
-    <div #scroller class="relative min-h-0 flex-1 overflow-auto">
+    <div
+      #scroller
+      class="relative min-h-0 flex-1 overflow-auto"
+      [style.overflow-anchor]="virtual() ? 'none' : null"
+    >
       <table
         #table
         role="grid"
@@ -271,12 +275,12 @@
               [attr.data-collapsible]="group.key === null ? null : ''"
               [attr.data-state]="group.key === null ? null : group.collapsed ? 'closed' : 'open'"
             >
-              @if (virtual() && virtualSegments().middleKey === group.rowKey) {
+              @if (virtual() && virtualSegments().gaps.has(group.rowKey)) {
                 <tr aria-hidden="true" class="max-md:block">
                   <td
                     class="max-md:block"
                     [attr.colspan]="colCount()"
-                    [style.height.px]="virtualSegments().middle"
+                    [style.height.px]="virtualSegments().gaps.get(group.rowKey)"
                   ></td>
                 </tr>
               }
@@ -337,12 +341,12 @@
                 </tr>
               }
               @for (entry of group.rows; track entry.key) {
-                @if (virtual() && virtualSegments().middleKey === entry.key) {
+                @if (virtual() && virtualSegments().gaps.has(entry.key)) {
                   <tr aria-hidden="true" class="max-md:block">
                     <td
                       class="max-md:block"
                       [attr.colspan]="colCount()"
-                      [style.height.px]="virtualSegments().middle"
+                      [style.height.px]="virtualSegments().gaps.get(entry.key)"
                     ></td>
                   </tr>
                 }

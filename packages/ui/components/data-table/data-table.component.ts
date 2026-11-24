@@ -6,7 +6,7 @@ import {
   computed,
   contentChild,
   contentChildren,
-  DestroyRef,
+  effect,
   ElementRef,
   inject,
   Injector,
@@ -14,6 +14,7 @@ import {
   model,
   output,
   signal,
+  untracked,
   type TemplateRef,
   viewChild,
   type InputSignalWithTransform,
@@ -523,6 +524,16 @@ interface ActiveCell {
  */
 const SELECT: string = '__select';
 /**
+ * Constant HEADER_HEIGHT
+ *
+ * @description
+ * Desktop sticky header height in pixels, matching the h-9 header row.
+ *
+ * @type {number}
+ */
+const HEADER_HEIGHT: number = 36;
+
+/**
  * Constant HEADER
  *
  * @description
@@ -703,26 +714,6 @@ interface VirtualViewport {
   mobile: boolean;
 
   /**
-   * Property row
-   *
-   * @description
-   * Estimated card height.
-   *
-   * @type {number}
-   */
-  row: number;
-
-  /**
-   * Property group
-   *
-   * @description
-   * Estimated group height.
-   *
-   * @type {number}
-   */
-  group: number;
-
-  /**
    * Property banner
    *
    * @description
@@ -863,16 +854,6 @@ interface VirtualWindow {
   bottom: number;
   // #endregion
 }
-
-/**
- * Type VirtualEstimates
- *
- * @description
- * Responsive estimates independent of scroll position.
- *
- * @type {Pick<VirtualViewport, 'mobile' | 'row' | 'group'>}
- */
-type VirtualEstimates = Pick<VirtualViewport, 'mobile' | 'row' | 'group'>;
 
 /**
  * Constant VIRTUAL_HEIGHTS
@@ -1142,15 +1123,13 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * Property virtual
    *
    * @description
-   * Renders only the lines in view (rows and group headers) plus ten above and below, between
-   * hidden spacer rows that keep the scrollbar to the full list, for long lists (the List and Sheet
-   * views). Heights are fixed by `density` (`ROW_HEIGHTS`, `GROUP_HEIGHTS`); below 768 px, where
-   * rows become cards, the first rendered row and group give the estimate. Rendered rows keep their
-   * `aria-rowindex`; the keyboard (arrows, Page Up and Down, Ctrl+Home and Ctrl+End, Shift+arrows)
-   * reaches and selects rows that are not rendered yet, and the focused row stays rendered while it
-   * is scrolled away. Rows entering on scroll play no entry motion. Column auto-fit measures the
-   * rendered cells only. Not CDK virtual scroll: its translated content wrapper would move the
-   * sticky header and break the table layout.
+   * Renders visible lines and ten lines of overscan, with the active, focused and editing lines
+   * retained. Give the table a bounded height, such as a fixed height or a flex parent with
+   * `min-h-0`, so its scroller does not grow to the full list. Desktop rows are 32, 36 or 44 px
+   * and group rows are 28, 32 or 36 px by density. Below 48rem each rendered card is measured;
+   * unmeasured lines use the mean height of measured lines of the same kind, with scroll anchoring.
+   * Keyboard navigation reaches all expanded lines and the selection banner. Rows entering the
+   * window have no entry motion; column auto-fit measures only rendered cells.
    *
    * @type {InputSignalWithTransform<boolean, unknown>}
    * @readonly
@@ -2284,27 +2263,32 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
     top: 0,
     height: 0,
     mobile: false,
-    row: 0,
-    group: 0,
     banner: 0,
   });
 
   /**
-   * Property virtualEstimates
+   * Property mobileLayout
    *
    * @description
-   * Height estimates isolated from scroll position so scrolling does not rebuild the model.
+   * Responsive layout state isolated from scroll position.
    *
-   * @type {Signal<VirtualEstimates>}
+   * @type {Signal<boolean>}
    * @readonly
    */
-  private readonly virtualEstimates: Signal<VirtualEstimates> = computed(
-    () => {
-      const viewport: VirtualViewport = this.viewport();
-      return { mobile: viewport.mobile, row: viewport.row, group: viewport.group };
-    },
-    { equal: (a, b) => a.mobile === b.mobile && a.row === b.row && a.group === b.group },
-  );
+  private readonly mobileLayout: Signal<boolean> = computed(() => this.viewport().mobile);
+
+  /**
+   * Property measuredHeights
+   *
+   * @description
+   * Mobile line heights in pixels, keyed by navigation identity.
+   *
+   * @type {WritableSignal<ReadonlyMap<string, number>>}
+   * @readonly
+   */
+  private readonly measuredHeights: WritableSignal<ReadonlyMap<string, number>> = signal<
+    ReadonlyMap<string, number>
+  >(new Map<string, number>());
 
   /**
    * Property focusedRow
@@ -2340,7 +2324,10 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * @readonly
    */
   private readonly virtualModel: Signal<VirtualModel<T>> = computed(() => {
-    const viewport: VirtualEstimates = this.virtualEstimates();
+    const mobile: boolean = this.mobileLayout();
+    const measured: ReadonlyMap<string, number> = mobile
+      ? this.measuredHeights()
+      : new Map<string, number>();
     const heights: { row: number; group: number } = VIRTUAL_HEIGHTS[this.density()];
     const lines: {
       group: GroupEntry<T>;
@@ -2355,15 +2342,42 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
           group,
           entry: null,
           key: group.rowKey,
-          height: (viewport.mobile && viewport.group) || heights.group,
+          height: heights.group,
         });
       for (const entry of group.rows)
         lines.push({
           group,
           entry,
           key: entry.key,
-          height: (viewport.mobile && viewport.row) || heights.row,
+          height: heights.row,
         });
+    }
+    if (mobile && measured.size > 0) {
+      let rowSum: number = 0;
+      let rowCount: number = 0;
+      let groupSum: number = 0;
+      let groupCount: number = 0;
+      for (const line of lines) {
+        const height: number | undefined = measured.get(line.key);
+        if (height === undefined) continue;
+        if (line.entry) {
+          rowSum += height;
+          rowCount += 1;
+        } else {
+          groupSum += height;
+          groupCount += 1;
+        }
+      }
+      for (const line of lines)
+        line.height =
+          measured.get(line.key) ??
+          (line.entry
+            ? rowCount
+              ? rowSum / rowCount
+              : heights.row
+            : groupCount
+              ? groupSum / groupCount
+              : heights.group);
     }
     for (const line of lines) offsets.push(offsets[offsets.length - 1] + line.height);
     return { lines, offsets };
@@ -2378,70 +2392,85 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * @type {Signal<VirtualWindow>}
    * @readonly
    */
-  protected readonly virtualWindow: Signal<VirtualWindow> = computed(() => {
-    const { lines, offsets }: VirtualModel<T> = this.virtualModel();
-    const viewport: VirtualViewport = this.viewport();
-    const top: number = Math.max(0, viewport.top - viewport.banner);
-    const bottom: number = Math.max(
-      top,
-      viewport.top + viewport.height - (viewport.mobile ? 0 : 36) - viewport.banner,
-    );
-    const find: (value: number) => number = (value: number): number => {
-      let low: number = 0;
-      let high: number = lines.length;
-      while (low < high) {
-        const mid: number = Math.floor((low + high) / 2);
-        if (offsets[mid + 1] <= value) low = mid + 1;
-        else high = mid;
-      }
-      return low;
-    };
-    const start: number = Math.max(0, find(top) - 10);
-    const end: number = Math.min(lines.length, Math.max(start + 20, find(bottom) + 11));
-    return { start, end, top: offsets[start], bottom: offsets[lines.length] - offsets[end] };
-  });
+  protected readonly virtualWindow: Signal<VirtualWindow> = computed(
+    () => {
+      const { lines, offsets }: VirtualModel<T> = this.virtualModel();
+      const viewport: VirtualViewport = this.viewport();
+      const top: number = Math.max(0, viewport.top - viewport.banner);
+      const bottom: number = Math.max(
+        top,
+        viewport.top + viewport.height - (viewport.mobile ? 0 : HEADER_HEIGHT) - viewport.banner,
+      );
+      const find: (value: number) => number = (value: number): number => {
+        let low: number = 0;
+        let high: number = lines.length;
+        while (low < high) {
+          const mid: number = Math.floor((low + high) / 2);
+          if (offsets[mid + 1] <= value) low = mid + 1;
+          else high = mid;
+        }
+        return low;
+      };
+      const start: number = Math.max(0, find(top) - 10);
+      const end: number = Math.min(lines.length, Math.max(start + 20, find(bottom) + 11));
+      return { start, end, top: offsets[start], bottom: offsets[lines.length] - offsets[end] };
+    },
+    {
+      equal: (a, b) =>
+        a.start === b.start && a.end === b.end && a.top === b.top && a.bottom === b.bottom,
+    },
+  );
 
   /**
    * Property virtualSegments
    *
    * @description
-   * Ordered line indices and spacers, including a focused line outside the window.
+   * Ordered window and pinned lines, with the gaps before each disjoint line.
    *
-   * @type {Signal<{ indices: number[]; top: number; middle: number; middleKey: string | null; bottom: number }>}
+   * @type {Signal<{ indices: number[]; top: number; gaps: Map<string, number>; bottom: number }>}
    * @readonly
    */
   protected readonly virtualSegments: Signal<{
     indices: number[];
     top: number;
-    middle: number;
-    middleKey: string | null;
+    gaps: Map<string, number>;
     bottom: number;
   }> = computed(() => {
     const model: VirtualModel<T> = this.virtualModel();
     const window: VirtualWindow = this.virtualWindow();
-    const indices: number[] = [];
-    const focused: string | null = this.focusedRow();
-    const pinned: number | undefined =
-      focused === null ? undefined : this.lineIndices().get(focused);
-    if (pinned !== undefined && pinned < window.start) indices.push(pinned);
+    const editing: EditState | null = this.editing();
+    const keys: (string | null | undefined)[] = [
+      this.focusedRow(),
+      this.active()?.row,
+      editing ? `r:${editing.rowId}` : null,
+    ];
+    const pinned: number[] = [
+      ...new Set(
+        keys
+          .map((key) => (key == null ? undefined : this.lineIndices().get(key)))
+          .filter(
+            (index): index is number =>
+              index !== undefined && (index < window.start || index >= window.end),
+          ),
+      ),
+    ].sort((a, b) => a - b);
+    const indices: number[] = pinned.filter((index) => index < window.start);
     for (let index: number = window.start; index < window.end; index += 1) indices.push(index);
-    if (pinned !== undefined && pinned >= window.end) indices.push(pinned);
-    let middle: number = 0;
-    let middleKey: string | null = null;
+    indices.push(...pinned.filter((index) => index >= window.end));
+    const gaps: Map<string, number> = new Map<string, number>();
     for (let index: number = 1; index < indices.length; index += 1) {
-      if (indices[index] > indices[index - 1] + 1) {
-        middle = model.offsets[indices[index]] - model.offsets[indices[index - 1] + 1];
-        middleKey = model.lines[indices[index]].key;
-        break;
-      }
+      if (indices[index] > indices[index - 1] + 1)
+        gaps.set(
+          model.lines[indices[index]].key,
+          model.offsets[indices[index]] - model.offsets[indices[index - 1] + 1],
+        );
     }
     const first: number = indices[0] ?? 0;
     const last: number = indices.at(-1) ?? -1;
     return {
       indices,
       top: model.offsets[first],
-      middle,
-      middleKey,
+      gaps,
       bottom: model.offsets[model.lines.length] - model.offsets[last + 1],
     };
   });
@@ -2685,68 +2714,118 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * Constructor
    *
    * @description
-   * Maintains grid focus and handles range selection.
+   * Maintains grid focus and range selection, and wires virtual scrolling and measurements.
    *
    * @constructor
    */
   public constructor() {
     if (isPlatformBrowser(inject(PLATFORM_ID))) {
-      const destroyRef: DestroyRef = inject(DestroyRef);
       afterNextRender(() => {
-        const scroller: HTMLElement = this.scroller().nativeElement;
-        let frame: number = 0;
-        const update: () => void = (): void => {
-          frame = 0;
-          const mobile: boolean =
-            scroller.ownerDocument.defaultView?.innerWidth !== undefined &&
-            scroller.ownerDocument.defaultView.innerWidth < 768;
-          const row: number = mobile
-            ? (scroller.querySelector<HTMLElement>('tr[data-cw-row^="r:"]')?.offsetHeight ?? 0)
-            : 0;
-          const group: number = mobile
-            ? (scroller.querySelector<HTMLElement>('tr[data-cw-row^="g:"]')?.offsetHeight ?? 0)
-            : 0;
-          const banner: number =
-            scroller.querySelector<HTMLElement>('tr[data-cw-row="banner"]')?.offsetHeight ?? 0;
-          const old: VirtualViewport = this.viewport();
-          const next: VirtualViewport = {
-            top: scroller.scrollTop,
-            height: scroller.clientHeight,
-            mobile,
-            row: row || (mobile === old.mobile ? old.row : 0),
-            group: group || (mobile === old.mobile ? old.group : 0),
-            banner,
-          };
-          if (
-            Object.keys(next).some(
-              (key) => next[key as keyof typeof next] !== old[key as keyof typeof old],
-            )
-          )
-            this.viewport.set(next);
-        };
-        const schedule: () => void = (): void => {
-          if (!frame) frame = requestAnimationFrame(update);
-        };
-        this.scheduleVirtualMeasurement = schedule;
-        scroller.addEventListener('scroll', schedule, { passive: true });
-        scroller.ownerDocument.defaultView?.addEventListener('resize', schedule);
-        const observer: ResizeObserver | null =
-          typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(schedule);
-        observer?.observe(scroller);
-        update();
-        destroyRef.onDestroy(() => {
-          scroller.removeEventListener('scroll', schedule);
-          scroller.ownerDocument.defaultView?.removeEventListener('resize', schedule);
-          observer?.disconnect();
-          if (frame) cancelAnimationFrame(frame);
-        });
+        effect(
+          (onCleanup) => {
+            if (!this.virtual()) return;
+            const scroller: HTMLElement = this.scroller().nativeElement;
+            let frame: number = 0;
+            let layout: string = '';
+            const update: () => void = (): void => {
+              frame = 0;
+              const view: Partial<Window> | null = scroller.ownerDocument.defaultView;
+              const mobile: boolean =
+                typeof view?.matchMedia === 'function' &&
+                view.matchMedia('(width < 48rem)').matches;
+              const signature: string = JSON.stringify([
+                mobile,
+                this.density(),
+                scroller.clientWidth,
+                this.visibleColumns().map((column) => column.key),
+              ]);
+              const old: VirtualViewport = this.viewport();
+              const model: VirtualModel<T> = this.virtualModel();
+              const scrollTop: number = scroller.scrollTop;
+              const banner: number =
+                scroller.querySelector<HTMLElement>('tr[data-cw-row="banner"]')?.offsetHeight ?? 0;
+              const current: ReadonlyMap<string, number> = this.measuredHeights();
+              const reset: boolean = signature !== layout;
+              layout = signature;
+              let measured: Map<string, number> | null = reset ? new Map<string, number>() : null;
+              if (mobile) {
+                for (const row of Array.from(
+                  scroller.querySelectorAll<HTMLElement>(
+                    'tr[data-cw-row^="r:"], tr[data-cw-row^="g:"]',
+                  ),
+                )) {
+                  const key: string | undefined = row.dataset['cwRow'];
+                  const height: number = row.offsetHeight;
+                  const previous: number = key ? ((measured ?? current).get(key) ?? 0) : 0;
+                  if (key && height > 0 && Math.abs(height - previous) >= 1) {
+                    measured ??= new Map<string, number>(current);
+                    measured.set(key, height);
+                  }
+                }
+              }
+              const changed: boolean = reset
+                ? current.size > 0 || (measured?.size ?? 0) > 0
+                : measured !== null;
+              let anchor: number = 0;
+              if (changed || mobile !== old.mobile) {
+                const position: number = Math.max(0, scrollTop - old.banner);
+                let high: number = model.lines.length;
+                while (anchor < high) {
+                  const middle: number = Math.floor((anchor + high) / 2);
+                  if (model.offsets[middle + 1] <= position) anchor = middle + 1;
+                  else high = middle;
+                }
+              }
+              if (changed && measured) this.measuredHeights.set(measured);
+              const next: VirtualViewport = {
+                top: scrollTop,
+                height: scroller.clientHeight,
+                mobile,
+                banner,
+              };
+              if (
+                Object.keys(next).some(
+                  (key) => next[key as keyof VirtualViewport] !== old[key as keyof VirtualViewport],
+                )
+              )
+                this.viewport.set(next);
+              if ((changed || mobile !== old.mobile) && anchor < model.lines.length) {
+                const updated: VirtualModel<T> = this.virtualModel();
+                const delta: number = updated.offsets[anchor] - model.offsets[anchor];
+                if (delta !== 0) {
+                  scroller.scrollTop = Math.max(0, scrollTop + delta);
+                  this.viewport.update((viewport) => ({ ...viewport, top: scroller.scrollTop }));
+                }
+              }
+            };
+            const schedule: () => void = (): void => {
+              if (!frame) frame = requestAnimationFrame(update);
+            };
+            this.scheduleVirtualMeasurement = schedule;
+            scroller.addEventListener('scroll', schedule, { passive: true });
+            scroller.ownerDocument.defaultView?.addEventListener('resize', schedule);
+            const observer: ResizeObserver | null =
+              typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(schedule);
+            observer?.observe(scroller);
+            untracked(update);
+            onCleanup(() => {
+              this.scheduleVirtualMeasurement = null;
+              scroller.removeEventListener('scroll', schedule);
+              scroller.ownerDocument.defaultView?.removeEventListener('resize', schedule);
+              observer?.disconnect();
+              if (frame) cancelAnimationFrame(frame);
+            });
+          },
+          { injector: this.injector },
+        );
       });
     }
     afterRenderEffect({
       read: () => {
         if (!this.virtual()) return;
         this.density();
-        this.virtualWindow();
+        this.virtualSegments();
+        this.visibleColumns();
         this.bannerState();
         this.scheduleVirtualMeasurement?.();
       },
@@ -2775,7 +2854,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
     afterRenderEffect({
       write: () => {
         this.groups();
-        if (this.virtual()) this.virtualWindow();
+        if (this.virtual()) this.virtualSegments();
         this.visibleColumns();
         this.loading();
         this.error();
@@ -3278,6 +3357,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
     if (next === this.page()) return;
     this.page.set(next);
     this.scroller().nativeElement.scrollTop = 0;
+    if (this.virtual()) this.viewport.update((viewport) => ({ ...viewport, top: 0 }));
   }
 
   /**
@@ -3293,6 +3373,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
     this.pageSize.set(size);
     if (this.page() !== null) this.page.set(1);
     this.scroller().nativeElement.scrollTop = 0;
+    if (this.virtual()) this.viewport.update((viewport) => ({ ...viewport, top: 0 }));
   }
 
   /**
@@ -3309,14 +3390,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
     if (!column.editable || this.loading()) return false;
     this.session += 1;
     this.editing.set({ rowId: entry.id, key: column.key, session: this.session });
-    this.active.set({ row: entry.key, col: column.key });
-    afterNextRender(
-      () => {
-        const cell: HTMLElement | null = this.cellElement({ row: entry.key, col: column.key });
-        cell?.querySelector<HTMLElement>(FOCUSABLE)?.focus();
-      },
-      { injector: this.injector },
-    );
+    this.revealAndFocus({ row: entry.key, col: column.key }, true);
     return true;
   }
 
@@ -3641,6 +3715,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
     if (!cell || row === undefined || col === undefined) return;
     this.focusedRow.set(row);
     const active: ActiveCell | null = this.active();
+    if (active?.row === row && (row.startsWith('g:') || row === 'banner')) return;
     if (active?.row !== row || active.col !== col) this.active.set({ row, col });
   }
 
@@ -3932,16 +4007,26 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    */
   private navigateVirtual(event: KeyboardEvent, rowKey: string, colKey: string): boolean {
     const model: VirtualModel<T> = this.virtualModel();
-    const index: number = rowKey === HEADER ? -1 : (this.lineIndices().get(rowKey) ?? -2);
-    if (index < -1) return false;
+    const banner: boolean = this.bannerState() !== null;
+    const offset: number = banner ? 2 : 1;
+    const index: number =
+      rowKey === HEADER
+        ? 0
+        : rowKey === 'banner' && banner
+          ? 1
+          : (this.lineIndices().get(rowKey) ?? -offset - 1) + offset;
+    if (index < 0) return false;
     const ctrl: boolean = event.ctrlKey || event.metaKey;
     if (event.altKey || (ctrl && event.key.startsWith('Arrow'))) return false;
     const columns: string[] = [
       ...(this.selectable() ? [SELECT] : []),
       ...this.visibleColumns().map((column) => column.key),
     ];
-    const currentGroup: boolean = index >= 0 && model.lines[index].entry === null;
-    const currentColumns: string[] = currentGroup ? ['group'] : columns;
+    const currentGroup: boolean = index >= offset && model.lines[index - offset].entry === null;
+    const currentSingle: boolean = currentGroup || (banner && index === 1);
+    const currentColumns: string[] = currentSingle ? ['group'] : columns;
+    const rememberedCol: string =
+      currentSingle && this.active()?.row === rowKey ? (this.active()?.col ?? colKey) : colKey;
     const columnIndex: number = Math.max(0, currentColumns.indexOf(colKey));
     const rtl: boolean =
       this.host.ownerDocument.dir === 'rtl' || getComputedStyle(this.host).direction === 'rtl';
@@ -3961,11 +4046,11 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
         next -= PAGE_STEP;
         break;
       case 'Home':
-        if (ctrl) next = -1;
+        if (ctrl) next = 0;
         column = 'first';
         break;
       case 'End':
-        if (ctrl) next = model.lines.length - 1;
+        if (ctrl) next = model.lines.length + offset - 1;
         column = 'last';
         break;
       case 'ArrowRight':
@@ -3979,12 +4064,14 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
       default:
         return false;
     }
-    next = Math.max(-1, Math.min(model.lines.length - 1, next));
-    const nextKey: string = next < 0 ? HEADER : model.lines[next].key;
-    const targetGroup: boolean = next >= 0 && model.lines[next].entry === null;
+    next = Math.max(0, Math.min(model.lines.length + offset - 1, next));
+    const nextKey: string =
+      next === 0 ? HEADER : banner && next === 1 ? 'banner' : model.lines[next - offset].key;
+    const targetGroup: boolean =
+      (banner && next === 1) || (next >= offset && model.lines[next - offset].entry === null);
     const targetColumns: string[] = targetGroup ? ['group'] : columns;
     if (targetColumns.length === 0) return true;
-    let targetCol: string = colKey;
+    let targetCol: string = rememberedCol;
     if (column === 'first') targetCol = targetColumns[0];
     else if (column === 'last') targetCol = targetColumns[targetColumns.length - 1];
     else if (column !== null)
@@ -4007,28 +4094,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
       }
     }
     const cell: ActiveCell = { row: nextKey, col: targetCol };
-    if (next >= 0) {
-      const viewport: VirtualViewport = this.viewport();
-      const scroller: HTMLElement = this.scroller().nativeElement;
-      const header: number = viewport.mobile ? 0 : 36;
-      const top: number = model.offsets[next] + viewport.banner;
-      const bottom: number = model.offsets[next + 1] + viewport.banner + header - viewport.height;
-      const scrollTop: number = Math.max(
-        0,
-        top < viewport.top ? top : bottom > viewport.top ? bottom : viewport.top,
-      );
-      if (scrollTop !== viewport.top) {
-        scroller.scrollTop = scrollTop;
-        this.viewport.set({ ...viewport, top: scroller.scrollTop });
-      }
-    }
-    this.active.set(cell);
-    afterNextRender(
-      () => {
-        this.focusCell(cell);
-      },
-      { injector: this.injector },
-    );
+    this.revealAndFocus(cell, false);
     return true;
   }
 
@@ -4078,6 +4144,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    */
   private firstBodyCell(): ActiveCell | null {
     if (this.virtual() && !this.loading() && !this.error() && !this.isEmpty()) {
+      if (this.bannerState()) return { row: 'banner', col: 'banner' };
       const line: VirtualLine<T> | undefined = this.virtualModel().lines.at(0);
       return line ? { row: line.key, col: line.entry ? this.firstHeaderKey() : 'group' } : null;
     }
@@ -4127,21 +4194,50 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    */
   private focusCell(cell: ActiveCell | null): void {
     if (!cell) return;
-    this.active.set(cell);
-    const target: HTMLElement | null = this.cellElement(cell);
-    if (target) {
-      target.focus();
-      return;
+    if (this.virtual()) {
+      this.revealAndFocus(cell, false);
+    } else {
+      this.active.set(cell);
+      this.cellElement(cell)?.focus();
     }
-    const index: number | undefined = this.virtual() ? this.lineIndices().get(cell.row) : undefined;
-    if (index === undefined) return;
-    const scroller: HTMLElement = this.scroller().nativeElement;
-    const viewport: VirtualViewport = this.viewport();
-    scroller.scrollTop = this.virtualModel().offsets[index] + viewport.banner;
-    this.viewport.set({ ...viewport, top: scroller.scrollTop });
+  }
+
+  /**
+   * Method revealAndFocus
+   *
+   * @description
+   * Reveals a virtual line and focuses its cell or editor after rendering.
+   *
+   * @param {ActiveCell} cell - Grid cell to reveal.
+   * @param {boolean} editor - Whether to focus the editor inside the cell.
+   */
+  private revealAndFocus(cell: ActiveCell, editor: boolean): void {
+    if (this.virtual()) {
+      const index: number | undefined = this.lineIndices().get(cell.row);
+      if (index !== undefined) {
+        const model: VirtualModel<T> = this.virtualModel();
+        const viewport: VirtualViewport = this.viewport();
+        const scroller: HTMLElement = this.scroller().nativeElement;
+        const header: number = viewport.mobile ? 0 : HEADER_HEIGHT;
+        const top: number = model.offsets[index] + viewport.banner;
+        const bottom: number =
+          model.offsets[index + 1] + viewport.banner + header - viewport.height;
+        const scrollTop: number = Math.max(
+          0,
+          top < viewport.top ? top : bottom > viewport.top ? bottom : viewport.top,
+        );
+        if (scrollTop !== viewport.top) {
+          scroller.scrollTop = scrollTop;
+          this.viewport.set({ ...viewport, top: scroller.scrollTop });
+        }
+      }
+    }
+    this.active.set(cell);
     afterNextRender(
       () => {
-        this.cellElement(cell)?.focus();
+        const target: HTMLElement | null = this.cellElement(cell);
+        if (editor) target?.querySelector<HTMLElement>(FOCUSABLE)?.focus();
+        else target?.focus();
       },
       { injector: this.injector },
     );

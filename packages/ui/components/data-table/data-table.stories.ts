@@ -338,7 +338,7 @@ export const Grouped: Story = {
   },
 };
 
-/** A long list with windowed rows and keyboard navigation. */
+/** A long list with windowed rows and keyboard navigation; its fixed-height parent bounds the scroller. */
 export const Virtual: Story = {
   render: () => ({
     props: {
