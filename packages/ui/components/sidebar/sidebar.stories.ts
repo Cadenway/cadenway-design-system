@@ -237,12 +237,17 @@ const FOOTER: string = `
  *
  * @param {CwSidebarState} state - Initial sidebar state.
  * @param {CwSidebarCollapsible} collapsible - Collapse behavior, defaulting to the icon rail.
+ * @param {string} options - Extra attributes of the sidebar, such as `overlayBelow="lg"`.
  * @returns {string} Angular template for the framed example.
  */
-function frame(state: CwSidebarState, collapsible: CwSidebarCollapsible = 'icon'): string {
+function frame(
+  state: CwSidebarState,
+  collapsible: CwSidebarCollapsible = 'icon',
+  options: string = '',
+): string {
   return `
     <div class="relative flex h-[528px] w-full max-w-xl overflow-hidden rounded-lg border">
-      <cw-sidebar #sb="cwSidebar" [state]="'${state}'" collapsible="${collapsible}"
+      <cw-sidebar #sb="cwSidebar" [state]="'${state}'" collapsible="${collapsible}" ${options}
                   [ariaLabel]="cwTheme === 'light' ? 'Navigation principale' : 'Navigation principale, thème sombre'">
         ${HEADER}
         ${NAVIGATION}
@@ -290,6 +295,18 @@ export const Collapsed: Story = {
 /** `collapsible="offcanvas"`, collapsed: the sidebar leaves the screen, the toggle stays. */
 export const Offcanvas: Story = {
   render: () => ({ template: frame('collapsed', 'offcanvas') }),
+};
+
+/**
+ * `overlayBelow="lg"` and `backdrop="container"`, the application shell of the mockup
+ * (`App.dc.html`): in a 768 to 1023 px viewport the sidebar starts hidden and, once expanded,
+ * floats over the content with a shadow, closed by Escape or a click outside; on a phone its
+ * backdrop stays inside the frame. At desktop width it is the expanded sidebar.
+ */
+export const TabletOverlay: Story = {
+  render: () => ({
+    template: frame('expanded', 'icon', 'overlayBelow="lg" backdrop="container"'),
+  }),
 };
 
 /** → and ← open and close a space; Ctrl B folds the sidebar to its rail and back. */

@@ -12,7 +12,12 @@ import { CwSidebarItem } from './sidebar-item/sidebar-item.component';
 import { CwSidebarSpace } from './sidebar-space/sidebar-space.component';
 import { CwSidebarToggle } from './sidebar-toggle/sidebar-toggle.directive';
 import { CwSidebar } from './sidebar.component';
-import type { CwSidebarCollapsible, CwSidebarState } from './sidebar.types';
+import type {
+  CwSidebarBackdrop,
+  CwSidebarCollapsible,
+  CwSidebarOverlayBelow,
+  CwSidebarState,
+} from './sidebar.types';
 
 /**
  * Component Host
@@ -34,7 +39,13 @@ import type { CwSidebarCollapsible, CwSidebarState } from './sidebar.types';
     provideIcons({ phosphorHouseBold, phosphorHouseFill, phosphorTrayBold, phosphorTrayFill }),
   ],
   template: `
-    <cw-sidebar #sidebar [(state)]="state" [collapsible]="collapsible()">
+    <cw-sidebar
+      #sidebar
+      [(state)]="state"
+      [collapsible]="collapsible()"
+      [overlayBelow]="overlayBelow()"
+      [backdrop]="backdrop()"
+    >
       <cw-sidebar-header><input aria-label="Rechercher" /></cw-sidebar-header>
       <cw-sidebar-group>
         <a cwSidebarItem href="/accueil" icon="phosphorHouseBold" active>Accueil</a>
@@ -88,6 +99,30 @@ class Host {
    * @readonly
    */
   public readonly produit: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property overlayBelow
+   *
+   * @description
+   * Breakpoint under which the sidebar floats over the content.
+   *
+   * @type {WritableSignal<CwSidebarOverlayBelow>}
+   * @readonly
+   */
+  public readonly overlayBelow: WritableSignal<CwSidebarOverlayBelow> =
+    signal<CwSidebarOverlayBelow>('md');
+
+  /**
+   * Property backdrop
+   *
+   * @description
+   * Extent of the floating sidebar's backdrop.
+   *
+   * @type {WritableSignal<CwSidebarBackdrop>}
+   * @readonly
+   */
+  public readonly backdrop: WritableSignal<CwSidebarBackdrop> =
+    signal<CwSidebarBackdrop>('viewport');
 
   /**
    * Property sprintActive
@@ -369,6 +404,118 @@ describe('CwSidebar on a phone', () => {
       event.preventDefault();
     });
     home.click();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.state()).toBe('collapsed');
+  });
+});
+
+describe('CwSidebar backdrop extent', () => {
+  let host: HTMLElement;
+
+  afterEach(() => {
+    host.remove();
+    Reflect.deleteProperty(window, 'matchMedia');
+  });
+
+  it('keeps the phone backdrop inside its container with backdrop="container"', async () => {
+    window.matchMedia = vi.fn((query: string) => ({
+      matches: query.includes('max-width: 767'),
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    })) as unknown as typeof window.matchMedia;
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    host = fixture.nativeElement as HTMLElement;
+    document.body.appendChild(host);
+    await fixture.whenStable();
+    fixture.componentInstance.state.set('expanded');
+    await fixture.whenStable();
+
+    expect(button(host, 'Fermer la barre latérale').classList.contains('fixed')).toBe(true);
+    fixture.componentInstance.backdrop.set('container');
+    await fixture.whenStable();
+    const backdrop: HTMLButtonElement = button(host, 'Fermer la barre latérale');
+    expect(backdrop.classList.contains('absolute')).toBe(true);
+    expect(backdrop.classList.contains('fixed')).toBe(false);
+  });
+});
+
+describe('CwSidebar on a tablet', () => {
+  let fixture: ComponentFixture<Host>;
+  let host: HTMLElement;
+
+  /**
+   * Function render
+   *
+   * @description
+   * Renders the host on a tablet (only the 768 to 1023 px query matches) with the given overlay
+   * breakpoint.
+   *
+   * @param {CwSidebarOverlayBelow} overlayBelow - Breakpoint under which the sidebar floats.
+   * @returns {Promise<void>} Resolves once the host is stable.
+   */
+  async function render(overlayBelow: CwSidebarOverlayBelow): Promise<void> {
+    window.matchMedia = vi.fn((query: string) => ({
+      matches: query.includes('min-width: 768px'),
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    })) as unknown as typeof window.matchMedia;
+    fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.overlayBelow.set(overlayBelow);
+    host = fixture.nativeElement as HTMLElement;
+    document.body.appendChild(host);
+    await fixture.whenStable();
+  }
+
+  afterEach(() => {
+    host.remove();
+    Reflect.deleteProperty(window, 'matchMedia');
+  });
+
+  it('stays in the flow, expanded and without backdrop by default', async () => {
+    await render('md');
+
+    expect(fixture.componentInstance.state()).toBe('expanded');
+    expect(host.querySelector('button[aria-label="Fermer la barre latérale"]')).toBeNull();
+  });
+
+  it('starts hidden with overlayBelow="lg", not as the icon rail', async () => {
+    await render('lg');
+
+    expect(fixture.componentInstance.state()).toBe('collapsed');
+    expect(host.querySelector('nav')?.hasAttribute('inert')).toBe(true);
+    expect(host.querySelector('nav')?.classList.contains('w-0')).toBe(true);
+  });
+
+  it('floats with a shadow over a transparent backdrop that closes it', async () => {
+    await render('lg');
+    button(host, 'Déplier la barre latérale').click();
+    await fixture.whenStable();
+    const nav: HTMLElement | null = host.querySelector('nav');
+
+    expect(nav?.hasAttribute('inert')).toBe(false);
+    expect(nav?.classList.contains('shadow-md')).toBe(true);
+    const backdrop: HTMLButtonElement = button(host, 'Fermer la barre latérale');
+    expect(backdrop.classList.contains('bg-transparent')).toBe(true);
+    backdrop.click();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.state()).toBe('collapsed');
+  });
+
+  it('closes on Escape but stays open when an item is followed', async () => {
+    await render('lg');
+    fixture.componentInstance.state.set('expanded');
+    await fixture.whenStable();
+    const home: HTMLAnchorElement = link(host, 'Accueil');
+    home.addEventListener('click', (event) => {
+      event.preventDefault();
+    });
+    home.click();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.state()).toBe('expanded');
+
+    press(document.body, 'Escape');
     await fixture.whenStable();
     expect(fixture.componentInstance.state()).toBe('collapsed');
   });

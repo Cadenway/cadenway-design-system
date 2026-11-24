@@ -17,7 +17,12 @@ import {
 } from '@angular/core';
 import { SIDEBAR_LABELS } from './sidebar-labels.token';
 
-import type { CwSidebarCollapsible, CwSidebarState } from './sidebar.types';
+import type {
+  CwSidebarBackdrop,
+  CwSidebarCollapsible,
+  CwSidebarOverlayBelow,
+  CwSidebarState,
+} from './sidebar.types';
 
 /* Mockup App.dc.html, « Navigation des espaces »: under 768 px the sidebar is a drawer over the
    content, with a backdrop. */
@@ -30,6 +35,17 @@ import type { CwSidebarCollapsible, CwSidebarState } from './sidebar.types';
  * @type {string}
  */
 const MOBILE: string = '(max-width: 767.98px)';
+
+/**
+ * Constant TABLET
+ *
+ * @description
+ * Media query of a tablet, between the phone drawer and the 1024 px desktop layout (Tailwind `md`
+ * to `lg`), where `overlayBelow="lg"` floats the expanded sidebar over the content.
+ *
+ * @type {string}
+ */
+const TABLET: string = '(min-width: 768px) and (max-width: 1023.98px)';
 
 /**
  * Type Mode
@@ -81,6 +97,17 @@ const NAV_MODES: Record<Mode, string> = {
 const DRAWER: string =
   'max-md:absolute max-md:inset-y-0 max-md:left-0 max-md:z-40 max-md:shadow-xl';
 
+/**
+ * Constant TABLET_OVERLAY
+ *
+ * @description
+ * Mockup `App.dc.html`: under 1024 px the sidebar floats over the content, below the phone drawer's
+ * layer (`max-md:z-40` wins on a phone); its `shadow-md` is set while it is expanded.
+ *
+ * @type {string}
+ */
+const TABLET_OVERLAY: string = 'max-lg:absolute max-lg:inset-y-0 max-lg:left-0 max-lg:z-30';
+
 /* The content keeps its 240 px while the width closes over it, and leaves with a slide, a fade and
    a 2 px blur (mockup App.dc.html). */
 /**
@@ -122,29 +149,48 @@ const BODY_MODES: Record<Mode, string> = {
   hidden: 'flex min-h-0 w-full flex-1 flex-col gap-3 overflow-y-auto px-2 pt-1 pb-3',
 };
 
-/* Backdrop of the phone drawer, the shade of the modal backdrops (Dialog sheet). */
 /**
- * Constant BACKDROP
+ * Constant BACKDROP_SCOPES
  *
  * @description
- * Backdrop classes for the phone drawer.
+ * Extent of the backdrop: the viewport, or the nearest positioned container (mockup `App.dc.html`:
+ * the phone backdrop covers the panel only, not the bottom tab bar).
  *
- * @type {string}
+ * @type {Record<CwSidebarBackdrop, string>}
  */
-const BACKDROP: string =
-  'fixed inset-0 z-30 cursor-default bg-black/30 animate-fade-in motion-reduce:animate-none md:hidden dark:bg-black/60';
+const BACKDROP_SCOPES: Record<CwSidebarBackdrop, string> = {
+  viewport: 'fixed inset-0 z-30 cursor-default',
+  container: 'absolute inset-0 z-30 cursor-default',
+};
 
 /**
- * Function watchPhone
+ * Constant BACKDROP_SHADES
  *
  * @description
- * Whether the screen is a phone's, following the media query. False where media queries do not exist (server rendering, test DOMs). `window.matchMedia` rather than the CDK `BreakpointObserver`: one query, and no `@angular/cdk/layout` bundle for it.
- * @returns {Signal<boolean>} Signal indicating whether the viewport uses the phone layout.
+ * Look of the backdrop: the shade of the modal backdrops (Dialog sheet) behind the phone drawer;
+ * transparent behind the tablet overlay, which the mockup leaves over the visible content, so the
+ * backdrop only catches the outside click that closes it.
+ *
+ * @type {Record<'phone' | 'tablet', string>}
  */
-function watchPhone(): Signal<boolean> {
+const BACKDROP_SHADES: Record<'phone' | 'tablet', string> = {
+  phone: 'bg-black/30 animate-fade-in motion-reduce:animate-none md:hidden dark:bg-black/60',
+  tablet: 'bg-transparent max-md:hidden lg:hidden',
+};
+
+/**
+ * Function watchMedia
+ *
+ * @description
+ * Whether a media query matches, following its changes. False where media queries do not exist (server rendering, test DOMs). `window.matchMedia` rather than the CDK `BreakpointObserver`: one query each, and no `@angular/cdk/layout` bundle for it.
+ *
+ * @param {string} media - The media query.
+ * @returns {Signal<boolean>} Signal indicating whether the media query matches.
+ */
+function watchMedia(media: string): Signal<boolean> {
   const view: (Window & typeof globalThis) | null = inject(DOCUMENT).defaultView;
   if (typeof view?.matchMedia !== 'function') return signal(false).asReadonly();
-  const query: MediaQueryList = view.matchMedia(MOBILE);
+  const query: MediaQueryList = view.matchMedia(media);
   const matches: WritableSignal<boolean> = signal(query.matches);
   const update: (event: MediaQueryListEvent) => void = (event: MediaQueryListEvent): void => {
     matches.set(event.matches);
@@ -174,7 +220,7 @@ function isEditable(target: EventTarget | null): boolean {
  * Component CwSidebar
  *
  * @description
- * The main navigation of the application, white like the content: instance, search, shortcuts, folding spaces and their lists, sprint progress, account; expanded or reduced to icons (Sidebar sheet of the Design System artifact, mockup `App.dc.html`). Holds an optional `cw-sidebar-header`, `cw-sidebar-group` sections of `a[cwSidebarItem]` and `cw-sidebar-space`, and an optional `cw-sidebar-footer`; the middle scrolls. It renders a `nav` named `ariaLabel`. `[(state)]` expands or collapses it (240 px or, with `collapsible="icon"`, the 48 px rail whose items show their name in a tooltip); `offcanvas` hides it, `none` never folds. Ctrl B (or ⌘ B) toggles it from anywhere outside a text field; a `button[cwSidebarToggle]` does too. Under 768 px a collapsible sidebar is a drawer over the content: it starts collapsed, opens with a backdrop, and closes on the backdrop, on Escape and when an item is followed. A hidden sidebar is `inert`. The consumer remembers the state per user.
+ * The main navigation of the application, white like the content: instance, search, shortcuts, folding spaces and their lists, sprint progress, account; expanded or reduced to icons (Sidebar sheet of the Design System artifact, mockup `App.dc.html`). Holds an optional `cw-sidebar-header`, `cw-sidebar-group` sections of `a[cwSidebarItem]` and `cw-sidebar-space`, and an optional `cw-sidebar-footer`; the middle scrolls. It renders a `nav` named `ariaLabel`. `[(state)]` expands or collapses it (240 px or, with `collapsible="icon"`, the 48 px rail whose items show their name in a tooltip); `offcanvas` hides it, `none` never folds. Ctrl B (or ⌘ B) toggles it from anywhere outside a text field; a `button[cwSidebarToggle]` does too. Under 768 px a collapsible sidebar is a drawer over the content: it starts collapsed, opens with a backdrop, and closes on the backdrop, on Escape and when an item is followed. With `overlayBelow="lg"` it also floats over the content between 768 and 1023 px (`shadow-md`, the mockup's tablet layout): it starts collapsed there, hides instead of showing the icon rail, and closes on Escape and on a click outside it (a transparent backdrop), but stays open when an item is followed, as in the mockup. `backdrop="container"` keeps the backdrop inside the nearest positioned ancestor (the content panel) instead of the viewport. A hidden sidebar is `inert`. The consumer remembers the state per user.
  */
 @Component({
   selector: 'cw-sidebar',
@@ -224,10 +270,35 @@ export class CwSidebar {
   public readonly ariaLabel: InputSignal<string> = input<string>(inject(SIDEBAR_LABELS).ariaLabel);
 
   /**
+   * Property overlayBelow
+   *
+   * @description
+   * Breakpoint under which the expanded sidebar floats over the content: `md`, the phone drawer
+   * only (the default); `lg`, also on a tablet. Without effect on a `none` sidebar.
+   *
+   * @type {InputSignal<CwSidebarOverlayBelow>}
+   * @readonly
+   */
+  public readonly overlayBelow: InputSignal<CwSidebarOverlayBelow> =
+    input<CwSidebarOverlayBelow>('md');
+
+  /**
+   * Property backdrop
+   *
+   * @description
+   * Extent of the backdrop of a floating sidebar: the `viewport` (the default) or the nearest
+   * positioned `container`, which must then hold the sidebar.
+   *
+   * @type {InputSignal<CwSidebarBackdrop>}
+   * @readonly
+   */
+  public readonly backdrop: InputSignal<CwSidebarBackdrop> = input<CwSidebarBackdrop>('viewport');
+
+  /**
    * Property closeLabel
    *
    * @description
-   * Name of the drawer's backdrop, which closes it on a phone.
+   * Name of the backdrop, which closes the floating sidebar (the phone drawer, the tablet overlay).
    *
    * @type {InputSignal<string>}
    * @readonly
@@ -256,7 +327,31 @@ export class CwSidebar {
    * @type {Signal<boolean>}
    * @readonly
    */
-  private readonly mobile: Signal<boolean> = watchPhone();
+  private readonly mobile: Signal<boolean> = watchMedia(MOBILE);
+
+  /**
+   * Property tablet
+   *
+   * @description
+   * Whether the viewport is a tablet's, between 768 and 1023 px.
+   *
+   * @type {Signal<boolean>}
+   * @readonly
+   */
+  private readonly tablet: Signal<boolean> = watchMedia(TABLET);
+
+  /**
+   * Property overlay
+   *
+   * @description
+   * Whether the sidebar uses the tablet overlay layout.
+   *
+   * @type {Signal<boolean>}
+   * @readonly
+   */
+  private readonly overlay: Signal<boolean> = computed(
+    () => this.collapsible() !== 'none' && this.overlayBelow() === 'lg' && this.tablet(),
+  );
 
   /**
    * Property collapsed
@@ -281,7 +376,7 @@ export class CwSidebar {
    * @readonly
    */
   public readonly rail: Signal<boolean> = computed(
-    () => this.collapsed() && this.collapsible() === 'icon' && !this.mobile(),
+    () => this.collapsed() && this.collapsible() === 'icon' && !this.mobile() && !this.overlay(),
   );
 
   /**
@@ -323,26 +418,42 @@ export class CwSidebar {
   protected readonly hidden: Signal<boolean> = computed(() => this.mode() === 'hidden');
 
   /**
-   * Property backdrop
+   * Property floating
    *
    * @description
-   * Whether the drawer backdrop is visible.
+   * Whether the sidebar floats over the content: the phone drawer or the tablet overlay.
    *
    * @type {Signal<boolean>}
    * @readonly
    */
-  protected readonly backdrop: Signal<boolean> = computed(() => this.drawer() && !this.collapsed());
+  private readonly floating: Signal<boolean> = computed(() => this.drawer() || this.overlay());
+
+  /**
+   * Property backdropShown
+   *
+   * @description
+   * Whether the backdrop of an expanded floating sidebar is rendered.
+   *
+   * @type {Signal<boolean>}
+   * @readonly
+   */
+  protected readonly backdropShown: Signal<boolean> = computed(
+    () => this.floating() && !this.collapsed(),
+  );
 
   /**
    * Property backdropClasses
    *
    * @description
-   * Classes used by the drawer backdrop.
+   * Classes of the backdrop: its extent, and the phone shade or the transparent tablet catcher.
    *
-   * @type {string}
+   * @type {Signal<string>}
    * @readonly
    */
-  protected readonly backdropClasses: string = BACKDROP;
+  protected readonly backdropClasses: Signal<string> = computed(
+    () =>
+      `${BACKDROP_SCOPES[this.backdrop()]} ${BACKDROP_SHADES[this.overlay() ? 'tablet' : 'phone']}`,
+  );
 
   /**
    * Property navClasses
@@ -353,9 +464,14 @@ export class CwSidebar {
    * @type {Signal<string>}
    * @readonly
    */
-  protected readonly navClasses: Signal<string> = computed(
-    () => `${NAV} ${NAV_MODES[this.mode()]} ${this.collapsible() === 'none' ? '' : DRAWER}`,
-  );
+  protected readonly navClasses: Signal<string> = computed(() => {
+    if (this.collapsible() === 'none') return `${NAV} ${NAV_MODES[this.mode()]}`;
+    const tablet: string =
+      this.overlayBelow() === 'lg'
+        ? `${TABLET_OVERLAY}${this.overlay() && !this.collapsed() ? ' shadow-md' : ''}`
+        : '';
+    return `${NAV} ${NAV_MODES[this.mode()]} ${DRAWER} ${tablet}`;
+  });
 
   /**
    * Property innerClasses
@@ -392,9 +508,9 @@ export class CwSidebar {
    * @constructor
    */
   public constructor() {
-    // Mockup App.dc.html: on a small screen the sidebar starts closed, the content first.
+    // Mockup App.dc.html: under 1024 px the sidebar starts closed, the content first.
     effect(() => {
-      if (this.drawer()) {
+      if (this.floating()) {
         untracked(() => {
           this.collapse();
         });
@@ -455,7 +571,7 @@ export class CwSidebar {
    */
   protected onDocumentKeydown(event: KeyboardEvent): void {
     if (event.defaultPrevented || this.collapsible() === 'none') return;
-    if (event.key === 'Escape' && this.backdrop()) {
+    if (event.key === 'Escape' && this.backdropShown()) {
       this.collapse();
       return;
     }

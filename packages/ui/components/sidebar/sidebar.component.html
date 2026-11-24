@@ -1,9 +1,9 @@
-@if (backdrop()) {
+@if (backdropShown()) {
   <button
     type="button"
     tabindex="-1"
     [attr.aria-label]="closeLabel()"
-    [class]="backdropClasses"
+    [class]="backdropClasses()"
     (click)="collapse()"
   ></button>
 }
