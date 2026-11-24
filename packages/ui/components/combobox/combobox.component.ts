@@ -98,8 +98,9 @@ const SIZES: Record<CwComboboxSize, string> = {
  */
 const PANEL: string =
   'flex max-h-80 max-w-sm flex-col overflow-hidden rounded-lg border bg-popover text-popover-foreground shadow-md animate-menu-in data-[state=closed]:animate-menu-out motion-reduce:animate-none ' +
-  // A phone sheet (`provideCwPhoneSheets`) fills the width of its pane.
-  'in-data-[presentation=sheet]:w-full in-data-[presentation=sheet]:max-w-none';
+  // A phone sheet (`provideCwPhoneSheets`) fills the width of its pane; the trigger-width minimum
+  // (an inline style) must not push it past the gutters.
+  'in-data-[presentation=sheet]:w-full in-data-[presentation=sheet]:max-w-none in-data-[presentation=sheet]:min-w-0!';
 
 /**
  * Interface KeyOption

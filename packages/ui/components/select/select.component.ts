@@ -88,8 +88,9 @@ const SIZES: Record<CwSelectSize, string> = {
  */
 const PANEL: string =
   'block max-h-80 max-w-sm overflow-y-auto rounded-lg border bg-popover p-1 text-popover-foreground shadow-md animate-menu-in data-[state=closed]:animate-menu-out motion-reduce:animate-none ' +
-  // A phone sheet (`provideCwPhoneSheets`) fills the width of its pane.
-  'in-data-[presentation=sheet]:w-full in-data-[presentation=sheet]:max-w-none';
+  // A phone sheet (`provideCwPhoneSheets`) fills the width of its pane; the trigger-width minimum
+  // (an inline style) must not push it past the gutters.
+  'in-data-[presentation=sheet]:w-full in-data-[presentation=sheet]:max-w-none in-data-[presentation=sheet]:min-w-0!';
 
 /* Typeahead: the letters typed within this delay add up to one search (WAI-ARIA listbox pattern). */
 /**

@@ -65,8 +65,9 @@ import type { CwPopoverAlign, CwPopoverSide, CwPopoverSize } from './popover.typ
  */
 const PANEL: string =
   'relative block rounded-lg border bg-popover text-popover-foreground shadow-md outline-hidden animate-menu-in motion-reduce:animate-none data-[state=closed]:animate-menu-out ' +
-  // A phone sheet (`provideCwPhoneSheets`) fills the width of its pane.
-  'in-data-[presentation=sheet]:w-full';
+  // A phone sheet (`provideCwPhoneSheets`) fills the width of its pane and stays within its
+  // height: the content scrolls inside it.
+  'in-data-[presentation=sheet]:flex in-data-[presentation=sheet]:w-full in-data-[presentation=sheet]:max-h-[inherit] in-data-[presentation=sheet]:flex-col';
 
 /**
  * Constant WIDTHS
@@ -92,7 +93,9 @@ const WIDTHS: Record<CwPopoverSize, string> = {
  *
  * @type {string}
  */
-const CONTENT: string = 'grid max-h-[max(96px,min(400px,calc(100dvh-32px)))] gap-3 overflow-y-auto';
+const CONTENT: string =
+  'grid max-h-[max(96px,min(400px,calc(100dvh-32px)))] gap-3 overflow-y-auto ' +
+  'in-data-[presentation=sheet]:max-h-none in-data-[presentation=sheet]:min-h-0';
 
 /**
  * Constant PADDINGS
