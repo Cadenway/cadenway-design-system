@@ -1,4 +1,5 @@
 import { Dialog, type DialogRef } from '@angular/cdk/dialog';
+import type { PositionStrategy } from '@angular/cdk/overlay';
 import {
   type TemplateRef,
   type ViewContainerRef,
@@ -165,6 +166,29 @@ export interface ɵModalOverlayConfig {
    * @type {() => void}
    */
   readonly onExternalClose: () => void;
+
+  /**
+   * Property positionStrategy
+   * @readonly
+   *
+   * @description
+   * Where the pane sits; by default the CDK centers it. A sheet docks it to an edge of the screen.
+   *
+   * @type {PositionStrategy | undefined}
+   */
+  readonly positionStrategy?: PositionStrategy;
+
+  /**
+   * Property maxWidth
+   * @readonly
+   *
+   * @description
+   * Maximum width of the pane; by default the CDK's `80vw`. A sheet that covers the screen lifts it
+   * (`100vw`), its panel classes keeping their own limit.
+   *
+   * @type {string | undefined}
+   */
+  readonly maxWidth?: string;
   // #endregion
 }
 
@@ -284,6 +308,8 @@ export class ɵModalOverlay {
       backdropClass: MODAL_BACKDROP.split(' '),
       // The animations are the tokens' keyframes on the panel and the backdrop.
       disableAnimations: true,
+      ...(config.positionStrategy ? { positionStrategy: config.positionStrategy } : {}),
+      ...(config.maxWidth ? { maxWidth: config.maxWidth } : {}),
     });
     this.ref = ref;
     this.leaving = false;

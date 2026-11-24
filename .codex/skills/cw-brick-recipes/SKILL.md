@@ -90,6 +90,10 @@ tasks beyond the display contracts of `cw-status-icon` and `cw-priority-icon`"):
 
 ## Wave 2: overlays and pickers
 
+Phone sheets are opt-in: with `provideCwPhoneSheets` from `@cadenway/ui/core`, Menu, Popover,
+Select and Combobox open their panel docked above the bottom tab bar below 768 px (mockup
+`App.dc.html`, `max-md:fixed max-md:inset-x-2 max-md:bottom-16`); without it nothing changes.
+
 | Brick | Entry | Selectors | API | Primitive |
 | --- | --- | --- | --- | --- |
 | Tooltip | `tooltip` | `[cwTooltip]` | `cwTooltip` (text or template); `cwTooltipShortcut`; `cwTooltipSide`, `cwTooltipAlign`; `cwTooltipArrow` = true; `cwTooltipOpenDelay` = 700; `cwTooltipDisabled`; `provideCwTooltip({ openDelay, skipDelay })` | CDK Overlay |
@@ -108,6 +112,7 @@ tasks beyond the display contracts of `cw-status-icon` and `cw-priority-icon`"):
 | Brick | Entry | Selectors | API | Primitive |
 | --- | --- | --- | --- | --- |
 | Dialog | `dialog` | `cw-dialog`, `[cwDialogTrigger]`, `cw-dialog-header`, `h2[cwDialogTitle]`, `p[cwDialogDescription]`, `cw-dialog-footer`, `button[cwDialogClose]` | `open` (model); `size`: sm, default, lg, full; `scrollable`; `showClose`; `closeOnEscape`; `closeOnOverlayClick`; `pending`; `closeLabel` = Fermer; out `closed` (escape, overlay, close, action). Full screen under 768 px | CDK Dialog and Overlay, focus trap |
+| Sheet | `sheet` | `cw-sheet`, `[cwSheetTrigger]`, `cw-sheet-header`, `h2[cwSheetTitle]`, `p[cwSheetDescription]`, `cw-sheet-body`, `cw-sheet-footer`, `button[cwSheetClose]` | `open` (model); `side`: right, left, top, bottom; `size`: sm, default, lg, full; `showClose`; `closeOnEscape`; `closeOnOverlayClick`; `closeLabel` = Fermer; out `closed` (escape, overlay, close, action). `right` enters with `animate-sheet-in`, `bottom` with `animate-drawer-in` | CDK Dialog docked by a global position, focus trap |
 | AlertDialog | `alert-dialog` | `cw-alert-dialog`, `[cwAlertDialogTrigger]`, `cw-alert-dialog-media`, `h2[cwAlertDialogTitle]`, `p[cwAlertDialogDescription]`, `button[cwAlertDialogCancel]`, `button[cwAlertDialogAction]` | `open` (model); `variant`: default, destructive; `size`: sm, default; `confirmText` (type the name to confirm); `confirmLabel`; `pending`; outs `confirm`, `cancel` | CDK Dialog (`role="alertdialog"`) |
 | Toast | `toast` | `cw-toaster`; `CwToastService` | `position` = bottom-right; `expand`; `visibleToasts` = 3; `duration` per tone (6 s in the mockup); `closeButton`; `hotkey` = F8; action and undo through `action.run()` | CDK Overlay; live region |
 

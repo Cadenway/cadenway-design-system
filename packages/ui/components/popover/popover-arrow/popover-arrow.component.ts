@@ -14,7 +14,9 @@ import type { CwPopoverAlign, CwPopoverSide } from '../popover.types';
  * @type {string}
  */
 const BASE: string =
-  'pointer-events-none absolute block size-2.5 rotate-45 rounded-[2px] bg-popover dark:shadow-none';
+  'pointer-events-none absolute block size-2.5 rotate-45 rounded-[2px] bg-popover dark:shadow-none ' +
+  // A phone sheet (`provideCwPhoneSheets`) is docked away from its trigger: no arrow points to it.
+  'in-data-[presentation=sheet]:hidden';
 
 // The diamond pokes 5 px out of the edge facing the trigger; its two outer sides carry the border.
 /**

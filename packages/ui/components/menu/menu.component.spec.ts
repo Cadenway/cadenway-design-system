@@ -1,5 +1,6 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideCwPhoneSheets } from '@cadenway/ui/core';
 
 import { CwMenuGroup } from './menu-group/menu-group.component';
 import { CwMenuItemCheckbox } from './menu-item-checkbox/menu-item-checkbox.component';
@@ -507,6 +508,55 @@ describe('CwMenu inline', () => {
     await fixture.whenStable();
     expect(fixture.componentInstance.count()).toBe(1);
     expect(host.querySelector('[role="menu"]')).toBe(panel);
+    fixture.destroy();
+  });
+});
+
+/**
+ * Function emulatePhone
+ *
+ * @description
+ * Gives the test DOM a `matchMedia` where the phone query matches, which jsdom lacks.
+ */
+function emulatePhone(): void {
+  Object.defineProperty(window, 'matchMedia', {
+    configurable: true,
+    value: (query: string): Pick<MediaQueryList, 'matches' | 'media'> => ({
+      matches: true,
+      media: query,
+    }),
+  });
+}
+
+describe('CwMenu on a phone', () => {
+  afterEach(() => {
+    Reflect.deleteProperty(window, 'matchMedia');
+  });
+
+  it('stays next to its trigger without provideCwPhoneSheets', async () => {
+    emulatePhone();
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    button(fixture.nativeElement as HTMLElement, 'Actions de la tâche').click();
+    await fixture.whenStable();
+
+    expect(menuNamed('Actions de la tâche').closest('[data-presentation]')).toBeNull();
+    fixture.destroy();
+  });
+
+  it('opens as a sheet docked above the tab bar with provideCwPhoneSheets', async () => {
+    emulatePhone();
+    TestBed.configureTestingModule({ providers: [provideCwPhoneSheets()] });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    button(fixture.nativeElement as HTMLElement, 'Actions de la tâche').click();
+    await fixture.whenStable();
+    const pane: HTMLElement | null =
+      menuNamed('Actions de la tâche').closest<HTMLElement>('[data-presentation]');
+
+    expect(pane?.getAttribute('data-presentation')).toBe('sheet');
+    expect(pane?.style.width).toBe('calc(100% - 16px)');
+    expect(pane?.style.maxHeight).toBe('calc(100dvh - 72px)');
     fixture.destroy();
   });
 });
