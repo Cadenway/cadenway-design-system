@@ -34,7 +34,8 @@ export {
   ɵstartOfMonth,
   ɵstartOfWeek,
 } from './dates/dates';
-export { ɵextensionOf, ɵformatFileSize } from './format/files';
+export { ɵextensionOf, ɵformatFileSize, ɵformatFileSizeIn } from './format/files';
+export { provideCwLocale, ɵLOCALE, ɵperLocale } from './locale/locale';
 export { ɵfold } from './format/text';
 export { ɵcreateMarkdownLexer, ɵwriteMention } from './markdown/markdown.marked';
 export type { ɵMentionToken, ɵUnderlineToken } from './markdown/markdown.marked';

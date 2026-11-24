@@ -1,5 +1,6 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideCwLocale } from '@cadenway/ui/core';
 
 import { CwTimeline } from './timeline.component';
 import type {
@@ -543,5 +544,29 @@ describe('CwTimeline', () => {
 
     key(row('Sprint 14'), '+', { ctrlKey: true });
     expect(component.zoom()).toBe(1.5);
+  });
+});
+
+describe('provideCwLocale', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [provideCwLocale('en-US')] });
+  });
+
+  it('names milestones and bar dates in English', () => {
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+
+    expect(
+      host.querySelector('[role="img"][aria-label="Jalon Revue de sprint 14, Nov 20"]'),
+    ).not.toBeNull();
+    const bar: HTMLElement | undefined = Array.from(
+      host.querySelectorAll<HTMLElement>('[role="button"]'),
+    ).find(
+      (element) =>
+        element.getAttribute('aria-label') ===
+        "Corriger l'export CSV, 40 %, En cours, du Nov 10 au Nov 13",
+    );
+    expect(bar).toBeDefined();
   });
 });

@@ -14,7 +14,7 @@ import {
 } from '@angular/core';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { CwButton } from '@cadenway/ui/components/button';
-import { ɵformatFileSize } from '@cadenway/ui/core';
+import { ɵformatFileSizeIn, ɵLOCALE } from '@cadenway/ui/core';
 import { CwSpinner } from '@cadenway/ui/components/spinner';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -223,6 +223,17 @@ export class CwDropzoneFile {
   private readonly announcer: LiveAnnouncer = inject(LiveAnnouncer);
 
   /**
+   * Property locale
+   *
+   * @description
+   * Locale of the file sizes, given by `provideCwLocale` (`fr-FR` by default).
+   *
+   * @type {string}
+   * @readonly
+   */
+  private readonly locale: string = inject(ɵLOCALE);
+
+  /**
    * Property text
    * @readonly
    *
@@ -269,7 +280,9 @@ export class CwDropzoneFile {
    *
    * @type {Signal<string>}
    */
-  protected readonly sizeText: Signal<string> = computed(() => ɵformatFileSize(this.size()));
+  protected readonly sizeText: Signal<string> = computed(() =>
+    ɵformatFileSizeIn(this.size(), this.locale),
+  );
 
   /**
    * Property progressText
@@ -281,7 +294,7 @@ export class CwDropzoneFile {
    * @type {Signal<string>}
    */
   protected readonly progressText: Signal<string> = computed(() => {
-    const sent: string = ɵformatFileSize((this.size() * this.percent()) / 100);
+    const sent: string = ɵformatFileSizeIn((this.size() * this.percent()) / 100, this.locale);
     return `${String(this.percent())} % · ${sent} ${this.text().of} ${this.sizeText()}`;
   });
   // #endregion

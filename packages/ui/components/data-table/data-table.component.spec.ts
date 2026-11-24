@@ -1,5 +1,6 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideCwLocale } from '@cadenway/ui/core';
 
 import { CwCellDef } from './cell/cell.directive';
 import { CwCellEditorDef } from './cell-editor/cell-editor.directive';
@@ -875,5 +876,48 @@ describe('CwDataTable', () => {
       expect(component.selection()).toBe('all');
       expect(host.textContent).toContain('Les 4 tâches sont sélectionnées');
     });
+  });
+});
+
+describe('provideCwLocale', () => {
+  /**
+   * Component DateTableHost
+   *
+   * @description
+   * Supplies a date to a table column using its default cell display.
+   */
+  @Component({
+    imports: [CwDataTable, CwDataTableColumn],
+    template: `<cw-data-table ariaLabel="Échéances" [data]="rows">
+      <cw-data-table-column key="due" header="Échéance" />
+    </cw-data-table>`,
+  })
+  class DateTableHost {
+    // #region Properties
+    /**
+     * Property rows
+     *
+     * @description
+     * Table row containing the date to format.
+     *
+     * @type {{ id: string; due: Date }[]}
+     * @readonly
+     */
+    public readonly rows: { id: string; due: Date }[] = [{ id: 'a', due: new Date(2026, 10, 18) }];
+    // #endregion
+  }
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [provideCwLocale('en-US')] });
+  });
+
+  it('formats a default date cell in English', () => {
+    const fixture: ComponentFixture<DateTableHost> = TestBed.createComponent(DateTableHost);
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+
+    expect(byRole(host, 'gridcell').some((cell) => cell.textContent.trim() === '11/18/2026')).toBe(
+      true,
+    );
   });
 });

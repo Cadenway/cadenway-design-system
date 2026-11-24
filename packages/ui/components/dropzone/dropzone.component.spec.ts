@@ -1,6 +1,7 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import type { Mock } from 'vitest';
+import { provideCwLocale } from '@cadenway/ui/core';
 
 import { CwDropzone } from './dropzone.component';
 import type { CwDropzoneRejection } from './dropzone.types';
@@ -288,5 +289,22 @@ describe('CwDropzone', () => {
     zone.dispatchEvent(dragEvent('drop', [file('a.png', 1, 'image/png')]));
     await fixture.whenStable();
     expect(component.added()).toEqual([]);
+  });
+});
+
+describe('provideCwLocale', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [provideCwLocale('en-US')] });
+  });
+
+  it('formats the default size limit in English', () => {
+    const fixture: ComponentFixture<CwDropzone> = TestBed.createComponent(CwDropzone);
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+
+    expect(host.textContent).toContain('50 MB max.');
+    expect(host.querySelector('button')?.getAttribute('aria-label')).toBe(
+      'parcourez les fichiers (50 MB max.)',
+    );
   });
 });

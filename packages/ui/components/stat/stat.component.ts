@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { CwSkeleton } from '@cadenway/ui/components/skeleton';
 import { CwSpinner } from '@cadenway/ui/components/spinner';
+import { ɵLOCALE, ɵperLocale } from '@cadenway/ui/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorArrowRightBold,
@@ -139,11 +140,14 @@ const GOAL_OF: string = 'sur';
  * Constant NUMBER
  *
  * @description
- * French number formatter used for values and goals.
+ * Number formatter of a locale for values and goals, at most two decimal places (« 4,25 » in
+ * French), built once per locale.
  *
- * @type {Intl.NumberFormat}
+ * @type {(locale: string) => Intl.NumberFormat}
  */
-const NUMBER: Intl.NumberFormat = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 2 });
+const NUMBER: (locale: string) => Intl.NumberFormat = ɵperLocale(
+  (locale: string) => new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }),
+);
 
 /**
  * Class CwStat
@@ -342,6 +346,18 @@ export class CwStat {
   private readonly group: CwStatGroup | null = inject(CwStatGroup, { optional: true });
 
   /**
+   * Property number
+   * @readonly
+   *
+   * @description
+   * Formatter of the numeric values and goals in the locale given by `provideCwLocale` (`fr-FR`
+   * by default).
+   *
+   * @type {Intl.NumberFormat}
+   */
+  private readonly number: Intl.NumberFormat = NUMBER(inject(ɵLOCALE));
+
+  /**
    * Property hostClasses
    * @readonly
    *
@@ -381,13 +397,13 @@ export class CwStat {
    * @readonly
    *
    * @description
-   * Display value, formatting numbers in French.
+   * Display value; a number is written in the provided locale.
    *
    * @type {Signal<string>}
    */
   protected readonly shownValue: Signal<string> = computed(() => {
     const value: string | number = this.value();
-    return typeof value === 'number' ? NUMBER.format(value) : value;
+    return typeof value === 'number' ? this.number.format(value) : value;
   });
 
   /**
@@ -468,8 +484,8 @@ export class CwStat {
     const goal: CwStatGoal | null = this.goal();
     if (!goal) return '';
     const unit: string = goal.unit ? ` ${goal.unit}` : '';
-    const percent: string = NUMBER.format(Math.round(this.goalPercent()));
-    return `${NUMBER.format(goal.value)} ${GOAL_OF} ${NUMBER.format(goal.max)}${unit} · ${percent} %`;
+    const percent: string = this.number.format(Math.round(this.goalPercent()));
+    return `${this.number.format(goal.value)} ${GOAL_OF} ${this.number.format(goal.max)}${unit} · ${percent} %`;
   });
   // #endregion
 }

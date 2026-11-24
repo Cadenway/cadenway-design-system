@@ -1,9 +1,11 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
+
 import { FormControl, FormsModule, NgModel, ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { FormField, form, required, type FieldTree } from '@angular/forms/signals';
 import { of } from 'rxjs';
+import { provideCwLocale } from '@cadenway/ui/core';
 
 import { CwBlockEditor } from './block-editor.component';
 import type { CwMentionPerson, CwMentionSearch } from './block-editor.types';
@@ -563,5 +565,47 @@ describe('CwBlockEditor', () => {
       expect(fixture.componentInstance.model().text).toBe('Contexte');
       fixture.destroy();
     });
+  });
+});
+
+describe('provideCwLocale', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [provideCwLocale('tr-TR')] });
+  });
+
+  it('uses Turkish case mapping when filtering slash menu options', async () => {
+    for (const query of ['LISTE', 'liste']) {
+      const fixture: ComponentFixture<ModelHost> = TestBed.createComponent(ModelHost);
+      fixture.autoDetectChanges();
+      await fixture.whenStable();
+      await settle();
+      const host: HTMLElement = fixture.nativeElement as HTMLElement;
+      const surface: HTMLElement = textbox(host, 'Contenu du document');
+      typeText(surface, `/${query}`);
+      await fixture.whenStable();
+      await settle();
+
+      const options: string[] = Array.from(host.querySelectorAll('[role="option"]')).map((option) =>
+        option.textContent.trim(),
+      );
+      expect(options.some((option) => option.startsWith('Liste'))).toBe(query === 'liste');
+      fixture.destroy();
+    }
+  });
+
+  it('keeps a Turkish dotted capital I an i when filtering slash menu options', async () => {
+    const fixture: ComponentFixture<ModelHost> = TestBed.createComponent(ModelHost);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    await settle();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    typeText(textbox(host, 'Contenu du document'), '/TİTRE');
+    await fixture.whenStable();
+    await settle();
+
+    const options: string[] = Array.from(host.querySelectorAll('[role="option"]')).map((option) =>
+      option.textContent.trim(),
+    );
+    expect(options.some((option) => option.startsWith('Titre 1'))).toBe(true);
   });
 });

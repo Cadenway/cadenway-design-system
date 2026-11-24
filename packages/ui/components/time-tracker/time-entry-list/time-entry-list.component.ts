@@ -2,6 +2,7 @@ import {
   Component,
   booleanAttribute,
   computed,
+  inject,
   input,
   output,
   type InputSignalWithTransform,
@@ -11,7 +12,7 @@ import {
 } from '@angular/core';
 import { CwAvatar } from '@cadenway/ui/components/avatar';
 import { CwButton } from '@cadenway/ui/components/button';
-import { ɵsameDay } from '@cadenway/ui/core';
+import { ɵLOCALE, ɵperLocale, ɵsameDay } from '@cadenway/ui/core';
 import {
   CwMenu,
   CwMenuItem,
@@ -85,29 +86,19 @@ const REVEAL: string =
   'relative z-10 flex justify-end opacity-0 transition-opacity group-hover/entry:opacity-100 group-focus-within/entry:opacity-100 has-[[aria-expanded=true]]:opacity-100 motion-reduce:transition-none';
 
 /**
- * Constant DAY
+ * Constant FORMATS
  *
  * @description
- * French day and month formatter.
+ * Formatters of a locale, built once per locale: the day and month of an older entry
+ * (« 10 nov. » in French) and the start time of a running one (« 14:05 »).
  *
- * @type {Intl.DateTimeFormat}
+ * @type {(locale: string) => { day: Intl.DateTimeFormat; time: Intl.DateTimeFormat }}
  */
-const DAY: Intl.DateTimeFormat = new Intl.DateTimeFormat('fr-FR', {
-  day: 'numeric',
-  month: 'short',
-});
-/**
- * Constant TIME
- *
- * @description
- * French time formatter.
- *
- * @type {Intl.DateTimeFormat}
- */
-const TIME: Intl.DateTimeFormat = new Intl.DateTimeFormat('fr-FR', {
-  hour: '2-digit',
-  minute: '2-digit',
-});
+const FORMATS: (locale: string) => { day: Intl.DateTimeFormat; time: Intl.DateTimeFormat } =
+  ɵperLocale((locale: string) => ({
+    day: new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short' }),
+    time: new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }),
+  }));
 
 /**
  * Component CwTimeEntryList
@@ -155,6 +146,20 @@ export class CwTimeEntryList {
   public readonly formatDate: InputSignal<((date: Date) => string) | null> = input<
     ((date: Date) => string) | null
   >(null);
+
+  /**
+   * Property formats
+   *
+   * @description
+   * Default date and time formatters, in the locale given by `provideCwLocale` (`fr-FR` by
+   * default).
+   *
+   * @type {{ day: Intl.DateTimeFormat; time: Intl.DateTimeFormat }}
+   * @readonly
+   */
+  private readonly formats: { day: Intl.DateTimeFormat; time: Intl.DateTimeFormat } = FORMATS(
+    inject(ɵLOCALE),
+  );
 
   /**
    * Property readonly
@@ -345,11 +350,11 @@ export class CwTimeEntryList {
     if (ɵsameDay(entry.date, today)) {
       // Preview: a running entry also gives its start time (« Aujourd'hui · 14:05 »).
       return entry.running
-        ? `${this.text().today} · ${TIME.format(entry.date)}`
+        ? `${this.text().today} · ${this.formats.time.format(entry.date)}`
         : this.text().today;
     }
     if (ɵsameDay(entry.date, yesterday)) return this.text().yesterday;
-    return DAY.format(entry.date);
+    return this.formats.day.format(entry.date);
   }
 
   /**

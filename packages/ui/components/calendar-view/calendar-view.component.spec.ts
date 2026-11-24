@@ -2,7 +2,9 @@ import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { CdkDropList, type CdkDrag, type CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component, signal, type DebugElement, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
+
 import { By } from '@angular/platform-browser';
+import { provideCwLocale } from '@cadenway/ui/core';
 
 import { CwCalendarItemDef } from './calendar-item-def/calendar-item-def.directive';
 import { CwCalendarView } from './calendar-view.component';
@@ -594,5 +596,26 @@ describe('CwCalendarView', () => {
     expect(grid().getAttribute('aria-label')).toBe('Novembre 2026');
     button(host, 'Sans date 1').click();
     expect(component.unscheduled).toBe(1);
+  });
+});
+
+describe('provideCwLocale', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideCwLocale('en-US'),
+        { provide: LiveAnnouncer, useValue: { announce: () => Promise.resolve() } },
+      ],
+    });
+  });
+
+  it('names a day in English while keeping the task count in French', () => {
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+
+    expect(cell(host, 'Thursday, November 12, 2026, 4 tâches').getAttribute('aria-current')).toBe(
+      'date',
+    );
   });
 });

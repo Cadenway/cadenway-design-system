@@ -1,5 +1,6 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideCwLocale } from '@cadenway/ui/core';
 
 import { CwAvatar } from './avatar.component';
 import type { CwAvatarPresence } from './avatar.types';
@@ -147,5 +148,21 @@ describe('CwAvatar', () => {
     expect(component.errors()).toBe(1);
     expect(ines.querySelector('img')).toBeNull();
     expect(ines.textContent).toContain('ID');
+  });
+});
+
+describe('provideCwLocale', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [provideCwLocale('tr-TR')] });
+  });
+
+  it('uses Turkish case mapping for initials', () => {
+    const fixture: ComponentFixture<CwAvatar> = TestBed.createComponent(CwAvatar);
+    fixture.componentRef.setInput('name', 'ilker şahin');
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+
+    expect(host.querySelector('[aria-hidden="true"]')?.textContent.trim()).toBe('İŞ');
+    expect(spoken(host)).toBe('ilker şahin');
   });
 });

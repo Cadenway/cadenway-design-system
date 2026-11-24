@@ -1,4 +1,4 @@
-import { Component, computed, input, numberAttribute, output } from '@angular/core';
+import { Component, computed, inject, input, numberAttribute, output } from '@angular/core';
 import type {
   InputSignal,
   InputSignalWithTransform,
@@ -6,7 +6,7 @@ import type {
   Signal,
 } from '@angular/core';
 import { CwAvatar } from '@cadenway/ui/components/avatar';
-import { CwRipple, ɵsameDay } from '@cadenway/ui/core';
+import { CwRipple, ɵLOCALE, ɵsameDay } from '@cadenway/ui/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorCaretRightBold } from '@ng-icons/phosphor-icons/bold';
 
@@ -153,6 +153,18 @@ export class CwMessageThread {
   protected readonly text: ThreadText = computed(() => ({ ...LABELS, ...this.labels() }));
 
   /**
+   * Property locale
+   * @readonly
+   *
+   * @description
+   * Locale of the default time of the last reply, given by `provideCwLocale` (`fr-FR` by
+   * default).
+   *
+   * @type {string}
+   */
+  private readonly locale: string = inject(ɵLOCALE);
+
+  /**
    * Property shown
    * @readonly
    *
@@ -194,9 +206,9 @@ export class CwMessageThread {
     const elapsed: number = now.getTime() - last.getTime();
     // « Dernière à 11:05 » the same day, after the first hour; a relative time otherwise.
     if (ɵsameDay(last, now) && elapsed >= 3_600_000) {
-      return `${this.text().last} ${this.text().at} ${clockTime(last)}`;
+      return `${this.text().last} ${this.text().at} ${clockTime(last, this.locale)}`;
     }
-    return `${this.text().last} ${messageTime(last, now, this.text().justNow)}`;
+    return `${this.text().last} ${messageTime(last, now, this.text().justNow, this.locale)}`;
   });
   // #endregion
 }

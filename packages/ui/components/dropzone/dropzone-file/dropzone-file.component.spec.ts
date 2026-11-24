@@ -2,6 +2,7 @@ import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import type { Mock } from 'vitest';
+import { provideCwLocale } from '@cadenway/ui/core';
 
 import type { CwDropzoneFileState } from '../dropzone.types';
 import { CwDropzoneFile } from './dropzone-file.component';
@@ -156,5 +157,20 @@ describe('CwDropzoneFile', () => {
     await fixture.whenStable();
     button(host, "Réessayer l'envoi de export-taches.csv").click();
     expect(component.events()).toEqual(['retry']);
+  });
+});
+
+describe('provideCwLocale', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [provideCwLocale('en-US')] });
+  });
+
+  it('formats upload progress sizes in English while keeping French text', () => {
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.detectChanges();
+
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain(
+      '64 % · 312 KB sur 488 KB',
+    );
   });
 });

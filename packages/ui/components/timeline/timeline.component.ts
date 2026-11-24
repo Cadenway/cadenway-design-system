@@ -22,6 +22,7 @@ import {
 } from '@angular/core';
 import { CwAvatar } from '@cadenway/ui/components/avatar';
 import {
+  ɵLOCALE,
   ɵaddDays,
   ɵaddMonths,
   ɵdaysBetween,
@@ -1812,6 +1813,18 @@ export class CwTimeline {
   private readonly announcer: LiveAnnouncer = inject(LiveAnnouncer);
 
   /**
+   * Property locale
+   *
+   * @description
+   * Locale of the ruler, the periods and the announced dates, given by `provideCwLocale` (`fr-FR`
+   * by default).
+   *
+   * @type {string}
+   * @readonly
+   */
+  private readonly locale: string = inject(ɵLOCALE);
+
+  /**
    * Property now
    * @readonly
    *
@@ -2196,7 +2209,7 @@ export class CwTimeline {
       );
       if (!row?.bar || !row.dates || row.top === null) return null;
       return {
-        text: moveText(row.dates.start, row.dates.end),
+        text: moveText(row.dates.start, row.dates.end, this.locale),
         x: this.nameColumnWidth() + row.bar.x + row.bar.width / 2,
         y: row.top >= 30 ? row.top - 28 : row.top + ROW_HEIGHT + 2,
       };
@@ -2558,7 +2571,7 @@ export class CwTimeline {
         date: day,
         x: columns.length * unit,
         width: unit,
-        label: weekdayShort(day),
+        label: weekdayShort(day, this.locale),
         sub: String(day.getDate()),
         today: ɵsameDay(day, today),
         weekend: weekends && isWeekend(day),
@@ -2576,6 +2589,7 @@ export class CwTimeline {
           sub: periodText(
             ɵstartOfWeek(column.date) < range.start ? range.start : ɵstartOfWeek(column.date),
             column.date,
+            this.locale,
           ),
         };
       } else {
@@ -2584,7 +2598,7 @@ export class CwTimeline {
           x: column.x,
           width: column.width,
           label: TEXTS.week(ɵisoWeek(column.date)),
-          sub: periodText(column.date, column.date),
+          sub: periodText(column.date, column.date, this.locale),
           separator: bands.length > 0,
         });
       }
@@ -2634,7 +2648,7 @@ export class CwTimeline {
         x: columns.length * unit,
         width: unit,
         label: TEXTS.weekShort(ɵisoWeek(monday)),
-        sub: dayMonth(monday),
+        sub: dayMonth(monday, this.locale),
         today: offset >= 0 && offset < 7,
         weekend: false,
         separator: columns.length > 0,
@@ -2655,7 +2669,7 @@ export class CwTimeline {
         key: month.toDateString(),
         x,
         width: right - x,
-        label: monthShort(month),
+        label: monthShort(month, this.locale),
         sub: String(month.getFullYear()),
         separator: bands.length > 0,
       });
@@ -2686,7 +2700,7 @@ export class CwTimeline {
         date: month,
         x: columns.length * unit,
         width: unit,
-        label: monthShort(month),
+        label: monthShort(month, this.locale),
         sub: '',
         today: monthsBetween(month, today) === 0,
         weekend: false,
@@ -2786,7 +2800,7 @@ export class CwTimeline {
       top,
       group,
       expanded,
-      meta: first && last ? `${periodText(first, last)} · ${count}` : count,
+      meta: first && last ? `${periodText(first, last, this.locale)} · ${count}` : count,
       bar,
     };
   }
@@ -2851,8 +2865,8 @@ export class CwTimeline {
       x: inside ? x : null,
       // Near the right edge the label goes left of the diamond (sheet, "Jalon").
       before: x > axis.width - 160,
-      dateText: dayMonth(date),
-      ariaLabel: TEXTS.milestone(mark.label, dayMonth(date)),
+      dateText: dayMonth(date, this.locale),
+      ariaLabel: TEXTS.milestone(mark.label, dayMonth(date, this.locale)),
     };
   }
 
@@ -2919,7 +2933,7 @@ export class CwTimeline {
       item.name,
       item.progress === undefined ? null : TEXTS.percent(progress),
       item.status ? CW_STATUS_LABELS[item.status] : null,
-      rangeText(dates.start, dates.end),
+      rangeText(dates.start, dates.end, this.locale),
       lateDays ? TEXTS.lateLong(lateDays) : null,
       predecessor ? TEXTS.conflict(predecessor) : null,
     ].filter((part) => part !== null);
@@ -3222,7 +3236,9 @@ export class CwTimeline {
         end: change.next.end,
         previous: change.own,
       });
-      messages.push(TEXTS.moved(change.item.name, rangeText(change.next.start, change.next.end)));
+      messages.push(
+        TEXTS.moved(change.item.name, rangeText(change.next.start, change.next.end, this.locale)),
+      );
     }
     const ids: Set<string> = new Set<string>(moved.map((change) => change.item.id));
     const byId: Map<string, CwTimelineItem> = this.itemsById();

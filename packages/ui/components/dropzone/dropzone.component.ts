@@ -3,6 +3,7 @@ import {
   ElementRef,
   booleanAttribute,
   computed,
+  inject,
   input,
   numberAttribute,
   output,
@@ -19,7 +20,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorUploadSimpleBold } from '@ng-icons/phosphor-icons/bold';
 import { phosphorWarningCircleFill } from '@ng-icons/phosphor-icons/fill';
 
-import { ɵextensionOf, ɵformatFileSize } from '@cadenway/ui/core';
+import { ɵextensionOf, ɵformatFileSizeIn, ɵLOCALE } from '@cadenway/ui/core';
 
 import type {
   CwDropzoneLabels,
@@ -181,6 +182,17 @@ const EXTENSION_TYPES: Record<string, string> = {
 })
 export class CwDropzone {
   // #region Properties
+  /**
+   * Property locale
+   * @readonly
+   *
+   * @description
+   * Locale of the maximum size in the hint, given by `provideCwLocale` (`fr-FR` by default).
+   *
+   * @type {string}
+   */
+  private readonly locale: string = inject(ɵLOCALE);
+
   /**
    * Property accept
    * @readonly
@@ -445,7 +457,7 @@ export class CwDropzone {
    * @type {Signal<string>}
    */
   protected readonly hintText: Signal<string> = computed(
-    () => this.hint() || `${ɵformatFileSize(this.maxSize())} max.`,
+    () => this.hint() || `${ɵformatFileSizeIn(this.maxSize(), this.locale)} max.`,
   );
 
   /**

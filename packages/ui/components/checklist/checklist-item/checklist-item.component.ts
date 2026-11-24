@@ -39,6 +39,7 @@ import {
   CwMenuSeparator,
   CwMenuTriggerFor,
 } from '@cadenway/ui/components/menu';
+import { ɵLOCALE, ɵperLocale } from '@cadenway/ui/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorArrowSquareOutBold,
@@ -121,14 +122,14 @@ const LINK: string =
  * Constant DUE
  *
  * @description
- * French day and abbreviated month formatter.
+ * Day and abbreviated month formatter of a locale (« 18 nov. » in French), built once per locale
+ * for every item of the page.
  *
- * @type {Intl.DateTimeFormat}
+ * @type {(locale: string) => Intl.DateTimeFormat}
  */
-const DUE: Intl.DateTimeFormat = new Intl.DateTimeFormat('fr-FR', {
-  day: 'numeric',
-  month: 'short',
-});
+const DUE: (locale: string) => Intl.DateTimeFormat = ɵperLocale(
+  (locale: string) => new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short' }),
+);
 
 /**
  * Class CwChecklistItem
@@ -309,6 +310,17 @@ export class CwChecklistItem implements ChecklistItemNode {
    * @type {ChecklistHost}
    */
   private readonly checklist: ChecklistHost = inject(CHECKLIST);
+
+  /**
+   * Property dueFormat
+   * @readonly
+   *
+   * @description
+   * Formatter of the due date in the locale given by `provideCwLocale` (`fr-FR` by default).
+   *
+   * @type {Intl.DateTimeFormat}
+   */
+  private readonly dueFormat: Intl.DateTimeFormat = DUE(inject(ɵLOCALE));
 
   /**
    * Property parent
@@ -641,7 +653,7 @@ export class CwChecklistItem implements ChecklistItemNode {
    */
   protected readonly dueText: Signal<string> = computed(() => {
     const due: Date | null = this.due();
-    return due ? DUE.format(due) : '';
+    return due ? this.dueFormat.format(due) : '';
   });
 
   /**

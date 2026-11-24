@@ -16,7 +16,7 @@ import {
   type ModelSignal,
   type Signal,
 } from '@angular/core';
-import { CwRipple } from '@cadenway/ui/core';
+import { CwRipple, ɵLOCALE, ɵperLocale } from '@cadenway/ui/core';
 import { CwSelect, CwSelectOption } from '@cadenway/ui/components/select';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -89,11 +89,14 @@ const STEPS: Record<CwPaginationSize, { readonly previous: string; readonly next
  * Constant NUMBER
  *
  * @description
- * French number formatter for page and row counts.
+ * Number formatter of a locale for page and row counts (« 1 240 » in French), built once per
+ * locale.
  *
- * @type {Intl.NumberFormat}
+ * @type {(locale: string) => Intl.NumberFormat}
  */
-const NUMBER: Intl.NumberFormat = new Intl.NumberFormat('fr-FR');
+const NUMBER: (locale: string) => Intl.NumberFormat = ɵperLocale(
+  (locale: string) => new Intl.NumberFormat(locale),
+);
 
 /**
  * Type Entry
@@ -296,6 +299,18 @@ export class CwPagination {
   private readonly announcer: LiveAnnouncer = inject(LiveAnnouncer);
 
   /**
+   * Property number
+   * @readonly
+   *
+   * @description
+   * Formatter of the page and row counts in the locale given by `provideCwLocale` (`fr-FR` by
+   * default).
+   *
+   * @type {Intl.NumberFormat}
+   */
+  private readonly number: Intl.NumberFormat = NUMBER(inject(ɵLOCALE));
+
+  /**
    * Property injector
    * @readonly
    *
@@ -431,7 +446,7 @@ export class CwPagination {
    */
   protected readonly status: Signal<string> = computed(
     () =>
-      `${this.text().page} ${NUMBER.format(this.current())} ${this.text().of} ${NUMBER.format(this.pageCount())}`,
+      `${this.text().page} ${this.number.format(this.current())} ${this.text().of} ${this.number.format(this.pageCount())}`,
   );
 
   /**
@@ -448,7 +463,7 @@ export class CwPagination {
     const size: number = Math.max(1, Math.floor(this.pageSize()));
     const start: number = total === 0 ? 0 : (this.current() - 1) * size + 1;
     const end: number = Math.min(this.current() * size, total);
-    return `${NUMBER.format(start)}–${NUMBER.format(end)} ${this.text().of} ${NUMBER.format(total)}`;
+    return `${this.number.format(start)}–${this.number.format(end)} ${this.text().of} ${this.number.format(total)}`;
   });
 
   /**

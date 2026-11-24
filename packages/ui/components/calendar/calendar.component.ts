@@ -32,6 +32,7 @@ import {
 import { CwButton } from '@cadenway/ui/components/button';
 import {
   CwRipple,
+  ɵLOCALE,
   ɵaddDays,
   ɵaddMonths,
   ɵdayKey,
@@ -594,12 +595,13 @@ export class CwCalendar implements FormValueControl<CwCalendarSelection>, Contro
    * Property locale
    *
    * @description
-   * Locale of the day and month names (`Intl.DateTimeFormat`).
+   * Locale of the day and month names (`Intl.DateTimeFormat`); by default the locale given by
+   * `provideCwLocale` (`fr-FR`).
    *
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly locale: InputSignal<string> = input('fr');
+  public readonly locale: InputSignal<string> = input<string>(inject(ɵLOCALE));
 
   /**
    * Property disabled

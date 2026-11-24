@@ -1,5 +1,6 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideCwLocale } from '@cadenway/ui/core';
 
 import type { CwFilter, CwFilterField } from '../filter-bar.types';
 import { CwFilterOptionDef } from '../filter-option/filter-option.directive';
@@ -203,5 +204,28 @@ describe('CwFilterChip', () => {
 
     expect(fixture.componentInstance.dueFilter().value).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(value.getAttribute('aria-expanded')).toBe('false');
+  });
+});
+
+describe('provideCwLocale', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [provideCwLocale('en-US')] });
+  });
+
+  it('formats the date filter value in English', () => {
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.componentInstance.dueFilter.set({
+      field: 'due',
+      operator: 'before',
+      value: '2026-11-30',
+    });
+    fixture.detectChanges();
+    const chip: HTMLElement = named(
+      fixture.nativeElement as HTMLElement,
+      '[role="group"]',
+      'Filtre Échéance',
+    );
+
+    expect(named(chip, 'button', 'Nov 30')).toBeTruthy();
   });
 });

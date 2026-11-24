@@ -14,6 +14,7 @@ import {
 } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorUserBold } from '@ng-icons/phosphor-icons/bold';
+import { ɵLOCALE } from '@cadenway/ui/core';
 
 import type { CwAvatarGroup } from './avatar-group/avatar-group.component';
 import { AVATAR_GROUP } from './avatar-group.token';
@@ -109,12 +110,14 @@ const DISC: {
  * Function initialsOf
  *
  * @description
- * Returns uppercase initials from the first and last words of a name.
+ * Returns uppercase initials from the first and last words of a name, with the case mapping of
+ * the locale (a Turkish « i » becomes « İ »).
  *
  * @param {string} name - Full name to abbreviate.
+ * @param {string} locale - BCP 47 language tag of the case mapping.
  * @returns {string} Initials, or an empty string for a blank name.
  */
-function initialsOf(name: string): string {
+function initialsOf(name: string, locale: string): string {
   const words: string[] = name
     .trim()
     .split(/\s+/)
@@ -122,7 +125,7 @@ function initialsOf(name: string): string {
   if (words.length === 0) return '';
   const first: string = Array.from(words[0] ?? '')[0] ?? '';
   const last: string = words.length > 1 ? (Array.from(words[words.length - 1] ?? '')[0] ?? '') : '';
-  return `${first}${last}`.toLocaleUpperCase('fr');
+  return `${first}${last}`.toLocaleUpperCase(locale);
 }
 
 /**
@@ -249,6 +252,17 @@ export class CwAvatar {
   protected readonly group: CwAvatarGroup | null = inject(AVATAR_GROUP, { optional: true });
 
   /**
+   * Property locale
+   * @readonly
+   *
+   * @description
+   * Locale of the initials' case mapping, given by `provideCwLocale` (`fr-FR` by default).
+   *
+   * @type {string}
+   */
+  private readonly locale: string = inject(ɵLOCALE);
+
+  /**
    * Property disc
    * @readonly
    *
@@ -330,7 +344,9 @@ export class CwAvatar {
    *
    * @type {Signal<string>}
    */
-  protected readonly initials: Signal<string> = computed(() => initialsOf(this.name() ?? ''));
+  protected readonly initials: Signal<string> = computed(() =>
+    initialsOf(this.name() ?? '', this.locale),
+  );
 
   /**
    * Property iconSize

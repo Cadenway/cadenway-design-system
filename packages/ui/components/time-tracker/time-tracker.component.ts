@@ -23,7 +23,7 @@ import {
 } from '@angular/core';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { CwButton } from '@cadenway/ui/components/button';
-import { CwRipple } from '@cadenway/ui/core';
+import { CwRipple, ɵLOCALE, ɵperLocale } from '@cadenway/ui/core';
 import { CwMeter } from '@cadenway/ui/components/meter';
 import { CwPopover, CwPopoverTrigger } from '@cadenway/ui/components/popover';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -120,14 +120,13 @@ const MINUTE: 60000 = 60_000;
  * Constant CLOCK
  *
  * @description
- * French formatter for a session start time.
+ * Formatter of a session start time in a locale (« 14:05 » in French), built once per locale.
  *
- * @type {Intl.DateTimeFormat}
+ * @type {(locale: string) => Intl.DateTimeFormat}
  */
-const CLOCK: Intl.DateTimeFormat = new Intl.DateTimeFormat('fr-FR', {
-  hour: '2-digit',
-  minute: '2-digit',
-});
+const CLOCK: (locale: string) => Intl.DateTimeFormat = ɵperLocale(
+  (locale: string) => new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }),
+);
 
 /**
  * Component CwTimeTracker
@@ -324,6 +323,18 @@ export class CwTimeTracker {
   private readonly announcer: LiveAnnouncer = inject(LiveAnnouncer);
 
   /**
+   * Property startFormat
+   *
+   * @description
+   * Formatter of the session start time in the locale given by `provideCwLocale` (`fr-FR` by
+   * default).
+   *
+   * @type {Intl.DateTimeFormat}
+   * @readonly
+   */
+  private readonly startFormat: Intl.DateTimeFormat = CLOCK(inject(ɵLOCALE));
+
+  /**
    * Property form
    *
    * @description
@@ -511,7 +522,7 @@ export class CwTimeTracker {
    */
   protected readonly since: Signal<string> = computed(() => {
     const startedAt: Date | null = this.startedAt();
-    return startedAt ? this.text().since(CLOCK.format(startedAt)) : '';
+    return startedAt ? this.text().since(this.startFormat.format(startedAt)) : '';
   });
 
   /**
