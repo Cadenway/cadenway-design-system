@@ -2,10 +2,13 @@ import {
   booleanAttribute,
   Component,
   computed,
+  inject,
   input,
   type InputSignalWithTransform,
   type Signal,
 } from '@angular/core';
+
+import { CwAppRail } from '../app-rail.component';
 
 /**
  * Component CwAppRailGroup
@@ -14,7 +17,8 @@ import {
  * A group of `[cwAppRailItem]` in a `nav[cwAppRail]`, stacked with 4 px between items (mockup
  * `App.dc.html`: the applications, then the favorite spaces). Below 768 px the group dissolves into
  * the tab bar row (`display: contents`), or disappears with `desktopOnly`, as the favorite spaces
- * and the organization switcher of the mockup do.
+ * and the organization switcher of the mockup do. In a rail whose `phoneLayout` is `column`, the
+ * group stays a column, `desktopOnly` included.
  */
 @Component({
   selector: 'cw-app-rail-group',
@@ -27,7 +31,7 @@ export class CwAppRailGroup {
    * Property desktopOnly
    *
    * @description
-   * Hides the whole group in the tab bar below 768 px.
+   * Hides the whole group in the tab bar below 768 px (not in a `column` rail).
    *
    * @type {InputSignalWithTransform<boolean, unknown>}
    * @readonly
@@ -35,6 +39,17 @@ export class CwAppRailGroup {
   public readonly desktopOnly: InputSignalWithTransform<boolean, unknown> = input(false, {
     transform: booleanAttribute,
   });
+
+  /**
+   * Property rail
+   *
+   * @description
+   * The rail holding the group, whose `phoneLayout` decides the layout below 768 px.
+   *
+   * @type {CwAppRail | null}
+   * @readonly
+   */
+  private readonly rail: CwAppRail | null = inject(CwAppRail, { optional: true });
 
   /**
    * Property classes
@@ -45,9 +60,9 @@ export class CwAppRailGroup {
    * @type {Signal<string>}
    * @readonly
    */
-  protected readonly classes: Signal<string> = computed(
-    () =>
-      `flex flex-col items-center gap-1 ${this.desktopOnly() ? 'max-md:hidden' : 'max-md:contents'}`,
-  );
+  protected readonly classes: Signal<string> = computed(() => {
+    if (this.rail?.phoneLayout() === 'column') return 'flex flex-col items-center gap-1';
+    return `flex flex-col items-center gap-1 ${this.desktopOnly() ? 'max-md:hidden' : 'max-md:contents'}`;
+  });
   // #endregion
 }

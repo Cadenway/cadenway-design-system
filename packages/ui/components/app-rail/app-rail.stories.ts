@@ -217,3 +217,25 @@ export const PhoneTabBar: Story = {
     template: `<div data-theme="light" class="min-h-[22rem] bg-canvas pb-14 text-foreground">${RAIL}</div>`,
   }),
 };
+
+/**
+ * `phoneLayout="column"`: the settings screens keep the 56 px column below 768 px, every group,
+ * separator and item included (mockup `Compte.dc.html`, `Organisation.dc.html`).
+ */
+export const PhoneColumn: Story = {
+  parameters: { themes: false },
+  globals: { viewport: { value: 'mobile1', isRotated: false } },
+  render: () => ({
+    template: `<div data-theme="light" class="flex h-[34rem] bg-canvas text-foreground">${RAIL.replace(
+      '<nav cwAppRail',
+      '<nav cwAppRail phoneLayout="column"',
+    )}</div>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const rail: HTMLElement = within(canvasElement).getByRole('navigation', {
+      name: 'Applications',
+    });
+    await expect(within(rail).getByRole('button', { name: 'Thème sombre' })).toBeVisible();
+    await expect(within(rail).getByRole('link', { name: 'Produit' })).toBeVisible();
+  },
+};

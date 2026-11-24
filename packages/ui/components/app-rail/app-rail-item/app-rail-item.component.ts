@@ -19,6 +19,7 @@ import { CwTooltip } from '@cadenway/ui/components/tooltip';
 import { ɵFOCUS } from '@cadenway/ui/core';
 import { NgIcon } from '@ng-icons/core';
 
+import { CwAppRail } from '../app-rail.component';
 import type { CwAppRailItemVariant } from '../app-rail.types';
 
 /**
@@ -32,10 +33,18 @@ import type { CwAppRailItemVariant } from '../app-rail.types';
  */
 const BASE: string =
   'relative isolate inline-flex size-9 shrink-0 items-center justify-center rounded-lg whitespace-nowrap ' +
-  // The tab bar shares 320 px between up to nine items: they may narrow there rather than overflow.
-  'max-md:min-w-0 max-md:shrink ' +
   'transition-colors motion-reduce:transition-none [&_ng-icon]:shrink-0 [&_ng-icon]:[--ng-icon__size:18px] ' +
   ɵFOCUS;
+
+/**
+ * Constant TAB_BAR_ITEM
+ *
+ * @description
+ * The tab bar shares 320 px between up to nine items: they may narrow there rather than overflow.
+ *
+ * @type {string}
+ */
+const TAB_BAR_ITEM: string = 'max-md:min-w-0 max-md:shrink';
 
 /**
  * Constant VARIANTS
@@ -207,7 +216,7 @@ export class CwAppRailItem {
    * Property desktopOnly
    *
    * @description
-   * Hides the item in the tab bar below 768 px.
+   * Hides the item in the tab bar below 768 px (not in a `column` rail).
    *
    * @type {InputSignalWithTransform<boolean, unknown>}
    * @readonly
@@ -376,6 +385,17 @@ export class CwAppRailItem {
   );
 
   /**
+   * Property rail
+   *
+   * @description
+   * The rail holding the item, whose `phoneLayout` decides the layout below 768 px.
+   *
+   * @type {CwAppRail | null}
+   * @readonly
+   */
+  private readonly rail: CwAppRail | null = inject(CwAppRail, { optional: true });
+
+  /**
    * Property classes
    *
    * @description
@@ -384,9 +404,10 @@ export class CwAppRailItem {
    * @type {Signal<string>}
    * @readonly
    */
-  protected readonly classes: Signal<string> = computed(
-    () => `${BASE} ${VARIANTS[this.variant()]}${this.desktopOnly() ? ' max-md:hidden' : ''}`,
-  );
+  protected readonly classes: Signal<string> = computed(() => {
+    if (this.rail?.phoneLayout() === 'column') return `${BASE} ${VARIANTS[this.variant()]}`;
+    return `${BASE} ${TAB_BAR_ITEM} ${VARIANTS[this.variant()]}${this.desktopOnly() ? ' max-md:hidden' : ''}`;
+  });
   // #endregion
 
   // #region Constructor

@@ -8,3 +8,15 @@
  * @type {'default' | 'primary'}
  */
 export type CwAppRailItemVariant = 'default' | 'primary';
+
+/**
+ * Type CwAppRailPhoneLayout
+ *
+ * @description
+ * Layout of the rail below 768 px: the bottom `tab-bar` of the application shell (`App.dc.html`),
+ * or the same 56 px `column` as on a desktop, as the settings screens keep it (`Compte.dc.html`,
+ * `Organisation.dc.html`).
+ *
+ * @type {'tab-bar' | 'column'}
+ */
+export type CwAppRailPhoneLayout = 'tab-bar' | 'column';

@@ -15,6 +15,7 @@ import { CwAppRailGroup } from './app-rail-group/app-rail-group.component';
 import { CwAppRailItem } from './app-rail-item/app-rail-item.component';
 import { CwAppRailSeparator } from './app-rail-separator/app-rail-separator.component';
 import { CwAppRail } from './app-rail.component';
+import type { CwAppRailPhoneLayout } from './app-rail.types';
 
 /**
  * Component Host
@@ -35,7 +36,7 @@ import { CwAppRail } from './app-rail.component';
     }),
   ],
   template: `
-    <nav cwAppRail ariaLabel="Applications">
+    <nav cwAppRail ariaLabel="Applications" [phoneLayout]="phoneLayout()">
       <cw-app-rail-group desktopOnly>
         <button cwAppRailItem variant="primary">
           <span cwAppRailItemMedia>AN</span>Atelier Nord
@@ -85,6 +86,18 @@ class Host {
    * @readonly
    */
   public readonly unread: WritableSignal<number | null> = signal<number | null>(3);
+
+  /**
+   * Property phoneLayout
+   *
+   * @description
+   * Layout of the rail below 768 px.
+   *
+   * @type {WritableSignal<CwAppRailPhoneLayout>}
+   * @readonly
+   */
+  public readonly phoneLayout: WritableSignal<CwAppRailPhoneLayout> =
+    signal<CwAppRailPhoneLayout>('tab-bar');
   // #endregion
 }
 
@@ -178,6 +191,35 @@ describe('CwAppRail', () => {
     expect(item(host, 'Accueil').hasAttribute('data-desktop-only')).toBe(false);
     expect(host.querySelector('cw-app-rail-group')?.getAttribute('data-desktop-only')).toBe('true');
     expect(host.querySelector('cw-app-rail-separator')?.getAttribute('aria-hidden')).toBe('true');
+  });
+
+  it('turns into the bottom tab bar below 768 px by default', () => {
+    expect(host.querySelector('nav')?.classList.contains('max-md:fixed')).toBe(true);
+    expect(host.querySelector('cw-app-rail-separator')?.classList.contains('max-md:hidden')).toBe(
+      true,
+    );
+    expect(host.querySelector('cw-app-rail-footer')?.classList.contains('max-md:contents')).toBe(
+      true,
+    );
+    expect(item(host, 'Thème sombre').classList.contains('max-md:hidden')).toBe(true);
+  });
+
+  it('keeps the desktop column below 768 px with phoneLayout="column"', async () => {
+    fixture.componentInstance.phoneLayout.set('column');
+    await fixture.whenStable();
+    const parts: Element[] = Array.from(
+      host.querySelectorAll(
+        'nav, cw-app-rail-group, cw-app-rail-separator, cw-app-rail-footer, [cwAppRailItem]',
+      ),
+    );
+
+    expect(parts.length).toBeGreaterThan(6);
+    expect(
+      parts.flatMap((part: Element) =>
+        Array.from(part.classList).filter((name: string) => name.startsWith('max-md:')),
+      ),
+    ).toEqual([]);
+    expect(item(host, 'Thème sombre').getAttribute('data-desktop-only')).toBe('true');
   });
 
   it('describes the item with what its tooltip adds to the label', () => {
