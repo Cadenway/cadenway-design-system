@@ -237,6 +237,17 @@ describe('CwSplitButton', () => {
     expect(document.activeElement).toBe(caret);
   });
 
+  it('closes the open menu before running the quick action', async () => {
+    const fixture: ComponentFixture<Host> = await setup();
+    pointerClick(button(fixture, 'Choisir un statut'));
+    await fixture.whenStable();
+    pointerClick(button(fixture, statusName));
+    await fixture.whenStable();
+
+    expect(fixture.componentInstance.log()).toEqual(['triggered']);
+    expect(menu()).toBeNull();
+  });
+
   it('toggles the menu closed with a second click on the caret', async () => {
     const fixture: ComponentFixture<Host> = await setup();
     const caret: HTMLButtonElement = button(fixture, 'Choisir un statut');

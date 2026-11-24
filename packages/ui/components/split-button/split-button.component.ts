@@ -288,12 +288,15 @@ export class CwSplitButton {
    *
    * @description
    * Runs the quick action, or toggles the menu with `opensMenu`. A click from the keyboard (Enter,
-   * Space) has no pointer detail and opens the menu on its first item.
+   * Space) has no pointer detail and opens the menu on its first item. The quick action first closes
+   * the menu this split button opened: the menu is placed against the whole button, so a click on
+   * the main half is not an outside click, and its choices would outlive the value they were for.
    *
    * @param {MouseEvent} event - The click.
    */
   protected onMainClick(event: MouseEvent): void {
     if (!this.opensMenu()) {
+      if (this.openedBy() !== null) this.menu().close();
       this.triggered.emit();
       return;
     }
