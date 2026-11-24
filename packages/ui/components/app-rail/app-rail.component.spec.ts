@@ -197,6 +197,8 @@ describe('CwAppRail', () => {
     const nav: HTMLElement | null = host.querySelector('nav');
 
     expect(nav?.getAttribute('data-phone-layout')).toBe('tab-bar');
+    // The parts' phone classes target this named group: without it none would apply.
+    expect(nav?.classList.contains('group/rail')).toBe(true);
     expect(nav?.classList.contains('max-md:fixed')).toBe(true);
     expect(
       host
