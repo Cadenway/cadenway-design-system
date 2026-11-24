@@ -1,16 +1,21 @@
 import {
   booleanAttribute,
   Component,
+  computed,
   contentChild,
+  effect,
+  ElementRef,
   inject,
   input,
   output,
+  untracked,
+  viewChild,
   type InputSignal,
   type InputSignalWithTransform,
   type OutputEmitterRef,
   type Signal,
 } from '@angular/core';
-import { CwMenu, CwMenuTriggerFor } from '@cadenway/ui/components/menu';
+import { CwMenu, type CwMenuFocus } from '@cadenway/ui/components/menu';
 import { ɵFOCUS_INSET } from '@cadenway/ui/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorArrowRightBold, phosphorCaretDownBold } from '@ng-icons/phosphor-icons/bold';
@@ -22,44 +27,53 @@ import { SPLIT_BUTTON_LABELS } from './split-button-labels.token';
  *
  * @description
  * Mockup `App.dc.html` (task status): the main half carries the current value in 12 px medium text,
- * lit `bg-muted` on hover; the focus ring stays inside the welded block.
+ * lit `bg-muted` on hover, and takes the free width when the split button is stretched (fields
+ * panel); the focus ring stays inside the welded block.
  *
  * @type {string}
  */
-const MAIN: string = `group/advance relative isolate flex min-w-0 items-center gap-1.5 rounded-l-[5px] px-2 text-left text-xs font-medium transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none ${ɵFOCUS_INSET}`;
+const MAIN: string = `group/main relative isolate flex min-w-0 flex-1 items-center gap-1.5 rounded-l-[5px] px-2 text-left text-xs font-medium transition-colors hover:bg-muted aria-expanded:bg-selected disabled:pointer-events-none motion-reduce:transition-none ${ɵFOCUS_INSET}`;
 
 /**
  * Constant TOGGLE
  *
  * @description
- * Mockup `App.dc.html`: the caret half is 24 px wide and muted, and turns `foreground` on hover;
- * `CwMenuTriggerFor` lights it while its menu is open.
+ * Mockup `App.dc.html`: the caret half is 24 px wide and muted, turns `foreground` on hover, and is
+ * lit `bg-selected` while the menu is open (bricks rule: selected is `bg-selected`).
  *
  * @type {string}
  */
-const TOGGLE: string = `group/toggle relative isolate inline-flex w-6 shrink-0 items-center justify-center rounded-r-[5px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground aria-expanded:text-foreground disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none ${ɵFOCUS_INSET}`;
+const TOGGLE: string = `group/toggle relative isolate inline-flex w-6 shrink-0 items-center justify-center rounded-r-[5px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground aria-expanded:bg-selected aria-expanded:text-foreground disabled:pointer-events-none motion-reduce:transition-none ${ɵFOCUS_INSET}`;
 
 /**
  * Component CwSplitButton
  *
  * @description
- * A two-part button: the main half runs the quick action, the caret half opens a menu of every
- * choice, as the task status button of the mockup (`App.dc.html`: the status moves to the next one
- * on click, the caret lists them all). The content is the main half's visual (an icon and the
- * current value); `label` is its accessible name and tooltip, since the content names the value and
- * not the action (« En cours · passer à « En revue » »). A click emits `advance`; `advanceable`
- * shows the → hint on hover and focus when there is a next value. Project the `cw-menu` the caret
- * opens inside the split button: it is wired to the caret (`aria-haspopup`, `aria-expanded`, the
- * keyboard of `CwMenuTriggerFor`), whose name is `menuLabel` (« Plus d’options » by default, or the
+ * A two-part button: the main half runs a quick action, the caret half opens a menu of every
+ * choice, as the task status button of the mockup (`App.dc.html`: a click moves the status to the
+ * next one, the caret lists them all). The content is the main half's visual (an icon and the
+ * current value); `label` is its accessible name, since the content names the value and not the
+ * action (« Statut : En cours. Passer à « En revue » »), and `tooltip` its tooltip (`label` by
+ * default; « Passer à « En revue » » in the mockup). A click on the main half emits `triggered`;
+ * `arrow` shows a → hint on hover and keyboard focus, for an action that moves to a next value.
+ * With `opensMenu`, the main half opens the menu instead (the mockup's status without a next one).
+ *
+ * Project the `cw-menu` the caret opens inside the split button; it is required. The menu is
+ * placed against the whole split button (its `align` and `side` apply), and the caret behaves as a
+ * menu button: `aria-haspopup`, `aria-expanded`, `aria-controls` while open, a click toggles it,
+ * Enter and Space open it on its first item, ↓ on the first, ↑ on the last, Escape closes it and
+ * gives the focus back. The caret is named by `menuLabel` (« Plus d’options » by default, or the
  * text of `provideCwSplitButtonLabels`). Both halves are their own Tab stop; `disabled` disables
- * both. No business logic: the consumer decides what the next value is.
+ * both, dims the whole block and closes an open menu. No business logic: the consumer decides
+ * what the quick action does. Style hook: `data-disabled` on the host.
  */
 @Component({
   selector: 'cw-split-button',
-  imports: [CwMenuTriggerFor, NgIcon],
+  imports: [NgIcon],
   providers: [provideIcons({ phosphorArrowRightBold, phosphorCaretDownBold })],
   host: {
-    class: 'inline-flex h-7 max-w-full items-stretch rounded-md border border-input',
+    class:
+      'inline-flex h-7 max-w-full items-stretch rounded-md border border-input transition-opacity data-disabled:opacity-50 motion-reduce:transition-none',
     '[attr.data-disabled]': 'disabled() ? "" : null',
   },
   templateUrl: './split-button.component.html',
@@ -70,13 +84,24 @@ export class CwSplitButton {
    * Property label
    *
    * @description
-   * Accessible name and tooltip of the main half: the action it runs, for example « En cours ·
-   * passer à « En revue » ».
+   * Accessible name of the main half: what it does, for example « Statut : En cours. Passer à
+   * « En revue » ».
    *
    * @type {InputSignal<string>}
    * @readonly
    */
   public readonly label: InputSignal<string> = input.required<string>();
+
+  /**
+   * Property tooltip
+   *
+   * @description
+   * Tooltip of the main half, for example « Passer à « En revue » »; `label` when not given.
+   *
+   * @type {InputSignal<string | undefined>}
+   * @readonly
+   */
+  public readonly tooltip: InputSignal<string | undefined> = input<string | undefined>();
 
   /**
    * Property menuLabel
@@ -90,15 +115,30 @@ export class CwSplitButton {
   public readonly menuLabel: InputSignal<string> = input<string>(inject(SPLIT_BUTTON_LABELS).menu);
 
   /**
-   * Property advanceable
+   * Property arrow
    *
    * @description
-   * Whether the main half moves to a next value: shows the → hint on hover and keyboard focus.
+   * Shows a → hint on the main half on hover and keyboard focus, for a quick action that moves to a
+   * next value.
    *
    * @type {InputSignalWithTransform<boolean, unknown>}
    * @readonly
    */
-  public readonly advanceable: InputSignalWithTransform<boolean, unknown> = input(true, {
+  public readonly arrow: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property opensMenu
+   *
+   * @description
+   * Makes the main half open the menu instead of emitting `triggered`, when there is no quick action
+   * to run (the mockup's status without a next one).
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   * @readonly
+   */
+  public readonly opensMenu: InputSignalWithTransform<boolean, unknown> = input(false, {
     transform: booleanAttribute,
   });
 
@@ -106,7 +146,7 @@ export class CwSplitButton {
    * Property disabled
    *
    * @description
-   * Disables both halves.
+   * Disables both halves and closes an open menu.
    *
    * @type {InputSignalWithTransform<boolean, unknown>}
    * @readonly
@@ -116,26 +156,88 @@ export class CwSplitButton {
   });
 
   /**
-   * Property advance
+   * Property triggered
    *
    * @description
-   * Emits when the main half is clicked (or pressed with Enter or Space).
+   * Emits when the main half runs its quick action (a click, Enter or Space), unless `opensMenu`.
    *
    * @type {OutputEmitterRef<void>}
    * @readonly
    */
-  public readonly advance: OutputEmitterRef<void> = output();
+  public readonly triggered: OutputEmitterRef<void> = output();
 
   /**
    * Property menu
    *
    * @description
-   * The projected menu the caret half opens.
+   * The projected menu; a split button without one fails at creation.
    *
    * @type {Signal<CwMenu>}
    * @readonly
    */
   protected readonly menu: Signal<CwMenu> = contentChild.required(CwMenu);
+
+  /**
+   * Property host
+   *
+   * @description
+   * The split button, against which the menu is placed.
+   *
+   * @type {HTMLElement}
+   * @readonly
+   */
+  private readonly host: HTMLElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+
+  /**
+   * Property mainButton
+   *
+   * @description
+   * The main half, the menu's trigger when it opens the menu.
+   *
+   * @type {Signal<ElementRef<HTMLButtonElement>>}
+   * @readonly
+   */
+  private readonly mainButton: Signal<ElementRef<HTMLButtonElement>> =
+    viewChild.required<ElementRef<HTMLButtonElement>>('main');
+
+  /**
+   * Property caretButton
+   *
+   * @description
+   * The caret half, the menu's trigger.
+   *
+   * @type {Signal<ElementRef<HTMLButtonElement>>}
+   * @readonly
+   */
+  private readonly caretButton: Signal<ElementRef<HTMLButtonElement>> =
+    viewChild.required<ElementRef<HTMLButtonElement>>('caret');
+
+  /**
+   * Property openedBy
+   *
+   * @description
+   * Which half opened the menu, or null while it is closed or opened from elsewhere.
+   *
+   * @type {Signal<'main' | 'caret' | null>}
+   * @readonly
+   */
+  protected readonly openedBy: Signal<'main' | 'caret' | null> = computed(() => {
+    const trigger: HTMLElement | null = this.menu().openedBy();
+    if (trigger === null) return null;
+    if (trigger === this.caretButton().nativeElement) return 'caret';
+    return trigger === this.mainButton().nativeElement ? 'main' : null;
+  });
+
+  /**
+   * Property title
+   *
+   * @description
+   * Tooltip of the main half.
+   *
+   * @type {Signal<string>}
+   * @readonly
+   */
+  protected readonly title: Signal<string> = computed(() => this.tooltip() ?? this.label());
 
   /**
    * Property mainClasses
@@ -158,5 +260,92 @@ export class CwSplitButton {
    * @readonly
    */
   protected readonly toggleClasses: string = TOGGLE;
+  // #endregion
+
+  // #region Constructor
+  /**
+   * Constructor
+   *
+   * @description
+   * Closes the menu this split button opened when it becomes disabled, so its items cannot run an
+   * action the consumer just made unavailable.
+   *
+   * @constructor
+   */
+  public constructor() {
+    effect(() => {
+      if (!this.disabled() || this.openedBy() === null) return;
+      untracked(() => {
+        this.menu().close();
+      });
+    });
+  }
+  // #endregion
+
+  // #region Methods
+  /**
+   * Method onMainClick
+   *
+   * @description
+   * Runs the quick action, or toggles the menu with `opensMenu`. A click from the keyboard (Enter,
+   * Space) has no pointer detail and opens the menu on its first item.
+   *
+   * @param {MouseEvent} event - The click.
+   */
+  protected onMainClick(event: MouseEvent): void {
+    if (!this.opensMenu()) {
+      this.triggered.emit();
+      return;
+    }
+    this.toggle(this.mainButton().nativeElement, event.detail === 0 ? 'first' : 'panel');
+  }
+
+  /**
+   * Method onCaretClick
+   *
+   * @description
+   * Toggles the menu from the caret; from the keyboard, it opens on the first item.
+   *
+   * @param {MouseEvent} event - The click.
+   */
+  protected onCaretClick(event: MouseEvent): void {
+    this.toggle(this.caretButton().nativeElement, event.detail === 0 ? 'first' : 'panel');
+  }
+
+  /**
+   * Method onCaretKeydown
+   *
+   * @description
+   * Opens the menu on its first item with ↓, on its last with ↑, as a menu button does.
+   *
+   * @param {KeyboardEvent} event - The key pressed on the caret.
+   */
+  protected onCaretKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+    event.preventDefault();
+    this.menu().open({
+      origin: this.host,
+      trigger: this.caretButton().nativeElement,
+      focus: event.key === 'ArrowDown' ? 'first' : 'last',
+    });
+  }
+
+  /**
+   * Method toggle
+   *
+   * @description
+   * Closes the menu when this split button opened it, or opens it against the whole split button
+   * with the given half as its trigger.
+   *
+   * @param {HTMLElement} trigger - The half that opens the menu and gets the focus back.
+   * @param {CwMenuFocus} focus - Where the focus goes once the menu is open.
+   */
+  private toggle(trigger: HTMLElement, focus: CwMenuFocus): void {
+    if (this.openedBy() !== null) {
+      this.menu().close();
+      return;
+    }
+    this.menu().open({ origin: this.host, trigger, focus });
+  }
   // #endregion
 }

@@ -10,17 +10,20 @@ import { provideCwSplitButtonLabels } from './split-button.providers';
  *
  * @description
  * Hosts the task status split button of the mockup (`App.dc.html`): the main half moves the status
- * to the next one, the caret lists every status.
+ * to the next one, or opens the menu when there is none; the caret lists every status. A second,
+ * plain split button keeps the default caret name.
  */
 @Component({
   imports: [CwSplitButton, CwMenu, CwMenuItem],
   template: `
     <cw-split-button
       menuLabel="Choisir un statut"
-      [label]="'En cours · passer à « En revue »'"
-      [advanceable]="advanceable()"
+      [label]="label()"
+      [tooltip]="tooltip()"
+      [arrow]="!last()"
+      [opensMenu]="last()"
       [disabled]="disabled()"
-      (advance)="log.set([...log(), 'advance'])"
+      (triggered)="log.set([...log(), 'triggered'])"
     >
       <span>En cours</span>
       <cw-menu align="end">
@@ -48,15 +51,41 @@ class Host {
   public readonly log: WritableSignal<string[]> = signal<string[]>([]);
 
   /**
-   * Property advanceable
+   * Property label
    *
    * @description
-   * Whether the status has a next one.
+   * Accessible name of the main half.
+   *
+   * @type {WritableSignal<string>}
+   * @readonly
+   */
+  public readonly label: WritableSignal<string> = signal(
+    'Statut : En cours. Passer à « En revue »',
+  );
+
+  /**
+   * Property tooltip
+   *
+   * @description
+   * Tooltip of the main half, or none to fall back to the label.
+   *
+   * @type {WritableSignal<string | undefined>}
+   * @readonly
+   */
+  public readonly tooltip: WritableSignal<string | undefined> = signal<string | undefined>(
+    'Passer à « En revue »',
+  );
+
+  /**
+   * Property last
+   *
+   * @description
+   * Whether the status has no next one, so the main half opens the menu.
    *
    * @type {WritableSignal<boolean>}
    * @readonly
    */
-  public readonly advanceable: WritableSignal<boolean> = signal(true);
+  public readonly last: WritableSignal<boolean> = signal(false);
 
   /**
    * Property disabled
@@ -121,6 +150,18 @@ function menu(): HTMLElement | null {
 }
 
 /**
+ * Function items
+ *
+ * @description
+ * Returns the items of the open menu.
+ *
+ * @returns {HTMLElement[]} The menu items, in order.
+ */
+function items(): HTMLElement[] {
+  return Array.from(menu()?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? []);
+}
+
+/**
  * Function key
  *
  * @description
@@ -135,49 +176,79 @@ function key(target: Element, value: string): void {
   );
 }
 
+/**
+ * Function pointerClick
+ *
+ * @description
+ * Clicks an element as a pointer does (a click with a detail of 1), unlike `click()`, which a menu
+ * button reads as Enter or Space.
+ *
+ * @param {Element} target - Element clicked.
+ */
+function pointerClick(target: Element): void {
+  target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 }));
+}
+
 describe('CwSplitButton', () => {
+  const statusName: string = 'Statut : En cours. Passer à « En revue »';
+
   afterEach(() => {
     menu()?.remove();
   });
 
-  it('names the main half by its action and emits advance on click', async () => {
+  it('names the main half by its action, titles it by its tooltip and emits triggered', async () => {
     const fixture: ComponentFixture<Host> = await setup();
-    const main: HTMLButtonElement = button(fixture, 'En cours · passer à « En revue »');
+    const main: HTMLButtonElement = button(fixture, statusName);
 
-    expect(main.getAttribute('title')).toBe('En cours · passer à « En revue »');
+    expect(main.getAttribute('title')).toBe('Passer à « En revue »');
+    expect(main.getAttribute('aria-haspopup')).toBeNull();
     expect(main.textContent).toContain('En cours');
     main.click();
 
-    expect(fixture.componentInstance.log()).toEqual(['advance']);
+    expect(fixture.componentInstance.log()).toEqual(['triggered']);
     expect(menu()).toBeNull();
+
+    fixture.componentInstance.tooltip.set(undefined);
+    await fixture.whenStable();
+    expect(main.getAttribute('title')).toBe(statusName);
   });
 
-  it('opens the projected menu from the caret, named by menuLabel, and runs an item', async () => {
+  it('opens the projected menu from the caret as a menu button and runs an item', async () => {
     const fixture: ComponentFixture<Host> = await setup();
     const caret: HTMLButtonElement = button(fixture, 'Choisir un statut');
 
     expect(caret.getAttribute('aria-haspopup')).toBe('menu');
     expect(caret.getAttribute('aria-expanded')).toBe('false');
-    caret.click();
+    pointerClick(caret);
     await fixture.whenStable();
 
     expect(caret.getAttribute('aria-expanded')).toBe('true');
-    const items: HTMLElement[] = Array.from(
-      menu()?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? [],
-    );
-    expect(items.map((item: HTMLElement) => item.textContent.trim())).toEqual([
+    expect(caret.getAttribute('aria-controls')).toBe(menu()?.id);
+    expect(items().map((item: HTMLElement) => item.textContent.trim())).toEqual([
       'À faire',
       'En revue',
     ]);
-    items[1]?.click();
+    items()[1]?.click();
     await fixture.whenStable();
 
     expect(fixture.componentInstance.log()).toEqual(['review']);
     expect(menu()).toBeNull();
+    expect(caret.getAttribute('aria-expanded')).toBe('false');
     expect(document.activeElement).toBe(caret);
   });
 
-  it('closes the menu on Escape and gives the focus back to the caret', async () => {
+  it('toggles the menu closed with a second click on the caret', async () => {
+    const fixture: ComponentFixture<Host> = await setup();
+    const caret: HTMLButtonElement = button(fixture, 'Choisir un statut');
+    pointerClick(caret);
+    await fixture.whenStable();
+    pointerClick(caret);
+    await fixture.whenStable();
+
+    expect(menu()).toBeNull();
+  });
+
+  it('opens on the first item with ArrowDown, on the last with ArrowUp, and closes on Escape', async () => {
     const fixture: ComponentFixture<Host> = await setup();
     const caret: HTMLButtonElement = button(fixture, 'Choisir un statut');
     caret.focus();
@@ -187,29 +258,49 @@ describe('CwSplitButton', () => {
     expect(document.activeElement?.textContent.trim()).toBe('À faire');
     key(document.activeElement ?? caret, 'Escape');
     await fixture.whenStable();
-
     expect(menu()).toBeNull();
     expect(document.activeElement).toBe(caret);
+
+    key(caret, 'ArrowUp');
+    await fixture.whenStable();
+    expect(document.activeElement?.textContent.trim()).toBe('En revue');
   });
 
-  it('shows the advance hint only when there is a next value', async () => {
+  it('opens the menu from the main half with opensMenu, on its first item from the keyboard', async () => {
     const fixture: ComponentFixture<Host> = await setup();
-    const main: HTMLButtonElement = button(fixture, 'En cours · passer à « En revue »');
+    fixture.componentInstance.last.set(true);
+    fixture.componentInstance.label.set('Statut : Terminé. Choisir un statut');
+    await fixture.whenStable();
+    const main: HTMLButtonElement = button(fixture, 'Statut : Terminé. Choisir un statut');
 
-    expect(main.querySelector('ng-icon')).not.toBeNull();
-    fixture.componentInstance.advanceable.set(false);
+    expect(main.getAttribute('aria-haspopup')).toBe('menu');
+    expect(main.getAttribute('aria-expanded')).toBe('false');
+    main.click();
     await fixture.whenStable();
 
-    expect(main.querySelector('ng-icon')).toBeNull();
+    expect(fixture.componentInstance.log()).toEqual([]);
+    expect(main.getAttribute('aria-expanded')).toBe('true');
+    expect(main.getAttribute('aria-controls')).toBe(menu()?.id);
+    expect(document.activeElement?.textContent.trim()).toBe('À faire');
+    key(document.activeElement ?? main, 'Escape');
+    await fixture.whenStable();
+
+    expect(document.activeElement).toBe(main);
   });
 
-  it('disables both halves', async () => {
+  it('disables both halves and closes the menu it opened', async () => {
     const fixture: ComponentFixture<Host> = await setup();
+    pointerClick(button(fixture, 'Choisir un statut'));
+    await fixture.whenStable();
+    expect(menu()).not.toBeNull();
+
     fixture.componentInstance.disabled.set(true);
     await fixture.whenStable();
 
-    expect(button(fixture, 'En cours · passer à « En revue »').disabled).toBe(true);
+    expect(menu()).toBeNull();
+    expect(button(fixture, statusName).disabled).toBe(true);
     expect(button(fixture, 'Choisir un statut').disabled).toBe(true);
+    expect(fixture.componentInstance.log()).toEqual([]);
   });
 
   it('names the caret « Plus d’options » by default, or with the provided text', async () => {

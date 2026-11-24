@@ -155,35 +155,77 @@ function labelOf(key: CwStatusKey): string {
 }
 
 /**
- * Function advanceLabel
+ * Function statusLabel
  *
  * @description
- * Accessible name of the main half, as the mockup writes it (`advanceLabel`).
+ * Accessible name of the main half, as the mockup writes it (`App.dc.html`, `stAdvanceAria`).
  *
  * @param {CwStatusKey} key - Current status.
  *
- * @returns {string} « En cours · passer à « En revue » », or the status alone without a next one.
+ * @returns {string} « Statut : En cours. Passer à « En revue » », or « … Choisir un statut » without
+ * a next status.
  */
-function advanceLabel(key: CwStatusKey): string {
+function statusLabel(key: CwStatusKey): string {
   const next: CwStatusKey | undefined = NEXT_STATUS[key];
-  return labelOf(key) + (next ? ` · passer à « ${labelOf(next)} »` : '');
+  return `Statut : ${labelOf(key)}. ${next ? `Passer à « ${labelOf(next)} »` : 'Choisir un statut'}`;
+}
+
+/**
+ * Function statusTooltip
+ *
+ * @description
+ * Tooltip of the main half, as the mockup writes it (`App.dc.html`, `stAdvanceTitle`).
+ *
+ * @param {CwStatusKey} key - Current status.
+ *
+ * @returns {string} « Passer à « En revue » », or « Choisir un statut » without a next status.
+ */
+function statusTooltip(key: CwStatusKey): string {
+  const next: CwStatusKey | undefined = NEXT_STATUS[key];
+  return next ? `Passer à « ${labelOf(next)} »` : 'Choisir un statut';
+}
+
+/**
+ * Function statusProps
+ *
+ * @description
+ * Story props of the task status button.
+ *
+ * @param {CwStatusKey} status - Initial status.
+ * @param {boolean} disabled - Whether the button is disabled.
+ *
+ * @returns {Record<string, unknown>} The props of `STATUS_TEMPLATE`.
+ */
+function statusProps(status: CwStatusKey, disabled: boolean): Record<string, unknown> {
+  return {
+    status,
+    disabled,
+    groups: STATUS_GROUPS,
+    next: NEXT_STATUS,
+    labelOf,
+    statusLabel,
+    statusTooltip,
+  };
 }
 
 /**
  * Constant STATUS_TEMPLATE
  *
  * @description
- * The task status button: the main half moves to the next status, the caret lists them all.
+ * The task status button: the main half moves to the next status, or opens the menu when there is
+ * none; the caret lists them all.
  *
  * @type {string}
  */
 const STATUS_TEMPLATE: string = `
   <cw-split-button
     menuLabel="Choisir un statut"
-    [label]="advanceLabel(status)"
-    [advanceable]="!!next[status]"
+    [label]="statusLabel(status)"
+    [tooltip]="statusTooltip(status)"
+    [arrow]="!!next[status]"
+    [opensMenu]="!next[status]"
     [disabled]="disabled"
-    (advance)="status = next[status] ?? status"
+    (triggered)="status = next[status] ?? status"
   >
     <cw-status-icon [status]="status" size="3.5" />
     <span class="truncate">{{ labelOf(status) }}</span>
@@ -222,80 +264,83 @@ function light(canvasElement: HTMLElement): HTMLElement {
 
 /** The task status: a click moves « En cours » to « En revue »; the caret lists every status. */
 export const TaskStatus: Story = {
-  render: () => ({
-    props: {
-      status: 'progress',
-      disabled: false,
-      groups: STATUS_GROUPS,
-      next: NEXT_STATUS,
-      labelOf,
-      advanceLabel,
-    },
-    template: STATUS_TEMPLATE,
-  }),
+  render: () => ({ props: statusProps('progress', false), template: STATUS_TEMPLATE }),
   play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const scope: { getByRole(role: string, options?: { name?: string }): HTMLElement } = within(
       light(canvasElement),
     );
     const main: HTMLElement = scope.getByRole('button', {
-      name: 'En cours · passer à « En revue »',
+      name: 'Statut : En cours. Passer à « En revue »',
     });
 
+    await expect(main).toHaveAttribute('title', 'Passer à « En revue »');
     await userEvent.click(main);
     await expect(
-      scope.getByRole('button', { name: 'En revue · passer à « En validation »' }),
+      scope.getByRole('button', { name: 'Statut : En revue. Passer à « En validation »' }),
     ).toBeInTheDocument();
   },
 };
 
-/** Keyboard: Tab reaches the caret, ↓ opens the menu on its first status, Escape closes it. */
+/**
+ * Keyboard: Enter on the main half moves the status, Tab reaches the caret, ↓ opens the menu on
+ * its first status, Escape closes it and gives the focus back.
+ */
 export const Keyboard: Story = {
-  render: TaskStatus.render,
+  render: () => ({ props: statusProps('progress', false), template: STATUS_TEMPLATE }),
   play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const scope: { getByRole(role: string, options?: { name?: string }): HTMLElement } = within(
       light(canvasElement),
     );
-    const caret: HTMLElement = scope.getByRole('button', { name: 'Choisir un statut' });
-
-    caret.focus();
-    await userEvent.keyboard('{ArrowDown}');
-    const menu: HTMLElement = await within(document.body).findByRole('menu', {
-      name: 'Choisir un statut',
+    const main: HTMLElement = scope.getByRole('button', {
+      name: 'Statut : En cours. Passer à « En revue »',
     });
+
+    main.focus();
+    await userEvent.keyboard('{Enter}');
+    await expect(
+      scope.getByRole('button', { name: 'Statut : En revue. Passer à « En validation »' }),
+    ).toHaveFocus();
+    await userEvent.tab();
+    const caret: HTMLElement = scope.getByRole('button', { name: 'Choisir un statut' });
+    await expect(caret).toHaveFocus();
+    await userEvent.keyboard('{ArrowDown}');
+    const menu: HTMLElement = await within(document.body).findByRole('menu');
     await expect(caret).toHaveAttribute('aria-expanded', 'true');
-    await expect(within(menu).getByRole('menuitemradio', { name: 'En cours' })).toBeChecked();
+    await expect(within(menu).getByRole('menuitemradio', { name: 'En revue' })).toBeChecked();
     await userEvent.keyboard('{Escape}');
     await waitFor(() => expect(caret).toHaveFocus());
     await expect(caret).toHaveAttribute('aria-expanded', 'false');
   },
 };
 
-/** A closed status has no next one: no → hint, the caret still changes it. */
+/** A closed status has no next one: no → hint, and the main half opens the menu. */
 export const WithoutNext: Story = {
-  render: () => ({
-    props: {
-      status: 'done',
-      disabled: false,
-      groups: STATUS_GROUPS,
-      next: NEXT_STATUS,
-      labelOf,
-      advanceLabel,
-    },
-    template: STATUS_TEMPLATE,
-  }),
+  render: () => ({ props: statusProps('done', false), template: STATUS_TEMPLATE }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole(role: string, options?: { name?: string }): HTMLElement } = within(
+      light(canvasElement),
+    );
+    const main: HTMLElement = scope.getByRole('button', {
+      name: 'Statut : Terminé. Choisir un statut',
+    });
+
+    await userEvent.click(main);
+    await within(document.body).findByRole('menu');
+    await expect(main).toHaveAttribute('aria-expanded', 'true');
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(main).toHaveFocus());
+  },
 };
 
 /** Disabled: both halves, for a reader without edit rights. */
 export const Disabled: Story = {
+  render: () => ({ props: statusProps('review', true), template: STATUS_TEMPLATE }),
+};
+
+/** Stretched, as in the fields panel of the task creation (`App.dc.html`): the main half grows. */
+export const Stretched: Story = {
   render: () => ({
-    props: {
-      status: 'review',
-      disabled: true,
-      groups: STATUS_GROUPS,
-      next: NEXT_STATUS,
-      labelOf,
-      advanceLabel,
-    },
-    template: STATUS_TEMPLATE,
+    props: statusProps('todo', false),
+    template: `<div class="flex w-72 flex-col [&>cw-split-button]:w-full">${STATUS_TEMPLATE.replace('align="end"', 'align="start"')}</div>`,
   }),
 };
