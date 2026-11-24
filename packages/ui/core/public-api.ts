@@ -14,6 +14,8 @@ export { ɵFOCUS, ɵFOCUS_FIELD, ɵFOCUS_FIELD_WITHIN, ɵFOCUS_INSET } from './s
 export { ɵmenuFrom, ɵpanelPositions, ɵplacementOf } from './overlay/overlay-positions';
 export { ɵConnectedPanel } from './overlay/connected-panel.service';
 export type { ɵConnectedPanelConfig } from './overlay/connected-panel.service';
+export { provideCwPhoneSheets, ɵphoneSheet } from './overlay/phone-sheet';
+export type { CwPhoneSheetConfig, ɵPhoneSheet } from './overlay/phone-sheet';
 export { ɵModalOverlay } from './overlay/modal-overlay.service';
 export type { ɵModalOverlayConfig } from './overlay/modal-overlay.service';
 export { ɵPanelStack } from './overlay/panel-stack.service';

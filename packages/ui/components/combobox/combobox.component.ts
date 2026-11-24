@@ -97,7 +97,9 @@ const SIZES: Record<CwComboboxSize, string> = {
  * @type {string}
  */
 const PANEL: string =
-  'flex max-h-80 max-w-sm flex-col overflow-hidden rounded-lg border bg-popover text-popover-foreground shadow-md animate-menu-in data-[state=closed]:animate-menu-out motion-reduce:animate-none';
+  'flex max-h-80 max-w-sm flex-col overflow-hidden rounded-lg border bg-popover text-popover-foreground shadow-md animate-menu-in data-[state=closed]:animate-menu-out motion-reduce:animate-none ' +
+  // A phone sheet (`provideCwPhoneSheets`) fills the width of its pane.
+  'in-data-[presentation=sheet]:w-full in-data-[presentation=sheet]:max-w-none';
 
 /**
  * Interface KeyOption
@@ -178,6 +180,10 @@ function defaultFilter(
  * and with Reactive or template-driven forms (it is the control's value accessor); `aria-invalid`
  * is set when the control is invalid and touched. Name it with a `<label for>` (its `id`) or
  * `ariaLabel`.
+ *
+ * With `provideCwPhoneSheets` (`@cadenway/ui/core`), below 768 px the panel opens as a sheet docked
+ * above the bottom tab bar, full width between gutters (mockup `App.dc.html`); the keyboard, the focus,
+ * Escape and outside clicks behave the same.
  */
 @Component({
   selector: 'cw-combobox',
@@ -1532,6 +1538,7 @@ export class CwCombobox<T = unknown>
         // A press on the trigger toggles the panel through its own click.
         if (!event.composedPath().includes(trigger)) this.hide(false);
       },
+      phoneSheet: true,
     });
     // The search field takes the focus once the panel is in the page (sheet, "Anatomie"), also
     // when the panel reopens during its closing animation and was never removed.

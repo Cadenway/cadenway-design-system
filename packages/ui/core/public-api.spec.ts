@@ -7,6 +7,7 @@ describe('@cadenway/ui/core public API', () => {
     expect(Object.keys(publicApi).sort()).toEqual([
       'CwRipple',
       'CwSwap',
+      'provideCwPhoneSheets',
       'ɵConnectedPanel',
       'ɵFOCUS',
       'ɵFOCUS_FIELD',
@@ -29,6 +30,7 @@ describe('@cadenway/ui/core public API', () => {
       'ɵmenuFrom',
       'ɵnavigateList',
       'ɵpanelPositions',
+      'ɵphoneSheet',
       'ɵplacementOf',
       'ɵprefersReducedMotion',
       'ɵsameDay',

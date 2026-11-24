@@ -5,6 +5,7 @@ import {
   type ConnectionPositionPair,
   type FlexibleConnectedPositionStrategy,
   type OverlayRef,
+  type PositionStrategy,
   createFlexibleConnectedPositionStrategy,
   createOverlayRef,
   createRepositionScrollStrategy,
@@ -41,6 +42,8 @@ import {
   ɵnavigateList,
   ɵPanelStack,
   ɵpanelPositions,
+  ɵphoneSheet,
+  type ɵPhoneSheet,
   type ɵStackedPanel,
 } from '@cadenway/ui/core';
 import type { Subscription } from 'rxjs';
@@ -74,7 +77,9 @@ const PANEL: string =
   '[&>*:nth-child(1)]:[animation-delay:60ms] [&>*:nth-child(2)]:[animation-delay:90ms] [&>*:nth-child(3)]:[animation-delay:120ms] ' +
   '[&>*:nth-child(4)]:[animation-delay:150ms] [&>*:nth-child(5)]:[animation-delay:180ms] [&>*:nth-child(6)]:[animation-delay:210ms] ' +
   '[&>*:nth-child(7)]:[animation-delay:240ms] [&>*:nth-child(8)]:[animation-delay:270ms] [&>*:nth-child(9)]:[animation-delay:300ms] ' +
-  '[&>*:nth-child(10)]:[animation-delay:330ms] [&>*:nth-child(11)]:[animation-delay:360ms] [&>*:nth-child(12)]:[animation-delay:390ms]';
+  '[&>*:nth-child(10)]:[animation-delay:330ms] [&>*:nth-child(11)]:[animation-delay:360ms] [&>*:nth-child(12)]:[animation-delay:390ms] ' +
+  // A phone sheet (`provideCwPhoneSheets`) fills the width of its pane.
+  'in-data-[presentation=sheet]:w-full in-data-[presentation=sheet]:max-w-none';
 
 /* Submenus open on the right of their item, top edges aligned (the panel's padding and border,
    5 px, sit above its first item), and flip to the left without room (sheet, anatomy 7). */
@@ -198,6 +203,10 @@ function sideOf(pair: ConnectedPosition): CwMenuSide {
  *
  * @description
  * A menu of actions or options opened from a button (`[cwMenuTriggerFor]`), from a right click (`[cwContextMenuTriggerFor]`) or from another menu's item (submenu): DropdownMenu sheet of the Design System artifact. Holds `button[cwMenuItem]`, `button[cwMenuItemCheckbox]`, `cw-menu-radio-group` with `button[cwMenuItemRadio]`, `cw-menu-group`, `cw-menu-label` and `cw-menu-separator`. The panel (`role="menu"`) renders in a CDK overlay at the body level, placed on `side` and `align` and flipped or shifted to stay visible; its width follows the content (`max-w-sm`), its height is capped to the room left and scrolls. It opens from the trigger's corner (`animate-menu-in`) and closes with `animate-menu-out`, at once under reduced motion. One menu is open at a time, and opening it closes an open select, combobox, popover or date picker unless it sits inside them. Keyboard: ↓ ↑ in a loop skipping disabled items, Home and End, → opens a submenu, ← closes it, Enter and Space activate, a letter highlights the next item starting with it, Escape closes the current menu and gives the focus back to its trigger, Tab closes every menu. A click outside closes the menus. The pointer and the arrows share one highlight (`data-highlighted`). `inline` renders the panel in place, always open (a menu shown inside a page, the stories); name it with `ariaLabel` then. A panel opened by a trigger is named by that trigger (`aria-labelledby`), or by `ariaLabel` when given. `closed` fires when an opened menu closes.
+ *
+ * With `provideCwPhoneSheets` (`@cadenway/ui/core`), below 768 px the panel opens as a sheet docked
+ * above the bottom tab bar, full width between gutters (mockup `App.dc.html`); the keyboard, the focus,
+ * Escape and outside clicks behave the same.
  */
 @Component({
   selector: 'cw-menu',
@@ -639,9 +648,17 @@ export class CwMenu {
       ...(options.positions ??
         (parent ? SUBMENU_POSITIONS : ɵpanelPositions(this.side(), this.align()))),
     ];
+    // Mockup App.dc.html: on a phone the rail's menus and submenus dock above the tab bar.
+    const sheet: ɵPhoneSheet | null = ɵphoneSheet(this.injector, options.trigger);
+    if (sheet) this.positionSubscription?.unsubscribe();
     const overlayRef: OverlayRef = this.ensureOverlay(
-      this.positionStrategy(options.origin, positions),
+      sheet?.strategy ?? this.positionStrategy(options.origin, positions),
     );
+    overlayRef.updateSize(
+      sheet ? { width: sheet.width, maxHeight: sheet.maxHeight } : { width: '', maxHeight: '' },
+    );
+    if (sheet) overlayRef.overlayElement.setAttribute('data-presentation', 'sheet');
+    else overlayRef.overlayElement.removeAttribute('data-presentation');
     const view: { rootNodes: unknown[]; detectChanges: () => void } = overlayRef.attach(
       new TemplatePortal(this.template(), this.viewContainerRef),
     );
@@ -652,9 +669,9 @@ export class CwMenu {
     this.panel = panel ?? null;
     if (panel) {
       panel.setAttribute('data-state', 'open');
-      // The preferred position until the overlay reports the one it took.
-      panel.style.setProperty('--menu-from', ɵmenuFrom(positions[0]));
-      panel.setAttribute('data-side', sideOf(positions[0]));
+      // The preferred position until the overlay reports the one it took; a sheet stays put.
+      panel.style.setProperty('--menu-from', sheet?.menuFrom ?? ɵmenuFrom(positions[0]));
+      panel.setAttribute('data-side', sheet ? 'top' : sideOf(positions[0]));
     }
     this.ɵfocus(options.focus ?? 'panel');
   }
@@ -924,10 +941,11 @@ export class CwMenu {
    * @description
    * Creates or updates the overlay for the supplied position strategy.
    *
-   * @param {FlexibleConnectedPositionStrategy} strategy - Position strategy to apply to the overlay.
+   * @param {PositionStrategy} strategy - Position strategy to apply to the overlay: next to the
+   * trigger, or docked as a phone sheet.
    * @returns {OverlayRef} Overlay using the requested position strategy.
    */
-  private ensureOverlay(strategy: FlexibleConnectedPositionStrategy): OverlayRef {
+  private ensureOverlay(strategy: PositionStrategy): OverlayRef {
     if (this.overlayRef) {
       this.overlayRef.updatePositionStrategy(strategy);
       return this.overlayRef;

@@ -2,6 +2,7 @@ import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormField, form, required, type FieldTree } from '@angular/forms/signals';
+import { provideCwPhoneSheets } from '@cadenway/ui/core';
 
 import { CwSelectEmpty } from './select-empty/select-empty.component';
 import { CwSelectGroup } from './select-group/select-group.component';
@@ -489,5 +490,43 @@ describe('CwSelect', () => {
     fixture.componentInstance.model.set({ priority: 'haute' });
     await fixture.whenStable();
     expect(trigger.textContent.trim()).toBe('Haute');
+  });
+});
+
+/**
+ * Function emulatePhone
+ *
+ * @description
+ * Gives the test DOM a `matchMedia` where the phone query matches, which jsdom lacks.
+ */
+function emulatePhone(): void {
+  Object.defineProperty(window, 'matchMedia', {
+    configurable: true,
+    value: (query: string): Pick<MediaQueryList, 'matches' | 'media'> => ({
+      matches: true,
+      media: query,
+    }),
+  });
+}
+
+describe('CwSelect on a phone', () => {
+  afterEach(() => {
+    Reflect.deleteProperty(window, 'matchMedia');
+  });
+
+  it('opens its options as a sheet with provideCwPhoneSheets', async () => {
+    emulatePhone();
+    TestBed.configureTestingModule({ providers: [provideCwPhoneSheets()] });
+    const fixture: ComponentFixture<ModelHost> = TestBed.createComponent(ModelHost);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    combobox(fixture.nativeElement as HTMLElement, 'Statut').click();
+    await fixture.whenStable();
+    const pane: HTMLElement | null | undefined =
+      listbox()?.closest<HTMLElement>('[data-presentation]');
+
+    expect(pane?.getAttribute('data-presentation')).toBe('sheet');
+    expect(pane?.style.width).toBe('calc(100% - 16px)');
+    fixture.destroy();
   });
 });

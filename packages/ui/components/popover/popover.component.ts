@@ -4,6 +4,7 @@ import {
   type OverlayRef,
   type ConnectedPosition,
   type FlexibleConnectedPositionStrategy,
+  type PositionStrategy,
   createFlexibleConnectedPositionStrategy,
   createOverlayRef,
   createRepositionScrollStrategy,
@@ -39,8 +40,10 @@ import {
   ɵmenuFrom,
   ɵPanelStack,
   ɵpanelPositions,
+  ɵphoneSheet,
   ɵplacementOf,
   ɵprefersReducedMotion,
+  type ɵPhoneSheet,
   type ɵPlacement,
   type ɵStackedPanel,
 } from '@cadenway/ui/core';
@@ -61,7 +64,9 @@ import type { CwPopoverAlign, CwPopoverSide, CwPopoverSize } from './popover.typ
  * @type {string}
  */
 const PANEL: string =
-  'relative block rounded-lg border bg-popover text-popover-foreground shadow-md outline-hidden animate-menu-in motion-reduce:animate-none data-[state=closed]:animate-menu-out';
+  'relative block rounded-lg border bg-popover text-popover-foreground shadow-md outline-hidden animate-menu-in motion-reduce:animate-none data-[state=closed]:animate-menu-out ' +
+  // A phone sheet (`provideCwPhoneSheets`) fills the width of its pane.
+  'in-data-[presentation=sheet]:w-full';
 
 /**
  * Constant WIDTHS
@@ -138,6 +143,10 @@ const VIEWPORT_MARGIN: number = 8;
  * a `button[cwPopoverClose]`, and when the focus tabs out of it; the focus returns to the trigger
  * unless the user moved it elsewhere. `modal` traps the focus and blocks the page behind a
  * transparent backdrop. The `cw-popover` element itself renders nothing in place.
+ *
+ * With `provideCwPhoneSheets` (`@cadenway/ui/core`), below 768 px the panel opens as a sheet docked
+ * above the bottom tab bar, full width between gutters (mockup `App.dc.html`); the keyboard, the focus,
+ * Escape and outside clicks behave the same.
  */
 @Component({
   selector: 'cw-popover',
@@ -633,30 +642,31 @@ export class CwPopover {
       align,
       this.sideOffset() + (this.arrow() ? ARROW_GAP : 0),
     );
+    // Mockup App.dc.html: on a phone a panel docks above the tab bar (`provideCwPhoneSheets`).
+    const sheet: ɵPhoneSheet | null = ɵphoneSheet(this.injector, origin);
     // `inline`: the panel's host is inserted next to the trigger (as a native popover in the top
     // layer), so it inherits the trigger's `data-theme` scope and follows it in the tab order.
-    const strategy: FlexibleConnectedPositionStrategy = createFlexibleConnectedPositionStrategy(
-      this.injector,
-      origin,
-    )
-      .withPositions(positions)
-      .withFlexibleDimensions(false)
-      .withPush(true)
-      .withViewportMargin(VIEWPORT_MARGIN)
-      .withPopoverLocation('inline');
+    const strategy: FlexibleConnectedPositionStrategy | null = sheet
+      ? null
+      : createFlexibleConnectedPositionStrategy(this.injector, origin)
+          .withPositions(positions)
+          .withFlexibleDimensions(false)
+          .withPush(true)
+          .withViewportMargin(VIEWPORT_MARGIN)
+          .withPopoverLocation('inline');
+    const positionStrategy: PositionStrategy | null = sheet?.strategy ?? strategy;
+    if (!positionStrategy) return;
     const overlayRef: OverlayRef = createOverlayRef(this.injector, {
-      positionStrategy: strategy,
+      positionStrategy,
       scrollStrategy: createRepositionScrollStrategy(this.injector),
       hasBackdrop: this.modal(),
       backdropClass: 'cdk-overlay-transparent-backdrop',
       disposeOnNavigation: true,
+      ...(sheet ? { width: sheet.width, maxHeight: sheet.maxHeight } : {}),
     });
+    if (sheet) overlayRef.overlayElement.setAttribute('data-presentation', 'sheet');
 
     this.subscriptions = [
-      strategy.positionChanges.subscribe((change) => {
-        this.placement.set(ɵplacementOf(change.connectionPair));
-        this.menuFrom.set(ɵmenuFrom(change.connectionPair));
-      }),
       overlayRef.keydownEvents().subscribe((event) => {
         if (event.key !== 'Escape' || hasModifierKey(event) || this.state() === 'closed') return;
         event.preventDefault();
@@ -671,10 +681,19 @@ export class CwPopover {
         if (this.closeOnOutsideClick()) this.open.set(false);
       }),
     ];
+    if (strategy) {
+      this.subscriptions.push(
+        strategy.positionChanges.subscribe((change) => {
+          this.placement.set(ɵplacementOf(change.connectionPair));
+          this.menuFrom.set(ɵmenuFrom(change.connectionPair));
+        }),
+      );
+    }
 
-    // The first frame reveals from the preferred corner, before the strategy reports its choice.
-    this.placement.set({ side, align });
-    this.menuFrom.set(ɵmenuFrom(positions[0]));
+    // The first frame reveals from the preferred corner, before the strategy reports its choice;
+    // a phone sheet rises from its bottom left corner.
+    this.placement.set(sheet ? { side: 'top', align: 'start' } : { side, align });
+    this.menuFrom.set(sheet?.menuFrom ?? ɵmenuFrom(positions[0]));
     this.state.set('open');
     this.overlayRef = overlayRef;
     this.anchor = origin;

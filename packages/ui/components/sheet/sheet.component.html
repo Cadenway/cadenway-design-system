@@ -1,0 +1,26 @@
+<ng-template #panel>
+  <div
+    [class]="panelClasses()"
+    [attr.data-state]="state()"
+    [attr.data-side]="side()"
+    [attr.data-size]="size()"
+  >
+    @if (showClose()) {
+      <span class="absolute top-2.5 right-3 flex">
+        <button
+          cwButton
+          variant="ghost"
+          size="icon-sm"
+          class="text-muted-foreground"
+          [attr.aria-label]="closeLabel()"
+          (click)="requestClose('close')"
+        >
+          <ng-icon name="phosphorXBold" aria-hidden="true" />
+        </button>
+      </span>
+    }
+    <ng-content select="cw-sheet-header" />
+    <ng-content />
+    <ng-content select="cw-sheet-footer" />
+  </div>
+</ng-template>

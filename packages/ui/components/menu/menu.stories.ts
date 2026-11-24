@@ -1,5 +1,6 @@
 import { CwAvatar } from '@cadenway/ui/components/avatar';
 import { CwButton } from '@cadenway/ui/components/button';
+import { provideCwPhoneSheets } from '@cadenway/ui/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorArchiveBold,
@@ -367,6 +368,36 @@ export const Submenu: Story = {
     await userEvent.keyboard('{ArrowLeft}');
     await expect(move).toHaveFocus();
     await userEvent.keyboard('{Escape}');
+    await expect(trigger).toHaveFocus();
+  },
+};
+
+/**
+ * Phone sheet: with `provideCwPhoneSheets`, below 768 px the menu docks above the tab bar, full
+ * width between 8 px gutters (mockup `App.dc.html`, the rail's menus). Choose a phone viewport in the
+ * toolbar; on a large screen the menu stays next to its trigger.
+ */
+export const PhoneSheet: Story = {
+  decorators: [applicationConfig({ providers: [provideCwPhoneSheets()] })],
+  globals: { viewport: { value: 'mobile1', isRotated: false } },
+  render: () => ({
+    template: `
+      <button cwButton variant="outline" [cwMenuTriggerFor]="account">Compte</button>
+      <cw-menu #account>
+        <button cwMenuItem><ng-icon name="phosphorPencilSimpleBold" /> Renommer</button>
+        <button cwMenuItem><ng-icon name="phosphorCopyBold" /> Dupliquer</button>
+        <cw-menu-separator />
+        <button cwMenuItem variant="destructive"><ng-icon name="phosphorTrashBold" /> Supprimer</button>
+      </cw-menu>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const trigger: HTMLElement = within(light(canvasElement)).getByRole('button', {
+      name: 'Compte',
+    });
+    await userEvent.click(trigger);
+    const menu: HTMLElement = await within(document.body).findByRole('menu', { name: 'Compte' });
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(menu).not.toBeInTheDocument());
     await expect(trigger).toHaveFocus();
   },
 };
