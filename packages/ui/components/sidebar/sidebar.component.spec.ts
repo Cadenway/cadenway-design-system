@@ -533,6 +533,19 @@ describe('CwSidebar on a tablet', () => {
     expect(document.activeElement).toBe(button(host, 'Déplier la barre latérale'));
   });
 
+  it('gives the focus back when the bound state closes it', async () => {
+    await render('lg');
+    const toggle: HTMLButtonElement = button(host, 'Déplier la barre latérale');
+    toggle.focus();
+    toggle.click();
+    await fixture.whenStable();
+    link(host, 'Accueil').focus();
+    fixture.componentInstance.state.set('collapsed');
+    await fixture.whenStable();
+
+    expect(document.activeElement).toBe(toggle);
+  });
+
   it('closes on Escape but stays open when an item is followed', async () => {
     await render('lg');
     fixture.componentInstance.state.set('expanded');
@@ -548,6 +561,57 @@ describe('CwSidebar on a tablet', () => {
     press(document.body, 'Escape');
     await fixture.whenStable();
     expect(fixture.componentInstance.state()).toBe('collapsed');
+  });
+});
+
+/**
+ * Class ConditionalToggleHost
+ *
+ * @description
+ * A shell whose toggle exists only while the sidebar is collapsed, as in the stories' frame.
+ */
+@Component({
+  imports: [CwSidebar, CwSidebarGroup, CwSidebarItem, CwSidebarToggle],
+  template: `
+    <cw-sidebar #sidebar overlayBelow="lg">
+      <cw-sidebar-group>
+        <a cwSidebarItem href="/accueil">Accueil</a>
+      </cw-sidebar-group>
+    </cw-sidebar>
+    @if (sidebar.collapsed()) {
+      <button type="button" [cwSidebarToggle]="sidebar">Basculer</button>
+    }
+  `,
+})
+class ConditionalToggleHost {}
+
+describe('CwSidebar with a toggle shown only while collapsed', () => {
+  it('focuses the toggle recreated after the sidebar closes', async () => {
+    window.matchMedia = vi.fn((query: string) => ({
+      matches: query.includes('min-width: 768px'),
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    })) as unknown as typeof window.matchMedia;
+    const fixture: ComponentFixture<ConditionalToggleHost> =
+      TestBed.createComponent(ConditionalToggleHost);
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    document.body.appendChild(host);
+    try {
+      await fixture.whenStable();
+      const opener: HTMLButtonElement = button(host, 'Déplier la barre latérale');
+      opener.focus();
+      opener.click();
+      await fixture.whenStable();
+      link(host, 'Accueil').focus();
+      press(document.body, 'Escape');
+      await fixture.whenStable();
+
+      expect(document.activeElement).toBe(button(host, 'Déplier la barre latérale'));
+    } finally {
+      host.remove();
+      Reflect.deleteProperty(window, 'matchMedia');
+    }
   });
 });
 
