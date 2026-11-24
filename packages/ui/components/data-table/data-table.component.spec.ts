@@ -1127,6 +1127,20 @@ describe('CwDataTable', () => {
             .filter((element: Element) => element.tagName === 'TR')
             .every((element: Element) => element.hasAttribute('aria-selected')),
         ).toBe(true);
+        expect(total()).toBe(100 * 36 + 84);
+
+        // New data may change rows that are not rendered: their cached heights are dropped.
+        component.data.set(component.data().map((task: Task): Task => ({ ...task })));
+        await stable();
+        await new Promise<void>((resolve) => {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              resolve();
+            });
+          });
+        });
+        await stable();
+        expect(total()).toBe(100 * 36);
       } finally {
         heights.mockRestore();
         vi.unstubAllGlobals();

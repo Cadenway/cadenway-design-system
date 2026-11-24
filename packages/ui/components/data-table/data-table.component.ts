@@ -2729,6 +2729,8 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
             const scroller: HTMLElement = this.scroller().nativeElement;
             let frame: number = 0;
             let layout: string = '';
+            let lastData: readonly T[] | null = null;
+            let lastWidths: Readonly<Record<string, number>> | null = null;
             const observed: Set<HTMLElement> = new Set<HTMLElement>();
             const update: () => void = (): void => {
               frame = 0;
@@ -2748,8 +2750,15 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
               const banner: number =
                 scroller.querySelector<HTMLElement>('tr[data-cw-row="banner"]')?.offsetHeight ?? 0;
               const current: ReadonlyMap<string, number> = this.measuredHeights();
-              const reset: boolean = signature !== layout;
+              // New data or column widths can change the height of rows that are not rendered, which
+              // the row observer cannot see: drop every cached height and measure again.
+              const data: readonly T[] = this.data();
+              const widths: Readonly<Record<string, number>> = this.columnWidths();
+              const reset: boolean =
+                signature !== layout || data !== lastData || widths !== lastWidths;
               layout = signature;
+              lastData = data;
+              lastWidths = widths;
               let measured: Map<string, number> | null = reset ? new Map<string, number>() : null;
               const rows: HTMLElement[] = Array.from(
                 scroller.querySelectorAll<HTMLElement>(
@@ -2845,6 +2854,8 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
         this.density();
         this.virtualSegments();
         this.visibleColumns();
+        this.columnWidths();
+        this.data();
         this.bannerState();
         this.loading();
         this.error();
