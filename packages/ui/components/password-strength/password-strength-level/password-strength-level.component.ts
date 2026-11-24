@@ -1,7 +1,6 @@
 import { Component, computed, input, type InputSignal, type Signal } from '@angular/core';
 
 import { CwPasswordStrength } from '../password-strength.component';
-import { strengthTone } from '../password-strength.constants';
 import type { CwPasswordStrengthTone } from '../password-strength.types';
 
 /**
@@ -72,7 +71,7 @@ export class CwPasswordStrengthLevel {
    */
   protected readonly classes: Signal<string> = computed(() => {
     const strength: CwPasswordStrength = this.for();
-    const tone: string = TONES[strengthTone(strength.score(), strength.total())];
+    const tone: string = TONES[strength.tone()];
     const shown: string = strength.empty()
       ? 'translate-y-1 opacity-0'
       : 'translate-y-0 opacity-100';

@@ -68,8 +68,8 @@ const RULE_CLASSES: Readonly<
     item: 'flex items-center gap-1.5 text-xs whitespace-nowrap text-jade-text transition-colors duration-300 motion-reduce:transition-none',
     ring:
       'origin-center rotate-[120deg] opacity-0 [stroke-dasharray:3_0] [transform-box:fill-box] ' +
-      '[transition:stroke-dasharray_.4s_var(--ease-snap),transform_.6s_var(--ease-spring),opacity_.2s_var(--ease-snap)_.16s] motion-reduce:transition-none',
-    fill: 'origin-center scale-100 [transform-box:fill-box] [transition:transform_.35s_var(--ease-spring)_90ms] motion-reduce:transition-none',
+      '[transition:stroke-dasharray_.4s_var(--ease-snap),rotate_.6s_var(--ease-spring),opacity_.2s_var(--ease-snap)_.16s] motion-reduce:transition-none',
+    fill: 'origin-center scale-100 [transform-box:fill-box] [transition:scale_.35s_var(--ease-spring)_90ms] motion-reduce:transition-none',
     check:
       'stroke-background [stroke-dasharray:1] [stroke-dashoffset:0] [transition:stroke-dashoffset_.26s_var(--ease-snap)_.23s] motion-reduce:transition-none',
   },
@@ -77,8 +77,8 @@ const RULE_CLASSES: Readonly<
     item: 'flex items-center gap-1.5 text-xs whitespace-nowrap text-muted-foreground transition-colors duration-300 motion-reduce:transition-none',
     ring:
       'origin-center rotate-0 [stroke-dasharray:2_1] [transform-box:fill-box] ' +
-      '[transition:stroke-dasharray_.4s_var(--ease-snap),transform_.6s_var(--ease-spring),opacity_.2s_var(--ease-snap)] motion-reduce:transition-none',
-    fill: 'origin-center scale-0 [transform-box:fill-box] [transition:transform_.35s_var(--ease-spring)] motion-reduce:transition-none',
+      '[transition:stroke-dasharray_.4s_var(--ease-snap),rotate_.6s_var(--ease-spring),opacity_.2s_var(--ease-snap)] motion-reduce:transition-none',
+    fill: 'origin-center scale-0 [transform-box:fill-box] [transition:scale_.35s_var(--ease-spring)] motion-reduce:transition-none',
     check:
       'stroke-background [stroke-dasharray:1] [stroke-dashoffset:1px] [transition:stroke-dashoffset_.26s_var(--ease-snap)] motion-reduce:transition-none',
   },
@@ -111,7 +111,7 @@ const ZONES: Readonly<Record<CwPasswordStrengthTone, CwMeterZone>> = {
  * places next to the field label: `<cw-password-strength #strength … />` and
  * `<cw-password-strength-level [for]="strength" />`. Point the field to the rules with
  * `[attr.aria-describedby]="strength.rulesId"`. Exported as `cwPasswordStrength`; `score`, `total`,
- * `level` and `empty` are readable signals (for a submit guard, for example). The meter never
+ * `level`, `tone` and `empty` are readable signals (for a submit guard, for example). The meter never
  * validates: the form decides what score it requires.
  */
 @Component({
@@ -138,20 +138,22 @@ export class CwPasswordStrength {
    * Property minLength
    *
    * @description
-   * Minimum length of the default length rule; 12 in the mockup.
+   * Minimum length of the default length rule, in code points; 12 in the mockup and in the identity
+   * service's password policy. At least 1; an invalid value falls back to 12.
    *
    * @type {InputSignalWithTransform<number, unknown>}
    * @readonly
    */
   public readonly minLength: InputSignalWithTransform<number, unknown> = input(12, {
-    transform: (value: unknown) => numberAttribute(value, 12),
+    transform: (value: unknown) => Math.max(1, numberAttribute(value, 12)),
   });
 
   /**
    * Property rules
    *
    * @description
-   * Rules replacing the four default ones; the meter has one bar per rule.
+   * Rules replacing the four default ones; the meter has one notch per rule. An empty array means no
+   * rule (no meter, an empty list), not the defaults.
    *
    * @type {InputSignal<readonly CwPasswordRule[] | undefined>}
    * @readonly
@@ -186,7 +188,8 @@ export class CwPasswordStrength {
    * Property results
    *
    * @description
-   * Each rule with whether the current password meets it.
+   * Each rule with whether the current password meets it; an empty password meets none, even a rule
+   * whose test accepts an empty string.
    *
    * @type {Signal<readonly RuleResult[]>}
    * @readonly
@@ -195,7 +198,7 @@ export class CwPasswordStrength {
     const value: string = this.value();
     return (this.rules() ?? cwPasswordRules(this.labels, this.minLength())).map((rule) => ({
       rule,
-      met: rule.test(value),
+      met: value !== '' && rule.test(value),
     }));
   });
 
@@ -235,19 +238,53 @@ export class CwPasswordStrength {
   public readonly total: Signal<number> = computed(() => this.results().length);
 
   /**
+   * Property levelIndex
+   *
+   * @description
+   * Position of the level in `labels.levels`, by share of the rules met so that any number of rules
+   * reads alike: the first level for an empty password or no rule met, the last one only when every
+   * rule is met, the levels in between spread over the shares (with the four default rules and five
+   * levels, one level per rule met, as in the mockup).
+   *
+   * @type {Signal<number>}
+   * @readonly
+   */
+  private readonly levelIndex: Signal<number> = computed(() => {
+    const top: number = this.labels.levels.length - 1;
+    const score: number = this.score();
+    const total: number = this.total();
+    if (score === 0 || top <= 0) return 0;
+    if (score === total) return top;
+    return Math.min(top - 1, 1 + Math.floor((score / total) * (top - 1)));
+  });
+
+  /**
    * Property level
    *
    * @description
-   * Level of the score (« Trop court » for an empty password or no rule met).
+   * Level of the password, from « Trop court » to « Excellent » (`labels.levels`).
    *
    * @type {Signal<string>}
    * @readonly
    */
-  public readonly level: Signal<string> = computed(() => {
-    const levels: readonly string[] = this.labels.levels;
-    const index: number = this.empty() ? 0 : Math.min(this.score(), levels.length - 1);
-    return levels[index] ?? '';
-  });
+  public readonly level: Signal<string> = computed(
+    () => this.labels.levels[this.levelIndex()] ?? '',
+  );
+
+  /**
+   * Property tone
+   *
+   * @description
+   * Tone of the level, so the color always agrees with the text: the first quarter of the levels is
+   * weak (grenat), up to the middle is fair (balise), above is good (jade). With the default levels:
+   * « Trop court » and « Faible » weak, « Moyen » fair, « Bon » and « Excellent » good.
+   *
+   * @type {Signal<CwPasswordStrengthTone>}
+   * @readonly
+   */
+  public readonly tone: Signal<CwPasswordStrengthTone> = computed(() =>
+    strengthTone(this.levelIndex(), this.labels.levels.length - 1),
+  );
 
   /**
    * Property notches
@@ -273,9 +310,7 @@ export class CwPasswordStrength {
    * @type {Signal<CwMeterZone>}
    * @readonly
    */
-  protected readonly zone: Signal<CwMeterZone> = computed(
-    () => ZONES[strengthTone(this.score(), this.total())],
-  );
+  protected readonly zone: Signal<CwMeterZone> = computed(() => ZONES[this.tone()]);
 
   /**
    * Property format

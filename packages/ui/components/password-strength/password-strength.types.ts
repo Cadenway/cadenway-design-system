@@ -11,7 +11,7 @@ export interface CwPasswordRule {
    * Property id
    *
    * @description
-   * Stable identifier of the rule, used to track its line.
+   * Stable identifier of the rule, used to track its line; unique among the meter's rules.
    *
    * @type {string}
    * @readonly
@@ -67,8 +67,9 @@ export interface CwPasswordStrengthLabels {
    * Property levels
    *
    * @description
-   * Level shown for each score, from 0 (no rule met) to the number of rules; the last entry serves
-   * any higher score.
+   * Levels from the weakest to the strongest. The first one reads for an empty password or no rule
+   * met, the last one only when every rule is met, the others by share of the rules met; their tone
+   * follows their position (first quarter weak, up to the middle fair, above good).
    *
    * @type {readonly string[]}
    * @readonly
@@ -79,7 +80,8 @@ export interface CwPasswordStrengthLabels {
    * Property met
    *
    * @description
-   * Hidden text read after a rule that the password meets.
+   * Hidden text read right after a rule that the password meets; it carries its own separator
+   * (« : respecté »), since nothing is inserted between the rule and this text.
    *
    * @type {string}
    * @readonly
@@ -90,7 +92,8 @@ export interface CwPasswordStrengthLabels {
    * Property unmet
    *
    * @description
-   * Hidden text read after a rule that the password does not meet yet.
+   * Hidden text read right after a rule that the password does not meet yet; it carries its own
+   * separator (« : non respecté »).
    *
    * @type {string}
    * @readonly

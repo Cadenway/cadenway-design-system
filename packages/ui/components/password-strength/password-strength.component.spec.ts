@@ -1,5 +1,6 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 
 import { CwPasswordStrength } from './password-strength.component';
 import { CwPasswordStrengthLevel } from './password-strength-level/password-strength-level.component';
@@ -189,6 +190,42 @@ describe('CwPasswordStrength', () => {
     expect(query(fixture, 'cw-password-strength-level').textContent.trim()).toBe('Bon');
   });
 
+  it('keeps at least one character for minLength and meets nothing on an empty field', async () => {
+    const fixture: ComponentFixture<Host> = await setup();
+    fixture.componentInstance.minLength.set(0);
+    fixture.componentInstance.rules.set(undefined);
+    await type(fixture, '');
+
+    expect(rules(fixture)[0]).toBe('1 caractères minimum : non respecté');
+    fixture.componentInstance.rules.set([
+      { id: 'no-space', label: 'Sans espace', test: (value) => !value.includes(' ') },
+    ]);
+    await fixture.whenStable();
+    expect(rules(fixture)).toEqual(['Sans espace : non respecté']);
+  });
+
+  it('exposes its state through exportAs and hides the level again once cleared', async () => {
+    const fixture: ComponentFixture<Host> = await setup();
+    const strength: CwPasswordStrength = fixture.debugElement.query(
+      By.directive(CwPasswordStrength),
+    ).componentInstance as CwPasswordStrength;
+    const level: HTMLElement = query(fixture, 'cw-password-strength-level');
+
+    expect([strength.empty(), strength.score(), strength.total()]).toEqual([true, 0, 4]);
+    await type(fixture, 'Durable2');
+    expect([strength.empty(), strength.score(), strength.level(), strength.tone()]).toEqual([
+      false,
+      2,
+      'Moyen',
+      'fair',
+    ]);
+    expect(level.getAttribute('aria-hidden')).toBeNull();
+
+    await type(fixture, '');
+    expect(level.getAttribute('aria-hidden')).toBe('true');
+    expect(strength.score()).toBe(0);
+  });
+
   it('replaces the default rules with one notch per rule', async () => {
     const fixture: ComponentFixture<Host> = await setup();
     fixture.componentInstance.rules.set([
@@ -205,6 +242,59 @@ describe('CwPasswordStrength', () => {
       '16 caractères minimum : non respecté',
       'Au moins une espace : respecté',
     ]);
+    expect(meter.getAttribute('aria-valuetext')).toBe('Moyen');
+
+    await type(fixture, 'cheval correct agrafe');
+    expect(meter.getAttribute('aria-valuetext')).toBe('Excellent');
+  });
+
+  it('keeps the last level for every rule met, whatever the number of rules', async () => {
+    const fixture: ComponentFixture<Host> = await setup();
+    fixture.componentInstance.rules.set(
+      ['a', 'b', 'c', 'd', 'e'].map((letter: string) => ({
+        id: letter,
+        label: `Contient ${letter}`,
+        test: (value: string): boolean => value.includes(letter),
+      })),
+    );
+    const meter: () => HTMLElement = (): HTMLElement =>
+      query(fixture, 'cw-password-strength [role="meter"]');
+    const levels: string[] = [];
+    for (const password of ['a', 'ab', 'abc', 'abcd', 'abcde']) {
+      await type(fixture, password);
+      levels.push(meter().getAttribute('aria-valuetext') ?? '');
+    }
+
+    expect(levels).toEqual(['Faible', 'Moyen', 'Moyen', 'Bon', 'Excellent']);
+    await type(fixture, 'abc');
+    expect(query(fixture, 'cw-password-strength cw-meter').getAttribute('data-zone')).toBe('high');
+  });
+
+  it('reads letters, digits and symbols in Unicode and counts code points', async () => {
+    const fixture: ComponentFixture<Host> = await setup();
+    await type(fixture, 'Aa123456789é');
+    expect(rules(fixture)[3]).toBe('Au moins un symbole : non respecté');
+
+    await type(fixture, 'Éé1 ');
+    expect(rules(fixture).slice(1)).toEqual([
+      'Majuscules et minuscules : respecté',
+      'Au moins un chiffre : respecté',
+      'Au moins un symbole : respecté',
+    ]);
+
+    await type(fixture, 'Durable2026😀');
+    expect(rules(fixture)[0]).toBe('12 caractères minimum : respecté');
+    await type(fixture, 'Durable202😀');
+    expect(rules(fixture)[0]).toBe('12 caractères minimum : non respecté');
+  });
+
+  it('draws no meter without rules', async () => {
+    const fixture: ComponentFixture<Host> = await setup();
+    fixture.componentInstance.rules.set([]);
+    await type(fixture, 'Durable2026!');
+
+    expect(query(fixture, 'cw-password-strength').querySelector('[role="meter"]')).toBeNull();
+    expect(rules(fixture)).toEqual([]);
   });
 
   it('gives each rule list its own id for the field description', async () => {
