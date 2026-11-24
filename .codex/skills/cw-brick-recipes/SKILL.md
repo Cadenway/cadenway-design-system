@@ -62,7 +62,7 @@ tasks beyond the display contracts of `cw-status-icon` and `cw-priority-icon`"):
 | Skeleton | `skeleton` | `div[cwSkeleton]` | `animation`: pulse, shimmer, none | — |
 | Card | `card` | `cw-card`, `-header`, `-title`, `-description`, `-action`, `-content`, `-footer` | `size`: default, sm; `interactive`; `selected` | — |
 | Item | `item` | `cw-item`, `a` or `button[cwItem]`, `cw-item-media`, `-content`, `-title`, `-description`, `-actions`, `-group`, `-separator` | `variant`: default, outline, muted; `size`: default, sm, xs; `selected` (model); `disabled`; `unread`; media `variant`: default, icon, image | roving focus in a group |
-| Logo | `logo` | `cw-logo` | `variant`: lockup, stacked, mark; `tone`: auto, mono; `size` = 28; `decorative`. Mark only until the lockups are redrawn | — |
+| Logo | `logo` | `cw-logo` | `variant`: lockup, stacked, mark; `tone`: auto, mono; `size` = 28; `decorative`. Mark and lockup (mark plus the « Cadenway » wordmark); stacked once its logotype is redrawn | — |
 | Field | `field` | `fieldset[cwFieldSet]`, `legend[cwFieldLegend]`, `cw-field-group`, `cw-field`, `label[cwFieldLabel]`, `cw-field-content`, `-title`, `-description`, `-error`, `-separator` | `orientation`: vertical, horizontal; `invalid`, `disabled` deduced from the control; `errors` | wires `id`, `for`, `aria-describedby` |
 | Input | `input` | `input[cwInput]` | `size`: sm, default, lg | native accessor |
 | Textarea | `textarea` | `textarea[cwTextarea]` | `autoResize` = true | `field-sizing: content` |

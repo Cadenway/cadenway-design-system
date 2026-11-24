@@ -1,10 +1,11 @@
 <svg
   viewBox="0 0 24 24"
+  class="shrink-0"
   [attr.width]="size()"
   [attr.height]="size()"
-  [attr.role]="decorative() ? null : 'img'"
-  [attr.aria-label]="decorative() ? null : 'Cadenway'"
-  [attr.aria-hidden]="decorative() ? 'true' : null"
+  [attr.role]="decorative() || lockup() ? null : 'img'"
+  [attr.aria-label]="decorative() || lockup() ? null : 'Cadenway'"
+  [attr.aria-hidden]="decorative() || lockup() ? 'true' : null"
   focusable="false"
 >
   <svg:path
@@ -22,3 +23,11 @@
     fill="currentColor"
   />
 </svg>
+@if (lockup()) {
+  <span
+    class="font-bold leading-none tracking-[-0.035em] whitespace-nowrap text-foreground"
+    [style.font-size.px]="wordmarkSize()"
+    aria-hidden="true"
+    >Cadenway</span
+  >
+}
