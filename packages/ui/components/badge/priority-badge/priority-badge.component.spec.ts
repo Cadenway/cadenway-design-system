@@ -1,6 +1,8 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
-import type { CwPriorityKey } from '@cadenway/ui/components/priority-icon';
+import { provideCwPriorityLabels, type CwPriorityKey } from '@cadenway/ui/components/priority-icon';
+
+import { provideCwBadgeLabels } from '../badge.providers';
 
 import { CwPriorityBadge } from './priority-badge.component';
 
@@ -87,5 +89,22 @@ describe('CwPriorityBadge', () => {
 
     expect(badge.textContent.trim()).toBe('Moyenne');
     expect(badge.dataset['priority']).toBe('moyenne');
+  });
+});
+
+describe('provideCwBadgeLabels and provideCwPriorityLabels', () => {
+  it('replaces visible priority words and icon-only accessible names', async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideCwPriorityLabels({ urgente: 'Urgent' }),
+        provideCwBadgeLabels({ haute: 'High priority' }),
+      ],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.textContent).toContain('Urgent');
+    expect(host.querySelector('[role="img"]')?.getAttribute('aria-label')).toBe('High priority');
   });
 });

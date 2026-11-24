@@ -2,6 +2,7 @@ import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { provideCwFilterBarLabels } from './filter-bar.providers';
 import { CwFilterBar } from './filter-bar.component';
 import type { CwFilter, CwFilterField, CwSavedFilter } from './filter-bar.types';
 import { CwFilterValueDef } from './filter-value/filter-value.directive';
@@ -486,5 +487,19 @@ describe('CwFilterBar', () => {
     await fixture.whenStable();
     named(menuNamed('Filtres enregistrés'), '[role="menuitem"]', 'Gérer les filtres').click();
     expect(component.events).toEqual(['applySaved:review', 'manageSaved']);
+  });
+});
+
+describe('provideCwFilterBarLabels', () => {
+  it('renders the provided text', async () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwFilterBarLabels({ region: 'Active filters' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    await fixture.whenStable();
+    const element: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(element.querySelector('[role="region"]')?.getAttribute('aria-label')).toBe(
+      'Active filters',
+    );
   });
 });

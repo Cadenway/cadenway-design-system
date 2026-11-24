@@ -281,7 +281,7 @@ export interface CwSavedFilter {
  * Interface CwFilterBarLabels
  *
  * @description
- * The French texts of the filter bar and its chips (Filter Bar sheet of the Design System artifact and mockup `App.dc.html`); give some of them through `labels` to override them.
+ * The texts of the filter bar and its chips (Filter Bar sheet of the Design System artifact and mockup `App.dc.html`); give some of them through `labels` to override them.
  */
 export interface CwFilterBarLabels {
   // #region Properties

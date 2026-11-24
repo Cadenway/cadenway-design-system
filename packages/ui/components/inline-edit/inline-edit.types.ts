@@ -12,7 +12,7 @@ export type CwInlineEditState = 'reading' | 'editing' | 'saving';
  * Interface CwInlineEditLabels
  *
  * @description
- * French labels used by an inline edit.
+ * Labels used by an inline edit.
  */
 export interface CwInlineEditLabels {
   // #region Properties

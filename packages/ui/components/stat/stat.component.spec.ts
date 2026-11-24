@@ -4,6 +4,7 @@ import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { CwStatGroup } from './stat-group/stat-group.component';
 import { CwStatSparkline } from './stat-sparkline/stat-sparkline.component';
 import { CwStat } from './stat.component';
+import { provideCwStatLabels } from './stat.providers';
 import type { CwStatGoal } from './stat.types';
 
 /**
@@ -161,5 +162,23 @@ describe('CwStat', () => {
     expect(open.querySelector('[role="status"]')?.getAttribute('aria-label')).toBe('Actualisation');
     expect(open.textContent).toContain('18');
     expect(open.getAttribute('aria-busy')).toBeNull();
+  });
+});
+
+describe('provideCwStatLabels', () => {
+  it('replaces trend, goal and refresh texts', async () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwStatLabels({ up: 'rising', goalOf: 'of', refreshing: 'Refreshing' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.componentInstance.refreshing.set(true);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.textContent).toContain('rising');
+    expect(host.querySelector('[role="progressbar"]')?.getAttribute('aria-valuetext')).toContain(
+      '34 of 50',
+    );
+    expect(host.querySelector('[aria-label="Refreshing"]')).not.toBeNull();
   });
 });

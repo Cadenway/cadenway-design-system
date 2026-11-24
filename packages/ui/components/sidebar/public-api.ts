@@ -12,3 +12,7 @@ export { CwSidebarItem } from './sidebar-item/sidebar-item.component';
 export { CwSidebarSpace } from './sidebar-space/sidebar-space.component';
 export { CwSidebarToggle } from './sidebar-toggle/sidebar-toggle.directive';
 export type { CwSidebarCollapsible, CwSidebarSpaceColor, CwSidebarState } from './sidebar.types';
+
+export { CW_SIDEBAR_LABELS } from './sidebar.constants';
+export { provideCwSidebarLabels } from './sidebar.providers';
+export type { CwSidebarLabels } from './sidebar.types';

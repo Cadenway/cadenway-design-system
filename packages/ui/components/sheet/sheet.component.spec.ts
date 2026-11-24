@@ -10,6 +10,7 @@ import { CwSheetHeader } from './sheet-header/sheet-header.component';
 import { CwSheetTitle } from './sheet-title/sheet-title.directive';
 import { CwSheetTrigger } from './sheet-trigger/sheet-trigger.directive';
 import { CwSheet } from './sheet.component';
+import { provideCwSheetLabels } from './sheet.providers';
 import type { CwSheetCloseReason, CwSheetSide } from './sheet.types';
 
 /**
@@ -276,5 +277,20 @@ describe('CwSheet', () => {
     expect(host.open()).toBe(true);
     expect(sheet()).not.toBeNull();
     expect(trigger.getAttribute('aria-expanded')).toBe('true');
+  });
+});
+
+describe('provideCwSheetLabels', () => {
+  it('names the close button of the sheets below it', async () => {
+    TestBed.configureTestingModule({ providers: [provideCwSheetLabels({ close: 'Close' })] });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    button(fixture.nativeElement as HTMLElement, 'Ouvrir CAD-482').click();
+    await fixture.whenStable();
+    const window: HTMLElement | null = sheet();
+    if (!window) throw new Error('Sheet not open');
+
+    expect(button(window, 'Close')).toBeTruthy();
+    fixture.destroy();
   });
 });

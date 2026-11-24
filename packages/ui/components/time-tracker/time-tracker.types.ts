@@ -269,7 +269,7 @@ export interface CwTimeEntryDraft {
  * Interface CwTimeTrackerLabels
  *
  * @description
- * The French texts of `cw-time-tracker` (Time Tracker sheet of the Design System artifact).
+ * The texts of `cw-time-tracker` (Time Tracker sheet of the Design System artifact).
  */
 export interface CwTimeTrackerLabels {
   // #region Properties
@@ -521,7 +521,7 @@ export interface CwTimeTrackerLabels {
  * Interface CwTimeEntryFormLabels
  *
  * @description
- * The French texts of `cw-time-entry-form`.
+ * The texts of `cw-time-entry-form`.
  */
 export interface CwTimeEntryFormLabels {
   // #region Properties
@@ -674,7 +674,7 @@ export interface CwTimeEntryFormLabels {
  * Interface CwTimeEntryListLabels
  *
  * @description
- * The French texts of `cw-time-entry-list`.
+ * The texts of `cw-time-entry-list`.
  */
 export interface CwTimeEntryListLabels {
   // #region Properties

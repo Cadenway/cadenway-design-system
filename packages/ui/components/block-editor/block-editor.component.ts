@@ -65,12 +65,9 @@ import { Editor } from '@tiptap/core';
 import type { ResolvedPos } from '@tiptap/pm/model';
 import type { SuggestionKeyDownProps, SuggestionProps } from '@tiptap/suggestion';
 
-import {
-  CW_BLOCK_EDITOR_LABELS,
-  CW_BLOCK_TYPES,
-  CW_INLINE_MARKS,
-  CW_TOOLBAR_BLOCKS,
-} from './block-editor.constants';
+import type { CwBlockEditorProvidedLabels } from './block-editor.types';
+import { BLOCK_EDITOR_LABELS } from './block-editor-labels.token';
+import { CW_TOOLBAR_BLOCKS } from './block-editor.constants';
 import {
   type SuggestionRenderer,
   activeBlock,
@@ -387,6 +384,17 @@ function connected(above: boolean): ConnectedPosition {
 export class CwBlockEditor implements FormValueControl<string>, ControlValueAccessor {
   // #region Properties
   /**
+   * Property providedLabels
+   *
+   * @description
+   * Texts inherited from the nearest labels provider.
+   *
+   * @type {CwBlockEditorProvidedLabels}
+   * @readonly
+   */
+  private readonly providedLabels: CwBlockEditorProvidedLabels = inject(BLOCK_EDITOR_LABELS);
+
+  /**
    * Property value
    *
    * @description
@@ -418,9 +426,7 @@ export class CwBlockEditor implements FormValueControl<string>, ControlValueAcce
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly placeholder: InputSignal<string> = input(
-    'Écrivez, ou tapez « / » pour insérer un bloc',
-  );
+  public readonly placeholder: InputSignal<string> = input<string>(this.providedLabels.placeholder);
 
   /**
    * Property ariaLabel
@@ -431,7 +437,7 @@ export class CwBlockEditor implements FormValueControl<string>, ControlValueAcce
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly ariaLabel: InputSignal<string> = input('Contenu du document');
+  public readonly ariaLabel: InputSignal<string> = input<string>(this.providedLabels.ariaLabel);
 
   /**
    * Property describedBy
@@ -466,8 +472,9 @@ export class CwBlockEditor implements FormValueControl<string>, ControlValueAcce
    * @type {InputSignal<readonly CwBlockType[]>}
    * @readonly
    */
-  public readonly blockTypes: InputSignal<readonly CwBlockType[]> =
-    input<readonly CwBlockType[]>(CW_BLOCK_TYPES);
+  public readonly blockTypes: InputSignal<readonly CwBlockType[]> = input<readonly CwBlockType[]>(
+    this.providedLabels.blockTypes,
+  );
 
   /**
    * Property mentionSearch
@@ -496,7 +503,7 @@ export class CwBlockEditor implements FormValueControl<string>, ControlValueAcce
    * Property labels
    *
    * @description
-   * French texts, overridable one by one.
+   * Texts, overridable one by one.
    *
    * @type {InputSignal<Partial<CwBlockEditorLabels>>}
    * @readonly
@@ -817,32 +824,13 @@ export class CwBlockEditor implements FormValueControl<string>, ControlValueAcce
    * @description
    * Default labels merged with consumer overrides.
    *
-   * @type {Signal<{ toolbar: string; blockType: string; blockMenu: string; mentionMenu: string; noResults: string; oneResult: string; manyResults: string; choose: string; insert: string; up: string; down: string; enter: string; link: string; linkPanel: string; linkUrl: string; linkPlaceholder: string; linkApply: string; emptyBlock: string; check: string; uncheck: string; task: string; }>}
+   * @type {Signal<CwBlockEditorProvidedLabels>}
    * @readonly
    */
-  protected readonly text: Signal<{
-    toolbar: string;
-    blockType: string;
-    blockMenu: string;
-    mentionMenu: string;
-    noResults: string;
-    oneResult: string;
-    manyResults: string;
-    choose: string;
-    insert: string;
-    up: string;
-    down: string;
-    enter: string;
-    link: string;
-    linkPanel: string;
-    linkUrl: string;
-    linkPlaceholder: string;
-    linkApply: string;
-    emptyBlock: string;
-    check: string;
-    uncheck: string;
-    task: string;
-  }> = computed(() => ({ ...CW_BLOCK_EDITOR_LABELS, ...this.labels() }));
+  protected readonly text: Signal<CwBlockEditorProvidedLabels> = computed(() => ({
+    ...this.providedLabels,
+    ...this.labels(),
+  }));
 
   /**
    * Property marks
@@ -850,37 +838,41 @@ export class CwBlockEditor implements FormValueControl<string>, ControlValueAcce
    * @description
    * Inline formatting buttons.
    *
-   * @type {readonly CwInlineMarkButton[]}
+   * @type {Signal<readonly CwInlineMarkButton[]>}
    * @readonly
    */
-  protected readonly marks: readonly CwInlineMarkButton[] = CW_INLINE_MARKS;
+  protected readonly marks: Signal<readonly CwInlineMarkButton[]> = computed(
+    () => this.providedLabels.inlineMarks,
+  );
 
   /**
    * Property toolbarBlocks
    *
    * @description
-   * Block types displayed in the toolbar.
+   * Block types displayed in the toolbar, from the provided block types (as before, the
+   * `blockTypes` input only shapes the slash menu, so an empty input disables that menu alone).
    *
    * @type {Signal<CwBlockType[]>}
    * @readonly
    */
   protected readonly toolbarBlocks: Signal<CwBlockType[]> = computed(() =>
-    CW_TOOLBAR_BLOCKS.map((kind) => CW_BLOCK_TYPES.find((type) => type.kind === kind)).filter(
-      (type): type is CwBlockType => type !== undefined,
-    ),
+    CW_TOOLBAR_BLOCKS.map((kind) =>
+      this.providedLabels.blockTypes.find((type) => type.kind === kind),
+    ).filter((type): type is CwBlockType => type !== undefined),
   );
 
   /**
    * Property typeEntries
    *
    * @description
-   * Block type choices excluding the separator.
+   * Block type choices of the toolbar's type menu, excluding the separator, from the provided
+   * block types.
    *
-   * @type {CwBlockType[]}
+   * @type {Signal<CwBlockType[]>}
    * @readonly
    */
-  protected readonly typeEntries: CwBlockType[] = CW_BLOCK_TYPES.filter(
-    (type) => type.kind !== 'hr',
+  protected readonly typeEntries: Signal<CwBlockType[]> = computed(() =>
+    this.providedLabels.blockTypes.filter((type) => type.kind !== 'hr'),
   );
 
   /**
@@ -1030,7 +1022,11 @@ export class CwBlockEditor implements FormValueControl<string>, ControlValueAcce
     this.revision();
     const editor: Editor | null = this.ready() ? this.editor : null;
     if (!editor) return new Set();
-    return new Set(this.marks.map((button) => button.mark).filter((mark) => editor.isActive(mark)));
+    return new Set(
+      this.marks()
+        .map((button) => button.mark)
+        .filter((mark) => editor.isActive(mark)),
+    );
   });
 
   /**
@@ -1095,8 +1091,8 @@ export class CwBlockEditor implements FormValueControl<string>, ControlValueAcce
    */
   protected readonly typeLabel: Signal<string> = computed(
     () =>
-      this.typeEntries.find((type) => type.kind === this.activeBlock())?.label ??
-      this.typeEntries[0].label,
+      this.typeEntries().find((type) => type.kind === this.activeBlock())?.label ??
+      this.typeEntries()[0].label,
   );
   // #endregion
 
@@ -1341,7 +1337,7 @@ export class CwBlockEditor implements FormValueControl<string>, ControlValueAcce
    * @param {string | undefined} kind - Block or suggestion menu kind.
    */
   protected onTypeChosen(kind: string | undefined): void {
-    const type: CwBlockType | undefined = this.typeEntries.find((entry) => entry.kind === kind);
+    const type: CwBlockType | undefined = this.typeEntries().find((entry) => entry.kind === kind);
     if (type) this.setBlock(type.kind);
   }
 
@@ -1562,7 +1558,9 @@ export class CwBlockEditor implements FormValueControl<string>, ControlValueAcce
           if (alone) return this.placeholder();
           if (node.type.name === 'heading') {
             const level: unknown = node.attrs['level'];
-            return this.typeEntries.find((type) => type.kind === `h${String(level)}`)?.label ?? '';
+            return (
+              this.typeEntries().find((type) => type.kind === `h${String(level)}`)?.label ?? ''
+            );
           }
           if (
             node.type.name === 'paragraph' &&

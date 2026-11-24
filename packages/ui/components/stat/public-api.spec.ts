@@ -5,10 +5,12 @@ describe('@cadenway/ui/stat public API', () => {
   // (.claude/rules/public-api.md): the runtime names are pinned here.
   it('exports exactly the pinned names', () => {
     expect(Object.keys(publicApi).sort()).toEqual([
+      'CW_STAT_LABELS',
       'CW_STAT_TREND_LABELS',
       'CwStat',
       'CwStatGroup',
       'CwStatSparkline',
+      'provideCwStatLabels',
     ]);
   });
 });

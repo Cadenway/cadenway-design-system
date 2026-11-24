@@ -79,3 +79,73 @@ export type CwWeekStart = 0 | 1;
  * @type {(date: Date) => boolean}
  */
 export type CwDateDisabledFn = (date: Date) => boolean;
+
+/**
+ * Interface CwCalendarLabels
+ *
+ * @description
+ * Texts used by Calendar instances.
+ */
+export interface CwCalendarLabels {
+  // #region Properties
+  /**
+   * Property previousMonth
+   *
+   * @description
+   * Previous month button accessible name.
+   *
+   * @type {string}
+   */
+  previousMonth: string;
+
+  /**
+   * Property nextMonth
+   *
+   * @description
+   * Next month button accessible name.
+   *
+   * @type {string}
+   */
+  nextMonth: string;
+
+  /**
+   * Property monthList
+   *
+   * @description
+   * Month selector accessible name.
+   *
+   * @type {string}
+   */
+  monthList: string;
+
+  /**
+   * Property yearList
+   *
+   * @description
+   * Year selector accessible name.
+   *
+   * @type {string}
+   */
+  yearList: string;
+
+  /**
+   * Property week
+   *
+   * @description
+   * Week number accessible name.
+   *
+   * @type {string}
+   */
+  week: string;
+
+  /**
+   * Property weekShort
+   *
+   * @description
+   * Abbreviated week heading.
+   *
+   * @type {string}
+   */
+  weekShort: string;
+  // #endregion
+}

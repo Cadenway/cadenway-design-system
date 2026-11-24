@@ -42,6 +42,7 @@ import {
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorCaretDownBold } from '@ng-icons/phosphor-icons/bold';
 
+import { SELECT_LABELS } from './select-labels.token';
 import { CwSelectEmpty } from './select-empty/select-empty.component';
 import { CwSelectOption } from './select-option/select-option.component';
 import { EMPTY } from './select.styles';
@@ -235,7 +236,9 @@ export class CwSelect<T = unknown>
    *
    * @type {InputSignal<string>}
    */
-  public readonly placeholder: InputSignal<string> = input('Choisir…');
+  public readonly placeholder: InputSignal<string> = input<string>(
+    inject(SELECT_LABELS).placeholder,
+  );
 
   /**
    * Property size
@@ -283,7 +286,7 @@ export class CwSelect<T = unknown>
    *
    * @type {InputSignal<string>}
    */
-  public readonly emptyText: InputSignal<string> = input('Aucune option');
+  public readonly emptyText: InputSignal<string> = input<string>(inject(SELECT_LABELS).emptyText);
 
   /**
    * Property ariaLabel

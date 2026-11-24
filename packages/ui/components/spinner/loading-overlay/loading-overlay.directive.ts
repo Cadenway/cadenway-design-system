@@ -12,6 +12,7 @@ import {
   type InputSignalWithTransform,
 } from '@angular/core';
 
+import { SPINNER_LABELS } from '../spinner-labels.token';
 import { CwLoadingVeil } from '../loading-veil/loading-veil.component';
 
 /**
@@ -58,7 +59,7 @@ export class CwLoadingOverlay {
    * @type {InputSignal<string>}
    * @default 'Chargement'
    */
-  public readonly loadingLabel: InputSignal<string> = input('Chargement');
+  public readonly loadingLabel: InputSignal<string> = input<string>(inject(SPINNER_LABELS).loading);
 
   /**
    * Property container

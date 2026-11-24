@@ -5,6 +5,7 @@ describe('@cadenway/ui/questionnaire public API', () => {
   // (.claude/rules/public-api.md): the runtime names are pinned here.
   it('exports exactly the pinned names', () => {
     expect(Object.keys(publicApi).sort()).toEqual([
+      'CW_QUESTIONNAIRE_LABELS',
       'CwQuestionnaire',
       'CwQuestionnaireActions',
       'CwQuestionnaireChoice',
@@ -13,6 +14,7 @@ describe('@cadenway/ui/questionnaire public API', () => {
       'CwQuestionnaireProgress',
       'CwQuestionnaireQuestion',
       'CwQuestionnaireTitle',
+      'provideCwQuestionnaireLabels',
     ]);
   });
 });

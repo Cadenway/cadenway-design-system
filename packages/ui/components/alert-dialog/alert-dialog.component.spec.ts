@@ -2,6 +2,7 @@ import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { CwButton } from '@cadenway/ui/components/button';
 
+import { provideCwAlertDialogLabels } from './alert-dialog.providers';
 import { CwAlertDialogAction } from './alert-dialog-action/alert-dialog-action.directive';
 import { CwAlertDialogCancel } from './alert-dialog-cancel/alert-dialog-cancel.directive';
 import { CwAlertDialogDescription } from './alert-dialog-description/alert-dialog-description.directive';
@@ -383,5 +384,29 @@ describe('CwAlertDialog', () => {
     const dialog: HTMLElement = await openFromTrigger();
 
     expect(dialog.querySelector('li')).toBeNull();
+  });
+});
+
+describe('provideCwAlertDialogLabels', () => {
+  it('replaces the default texts below its injector', async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideCwAlertDialogLabels({
+          confirm: 'Type to confirm',
+          more: (count) => `+ ${String(count)} more`,
+        }),
+      ],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    fixture.componentInstance.confirmText.set('Example');
+    fixture.componentInstance.items.set(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']);
+    button(fixture.nativeElement as HTMLElement, "Supprimer l'espace").click();
+    await fixture.whenStable();
+    expect(alertDialog()?.textContent).toContain('Type to confirm');
+    expect(alertDialog()?.textContent).toContain('more');
+    expect(alertDialog()?.textContent).not.toContain('Pour confirmer, saisissez');
+    fixture.destroy();
   });
 });

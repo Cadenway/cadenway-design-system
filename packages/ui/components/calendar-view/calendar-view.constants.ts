@@ -1,4 +1,4 @@
-import type { CwCalendarViewLabels } from './calendar-view.types';
+import type { CwCalendarViewLabels, CwCalendarViewProvidedLabels } from './calendar-view.types';
 
 /**
  * Constant CW_CALENDAR_VIEW_LABELS
@@ -33,3 +33,28 @@ export const CW_CALENDAR_VIEW_LABELS: CwCalendarViewLabels = {
   moved: '{item} déplacée au {date}',
   cancelled: 'Déplacement annulé.',
 };
+
+/**
+ * Constant PROVIDED_LABELS
+ *
+ * @description
+ * Complete French defaults used by the labels provider and token.
+ *
+ * @type {CwCalendarViewProvidedLabels}
+ */
+const PROVIDED_LABELS: CwCalendarViewProvidedLabels = {
+  ...CW_CALENDAR_VIEW_LABELS,
+  ariaLabel: 'Calendrier',
+};
+
+/**
+ * Function getProvidedLabels
+ *
+ * @description
+ * Returns the complete French defaults for the provider and token.
+ *
+ * @returns {CwCalendarViewProvidedLabels} Complete default texts.
+ */
+export function getProvidedLabels(): CwCalendarViewProvidedLabels {
+  return PROVIDED_LABELS;
+}

@@ -2,6 +2,7 @@ import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { provideCwPaginationLabels } from './pagination.providers';
 import { CwPaginationLink } from './pagination-link/pagination-link.component';
 import { CwPagination } from './pagination.component';
 
@@ -328,5 +329,18 @@ describe('CwPagination', () => {
     expect(link?.getAttribute('aria-disabled')).toBe('true');
     expect(link?.getAttribute('tabindex')).toBe('-1');
     expect(component.routed()).toBe(0);
+  });
+});
+
+describe('provideCwPaginationLabels', () => {
+  it('uses supplied text in the hosted declarations', () => {
+    TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [provideCwPaginationLabels({ previousText: 'Previous' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.textContent).toContain('Previous');
   });
 });

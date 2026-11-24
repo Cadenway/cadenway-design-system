@@ -11,3 +11,7 @@ export { CwPageHeaderFavorite } from './page-header-favorite/page-header-favorit
 export { CwPageHeaderTabs } from './page-header-tabs/page-header-tabs.component';
 export { CwPageHeaderTitle } from './page-header-title/page-header-title.component';
 export type { CwPageHeaderSize } from './page-header.types';
+
+export { CW_PAGE_HEADER_LABELS } from './page-header.constants';
+export { provideCwPageHeaderLabels } from './page-header.providers';
+export type { CwPageHeaderLabels } from './page-header.types';

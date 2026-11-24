@@ -15,6 +15,7 @@ import { CwRipple } from '@cadenway/ui/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorPlusBold } from '@ng-icons/phosphor-icons/bold';
 
+import { CHECKLIST_LABELS } from '../checklist-labels.token';
 import { CHECKLIST, type ChecklistHost } from '../checklist.token';
 
 /* Literal class strings (Checklist sheet and preview of the Design System artifact): the `plus`
@@ -75,8 +76,8 @@ export class CwChecklistAdd {
    *
    * @type {InputSignal<string>}
    */
-  public readonly placeholder: InputSignal<string> = input(
-    'Élément de checklist (Entrée pour ajouter, Échap pour terminer)',
+  public readonly placeholder: InputSignal<string> = input<string>(
+    inject(CHECKLIST_LABELS).addPlaceholder,
   );
 
   /**

@@ -29,3 +29,14 @@ export type CwStatusKey =
  * @type {'3' | '3.5' | '4' | '5'}
  */
 export type CwStatusIconSize = '3' | '3.5' | '4' | '5';
+
+/**
+ * Type CwStatusLabels
+ *
+ * @description
+ * The word written next to each status icon, French by default (`CW_STATUS_LABELS`), replaced for
+ * an application or a subtree with `provideCwStatusLabels` and read with `injectCwStatusLabels`.
+ *
+ * @type {Readonly<Record<CwStatusKey, string>>}
+ */
+export type CwStatusLabels = Readonly<Record<CwStatusKey, string>>;

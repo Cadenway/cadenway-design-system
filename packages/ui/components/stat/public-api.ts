@@ -5,12 +5,14 @@
  */
 
 export { CwStat } from './stat.component';
-export { CW_STAT_TREND_LABELS } from './stat.constants';
+export { CW_STAT_LABELS, CW_STAT_TREND_LABELS } from './stat.constants';
+export { provideCwStatLabels } from './stat.providers';
 export { CwStatGroup } from './stat-group/stat-group.component';
 export { CwStatSparkline } from './stat-sparkline/stat-sparkline.component';
 export type {
   CwStatDeltaVariant,
   CwStatGoal,
+  CwStatLabels,
   CwStatSentiment,
   CwStatSize,
   CwStatSparklineType,

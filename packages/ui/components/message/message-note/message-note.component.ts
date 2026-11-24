@@ -1,4 +1,4 @@
-import { Component, computed, input, type InputSignal, type Signal } from '@angular/core';
+import { Component, inject, computed, input, type InputSignal, type Signal } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorCheckCircleFill,
@@ -7,7 +7,8 @@ import {
   phosphorWarningFill,
 } from '@ng-icons/phosphor-icons/fill';
 
-import { TONE_ICONS, TONE_LABELS, toneRole } from '../message.styles';
+import { MESSAGE_TONE_LABELS } from '../message-tone-labels.token';
+import { TONE_ICONS, toneRole } from '../message.styles';
 import type { CwMessageTone, CwMessageToneLabels } from '../message.types';
 
 /**
@@ -46,6 +47,17 @@ import type { CwMessageTone, CwMessageToneLabels } from '../message.types';
 export class CwMessageNote {
   // #region Properties
   /**
+   * Property providedToneLabels
+   *
+   * @description
+   * Tone words resolved from the current injector.
+   *
+   * @type {CwMessageToneLabels}
+   * @readonly
+   */
+  private readonly providedToneLabels: CwMessageToneLabels = inject(MESSAGE_TONE_LABELS);
+
+  /**
    * Property tone
    * @readonly
    *
@@ -62,7 +74,7 @@ export class CwMessageNote {
    * @readonly
    *
    * @description
-   * Overrides for the default French tone words.
+   * Overrides for the provided tone words.
    *
    * @type {InputSignal<Partial<CwMessageToneLabels>>}
    * @default {}
@@ -109,7 +121,7 @@ export class CwMessageNote {
    */
   protected readonly toneWord: Signal<string> = computed(() => {
     const tone: CwMessageTone = this.tone();
-    return tone === 'default' ? '' : { ...TONE_LABELS, ...this.toneLabels() }[tone];
+    return tone === 'default' ? '' : { ...this.providedToneLabels, ...this.toneLabels() }[tone];
   });
   // #endregion
 }

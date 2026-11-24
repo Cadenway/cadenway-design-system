@@ -17,3 +17,23 @@ export type CwAlertVariant = 'info' | 'success' | 'warning' | 'destructive';
  * @type {'default' | 'compact'}
  */
 export type CwAlertSize = 'default' | 'compact';
+
+/**
+ * Interface CwAlertLabels
+ *
+ * @description
+ * Texts used by Alert instances.
+ */
+export interface CwAlertLabels {
+  // #region Properties
+  /**
+   * Property close
+   *
+   * @description
+   * Close button accessible name.
+   *
+   * @type {string}
+   */
+  close: string;
+  // #endregion
+}

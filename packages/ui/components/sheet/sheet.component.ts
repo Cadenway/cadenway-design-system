@@ -30,6 +30,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorXBold } from '@ng-icons/phosphor-icons/bold';
 
 import { CwSheetDescription } from './sheet-description/sheet-description.directive';
+import { SHEET_LABELS } from './sheet-labels.token';
 import { CW_SHEET, type CwSheetContext } from './sheet.token';
 import type { CwSheetCloseReason, CwSheetSide, CwSheetSize } from './sheet.types';
 
@@ -195,12 +196,12 @@ export class CwSheet implements CwSheetContext {
    * @readonly
    *
    * @description
-   * Accessible name of the close button.
+   * Accessible name of the close button; by default the `close` text of `provideCwSheetLabels`
+   * (« Fermer »).
    *
    * @type {InputSignal<string>}
-   * @default 'Fermer'
    */
-  public readonly closeLabel: InputSignal<string> = input('Fermer');
+  public readonly closeLabel: InputSignal<string> = input<string>(inject(SHEET_LABELS).close);
 
   /**
    * Property closed

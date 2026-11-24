@@ -1,4 +1,5 @@
 import { Directive, computed, inject, input, type InputSignal, type Signal } from '@angular/core';
+import { SIDEBAR_LABELS } from '../sidebar-labels.token';
 
 import { CwSidebar } from '../sidebar.component';
 
@@ -41,7 +42,9 @@ export class CwSidebarToggle {
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly collapseLabel: InputSignal<string> = input('Replier la barre latérale');
+  public readonly collapseLabel: InputSignal<string> = input<string>(
+    inject(SIDEBAR_LABELS).collapseLabel,
+  );
 
   /**
    * Property expandLabel
@@ -52,7 +55,9 @@ export class CwSidebarToggle {
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly expandLabel: InputSignal<string> = input('Déplier la barre latérale');
+  public readonly expandLabel: InputSignal<string> = input<string>(
+    inject(SIDEBAR_LABELS).expandLabel,
+  );
 
   /**
    * Property parent

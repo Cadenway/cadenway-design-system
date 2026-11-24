@@ -8,6 +8,7 @@ import { CwToolbarOverflow } from './toolbar-overflow/toolbar-overflow.component
 import { CwToolbarSeparator } from './toolbar-separator/toolbar-separator.component';
 import { CwToolbarSpacer } from './toolbar-spacer/toolbar-spacer.component';
 import { CwToolbar } from './toolbar.component';
+import { provideCwToolbarLabels } from './toolbar.providers';
 
 /**
  * Class Host
@@ -363,5 +364,18 @@ describe('CwToolbar overflow', () => {
     trier.focus();
     key(trier, 'ArrowRight');
     expect(document.activeElement).toBe(button(host, 'Plus d’options'));
+  });
+});
+
+describe('provideCwToolbarLabels', () => {
+  it('replaces the overflow button accessible name', () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwToolbarLabels({ overflow: 'More options' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('button[aria-label="More options"]'),
+    ).not.toBeNull();
   });
 });

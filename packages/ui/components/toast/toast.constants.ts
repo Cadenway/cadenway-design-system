@@ -1,4 +1,4 @@
-import type { CwToastTone } from './toast.types';
+import type { CwToastLabels, CwToastTone } from './toast.types';
 
 /**
  * Constant CW_TOAST_DURATIONS
@@ -17,4 +17,19 @@ export const CW_TOAST_DURATIONS: Readonly<Record<CwToastTone, number>> = {
   warning: 6000,
   error: Infinity,
   loading: Infinity,
+};
+
+/**
+ * Constant CW_TOAST_LABELS
+ *
+ * @description
+ * Default texts from the Toast sheet of the Design System artifact.
+ *
+ * @type {CwToastLabels}
+ */
+export const CW_TOAST_LABELS: CwToastLabels = {
+  undo: 'Annuler',
+  close: 'Fermer la notification',
+  ariaLabel: 'Notifications (F8)',
+  older: (count) => `+${String(count)} plus anciennes`,
 };

@@ -27,6 +27,7 @@ import {
   phosphorWarningFill,
 } from '@ng-icons/phosphor-icons/fill';
 
+import { BANNER_LABELS } from './banner-labels.token';
 import type { CwBannerPlacement, CwBannerTone } from './banner.types';
 
 /**
@@ -273,7 +274,7 @@ export class CwBanner {
    * @type {InputSignal<string>}
    * @default 'Masquer le bandeau'
    */
-  public readonly closeLabel: InputSignal<string> = input('Masquer le bandeau');
+  public readonly closeLabel: InputSignal<string> = input<string>(inject(BANNER_LABELS).close);
 
   /**
    * Property multiline

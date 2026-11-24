@@ -37,9 +37,9 @@ import {
 } from '@ng-icons/phosphor-icons/bold';
 import { phosphorWarningFill } from '@ng-icons/phosphor-icons/fill';
 
+import { RELATIONS_LABELS } from './relations-labels.token';
 import { CwRelationLeading } from './relation-leading/relation-leading.directive';
 import { CwRelationPicker } from './relation-picker/relation-picker.component';
-import { CW_RELATIONS_LABELS } from './relations.constants';
 import type {
   CwRelation,
   CwRelationAddEvent,
@@ -254,7 +254,7 @@ export class CwRelations {
    * Property labels
    *
    * @description
-   * French texts, any of them overridden (`CW_RELATIONS_LABELS`).
+   * Texts, with individual overrides (`CW_RELATIONS_LABELS`).
    *
    * @type {InputSignal<Partial<CwRelationsLabels>>}
    * @readonly
@@ -442,10 +442,21 @@ export class CwRelations {
   protected readonly emptyAddClasses: string = EMPTY_ADD;
 
   /**
+   * Property providedLabels
+   *
+   * @description
+   * Texts inherited from the injector.
+   *
+   * @type {CwRelationsLabels}
+   * @readonly
+   */
+  private readonly providedLabels: CwRelationsLabels = inject(RELATIONS_LABELS);
+
+  /**
    * Property text
    *
    * @description
-   * Default labels merged with consumer overrides.
+   * Provided labels merged with consumer overrides.
    *
    * @type {Signal<{ title: string; add: string; addRelation: string; empty: string; actions: (reference: string) => string; open: string; changeType: string; copyLink: string; remove: string; removed: string; added: (type: string, reference: string) => string; picker: string; type: string; search: string; searchPlaceholder: string; alreadyLinked: string; noResult: string; }>}
    * @readonly
@@ -468,7 +479,7 @@ export class CwRelations {
     searchPlaceholder: string;
     alreadyLinked: string;
     noResult: string;
-  }> = computed(() => ({ ...CW_RELATIONS_LABELS, ...this.labels() }));
+  }> = computed(() => ({ ...this.providedLabels, ...this.labels() }));
 
   /**
    * Property leading

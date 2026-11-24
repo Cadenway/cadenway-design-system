@@ -23,10 +23,10 @@ import {
 } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorMagnifyingGlassBold } from '@ng-icons/phosphor-icons/bold';
-
 import { ɵafterExitAnimation } from '@cadenway/ui/core';
 import { CwSpinner } from '@cadenway/ui/components/spinner';
 
+import { COMMAND_LABELS } from '../command-labels.token';
 import { cwCommandFuzzyFilter } from '../command.constants';
 import type { CwCommandFilter } from '../command.types';
 import { type CommandHost, CommandState } from '../command-state/command-state.service';
@@ -155,7 +155,7 @@ export class CwCommandDialog implements CommandHost {
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly ariaLabel: InputSignal<string> = input('Palette de commandes');
+  public readonly ariaLabel: InputSignal<string> = input(inject(COMMAND_LABELS).dialogLabel);
 
   /**
    * Property shortcut

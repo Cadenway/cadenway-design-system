@@ -32,6 +32,8 @@ import {
 } from '@ng-icons/phosphor-icons/bold';
 import { phosphorWarningCircleFill } from '@ng-icons/phosphor-icons/fill';
 
+import type { CwAttachmentProvidedLabels } from './attachment.types';
+import { ATTACHMENT_LABELS } from './attachment-labels.token';
 import { detectType, domainOf, typeIcon } from './attachment.format';
 import type {
   CwAttachmentLabels,
@@ -40,31 +42,6 @@ import type {
   CwAttachmentState,
   CwAttachmentType,
 } from './attachment.types';
-
-/**
- * Constant LABELS
- *
- * @description
- * Default French labels for attachment actions and states.
- *
- * @type {CwAttachmentLabels}
- */
-const LABELS: CwAttachmentLabels = {
-  image: 'Image',
-  file: 'Fichier',
-  download: 'Télécharger',
-  open: 'Ouvrir',
-  retry: "Réessayer l'envoi de",
-  cancel: "Annuler l'envoi de",
-  progress: 'Envoi de',
-  processing: "Génération de l'aperçu…",
-  processingShort: 'Aperçu…',
-  uploading: 'Envoi…',
-  failed: 'Échec',
-  sending: 'Envoi en cours',
-  working: 'Traitement en cours',
-  done: 'joint',
-};
 
 /**
  * Type Layout
@@ -156,6 +133,17 @@ const NAME: Record<Layout, string> = {
 })
 export class CwAttachment {
   // #region Properties
+  /**
+   * Property providedLabels
+   *
+   * @description
+   * Texts inherited from the nearest labels provider.
+   *
+   * @type {CwAttachmentProvidedLabels}
+   * @readonly
+   */
+  private readonly providedLabels: CwAttachmentProvidedLabels = inject(ATTACHMENT_LABELS);
+
   /**
    * Property name
    * @readonly
@@ -302,14 +290,16 @@ export class CwAttachment {
    *
    * @type {InputSignal<string>}
    */
-  public readonly removeLabel: InputSignal<string> = input('Retirer');
+  public readonly removeLabel: InputSignal<string> = input<string>(
+    inject(ATTACHMENT_LABELS).remove,
+  );
 
   /**
    * Property labels
    * @readonly
    *
    * @description
-   * Overrides for the default French labels.
+   * Overrides for the provided labels.
    *
    * @type {InputSignal<Partial<CwAttachmentLabels>>}
    */
@@ -379,10 +369,10 @@ export class CwAttachment {
    * @description
    * Combines default labels with caller overrides.
    *
-   * @type {Signal<CwAttachmentLabels>}
+   * @type {Signal<CwAttachmentProvidedLabels>}
    */
-  protected readonly text: Signal<CwAttachmentLabels> = computed(() => ({
-    ...LABELS,
+  protected readonly text: Signal<CwAttachmentProvidedLabels> = computed(() => ({
+    ...this.providedLabels,
     ...this.labels(),
   }));
 

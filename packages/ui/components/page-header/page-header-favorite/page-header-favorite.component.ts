@@ -13,6 +13,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorStarBold } from '@ng-icons/phosphor-icons/bold';
 import { phosphorStarFill } from '@ng-icons/phosphor-icons/fill';
 
+import { PAGE_HEADER_LABELS } from '../page-header-labels.token';
 import { CwPageHeader } from '../page-header.component';
 
 /**
@@ -81,7 +82,9 @@ export class CwPageHeaderFavorite {
    * @type {InputSignal<string>}
    * @default 'Favori'
    */
-  public readonly ariaLabel: InputSignal<string> = input('Favori');
+  public readonly ariaLabel: InputSignal<string> = input<string>(
+    inject(PAGE_HEADER_LABELS).favorite,
+  );
 
   /**
    * Property header

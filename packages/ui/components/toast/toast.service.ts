@@ -7,25 +7,16 @@ import {
   type WritableSignal,
 } from '@angular/core';
 
+import { TOAST_LABELS } from './toast-labels.token';
 import { CW_TOAST_DURATIONS } from './toast.constants';
 import type {
   CwToast,
   CwToastChanges,
+  CwToastLabels,
   CwToastOptions,
   CwToastPromiseMessages,
   CwToastTone,
 } from './toast.types';
-
-// Mockup App.dc.html: the action of an undoable change reads « Annuler ».
-/**
- * Constant UNDO_LABEL
- *
- * @description
- * Label used when the undo shorthand creates an action.
- *
- * @type {string}
- */
-const UNDO_LABEL: string = 'Annuler';
 
 /**
  * Interface Timer
@@ -76,6 +67,17 @@ interface Timer {
 @Service()
 export class CwToastService {
   // #region Properties
+  /**
+   * Property labels
+   *
+   * @description
+   * Texts used for actions created by this service.
+   *
+   * @type {CwToastLabels}
+   * @readonly
+   */
+  private readonly labels: CwToastLabels = inject(TOAST_LABELS);
+
   /**
    * Property list
    *
@@ -308,7 +310,7 @@ export class CwToastService {
       ...(changes.description === undefined ? {} : { description: changes.description }),
       ...(changes.duration === undefined ? {} : { duration: changes.duration }),
       ...(changes.closable === undefined ? {} : { closable: changes.closable }),
-      ...(changes.action || changes.undo ? { action: actionOf(changes) } : {}),
+      ...(changes.action || changes.undo ? { action: actionOf(changes, this.labels.undo) } : {}),
     };
     this.list.update((toasts) => toasts.map((toast) => (toast.id === id ? next : toast)));
     if (changes.tone !== undefined || changes.duration !== undefined) {
@@ -412,7 +414,7 @@ export class CwToastService {
   private add(tone: CwToastTone, title: string, options: CwToastOptions): string {
     this.sequence += 1;
     const id: string = `cw-toast-${String(this.sequence)}`;
-    const action: CwToast['action'] = actionOf(options);
+    const action: CwToast['action'] = actionOf(options, this.labels.undo);
     const toast: CwToast = {
       id,
       tone,
@@ -479,9 +481,10 @@ export class CwToastService {
  * Selects the explicit action or builds one from the undo callback.
  *
  * @param {CwToastOptions} options - Optional content and behavior for the toast.
+ * @param {string} undoLabel - Label of the undo action.
  * @returns {CwToast['action']} Selected action, or undefined when no action is provided.
  */
-function actionOf(options: CwToastOptions): CwToast['action'] {
+function actionOf(options: CwToastOptions, undoLabel: string): CwToast['action'] {
   if (options.action) return options.action;
-  return options.undo ? { label: UNDO_LABEL, run: options.undo } : undefined;
+  return options.undo ? { label: undoLabel, run: options.undo } : undefined;
 }

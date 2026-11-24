@@ -5,12 +5,14 @@ describe('@cadenway/ui/toolbar public API', () => {
   // (.claude/rules/public-api.md): the runtime names are pinned here.
   it('exports exactly the pinned names', () => {
     expect(Object.keys(publicApi).sort()).toEqual([
+      'CW_TOOLBAR_LABELS',
       'CwToolbar',
       'CwToolbarGroup',
       'CwToolbarItem',
       'CwToolbarOverflow',
       'CwToolbarSeparator',
       'CwToolbarSpacer',
+      'provideCwToolbarLabels',
     ]);
   });
 });

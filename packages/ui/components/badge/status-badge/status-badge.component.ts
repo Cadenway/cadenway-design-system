@@ -2,8 +2,10 @@ import { Component, computed, input, type InputSignal, type Signal } from '@angu
 import {
   CW_STATUS_LABELS,
   CwStatusIcon,
+  injectCwStatusLabels,
   type CwStatusIconSize,
   type CwStatusKey,
+  type CwStatusLabels,
 } from '@cadenway/ui/components/status-icon';
 
 import { BADGE_BASE, BADGE_SIZES, BADGE_VARIANTS } from '../badge.constants';
@@ -29,7 +31,7 @@ const STATUS_ICON_SIZES: Record<CwBadgeSize, CwStatusIconSize> = { default: '3',
  *
  * `status` is one of the ten `CwStatusKey`; an unknown key reads `todo`. `from` forwards a previous
  * status so the icon morphs after mounting. `label` replaces the word (« En cours » by default, from
- * `CW_STATUS_LABELS`). The icon is `aria-hidden`: the word is the accessible text.
+ * `CW_STATUS_LABELS`, or the word given by `provideCwStatusLabels`). The icon is `aria-hidden`: the word is the accessible text.
  */
 @Component({
   selector: 'cw-status-badge',
@@ -73,7 +75,7 @@ export class CwStatusBadge {
    * @readonly
    *
    * @description
-   * Replacement text for the status; null or undefined uses the standard French label.
+   * Replacement text for the status; null or undefined uses the provided word (`provideCwStatusLabels`, French by default).
    *
    * @type {InputSignal<string | null | undefined>}
    * @default undefined
@@ -93,6 +95,17 @@ export class CwStatusBadge {
    * @default 'default'
    */
   public readonly size: InputSignal<CwBadgeSize> = input<CwBadgeSize>('default');
+
+  /**
+   * Property labels
+   * @readonly
+   *
+   * @description
+   * Status words given by `provideCwStatusLabels`, or the French defaults.
+   *
+   * @type {CwStatusLabels}
+   */
+  private readonly labels: CwStatusLabels = injectCwStatusLabels();
 
   /**
    * Property current
@@ -138,12 +151,13 @@ export class CwStatusBadge {
    * @readonly
    *
    * @description
-   * Custom label when supplied, otherwise the French label for the validated status.
+   * Custom label when supplied, otherwise the provided word (`provideCwStatusLabels`, French by
+   * default) for the validated status.
    *
    * @type {Signal<string>}
    */
   protected readonly text: Signal<string> = computed(
-    () => this.label() ?? CW_STATUS_LABELS[this.current()],
+    () => this.label() ?? this.labels[this.current()],
   );
   // #endregion
 }

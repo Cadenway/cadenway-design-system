@@ -17,3 +17,35 @@ export type CwSelectSize = 'sm' | 'default' | 'lg';
  * @type {(a: T, b: T) => boolean}
  */
 export type CwSelectCompareWith<T> = (a: T, b: T) => boolean;
+
+/**
+ * Interface CwSelectLabels
+ *
+ * @description
+ * Default texts replaced for an application or subtree with `provideCwSelectLabels`.
+ */
+export interface CwSelectLabels {
+  // #region Properties
+  /**
+   * Property placeholder
+   *
+   * @description
+   * Default text for the `placeholder` input.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly placeholder: string;
+
+  /**
+   * Property emptyText
+   *
+   * @description
+   * Default text for the `emptyText` input.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly emptyText: string;
+  // #endregion
+}

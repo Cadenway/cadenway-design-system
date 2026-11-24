@@ -31,3 +31,25 @@ export type CwSheetSize = 'sm' | 'default' | 'lg' | 'full';
  * @type {'escape' | 'overlay' | 'close' | 'action'}
  */
 export type CwSheetCloseReason = 'escape' | 'overlay' | 'close' | 'action';
+
+/**
+ * Interface CwSheetLabels
+ *
+ * @description
+ * The texts of a sheet, French by default (`CW_SHEET_LABELS`), replaced for an application or a
+ * subtree with `provideCwSheetLabels`.
+ */
+export interface CwSheetLabels {
+  // #region Properties
+  /**
+   * Property close
+   *
+   * @description
+   * Accessible name of the close button (`closeLabel`).
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly close: string;
+  // #endregion
+}

@@ -10,6 +10,7 @@ describe('@cadenway/ui/filter-bar public API', () => {
       'CwFilterChip',
       'CwFilterOptionDef',
       'CwFilterValueDef',
+      'provideCwFilterBarLabels',
     ]);
   });
 });

@@ -17,6 +17,9 @@ export type {
   CwCalendarSpan,
   CwCalendarSpanFn,
   CwCalendarViewLabels,
+  CwCalendarViewProvidedLabels,
   CwCalendarViewMode,
   CwCalendarWeekStart,
 } from './calendar-view.types';
+
+export { provideCwCalendarViewLabels } from './calendar-view.providers';

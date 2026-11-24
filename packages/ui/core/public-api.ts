@@ -38,5 +38,7 @@ export {
 } from './dates/dates';
 export { ɵextensionOf, ɵformatFileSize } from './format/files';
 export { ɵfold } from './format/text';
+export { ɵlabelsToken, ɵprovideLabels } from './labels/labels';
+export type { ɵLabelsOverrides } from './labels/labels';
 export { ɵcreateMarkdownLexer, ɵwriteMention } from './markdown/markdown.marked';
 export type { ɵMentionToken, ɵUnderlineToken } from './markdown/markdown.marked';

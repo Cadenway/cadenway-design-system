@@ -22,6 +22,7 @@ import type { FormValueControl } from '@angular/forms/signals';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorWarningCircleFill } from '@ng-icons/phosphor-icons/fill';
 
+import { QUESTIONNAIRE_LABELS } from '../questionnaire-labels.token';
 import {
   type ChoiceRef,
   QUESTIONNAIRE,
@@ -96,7 +97,9 @@ export class CwQuestionnaireQuestion
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly errorText: InputSignal<string> = input('Choisissez une réponse pour continuer.');
+  public readonly errorText: InputSignal<string> = input<string>(
+    inject(QUESTIONNAIRE_LABELS).errorText,
+  );
 
   /**
    * Property name

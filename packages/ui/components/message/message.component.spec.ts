@@ -6,6 +6,11 @@ import { CwMessage } from './message.component';
 import { CwMessageAvatar } from './message-avatar/message-avatar.component';
 import { CwMessageGroup } from './message-group/message-group.component';
 import { CwMessageThread } from './message-thread/message-thread.component';
+import {
+  provideCwMessageLabels,
+  provideCwMessageThreadLabels,
+  provideCwMessageToneLabels,
+} from './message.providers';
 import type { CwMessageStatus, CwMessageTimeFormatter } from './message.types';
 
 /**
@@ -338,5 +343,24 @@ describe('CwMessage', () => {
     buttonNamed(required(error), 'Réessayer').click();
 
     expect(component.events()).toEqual(['invite', 'reload']);
+  });
+});
+
+describe('message label providers', () => {
+  it('replaces message, thread and tone text', async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideCwMessageLabels({ edited: 'edited' }),
+        provideCwMessageThreadLabels({ replies: 'replies' }),
+        provideCwMessageToneLabels({ warning: 'Warning' }),
+      ],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const text: string = (fixture.nativeElement as HTMLElement).textContent;
+    expect(text).toContain('edited');
+    expect(text).toContain('3 replies');
+    expect(text).toContain('Warning');
   });
 });

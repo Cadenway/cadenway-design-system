@@ -1,6 +1,7 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { provideCwRelationsLabels } from './relations.providers';
 import { CwRelationLeading } from './relation-leading/relation-leading.directive';
 import { CwRelationPicker } from './relation-picker/relation-picker.component';
 import { CwRelations } from './relations.component';
@@ -332,5 +333,17 @@ describe('CwRelationPicker', () => {
     const host: HTMLElement = fixture.nativeElement as HTMLElement;
 
     expect(host.querySelector('[role="combobox"]')?.textContent).toContain('Bloque');
+  });
+});
+
+describe('provideCwRelationsLabels', () => {
+  it('renders the provided text', async () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwRelationsLabels({ title: 'Links' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    await fixture.whenStable();
+    const element: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(element.textContent).toContain('Links');
   });
 });

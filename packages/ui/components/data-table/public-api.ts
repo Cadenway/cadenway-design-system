@@ -15,6 +15,7 @@ export { CwDataTablePagination } from './data-table-pagination/data-table-pagina
 export { CwDataTableToolbar } from './data-table-toolbar/data-table-toolbar.directive';
 export { CwDataTable } from './data-table.component';
 export { CW_DATA_TABLE_PAGE_SIZES, CW_DATA_TABLE_TEXTS } from './data-table.constants';
+export { provideCwDataTableTexts } from './data-table.providers';
 export type {
   CwBulkAction,
   CwBulkActionEvent,
@@ -27,6 +28,7 @@ export type {
   CwDataTableDensity,
   CwDataTableSelection,
   CwDataTableTexts,
+  CwDataTableProvidedTexts,
   CwGroupContext,
   CwSort,
   CwSortDirection,

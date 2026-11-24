@@ -5,6 +5,7 @@ describe('@cadenway/ui/sheet public API', () => {
   // (.claude/rules/public-api.md): the runtime names are pinned here.
   it('exports exactly the pinned names', () => {
     expect(Object.keys(publicApi).sort()).toEqual([
+      'CW_SHEET_LABELS',
       'CwSheet',
       'CwSheetBody',
       'CwSheetClose',
@@ -13,6 +14,7 @@ describe('@cadenway/ui/sheet public API', () => {
       'CwSheetHeader',
       'CwSheetTitle',
       'CwSheetTrigger',
+      'provideCwSheetLabels',
     ]);
   });
 });

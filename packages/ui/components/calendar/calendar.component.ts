@@ -28,7 +28,6 @@ import {
   phosphorCaretLeftBold,
   phosphorCaretRightBold,
 } from '@ng-icons/phosphor-icons/bold';
-
 import { CwButton } from '@cadenway/ui/components/button';
 import {
   CwRipple,
@@ -42,6 +41,7 @@ import {
   ɵstartOfMonth,
 } from '@cadenway/ui/core';
 
+import { CALENDAR_LABELS } from './calendar-labels.token';
 import type {
   CwCalendarCaptionLayout,
   CwCalendarMode,
@@ -662,7 +662,9 @@ export class CwCalendar implements FormValueControl<CwCalendarSelection>, Contro
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly previousMonthLabel: InputSignal<string> = input('Mois précédent');
+  public readonly previousMonthLabel: InputSignal<string> = input<string>(
+    inject(CALENDAR_LABELS).previousMonth,
+  );
 
   /**
    * Property nextMonthLabel
@@ -673,7 +675,9 @@ export class CwCalendar implements FormValueControl<CwCalendarSelection>, Contro
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly nextMonthLabel: InputSignal<string> = input('Mois suivant');
+  public readonly nextMonthLabel: InputSignal<string> = input<string>(
+    inject(CALENDAR_LABELS).nextMonth,
+  );
 
   /**
    * Property monthListLabel
@@ -684,7 +688,9 @@ export class CwCalendar implements FormValueControl<CwCalendarSelection>, Contro
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly monthListLabel: InputSignal<string> = input('Mois');
+  public readonly monthListLabel: InputSignal<string> = input<string>(
+    inject(CALENDAR_LABELS).monthList,
+  );
 
   /**
    * Property yearListLabel
@@ -695,7 +701,9 @@ export class CwCalendar implements FormValueControl<CwCalendarSelection>, Contro
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly yearListLabel: InputSignal<string> = input('Année');
+  public readonly yearListLabel: InputSignal<string> = input<string>(
+    inject(CALENDAR_LABELS).yearList,
+  );
 
   /**
    * Property weekLabel
@@ -706,7 +714,7 @@ export class CwCalendar implements FormValueControl<CwCalendarSelection>, Contro
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly weekLabel: InputSignal<string> = input('Semaine');
+  public readonly weekLabel: InputSignal<string> = input<string>(inject(CALENDAR_LABELS).week);
 
   /**
    * Property weekShortLabel
@@ -717,7 +725,9 @@ export class CwCalendar implements FormValueControl<CwCalendarSelection>, Contro
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly weekShortLabel: InputSignal<string> = input('S.');
+  public readonly weekShortLabel: InputSignal<string> = input<string>(
+    inject(CALENDAR_LABELS).weekShort,
+  );
 
   /**
    * Property touch

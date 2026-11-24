@@ -36,9 +36,9 @@ import {
 } from '@ng-icons/phosphor-icons/bold';
 import { phosphorPlayFill, phosphorStopFill } from '@ng-icons/phosphor-icons/fill';
 
+import { TIME_TRACKER_LABELS } from './time-tracker-labels.token';
 import { formatDuration } from './duration';
 import { CwTimeEntryForm } from './time-entry-form/time-entry-form.component';
-import { CW_TIME_TRACKER_LABELS } from './time-tracker.constants';
 import type {
   CwTimeStopEvent,
   CwTimeTrackerLabels,
@@ -259,7 +259,7 @@ export class CwTimeTracker {
    * Property labels
    *
    * @description
-   * French texts, any of them overridden (`CW_TIME_TRACKER_LABELS`).
+   * Texts, with individual overrides (`CW_TIME_TRACKER_LABELS`).
    *
    * @type {InputSignal<Partial<CwTimeTrackerLabels>>}
    * @readonly
@@ -384,10 +384,21 @@ export class CwTimeTracker {
   });
 
   /**
+   * Property providedLabels
+   *
+   * @description
+   * Texts inherited from the injector.
+   *
+   * @type {CwTimeTrackerLabels}
+   * @readonly
+   */
+  private readonly providedLabels: CwTimeTrackerLabels = inject(TIME_TRACKER_LABELS);
+
+  /**
    * Property text
    *
    * @description
-   * Default labels merged with consumer overrides.
+   * Provided labels merged with consumer overrides.
    *
    * @type {Signal<{ start: string; stop: string; resume: string; pause: string; stopShort: string; elapsed: string; since: (time: string) => string; paused: string; total: string; started: string; saved: (duration: string) => string; compactStart: (total: string) => string; compactStop: (clock: string) => string; compactResume: (clock: string) => string; tracked: string; estimate: string; meterValue: (total: string, estimate: string) => string; remaining: (duration: string) => string; over: (duration: string) => string; billable: string; of: string; addTime: string; }>}
    * @readonly
@@ -415,7 +426,7 @@ export class CwTimeTracker {
     billable: string;
     of: string;
     addTime: string;
-  }> = computed(() => ({ ...CW_TIME_TRACKER_LABELS, ...this.labels() }));
+  }> = computed(() => ({ ...this.providedLabels, ...this.labels() }));
 
   /**
    * Property timerClasses

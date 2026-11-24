@@ -3,6 +3,7 @@ import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { CwButton } from '@cadenway/ui/components/button';
 import type { MockInstance } from 'vitest';
 
+import { provideCwBannerLabels } from './banner.providers';
 import { CwBannerActions } from './banner-actions/banner-actions.component';
 import { CwBanner } from './banner.component';
 
@@ -193,5 +194,23 @@ describe('CwBanner', () => {
 
     expect(setItem).not.toHaveBeenCalled();
     setItem.mockRestore();
+  });
+});
+
+describe('provideCwBannerLabels', () => {
+  it('replaces the default texts below its injector', async () => {
+    TestBed.configureTestingModule({ providers: [provideCwBannerLabels({ close: 'Dismiss' })] });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('button[aria-label="Dismiss"]'),
+    ).toBeTruthy();
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector(
+        'button[aria-label="Masquer le bandeau"]',
+      ),
+    ).toBeNull();
+    fixture.destroy();
   });
 });

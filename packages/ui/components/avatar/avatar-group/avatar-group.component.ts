@@ -3,6 +3,7 @@ import {
   computed,
   contentChildren,
   forwardRef,
+  inject,
   input,
   numberAttribute,
   type InputSignal,
@@ -10,6 +11,7 @@ import {
   type Signal,
 } from '@angular/core';
 
+import { AVATAR_LABELS } from '../avatar-labels.token';
 import { AVATAR_GROUP } from '../avatar-group.token';
 import { CwAvatar } from '../avatar.component';
 import type { CwAvatarSize } from '../avatar.types';
@@ -104,7 +106,7 @@ export class CwAvatarGroup {
    *
    * @type {InputSignal<string>}
    */
-  public readonly ariaLabel: InputSignal<string> = input('Assignés');
+  public readonly ariaLabel: InputSignal<string> = input<string>(inject(AVATAR_LABELS).group);
 
   /**
    * Property othersPrefix
@@ -115,7 +117,9 @@ export class CwAvatarGroup {
    *
    * @type {InputSignal<string>}
    */
-  public readonly othersPrefix: InputSignal<string> = input('et');
+  public readonly othersPrefix: InputSignal<string> = input<string>(
+    inject(AVATAR_LABELS).othersPrefix,
+  );
 
   /**
    * Property avatars

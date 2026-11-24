@@ -13,3 +13,7 @@ export type {
   CwDateRange,
   CwWeekStart,
 } from './calendar.types';
+
+export { CW_CALENDAR_LABELS } from './calendar.constants';
+export { provideCwCalendarLabels } from './calendar.providers';
+export type { CwCalendarLabels } from './calendar.types';

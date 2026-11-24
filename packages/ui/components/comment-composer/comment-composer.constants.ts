@@ -1,3 +1,4 @@
+import type { CwCommentComposerProvidedLabels } from './comment-composer.types';
 import type { CwCommentComposerLabels, CwComposerCommand } from './comment-composer.types';
 
 /**
@@ -43,3 +44,30 @@ export const CW_COMMENT_COMPOSER_LABELS: CwCommentComposerLabels = {
   retry: 'Réessayer',
   sendKeys: ['Ctrl', 'Entrée'],
 };
+
+/**
+ * Constant PROVIDED_LABELS
+ *
+ * @description
+ * Complete French defaults used by the labels provider and token.
+ *
+ * @type {CwCommentComposerProvidedLabels}
+ */
+const PROVIDED_LABELS: CwCommentComposerProvidedLabels = {
+  ...CW_COMMENT_COMPOSER_LABELS,
+  placeholder: 'Écrire un commentaire…',
+  disabledText: 'Commentaires désactivés',
+  commands: CW_COMPOSER_COMMANDS,
+};
+
+/**
+ * Function getProvidedLabels
+ *
+ * @description
+ * Returns the complete French defaults for the provider and token.
+ *
+ * @returns {CwCommentComposerProvidedLabels} Complete default texts.
+ */
+export function getProvidedLabels(): CwCommentComposerProvidedLabels {
+  return PROVIDED_LABELS;
+}

@@ -1,4 +1,5 @@
 import { Component, computed, inject, input, type InputSignal, type Signal } from '@angular/core';
+import { QUESTIONNAIRE_LABELS } from '../questionnaire-labels.token';
 
 import { QUESTIONNAIRE, type QuestionnaireRef } from '../questionnaire.token';
 
@@ -27,7 +28,7 @@ export class CwQuestionnaireProgress {
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly label: InputSignal<string> = input('Question');
+  public readonly label: InputSignal<string> = input<string>(inject(QUESTIONNAIRE_LABELS).label);
 
   /**
    * Property ofLabel
@@ -38,7 +39,9 @@ export class CwQuestionnaireProgress {
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly ofLabel: InputSignal<string> = input('sur');
+  public readonly ofLabel: InputSignal<string> = input<string>(
+    inject(QUESTIONNAIRE_LABELS).ofLabel,
+  );
 
   /**
    * Property ariaLabel
@@ -49,7 +52,9 @@ export class CwQuestionnaireProgress {
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly ariaLabel: InputSignal<string> = input('Progression du formulaire');
+  public readonly ariaLabel: InputSignal<string> = input<string>(
+    inject(QUESTIONNAIRE_LABELS).ariaLabel,
+  );
 
   /**
    * Property questionnaire

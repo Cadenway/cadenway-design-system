@@ -1,3 +1,4 @@
+import type { CwBlockEditorProvidedLabels } from './block-editor.types';
 import type {
   CwBlockEditorLabels,
   CwBlockKind,
@@ -100,3 +101,31 @@ export const CW_BLOCK_EDITOR_LABELS: CwBlockEditorLabels = {
   uncheck: 'Décocher « {text} »',
   task: 'tâche',
 };
+
+/**
+ * Constant PROVIDED_LABELS
+ *
+ * @description
+ * Complete French defaults used by the labels provider and token.
+ *
+ * @type {CwBlockEditorProvidedLabels}
+ */
+const PROVIDED_LABELS: CwBlockEditorProvidedLabels = {
+  ...CW_BLOCK_EDITOR_LABELS,
+  placeholder: 'Écrivez, ou tapez « / » pour insérer un bloc',
+  ariaLabel: 'Contenu du document',
+  blockTypes: CW_BLOCK_TYPES,
+  inlineMarks: CW_INLINE_MARKS,
+};
+
+/**
+ * Function getProvidedLabels
+ *
+ * @description
+ * Returns the complete French defaults for the provider and token.
+ *
+ * @returns {CwBlockEditorProvidedLabels} Complete default texts.
+ */
+export function getProvidedLabels(): CwBlockEditorProvidedLabels {
+  return PROVIDED_LABELS;
+}

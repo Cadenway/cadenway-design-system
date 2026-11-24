@@ -4,6 +4,16 @@
  * Explicit named exports only (.claude/rules/public-api.md).
  */
 
+export {
+  CW_MESSAGE_LABELS,
+  CW_MESSAGE_THREAD_LABELS,
+  CW_MESSAGE_TONE_LABELS,
+} from './message.constants';
+export {
+  provideCwMessageLabels,
+  provideCwMessageThreadLabels,
+  provideCwMessageToneLabels,
+} from './message.providers';
 export { CwMessage } from './message.component';
 export { CwMessageActions } from './message-actions/message-actions.component';
 export { CwMessageAvatar } from './message-avatar/message-avatar.component';

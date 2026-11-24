@@ -17,6 +17,7 @@ import { CwKbd } from '@cadenway/ui/components/kbd';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorCheckBold } from '@ng-icons/phosphor-icons/bold';
 
+import { QUESTIONNAIRE_LABELS } from '../questionnaire-labels.token';
 import {
   type ChoiceRef,
   type QuestionRef,
@@ -113,7 +114,9 @@ export class CwQuestionnaireChoice implements ChoiceRef {
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly otherPlaceholder: InputSignal<string> = input('Précisez…');
+  public readonly otherPlaceholder: InputSignal<string> = input<string>(
+    inject(QUESTIONNAIRE_LABELS).otherPlaceholder,
+  );
 
   /**
    * Property otherLabel
@@ -124,7 +127,9 @@ export class CwQuestionnaireChoice implements ChoiceRef {
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly otherLabel: InputSignal<string> = input('Autre : précisez');
+  public readonly otherLabel: InputSignal<string> = input<string>(
+    inject(QUESTIONNAIRE_LABELS).otherLabel,
+  );
 
   /**
    * Property question

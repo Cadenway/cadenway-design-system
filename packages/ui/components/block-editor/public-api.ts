@@ -14,6 +14,7 @@ export {
 } from './block-editor.constants';
 export type {
   CwBlockEditorLabels,
+  CwBlockEditorProvidedLabels,
   CwBlockEditorVariant,
   CwBlockKind,
   CwBlockType,
@@ -22,3 +23,5 @@ export type {
   CwMentionPerson,
   CwMentionSearch,
 } from './block-editor.types';
+
+export { provideCwBlockEditorLabels } from './block-editor.providers';

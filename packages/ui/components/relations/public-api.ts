@@ -18,3 +18,5 @@ export type {
   CwRelationType,
   CwRelationsLabels,
 } from './relations.types';
+
+export { provideCwRelationsLabels } from './relations.providers';

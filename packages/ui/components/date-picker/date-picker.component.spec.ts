@@ -2,9 +2,9 @@ import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { FormField, form, type FieldTree } from '@angular/forms/signals';
-
 import type { CwCalendarMode } from '@cadenway/ui/components/calendar';
 
+import { provideCwDatePickerLabels } from './date-picker.providers';
 import { CwDatePicker } from './date-picker.component';
 import type { CwDatePickerValue, CwDatePickerVariant, CwDatePreset } from './date-picker.types';
 
@@ -424,5 +424,16 @@ describe('CwDatePicker', () => {
     named(panel, 'Effacer').click();
     await signalFixture.whenStable();
     expect(signalFixture.componentInstance.model().due).toBeNull();
+  });
+});
+
+describe('provideCwDatePickerLabels', () => {
+  it('renders provided text', () => {
+    TestBed.configureTestingModule({
+      providers: [provideCwDatePickerLabels({ placeholder: 'Choose a date' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Choose a date');
   });
 });

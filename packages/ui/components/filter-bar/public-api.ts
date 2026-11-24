@@ -21,3 +21,5 @@ export type {
 export { CwFilterChip } from './filter-chip/filter-chip.component';
 export { CwFilterOptionDef } from './filter-option/filter-option.directive';
 export { CwFilterValueDef } from './filter-value/filter-value.directive';
+
+export { provideCwFilterBarLabels } from './filter-bar.providers';

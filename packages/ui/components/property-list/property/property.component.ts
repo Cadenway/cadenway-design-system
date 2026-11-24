@@ -16,6 +16,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorLockSimpleBold } from '@ng-icons/phosphor-icons/bold';
 import { phosphorWarningCircleFill } from '@ng-icons/phosphor-icons/fill';
 
+import { PROPERTY_LIST_LABELS } from '../property-list-labels.token';
 import { PROPERTY_LIST, type PropertyListHost } from '../property-list.token';
 import { PROPERTY, type PropertyHost } from '../property.token';
 import type { CwPropertyListOrientation } from '../property-list.types';
@@ -185,7 +186,9 @@ export class CwProperty implements PropertyHost {
    *
    * @type {InputSignal<string>}
    */
-  public readonly emptyText: InputSignal<string> = input('Vide');
+  public readonly emptyText: InputSignal<string> = input<string>(
+    inject(PROPERTY_LIST_LABELS).emptyText,
+  );
 
   /**
    * Property readonlyLabel
@@ -196,7 +199,9 @@ export class CwProperty implements PropertyHost {
    *
    * @type {InputSignal<string>}
    */
-  public readonly readonlyLabel: InputSignal<string> = input('Lecture seule');
+  public readonly readonlyLabel: InputSignal<string> = input<string>(
+    inject(PROPERTY_LIST_LABELS).readonlyLabel,
+  );
 
   /**
    * Property error

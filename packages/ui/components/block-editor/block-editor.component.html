@@ -17,7 +17,7 @@
         <ng-icon name="phosphorCaretDownBold" class="text-muted-foreground" aria-hidden="true" />
       </button>
       <cw-toolbar-separator />
-      @for (button of marks; track button.mark) {
+      @for (button of marks(); track button.mark) {
         <button
           cwButton
           cwToolbarItem
@@ -77,7 +77,7 @@
   </div>
   <cw-menu #typeMenu [ariaLabel]="text().blockType" (closed)="refocus()">
     <cw-menu-radio-group [value]="activeBlock()" (valueChange)="onTypeChosen($event)">
-      @for (type of typeEntries; track type.kind) {
+      @for (type of typeEntries(); track type.kind) {
         <button cwMenuItemRadio [value]="type.kind">
           @if (type.icon) {
             <ng-icon [name]="type.icon" class="text-muted-foreground" aria-hidden="true" />

@@ -53,6 +53,7 @@ import {
   phosphorPlusBold,
 } from '@ng-icons/phosphor-icons/bold';
 
+import { COMBOBOX_LABELS } from './combobox-labels.token';
 import { CwComboboxEmpty } from './combobox-empty/combobox-empty.component';
 import { CwComboboxOption } from './combobox-option/combobox-option.component';
 import { EMPTY, OPTION } from './combobox.styles';
@@ -250,7 +251,7 @@ export class CwCombobox<T = unknown>
    *
    * @type {InputSignal<string>}
    */
-  public readonly placeholder: InputSignal<string> = input('Choisir…');
+  public readonly placeholder: InputSignal<string> = input(inject(COMBOBOX_LABELS).placeholder);
 
   /**
    * Property searchPlaceholder
@@ -261,7 +262,9 @@ export class CwCombobox<T = unknown>
    *
    * @type {InputSignal<string>}
    */
-  public readonly searchPlaceholder: InputSignal<string> = input('Rechercher…');
+  public readonly searchPlaceholder: InputSignal<string> = input(
+    inject(COMBOBOX_LABELS).searchPlaceholder,
+  );
 
   /**
    * Property emptyText
@@ -274,7 +277,7 @@ export class CwCombobox<T = unknown>
    */
   public readonly emptyText: InputSignal<string | ((query: string) => string)> = input<
     string | ((query: string) => string)
-  >('Aucun résultat');
+  >(inject(COMBOBOX_LABELS).emptyText);
 
   /**
    * Property creatable
@@ -300,7 +303,7 @@ export class CwCombobox<T = unknown>
    */
   public readonly createLabel: InputSignal<(query: string) => string> = input<
     (query: string) => string
-  >((query) => `Créer « ${query} »`);
+  >(inject(COMBOBOX_LABELS).createLabel);
 
   /**
    * Property loading
@@ -324,7 +327,7 @@ export class CwCombobox<T = unknown>
    *
    * @type {InputSignal<string>}
    */
-  public readonly loadingText: InputSignal<string> = input('Recherche…');
+  public readonly loadingText: InputSignal<string> = input(inject(COMBOBOX_LABELS).loadingText);
 
   /**
    * Property filter
@@ -349,7 +352,7 @@ export class CwCombobox<T = unknown>
    */
   public readonly summary: InputSignal<(count: number) => string> = input<
     (count: number) => string
-  >((count) => `${String(count)} sélectionnés`);
+  >(inject(COMBOBOX_LABELS).summary);
 
   /**
    * Property resultsLabel
@@ -362,7 +365,7 @@ export class CwCombobox<T = unknown>
    */
   public readonly resultsLabel: InputSignal<(count: number) => string> = input<
     (count: number) => string
-  >((count) => (count === 1 ? '1 résultat' : `${String(count)} résultats`));
+  >(inject(COMBOBOX_LABELS).resultsLabel);
 
   /**
    * Property size

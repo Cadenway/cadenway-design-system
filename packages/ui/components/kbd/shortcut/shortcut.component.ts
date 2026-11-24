@@ -8,6 +8,8 @@ import {
   type Signal,
 } from '@angular/core';
 
+import { KBD_LABELS } from '../kbd-labels.token';
+import type { CwKbdLabels } from '../kbd.types';
 import { CwKbdGroup } from '../kbd-group/kbd-group.directive';
 import { CwKbd } from '../kbd.directive';
 import type { CwKbdSize, CwKbdVariant } from '../kbd.types';
@@ -37,7 +39,7 @@ interface KeyName {
    * @readonly
    *
    * @description
-   * French name included in the visually hidden shortcut description.
+   * Name included in the visually hidden shortcut description.
    *
    * @type {string}
    */
@@ -65,54 +67,55 @@ interface KeyName {
  *
  * @param {string} token - Key token from a shortcut combination.
  * @param {boolean} mac - Whether platform-specific modifiers use macOS names.
+ * @param {CwKbdLabels} labels - Displayed and spoken names.
  *
  * @returns {KeyName} Names used to render and announce the key.
  */
-function keyName(token: string, mac: boolean): KeyName {
+function keyName(token: string, mac: boolean, labels: CwKbdLabels): KeyName {
   switch (token.toLowerCase()) {
     case 'mod':
       return mac
-        ? { label: '⌘', spoken: 'Commande', aria: 'Meta' }
-        : { label: 'Ctrl', spoken: 'Contrôle', aria: 'Control' };
+        ? { label: '⌘', spoken: labels.commandSpoken, aria: 'Meta' }
+        : { label: labels.control, spoken: labels.controlSpoken, aria: 'Control' };
     case 'ctrl':
     case 'control':
-      return { label: 'Ctrl', spoken: 'Contrôle', aria: 'Control' };
+      return { label: labels.control, spoken: labels.controlSpoken, aria: 'Control' };
     case 'meta':
     case 'cmd':
-      return { label: '⌘', spoken: 'Commande', aria: 'Meta' };
+      return { label: '⌘', spoken: labels.commandSpoken, aria: 'Meta' };
     case 'shift':
       return mac
-        ? { label: '⇧', spoken: 'Majuscule', aria: 'Shift' }
-        : { label: 'Maj', spoken: 'Majuscule', aria: 'Shift' };
+        ? { label: '⇧', spoken: labels.shiftSpoken, aria: 'Shift' }
+        : { label: labels.shift, spoken: labels.shiftSpoken, aria: 'Shift' };
     case 'alt':
     case 'option':
       return mac
-        ? { label: '⌥', spoken: 'Option', aria: 'Alt' }
-        : { label: 'Alt', spoken: 'Alt', aria: 'Alt' };
+        ? { label: '⌥', spoken: labels.optionSpoken, aria: 'Alt' }
+        : { label: labels.alt, spoken: labels.alt, aria: 'Alt' };
     case 'esc':
     case 'escape':
-      return { label: 'Échap', spoken: 'Échap', aria: 'Escape' };
+      return { label: labels.escape, spoken: labels.escape, aria: 'Escape' };
     case 'enter':
-      return { label: 'Entrée', spoken: 'Entrée', aria: 'Enter' };
+      return { label: labels.enter, spoken: labels.enter, aria: 'Enter' };
     case 'tab':
-      return { label: 'Tab', spoken: 'Tab', aria: 'Tab' };
+      return { label: labels.tab, spoken: labels.tab, aria: 'Tab' };
     case 'del':
     case 'delete':
-      return { label: 'Suppr', spoken: 'Suppr', aria: 'Delete' };
+      return { label: labels.delete, spoken: labels.delete, aria: 'Delete' };
     case 'space':
-      return { label: 'Espace', spoken: 'Espace', aria: 'Space' };
+      return { label: labels.space, spoken: labels.space, aria: 'Space' };
     case 'up':
     case 'arrowup':
-      return { label: '↑', spoken: 'Flèche haut', aria: 'ArrowUp' };
+      return { label: '↑', spoken: labels.upSpoken, aria: 'ArrowUp' };
     case 'down':
     case 'arrowdown':
-      return { label: '↓', spoken: 'Flèche bas', aria: 'ArrowDown' };
+      return { label: '↓', spoken: labels.downSpoken, aria: 'ArrowDown' };
     case 'left':
     case 'arrowleft':
-      return { label: '←', spoken: 'Flèche gauche', aria: 'ArrowLeft' };
+      return { label: '←', spoken: labels.leftSpoken, aria: 'ArrowLeft' };
     case 'right':
     case 'arrowright':
-      return { label: '→', spoken: 'Flèche droite', aria: 'ArrowRight' };
+      return { label: '→', spoken: labels.rightSpoken, aria: 'ArrowRight' };
     default: {
       const label: string = token.length === 1 ? token.toUpperCase() : token;
       return { label, spoken: label, aria: label };
@@ -145,7 +148,7 @@ function isMac(document: Document): boolean {
  *
  * `+` joins the keys of one combination; `mod` is Ctrl or ⌘ depending on the platform, `shift` and
  * `alt` follow the platform too, and the keys of the Kbd sheet (`esc`, `enter`, `tab`, `delete`,
- * `space`, arrows `up`, `down`, `left`, `right`) get their French names. The keys are hidden from
+ * `space`, arrows `up`, `down`, `left`, `right`) get their configured names. The keys are hidden from
  * assistive technologies and a visually hidden text spells the shortcut out (« Contrôle K »). The
  * element that carries the shortcut sets `aria-keyshortcuts` itself, from `ariaKeyShortcuts()`.
  */
@@ -206,7 +209,18 @@ export class CwShortcut {
    * @type {InputSignal<string>}
    * @default 'puis'
    */
-  public readonly thenLabel: InputSignal<string> = input('puis');
+  public readonly thenLabel: InputSignal<string> = input<string>(inject(KBD_LABELS).then);
+
+  /**
+   * Property providedLabels
+   *
+   * @description
+   * Shortcut names inherited from the current injector.
+   *
+   * @type {CwKbdLabels}
+   * @readonly
+   */
+  private readonly providedLabels: CwKbdLabels = inject(KBD_LABELS);
 
   /**
    * Property mac
@@ -237,7 +251,7 @@ export class CwShortcut {
         step
           .split('+')
           .filter((token) => token !== '')
-          .map((token) => keyName(token, this.mac)),
+          .map((token) => keyName(token, this.mac, this.providedLabels)),
       ),
   );
 
@@ -246,7 +260,7 @@ export class CwShortcut {
    * @readonly
    *
    * @description
-   * French spoken shortcut text joining combination keys and sequence steps.
+   * Spoken shortcut text joining combination keys and sequence steps.
    *
    * @type {Signal<string>}
    */

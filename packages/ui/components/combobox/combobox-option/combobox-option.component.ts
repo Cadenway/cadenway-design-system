@@ -12,9 +12,9 @@ import {
 import { _IdGenerator } from '@angular/cdk/a11y';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorCheckBold } from '@ng-icons/phosphor-icons/bold';
-
 import { ɵenterDelay } from '@cadenway/ui/core';
 
+import { COMBOBOX_LABELS } from '../combobox-labels.token';
 import { OPTION, OPTION_ENTER } from '../combobox.styles';
 import { COMBOBOX_HOST, type ComboboxHost } from '../combobox.token';
 
@@ -96,7 +96,7 @@ export class CwComboboxOption<T = unknown> {
    *
    * @type {InputSignal<string>}
    */
-  public readonly disabledLabel: InputSignal<string> = input('Désactivé');
+  public readonly disabledLabel: InputSignal<string> = input(inject(COMBOBOX_LABELS).disabledLabel);
 
   /**
    * Property host

@@ -7,6 +7,7 @@ import { By } from '@angular/platform-browser';
 import { CwKanban } from './kanban.component';
 import { CwKanbanCardDef } from './kanban-card-def/kanban-card-def.directive';
 import { CwKanbanEmptyDef } from './kanban-empty-def/kanban-empty-def.directive';
+import { provideCwKanbanLabels } from './kanban.providers';
 import type { KanbanCellData } from './kanban.token';
 import type {
   CwKanbanColumn,
@@ -691,5 +692,22 @@ describe('CwKanban', () => {
       press(card(host, 'CAD-482'), ' ');
       expect(component.moves[0]?.to).toEqual({ column: 'progress', lane: 'basse', index: 0 });
     });
+  });
+});
+
+describe('provideCwKanbanLabels', () => {
+  it('replaces the French texts of the boards below it', () => {
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: LiveAnnouncer, useValue: { announce: vi.fn(() => Promise.resolve()) } },
+        provideCwKanbanLabels({ column: 'Column {column}', countOther: '{count} tasks' }),
+      ],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    const todo: HTMLElement = group(fixture.nativeElement as HTMLElement, 'Column À faire');
+
+    expect(todo.textContent).toContain('2 tasks');
+    expect(button(todo, 'Ajouter une tâche dans À faire')).toBeTruthy();
   });
 });

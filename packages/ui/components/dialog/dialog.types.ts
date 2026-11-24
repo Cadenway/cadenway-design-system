@@ -18,3 +18,25 @@ export type CwDialogSize = 'sm' | 'default' | 'lg' | 'full';
  * @type {'escape' | 'overlay' | 'close' | 'action'}
  */
 export type CwDialogCloseReason = 'escape' | 'overlay' | 'close' | 'action';
+
+/**
+ * Interface CwDialogLabels
+ *
+ * @description
+ * The texts of a dialog, French by default (`CW_DIALOG_LABELS`), replaced for an application or a
+ * subtree with `provideCwDialogLabels`.
+ */
+export interface CwDialogLabels {
+  // #region Properties
+  /**
+   * Property close
+   *
+   * @description
+   * Accessible name of the close button (`closeLabel`).
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly close: string;
+  // #endregion
+}

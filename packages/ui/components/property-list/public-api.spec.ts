@@ -5,10 +5,12 @@ describe('@cadenway/ui/property-list public API', () => {
   // (.claude/rules/public-api.md): the runtime names are pinned here.
   it('exports exactly the pinned names', () => {
     expect(Object.keys(publicApi).sort()).toEqual([
+      'CW_PROPERTY_LIST_LABELS',
       'CwProperty',
       'CwPropertyGroup',
       'CwPropertyList',
       'CwPropertyValue',
+      'provideCwPropertyListLabels',
     ]);
   });
 });

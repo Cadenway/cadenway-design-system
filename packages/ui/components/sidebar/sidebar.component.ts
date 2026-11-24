@@ -15,6 +15,7 @@ import {
   type ModelSignal,
   type WritableSignal,
 } from '@angular/core';
+import { SIDEBAR_LABELS } from './sidebar-labels.token';
 
 import type { CwSidebarCollapsible, CwSidebarState } from './sidebar.types';
 
@@ -220,7 +221,7 @@ export class CwSidebar {
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly ariaLabel: InputSignal<string> = input('Navigation principale');
+  public readonly ariaLabel: InputSignal<string> = input<string>(inject(SIDEBAR_LABELS).ariaLabel);
 
   /**
    * Property closeLabel
@@ -231,7 +232,9 @@ export class CwSidebar {
    * @type {InputSignal<string>}
    * @readonly
    */
-  public readonly closeLabel: InputSignal<string> = input('Fermer la barre latérale');
+  public readonly closeLabel: InputSignal<string> = input<string>(
+    inject(SIDEBAR_LABELS).closeLabel,
+  );
 
   /**
    * Property id
