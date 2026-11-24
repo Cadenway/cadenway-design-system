@@ -390,6 +390,23 @@ describe('CwSidebar on a phone', () => {
     expect(fixture.componentInstance.state()).toBe('collapsed');
   });
 
+  it('gives the focus back to its toggle when a followed item closes it', async () => {
+    const toggle: HTMLButtonElement = button(host, 'Déplier la barre latérale');
+    toggle.focus();
+    toggle.click();
+    await fixture.whenStable();
+    const home: HTMLAnchorElement = link(host, 'Accueil');
+    home.addEventListener('click', (event) => {
+      event.preventDefault();
+    });
+    home.focus();
+    home.click();
+    await fixture.whenStable();
+
+    expect(fixture.componentInstance.state()).toBe('collapsed');
+    expect(document.activeElement).toBe(toggle);
+  });
+
   it('closes on Escape and when an item is followed', async () => {
     fixture.componentInstance.state.set('expanded');
     await fixture.whenStable();
@@ -419,7 +436,7 @@ describe('CwSidebar backdrop extent', () => {
 
   it('keeps the phone backdrop inside its container with backdrop="container"', async () => {
     window.matchMedia = vi.fn((query: string) => ({
-      matches: query.includes('max-width: 767'),
+      matches: query.includes('width < 48rem'),
       media: query,
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
@@ -456,7 +473,7 @@ describe('CwSidebar on a tablet', () => {
    */
   async function render(overlayBelow: CwSidebarOverlayBelow): Promise<void> {
     window.matchMedia = vi.fn((query: string) => ({
-      matches: query.includes('min-width: 768px'),
+      matches: query.includes('48rem <= width'),
       media: query,
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
@@ -546,6 +563,28 @@ describe('CwSidebar on a tablet', () => {
     expect(document.activeElement).toBe(toggle);
   });
 
+  it('opens again at a desktop width after the tablet overlay closed it', async () => {
+    const tablet: { change: ((event: MediaQueryListEvent) => void) | null } = { change: null };
+    window.matchMedia = vi.fn((query: string) => ({
+      matches: query.includes('48rem <= width'),
+      media: query,
+      addEventListener: (_: string, handler: (event: MediaQueryListEvent) => void): void => {
+        if (query.includes('48rem <= width')) tablet.change = handler;
+      },
+      removeEventListener: vi.fn(),
+    })) as unknown as typeof window.matchMedia;
+    fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.overlayBelow.set('lg');
+    host = fixture.nativeElement as HTMLElement;
+    document.body.appendChild(host);
+    await fixture.whenStable();
+    expect(fixture.componentInstance.state()).toBe('collapsed');
+
+    tablet.change?.({ matches: false } as MediaQueryListEvent);
+    await fixture.whenStable();
+    expect(fixture.componentInstance.state()).toBe('expanded');
+  });
+
   it('closes on Escape but stays open when an item is followed', async () => {
     await render('lg');
     fixture.componentInstance.state.set('expanded');
@@ -565,7 +604,7 @@ describe('CwSidebar on a tablet', () => {
 });
 
 /**
- * Class ConditionalToggleHost
+ * Component ConditionalToggleHost
  *
  * @description
  * A shell whose toggle exists only while the sidebar is collapsed, as in the stories' frame.
@@ -588,7 +627,7 @@ class ConditionalToggleHost {}
 describe('CwSidebar with a toggle shown only while collapsed', () => {
   it('focuses the toggle recreated after the sidebar closes', async () => {
     window.matchMedia = vi.fn((query: string) => ({
-      matches: query.includes('min-width: 768px'),
+      matches: query.includes('48rem <= width'),
       media: query,
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),

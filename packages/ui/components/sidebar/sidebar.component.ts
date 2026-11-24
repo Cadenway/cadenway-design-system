@@ -36,18 +36,19 @@ import type {
  *
  * @type {string}
  */
-const MOBILE: string = '(max-width: 767.98px)';
+const MOBILE: string = '(width < 48rem)';
 
 /**
  * Constant TABLET
  *
  * @description
- * Media query of a tablet, between the phone drawer and the 1024 px desktop layout (Tailwind `md`
- * to `lg`), where `overlayBelow="lg"` floats the expanded sidebar over the content.
+ * Media query of a tablet, between the phone drawer and the 1024 px desktop layout, in the rem of
+ * Tailwind's `md` and `lg` so the script and the `max-md:` and `max-lg:` classes switch together,
+ * whatever the default font size; `overlayBelow="lg"` floats the expanded sidebar there.
  *
  * @type {string}
  */
-const TABLET: string = '(min-width: 768px) and (max-width: 1023.98px)';
+const TABLET: string = '(48rem <= width < 64rem)';
 
 /**
  * Type Mode
@@ -222,7 +223,7 @@ function isEditable(target: EventTarget | null): boolean {
  * Component CwSidebar
  *
  * @description
- * The main navigation of the application, white like the content: instance, search, shortcuts, folding spaces and their lists, sprint progress, account; expanded or reduced to icons (Sidebar sheet of the Design System artifact, mockup `App.dc.html`). Holds an optional `cw-sidebar-header`, `cw-sidebar-group` sections of `a[cwSidebarItem]` and `cw-sidebar-space`, and an optional `cw-sidebar-footer`; the middle scrolls. It renders a `nav` named `ariaLabel`. `[(state)]` expands or collapses it (240 px or, with `collapsible="icon"`, the 48 px rail whose items show their name in a tooltip); `offcanvas` hides it, `none` never folds. Ctrl B (or ⌘ B) toggles it from anywhere outside a text field; a `button[cwSidebarToggle]` does too. Under 768 px a collapsible sidebar is a drawer over the content: it starts collapsed, opens with a backdrop, and closes on the backdrop, on Escape and when an item is followed. With `overlayBelow="lg"` it also floats over the content between 768 and 1023 px (`shadow-md`, the mockup's tablet layout): it starts collapsed there, hides instead of showing the icon rail, and closes on Escape and on a click outside it (a transparent backdrop), but stays open when an item is followed, as in the mockup. `backdrop="container"` keeps the backdrop inside the nearest positioned ancestor (the content panel) instead of the viewport. A hidden sidebar is `inert`. The consumer remembers the state per user.
+ * The main navigation of the application, white like the content: instance, search, shortcuts, folding spaces and their lists, sprint progress, account; expanded or reduced to icons (Sidebar sheet of the Design System artifact, mockup `App.dc.html`). Holds an optional `cw-sidebar-header`, `cw-sidebar-group` sections of `a[cwSidebarItem]` and `cw-sidebar-space`, and an optional `cw-sidebar-footer`; the middle scrolls. It renders a `nav` named `ariaLabel`. `[(state)]` expands or collapses it (240 px or, with `collapsible="icon"`, the 48 px rail whose items show their name in a tooltip); `offcanvas` hides it, `none` never folds. Ctrl B (or ⌘ B) toggles it from anywhere outside a text field; a `button[cwSidebarToggle]` does too. Under 768 px a collapsible sidebar is a drawer over the content: it starts collapsed, opens with a backdrop, and closes on the backdrop, on Escape and when an item is followed. With `overlayBelow="lg"` it also floats over the content between 768 and 1023 px (`shadow-md`, the mockup's tablet layout): it starts collapsed there, hides instead of showing the icon rail, and closes on Escape and on a click outside it (a transparent backdrop), but stays open when an item is followed, as in the mockup; when the tablet layout closed it, it opens again at a desktop width. `backdrop="container"` keeps the backdrop inside the nearest positioned ancestor (the content panel) instead of the viewport. A hidden sidebar is `inert`. The consumer remembers the state per user.
  */
 @Component({
   selector: 'cw-sidebar',
@@ -276,7 +277,9 @@ export class CwSidebar {
    *
    * @description
    * Breakpoint under which the expanded sidebar floats over the content: `md`, the phone drawer
-   * only (the default); `lg`, also on a tablet. Without effect on a `none` sidebar.
+   * only (the default); `lg`, also on a tablet. Without effect on a `none` sidebar. With `lg`, use
+   * `backdrop="container"` when other controls sit beside the content panel (the app rail): a
+   * viewport backdrop would catch their first click to close the sidebar.
    *
    * @type {InputSignal<CwSidebarOverlayBelow>}
    * @readonly
@@ -543,13 +546,22 @@ export class CwSidebar {
    * @constructor
    */
   public constructor() {
-    // Mockup App.dc.html: under 1024 px the sidebar starts closed, the content first.
+    // Mockup App.dc.html: under 1024 px the sidebar starts closed, the content first. A sidebar the
+    // tablet overlay closed opens again when the window grows back to a desktop width, so
+    // snapping a desktop window to half the screen does not leave it closed for good.
+    let reopen: boolean = false;
     effect(() => {
-      if (this.floating()) {
-        untracked(() => {
+      const floating: boolean = this.floating();
+      const overlay: boolean = this.overlay();
+      untracked(() => {
+        if (floating) {
+          reopen = overlay && (reopen || !this.collapsed());
           this.collapse();
-        });
-      }
+        } else if (reopen) {
+          reopen = false;
+          if (this.collapsed()) this.expand();
+        }
+      });
     });
     // Every way of opening or closing (a method, a toggle, Escape, the backdrop, the `state` model
     // bound by the consumer) goes through this transition.
@@ -627,6 +639,9 @@ export class CwSidebar {
     if (!this.floating() || !nav?.contains(active)) return;
     afterNextRender(
       () => {
+        // Leave a focus the consumer moved elsewhere in the meantime.
+        const current: Element | null = this.document.activeElement;
+        if (current !== null && current !== this.document.body && !nav.contains(current)) return;
         this.restoreFocus(nav, opener);
       },
       { injector: this.injector },
@@ -650,7 +665,7 @@ export class CwSidebar {
    *
    * @description
    * Gives the focus back to the opener when it is still in the document, or else to the first
-   * toggle of this sidebar outside it.
+   * visible toggle of this sidebar outside it (a toggle hidden at this width cannot hold it).
    *
    * @param {HTMLElement} nav - The navigation the focus leaves.
    * @param {HTMLElement | null} opener - The element that had the focus when the sidebar opened.
@@ -661,7 +676,11 @@ export class CwSidebar {
         ? opener
         : Array.from(
             this.document.querySelectorAll<HTMLElement>(`[aria-controls="${this.id}"]`),
-          ).find((toggle: HTMLElement) => !nav.contains(toggle));
+          ).find(
+            (toggle: HTMLElement) =>
+              !nav.contains(toggle) &&
+              (typeof toggle.checkVisibility !== 'function' || toggle.checkVisibility()),
+          );
     target?.focus();
   }
 
