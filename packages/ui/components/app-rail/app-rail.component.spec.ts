@@ -179,4 +179,14 @@ describe('CwAppRail', () => {
     expect(host.querySelector('cw-app-rail-group')?.getAttribute('data-desktop-only')).toBe('true');
     expect(host.querySelector('cw-app-rail-separator')?.getAttribute('aria-hidden')).toBe('true');
   });
+
+  it('describes the item with what its tooltip adds to the label', () => {
+    const search: HTMLElement = item(host, 'Rechercher (Ctrl K)');
+    const description: HTMLElement | null = document.getElementById(
+      search.getAttribute('aria-describedby') ?? '',
+    );
+
+    expect(description?.textContent).toBe('Rechercher, Ctrl K');
+    expect(item(host, 'Accueil').hasAttribute('aria-describedby')).toBe(false);
+  });
 });

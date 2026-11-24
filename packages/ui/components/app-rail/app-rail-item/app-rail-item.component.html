@@ -20,3 +20,6 @@
     >{{ badge() }}</span
   >
 }
+@if (description(); as text) {
+  <span [id]="descriptionId" hidden>{{ text }}</span>
+}

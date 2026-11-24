@@ -1,3 +1,4 @@
+import { _IdGenerator } from '@angular/cdk/a11y';
 import {
   afterEveryRender,
   booleanAttribute,
@@ -94,6 +95,7 @@ function filled(icon: string): string {
     '[attr.type]': 'type',
     '[attr.aria-label]': 'accessibleName()',
     '[attr.aria-current]': 'current() ? "page" : null',
+    '[attr.aria-describedby]': 'description() ? descriptionId : null',
     '[attr.data-variant]': 'variant()',
     '[attr.data-desktop-only]': 'desktopOnly() ? "true" : null',
     '(focus)': 'forwardFocus("focus")',
@@ -307,6 +309,39 @@ export class CwAppRailItem {
    * @readonly
    */
   protected readonly tooltipText: Signal<string> = computed(() => this.tooltip() ?? this.label());
+
+  /**
+   * Property descriptionId
+   *
+   * @description
+   * Id of the hidden description the item points to with `aria-describedby`.
+   *
+   * @type {string}
+   * @readonly
+   */
+  protected readonly descriptionId: string = inject(_IdGenerator).getId(
+    'cw-app-rail-item-description-',
+  );
+
+  /**
+   * Property description
+   *
+   * @description
+   * What the tooltip adds to the label, read as the item's description on focus: a `tooltip`
+   * different from the label and the `shortcut` keys; null when the bubble only repeats the label
+   * (the tooltip's own `aria-describedby` sits on its hidden layer, not on the item).
+   *
+   * @type {Signal<string | null>}
+   * @readonly
+   */
+  protected readonly description: Signal<string | null> = computed(() => {
+    const tooltip: string | undefined = this.tooltip();
+    const parts: string[] = [
+      tooltip !== undefined && tooltip !== this.label() ? tooltip : '',
+      this.shortcut()?.join(' ') ?? '',
+    ].filter((part) => part !== '');
+    return parts.length > 0 ? parts.join(', ') : null;
+  });
 
   /**
    * Property accessibleName
