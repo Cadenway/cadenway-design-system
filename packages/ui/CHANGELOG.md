@@ -1,5 +1,12 @@
 # @cadenway/ui
 
+## 0.5.0
+
+### Minor Changes
+
+- 2ae2174: Add the `@cadenway/ui/components/password-strength` entry point, the strength of a new password as the mockup shows it under the field (`Inscription.dc.html`, `Reinitialisation.dc.html`): `cw-password-strength` (`exportAs` `cwPasswordStrength`) draws a `cw-meter` in `segmented` with one notch per rule (its value text is the level) and the list of rules, each read as met or not; `cw-password-strength-level` (`for`) writes the level (« Trop court » to « Excellent ») in a polite live region next to the field label. `value` is the password, `minLength` (12 code points, as the identity service's policy) sets the length rule and `rules` replaces the four default rules (length, upper and lower case, a digit, a symbol, read in Unicode, built by `cwPasswordRules`). The level follows the share of rules met, whatever their number, and its `tone` (weak, fair, good) follows the level. `score`, `total`, `level`, `tone`, `empty` and `rulesId` (for the field's `aria-describedby`) are readable; the meter never validates. Texts come from `provideCwPasswordStrengthLabels` over `CW_PASSWORD_STRENGTH_LABELS`.
+- d544e0c: Add the `@cadenway/ui/components/split-button` entry point, the two-part button of the task status in the mockup (`App.dc.html`): `cw-split-button` runs a quick action from its main half (out `triggered`; named by the required `label`, titled by `tooltip`, its content the visual of the current value, a → hint on hover and focus with `arrow`; with `opensMenu` it opens the menu instead) and opens the projected `cw-menu`, placed against the whole button, from its caret half, a menu button named by `menuLabel` (« Plus d’options » by default, `provideCwSplitButtonLabels` over `CW_SPLIT_BUTTON_LABELS`). The main half grows when the button is stretched. `disabled` disables and dims both halves and closes an open menu.
+
 ## 0.4.0
 
 ### Minor Changes
