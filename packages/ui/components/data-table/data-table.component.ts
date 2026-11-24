@@ -4170,6 +4170,18 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
       const line: VirtualLine<T> | undefined = this.virtualModel().lines.at(0);
       return line ? { row: line.key, col: line.entry ? this.firstHeaderKey() : 'group' } : null;
     }
+    return this.firstRenderedBodyCell();
+  }
+
+  /**
+   * Method firstRenderedBodyCell
+   *
+   * @description
+   * Finds the first body cell present in the DOM, in document order.
+   *
+   * @returns {ActiveCell | null} First rendered body cell, or null.
+   */
+  private firstRenderedBodyCell(): ActiveCell | null {
     const first: HTMLElement | undefined = this.navRows().find(
       (row) => row.dataset['cwRow'] !== HEADER,
     );
@@ -4185,12 +4197,16 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * Method defaultCell
    *
    * @description
-   * Finds the default grid focus target.
+   * Finds the default grid focus target: the first body cell, else (in `virtual` mode, once that
+   * line has left the window) the first rendered body cell, else the header. The rendered fallback
+   * keeps a reachable tab stop below 48rem, where the header row is hidden.
+   *
    * @returns {HTMLElement | null} Default focus target, or null.
    */
   private defaultCell(): HTMLElement | null {
     return (
       this.cellElement(this.firstBodyCell()) ??
+      (this.virtual() ? this.cellElement(this.firstRenderedBodyCell()) : null) ??
       this.cellElement({ row: HEADER, col: this.firstHeaderKey() })
     );
   }

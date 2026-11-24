@@ -605,6 +605,41 @@ describe('CwDataTable', () => {
       ).toBe(2000 * 36);
     });
 
+    it('keeps a rendered body cell as the tab stop after scrolling an unfocused grid', async () => {
+      component.data.set(
+        Array.from({ length: 2000 }, (_, index): Task => ({
+          id: String(index),
+          name: String(index),
+          status: 'a',
+          estimate: index,
+        })),
+      );
+      component.virtual.set(true);
+      await stable();
+      const grid: HTMLElement = one(host, 'grid', 'Tâches de Produit');
+      const scroller: HTMLElement = required(grid.parentElement);
+      Object.defineProperty(scroller, 'clientHeight', { configurable: true, value: 360 });
+      Object.defineProperty(scroller, 'scrollTop', {
+        configurable: true,
+        writable: true,
+        value: 36000,
+      });
+      scroller.dispatchEvent(new Event('scroll'));
+      await new Promise<void>((resolve) => {
+        requestAnimationFrame(() => {
+          resolve();
+        });
+      });
+      await stable();
+      const stops: HTMLElement[] = Array.from(grid.querySelectorAll<HTMLElement>('[tabindex="0"]'));
+
+      expect(stops).toHaveLength(1);
+      expect(stops[0].getAttribute('role')).toBe('gridcell');
+      expect(
+        Number(stops[0].closest('[role="row"]')?.getAttribute('aria-rowindex')),
+      ).toBeGreaterThan(900);
+    });
+
     it('navigates to the last row and retains focus when scrolled away', async () => {
       component.data.set(
         Array.from({ length: 2000 }, (_, index): Task => ({
