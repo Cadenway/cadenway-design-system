@@ -11,7 +11,18 @@ import type { CwAppRailPhoneLayout } from './app-rail.types';
  *
  * @type {string}
  */
-const RAIL: string = 'relative z-30 flex w-14 shrink-0 flex-col items-center gap-1 py-2';
+const RAIL: string = 'group/rail relative z-30 flex w-14 shrink-0 flex-col items-center gap-1 py-2';
+
+/**
+ * Constant COLUMN
+ *
+ * @description
+ * A column kept on a phone may be taller than a short or landscape screen: it scrolls, without a
+ * visible scrollbar in its 56 px (the tooltips live in an overlay, so they are not clipped).
+ *
+ * @type {string}
+ */
+const COLUMN: string = 'overflow-y-auto overscroll-contain [scrollbar-width:none]';
 
 /**
  * Constant TAB_BAR
@@ -40,12 +51,15 @@ const TAB_BAR: string =
  * the consumer's layout owns. Items keep their natural tab order; the current page is the item with
  * `current`. With `phoneLayout="column"` the rail stays the 56 px column below 768 px, with every
  * group, separator and item (`desktopOnly` included), as the settings screens of the mockup keep it
- * (`Compte.dc.html`, `Organisation.dc.html`).
+ * (`Compte.dc.html`, `Organisation.dc.html`); that column scrolls when it is taller than the
+ * screen. The parts follow the layout through the rail's `data-phone-layout` attribute, so they may
+ * be projected through a wrapper component. Style hook: `data-phone-layout` on the host.
  */
 @Component({
   selector: 'nav[cwAppRail]',
   host: {
     '[class]': 'classes()',
+    '[attr.data-phone-layout]': 'phoneLayout()',
     '[attr.aria-label]': 'ariaLabel()',
   },
   templateUrl: './app-rail.component.html',
@@ -86,7 +100,7 @@ export class CwAppRail {
    * @readonly
    */
   protected readonly classes: Signal<string> = computed(() =>
-    this.phoneLayout() === 'column' ? RAIL : `${RAIL} ${TAB_BAR}`,
+    this.phoneLayout() === 'column' ? `${RAIL} ${COLUMN}` : `${RAIL} ${TAB_BAR}`,
   );
   // #endregion
 }

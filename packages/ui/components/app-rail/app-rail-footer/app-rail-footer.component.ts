@@ -1,6 +1,4 @@
-import { Component, computed, inject, type Signal } from '@angular/core';
-
-import { CwAppRail } from '../app-rail.component';
+import { Component } from '@angular/core';
 
 /**
  * Component CwAppRailFooter
@@ -14,34 +12,10 @@ import { CwAppRail } from '../app-rail.component';
  */
 @Component({
   selector: 'cw-app-rail-footer',
-  host: { '[class]': 'classes()' },
+  host: {
+    class:
+      'mt-auto flex flex-col items-center gap-1 max-md:group-data-[phone-layout=tab-bar]/rail:contents',
+  },
   templateUrl: './app-rail-footer.component.html',
 })
-export class CwAppRailFooter {
-  // #region Properties
-  /**
-   * Property rail
-   *
-   * @description
-   * The rail holding the footer, whose `phoneLayout` decides the layout below 768 px.
-   *
-   * @type {CwAppRail | null}
-   * @readonly
-   */
-  private readonly rail: CwAppRail | null = inject(CwAppRail, { optional: true });
-
-  /**
-   * Property classes
-   *
-   * @description
-   * Bottom of the column, dissolved into the tab bar row below 768 px.
-   *
-   * @type {Signal<string>}
-   * @readonly
-   */
-  protected readonly classes: Signal<string> = computed(
-    () =>
-      `mt-auto flex flex-col items-center gap-1${this.rail?.phoneLayout() === 'column' ? '' : ' max-md:contents'}`,
-  );
-  // #endregion
-}
+export class CwAppRailFooter {}

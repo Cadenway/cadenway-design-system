@@ -2,13 +2,10 @@ import {
   booleanAttribute,
   Component,
   computed,
-  inject,
   input,
   type InputSignalWithTransform,
   type Signal,
 } from '@angular/core';
-
-import { CwAppRail } from '../app-rail.component';
 
 /**
  * Component CwAppRailGroup
@@ -41,17 +38,6 @@ export class CwAppRailGroup {
   });
 
   /**
-   * Property rail
-   *
-   * @description
-   * The rail holding the group, whose `phoneLayout` decides the layout below 768 px.
-   *
-   * @type {CwAppRail | null}
-   * @readonly
-   */
-  private readonly rail: CwAppRail | null = inject(CwAppRail, { optional: true });
-
-  /**
    * Property classes
    *
    * @description
@@ -60,9 +46,13 @@ export class CwAppRailGroup {
    * @type {Signal<string>}
    * @readonly
    */
-  protected readonly classes: Signal<string> = computed(() => {
-    if (this.rail?.phoneLayout() === 'column') return 'flex flex-col items-center gap-1';
-    return `flex flex-col items-center gap-1 ${this.desktopOnly() ? 'max-md:hidden' : 'max-md:contents'}`;
-  });
+  protected readonly classes: Signal<string> = computed(
+    () =>
+      `flex flex-col items-center gap-1 ${
+        this.desktopOnly()
+          ? 'max-md:group-data-[phone-layout=tab-bar]/rail:hidden'
+          : 'max-md:group-data-[phone-layout=tab-bar]/rail:contents'
+      }`,
+  );
   // #endregion
 }

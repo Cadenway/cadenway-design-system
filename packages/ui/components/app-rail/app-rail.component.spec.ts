@@ -194,32 +194,43 @@ describe('CwAppRail', () => {
   });
 
   it('turns into the bottom tab bar below 768 px by default', () => {
-    expect(host.querySelector('nav')?.classList.contains('max-md:fixed')).toBe(true);
-    expect(host.querySelector('cw-app-rail-separator')?.classList.contains('max-md:hidden')).toBe(
-      true,
-    );
-    expect(host.querySelector('cw-app-rail-footer')?.classList.contains('max-md:contents')).toBe(
-      true,
-    );
-    expect(item(host, 'Thème sombre').classList.contains('max-md:hidden')).toBe(true);
+    const nav: HTMLElement | null = host.querySelector('nav');
+
+    expect(nav?.getAttribute('data-phone-layout')).toBe('tab-bar');
+    expect(nav?.classList.contains('max-md:fixed')).toBe(true);
+    expect(
+      host
+        .querySelector('cw-app-rail-separator')
+        ?.classList.contains('max-md:group-data-[phone-layout=tab-bar]/rail:hidden'),
+    ).toBe(true);
+    expect(
+      item(host, 'Thème sombre').classList.contains(
+        'max-md:group-data-[phone-layout=tab-bar]/rail:hidden',
+      ),
+    ).toBe(true);
   });
 
-  it('keeps the desktop column below 768 px with phoneLayout="column"', async () => {
+  it('keeps a scrolling column below 768 px with phoneLayout="column"', async () => {
     fixture.componentInstance.phoneLayout.set('column');
     await fixture.whenStable();
-    const parts: Element[] = Array.from(
+    const nav: HTMLElement | null = host.querySelector('nav');
+    const phoneClasses: string[] = Array.from(
       host.querySelectorAll(
         'nav, cw-app-rail-group, cw-app-rail-separator, cw-app-rail-footer, [cwAppRailItem]',
       ),
+    ).flatMap((part: Element) =>
+      Array.from(part.classList).filter((name: string) => name.startsWith('max-md:')),
     );
 
-    expect(parts.length).toBeGreaterThan(6);
+    expect(nav?.getAttribute('data-phone-layout')).toBe('column');
+    expect(nav?.classList.contains('overflow-y-auto')).toBe(true);
+    expect(phoneClasses.length).toBeGreaterThan(0);
+    // The parts' phone classes all wait for a tab-bar rail, so none applies in a column rail.
     expect(
-      parts.flatMap((part: Element) =>
-        Array.from(part.classList).filter((name: string) => name.startsWith('max-md:')),
+      phoneClasses.every((name: string) =>
+        name.startsWith('max-md:group-data-[phone-layout=tab-bar]/rail:'),
       ),
-    ).toEqual([]);
-    expect(item(host, 'Thème sombre').getAttribute('data-desktop-only')).toBe('true');
+    ).toBe(true);
   });
 
   it('describes the item with what its tooltip adds to the label', () => {

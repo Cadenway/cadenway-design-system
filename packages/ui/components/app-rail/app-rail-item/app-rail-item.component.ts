@@ -19,7 +19,6 @@ import { CwTooltip } from '@cadenway/ui/components/tooltip';
 import { ɵFOCUS } from '@cadenway/ui/core';
 import { NgIcon } from '@ng-icons/core';
 
-import { CwAppRail } from '../app-rail.component';
 import type { CwAppRailItemVariant } from '../app-rail.types';
 
 /**
@@ -44,7 +43,8 @@ const BASE: string =
  *
  * @type {string}
  */
-const TAB_BAR_ITEM: string = 'max-md:min-w-0 max-md:shrink';
+const TAB_BAR_ITEM: string =
+  'max-md:group-data-[phone-layout=tab-bar]/rail:min-w-0 max-md:group-data-[phone-layout=tab-bar]/rail:shrink';
 
 /**
  * Constant VARIANTS
@@ -385,17 +385,6 @@ export class CwAppRailItem {
   );
 
   /**
-   * Property rail
-   *
-   * @description
-   * The rail holding the item, whose `phoneLayout` decides the layout below 768 px.
-   *
-   * @type {CwAppRail | null}
-   * @readonly
-   */
-  private readonly rail: CwAppRail | null = inject(CwAppRail, { optional: true });
-
-  /**
    * Property classes
    *
    * @description
@@ -404,10 +393,12 @@ export class CwAppRailItem {
    * @type {Signal<string>}
    * @readonly
    */
-  protected readonly classes: Signal<string> = computed(() => {
-    if (this.rail?.phoneLayout() === 'column') return `${BASE} ${VARIANTS[this.variant()]}`;
-    return `${BASE} ${TAB_BAR_ITEM} ${VARIANTS[this.variant()]}${this.desktopOnly() ? ' max-md:hidden' : ''}`;
-  });
+  protected readonly classes: Signal<string> = computed(
+    () =>
+      `${BASE} ${TAB_BAR_ITEM} ${VARIANTS[this.variant()]}${
+        this.desktopOnly() ? ' max-md:group-data-[phone-layout=tab-bar]/rail:hidden' : ''
+      }`,
+  );
   // #endregion
 
   // #region Constructor
