@@ -371,15 +371,30 @@ describe('CwInputOtp', () => {
   });
 });
 
+/**
+ * Component OtpHost
+ *
+ * @description
+ * Holds a bare code field. A host keeps the field inside a TestBed root that teardown removes: the
+ * field clears its host `id`, so as the root it would stay in the document and leak into the next
+ * spec files of the worker.
+ */
+@Component({
+  imports: [CwInputOtp],
+  template: '<cw-input-otp />',
+})
+class OtpHost {}
+
 describe('provideCwInputOtpLabels', () => {
   it('renders provided text', () => {
     TestBed.configureTestingModule({
       providers: [provideCwInputOtpLabels({ ariaLabel: 'One-time code' })],
     });
-    const fixture: ComponentFixture<CwInputOtp> = TestBed.createComponent(CwInputOtp);
+    const fixture: ComponentFixture<OtpHost> = TestBed.createComponent(OtpHost);
     fixture.detectChanges();
     expect(
       (fixture.nativeElement as HTMLElement).querySelector('input')?.getAttribute('aria-label'),
     ).toBe('One-time code');
+    fixture.destroy();
   });
 });

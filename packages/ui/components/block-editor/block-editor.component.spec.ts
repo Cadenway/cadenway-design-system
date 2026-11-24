@@ -7,7 +7,7 @@ import { of } from 'rxjs';
 
 import { provideCwBlockEditorLabels } from './block-editor.providers';
 import { CwBlockEditor } from './block-editor.component';
-import type { CwMentionPerson, CwMentionSearch } from './block-editor.types';
+import type { CwBlockType, CwMentionPerson, CwMentionSearch } from './block-editor.types';
 
 /* jsdom has no layout: the engine measures the caret when it scrolls it into view, Floating UI
    watches sizes. These stand-ins only answer with empty boxes. */
@@ -582,12 +582,58 @@ describe('provideCwBlockEditorLabels', () => {
 });
 
 describe('block editor block type input', () => {
-  it('shapes the slash suggestions while the toolbar keeps the provided block types', async () => {
-    const fixture: ComponentFixture<CwBlockEditor> = TestBed.createComponent(CwBlockEditor);
-    fixture.componentRef.setInput('blockTypes', [{ kind: 'p', label: 'Custom text' }]);
+  /**
+   * Component BlockTypesHost
+   *
+   * @description
+   * Holds an editor given only `blockTypes`. A host keeps the editor inside a TestBed root that
+   * teardown removes: the editor clears its host `id`, so as the root it would stay in the document
+   * and leak into the next spec files of the worker.
+   */
+  @Component({
+    imports: [CwBlockEditor],
+    template: '<cw-block-editor [blockTypes]="types()" />',
+  })
+  class BlockTypesHost {
+    // #region Properties
+    /**
+     * Property types
+     *
+     * @description
+     * Block types given to the editor.
+     *
+     * @type {WritableSignal<readonly CwBlockType[]>}
+     * @readonly
+     */
+    public readonly types: WritableSignal<readonly CwBlockType[]> = signal<readonly CwBlockType[]>(
+      [],
+    );
+    // #endregion
+  }
+
+  /**
+   * Function render
+   *
+   * @description
+   * Renders the editor with the given block types.
+   *
+   * @param {readonly CwBlockType[]} types - Block types given to the `blockTypes` input.
+   *
+   * @returns {Promise<ComponentFixture<BlockTypesHost>>} The rendered host.
+   */
+  async function render(types: readonly CwBlockType[]): Promise<ComponentFixture<BlockTypesHost>> {
+    const fixture: ComponentFixture<BlockTypesHost> = TestBed.createComponent(BlockTypesHost);
+    fixture.componentInstance.types.set(types);
     fixture.autoDetectChanges();
     await fixture.whenStable();
     await settle();
+    return fixture;
+  }
+
+  it('shapes the slash suggestions while the toolbar keeps the provided block types', async () => {
+    const fixture: ComponentFixture<BlockTypesHost> = await render([
+      { kind: 'p', label: 'Custom text' },
+    ]);
     const host: HTMLElement = fixture.nativeElement as HTMLElement;
     expect(() => button(host, 'Type de bloc : Custom text')).toThrow();
     const surface: HTMLElement = textbox(host, 'Contenu du document');
@@ -601,11 +647,7 @@ describe('block editor block type input', () => {
   });
 
   it('disables only the slash menu with an empty input', async () => {
-    const fixture: ComponentFixture<CwBlockEditor> = TestBed.createComponent(CwBlockEditor);
-    fixture.componentRef.setInput('blockTypes', []);
-    fixture.autoDetectChanges();
-    await fixture.whenStable();
-    await settle();
+    const fixture: ComponentFixture<BlockTypesHost> = await render([]);
     const host: HTMLElement = fixture.nativeElement as HTMLElement;
     expect(host.querySelector('[role="toolbar"]')).not.toBeNull();
     typeText(textbox(host, 'Contenu du document'), '/');

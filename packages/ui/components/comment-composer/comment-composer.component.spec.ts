@@ -662,13 +662,27 @@ describe('provideCwCommentComposerLabels', () => {
   });
 });
 
+/**
+ * Component ExplicitPlaceholderHost
+ *
+ * @description
+ * Holds a composer given an explicit placeholder. A host keeps the composer inside a TestBed root
+ * that teardown removes: the composer clears its host `id`, so as the root it would stay in the
+ * document and leak into the next spec files of the worker.
+ */
+@Component({
+  imports: [CwCommentComposer],
+  template: '<cw-comment-composer placeholder="Explicit" />',
+})
+class ExplicitPlaceholderHost {}
+
 describe('comment composer placeholder precedence', () => {
   it('uses the explicit placeholder over the provided value', async () => {
     TestBed.configureTestingModule({
       providers: [provideCwCommentComposerLabels({ placeholder: 'Provided' })],
     });
-    const fixture: ComponentFixture<CwCommentComposer> = TestBed.createComponent(CwCommentComposer);
-    fixture.componentRef.setInput('placeholder', 'Explicit');
+    const fixture: ComponentFixture<ExplicitPlaceholderHost> =
+      TestBed.createComponent(ExplicitPlaceholderHost);
     fixture.autoDetectChanges();
     await fixture.whenStable();
     const editor: CwBlockEditor = fixture.debugElement.query(By.directive(CwBlockEditor))
