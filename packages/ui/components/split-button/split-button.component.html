@@ -1,0 +1,45 @@
+<button
+  #main
+  type="button"
+  [class]="mainClasses"
+  [attr.aria-label]="label()"
+  [attr.aria-haspopup]="opensMenu() ? 'menu' : null"
+  [attr.aria-expanded]="opensMenu() ? openedBy() === 'main' : null"
+  [attr.aria-controls]="openedBy() === 'main' ? menu().panelId : null"
+  [title]="title()"
+  [disabled]="disabled()"
+  (click)="onMainClick($event)"
+>
+  <ng-content />
+  @if (arrow() && !opensMenu()) {
+    <ng-icon
+      name="phosphorArrowRightBold"
+      size="0.75rem"
+      class="-ml-0.5 shrink-0 text-muted-foreground opacity-0 transition-all group-hover/main:translate-x-0.5 group-hover/main:opacity-100 group-focus-visible/main:opacity-100 motion-reduce:transition-none"
+      aria-hidden="true"
+    />
+  }
+</button>
+<span class="w-px shrink-0 bg-input" aria-hidden="true"></span>
+<button
+  #caret
+  type="button"
+  aria-haspopup="menu"
+  [class]="toggleClasses"
+  [attr.aria-expanded]="openedBy() !== null"
+  [attr.aria-controls]="openedBy() === 'caret' ? menu().panelId : null"
+  [attr.data-state]="openedBy() !== null ? 'open' : 'closed'"
+  [attr.aria-label]="menuLabel()"
+  [title]="menuLabel()"
+  [disabled]="disabled()"
+  (click)="onCaretClick($event)"
+  (keydown)="onCaretKeydown($event)"
+>
+  <ng-icon
+    name="phosphorCaretDownBold"
+    size="0.75rem"
+    class="transition-transform duration-[420ms] ease-spring group-aria-expanded/toggle:rotate-180 motion-reduce:transition-none"
+    aria-hidden="true"
+  />
+</button>
+<ng-content select="cw-menu" />
