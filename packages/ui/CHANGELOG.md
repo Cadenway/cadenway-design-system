@@ -1,5 +1,12 @@
 # @cadenway/ui
 
+## 0.7.0
+
+### Minor Changes
+
+- ba33b3b: Add `phoneLayout` to `nav[cwAppRail]`: `tab-bar` (the default, unchanged) turns the rail into the bottom tab bar below 768 px; `column` keeps the 56 px column at every width, with its separators, groups and `desktopOnly` items, as the settings screens of the mockup do (`Compte.dc.html`, `Organisation.dc.html`); the column scrolls when it is taller than a short or landscape phone screen. The parts follow the layout through the rail's `data-phone-layout` attribute, so they also work when projected through a wrapper component; used outside a `nav[cwAppRail]`, a part no longer changes below 768 px. New type `CwAppRailPhoneLayout`.
+- 5248f10: Add two opt-in inputs to `cw-sidebar` for the application shell of the mockup (`App.dc.html`). `overlayBelow="lg"` (default `md`, the phone drawer only) also floats the expanded sidebar over the content between 768 and 1023 px, with a `shadow-md`: it starts hidden there instead of showing the icon rail, closes on Escape and on a click outside it (a transparent backdrop), stays open when an item is followed, and opens again when the window grows back to a desktop width. `backdrop="container"` (default `viewport`) makes the backdrop `absolute` inside the nearest positioned ancestor instead of `fixed` over the viewport, so it leaves out the bottom tab bar of `cw-app-rail`; use it with `overlayBelow="lg"` when controls sit beside the content panel. When a floating sidebar (the phone drawer or the tablet overlay) closes with the focus inside it, however it closes, the focus now goes back to the element that opened it, or to a visible toggle outside it, instead of staying in the inert navigation. The phone and tablet media queries now use Tailwind's rem breakpoints (`48rem`, `64rem`), so the script and the classes switch together whatever the default font size. New types `CwSidebarOverlayBelow` and `CwSidebarBackdrop`.
+
 ## 0.6.0
 
 ### Minor Changes
