@@ -533,31 +533,40 @@ describe('provideCwLocale with another calendar or digits', () => {
 });
 
 describe('locale input', () => {
-  it('gives the hint of the locale input, in the order the field parses', () => {
-    const fixture: ComponentFixture<CwDatePicker> = TestBed.createComponent(CwDatePicker);
-    fixture.componentRef.setInput('variant', 'input');
-    fixture.componentRef.setInput('ariaLabel', 'Échéance');
-    fixture.componentRef.setInput('locale', 'en-US');
+  /**
+   * Component LocaleHost
+   *
+   * @description
+   * Two typed pickers given only a `locale` input, one with its own hint. A host component keeps
+   * the pickers inside a TestBed root that teardown removes: a picker created as the root clears
+   * the root's `id` (`[attr.id]` is null on its host), and the leftover elements would leak into
+   * the next spec files of the worker.
+   */
+  @Component({
+    imports: [CwDatePicker],
+    template: `
+      <cw-date-picker ariaLabel="Échéance" variant="input" locale="en-US" />
+      <cw-date-picker
+        ariaLabel="Rappel"
+        variant="input"
+        locale="en-US"
+        inputPlaceholder="MM/DD/YYYY"
+      />
+    `,
+  })
+  class LocaleHost {}
+
+  it('gives the hint of the locale input, in the order the field parses, or keeps a given one', () => {
+    const fixture: ComponentFixture<LocaleHost> = TestBed.createComponent(LocaleHost);
     fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
     const field: HTMLInputElement = named(
-      fixture.nativeElement as HTMLElement,
+      host,
       'Échéance (mm/dd/yyyy)',
       'input',
     ) as HTMLInputElement;
 
     expect(field.placeholder).toBe('mm/dd/yyyy');
-  });
-
-  it('keeps a given hint whatever the locale', () => {
-    const fixture: ComponentFixture<CwDatePicker> = TestBed.createComponent(CwDatePicker);
-    fixture.componentRef.setInput('variant', 'input');
-    fixture.componentRef.setInput('ariaLabel', 'Échéance');
-    fixture.componentRef.setInput('locale', 'en-US');
-    fixture.componentRef.setInput('inputPlaceholder', 'MM/DD/YYYY');
-    fixture.detectChanges();
-
-    expect(
-      named(fixture.nativeElement as HTMLElement, 'Échéance (MM/DD/YYYY)', 'input'),
-    ).toBeTruthy();
+    expect(named(host, 'Rappel (MM/DD/YYYY)', 'input')).toBeTruthy();
   });
 });
