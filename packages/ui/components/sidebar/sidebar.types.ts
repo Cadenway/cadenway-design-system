@@ -20,6 +20,30 @@ export type CwSidebarState = 'expanded' | 'collapsed';
 export type CwSidebarCollapsible = 'icon' | 'offcanvas' | 'none';
 
 /**
+ * Type CwSidebarOverlayBelow
+ *
+ * @description
+ * Breakpoint under which an expanded collapsible sidebar floats over the content instead of
+ * pushing it: `md` (768 px), the phone drawer only; `lg` (1024 px), also over the content of a
+ * tablet, as the mockup's application shell does (`App.dc.html`).
+ *
+ * @type {'md' | 'lg'}
+ */
+export type CwSidebarOverlayBelow = 'md' | 'lg';
+
+/**
+ * Type CwSidebarBackdrop
+ *
+ * @description
+ * Where the backdrop of a floating sidebar spreads: the whole `viewport` (`fixed`), or the nearest
+ * positioned `container` (`absolute`), so that it leaves out what sits outside it, such as the
+ * application rail's bottom tab bar (`App.dc.html`).
+ *
+ * @type {'viewport' | 'container'}
+ */
+export type CwSidebarBackdrop = 'viewport' | 'container';
+
+/**
  * Type CwSidebarSpaceColor
  *
  * @description

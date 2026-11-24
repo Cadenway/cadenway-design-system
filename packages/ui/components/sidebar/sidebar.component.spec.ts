@@ -12,7 +12,12 @@ import { CwSidebarItem } from './sidebar-item/sidebar-item.component';
 import { CwSidebarSpace } from './sidebar-space/sidebar-space.component';
 import { CwSidebarToggle } from './sidebar-toggle/sidebar-toggle.directive';
 import { CwSidebar } from './sidebar.component';
-import type { CwSidebarCollapsible, CwSidebarState } from './sidebar.types';
+import type {
+  CwSidebarBackdrop,
+  CwSidebarCollapsible,
+  CwSidebarOverlayBelow,
+  CwSidebarState,
+} from './sidebar.types';
 
 /**
  * Component Host
@@ -34,7 +39,13 @@ import type { CwSidebarCollapsible, CwSidebarState } from './sidebar.types';
     provideIcons({ phosphorHouseBold, phosphorHouseFill, phosphorTrayBold, phosphorTrayFill }),
   ],
   template: `
-    <cw-sidebar #sidebar [(state)]="state" [collapsible]="collapsible()">
+    <cw-sidebar
+      #sidebar
+      [(state)]="state"
+      [collapsible]="collapsible()"
+      [overlayBelow]="overlayBelow()"
+      [backdrop]="backdrop()"
+    >
       <cw-sidebar-header><input aria-label="Rechercher" /></cw-sidebar-header>
       <cw-sidebar-group>
         <a cwSidebarItem href="/accueil" icon="phosphorHouseBold" active>Accueil</a>
@@ -88,6 +99,30 @@ class Host {
    * @readonly
    */
   public readonly produit: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property overlayBelow
+   *
+   * @description
+   * Breakpoint under which the sidebar floats over the content.
+   *
+   * @type {WritableSignal<CwSidebarOverlayBelow>}
+   * @readonly
+   */
+  public readonly overlayBelow: WritableSignal<CwSidebarOverlayBelow> =
+    signal<CwSidebarOverlayBelow>('md');
+
+  /**
+   * Property backdrop
+   *
+   * @description
+   * Extent of the floating sidebar's backdrop.
+   *
+   * @type {WritableSignal<CwSidebarBackdrop>}
+   * @readonly
+   */
+  public readonly backdrop: WritableSignal<CwSidebarBackdrop> =
+    signal<CwSidebarBackdrop>('viewport');
 
   /**
    * Property sprintActive
@@ -355,6 +390,23 @@ describe('CwSidebar on a phone', () => {
     expect(fixture.componentInstance.state()).toBe('collapsed');
   });
 
+  it('gives the focus back to its toggle when a followed item closes it', async () => {
+    const toggle: HTMLButtonElement = button(host, 'Déplier la barre latérale');
+    toggle.focus();
+    toggle.click();
+    await fixture.whenStable();
+    const home: HTMLAnchorElement = link(host, 'Accueil');
+    home.addEventListener('click', (event) => {
+      event.preventDefault();
+    });
+    home.focus();
+    home.click();
+    await fixture.whenStable();
+
+    expect(fixture.componentInstance.state()).toBe('collapsed');
+    expect(document.activeElement).toBe(toggle);
+  });
+
   it('closes on Escape and when an item is followed', async () => {
     fixture.componentInstance.state.set('expanded');
     await fixture.whenStable();
@@ -371,6 +423,234 @@ describe('CwSidebar on a phone', () => {
     home.click();
     await fixture.whenStable();
     expect(fixture.componentInstance.state()).toBe('collapsed');
+  });
+});
+
+describe('CwSidebar backdrop extent', () => {
+  let host: HTMLElement;
+
+  afterEach(() => {
+    host.remove();
+    Reflect.deleteProperty(window, 'matchMedia');
+  });
+
+  it('keeps the phone backdrop inside its container with backdrop="container"', async () => {
+    window.matchMedia = vi.fn((query: string) => ({
+      matches: query.includes('width < 48rem'),
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    })) as unknown as typeof window.matchMedia;
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    host = fixture.nativeElement as HTMLElement;
+    document.body.appendChild(host);
+    await fixture.whenStable();
+    fixture.componentInstance.state.set('expanded');
+    await fixture.whenStable();
+
+    expect(button(host, 'Fermer la barre latérale').classList.contains('fixed')).toBe(true);
+    fixture.componentInstance.backdrop.set('container');
+    await fixture.whenStable();
+    const backdrop: HTMLButtonElement = button(host, 'Fermer la barre latérale');
+    expect(backdrop.classList.contains('absolute')).toBe(true);
+    expect(backdrop.classList.contains('fixed')).toBe(false);
+  });
+});
+
+describe('CwSidebar on a tablet', () => {
+  let fixture: ComponentFixture<Host>;
+  let host: HTMLElement;
+
+  /**
+   * Function render
+   *
+   * @description
+   * Renders the host on a tablet (only the 768 to 1023 px query matches) with the given overlay
+   * breakpoint.
+   *
+   * @param {CwSidebarOverlayBelow} overlayBelow - Breakpoint under which the sidebar floats.
+   * @returns {Promise<void>} Resolves once the host is stable.
+   */
+  async function render(overlayBelow: CwSidebarOverlayBelow): Promise<void> {
+    window.matchMedia = vi.fn((query: string) => ({
+      matches: query.includes('48rem <= width'),
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    })) as unknown as typeof window.matchMedia;
+    fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.overlayBelow.set(overlayBelow);
+    host = fixture.nativeElement as HTMLElement;
+    document.body.appendChild(host);
+    await fixture.whenStable();
+  }
+
+  afterEach(() => {
+    host.remove();
+    Reflect.deleteProperty(window, 'matchMedia');
+  });
+
+  it('stays in the flow, expanded and without backdrop by default', async () => {
+    await render('md');
+
+    expect(fixture.componentInstance.state()).toBe('expanded');
+    expect(host.querySelector('button[aria-label="Fermer la barre latérale"]')).toBeNull();
+  });
+
+  it('starts hidden with overlayBelow="lg", not as the icon rail', async () => {
+    await render('lg');
+
+    expect(fixture.componentInstance.state()).toBe('collapsed');
+    expect(host.querySelector('nav')?.hasAttribute('inert')).toBe(true);
+    expect(host.querySelector('nav')?.classList.contains('w-0')).toBe(true);
+  });
+
+  it('floats with a shadow over a transparent backdrop that closes it', async () => {
+    await render('lg');
+    button(host, 'Déplier la barre latérale').click();
+    await fixture.whenStable();
+    const nav: HTMLElement | null = host.querySelector('nav');
+
+    expect(nav?.hasAttribute('inert')).toBe(false);
+    expect(nav?.classList.contains('shadow-md')).toBe(true);
+    const backdrop: HTMLButtonElement = button(host, 'Fermer la barre latérale');
+    expect(backdrop.classList.contains('bg-transparent')).toBe(true);
+    backdrop.click();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.state()).toBe('collapsed');
+  });
+
+  it('gives the focus back to its opener when Escape or the backdrop closes it', async () => {
+    await render('lg');
+    const toggle: HTMLButtonElement = button(host, 'Déplier la barre latérale');
+    toggle.focus();
+    toggle.click();
+    await fixture.whenStable();
+    link(host, 'Accueil').focus();
+    press(document.body, 'Escape');
+    await fixture.whenStable();
+    expect(document.activeElement).toBe(toggle);
+
+    toggle.click();
+    await fixture.whenStable();
+    link(host, 'Accueil').focus();
+    button(host, 'Fermer la barre latérale').click();
+    await fixture.whenStable();
+    expect(document.activeElement).toBe(toggle);
+  });
+
+  it('falls back to a toggle outside it when it was opened without one', async () => {
+    await render('lg');
+    fixture.componentInstance.state.set('expanded');
+    await fixture.whenStable();
+    link(host, 'Accueil').focus();
+    press(document.body, 'Escape');
+    await fixture.whenStable();
+
+    expect(document.activeElement).toBe(button(host, 'Déplier la barre latérale'));
+  });
+
+  it('gives the focus back when the bound state closes it', async () => {
+    await render('lg');
+    const toggle: HTMLButtonElement = button(host, 'Déplier la barre latérale');
+    toggle.focus();
+    toggle.click();
+    await fixture.whenStable();
+    link(host, 'Accueil').focus();
+    fixture.componentInstance.state.set('collapsed');
+    await fixture.whenStable();
+
+    expect(document.activeElement).toBe(toggle);
+  });
+
+  it('opens again at a desktop width after the tablet overlay closed it', async () => {
+    const tablet: { change: ((event: MediaQueryListEvent) => void) | null } = { change: null };
+    window.matchMedia = vi.fn((query: string) => ({
+      matches: query.includes('48rem <= width'),
+      media: query,
+      addEventListener: (_: string, handler: (event: MediaQueryListEvent) => void): void => {
+        if (query.includes('48rem <= width')) tablet.change = handler;
+      },
+      removeEventListener: vi.fn(),
+    })) as unknown as typeof window.matchMedia;
+    fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.overlayBelow.set('lg');
+    host = fixture.nativeElement as HTMLElement;
+    document.body.appendChild(host);
+    await fixture.whenStable();
+    expect(fixture.componentInstance.state()).toBe('collapsed');
+
+    tablet.change?.({ matches: false } as MediaQueryListEvent);
+    await fixture.whenStable();
+    expect(fixture.componentInstance.state()).toBe('expanded');
+  });
+
+  it('closes on Escape but stays open when an item is followed', async () => {
+    await render('lg');
+    fixture.componentInstance.state.set('expanded');
+    await fixture.whenStable();
+    const home: HTMLAnchorElement = link(host, 'Accueil');
+    home.addEventListener('click', (event) => {
+      event.preventDefault();
+    });
+    home.click();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.state()).toBe('expanded');
+
+    press(document.body, 'Escape');
+    await fixture.whenStable();
+    expect(fixture.componentInstance.state()).toBe('collapsed');
+  });
+});
+
+/**
+ * Component ConditionalToggleHost
+ *
+ * @description
+ * A shell whose toggle exists only while the sidebar is collapsed, as in the stories' frame.
+ */
+@Component({
+  imports: [CwSidebar, CwSidebarGroup, CwSidebarItem, CwSidebarToggle],
+  template: `
+    <cw-sidebar #sidebar overlayBelow="lg">
+      <cw-sidebar-group>
+        <a cwSidebarItem href="/accueil">Accueil</a>
+      </cw-sidebar-group>
+    </cw-sidebar>
+    @if (sidebar.collapsed()) {
+      <button type="button" [cwSidebarToggle]="sidebar">Basculer</button>
+    }
+  `,
+})
+class ConditionalToggleHost {}
+
+describe('CwSidebar with a toggle shown only while collapsed', () => {
+  it('focuses the toggle recreated after the sidebar closes', async () => {
+    window.matchMedia = vi.fn((query: string) => ({
+      matches: query.includes('48rem <= width'),
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    })) as unknown as typeof window.matchMedia;
+    const fixture: ComponentFixture<ConditionalToggleHost> =
+      TestBed.createComponent(ConditionalToggleHost);
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    document.body.appendChild(host);
+    try {
+      await fixture.whenStable();
+      const opener: HTMLButtonElement = button(host, 'Déplier la barre latérale');
+      opener.focus();
+      opener.click();
+      await fixture.whenStable();
+      link(host, 'Accueil').focus();
+      press(document.body, 'Escape');
+      await fixture.whenStable();
+
+      expect(document.activeElement).toBe(button(host, 'Déplier la barre latérale'));
+    } finally {
+      host.remove();
+      Reflect.deleteProperty(window, 'matchMedia');
+    }
   });
 });
 
