@@ -37,6 +37,28 @@ export type CwCodeBlockLineKind = 'default' | 'highlighted' | 'added' | 'removed
 export interface CwCodeBlockLabels {
   // #region Properties
   /**
+   * Property code
+   *
+   * @description
+   * Fallback name of the code area.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly code: string;
+
+  /**
+   * Property lines
+   *
+   * @description
+   * Formats the line count for the code area name.
+   *
+   * @type {(count: number) => string}
+   * @readonly
+   */
+  readonly lines: (count: number) => string;
+
+  /**
    * Property copyLabel
    *
    * @description

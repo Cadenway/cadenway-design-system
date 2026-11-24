@@ -78,28 +78,6 @@ export interface CwCommandLabels {
   readonly closeLabel: string;
 
   /**
-   * Property enterKey
-   *
-   * @description
-   * Displayed name of the Enter key.
-   *
-   * @type {string}
-   * @readonly
-   */
-  readonly enterKey: string;
-
-  /**
-   * Property escapeKey
-   *
-   * @description
-   * Displayed name of the Escape key.
-   *
-   * @type {string}
-   * @readonly
-   */
-  readonly escapeKey: string;
-
-  /**
    * Property listLabel
    *
    * @description

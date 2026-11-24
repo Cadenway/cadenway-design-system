@@ -1,5 +1,6 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideCwKbdLabels } from '@cadenway/ui/components/kbd';
 
 import { CwCellDef } from './cell/cell.directive';
 import { CwCellEditorDef } from './cell-editor/cell-editor.directive';
@@ -889,5 +890,18 @@ describe('provideCwDataTableTexts', () => {
     fixture.autoDetectChanges();
     await fixture.whenStable();
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('No rows');
+  });
+});
+
+describe('keyboard labels in the bulk bar', () => {
+  it('uses provided keyboard names', async () => {
+    TestBed.configureTestingModule({ providers: [provideCwKbdLabels({ delete: 'Delete' })] });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    one(host, 'checkbox', 'Sélectionner CAD-482').click();
+    await fixture.whenStable();
+    expect(one(host, 'toolbar', 'Actions sur la sélection').textContent).toContain('Delete');
   });
 });

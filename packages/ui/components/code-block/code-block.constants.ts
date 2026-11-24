@@ -9,6 +9,8 @@ import type { CwCodeBlockLabels } from './code-block.types';
  * @type {CwCodeBlockLabels}
  */
 export const CW_CODE_BLOCK_LABELS: CwCodeBlockLabels = {
+  code: 'Code',
+  lines: (count) => `${String(count)} ${count > 1 ? 'lignes' : 'ligne'}`,
   copyLabel: 'Copier le code',
   copiedLabel: 'Copié',
   addedLabel: 'ajouté',

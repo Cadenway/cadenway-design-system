@@ -256,12 +256,12 @@ export interface CwDropzoneFileLabels {
 }
 
 /**
- * Interface CwDropzoneProviderLabels
+ * Interface CwDropzoneProvidedLabels
  *
  * @description
  * Complete provider texts, including defaults for the separate title and browse inputs.
  */
-export interface CwDropzoneProviderLabels extends CwDropzoneLabels {
+export interface CwDropzoneProvidedLabels extends CwDropzoneLabels {
   // #region Properties
   /**
    * Property title

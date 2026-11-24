@@ -4,7 +4,7 @@ import { ɵprovideLabels } from '@cadenway/ui/core';
 import { DROPZONE_FILE_LABELS } from './dropzone-file-labels.token';
 import { DROPZONE_LABELS } from './dropzone-labels.token';
 import { CW_DROPZONE_FILE_LABELS, CW_DROPZONE_LABELS } from './dropzone.constants';
-import type { CwDropzoneFileLabels, CwDropzoneProviderLabels } from './dropzone.types';
+import type { CwDropzoneFileLabels, CwDropzoneProvidedLabels } from './dropzone.types';
 
 /**
  * Function provideCwDropzoneLabels
@@ -16,13 +16,13 @@ import type { CwDropzoneFileLabels, CwDropzoneProviderLabels } from './dropzone.
  * defaults (`CW_DROPZONE_LABELS`); the component's text inputs still override them. A function is
  * called once, in an injection context, when a component first reads its texts.
  *
- * @param {Partial<CwDropzoneProviderLabels> | (() => Partial<CwDropzoneProviderLabels>)} labels - Texts to replace, or a
+ * @param {Partial<CwDropzoneProvidedLabels> | (() => Partial<CwDropzoneProvidedLabels>)} labels - Texts to replace, or a
  * function returning them.
  *
- * @returns {Provider} Provider of the merged dialog texts.
+ * @returns {Provider} Provider of the merged dropzone texts.
  */
 export function provideCwDropzoneLabels(
-  labels: Partial<CwDropzoneProviderLabels> | (() => Partial<CwDropzoneProviderLabels>),
+  labels: Partial<CwDropzoneProvidedLabels> | (() => Partial<CwDropzoneProvidedLabels>),
 ): Provider {
   return ɵprovideLabels(DROPZONE_LABELS, CW_DROPZONE_LABELS, labels);
 }
@@ -31,7 +31,7 @@ export function provideCwDropzoneLabels(
  * Function provideCwDropzoneFileLabels
  *
  * @description
- * Sets the texts of every `cw-dropzone` below the injector it is provided in (the application, a
+ * Sets the texts of every `cw-dropzone-file` below the injector it is provided in (the application, a
  * route or a component subtree), for example the English source copy of an application translated
  * with `$localize`. The texts are merged over those of the parent injector, then over the French
  * defaults (`CW_DROPZONE_FILE_LABELS`); the component's text inputs still override them. A function is
@@ -40,7 +40,7 @@ export function provideCwDropzoneLabels(
  * @param {Partial<CwDropzoneFileLabels> | (() => Partial<CwDropzoneFileLabels>)} labels - Texts to replace, or a
  * function returning them.
  *
- * @returns {Provider} Provider of the merged dialog texts.
+ * @returns {Provider} Provider of the merged dropzone texts.
  */
 export function provideCwDropzoneFileLabels(
   labels: Partial<CwDropzoneFileLabels> | (() => Partial<CwDropzoneFileLabels>),

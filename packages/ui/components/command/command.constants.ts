@@ -38,8 +38,6 @@ export const CW_COMMAND_LABELS: CwCommandLabels = {
   navigateLabel: 'naviguer',
   runLabel: 'ouvrir',
   closeLabel: 'fermer',
-  enterKey: 'Entrée',
-  escapeKey: 'Échap',
   listLabel: 'Résultats',
   loadingLabel: 'Recherche…',
   resultsNone: 'Aucun résultat',

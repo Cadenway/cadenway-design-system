@@ -1,5 +1,6 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideCwKbdLabels } from '@cadenway/ui/components/kbd';
 
 import { provideCwCommandLabels } from '../command.providers';
 import { CwCommandFooter } from '../command-footer/command-footer.component';
@@ -198,13 +199,12 @@ describe('provideCwCommandLabels in the dialog', () => {
   it('renders the provided dialog and keyboard texts', async () => {
     TestBed.configureTestingModule({
       providers: [
+        provideCwKbdLabels({ enter: 'Enter', escape: 'Escape' }),
         provideCwCommandLabels({
           dialogLabel: 'Command palette',
           navigateLabel: 'navigate',
           runLabel: 'open',
           closeLabel: 'close',
-          enterKey: 'Enter',
-          escapeKey: 'Escape',
         }),
       ],
     });

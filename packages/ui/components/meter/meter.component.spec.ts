@@ -233,10 +233,17 @@ describe('CwMeter', () => {
 describe('provideCwMeterLabels', () => {
   it('renders provided text', () => {
     TestBed.configureTestingModule({
-      providers: [provideCwMeterLabels({ threshold: 'Capacity' })],
+      providers: [
+        provideCwMeterLabels({ threshold: 'Capacity', free: 'Free', unmeasured: 'Not measured' }),
+      ],
     });
     const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
     fixture.detectChanges();
-    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Capacity');
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+    expect(host.textContent).toContain('Capacity');
+    expect(host.textContent).toContain('Free');
+    expect(meterNamed(host, 'Charge de Léa Martin').getAttribute('aria-valuetext')).toBe(
+      'Not measured',
+    );
   });
 });

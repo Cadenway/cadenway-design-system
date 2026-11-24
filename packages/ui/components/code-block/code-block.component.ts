@@ -25,7 +25,12 @@ import { phosphorCheckBold, phosphorCopyBold } from '@ng-icons/phosphor-icons/bo
 import { phosphorWarningCircleFill } from '@ng-icons/phosphor-icons/fill';
 
 import { CODE_BLOCK_LABELS } from './code-block-labels.token';
-import type { CwCodeBlockLineKind, CwCodeBlockSize, CwCodeBlockVariant } from './code-block.types';
+import type {
+  CwCodeBlockLabels,
+  CwCodeBlockLineKind,
+  CwCodeBlockSize,
+  CwCodeBlockVariant,
+} from './code-block.types';
 
 /**
  * Interface Line
@@ -349,6 +354,17 @@ export class CwCodeBlock {
   public readonly copyLabel: InputSignal<string> = input(inject(CODE_BLOCK_LABELS).copyLabel);
 
   /**
+   * Property providedLabels
+   *
+   * @description
+   * Accessible area names resolved from the current injector.
+   *
+   * @type {CwCodeBlockLabels}
+   * @readonly
+   */
+  private readonly providedLabels: CwCodeBlockLabels = inject(CODE_BLOCK_LABELS);
+
+  /**
    * Property copiedLabel
    * @readonly
    *
@@ -631,8 +647,8 @@ export class CwCodeBlock {
     const given: string | null = this.ariaLabel();
     if (given) return given;
     const count: number = this.lines().length;
-    const name: string = this.filename() ?? this.language() ?? 'Code';
-    return `${name}, ${String(count)} ${count > 1 ? 'lignes' : 'ligne'}`;
+    const name: string = this.filename() ?? this.language() ?? this.providedLabels.code;
+    return `${name}, ${this.providedLabels.lines(count)}`;
   });
   // #endregion
 

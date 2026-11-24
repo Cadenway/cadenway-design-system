@@ -1,5 +1,6 @@
 import { Component, computed, input, type InputSignal, type Signal } from '@angular/core';
 import {
+  CW_STATUS_LABELS,
   CwStatusIcon,
   injectCwStatusLabels,
   type CwStatusIconSize,
@@ -116,7 +117,7 @@ export class CwStatusBadge {
    * @type {Signal<CwStatusKey>}
    */
   protected readonly current: Signal<CwStatusKey> = computed<CwStatusKey>(() =>
-    Object.hasOwn(this.labels, this.status()) ? this.status() : 'todo',
+    Object.hasOwn(CW_STATUS_LABELS, this.status()) ? this.status() : 'todo',
   );
 
   /**

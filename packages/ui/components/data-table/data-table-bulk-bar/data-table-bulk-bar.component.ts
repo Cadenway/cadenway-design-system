@@ -12,12 +12,11 @@ import {
 } from '@angular/core';
 import { FocusKeyManager } from '@angular/cdk/a11y';
 import { CwRipple, ɵFOCUS, ɵnavigateList } from '@cadenway/ui/core';
-import { CwKbd } from '@cadenway/ui/components/kbd';
+import { CwKbd, injectCwKbdLabels, type CwKbdLabels } from '@cadenway/ui/components/kbd';
 import { NgIcon } from '@ng-icons/core';
 
-import { DATA_TABLE_TEXTS } from '../data-table-texts.token';
 import { ɵCW_DATA_TABLE, type ɵCwDataTableContext } from '../data-table.token';
-import type { CwBulkAction, CwDataTableProviderTexts } from '../data-table.types';
+import type { CwBulkAction } from '../data-table.types';
 
 /* Literal class strings (DataTableComplete sheet and preview, "Barre d'actions de sélection"). */
 /**
@@ -109,10 +108,10 @@ export class CwDataTableBulkBar {
    * @description
    * Keyboard names resolved from the current injector.
    *
-   * @type {CwDataTableProviderTexts}
+   * @type {CwKbdLabels}
    * @readonly
    */
-  private readonly shortcutTexts: CwDataTableProviderTexts = inject(DATA_TABLE_TEXTS);
+  private readonly shortcutTexts: CwKbdLabels = injectCwKbdLabels();
 
   /**
    * Property ariaLabel
@@ -232,12 +231,12 @@ export class CwDataTableBulkBar {
    * @returns {string} Displayed keyboard shortcut.
    */
   protected keyLabel(key: string): string {
-    const texts: CwDataTableProviderTexts = this.shortcutTexts;
+    const texts: CwKbdLabels = this.shortcutTexts;
     const labels: Readonly<Record<string, string>> = {
-      Delete: texts.keyDelete,
-      Escape: texts.keyEscape,
-      Backspace: texts.keyBackspace,
-      Enter: texts.keyEnter,
+      Delete: texts.delete,
+      Escape: texts.escape,
+      Backspace: texts.backspace,
+      Enter: texts.enter,
     };
     return labels[key] ?? key.toUpperCase();
   }

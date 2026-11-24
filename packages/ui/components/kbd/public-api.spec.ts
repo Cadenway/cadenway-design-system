@@ -9,6 +9,7 @@ describe('@cadenway/ui/kbd public API', () => {
       'CwKbd',
       'CwKbdGroup',
       'CwShortcut',
+      'injectCwKbdLabels',
       'provideCwKbdLabels',
     ]);
   });

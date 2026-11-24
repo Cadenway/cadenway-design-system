@@ -1,7 +1,6 @@
 import { Component, inject, input, type InputSignal } from '@angular/core';
-import { CwKbd } from '@cadenway/ui/components/kbd';
+import { CwKbd, injectCwKbdLabels, type CwKbdLabels } from '@cadenway/ui/components/kbd';
 
-import type { CwCommandLabels } from '../command.types';
 import { COMMAND_LABELS } from '../command-labels.token';
 
 /**
@@ -26,10 +25,10 @@ export class CwCommandFooter {
    * @description
    * Keyboard names shown in the default footer.
    *
-   * @type {CwCommandLabels}
+   * @type {CwKbdLabels}
    * @readonly
    */
-  public readonly keyLabels: CwCommandLabels = inject(COMMAND_LABELS);
+  protected readonly keyLabels: CwKbdLabels = injectCwKbdLabels();
 
   /**
    * Property navigateLabel

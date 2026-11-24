@@ -25,7 +25,7 @@ import { ɵextensionOf, ɵformatFileSize } from '@cadenway/ui/core';
 import { DROPZONE_LABELS } from './dropzone-labels.token';
 import type {
   CwDropzoneLabels,
-  CwDropzoneProviderLabels,
+  CwDropzoneProvidedLabels,
   CwDropzoneRejection,
   CwDropzoneSize,
   CwDropzoneState,
@@ -172,10 +172,10 @@ export class CwDropzone {
    * @description
    * Texts resolved from the current injector.
    *
-   * @type {CwDropzoneProviderLabels}
+   * @type {CwDropzoneProvidedLabels}
    * @readonly
    */
-  private readonly providedLabels: CwDropzoneProviderLabels = inject(DROPZONE_LABELS);
+  private readonly providedLabels: CwDropzoneProvidedLabels = inject(DROPZONE_LABELS);
 
   /**
    * Property accept

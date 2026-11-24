@@ -121,6 +121,15 @@ describe('ɵprovideLabels', () => {
     expect(TestBed.inject(TEXTS)).toEqual({ close: 'Close', empty: 'Aucun résultat' });
   });
 
+  it('ignores undefined overrides over defaults and parent values', () => {
+    TestBed.configureTestingModule({ providers: [provideTexts({ close: 'Close' })] });
+    const child: Injector = Injector.create({
+      parent: TestBed.inject(Injector),
+      providers: [provideTexts({ close: undefined, empty: undefined })],
+    });
+    expect(child.get(TEXTS)).toEqual({ close: 'Close', empty: 'Aucun résultat' });
+  });
+
   it('calls a function override once, in an injection context', () => {
     let injector: Injector | undefined;
     const factory: () => Partial<Texts> = vi.fn(() => {

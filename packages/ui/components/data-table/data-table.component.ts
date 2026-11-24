@@ -60,7 +60,7 @@ import type {
   CwDataTableDensity,
   CwDataTableSelection,
   CwDataTableTexts,
-  CwDataTableProviderTexts,
+  CwDataTableProvidedTexts,
   CwGroupContext,
   CwSort,
   CwSortDirection,
@@ -890,10 +890,10 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * @description
    * Table texts resolved from the current injector.
    *
-   * @type {CwDataTableProviderTexts}
+   * @type {CwDataTableProvidedTexts}
    * @readonly
    */
-  private readonly providedTexts: CwDataTableProviderTexts = inject(DATA_TABLE_TEXTS);
+  private readonly providedTexts: CwDataTableProvidedTexts = inject(DATA_TABLE_TEXTS);
 
   /**
    * Property data

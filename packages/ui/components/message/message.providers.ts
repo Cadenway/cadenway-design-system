@@ -24,7 +24,7 @@ import type { CwMessageLabels, CwMessageThreadLabels, CwMessageToneLabels } from
  * @param {Partial<CwMessageLabels> | (() => Partial<CwMessageLabels>)} labels - Texts to replace, or a
  * function returning them.
  *
- * @returns {Provider} Provider of the merged dialog texts.
+ * @returns {Provider} Provider of the merged message texts.
  */
 export function provideCwMessageLabels(
   labels: Partial<CwMessageLabels> | (() => Partial<CwMessageLabels>),
@@ -36,7 +36,7 @@ export function provideCwMessageLabels(
  * Function provideCwMessageThreadLabels
  *
  * @description
- * Sets the texts of every `cw-message` below the injector it is provided in (the application, a
+ * Sets the texts of every `cw-message-thread` below the injector it is provided in (the application, a
  * route or a component subtree), for example the English source copy of an application translated
  * with `$localize`. The texts are merged over those of the parent injector, then over the French
  * defaults (`CW_MESSAGE_THREAD_LABELS`); the component's label inputs still override them. A function is
@@ -45,7 +45,7 @@ export function provideCwMessageLabels(
  * @param {Partial<CwMessageThreadLabels> | (() => Partial<CwMessageThreadLabels>)} labels - Texts to replace, or a
  * function returning them.
  *
- * @returns {Provider} Provider of the merged dialog texts.
+ * @returns {Provider} Provider of the merged message texts.
  */
 export function provideCwMessageThreadLabels(
   labels: Partial<CwMessageThreadLabels> | (() => Partial<CwMessageThreadLabels>),
@@ -57,7 +57,7 @@ export function provideCwMessageThreadLabels(
  * Function provideCwMessageToneLabels
  *
  * @description
- * Sets the texts of every `cw-message` below the injector it is provided in (the application, a
+ * Sets the texts of every `cw-message-note` below the injector it is provided in (the application, a
  * route or a component subtree), for example the English source copy of an application translated
  * with `$localize`. The texts are merged over those of the parent injector, then over the French
  * defaults (`CW_MESSAGE_TONE_LABELS`); the component's label inputs still override them. A function is
@@ -66,7 +66,7 @@ export function provideCwMessageThreadLabels(
  * @param {Partial<CwMessageToneLabels> | (() => Partial<CwMessageToneLabels>)} labels - Texts to replace, or a
  * function returning them.
  *
- * @returns {Provider} Provider of the merged dialog texts.
+ * @returns {Provider} Provider of the merged message texts.
  */
 export function provideCwMessageToneLabels(
   labels: Partial<CwMessageToneLabels> | (() => Partial<CwMessageToneLabels>),

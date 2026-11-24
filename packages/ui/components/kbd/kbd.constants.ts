@@ -21,6 +21,7 @@ export const CW_KBD_LABELS: CwKbdLabels = {
   enter: 'Entrée',
   tab: 'Tab',
   delete: 'Suppr',
+  backspace: 'Retour',
   space: 'Espace',
   upSpoken: 'Flèche haut',
   downSpoken: 'Flèche bas',

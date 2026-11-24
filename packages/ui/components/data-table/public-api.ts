@@ -28,7 +28,7 @@ export type {
   CwDataTableDensity,
   CwDataTableSelection,
   CwDataTableTexts,
-  CwDataTableProviderTexts,
+  CwDataTableProvidedTexts,
   CwGroupContext,
   CwSort,
   CwSortDirection,

@@ -526,7 +526,7 @@ export class CwMeter {
    *
    * @type {InputSignal<string>}
    */
-  public readonly freeLabel: InputSignal<string> = input('Libre');
+  public readonly freeLabel: InputSignal<string> = input(inject(METER_LABELS).free);
 
   /**
    * Property unmeasuredText
@@ -537,7 +537,7 @@ export class CwMeter {
    *
    * @type {InputSignal<string>}
    */
-  public readonly unmeasuredText: InputSignal<string> = input('Aucune mesure');
+  public readonly unmeasuredText: InputSignal<string> = input(inject(METER_LABELS).unmeasured);
 
   /**
    * Property loading

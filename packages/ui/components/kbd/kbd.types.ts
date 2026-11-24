@@ -159,6 +159,17 @@ export interface CwKbdLabels {
   readonly delete: string;
 
   /**
+   * Property backspace
+   *
+   * @description
+   * Visible name of the Backspace key.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly backspace: string;
+
+  /**
    * Property space
    *
    * @description

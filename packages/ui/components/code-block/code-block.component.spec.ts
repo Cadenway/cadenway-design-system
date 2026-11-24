@@ -223,7 +223,13 @@ describe('CwCodeBlock', () => {
 describe('provideCwCodeBlockLabels', () => {
   it('renders provided text', async () => {
     TestBed.configureTestingModule({
-      providers: [provideCwCodeBlockLabels({ copyLabel: 'Copy code' })],
+      providers: [
+        provideCwCodeBlockLabels({
+          copyLabel: 'Copy code',
+          code: 'Source',
+          lines: (count) => `${String(count)} ${count === 1 ? 'line' : 'lines'}`,
+        }),
+      ],
     });
     const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
     fixture.detectChanges();
@@ -231,5 +237,10 @@ describe('provideCwCodeBlockLabels', () => {
     expect(
       (fixture.nativeElement as HTMLElement).querySelector('button[aria-label="Copy code"]'),
     ).not.toBeNull();
+    expect(area(fixture.nativeElement as HTMLElement, 'bash, 1 line')).toBeTruthy();
+    const block: ComponentFixture<CwCodeBlock> = TestBed.createComponent(CwCodeBlock);
+    block.componentRef.setInput('code', 'hello');
+    block.detectChanges();
+    expect(area(block.nativeElement as HTMLElement, 'Source, 1 line')).toBeTruthy();
   });
 });

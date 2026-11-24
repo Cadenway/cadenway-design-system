@@ -9,5 +9,7 @@ import type { CwMeterLabels } from './meter.types';
  * @type {CwMeterLabels}
  */
 export const CW_METER_LABELS: CwMeterLabels = {
+  free: 'Libre',
+  unmeasured: 'Aucune mesure',
   threshold: 'Capacité',
 };

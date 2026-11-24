@@ -9,7 +9,7 @@ import type { CwBadgeLabels } from './badge.types';
  * Function provideCwBadgeLabels
  *
  * @description
- * Sets the texts of every `cw-badge` below the injector it is provided in (the application, a
+ * Sets the texts of every icon-only `cw-priority-badge` below the injector it is provided in (the application, a
  * route or a component subtree), for example the English source copy of an application translated
  * with `$localize`. The texts are merged over those of the parent injector, then over the French
  * defaults (`CW_BADGE_LABELS`); a priority badge's `ariaLabel` input still overrides them. A function is

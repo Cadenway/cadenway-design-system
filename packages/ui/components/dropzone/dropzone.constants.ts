@@ -1,4 +1,4 @@
-import type { CwDropzoneFileLabels, CwDropzoneProviderLabels } from './dropzone.types';
+import type { CwDropzoneFileLabels, CwDropzoneProvidedLabels } from './dropzone.types';
 
 /**
  * Constant CW_DROPZONE_LABELS
@@ -6,9 +6,9 @@ import type { CwDropzoneFileLabels, CwDropzoneProviderLabels } from './dropzone.
  * @description
  * Default French labels for dropzone states and limits.
  *
- * @type {CwDropzoneProviderLabels}
+ * @type {CwDropzoneProvidedLabels}
  */
-export const CW_DROPZONE_LABELS: CwDropzoneProviderLabels = {
+export const CW_DROPZONE_LABELS: CwDropzoneProvidedLabels = {
   title: 'Déposez des fichiers',
   browse: 'parcourez',
   max: 'max',

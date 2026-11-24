@@ -1,5 +1,5 @@
 import type {
-  CwDataTableProviderTexts,
+  CwDataTableProvidedTexts,
   CwDataTableTexts,
   CwSortDirection,
 } from './data-table.types';
@@ -48,20 +48,16 @@ export const CW_DATA_TABLE_TEXTS: CwDataTableTexts = {
 };
 
 /**
- * Constant CW_DATA_TABLE_PROVIDER_TEXTS
+ * Constant CW_DATA_TABLE_PROVIDED_TEXTS
  *
  * @description
- * Complete provider defaults, including shortcut names from the DataTableComplete sheet.
+ * Complete provider defaults, including the empty-state text.
  *
- * @type {CwDataTableProviderTexts}
+ * @type {CwDataTableProvidedTexts}
  */
-export const CW_DATA_TABLE_PROVIDER_TEXTS: CwDataTableProviderTexts = {
+export const CW_DATA_TABLE_PROVIDED_TEXTS: CwDataTableProvidedTexts = {
   ...CW_DATA_TABLE_TEXTS,
   emptyText: 'Aucune tâche ne correspond',
-  keyDelete: 'Suppr',
-  keyEscape: 'Échap',
-  keyBackspace: 'Retour',
-  keyEnter: 'Entrée',
 };
 
 /**

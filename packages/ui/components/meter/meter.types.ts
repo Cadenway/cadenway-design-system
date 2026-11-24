@@ -79,6 +79,28 @@ export type CwMeterFormat = (value: number, max: number) => string;
 export interface CwMeterLabels {
   // #region Properties
   /**
+   * Property free
+   *
+   * @description
+   * Legend label for the remaining capacity.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly free: string;
+
+  /**
+   * Property unmeasured
+   *
+   * @description
+   * Accessible text for an unmeasured value.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly unmeasured: string;
+
+  /**
    * Property threshold
    *
    * @description

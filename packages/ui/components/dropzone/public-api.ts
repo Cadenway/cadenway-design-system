@@ -12,7 +12,7 @@ export type {
   CwDropzoneFileLabels,
   CwDropzoneFileState,
   CwDropzoneLabels,
-  CwDropzoneProviderLabels,
+  CwDropzoneProvidedLabels,
   CwDropzoneRejectReason,
   CwDropzoneRejection,
   CwDropzoneSize,

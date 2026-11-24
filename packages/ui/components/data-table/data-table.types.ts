@@ -802,12 +802,12 @@ export interface CwDataTableTexts {
 }
 
 /**
- * Interface CwDataTableProviderTexts
+ * Interface CwDataTableProvidedTexts
  *
  * @description
- * Complete provider texts, including empty-state and keyboard shortcut labels.
+ * Complete provider texts, including the empty-state label.
  */
-export interface CwDataTableProviderTexts extends CwDataTableTexts {
+export interface CwDataTableProvidedTexts extends CwDataTableTexts {
   // #region Properties
   /**
    * Property emptyText
@@ -819,49 +819,5 @@ export interface CwDataTableProviderTexts extends CwDataTableTexts {
    * @readonly
    */
   readonly emptyText: string;
-
-  /**
-   * Property keyDelete
-   *
-   * @description
-   * Displayed name of the Delete key.
-   *
-   * @type {string}
-   * @readonly
-   */
-  readonly keyDelete: string;
-
-  /**
-   * Property keyEscape
-   *
-   * @description
-   * Displayed name of the Escape key.
-   *
-   * @type {string}
-   * @readonly
-   */
-  readonly keyEscape: string;
-
-  /**
-   * Property keyBackspace
-   *
-   * @description
-   * Displayed name of the Backspace key.
-   *
-   * @type {string}
-   * @readonly
-   */
-  readonly keyBackspace: string;
-
-  /**
-   * Property keyEnter
-   *
-   * @description
-   * Displayed name of the Enter key.
-   *
-   * @type {string}
-   * @readonly
-   */
-  readonly keyEnter: string;
   // #endregion
 }

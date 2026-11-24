@@ -43,7 +43,8 @@ export function ɵlabelsToken<T extends object>(
  * Builds the provider behind every `provideCw…Labels` function. The overrides are merged over the
  * texts of the parent injector (or over `defaults` at the root), so an application provides its
  * texts once and a route or a component subtree can still replace a few of them. A brick's own
- * `labels` or text inputs keep precedence over what is provided.
+ * `labels` or text inputs keep precedence over what is provided. Supply one provider per injector;
+ * multiple providers in the same injector do not merge, and the last one wins.
  *
  * Shared across the entry points of `@cadenway/ui`; not public API (`ɵ` prefix).
  *
@@ -78,5 +79,8 @@ export function ɵprovideLabels<T extends object>(
  * @returns {Partial<T>} The texts to merge.
  */
 function resolveOverrides<T extends object>(overrides: ɵLabelsOverrides<T>): Partial<T> {
-  return typeof overrides === 'function' ? overrides() : overrides;
+  const values: Partial<T> = typeof overrides === 'function' ? overrides() : overrides;
+  return Object.fromEntries(
+    Object.entries(values).filter((entry: [string, unknown]) => entry[1] !== undefined),
+  ) as Partial<T>;
 }
