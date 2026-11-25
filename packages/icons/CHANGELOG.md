@@ -1,5 +1,11 @@
 # @cadenway/icons
 
+## 0.4.0
+
+### Minor Changes
+
+- 2929a60: Register `phosphorTrayFill`, the active twin of the inbox tray, so a current inbox item draws the Fill weight as the other applications do.
+
 ## 0.3.0
 
 ### Minor Changes
