@@ -18,6 +18,7 @@ import { ɵFOCUS, ɵFOCUS_INSET } from '@cadenway/ui/core';
 import { TAB } from '../tab.token';
 import { CwTabsList } from '../tabs-list/tabs-list.component';
 import { CwTabs } from '../tabs.component';
+import { requiredInputBound } from '../tabs-bound';
 import type { CwTabsLayout, CwTabsSize } from '../tabs.types';
 
 /* Literal class strings (Tabs sheet and preview of the Design System artifact), so Tailwind finds
@@ -167,14 +168,7 @@ export class CwTab {
    *
    * @type {Signal<boolean>}
    */
-  public readonly bound: Signal<boolean> = computed(() => {
-    try {
-      void this.value();
-      return true;
-    } catch {
-      return false;
-    }
-  });
+  public readonly bound: Signal<boolean> = requiredInputBound(this.value);
 
   /**
    * Property disabled

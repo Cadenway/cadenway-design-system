@@ -543,12 +543,14 @@ export interface CwGroupDef {
    * Property value
    *
    * @description
-   * The group value, compared with `String(row[groupBy])`.
+   * The group value: null and undefined become an empty key, dates use the configured locale,
+   * and other values use the same text conversion as the table cells. The resulting key is emitted
+   * by `rowAdd`.
    *
-   * @type {string}
+   * @type {unknown}
    * @readonly
    */
-  readonly value: string;
+  readonly value: unknown;
 
   /**
    * Property label
@@ -598,7 +600,7 @@ export interface CwGroupContext {
    * Property $implicit
    *
    * @description
-   * The group value (`String(row[groupBy])`).
+   * The formatted group key, as described by `CwGroupDef.value`.
    *
    * @type {string}
    * @readonly

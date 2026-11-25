@@ -217,7 +217,7 @@ export const Keyboard: Story = {
 
 /**
  * The four presences of the user menu (mockup `App.dc.html`, « Statut »): online, away, do not
- * disturb with its bar, invisible with a faded dot; at every size, always read in the hidden text.
+ * disturb with its bar, invisible with a hollow dot; at every size, always read in the hidden text.
  */
 export const PresenceStates: Story = {
   render: () => ({
@@ -234,8 +234,27 @@ export const PresenceStates: Story = {
       </div>`,
   }),
   play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
-    const scope: HTMLElement = light(canvasElement);
-    await expect(within(scope).getAllByText('Léa Petit (ne pas déranger)')).toHaveLength(4);
-    await expect(within(scope).getAllByText('Inès Roux (invisible)')).toHaveLength(4);
+    const scopes: NodeListOf<HTMLElement> =
+      canvasElement.querySelectorAll<HTMLElement>('section[data-theme]');
+    await expect(scopes).toHaveLength(2);
+    for (const scope of scopes) {
+      await expect(within(scope).getAllByText('Léa Petit (ne pas déranger)')).toHaveLength(4);
+      const invisible: HTMLElement[] = within(scope).getAllByText('Inès Roux (invisible)');
+      await expect(invisible).toHaveLength(4);
+      for (const label of invisible) {
+        const dot: HTMLElement | null = label.nextElementSibling as HTMLElement | null;
+        if (!dot) throw new Error('Presence dot missing');
+        await expect(getComputedStyle(dot).backgroundColor).toBe('rgba(0, 0, 0, 0)');
+        await expect(parseFloat(getComputedStyle(dot).borderTopWidth)).toBeGreaterThan(0);
+      }
+      for (const label of within(scope).getAllByText('Léa Petit (ne pas déranger)')) {
+        const dot: HTMLElement | null = label.nextElementSibling as HTMLElement | null;
+        const bar: HTMLElement | null = dot?.firstElementChild as HTMLElement | null;
+        if (!dot || !bar) throw new Error('Presence bar missing');
+        await expect(bar.getBoundingClientRect().width).toBeGreaterThanOrEqual(
+          dot.getBoundingClientRect().width / 2,
+        );
+      }
+    }
   },
 };

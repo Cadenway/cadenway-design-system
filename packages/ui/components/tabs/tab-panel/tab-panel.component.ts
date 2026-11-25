@@ -12,6 +12,7 @@ import { ɵFOCUS } from '@cadenway/ui/core';
 
 import { TAB_PANEL } from '../tab-panel.token';
 import { CwTabs } from '../tabs.component';
+import { requiredInputBound } from '../tabs-bound';
 
 /**
  * Constant HORIZONTAL
@@ -82,14 +83,7 @@ export class CwTabPanel {
    *
    * @type {Signal<boolean>}
    */
-  public readonly bound: Signal<boolean> = computed(() => {
-    try {
-      void this.value();
-      return true;
-    } catch {
-      return false;
-    }
-  });
+  public readonly bound: Signal<boolean> = requiredInputBound(this.value);
 
   /**
    * Property root

@@ -380,6 +380,10 @@ export const CreatedActive: Story = {
               <button cwTab [value]="saved">{{ saved }}</button>
             }
           </cw-tabs-list>
+          <cw-tab-panel value="liste">Liste</cw-tab-panel>
+          @for (saved of views; track saved) {
+            <cw-tab-panel [value]="saved">{{ saved }}</cw-tab-panel>
+          }
         </cw-tabs>
         <button cwButton variant="ghost" size="sm" (click)="save()">Enregistrer la vue</button>
       </div>`,
@@ -391,6 +395,7 @@ export const CreatedActive: Story = {
     const created: HTMLElement = scope.getByRole('tab', { name: 'Vue 1' });
     await expect(created).toHaveAttribute('aria-selected', 'true');
     await expect(created).toHaveAttribute('tabindex', '0');
+    await expect(scope.getByRole('tabpanel', { name: 'Vue 1' })).toBeVisible();
     await expect(scope.getByRole('tab', { name: 'Liste' })).toHaveAttribute(
       'aria-selected',
       'false',

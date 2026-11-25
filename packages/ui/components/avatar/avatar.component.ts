@@ -59,8 +59,7 @@ const DOT_SIZES: Record<CwAvatarSize, string> = {
  * Constant DOT_COLORS
  *
  * @description
- * Presence indicator colors; `dnd` and `invisible` follow the mockup's user menu (`App.dc.html`,
- * `USER_STATUSES`: `bg-grenat`, `bg-ink-muted/50`).
+ * Presence indicator colors; the hollow invisible indicator preserves contrast against its ring.
  *
  * @type {Record<CwAvatarPresence, string>}
  */
@@ -68,7 +67,7 @@ const DOT_COLORS: Record<CwAvatarPresence, string> = {
   online: 'bg-jade',
   away: 'bg-ink-muted',
   dnd: 'bg-grenat',
-  invisible: 'bg-ink-muted/50',
+  invisible: 'border border-ink-muted bg-transparent',
 };
 
 /**
@@ -146,7 +145,7 @@ function initialsOf(name: string, locale: string): string {
  *
  * Everything comes from `name` and `src`; nothing is projected. The initials show while the photo
  * loads and come back if it fails (`imageError` emits the image's error event). The full name, the
- * presence (`online`, `away`, `dnd` with a bar across the dot, `invisible` with a faded one) and the
+ * presence (`online`, `away`, `dnd` with a bar across the dot, `invisible` with a hollow one) and the
  * deactivated state are always in a visually hidden text and in the `title`, never
  * carried by color alone; the photo has `alt=""` so the name is not read twice. Inside a
  * `cw-avatar-group` the avatar takes the group's size, is ringed with the background and is hidden

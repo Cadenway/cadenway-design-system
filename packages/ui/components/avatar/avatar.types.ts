@@ -13,7 +13,7 @@ export type CwAvatarSize = 'xs' | 'sm' | 'default' | 'lg';
  *
  * @description
  * Presence shown by the dot: online, away, do not disturb (`dnd`, a bar across the dot) or
- * invisible (connected but shown offline, a faded dot), as the statuses of the mockup's user menu
+ * invisible (connected but shown offline, a hollow dot), as the statuses of the mockup's user menu
  * (`App.dc.html`, `USER_STATUSES`); a null input means offline and shows no dot.
  *
  * @type {'online' | 'away' | 'dnd' | 'invisible'}

@@ -659,14 +659,13 @@ export const DeclaredGroups: Story = {
         { value: 'todo', count: 23 },
       ],
       added: '',
-      moved: (task: { id: string }): string | null =>
-        task.id === 'CAD-471' ? 'animate-row-in' : null,
+      moved: (task: { id: string }): 'in' | null => (task.id === 'CAD-471' ? 'in' : null),
     },
     template: `
       <div class="grid w-full gap-2">
         <cw-data-table class="w-full" ariaLabel="Tâches de Produit" [data]="tasks" groupBy="status"
                        [groups]="groups" [groupLabel]="statusLabel" [page]="null" [rowLabel]="rowLabel"
-                       [rowClass]="moved" addRow (rowAdd)="added = $event">
+                       [rowMotion]="moved" addRow (rowAdd)="added = $event">
           ${GROUP}
           ${COLUMNS}
         </cw-data-table>
@@ -771,6 +770,9 @@ export const PhoneGrid: Story = {
     const name: HTMLElement | null = row.querySelector('[data-cw-col="name"]');
     const due: HTMLElement | null = row.querySelector('[data-cw-col="due"]');
     if (!name || !due) throw new Error('Phone grid cells missing');
+    await expect(
+      Math.abs(due.getBoundingClientRect().right - row.getBoundingClientRect().right),
+    ).toBeLessThan(2);
     name.focus();
     await userEvent.keyboard('{End}');
     await expect(due).toHaveFocus();

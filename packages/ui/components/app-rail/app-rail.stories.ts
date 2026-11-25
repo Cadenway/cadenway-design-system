@@ -1,3 +1,4 @@
+import { provideCadenwayIcons } from '@cadenway/icons';
 import { CwAvatar } from '@cadenway/ui/components/avatar';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -19,7 +20,6 @@ import {
   phosphorFileTextFill,
   phosphorHouseFill,
   phosphorSquaresFourFill,
-  phosphorTrayFill,
 } from '@ng-icons/phosphor-icons/fill';
 import {
   type Meta,
@@ -76,6 +76,7 @@ const meta: Meta = {
     }),
     applicationConfig({
       providers: [
+        provideCadenwayIcons(),
         provideIcons({
           phosphorChartBarBold,
           phosphorChartBarFill,
@@ -93,7 +94,6 @@ const meta: Meta = {
           phosphorSquaresFourFill,
           phosphorTargetBold,
           phosphorTrayBold,
-          phosphorTrayFill,
         }),
       ],
     }),

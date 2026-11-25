@@ -1803,7 +1803,10 @@ describe('keyboard labels in the bulk bar', () => {
       [groupLabel]="groupLabel"
       [addRow]="addRow()"
       [texts]="texts()"
-      [rowClass]="rowClass"
+      [rowMotion]="rowMotion"
+      [filtered]="filtered()"
+      [loading]="loading()"
+      [error]="error()"
       [phoneLayout]="phoneLayout()"
       [phoneColumns]="['estimate']"
       [(collapsed)]="collapsed"
@@ -1850,6 +1853,39 @@ class ListHost {
    * @readonly
    */
   public readonly groupBy: WritableSignal<string | null> = signal<string | null>('status');
+
+  /**
+   * Property filtered
+   *
+   * @description
+   * Whether the consumer applies a search or filter.
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  public readonly filtered: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property loading
+   *
+   * @description
+   * Whether rows are loading.
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  public readonly loading: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property error
+   *
+   * @description
+   * Error shown in place of the rows.
+   *
+   * @type {WritableSignal<string | null>}
+   * @readonly
+   */
+  public readonly error: WritableSignal<string | null> = signal<string | null>(null);
 
   /**
    * Property groups
@@ -1948,16 +1984,16 @@ class ListHost {
     ({ progress: 'En cours', blocked: 'Bloqué' })[key] ?? key;
 
   /**
-   * Property rowClass
+   * Property rowMotion
    *
    * @description
    * Marks the row that has just moved.
    *
-   * @type {(task: Task) => string | null}
+   * @type {(task: Task) => 'in' | null}
    * @readonly
    */
-  public readonly rowClass: (task: Task) => string | null = (task: Task): string | null =>
-    task.id === 'CAD-471' ? 'animate-row-in' : null;
+  public readonly rowMotion: (task: Task) => 'in' | null = (task: Task): 'in' | null =>
+    task.id === 'CAD-471' ? 'in' : null;
   // #endregion
 }
 
@@ -2010,6 +2046,37 @@ describe('CwDataTable list view', () => {
   });
 
   describe('declared groups', () => {
+    it('uses the same converted keys for declared values, rows and add events', async () => {
+      const date: Date = new Date(2026, 10, 18);
+      for (const [value, expected] of [
+        [null, ''],
+        [undefined, ''],
+        [date, date.toLocaleDateString('fr-FR')],
+      ] as const) {
+        component.groups.set([{ value, label: 'Groupe' }]);
+        component.data.set([
+          { id: '1', name: 'Valeur', status: value, estimate: 1 } as unknown as Task,
+        ]);
+        await fixture.whenStable();
+        expect(groupNames(host)).toEqual(['Groupe 1']);
+        addButtons(host)[0].click();
+        expect(component.added.at(-1)).toBe(expected);
+      }
+    });
+
+    it('shows the empty state for an empty filtered grouped or flat result', async () => {
+      component.data.set([]);
+      component.filtered.set(true);
+      await fixture.whenStable();
+      expect(host.textContent).toContain('Aucune tâche');
+      expect(groupNames(host)).toHaveLength(0);
+      expect(addButtons(host)).toHaveLength(0);
+      component.groupBy.set(null);
+      await fixture.whenStable();
+      expect(host.textContent).toContain('Aucune tâche');
+      expect(addButtons(host)).toHaveLength(0);
+    });
+
     it('renders the declared groups in order with their counts, empty ones included', () => {
       expect(groupNames(host)).toEqual(['À faire 12', 'En cours 30', 'En revue 0', 'Bloqué 1']);
     });
@@ -2084,7 +2151,7 @@ describe('CwDataTable list view', () => {
     });
   });
 
-  it('adds the classes of rowClass to a data row', () => {
+  it('applies the requested row entrance motion', () => {
     const moved: HTMLElement | undefined = dataRows(host).find((row) =>
       row.textContent.includes('Migrer les pièces jointes'),
     );
@@ -2126,7 +2193,7 @@ describe('CwDataTable list view', () => {
           window.dispatchEvent(new Event('resize'));
           await fixture.whenStable();
           expect(cells[2].tabIndex).toBe(-1);
-          expect(document.activeElement).not.toBe(cells[2]);
+          expect(document.activeElement).toBe(cells[1]);
           cells[3].focus();
           key(cells[3], { key: 'Home' });
           await fixture.whenStable();
@@ -2151,7 +2218,7 @@ describe('CwDataTable list view', () => {
           component.phoneLayout.set('grid');
           await fixture.whenStable();
           expect(cells[2].tabIndex).toBe(-1);
-          expect(document.activeElement).not.toBe(cells[2]);
+          expect(document.activeElement).toBe(cells[1]);
         } finally {
           if (original) Object.defineProperty(window, 'matchMedia', original);
           else Reflect.deleteProperty(window, 'matchMedia');
@@ -2242,6 +2309,16 @@ describe('CwDataTable list view', () => {
       await scrollTo(400 * 36 - 600);
       expect(component.nearEnds()).toBe(2);
     });
+
+    for (const state of ['loading', 'error'] as const) {
+      it(`suppresses nearEnd while ${state} is active`, async () => {
+        if (state === 'loading') component.loading.set(true);
+        else component.error.set('Erreur');
+        await fixture.whenStable();
+        await scrollTo(200 * 36 - 600);
+        expect(component.nearEnds()).toBe(0);
+      });
+    }
 
     it('stays silent outside virtual mode', async () => {
       component.virtual.set(false);

@@ -53,6 +53,8 @@ const config: StorybookConfig = {
         '@angular/forms',
         '@angular/forms/signals',
         '@ng-icons/core',
+        '@ng-icons/flag-icons',
+        '@ng-icons/svgl',
         '@ng-icons/phosphor-icons/bold',
         '@ng-icons/phosphor-icons/fill',
       ],

@@ -1125,7 +1125,7 @@ function defaultTrackBy(row: unknown): string {
  * Component CwDataTable
  *
  * @description
- * The list of a view: a grid that sorts, groups, selects, edits and pages generic rows of 32, 36 or 44 px (DataTable and DataTableComplete sheets of the Design System artifact; mockup `App.dc.html` list view, `Organisation.dc.html` members). Columns come from `columns` (`CwColumnDef<T>[]`) or from `cw-data-table-column` children, which also bring the `ng-template[cwCell]` and `ng-template[cwCellEditor]` templates. Rows are identified by `trackBy` (`row.id` by default); `sort`, `selection`, `collapsed`, `density`, `page`, `pageSize`, `columnWidths`, `columnOrder` and `columnVisibility` are models. Without `manual` the table sorts (`value(row)` or `row[key]`, French collation, empty values last) and pages `data` itself; with `manual` the consumer sorts and pages on the server, passes the page in `data` and the count in `total`. `groupBy` folds rows by `String(row[groupBy])`, groups in `groupOrder` then in order of appearance; `groups` declares groups ahead of them, rendered even when empty and counted with their declared `count`; `ng-template[cwDataTableGroup]` draws the group label; `addRow` ends each open group with an « Ajouter une tâche » row that emits `rowAdd`. Bulk actions, statuses and labels belong to the consumer: the selection bar appears with `bulkActions` (or a projected `cw-data-table-bulk-bar`) and emits `bulkAction`. Keyboard (one tab stop, roving over the cells): arrows, Home / End, Ctrl + Home / End, Page Up / Down; Space ticks the row, Shift + Space or Shift + click selects a range from the anchor, Shift + ↑ ↓ extends, Ctrl + A ticks the page, Escape empties the selection; Enter opens the row or the editor of an editable cell, F2 the editor; in an editor Escape cancels and Tab moves to the next editable cell; ← → fold a group row; Enter / Space on a header sorts, Shift adds a criterion; Ctrl + Shift + ← → moves a column. The controls of the active cell are reached with Tab. A resize handle takes ← → (8 px, Shift 32 px), Home / End and Enter (fit to content). Announcements go through the CDK `LiveAnnouncer`. `rowClass` adds the consumer's motion or state classes to a row. In `virtual` mode `nearEnd` asks for the next page when the window nears the last line. Under 768 px the rows become cards, or with `phoneLayout="grid"` a compact grid of the first data column and the `phoneColumns`, under its header.
+ * The list of a view: a grid that sorts, groups, selects, edits and pages generic rows of 32, 36 or 44 px (DataTable and DataTableComplete sheets of the Design System artifact; mockup `App.dc.html` list view, `Organisation.dc.html` members). Columns come from `columns` (`CwColumnDef<T>[]`) or from `cw-data-table-column` children, which also bring the `ng-template[cwCell]` and `ng-template[cwCellEditor]` templates. Rows are identified by `trackBy` (`row.id` by default); `sort`, `selection`, `collapsed`, `density`, `page`, `pageSize`, `columnWidths`, `columnOrder` and `columnVisibility` are models. Without `manual` the table sorts (`value(row)` or `row[key]`, French collation, empty values last) and pages `data` itself; with `manual` the consumer sorts and pages on the server, passes the page in `data` and the count in `total`. `groupBy` folds rows by the displayed group key (empty for null or undefined; dates formatted in the configured locale), groups in `groupOrder` then in order of appearance; `groups` declares groups ahead of them, rendered even when empty and counted with their declared `count`; `ng-template[cwDataTableGroup]` draws the group label; `addRow` ends each open group with an « Ajouter une tâche » row that emits `rowAdd`. Bulk actions, statuses and labels belong to the consumer: the selection bar appears with `bulkActions` (or a projected `cw-data-table-bulk-bar`) and emits `bulkAction`. Keyboard (one tab stop, roving over the cells): arrows, Home / End, Ctrl + Home / End, Page Up / Down; Space ticks the row, Shift + Space or Shift + click selects a range from the anchor, Shift + ↑ ↓ extends, Ctrl + A ticks the page, Escape empties the selection; Enter opens the row or the editor of an editable cell, F2 the editor; in an editor Escape cancels and Tab moves to the next editable cell; ← → fold a group row; Enter / Space on a header sorts, Shift adds a criterion; Ctrl + Shift + ← → moves a column. The controls of the active cell are reached with Tab. A resize handle takes ← → (8 px, Shift 32 px), Home / End and Enter (fit to content). Announcements go through the CDK `LiveAnnouncer`. `rowMotion` requests the row entrance animation. In `virtual` mode `nearEnd` asks for the next page when the window nears the last line. Under 768 px the rows become cards, or with `phoneLayout="grid"` a compact grid of the first data column and the `phoneColumns`, under its header.
  */
 @Component({
   selector: 'cw-data-table',
@@ -1260,19 +1260,31 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
   >(null);
 
   /**
-   * Property rowClass
+   * Property rowMotion
    *
    * @description
-   * Extra classes of a data row, read on each render; null or an empty string for none. Meant for
-   * motion and transient states the consumer drives, such as `animate-row-in` on a row that has
-   * just moved (mockup `App.dc.html`, `cw-row-in`), never to restyle the table.
+   * Selects the entrance animation for each row; null leaves the row static.
    *
-   * @type {InputSignal<((row: T) => string | null) | null>}
+   * @type {InputSignal<((row: T) => 'in' | null) | null>}
    * @readonly
    */
-  public readonly rowClass: InputSignal<((row: T) => string | null) | null> = input<
-    ((row: T) => string | null) | null
+  public readonly rowMotion: InputSignal<((row: T) => 'in' | null) | null> = input<
+    ((row: T) => 'in' | null) | null
   >(null);
+
+  /**
+   * Property filtered
+   *
+   * @description
+   * Indicates that the consumer supplied rows matching an active search or filter.
+   * An empty filtered result displays the empty state instead of declared groups or an add row.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   * @readonly
+   */
+  public readonly filtered: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
 
   /**
    * Property groupBy
@@ -1329,7 +1341,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * Groups declared with `groupBy`, in display order: each renders its header even without a
    * loaded row, its `label` replaces `groupLabel` and its `count` the number of loaded rows (the
    * total a paged or windowed list knows). Values of loaded rows that are not declared follow.
-   * With declared groups and no row, the groups render instead of the empty state.
+   * With declared groups and no row, the groups render instead of the empty state unless `filtered` is set.
    *
    * @type {InputSignal<readonly CwGroupDef[]>}
    * @readonly
@@ -2370,6 +2382,21 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
   );
 
   /**
+   * Property spanCount
+   *
+   * @description
+   * Physical column span in the active layout; ARIA retains the full column count.
+   *
+   * @type {Signal<number>}
+   * @readonly
+   */
+  protected readonly spanCount: Signal<number> = computed(() =>
+    this.phoneViewport() && !this.cards()
+      ? this.navigationColumns().length + (this.selectable() ? 1 : 0)
+      : this.colCount(),
+  );
+
+  /**
    * Property totalCount
    *
    * @description
@@ -2475,7 +2502,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
   private readonly declaredGroups: Signal<Map<string, CwGroupDef>> = computed(() =>
     this.groupBy() === null
       ? new Map<string, CwGroupDef>()
-      : new Map(this.groups().map((group) => [group.value, group])),
+      : new Map(this.groups().map((group) => [toText(group.value, this.locale), group])),
   );
 
   /**
@@ -3017,7 +3044,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * Property isEmpty
    *
    * @description
-   * Whether the empty state replaces the body: no row on the page and no declared group to show.
+   * Whether the empty state replaces the body, including an empty consumer-filtered result.
    *
    * @type {Signal<boolean>}
    * @readonly
@@ -3025,8 +3052,9 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
   protected readonly isEmpty: Signal<boolean> = computed(
     () =>
       this.pageRows().length === 0 &&
-      this.declaredGroups().size === 0 &&
-      !(this.groupBy() === null && this.addRow() && this.editable()),
+      (this.filtered() ||
+        (this.declaredGroups().size === 0 &&
+          !(this.groupBy() === null && this.addRow() && this.editable()))),
   );
 
   /**
@@ -3093,31 +3121,31 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * @constructor
    */
   public constructor() {
-    // nearEnd: once per approach of the end; a new `data` (the next page) or leaving the zone arms
-    // it again, so a consumer that has no more rows is not called on every scroll frame.
-    let armed: boolean = true;
-    let lastData: readonly T[] | null = null;
-    effect(() => {
-      if (!this.virtual() || this.loading() || this.error() !== null) return;
-      const data: readonly T[] = this.data();
-      const total: number = this.virtualModel().lines.length;
-      const near: boolean =
-        total > 0 && total - this.virtualWindow().end <= this.nearEndThreshold();
-      if (data !== lastData) {
-        lastData = data;
-        armed = true;
-      }
-      if (!near) {
-        armed = true;
-        return;
-      }
-      if (!armed) return;
-      armed = false;
-      untracked(() => {
-        this.nearEnd.emit();
-      });
-    });
     if (isPlatformBrowser(inject(PLATFORM_ID))) {
+      // nearEnd: once per approach of the end; a new `data` (the next page) or leaving the zone arms
+      // it again, so a consumer that has no more rows is not called on every scroll frame.
+      let armed: boolean = true;
+      let lastData: readonly T[] | null = null;
+      effect(() => {
+        if (!this.virtual() || this.loading() || this.error() !== null) return;
+        const data: readonly T[] = this.data();
+        const total: number = this.virtualModel().lines.length;
+        const near: boolean =
+          total > 0 && total - this.virtualWindow().end <= this.nearEndThreshold();
+        if (data !== lastData) {
+          lastData = data;
+          armed = true;
+        }
+        if (!near) {
+          armed = true;
+          return;
+        }
+        if (!armed) return;
+        armed = false;
+        untracked(() => {
+          this.nearEnd.emit();
+        });
+      });
       effect((onCleanup) => {
         const view: Window | null = this.host.ownerDocument.defaultView;
         if (!view) return;
@@ -3320,9 +3348,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
           );
         const target: HTMLElement | null =
           this.cellElement(active) ??
-          (hiddenActive
-            ? activeRow?.querySelector<HTMLElement>('[data-cw-cell]:not(.max-md\\:hidden)')
-            : null) ??
+          (hiddenActive && activeRow && active ? this.nearestCell(activeRow, active.col) : null) ??
           this.defaultCell();
         if (active && target && hiddenActive) {
           const col: string | undefined = target.dataset['cwCol'];
@@ -3447,14 +3473,15 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * Method rowClassesOf
    *
    * @description
-   * Builds classes for a data row: the density and phone layout classes, then `rowClass(row)`.
+   * Builds classes for a data row: the density and phone layout classes, and the requested row entrance animation.
    *
    * @param {RowEntry<T>} entry - Rendered row.
    * @returns {string} Classes for the row.
    */
   protected rowClassesOf(entry: RowEntry<T>): string {
-    const extra: string | null | undefined = this.rowClass()?.(entry.row);
-    return extra ? `${this.rowClasses()} ${extra}` : this.rowClasses();
+    return this.rowMotion()?.(entry.row) === 'in'
+      ? `${this.rowClasses()} animate-row-in`
+      : this.rowClasses();
   }
 
   /**
@@ -4661,6 +4688,34 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
   private navRows(): HTMLElement[] {
     return Array.from(
       this.tableRef().nativeElement.querySelectorAll<HTMLElement>('tr[data-cw-row]'),
+    );
+  }
+
+  /**
+   * Method nearestCell
+   *
+   * @description
+   * Finds the closest visible data column to a hidden active column, preferring the preceding one on ties.
+   *
+   * @param {HTMLElement} row - Row containing the hidden cell.
+   * @param {string} key - Hidden column key.
+   * @returns {HTMLElement | null} Nearest visible data cell.
+   */
+  private nearestCell(row: HTMLElement, key: string): HTMLElement | null {
+    const columns: ResolvedColumn<T>[] = this.visibleColumns();
+    const index: number = columns.findIndex((column) => column.key === key);
+    const candidates: ResolvedColumn<T>[] = this.navigationColumns();
+    const nearest: ResolvedColumn<T> | undefined = candidates.reduce<ResolvedColumn<T> | undefined>(
+      (best, column) =>
+        !best || Math.abs(columns.indexOf(column) - index) < Math.abs(columns.indexOf(best) - index)
+          ? column
+          : best,
+      undefined,
+    );
+    return (
+      (Array.from(row.children).find(
+        (cell) => (cell as HTMLElement).dataset['cwCol'] === nearest?.key,
+      ) as HTMLElement | undefined) ?? null
     );
   }
 
