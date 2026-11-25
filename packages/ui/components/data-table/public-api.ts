@@ -26,10 +26,12 @@ export type {
   CwColumnDef,
   CwColumnResizeEvent,
   CwDataTableDensity,
+  CwDataTablePhoneLayout,
   CwDataTableSelection,
   CwDataTableTexts,
   CwDataTableProvidedTexts,
   CwGroupContext,
+  CwGroupDef,
   CwSort,
   CwSortDirection,
 } from './data-table.types';

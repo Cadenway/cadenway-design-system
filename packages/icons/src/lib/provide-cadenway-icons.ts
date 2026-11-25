@@ -10,8 +10,9 @@ import { PHOSPHOR_FILL_ICONS } from './sets/phosphor-fill.icons';
  * The registered set, keyed by the name a template gives to `<ng-icon name="…">`, sorted by name.
  *
  * Every icon the mockup uses (docs/maquette/source/*.dc.html, literal `ng-icon` classes and the
- * script tables that feed them), one file per family under `sets/`: 217 Phosphor `Bold`, 57
- * Phosphor `Fill`, 7 svgl logos and 4 flags. No other Phosphor weight is used.
+ * script tables that feed them), one file per family under `sets/`: 217 Phosphor `Bold`, 58
+ * Phosphor `Fill` (the mockup's 57 and the inbox tray's active twin), 7 svgl logos and 4 flags. No
+ * other Phosphor weight is used.
  */
 const CADENWAY_ICONS: Record<string, string> = Object.fromEntries(
   Object.entries({

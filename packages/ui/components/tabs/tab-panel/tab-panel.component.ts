@@ -72,6 +72,26 @@ export class CwTabPanel {
   public readonly value: InputSignal<string> = input.required<string>();
 
   /**
+   * Property bound
+   * @readonly
+   *
+   * @description
+   * Whether the required `value` has been set; the set ignores a panel created by a `@for` until
+   * then, as it does for `CwTab.bound` (NG0950).
+   * @internal
+   *
+   * @type {Signal<boolean>}
+   */
+  public readonly bound: Signal<boolean> = computed(() => {
+    try {
+      void this.value();
+      return true;
+    } catch {
+      return false;
+    }
+  });
+
+  /**
    * Property root
    * @readonly
    *

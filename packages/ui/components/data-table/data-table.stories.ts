@@ -642,3 +642,129 @@ export const ReadOnly: Story = {
       </cw-data-table>`,
   }),
 };
+
+/**
+ * The list view with its default groups declared (mockup `App.dc.html`): each header reads the
+ * count the server knows, « En revue » renders without a loaded row, every open group ends with
+ * « Ajouter une tâche », and the row that has just moved plays `animate-row-in`.
+ */
+export const DeclaredGroups: Story = {
+  render: () => ({
+    props: {
+      ...PROPS,
+      groups: [
+        { value: 'progress', count: 14 },
+        { value: 'review', label: 'En revue' },
+        { value: 'blocked', count: 1 },
+        { value: 'todo', count: 23 },
+      ],
+      added: '',
+      moved: (task: { id: string }): string | null =>
+        task.id === 'CAD-471' ? 'animate-row-in' : null,
+    },
+    template: `
+      <div class="grid w-full gap-2">
+        <cw-data-table class="w-full" ariaLabel="Tâches de Produit" [data]="tasks" groupBy="status"
+                       [groups]="groups" [groupLabel]="statusLabel" [page]="null" [rowLabel]="rowLabel"
+                       [rowClass]="moved" addRow (rowAdd)="added = $event">
+          ${GROUP}
+          ${COLUMNS}
+        </cw-data-table>
+        <p class="text-sm text-muted-foreground" role="status">{{ added ? 'Nouvelle tâche dans ' + added : '' }}</p>
+      </div>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+      getAllByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement[];
+    } = within(light(canvasElement));
+    await expect(scope.getByRole('button', { name: /En cours.*14/ })).toBeInTheDocument();
+    await expect(scope.getByRole('button', { name: /En revue.*0/ })).toBeInTheDocument();
+    const adds: HTMLElement[] = scope.getAllByRole('button', { name: 'Ajouter une tâche' });
+    await expect(adds).toHaveLength(4);
+    await userEvent.click(adds[1]);
+    await expect(scope.getByRole('status')).toHaveTextContent('Nouvelle tâche dans review');
+  },
+};
+
+/**
+ * Infinite loading: the windowed list emits `nearEnd` as it nears its last loaded row and the
+ * consumer appends the next page, without listening to scroll events.
+ */
+export const LoadsNextPage: Story = {
+  render: () => {
+    const page: (from: number) => { id: string; name: string; status: string }[] = (from: number) =>
+      Array.from({ length: 100 }, (_, index: number) => ({
+        id: `CAD-${String(from + index + 1)}`,
+        name: `Préparer la tâche ${String(from + index + 1)}`,
+        status: 'todo',
+      }));
+    return {
+      props: {
+        tasks: page(0),
+        statusLabel: PROPS.statusLabel,
+        groups: [{ value: 'todo', count: 300 }],
+        more() {
+          const story: { tasks: { id: string; name: string; status: string }[] } = this as {
+            tasks: { id: string; name: string; status: string }[];
+          };
+          if (story.tasks.length < 300) story.tasks = [...story.tasks, ...page(story.tasks.length)];
+        },
+      },
+      template: `
+        <div class="flex h-96 flex-col">
+          <cw-data-table class="flex min-h-0 flex-1 flex-col" ariaLabel="Tâches à faire" [data]="tasks"
+                         groupBy="status" [groups]="groups" [groupLabel]="statusLabel" [page]="null"
+                         virtual (nearEnd)="more()">
+            <cw-data-table-column key="name" header="Nom" />
+            <cw-data-table-column key="status" header="Statut" />
+          </cw-data-table>
+        </div>`,
+    };
+  },
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const grid: HTMLElement = within(light(canvasElement)).getByRole('grid', {
+      name: 'Tâches à faire',
+    });
+    await expect(grid).toHaveAttribute('aria-rowcount', '102');
+    const scroller: HTMLElement | null = grid.parentElement;
+    if (!scroller) throw new Error('Scroller missing');
+    scroller.scrollTop = scroller.scrollHeight;
+    await waitFor(() => expect(grid).toHaveAttribute('aria-rowcount', '202'));
+  },
+};
+
+/**
+ * On a phone, `phoneLayout="grid"` keeps the three-column list of the mockup (`App.dc.html`): the
+ * checkbox, the name and the due date under their header, instead of cards.
+ */
+export const PhoneGrid: Story = {
+  parameters: { themes: false },
+  globals: { viewport: { value: 'mobile1', isRotated: false } },
+  render: () => ({
+    props: PROPS,
+    template: `
+      <div data-theme="light" class="bg-background p-4 text-foreground">
+        <cw-data-table class="w-full" ariaLabel="Tâches de Produit" [data]="tasks" groupBy="status"
+                       [groupLabel]="statusLabel" [page]="null" [rowLabel]="rowLabel"
+                       phoneLayout="grid" [phoneColumns]="['due']" addRow>
+          ${GROUP}
+          ${COLUMNS}
+        </cw-data-table>
+      </div>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+      queryByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement | null;
+    } = within(canvasElement);
+    await expect(scope.getByRole('columnheader', { name: /Échéance/ })).toBeVisible();
+    await expect(scope.getByRole('columnheader', { name: /Nom/ })).toBeVisible();
+    await expect(scope.queryByRole('columnheader', { name: /Priorité/ })).toBeNull();
+    // The first column gives up its desktop width: the three columns fit the phone.
+    const scroller: HTMLElement | null = scope.getByRole('grid', {
+      name: 'Tâches de Produit',
+    }).parentElement;
+    await expect(scroller?.scrollWidth).toBeLessThanOrEqual(scroller?.clientWidth ?? 0);
+  },
+};

@@ -15,7 +15,10 @@ import type {
   CwBulkActionEvent,
   CwCellEditEvent,
   CwColumnResizeEvent,
+  CwDataTablePhoneLayout,
   CwDataTableSelection,
+  CwDataTableTexts,
+  CwGroupDef,
   CwSort,
 } from './data-table.types';
 
@@ -1776,5 +1779,395 @@ describe('keyboard labels in the bulk bar', () => {
     one(host, 'checkbox', 'Sélectionner CAD-482').click();
     await fixture.whenStable();
     expect(one(host, 'toolbar', 'Actions sur la sélection').textContent).toContain('Delete');
+  });
+});
+
+/**
+ * Component ListHost
+ *
+ * @description
+ * Hosts the list view of the mockup: declared groups, trailing add rows, a row class, a phone
+ * layout and a windowed list that asks for its next page.
+ */
+@Component({
+  imports: [CwDataTable, CwDataTableColumn],
+  providers: [provideCwDataTableTexts({ emptyText: 'Aucune tâche' })],
+  template: `
+    <cw-data-table
+      ariaLabel="Liste Produit"
+      [page]="null"
+      [data]="data()"
+      [virtual]="virtual()"
+      groupBy="status"
+      [groups]="groups()"
+      [groupLabel]="groupLabel"
+      [addRow]="addRow()"
+      [texts]="texts()"
+      [rowClass]="rowClass"
+      [phoneLayout]="phoneLayout()"
+      [phoneColumns]="['estimate']"
+      [(collapsed)]="collapsed"
+      (rowAdd)="added.push($event)"
+      (nearEnd)="nearEnds.set(nearEnds() + 1)"
+    >
+      <cw-data-table-column key="name" header="Nom" />
+      <cw-data-table-column key="status" header="Statut" />
+      <cw-data-table-column key="estimate" header="Estimation" align="end" />
+    </cw-data-table>
+  `,
+})
+class ListHost {
+  // #region Properties
+  /**
+   * Property data
+   *
+   * @description
+   * Loaded rows.
+   *
+   * @type {WritableSignal<readonly Task[]>}
+   * @readonly
+   */
+  public readonly data: WritableSignal<readonly Task[]> = signal<readonly Task[]>(TASKS);
+
+  /**
+   * Property virtual
+   *
+   * @description
+   * Enables windowed rendering.
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  public readonly virtual: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property groups
+   *
+   * @description
+   * Declared groups with the counts the server knows.
+   *
+   * @type {WritableSignal<readonly CwGroupDef[]>}
+   * @readonly
+   */
+  public readonly groups: WritableSignal<readonly CwGroupDef[]> = signal<readonly CwGroupDef[]>([
+    { value: 'todo', label: 'À faire', count: 12 },
+    { value: 'progress', count: 30 },
+    { value: 'review', label: 'En revue' },
+  ]);
+
+  /**
+   * Property addRow
+   *
+   * @description
+   * Shows the trailing add rows.
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  public readonly addRow: WritableSignal<boolean> = signal(true);
+
+  /**
+   * Property texts
+   *
+   * @description
+   * Text overrides of the table.
+   *
+   * @type {WritableSignal<Partial<CwDataTableTexts>>}
+   * @readonly
+   */
+  public readonly texts: WritableSignal<Partial<CwDataTableTexts>> = signal<
+    Partial<CwDataTableTexts>
+  >({});
+
+  /**
+   * Property phoneLayout
+   *
+   * @description
+   * Layout below 768 px.
+   *
+   * @type {WritableSignal<CwDataTablePhoneLayout>}
+   * @readonly
+   */
+  public readonly phoneLayout: WritableSignal<CwDataTablePhoneLayout> =
+    signal<CwDataTablePhoneLayout>('cards');
+
+  /**
+   * Property collapsed
+   *
+   * @description
+   * Folded groups.
+   *
+   * @type {WritableSignal<readonly string[]>}
+   * @readonly
+   */
+  public readonly collapsed: WritableSignal<readonly string[]> = signal<readonly string[]>([]);
+
+  /**
+   * Property added
+   *
+   * @description
+   * Group values emitted by the add rows.
+   *
+   * @type {(string | null)[]}
+   * @readonly
+   */
+  public readonly added: (string | null)[] = [];
+
+  /**
+   * Property nearEnds
+   *
+   * @description
+   * Number of `nearEnd` emissions.
+   *
+   * @type {WritableSignal<number>}
+   * @readonly
+   */
+  public readonly nearEnds: WritableSignal<number> = signal(0);
+
+  /**
+   * Property groupLabel
+   *
+   * @description
+   * Labels of the undeclared status values.
+   *
+   * @type {(key: string) => string}
+   * @readonly
+   */
+  public readonly groupLabel: (key: string) => string = (key: string): string =>
+    ({ progress: 'En cours', blocked: 'Bloqué' })[key] ?? key;
+
+  /**
+   * Property rowClass
+   *
+   * @description
+   * Marks the row that has just moved.
+   *
+   * @type {(task: Task) => string | null}
+   * @readonly
+   */
+  public readonly rowClass: (task: Task) => string | null = (task: Task): string | null =>
+    task.id === 'CAD-471' ? 'animate-row-in' : null;
+  // #endregion
+}
+
+/**
+ * Function groupNames
+ *
+ * @description
+ * Reads the group header buttons in order, label and count.
+ *
+ * @param {HTMLElement} root - Rendered table.
+ * @returns {string[]} Group header texts.
+ */
+function groupNames(root: HTMLElement): string[] {
+  return Array.from(
+    root.querySelectorAll<HTMLElement>('[role="gridcell"] button[aria-expanded]'),
+  ).map((element) =>
+    Array.from(element.querySelectorAll('span'))
+      .map((part) => part.textContent.trim())
+      .join(' '),
+  );
+}
+
+/**
+ * Function addButtons
+ *
+ * @description
+ * Finds the buttons of the trailing add rows.
+ *
+ * @param {HTMLElement} root - Rendered table.
+ * @param {string} name - Accessible name of the buttons.
+ * @returns {HTMLButtonElement[]} Add buttons in document order.
+ */
+function addButtons(root: HTMLElement, name: string = 'Ajouter une tâche'): HTMLButtonElement[] {
+  return Array.from(root.querySelectorAll('button')).filter(
+    (element) => element.textContent.trim() === name,
+  );
+}
+
+describe('CwDataTable list view', () => {
+  let fixture: ComponentFixture<ListHost>;
+  let host: HTMLElement;
+  let component: ListHost;
+
+  beforeEach(async () => {
+    fixture = TestBed.createComponent(ListHost);
+    component = fixture.componentInstance;
+    host = fixture.nativeElement as HTMLElement;
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+  });
+
+  describe('declared groups', () => {
+    it('renders the declared groups in order with their counts, empty ones included', () => {
+      expect(groupNames(host)).toEqual(['À faire 12', 'En cours 30', 'En revue 0', 'Bloqué 1']);
+    });
+
+    it('renders the declared groups instead of the empty state', async () => {
+      component.data.set([]);
+      await fixture.whenStable();
+      expect(groupNames(host)).toEqual(['À faire 12', 'En cours 30', 'En revue 0']);
+      expect(host.textContent).not.toContain('Aucune tâche');
+    });
+
+    it('keeps the empty state without declared groups', async () => {
+      component.groups.set([]);
+      component.data.set([]);
+      await fixture.whenStable();
+      expect(host.textContent).toContain('Aucune tâche');
+    });
+  });
+
+  describe('trailing add rows', () => {
+    it('ends each open group with an add row, counted in the grid', async () => {
+      expect(addButtons(host)).toHaveLength(4);
+      // 4 rows, the header, 4 groups and 4 add rows.
+      expect(one(host, 'grid', 'Liste Produit').getAttribute('aria-rowcount')).toBe('13');
+      component.collapsed.set(['review']);
+      await fixture.whenStable();
+      expect(addButtons(host)).toHaveLength(3);
+    });
+
+    it('emits the group value on click and on Enter or Space on its cell', () => {
+      addButtons(host)[2].click();
+      const cell: HTMLElement = required(
+        addButtons(host)[0].closest<HTMLElement>('[role="gridcell"]'),
+      );
+      key(cell, { key: 'Enter' });
+      key(cell, { key: ' ' });
+      expect(component.added).toEqual(['review', 'todo', 'todo']);
+    });
+
+    it('takes its label from the texts', async () => {
+      component.texts.set({ addRow: 'Ajouter un membre' });
+      await fixture.whenStable();
+      expect(addButtons(host, 'Ajouter un membre')).toHaveLength(4);
+    });
+
+    it('shows no add row unless asked', async () => {
+      component.addRow.set(false);
+      await fixture.whenStable();
+      expect(addButtons(host)).toHaveLength(0);
+    });
+
+    it('is reached with the arrows like a single-cell row', async () => {
+      const review: HTMLElement = required(
+        button(host, 'En revue').closest<HTMLElement>('[role="gridcell"]'),
+      );
+      review.focus();
+      key(review, { key: 'ArrowDown' });
+      await fixture.whenStable();
+      const active: Element | null = document.activeElement;
+      expect(active?.getAttribute('data-cw-col')).toBe('add');
+      expect(active?.closest('[role="row"]')?.getAttribute('aria-rowindex')).toBe('10');
+    });
+  });
+
+  it('adds the classes of rowClass to a data row', () => {
+    const moved: HTMLElement | undefined = dataRows(host).find((row) =>
+      row.textContent.includes('Migrer les pièces jointes'),
+    );
+    expect(moved?.classList).toContain('animate-row-in');
+    expect(dataRows(host).filter((row) => row.classList.contains('animate-row-in'))).toHaveLength(
+      1,
+    );
+  });
+
+  describe('phone layout', () => {
+    it('turns rows into cards by default', () => {
+      expect(host.querySelector('thead')?.classList).toContain('max-md:hidden');
+      expect(dataRows(host)[0].classList).toContain('max-md:flex');
+    });
+
+    it('keeps a grid of the first column and the phone columns in grid mode', async () => {
+      component.phoneLayout.set('grid');
+      await fixture.whenStable();
+      expect(host.querySelector('thead')?.classList).not.toContain('max-md:hidden');
+      const [name, status, estimate]: HTMLElement[] = byRole(host, 'columnheader').slice(1);
+      expect(name.classList).not.toContain('max-md:hidden');
+      expect(status.classList).toContain('max-md:hidden');
+      expect(estimate.classList).not.toContain('max-md:hidden');
+      const row: HTMLElement = dataRows(host)[0];
+      expect(row.classList).not.toContain('max-md:flex');
+      expect(
+        byRole(row, 'gridcell').map((cell) => cell.classList.contains('max-md:hidden')),
+      ).toEqual([false, false, true, false]);
+      expect(host.querySelector('table')?.classList).not.toContain('max-md:block');
+    });
+  });
+
+  describe('nearEnd', () => {
+    /**
+     * Function scrollTo
+     *
+     * @description
+     * Scrolls the virtual scroller and waits for its measurement frame.
+     *
+     * @param {number} top - Scroll offset in pixels.
+     * @returns {Promise<void>} Promise resolved once the table settles.
+     */
+    async function scrollTo(top: number): Promise<void> {
+      const scroller: HTMLElement = required(one(host, 'grid', 'Liste Produit').parentElement);
+      Object.defineProperty(scroller, 'clientHeight', { configurable: true, value: 360 });
+      Object.defineProperty(scroller, 'scrollTop', {
+        configurable: true,
+        writable: true,
+        value: top,
+      });
+      scroller.dispatchEvent(new Event('scroll'));
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => {
+          resolve();
+        }),
+      );
+      await fixture.whenStable();
+    }
+
+    /**
+     * Function page
+     *
+     * @description
+     * Builds loaded rows of one status.
+     *
+     * @param {number} length - Number of rows.
+     * @returns {Task[]} Rows of the page.
+     */
+    function page(length: number): Task[] {
+      return Array.from({ length }, (_, index): Task => ({
+        id: String(index),
+        name: `Tâche ${String(index)}`,
+        status: 'todo',
+        estimate: index,
+      }));
+    }
+
+    beforeEach(async () => {
+      component.groups.set([{ value: 'todo', label: 'À faire', count: 400 }]);
+      component.addRow.set(false);
+      component.data.set(page(200));
+      component.virtual.set(true);
+      await fixture.whenStable();
+    });
+
+    it('fires once when the window nears the last loaded row, again after the next page', async () => {
+      expect(component.nearEnds()).toBe(0);
+      await scrollTo(200 * 36 - 600);
+      expect(component.nearEnds()).toBe(1);
+      await scrollTo(200 * 36 - 560);
+      expect(component.nearEnds()).toBe(1);
+
+      component.data.set(page(400));
+      await fixture.whenStable();
+      expect(component.nearEnds()).toBe(1);
+      await scrollTo(400 * 36 - 600);
+      expect(component.nearEnds()).toBe(2);
+    });
+
+    it('stays silent outside virtual mode', async () => {
+      component.virtual.set(false);
+      component.data.set(page(5));
+      await fixture.whenStable();
+      expect(component.nearEnds()).toBe(0);
+    });
   });
 });

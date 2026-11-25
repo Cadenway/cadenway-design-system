@@ -4,9 +4,12 @@ import { CwLabel } from '@cadenway/ui/components/label';
 import { CwSwitch } from '@cadenway/ui/components/switch';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
+  phosphorArrowRightBold,
   phosphorCalendarBlankBold,
+  phosphorCheckBold,
   phosphorCopyBold,
   phosphorQuestionBold,
+  phosphorTrayBold,
   phosphorUsersBold,
 } from '@ng-icons/phosphor-icons/bold';
 import {
@@ -49,9 +52,12 @@ const meta: Meta = {
     applicationConfig({
       providers: [
         provideIcons({
+          phosphorArrowRightBold,
           phosphorCalendarBlankBold,
+          phosphorCheckBold,
           phosphorCopyBold,
           phosphorQuestionBold,
+          phosphorTrayBold,
           phosphorUsersBold,
         }),
       ],
@@ -275,5 +281,45 @@ export const Modal: Story = {
 
     await userEvent.click(within(panel).getByRole('button', { name: 'Annuler' }));
     await waitFor(() => expect(scope.queryByRole('dialog')).toBeNull());
+  },
+};
+
+/**
+ * The inbox of the rail (mockup `App.dc.html`): 384 px, `padding="none"`, its sections drawing
+ * their own edges, its list scrolling by itself.
+ */
+export const Flush: Story = {
+  render: () => ({
+    template: `
+      <div class="h-[30rem]">
+        <button cwButton variant="ghost" size="icon" aria-label="Boîte de réception" [cwPopoverTrigger]="inbox">
+          <ng-icon name="phosphorTrayBold" />
+        </button>
+        <cw-popover #inbox side="right" align="start" size="xl" padding="none" [open]="true"
+                    [ariaLabel]="cwTheme === 'light' ? 'Boîte de réception' : 'Boîte de réception, thème sombre'">
+          <div class="flex h-11 items-center gap-2 border-b pr-2 pl-3.5">
+            <p class="text-sm font-medium">Boîte de réception</p>
+            <span class="rounded-full bg-secondary px-1.5 text-xs leading-5 font-medium tabular-nums">3</span>
+            <button cwButton variant="ghost" size="xs" class="ml-auto"><ng-icon name="phosphorCheckBold" />Tout marquer comme lu</button>
+          </div>
+          <ul class="flex max-h-[26rem] flex-col gap-px overflow-y-auto p-1">
+            @for (item of ['Hugo a commenté CAD-482', 'Léa vous a assigné CAD-479', 'CAD-471 est bloquée']; track item) {
+              <li><button type="button" class="flex w-full rounded-md px-2.5 py-2.5 text-left text-sm hover:bg-muted">{{ item }}</button></li>
+            }
+          </ul>
+          <div class="border-t p-1">
+            <button cwButton variant="ghost" size="sm" class="w-full" cwPopoverClose>Tout afficher dans l’accueil<ng-icon name="phosphorArrowRightBold" /></button>
+          </div>
+        </cw-popover>
+      </div>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const panel: HTMLElement = within(light(canvasElement)).getByRole('dialog', {
+      name: 'Boîte de réception',
+    });
+    await expect(Math.round(panel.getBoundingClientRect().width)).toBe(384);
+    // No inner padding: the header starts at the panel's 1 px border.
+    const header: HTMLElement | null = within(panel).getByText('Boîte de réception').parentElement;
+    await expect(header?.getBoundingClientRect().left).toBe(panel.getBoundingClientRect().left + 1);
   },
 };

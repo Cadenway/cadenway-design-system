@@ -12,6 +12,7 @@ import {
   Injector,
   input,
   model,
+  numberAttribute,
   output,
   signal,
   untracked,
@@ -49,7 +50,7 @@ import { CwDataTableEmpty } from './data-table-empty/data-table-empty.directive'
 import { CwDataTableGroup } from './data-table-group/data-table-group.directive';
 import { CwDataTablePagination } from './data-table-pagination/data-table-pagination.component';
 import { DATA_TABLE_TEXTS } from './data-table-texts.token';
-import { CW_DATA_TABLE_PAGE_SIZES } from './data-table.constants';
+import { CW_DATA_TABLE_PAGE_SIZES, CW_DATA_TABLE_TEXTS } from './data-table.constants';
 import { ɵCW_DATA_TABLE, type ɵCwDataTableContext } from './data-table.token';
 import type {
   CwBulkAction,
@@ -61,10 +62,12 @@ import type {
   CwColumnDef,
   CwColumnResizeEvent,
   CwDataTableDensity,
+  CwDataTablePhoneLayout,
   CwDataTableSelection,
   CwDataTableTexts,
   CwDataTableProvidedTexts,
   CwGroupContext,
+  CwGroupDef,
   CwSort,
   CwSortDirection,
 } from './data-table.types';
@@ -371,6 +374,29 @@ interface GroupEntry<T> {
    * @readonly
    */
   readonly rows: readonly RowEntry<T>[];
+
+  /**
+   * Property addKey
+   *
+   * @description
+   * Grid key of the trailing add row (`a:` and the group value).
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly addKey: string;
+
+  /**
+   * Property addIndex
+   *
+   * @description
+   * One-based `aria-rowindex` of the trailing add row; 0 when the group shows none (no `addRow`,
+   * a read-only table or a folded group).
+   *
+   * @type {number}
+   * @readonly
+   */
+  readonly addIndex: number;
   // #endregion
 }
 
@@ -747,11 +773,21 @@ interface VirtualLine<T> {
    * Property entry
    *
    * @description
-   * Data row, or null for a group header.
+   * Data row, or null for a group header or an add row.
    *
    * @type {RowEntry<T> | null}
    */
   entry: RowEntry<T> | null;
+
+  /**
+   * Property kind
+   *
+   * @description
+   * What the line draws: a group header, a data row or the trailing add row of a group.
+   *
+   * @type {'group' | 'row' | 'add'}
+   */
+  kind: 'group' | 'row' | 'add';
 
   /**
    * Property key
@@ -869,30 +905,62 @@ const VIRTUAL_HEIGHTS: Record<CwDataTableDensity, { row: number; group: number }
   comfortable: { row: 44, group: 36 },
 };
 
-/* Under 768 px the table becomes cards (mockup `styles/app.css`, `.cw-cards`): the header row
-   hides, each row wraps its cells, the first data cell takes the whole line, the last one goes to
-   the right. */
 /**
  * Constant ROW
  *
  * @description
- * Classes for data rows.
+ * Classes for data rows, in both phone layouts.
  *
  * @type {string}
  */
 const ROW: string =
-  'group/row border-b transition-colors hover:bg-accent aria-selected:bg-selected motion-reduce:transition-none ' +
+  'group/row border-b transition-colors hover:bg-accent aria-selected:bg-selected motion-reduce:transition-none';
+
+/* Under 768 px the `cards` layout turns the table into cards (mockup `styles/app.css`,
+   `.cw-cards`): the header row hides, each row wraps its cells, the first data cell takes the
+   whole line, the last one goes to the right. The `grid` layout keeps the table rows instead
+   (mockup `App.dc.html`, the three-column list on a phone). */
+/**
+ * Constant ROW_CARD
+ *
+ * @description
+ * Classes turning a data row into a card below 768 px.
+ *
+ * @type {string}
+ */
+const ROW_CARD: string =
   'max-md:flex max-md:h-auto max-md:flex-wrap max-md:items-center max-md:gap-x-3 max-md:gap-y-1.5 max-md:p-3';
+
+/**
+ * Constant CELL_BASE
+ *
+ * @description
+ * Classes for data cells, in both phone layouts.
+ *
+ * @type {string}
+ */
+const CELL_BASE: string = `align-middle overflow-hidden whitespace-nowrap ${ɵFOCUS_INSET}`;
 
 /**
  * Constant CELL
  *
  * @description
- * Classes for data cells.
+ * Classes for data cells of the `cards` phone layout.
  *
  * @type {string}
  */
-const CELL: string = `align-middle overflow-hidden whitespace-nowrap ${ɵFOCUS_INSET} max-md:p-0 max-md:overflow-visible`;
+const CELL: string = `${CELL_BASE} max-md:p-0 max-md:overflow-visible`;
+
+/**
+ * Constant ADD_BUTTON
+ *
+ * @description
+ * Classes of the button of a trailing add row (mockup `App.dc.html`, list view: a 28 px muted
+ * button with a plus).
+ *
+ * @type {string}
+ */
+const ADD_BUTTON: string = `relative isolate flex h-7 items-center gap-1.5 overflow-hidden rounded-md px-2 text-sm whitespace-nowrap text-muted-foreground transition-colors hover:bg-accent hover:text-foreground motion-reduce:transition-none ${ɵFOCUS} [&_ng-icon]:[--ng-icon__size:1rem]`;
 
 /**
  * Constant CELL_ALIGN
@@ -1057,7 +1125,7 @@ function defaultTrackBy(row: unknown): string {
  * Component CwDataTable
  *
  * @description
- * The list of a view: a grid that sorts, groups, selects, edits and pages generic rows of 32, 36 or 44 px (DataTable and DataTableComplete sheets of the Design System artifact; mockup `App.dc.html` list view, `Organisation.dc.html` members). Columns come from `columns` (`CwColumnDef<T>[]`) or from `cw-data-table-column` children, which also bring the `ng-template[cwCell]` and `ng-template[cwCellEditor]` templates. Rows are identified by `trackBy` (`row.id` by default); `sort`, `selection`, `collapsed`, `density`, `page`, `pageSize`, `columnWidths`, `columnOrder` and `columnVisibility` are models. Without `manual` the table sorts (`value(row)` or `row[key]`, French collation, empty values last) and pages `data` itself; with `manual` the consumer sorts and pages on the server, passes the page in `data` and the count in `total`. `groupBy` folds rows by `String(row[groupBy])`, groups in `groupOrder` then in order of appearance; `ng-template[cwDataTableGroup]` draws the group label. Bulk actions, statuses and labels belong to the consumer: the selection bar appears with `bulkActions` (or a projected `cw-data-table-bulk-bar`) and emits `bulkAction`. Keyboard (one tab stop, roving over the cells): arrows, Home / End, Ctrl + Home / End, Page Up / Down; Space ticks the row, Shift + Space or Shift + click selects a range from the anchor, Shift + ↑ ↓ extends, Ctrl + A ticks the page, Escape empties the selection; Enter opens the row or the editor of an editable cell, F2 the editor; in an editor Escape cancels and Tab moves to the next editable cell; ← → fold a group row; Enter / Space on a header sorts, Shift adds a criterion; Ctrl + Shift + ← → moves a column. The controls of the active cell are reached with Tab. A resize handle takes ← → (8 px, Shift 32 px), Home / End and Enter (fit to content). Announcements go through the CDK `LiveAnnouncer`. Under 768 px the rows become cards.
+ * The list of a view: a grid that sorts, groups, selects, edits and pages generic rows of 32, 36 or 44 px (DataTable and DataTableComplete sheets of the Design System artifact; mockup `App.dc.html` list view, `Organisation.dc.html` members). Columns come from `columns` (`CwColumnDef<T>[]`) or from `cw-data-table-column` children, which also bring the `ng-template[cwCell]` and `ng-template[cwCellEditor]` templates. Rows are identified by `trackBy` (`row.id` by default); `sort`, `selection`, `collapsed`, `density`, `page`, `pageSize`, `columnWidths`, `columnOrder` and `columnVisibility` are models. Without `manual` the table sorts (`value(row)` or `row[key]`, French collation, empty values last) and pages `data` itself; with `manual` the consumer sorts and pages on the server, passes the page in `data` and the count in `total`. `groupBy` folds rows by `String(row[groupBy])`, groups in `groupOrder` then in order of appearance; `groups` declares groups ahead of them, rendered even when empty and counted with their declared `count`; `ng-template[cwDataTableGroup]` draws the group label; `addRow` ends each open group with an « Ajouter une tâche » row that emits `rowAdd`. Bulk actions, statuses and labels belong to the consumer: the selection bar appears with `bulkActions` (or a projected `cw-data-table-bulk-bar`) and emits `bulkAction`. Keyboard (one tab stop, roving over the cells): arrows, Home / End, Ctrl + Home / End, Page Up / Down; Space ticks the row, Shift + Space or Shift + click selects a range from the anchor, Shift + ↑ ↓ extends, Ctrl + A ticks the page, Escape empties the selection; Enter opens the row or the editor of an editable cell, F2 the editor; in an editor Escape cancels and Tab moves to the next editable cell; ← → fold a group row; Enter / Space on a header sorts, Shift adds a criterion; Ctrl + Shift + ← → moves a column. The controls of the active cell are reached with Tab. A resize handle takes ← → (8 px, Shift 32 px), Home / End and Enter (fit to content). Announcements go through the CDK `LiveAnnouncer`. `rowClass` adds the consumer's motion or state classes to a row. In `virtual` mode `nearEnd` asks for the next page when the window nears the last line. Under 768 px the rows become cards, or with `phoneLayout="grid"` a compact grid of the first data column and the `phoneColumns`, under its header.
  */
 @Component({
   selector: 'cw-data-table',
@@ -1140,6 +1208,20 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
   });
 
   /**
+   * Property nearEndThreshold
+   *
+   * @description
+   * Number of lines (rows, group headers and add rows) between the end of the rendered window and
+   * the last line under which `nearEnd` fires; 10 by default.
+   *
+   * @type {InputSignalWithTransform<number, unknown>}
+   * @readonly
+   */
+  public readonly nearEndThreshold: InputSignalWithTransform<number, unknown> = input(10, {
+    transform: numberAttribute,
+  });
+
+  /**
    * Property columns
    *
    * @description
@@ -1175,6 +1257,21 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    */
   public readonly rowLabel: InputSignal<((row: T) => string) | null> = input<
     ((row: T) => string) | null
+  >(null);
+
+  /**
+   * Property rowClass
+   *
+   * @description
+   * Extra classes of a data row, read on each render; null or an empty string for none. Meant for
+   * motion and transient states the consumer drives, such as `animate-row-in` on a row that has
+   * just moved (mockup `App.dc.html`, `cw-row-in`), never to restyle the table.
+   *
+   * @type {InputSignal<((row: T) => string | null) | null>}
+   * @readonly
+   */
+  public readonly rowClass: InputSignal<((row: T) => string | null) | null> = input<
+    ((row: T) => string | null) | null
   >(null);
 
   /**
@@ -1224,6 +1321,60 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
   public readonly groupAddable: InputSignalWithTransform<boolean, unknown> = input(false, {
     transform: booleanAttribute,
   });
+
+  /**
+   * Property groups
+   *
+   * @description
+   * Groups declared with `groupBy`, in display order: each renders its header even without a
+   * loaded row, its `label` replaces `groupLabel` and its `count` the number of loaded rows (the
+   * total a paged or windowed list knows). Values of loaded rows that are not declared follow.
+   * With declared groups and no row, the groups render instead of the empty state.
+   *
+   * @type {InputSignal<readonly CwGroupDef[]>}
+   * @readonly
+   */
+  public readonly groups: InputSignal<readonly CwGroupDef[]> = input<readonly CwGroupDef[]>([]);
+
+  /**
+   * Property addRow
+   *
+   * @description
+   * Ends each open group (the whole list when flat) with an « Ajouter une tâche » row, when the
+   * table is editable (mockup `App.dc.html`, list view); pressing it emits `rowAdd`. Its label is
+   * `addRow` of the texts (`provideCwDataTableTexts`, `texts`).
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   * @readonly
+   */
+  public readonly addRow: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property phoneLayout
+   *
+   * @description
+   * Layout below 768 px: `cards` (default) or `grid`, a compact grid of the first data column and
+   * the `phoneColumns` under its header, the other columns hidden.
+   *
+   * @type {InputSignal<CwDataTablePhoneLayout>}
+   * @readonly
+   */
+  public readonly phoneLayout: InputSignal<CwDataTablePhoneLayout> =
+    input<CwDataTablePhoneLayout>('cards');
+
+  /**
+   * Property phoneColumns
+   *
+   * @description
+   * Keys of the columns the `grid` phone layout keeps after the first data column, which is always
+   * kept and takes the remaining width (`['due']` for the mockup's name and due date).
+   *
+   * @type {InputSignal<readonly string[]>}
+   * @readonly
+   */
+  public readonly phoneColumns: InputSignal<readonly string[]> = input<readonly string[]>([]);
 
   /**
    * Property sort
@@ -1545,6 +1696,32 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
   public readonly groupAdd: OutputEmitterRef<string> = output<string>();
 
   /**
+   * Property rowAdd
+   *
+   * @description
+   * The trailing add row of a group was pressed (click, or Enter or Space on its cell); the payload
+   * is the group value, null for a flat list.
+   *
+   * @type {OutputEmitterRef<string | null>}
+   * @readonly
+   */
+  public readonly rowAdd: OutputEmitterRef<string | null> = output<string | null>();
+
+  /**
+   * Property nearEnd
+   *
+   * @description
+   * In `virtual` mode, the rendered window came within `nearEndThreshold` lines of the last line:
+   * the consumer loads the next page without listening to scroll events. It fires once per
+   * approach and again only after `data` changes or the window moves away from the end; never
+   * while `loading` or in `error`.
+   *
+   * @type {OutputEmitterRef<void>}
+   * @readonly
+   */
+  public readonly nearEnd: OutputEmitterRef<void> = output();
+
+  /**
    * Property retry
    *
    * @description
@@ -1739,28 +1916,6 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
   private session: number = 0;
 
   /**
-   * Property rowHeight
-   *
-   * @description
-   * Row height classes for the current density.
-   *
-   * @type {Signal<string>}
-   * @readonly
-   */
-  protected readonly rowHeight: Signal<string> = computed(() => ROW_HEIGHTS[this.density()]);
-
-  /**
-   * Property groupHeight
-   *
-   * @description
-   * Group height classes for the current density.
-   *
-   * @type {Signal<string>}
-   * @readonly
-   */
-  protected readonly groupHeight: Signal<string> = computed(() => GROUP_HEIGHTS[this.density()]);
-
-  /**
    * Property rowClasses
    *
    * @description
@@ -1770,7 +1925,142 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * @readonly
    */
   protected readonly rowClasses: Signal<string> = computed(
-    () => `${ROW} ${ROW_HEIGHTS[this.density()]}`,
+    () => `${ROW} ${ROW_HEIGHTS[this.density()]}${this.cards() ? ` ${ROW_CARD}` : ''}`,
+  );
+
+  /**
+   * Property cards
+   *
+   * @description
+   * Whether rows become cards below 768 px (`phoneLayout` `cards`).
+   *
+   * @type {Signal<boolean>}
+   * @readonly
+   */
+  protected readonly cards: Signal<boolean> = computed(() => this.phoneLayout() === 'cards');
+
+  /**
+   * Property phoneBlock
+   *
+   * @description
+   * Turns a table part into a block below 768 px in the `cards` layout; empty in `grid`, where the
+   * table keeps its rows.
+   *
+   * @type {Signal<string>}
+   * @readonly
+   */
+  protected readonly phoneBlock: Signal<string> = computed(() =>
+    this.cards() ? 'max-md:block' : '',
+  );
+
+  /**
+   * Property phoneKept
+   *
+   * @description
+   * Keys of the columns the `grid` phone layout shows: the first data column and `phoneColumns`.
+   *
+   * @type {Signal<Set<string>>}
+   * @readonly
+   */
+  private readonly phoneKept: Signal<Set<string>> = computed(() => {
+    const first: string | undefined = this.visibleColumns().at(0)?.key;
+    return new Set<string>([...(first === undefined ? [] : [first]), ...this.phoneColumns()]);
+  });
+
+  /**
+   * Property theadClasses
+   *
+   * @description
+   * Classes of the header group: hidden below 768 px in the `cards` layout.
+   *
+   * @type {Signal<string>}
+   * @readonly
+   */
+  protected readonly theadClasses: Signal<string> = computed(
+    () => `sticky top-0 z-10 bg-background${this.cards() ? ' max-md:hidden' : ''}`,
+  );
+
+  /**
+   * Property groupRowClasses
+   *
+   * @description
+   * Classes of a group header row at the current density and phone layout.
+   *
+   * @type {Signal<string>}
+   * @readonly
+   */
+  protected readonly groupRowClasses: Signal<string> = computed(
+    () => `border-b bg-muted ${GROUP_HEIGHTS[this.density()]} ${this.phoneBlock()}`,
+  );
+
+  /**
+   * Property addRowClasses
+   *
+   * @description
+   * Classes of a trailing add row: one data row high.
+   *
+   * @type {Signal<string>}
+   * @readonly
+   */
+  protected readonly addRowClasses: Signal<string> = computed(
+    () => `border-b ${ROW_HEIGHTS[this.density()]} ${this.phoneBlock()}`,
+  );
+
+  /**
+   * Property addCellClasses
+   *
+   * @description
+   * Classes of the cell of an add row: its label lines up with the first data column (40 px after
+   * the selection column, as `px-10` in the mockup).
+   *
+   * @type {Signal<string>}
+   * @readonly
+   */
+  protected readonly addCellClasses: Signal<string> = computed(
+    () =>
+      `align-middle ${this.selectable() ? 'pl-10' : 'pl-1'} pr-3 ${ɵFOCUS_INSET}${
+        this.cards() ? ' max-md:block max-md:py-1' : ''
+      }`,
+  );
+
+  /**
+   * Property addButtonClasses
+   *
+   * @description
+   * Classes of the button of an add row.
+   *
+   * @type {string}
+   * @readonly
+   */
+  protected readonly addButtonClasses: string = ADD_BUTTON;
+
+  /**
+   * Property addRowLabel
+   *
+   * @description
+   * Label of the add rows, from the texts, « Ajouter une tâche » by default.
+   *
+   * @type {Signal<string>}
+   * @readonly
+   */
+  protected readonly addRowLabel: Signal<string> = computed(
+    () => this.copy().addRow ?? CW_DATA_TABLE_TEXTS.addRow,
+  );
+
+  /**
+   * Property skeletonRowClasses
+   *
+   * @description
+   * Classes of a loading row at the current density and phone layout.
+   *
+   * @type {Signal<string>}
+   * @readonly
+   */
+  protected readonly skeletonRowClasses: Signal<string> = computed(
+    () =>
+      `border-b ${ROW_HEIGHTS[this.density()]}${
+        this.cards() ? ' max-md:flex max-md:h-auto max-md:gap-3 max-md:p-3' : ''
+      }`,
   );
 
   /**
@@ -1782,8 +2072,8 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * @type {Signal<string>}
    * @readonly
    */
-  protected readonly bodyMotion: Signal<string> = computed(() =>
-    this.virtual() ? '' : BODY_MOTION,
+  protected readonly bodyMotion: Signal<string> = computed(
+    () => `${this.virtual() ? '' : BODY_MOTION} ${this.phoneBlock()}`,
   );
 
   /**
@@ -1839,7 +2129,9 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * @type {string}
    * @readonly
    */
-  protected readonly selectCellClasses: string = `${CELL} w-9 pr-1 pl-3 max-md:order-first`;
+  protected readonly selectCellClasses: Signal<string> = computed(() =>
+    this.cards() ? `${CELL} w-9 pr-1 pl-3 max-md:order-first` : `${CELL_BASE} w-9 pr-1 pl-3`,
+  );
 
   /**
    * Property selectHeadClasses
@@ -1861,7 +2153,9 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * @type {string}
    * @readonly
    */
-  protected readonly groupCellClasses: string = `px-2 align-middle ${ɵFOCUS_INSET} max-md:block max-md:py-1`;
+  protected readonly groupCellClasses: Signal<string> = computed(
+    () => `px-2 align-middle ${ɵFOCUS_INSET}${this.cards() ? ' max-md:block max-md:py-1' : ''}`,
+  );
 
   /**
    * Property groupButtonClasses
@@ -1883,7 +2177,12 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * @type {string}
    * @readonly
    */
-  protected readonly bannerCellClasses: string = `px-3 text-center align-middle text-sm ${ɵFOCUS_INSET} max-md:block max-md:py-2`;
+  protected readonly bannerCellClasses: Signal<string> = computed(
+    () =>
+      `px-3 text-center align-middle text-sm ${ɵFOCUS_INSET}${
+        this.cards() ? ' max-md:block max-md:py-2' : ''
+      }`,
+  );
 
   /**
    * Property stateCellClasses
@@ -1894,7 +2193,9 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * @type {string}
    * @readonly
    */
-  protected readonly stateCellClasses: string = `p-3 ${ɵFOCUS_INSET} max-md:block`;
+  protected readonly stateCellClasses: Signal<string> = computed(
+    () => `p-3 ${ɵFOCUS_INSET} ${this.phoneBlock()}`,
+  );
 
   /**
    * Property linkClasses
@@ -2137,10 +2438,26 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
 
   // #region Properties
   /**
+   * Property declaredGroups
+   *
+   * @description
+   * Declared groups by value, in their order; empty without `groupBy`.
+   *
+   * @type {Signal<Map<string, CwGroupDef>>}
+   * @readonly
+   */
+  private readonly declaredGroups: Signal<Map<string, CwGroupDef>> = computed(() =>
+    this.groupBy() === null
+      ? new Map<string, CwGroupDef>()
+      : new Map(this.groups().map((group) => [group.value, group])),
+  );
+
+  /**
    * Property groupIndex
    *
    * @description
-   * Group values in display order with their counts over every loaded row.
+   * Group values in display order (declared groups, `groupOrder`, then order of appearance) with
+   * their counts over every loaded row.
    *
    * @type {Signal<Map<string, number>>}
    * @readonly
@@ -2148,6 +2465,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
   private readonly groupIndex: Signal<Map<string, number>> = computed(() => {
     const counts: Map<string, number> = new Map<string, number>();
     if (this.groupBy() === null) return counts;
+    for (const key of this.declaredGroups().keys()) counts.set(key, 0);
     for (const key of this.groupOrder()) counts.set(key, 0);
     for (const row of this.sortedRows()) {
       const key: string = this.groupKeyOf(row);
@@ -2182,64 +2500,82 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
   });
 
   /**
-   * Property groups
+   * Property groupEntries
    *
    * @description
-   * Rendered groups and their rows.
+   * Rendered groups and their rows: declared groups (`groups`) first and even when empty, then the
+   * values of the loaded rows; each with its trailing add row when `addRow` applies.
    *
    * @type {Signal<readonly GroupEntry<T>[]>}
    * @readonly
    */
-  protected readonly groups: Signal<readonly GroupEntry<T>[]> = computed<readonly GroupEntry<T>[]>(
-    () => {
-      const rows: readonly T[] = this.pageRows();
-      const trackBy: (row: T) => string = this.trackBy();
-      // aria-rowindex: the header is row 1; rows of earlier pages count before this page.
-      let index: number = 1 + this.pageOffset();
-      const entry: (row: T) => RowEntry<T> = (row: T): RowEntry<T> => {
-        const id: string = trackBy(row);
-        index += 1;
-        return { row, id, key: `r:${id}`, rowIndex: index };
+  protected readonly groupEntries: Signal<readonly GroupEntry<T>[]> = computed<
+    readonly GroupEntry<T>[]
+  >(() => {
+    const rows: readonly T[] = this.pageRows();
+    const trackBy: (row: T) => string = this.trackBy();
+    const adds: boolean = this.addRow() && this.editable();
+    // aria-rowindex: the header is row 1; rows of earlier pages count before this page.
+    let index: number = 1 + this.pageOffset();
+    const entry: (row: T) => RowEntry<T> = (row: T): RowEntry<T> => {
+      const id: string = trackBy(row);
+      index += 1;
+      return { row, id, key: `r:${id}`, rowIndex: index };
+    };
+    const addIndex: () => number = (): number => {
+      if (!adds) return 0;
+      index += 1;
+      return index;
+    };
+    if (this.groupBy() === null) {
+      const entries: RowEntry<T>[] = rows.map(entry);
+      return [
+        {
+          key: null,
+          rowKey: '',
+          label: '',
+          count: rows.length,
+          collapsed: false,
+          rowIndex: 0,
+          rows: entries,
+          addKey: 'a:',
+          addIndex: addIndex(),
+        },
+      ];
+    }
+    const declared: Map<string, CwGroupDef> = this.declaredGroups();
+    const buckets: Map<string, T[]> = new Map<string, T[]>();
+    for (const key of declared.keys()) buckets.set(key, []);
+    for (const row of rows) {
+      const key: string = this.groupKeyOf(row);
+      const bucket: T[] | undefined = buckets.get(key);
+      if (bucket) bucket.push(row);
+      else buckets.set(key, [row]);
+    }
+    const collapsed: Set<string> = new Set<string>(this.collapsed());
+    const label: (key: string) => string = this.groupLabel();
+    const counts: Map<string, number> = this.groupIndex();
+    return [...buckets.entries()].map(([key, members]: [string, T[]]) => {
+      index += 1;
+      const rowIndex: number = index;
+      const folded: boolean = collapsed.has(key);
+      const definition: CwGroupDef | undefined = declared.get(key);
+      const entries: RowEntry<T>[] = folded ? [] : members.map(entry);
+      return {
+        key,
+        rowKey: `g:${key}`,
+        label: definition?.label ?? label(key),
+        count:
+          definition?.count ??
+          (this.manual() ? members.length : (counts.get(key) ?? members.length)),
+        collapsed: folded,
+        rowIndex,
+        rows: entries,
+        addKey: `a:${key}`,
+        addIndex: folded ? 0 : addIndex(),
       };
-      if (this.groupBy() === null) {
-        return [
-          {
-            key: null,
-            rowKey: '',
-            label: '',
-            count: rows.length,
-            collapsed: false,
-            rowIndex: 0,
-            rows: rows.map(entry),
-          },
-        ];
-      }
-      const buckets: Map<string, T[]> = new Map<string, T[]>();
-      for (const row of rows) {
-        const key: string = this.groupKeyOf(row);
-        const bucket: T[] | undefined = buckets.get(key);
-        if (bucket) bucket.push(row);
-        else buckets.set(key, [row]);
-      }
-      const collapsed: Set<string> = new Set<string>(this.collapsed());
-      const label: (key: string) => string = this.groupLabel();
-      const counts: Map<string, number> = this.groupIndex();
-      return [...buckets.entries()].map(([key, members]: [string, T[]]) => {
-        index += 1;
-        const rowIndex: number = index;
-        const folded: boolean = collapsed.has(key);
-        return {
-          key,
-          rowKey: `g:${key}`,
-          label: label(key),
-          count: this.manual() ? members.length : (counts.get(key) ?? members.length),
-          collapsed: folded,
-          rowIndex,
-          rows: folded ? [] : members.map(entry),
-        };
-      });
-    },
-  );
+    });
+  });
 
   /**
    * Property scheduleVirtualMeasurement
@@ -2328,18 +2664,14 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
     const mobile: boolean = this.mobileLayout();
     const measured: ReadonlyMap<string, number> = this.measuredHeights();
     const heights: { row: number; group: number } = VIRTUAL_HEIGHTS[this.density()];
-    const lines: {
-      group: GroupEntry<T>;
-      entry: RowEntry<T> | null;
-      key: string;
-      height: number;
-    }[] = [];
+    const lines: VirtualLine<T>[] = [];
     const offsets: number[] = [0];
-    for (const group of this.groups()) {
+    for (const group of this.groupEntries()) {
       if (group.key !== null)
         lines.push({
           group,
           entry: null,
+          kind: 'group',
           key: group.rowKey,
           height: heights.group,
         });
@@ -2347,9 +2679,12 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
         lines.push({
           group,
           entry,
+          kind: 'row',
           key: entry.key,
           height: heights.row,
         });
+      if (group.addIndex > 0)
+        lines.push({ group, entry: null, kind: 'add', key: group.addKey, height: heights.row });
     }
     if (mobile && measured.size > 0) {
       let rowSum: number = 0;
@@ -2358,7 +2693,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
       let groupCount: number = 0;
       for (const line of lines) {
         const height: number | undefined = measured.get(line.key);
-        if (height === undefined) continue;
+        if (height === undefined || line.kind === 'add') continue;
         if (line.entry) {
           rowSum += height;
           rowCount += 1;
@@ -2367,16 +2702,20 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
           groupCount += 1;
         }
       }
+      // An add row keeps its one-line height on a phone; rows and group headers take the mean of
+      // their measured kind, cards wrapping to unknown heights.
       for (const line of lines)
         line.height =
           measured.get(line.key) ??
-          (line.entry
-            ? rowCount
-              ? rowSum / rowCount
-              : heights.row
-            : groupCount
-              ? groupSum / groupCount
-              : heights.group);
+          (line.kind === 'add'
+            ? heights.row
+            : line.entry
+              ? rowCount
+                ? rowSum / rowCount
+                : heights.row
+              : groupCount
+                ? groupSum / groupCount
+                : heights.group);
     }
     if (!mobile) {
       for (const line of lines) line.height = measured.get(line.key) ?? line.height;
@@ -2401,7 +2740,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
       const top: number = Math.max(0, viewport.top - viewport.banner);
       const bottom: number = Math.max(
         top,
-        viewport.top + viewport.height - (viewport.mobile ? 0 : HEADER_HEIGHT) - viewport.banner,
+        viewport.top + viewport.height - this.headerOffset(viewport) - viewport.banner,
       );
       const find: (value: number) => number = (value: number): number => {
         let low: number = 0;
@@ -2501,7 +2840,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * @readonly
    */
   protected readonly displayedGroups: Signal<readonly GroupEntry<T>[]> = computed(() => {
-    if (!this.virtual()) return this.groups();
+    if (!this.virtual()) return this.groupEntries();
     const lines: VirtualLine<T>[] = this.virtualModel().lines;
     const groups: GroupEntry<T>[] = [];
     for (const index of this.virtualSegments().indices) {
@@ -2526,7 +2865,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * @readonly
    */
   private readonly renderedRows: Signal<RowEntry<T>[]> = computed(() =>
-    this.groups().flatMap((group) => group.rows),
+    this.groupEntries().flatMap((group) => group.rows),
   );
 
   /**
@@ -2652,12 +2991,14 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * Property isEmpty
    *
    * @description
-   * Checks whether a value is empty for sorting.
+   * Whether the empty state replaces the body: no row on the page and no declared group to show.
    *
    * @type {Signal<boolean>}
    * @readonly
    */
-  protected readonly isEmpty: Signal<boolean> = computed(() => this.pageRows().length === 0);
+  protected readonly isEmpty: Signal<boolean> = computed(
+    () => this.pageRows().length === 0 && this.declaredGroups().size === 0,
+  );
 
   /**
    * Property hasProjectedEmpty
@@ -2706,8 +3047,10 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * @readonly
    */
   protected readonly ariaRowCount: Signal<number> = computed(() => {
-    const groups: number = this.groupBy() === null ? 0 : this.groups().length;
-    return this.totalCount() + 1 + groups;
+    const entries: readonly GroupEntry<T>[] = this.groupEntries();
+    const groups: number = this.groupBy() === null ? 0 : entries.length;
+    const adds: number = entries.filter((group) => group.addIndex > 0).length;
+    return this.totalCount() + 1 + groups + adds;
   });
   // #endregion
 
@@ -2721,6 +3064,30 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * @constructor
    */
   public constructor() {
+    // nearEnd: once per approach of the end; a new `data` (the next page) or leaving the zone arms
+    // it again, so a consumer that has no more rows is not called on every scroll frame.
+    let armed: boolean = true;
+    let lastData: readonly T[] | null = null;
+    effect(() => {
+      if (!this.virtual() || this.loading() || this.error() !== null) return;
+      const data: readonly T[] = this.data();
+      const total: number = this.virtualModel().lines.length;
+      const near: boolean =
+        total > 0 && total - this.virtualWindow().end <= this.nearEndThreshold();
+      if (data !== lastData) {
+        lastData = data;
+        armed = true;
+      }
+      if (!near) {
+        armed = true;
+        return;
+      }
+      if (!armed) return;
+      armed = false;
+      untracked(() => {
+        this.nearEnd.emit();
+      });
+    });
     if (isPlatformBrowser(inject(PLATFORM_ID))) {
       afterNextRender(() => {
         effect(
@@ -2762,7 +3129,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
               let measured: Map<string, number> | null = reset ? new Map<string, number>() : null;
               const rows: HTMLElement[] = Array.from(
                 scroller.querySelectorAll<HTMLElement>(
-                  'tr[data-cw-row^="r:"], tr[data-cw-row^="g:"]',
+                  'tr[data-cw-row^="r:"], tr[data-cw-row^="g:"], tr[data-cw-row^="a:"]',
                 ),
               );
               const currentRows: Set<HTMLElement> = new Set<HTMLElement>(rows);
@@ -2886,7 +3253,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
     // an open editor.
     afterRenderEffect({
       write: () => {
-        this.groups();
+        this.groupEntries();
         if (this.virtual()) this.virtualSegments();
         this.visibleColumns();
         this.loading();
@@ -2936,6 +3303,8 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * @returns {string} Classes for the cell.
    */
   protected cellClasses(column: ResolvedColumn<T>, first: boolean): string {
+    if (!this.cards())
+      return `${CELL_BASE} ${CELL_ALIGN[column.align]}${this.phoneHidden(column) ? ' max-md:hidden' : ''}`;
     const card:
       'max-md:min-w-0 max-md:flex-1 max-md:basis-[calc(100%-2.5rem)]' | 'max-md:last:ml-auto' =
       first
@@ -2954,7 +3323,80 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * @returns {string} Classes for the header.
    */
   protected headClasses(column: ResolvedColumn<T>): string {
-    return `${HEAD} ${HEAD_ALIGN[column.align]}`;
+    return `${HEAD} ${HEAD_ALIGN[column.align]}${this.phoneHidden(column) ? ' max-md:hidden' : ''}`;
+  }
+
+  /**
+   * Method phoneHidden
+   *
+   * @description
+   * Whether the `grid` phone layout hides a column below 768 px.
+   *
+   * @param {ResolvedColumn<T>} column - Column involved in the operation.
+   * @returns {boolean} Whether the column is hidden on a phone.
+   */
+  protected phoneHidden(column: ResolvedColumn<T>): boolean {
+    return !this.cards() && !this.phoneKept().has(column.key);
+  }
+
+  /**
+   * Method colClasses
+   *
+   * @description
+   * Builds classes for the `col` of a data column: in the `grid` phone layout, below 768 px, a
+   * hidden column drops out and the first one gives up its width to take the remaining space
+   * (`!important` beats the inline width of the desktop layout).
+   *
+   * @param {ResolvedColumn<T>} column - Column involved in the operation.
+   * @param {boolean} first - Whether the column is the first data column.
+   * @returns {string} Classes for the column element.
+   */
+  protected colClasses(column: ResolvedColumn<T>, first: boolean): string {
+    if (this.cards()) return '';
+    if (first) return 'max-md:w-auto!';
+    return this.phoneHidden(column) ? 'max-md:hidden' : '';
+  }
+
+  /**
+   * Method skeletonCellClasses
+   *
+   * @description
+   * Builds classes for a loading cell of a data column.
+   *
+   * @param {ResolvedColumn<T>} column - Column involved in the operation.
+   * @returns {string} Classes for the loading cell.
+   */
+  protected skeletonCellClasses(column: ResolvedColumn<T>): string {
+    if (this.cards()) return 'px-3 align-middle max-md:flex-1 max-md:p-0';
+    return `px-3 align-middle${this.phoneHidden(column) ? ' max-md:hidden' : ''}`;
+  }
+
+  /**
+   * Method rowClassesOf
+   *
+   * @description
+   * Builds classes for a data row: the density and phone layout classes, then `rowClass(row)`.
+   *
+   * @param {RowEntry<T>} entry - Rendered row.
+   * @returns {string} Classes for the row.
+   */
+  protected rowClassesOf(entry: RowEntry<T>): string {
+    const extra: string | null | undefined = this.rowClass()?.(entry.row);
+    return extra ? `${this.rowClasses()} ${extra}` : this.rowClasses();
+  }
+
+  /**
+   * Method headerOffset
+   *
+   * @description
+   * Height of the sticky header inside the scroller, in pixels: none when the `cards` layout hides
+   * it on a phone.
+   *
+   * @param {VirtualViewport} viewport - Last scroller measurements.
+   * @returns {number} Header height in pixels.
+   */
+  private headerOffset(viewport: VirtualViewport): number {
+    return viewport.mobile && this.cards() ? 0 : HEADER_HEIGHT;
   }
 
   /**
@@ -3794,7 +4236,10 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
     const entry: RowEntry<T> | undefined = this.rowByKey().get(rowKey);
     const column: ResolvedColumn<T> | undefined = this.columnByKey().get(colKey);
     const group: GroupEntry<T> | undefined = rowKey.startsWith('g:')
-      ? this.groups().find((g) => g.rowKey === rowKey)
+      ? this.groupEntries().find((g) => g.rowKey === rowKey)
+      : undefined;
+    const adder: GroupEntry<T> | undefined = rowKey.startsWith('a:')
+      ? this.groupEntries().find((g) => g.addKey === rowKey)
       : undefined;
     const ctrl: boolean = event.ctrlKey || event.metaKey;
 
@@ -3837,7 +4282,8 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
       case ' ':
         if (!onCell) return;
         event.preventDefault();
-        if (group) this.toggleGroup(group);
+        if (adder) this.rowAdd.emit(adder.key);
+        else if (group) this.toggleGroup(group);
         else if (rowKey === HEADER && colKey === SELECT)
           this.toggleAll(this.headerState() !== 'checked');
         else if (rowKey === HEADER && column) this.toggleSort(column, event.shiftKey);
@@ -3849,7 +4295,8 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
       case 'Enter':
         if (!onCell) return;
         event.preventDefault();
-        if (group) this.toggleGroup(group);
+        if (adder) this.rowAdd.emit(adder.key);
+        else if (group) this.toggleGroup(group);
         else if (rowKey === HEADER && column) this.toggleSort(column, event.shiftKey);
         else if (entry && column) {
           const first: boolean = this.visibleColumns()[0]?.key === column.key;
@@ -4267,7 +4714,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
         const model: VirtualModel<T> = this.virtualModel();
         const viewport: VirtualViewport = this.viewport();
         const scroller: HTMLElement = this.scroller().nativeElement;
-        const header: number = viewport.mobile ? 0 : HEADER_HEIGHT;
+        const header: number = this.headerOffset(viewport);
         const top: number = model.offsets[index] + viewport.banner;
         const bottom: number =
           model.offsets[index + 1] + viewport.banner + header - viewport.height;

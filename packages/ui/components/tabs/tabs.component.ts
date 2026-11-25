@@ -151,13 +151,13 @@ export class CwTabs {
    * @readonly
    *
    * @description
-   * Tabs belonging to this set in document order.
+   * Tabs belonging to this set in document order, once their inputs are set (`CwTab.bound`).
    * @internal
    *
    * @type {Signal<CwTab[]>}
    */
   public readonly tabs: Signal<CwTab[]> = computed(() =>
-    this.allTabs().filter((tab) => tab.root === this),
+    this.allTabs().filter((tab) => tab.root === this && tab.bound()),
   );
 
   /**
@@ -165,13 +165,13 @@ export class CwTabs {
    * @readonly
    *
    * @description
-   * Panels belonging to this set in document order.
+   * Panels belonging to this set in document order, once their inputs are set.
    * @internal
    *
    * @type {Signal<CwTabPanel[]>}
    */
   public readonly panels: Signal<CwTabPanel[]> = computed(() =>
-    this.allPanels().filter((panel) => panel.root === this),
+    this.allPanels().filter((panel) => panel.root === this && panel.bound()),
   );
 
   /**

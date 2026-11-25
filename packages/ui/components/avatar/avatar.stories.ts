@@ -214,3 +214,28 @@ export const Keyboard: Story = {
     await expect(scope.getByRole('status')).toHaveTextContent('1 ouverture(s)');
   },
 };
+
+/**
+ * The four presences of the user menu (mockup `App.dc.html`, « Statut »): online, away, do not
+ * disturb with its bar, invisible with a faded dot; at every size, always read in the hidden text.
+ */
+export const PresenceStates: Story = {
+  render: () => ({
+    template: `
+      <div class="grid gap-3">
+        @for (size of ['xs', 'sm', 'default', 'lg']; track size) {
+          <div class="flex items-end gap-5">
+            <cw-avatar name="Camille Martin" presence="online" [size]="size" />
+            <cw-avatar name="Hugo Dubois" presence="away" [size]="size" />
+            <cw-avatar name="Léa Petit" presence="dnd" [size]="size" />
+            <cw-avatar name="Inès Roux" presence="invisible" [size]="size" />
+          </div>
+        }
+      </div>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: HTMLElement = light(canvasElement);
+    await expect(within(scope).getAllByText('Léa Petit (ne pas déranger)')).toHaveLength(4);
+    await expect(within(scope).getAllByText('Inès Roux (invisible)')).toHaveLength(4);
+  },
+};

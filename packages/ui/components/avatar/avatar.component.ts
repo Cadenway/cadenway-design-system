@@ -18,6 +18,7 @@ import { ɵLOCALE } from '@cadenway/ui/core';
 
 import type { CwAvatarProvidedLabels } from './avatar.types';
 import { AVATAR_LABELS } from './avatar-labels.token';
+import { CW_AVATAR_LABELS } from './avatar.constants';
 import type { CwAvatarGroup } from './avatar-group/avatar-group.component';
 import { AVATAR_GROUP } from './avatar-group.token';
 import { ICON_SIZES, SIZES } from './avatar.styles';
@@ -58,13 +59,32 @@ const DOT_SIZES: Record<CwAvatarSize, string> = {
  * Constant DOT_COLORS
  *
  * @description
- * Presence indicator colors for online and away states.
+ * Presence indicator colors; `dnd` and `invisible` follow the mockup's user menu (`App.dc.html`,
+ * `USER_STATUSES`: `bg-grenat`, `bg-ink-muted/50`).
  *
  * @type {Record<CwAvatarPresence, string>}
  */
 const DOT_COLORS: Record<CwAvatarPresence, string> = {
   online: 'bg-jade',
   away: 'bg-ink-muted',
+  dnd: 'bg-grenat',
+  invisible: 'bg-ink-muted/50',
+};
+
+/**
+ * Constant BAR_SIZES
+ *
+ * @description
+ * Size of the bar drawn across the do-not-disturb dot, for each avatar size (mockup `App.dc.html`,
+ * user menu: `h-[2px] w-1.5` on a 12 px dot, `h-[1.5px] w-1.5` on a 10 px one).
+ *
+ * @type {Record<CwAvatarSize, string>}
+ */
+const BAR_SIZES: Record<CwAvatarSize, string> = {
+  xs: 'h-px w-1',
+  sm: 'h-px w-1',
+  default: 'h-[1.5px] w-1.5',
+  lg: 'h-[2px] w-1.5',
 };
 
 /**
@@ -75,7 +95,8 @@ const DOT_COLORS: Record<CwAvatarPresence, string> = {
  *
  * @type {string}
  */
-const DOT: string = 'absolute right-0 bottom-0 block rounded-full ring-2 ring-background';
+const DOT: string =
+  'absolute right-0 bottom-0 flex items-center justify-center rounded-full ring-2 ring-background';
 
 /**
  * Constant DISC
@@ -125,7 +146,8 @@ function initialsOf(name: string, locale: string): string {
  *
  * Everything comes from `name` and `src`; nothing is projected. The initials show while the photo
  * loads and come back if it fails (`imageError` emits the image's error event). The full name, the
- * presence and the deactivated state are always in a visually hidden text and in the `title`, never
+ * presence (`online`, `away`, `dnd` with a bar across the dot, `invisible` with a faded one) and the
+ * deactivated state are always in a visually hidden text and in the `title`, never
  * carried by color alone; the photo has `alt=""` so the name is not read twice. Inside a
  * `cw-avatar-group` the avatar takes the group's size, is ringed with the background and is hidden
  * beyond the group's `max`. Decorative: wrap it in a `<button>` to make it clickable. Style hooks:
@@ -328,7 +350,7 @@ export class CwAvatar {
     const presence: CwAvatarPresence | null = this.presence();
     const name: string = this.name()?.trim() ?? '';
     let text: string = name === '' ? labels.unknown : name;
-    if (presence) text += ` (${labels[presence]})`;
+    if (presence) text += ` (${labels[presence] ?? CW_AVATAR_LABELS[presence]})`;
     if (this.disabled()) text += ` (${labels.disabled})`;
     return text;
   });
@@ -383,6 +405,21 @@ export class CwAvatar {
     const presence: CwAvatarPresence | null = this.presence();
     return presence ? `${DOT} ${DOT_SIZES[this.effectiveSize()]} ${DOT_COLORS[presence]}` : '';
   });
+
+  /**
+   * Property barClasses
+   * @readonly
+   *
+   * @description
+   * Classes of the bar across the do-not-disturb dot; empty for the other presences.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly barClasses: Signal<string> = computed(() =>
+    this.presence() === 'dnd'
+      ? `rounded-full bg-background ${BAR_SIZES[this.effectiveSize()]}`
+      : '',
+  );
 
   /**
    * Property hidden

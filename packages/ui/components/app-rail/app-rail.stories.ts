@@ -19,6 +19,7 @@ import {
   phosphorFileTextFill,
   phosphorHouseFill,
   phosphorSquaresFourFill,
+  phosphorTrayFill,
 } from '@ng-icons/phosphor-icons/fill';
 import {
   type Meta,
@@ -92,6 +93,7 @@ const meta: Meta = {
           phosphorSquaresFourFill,
           phosphorTargetBold,
           phosphorTrayBold,
+          phosphorTrayFill,
         }),
       ],
     }),
@@ -237,5 +239,32 @@ export const PhoneColumn: Story = {
     });
     await expect(within(rail).getByRole('button', { name: 'Thème sombre' })).toBeVisible();
     await expect(within(rail).getByRole('link', { name: 'Produit' })).toBeVisible();
+  },
+};
+
+/**
+ * The inbox open: its item is current and, without `activeIcon`, draws the tray's Fill twin
+ * (`phosphorTrayFill`, now registered by `@cadenway/icons`), as the other applications do.
+ */
+export const InboxOpen: Story = {
+  render: () => ({
+    template: `<div class="flex h-[34rem] rounded-lg border border-border bg-canvas">${RAIL.replace(
+      '<a cwAppRailItem href="#home" icon="phosphorHouseBold" current>Accueil</a>',
+      '<a cwAppRailItem href="#home" icon="phosphorHouseBold">Accueil</a>',
+    ).replace(
+      'icon="phosphorTrayBold" activeIcon="phosphorTrayBold"',
+      'icon="phosphorTrayBold" current',
+    )}</div>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const rail: HTMLElement = within(light(canvasElement)).getByRole('navigation', {
+      name: 'Applications',
+    });
+    const inbox: HTMLElement = within(rail).getByRole('button', {
+      name: 'Boîte de réception, 3 non lues',
+    });
+    await expect(inbox).toHaveAttribute('aria-current', 'page');
+    // An unregistered name renders an empty `ng-icon`: the Fill twin is drawn.
+    await expect(inbox.querySelector('ng-icon svg')).toBeInTheDocument();
   },
 };

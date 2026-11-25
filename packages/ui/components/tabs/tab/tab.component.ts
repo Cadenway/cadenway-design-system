@@ -155,6 +155,28 @@ export class CwTab {
   public readonly value: InputSignal<string> = input.required<string>();
 
   /**
+   * Property bound
+   * @readonly
+   *
+   * @description
+   * Whether the required `value` has been set. A tab created by a `@for` enters the set's query
+   * before its inputs are set; the set ignores it until then, so the bindings of its siblings never
+   * read an unset `value` (NG0950), even when the new tab is the active one. Reading the input
+   * registers the dependency before it throws, so this turns true as soon as the value arrives.
+   * @internal
+   *
+   * @type {Signal<boolean>}
+   */
+  public readonly bound: Signal<boolean> = computed(() => {
+    try {
+      void this.value();
+      return true;
+    } catch {
+      return false;
+    }
+  });
+
+  /**
    * Property disabled
    * @readonly
    *

@@ -10,9 +10,9 @@ import type {
  * @description
  * The French texts of `cw-data-table`, word for word from the DataTable sheets and the mockup (`App.dc.html`, `Organisation.dc.html`). One place, so a later `@angular/localize` extraction is mechanical; the `texts` input overrides any of them (« membres » instead of « tâches »).
  *
- * @type {CwDataTableTexts}
+ * @type {Required<CwDataTableTexts>}
  */
-export const CW_DATA_TABLE_TEXTS: CwDataTableTexts = {
+export const CW_DATA_TABLE_TEXTS: Required<CwDataTableTexts> = {
   selectAll: 'Tout sélectionner sur la page',
   selectRow: (label) => `Sélectionner ${label}`,
   selected: (count) =>
@@ -35,6 +35,7 @@ export const CW_DATA_TABLE_TEXTS: CwDataTableTexts = {
           .join(', puis par ')}`,
   groupToggled: (label, collapsed) => `Groupe ${label} ${collapsed ? 'replié' : 'déplié'}`,
   groupAdd: (label) => `Ajouter une tâche dans ${label}`,
+  addRow: 'Ajouter une tâche',
   columnWidth: (header) => `Largeur de la colonne ${header}`,
   columnResized: (header, width) => `Colonne ${header} : ${String(width)} pixels`,
   columnMoved: (header, position) => `Colonne ${header} en position ${String(position)}`,
@@ -53,9 +54,9 @@ export const CW_DATA_TABLE_TEXTS: CwDataTableTexts = {
  * @description
  * Complete provider defaults, including the empty-state text.
  *
- * @type {CwDataTableProvidedTexts}
+ * @type {Required<CwDataTableProvidedTexts>}
  */
-export const CW_DATA_TABLE_PROVIDED_TEXTS: CwDataTableProvidedTexts = {
+export const CW_DATA_TABLE_PROVIDED_TEXTS: Required<CwDataTableProvidedTexts> = {
   ...CW_DATA_TABLE_TEXTS,
   emptyText: 'Aucune tâche ne correspond',
 };
