@@ -4004,7 +4004,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    */
   private editNext(entry: RowEntry<T>, column: ResolvedColumn<T>, backwards: boolean): void {
     const rows: RowEntry<T>[] = this.renderedRows();
-    const columns: ResolvedColumn<T>[] = this.visibleColumns();
+    const columns: ResolvedColumn<T>[] = this.navigationColumns();
     const cells: { entry: RowEntry<T>; column: ResolvedColumn<T> }[] = [];
     for (const row of rows)
       for (const c of columns) if (c.editable) cells.push({ entry: row, column: c });

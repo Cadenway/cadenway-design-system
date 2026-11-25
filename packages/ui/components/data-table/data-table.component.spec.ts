@@ -1790,7 +1790,7 @@ describe('keyboard labels in the bulk bar', () => {
  * layout and a windowed list that asks for its next page.
  */
 @Component({
-  imports: [CwDataTable, CwDataTableColumn],
+  imports: [CwDataTable, CwDataTableColumn, CwCellEditorDef],
   providers: [provideCwDataTableTexts({ emptyText: 'Aucune tâche' })],
   template: `
     <cw-data-table
@@ -1813,9 +1813,21 @@ describe('keyboard labels in the bulk bar', () => {
       (rowAdd)="added.push($event)"
       (nearEnd)="nearEnds.set(nearEnds() + 1)"
     >
-      <cw-data-table-column key="name" header="Nom" />
-      <cw-data-table-column key="status" header="Statut" />
-      <cw-data-table-column key="estimate" header="Estimation" align="end" />
+      <cw-data-table-column key="name" header="Nom">
+        <ng-template cwCellEditor
+          ><input role="textbox" aria-label="Modifier le nom"
+        /></ng-template>
+      </cw-data-table-column>
+      <cw-data-table-column key="status" header="Statut">
+        <ng-template cwCellEditor
+          ><input role="textbox" aria-label="Modifier le statut"
+        /></ng-template>
+      </cw-data-table-column>
+      <cw-data-table-column key="estimate" header="Estimation" align="end">
+        <ng-template cwCellEditor
+          ><input role="textbox" aria-label="Modifier l’estimation"
+        /></ng-template>
+      </cw-data-table-column>
     </cw-data-table>
   `,
 })
@@ -2219,6 +2231,43 @@ describe('CwDataTable list view', () => {
           await fixture.whenStable();
           expect(cells[2].tabIndex).toBe(-1);
           expect(document.activeElement).toBe(cells[1]);
+        } finally {
+          if (original) Object.defineProperty(window, 'matchMedia', original);
+          else Reflect.deleteProperty(window, 'matchMedia');
+        }
+      });
+    }
+
+    for (const virtual of [false, true]) {
+      it(`tabs between phone-visible editors in both directions (virtual: ${String(virtual)})`, async () => {
+        const original: PropertyDescriptor | undefined = Object.getOwnPropertyDescriptor(
+          window,
+          'matchMedia',
+        );
+        Object.defineProperty(window, 'matchMedia', {
+          configurable: true,
+          value: () => ({ matches: true }),
+        });
+        try {
+          component.virtual.set(virtual);
+          component.phoneLayout.set('grid');
+          window.dispatchEvent(new Event('resize'));
+          await fixture.whenStable();
+          const cells: HTMLElement[] = byRole(dataRows(host)[0], 'gridcell');
+          cells[1].focus();
+          key(cells[1], { key: 'F2' });
+          await fixture.whenStable();
+          const name: HTMLElement = one(host, 'textbox', 'Modifier le nom');
+          expect(document.activeElement).toBe(name);
+          key(name, { key: 'Tab' });
+          await fixture.whenStable();
+          const estimate: HTMLElement = one(host, 'textbox', 'Modifier l’estimation');
+          expect(document.activeElement).toBe(estimate);
+          expect(byRole(host, 'textbox', 'Modifier le statut')).toHaveLength(0);
+          key(estimate, { key: 'Tab', shiftKey: true });
+          await fixture.whenStable();
+          expect(document.activeElement).toBe(one(host, 'textbox', 'Modifier le nom'));
+          expect(byRole(host, 'textbox', 'Modifier le statut')).toHaveLength(0);
         } finally {
           if (original) Object.defineProperty(window, 'matchMedia', original);
           else Reflect.deleteProperty(window, 'matchMedia');
