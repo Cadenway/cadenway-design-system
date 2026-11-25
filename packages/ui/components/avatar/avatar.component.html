@@ -23,5 +23,9 @@
 </span>
 <span class="sr-only">{{ spoken() }}</span>
 @if (presence()) {
-  <span aria-hidden="true" [class]="dotClasses()"></span>
+  <span aria-hidden="true" [class]="dotClasses()">
+    @if (barClasses()) {
+      <span [class]="barClasses()"></span>
+    }
+  </span>
 }

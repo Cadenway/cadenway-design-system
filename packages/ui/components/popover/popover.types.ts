@@ -23,8 +23,21 @@ export type CwPopoverAlign = 'start' | 'center' | 'end';
  *
  * @description
  * Width of the panel (Popover sheet, "Tailles"): `sm` 224 px (a small form such as an estimate),
- * `default` 288 px (contextual help, settings), `lg` 320 px (sharing with a link).
+ * `default` 288 px (contextual help, settings), `lg` 320 px (sharing with a link), `xl` 384 px
+ * (the inbox panel of the rail, mockup `App.dc.html`).
  *
- * @type {'sm' | 'default' | 'lg'}
+ * @type {'sm' | 'default' | 'lg' | 'xl'}
  */
-export type CwPopoverSize = 'sm' | 'default' | 'lg';
+export type CwPopoverSize = 'sm' | 'default' | 'lg' | 'xl';
+
+/**
+ * Type CwPopoverPadding
+ *
+ * @description
+ * Inner spacing of the panel: `default` pads the content by size and spaces its children by 12 px;
+ * `none` leaves both to the content, whose sections draw their own edges (the inbox panel of the
+ * mockup `App.dc.html`: a header, tabs, a list and a footer separated by borders).
+ *
+ * @type {'default' | 'none'}
+ */
+export type CwPopoverPadding = 'default' | 'none';

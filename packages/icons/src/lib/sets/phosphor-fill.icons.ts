@@ -50,6 +50,7 @@ import {
   phosphorStopFill,
   phosphorTableFill,
   phosphorTargetFill,
+  phosphorTrayFill,
   phosphorUserCircleFill,
   phosphorUsersFill,
   phosphorUsersThreeFill,
@@ -58,7 +59,7 @@ import {
   phosphorXCircleFill,
 } from '@ng-icons/phosphor-icons/fill';
 
-/** Phosphor `Fill`: the active twin of a Bold icon (current sidebar item, selected tab) and the filled statuses. Every name is used by the mockup (`docs/maquette/source`). */
+/** Phosphor `Fill`: the active twin of a Bold icon (current sidebar item, selected tab) and the filled statuses. Every name is used by the mockup (`docs/maquette/source`), except `phosphorTrayFill`: the mockup's rail keeps the inbox tray Bold when it is open (`App.dc.html`, `railDefs`), and the webapp gives it the Fill twin the other applications have. */
 export const PHOSPHOR_FILL_ICONS = {
   phosphorAlarmFill,
   phosphorBellFill,
@@ -111,6 +112,7 @@ export const PHOSPHOR_FILL_ICONS = {
   phosphorStopFill,
   phosphorTableFill,
   phosphorTargetFill,
+  phosphorTrayFill,
   phosphorUserCircleFill,
   phosphorUsersFill,
   phosphorUsersThreeFill,

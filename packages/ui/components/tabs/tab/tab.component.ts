@@ -18,6 +18,7 @@ import { ɵFOCUS, ɵFOCUS_INSET } from '@cadenway/ui/core';
 import { TAB } from '../tab.token';
 import { CwTabsList } from '../tabs-list/tabs-list.component';
 import { CwTabs } from '../tabs.component';
+import { requiredInputBound } from '../tabs-bound';
 import type { CwTabsLayout, CwTabsSize } from '../tabs.types';
 
 /* Literal class strings (Tabs sheet and preview of the Design System artifact), so Tailwind finds
@@ -153,6 +154,21 @@ export class CwTab {
    * @type {InputSignal<string>}
    */
   public readonly value: InputSignal<string> = input.required<string>();
+
+  /**
+   * Property bound
+   * @readonly
+   *
+   * @description
+   * Whether the required `value` has been set. A tab created by a `@for` enters the set's query
+   * before its inputs are set; the set ignores it until then, so the bindings of its siblings never
+   * read an unset `value` (NG0950), even when the new tab is the active one. Reading the input
+   * registers the dependency before it throws, so this turns true as soon as the value arrives.
+   * @internal
+   *
+   * @type {Signal<boolean>}
+   */
+  public readonly bound: Signal<boolean> = requiredInputBound(this.value);
 
   /**
    * Property disabled

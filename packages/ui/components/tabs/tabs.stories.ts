@@ -354,3 +354,51 @@ export const ManualActivation: Story = {
     await expect(board).toHaveAttribute('aria-selected', 'true');
   },
 };
+
+/**
+ * A saved view becomes a tab and the active one in the same change (mockup `App.dc.html`,
+ * « Enregistrer la vue »): the new tab is selected and holds the Tab stop.
+ */
+export const CreatedActive: Story = {
+  render: () => ({
+    props: {
+      view: 'liste',
+      views: [] as string[],
+      save() {
+        const story: { views: string[]; view: string } = this as { views: string[]; view: string };
+        const name: string = `Vue ${String(story.views.length + 1)}`;
+        story.views = [...story.views, name];
+        story.view = name;
+      },
+    },
+    template: `
+      <div class="flex w-full max-w-xl items-end gap-2">
+        <cw-tabs variant="bar" class="min-w-0 flex-1" [(value)]="view">
+          <cw-tabs-list ariaLabel="Vues de la liste">
+            <button cwTab value="liste">Liste</button>
+            @for (saved of views; track saved) {
+              <button cwTab [value]="saved">{{ saved }}</button>
+            }
+          </cw-tabs-list>
+          <cw-tab-panel value="liste">Liste</cw-tab-panel>
+          @for (saved of views; track saved) {
+            <cw-tab-panel [value]="saved">{{ saved }}</cw-tab-panel>
+          }
+        </cw-tabs>
+        <button cwButton variant="ghost" size="sm" (click)="save()">Enregistrer la vue</button>
+      </div>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole(role: string, options?: { name?: string | RegExp }): HTMLElement } =
+      within(light(canvasElement));
+    await userEvent.click(scope.getByRole('button', { name: 'Enregistrer la vue' }));
+    const created: HTMLElement = scope.getByRole('tab', { name: 'Vue 1' });
+    await expect(created).toHaveAttribute('aria-selected', 'true');
+    await expect(created).toHaveAttribute('tabindex', '0');
+    await expect(scope.getByRole('tabpanel', { name: 'Vue 1' })).toBeVisible();
+    await expect(scope.getByRole('tab', { name: 'Liste' })).toHaveAttribute(
+      'aria-selected',
+      'false',
+    );
+  },
+};

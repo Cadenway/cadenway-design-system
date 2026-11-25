@@ -529,6 +529,66 @@ export interface CwBulkActionEvent {
 }
 
 /**
+ * Interface CwGroupDef
+ *
+ * @description
+ * A group declared by the consumer through the `groups` input, with `groupBy`: it renders in the
+ * declared order even when no loaded row has its value (the empty default groups of the mockup's
+ * list view, `App.dc.html`), and its header shows the declared count instead of the number of
+ * loaded rows, so a paged or windowed list reads its real size.
+ */
+export interface CwGroupDef {
+  // #region Properties
+  /**
+   * Property value
+   *
+   * @description
+   * The group value: null and undefined become an empty key, dates use the configured locale,
+   * and other values use the same text conversion as the table cells. The resulting key is emitted
+   * by `rowAdd`.
+   *
+   * @type {unknown}
+   * @readonly
+   */
+  readonly value: unknown;
+
+  /**
+   * Property label
+   *
+   * @description
+   * The label of its header; `groupLabel(value)` when omitted.
+   *
+   * @type {string | undefined}
+   * @readonly
+   */
+  readonly label?: string;
+
+  /**
+   * Property count
+   *
+   * @description
+   * The number of rows the group holds, loaded or not; the loaded count when omitted.
+   *
+   * @type {number | undefined}
+   * @readonly
+   */
+  readonly count?: number;
+  // #endregion
+}
+
+/**
+ * Type CwDataTablePhoneLayout
+ *
+ * @description
+ * Layout of the table below 768 px: `cards` (default) wraps each row into a card and hides the
+ * header; `grid` keeps a compact grid of the first data column and the `phoneColumns`, with its
+ * header (the three-column list of the mockup `App.dc.html` on a phone).
+ *
+ * @type {'cards' | 'grid'}
+ */
+export type CwDataTablePhoneLayout = 'cards' | 'grid';
+
+/**
  * Interface CwGroupContext
  *
  * @description
@@ -540,7 +600,7 @@ export interface CwGroupContext {
    * Property $implicit
    *
    * @description
-   * The group value (`String(row[groupBy])`).
+   * The formatted group key, as described by `CwGroupDef.value`.
    *
    * @type {string}
    * @readonly
@@ -699,6 +759,19 @@ export interface CwDataTableTexts {
    * @readonly
    */
   readonly groupAdd: (label: string) => string;
+
+  /**
+   * Property addRow
+   *
+   * @description
+   * Label of the trailing add row of a group (« Ajouter une tâche », mockup `App.dc.html`, list
+   * view). Optional in the type so existing text objects stay valid; `CW_DATA_TABLE_TEXTS` always
+   * defines it.
+   *
+   * @type {string | undefined}
+   * @readonly
+   */
+  readonly addRow?: string;
 
   /**
    * Property columnWidth

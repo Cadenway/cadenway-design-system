@@ -279,6 +279,56 @@ class LinksHost {
 })
 class ProvidedHost {}
 
+/**
+ * Class CreatedHost
+ *
+ * @description
+ * Hosts tabs and panels rendered from a list that can grow with an already active entry, as the
+ * saved views of a list do.
+ */
+@Component({
+  imports: [CwTabs, CwTabsList, CwTab, CwTabPanel],
+  template: `
+    <cw-tabs variant="bar" [(value)]="view">
+      <cw-tabs-list ariaLabel="Vues enregistrées">
+        <button cwTab value="liste">Liste</button>
+        @for (saved of views(); track saved) {
+          <button cwTab [value]="saved">{{ saved }}</button>
+        }
+      </cw-tabs-list>
+      <cw-tab-panel value="liste">Toutes les tâches</cw-tab-panel>
+      @for (saved of views(); track saved) {
+        <cw-tab-panel [value]="saved">Tâches de {{ saved }}</cw-tab-panel>
+      }
+    </cw-tabs>
+  `,
+})
+class CreatedHost {
+  // #region Properties
+  /**
+   * Property view
+   * @readonly
+   *
+   * @description
+   * Active tab value.
+   *
+   * @type {WritableSignal<string>}
+   */
+  public readonly view: WritableSignal<string> = signal('liste');
+
+  /**
+   * Property views
+   * @readonly
+   *
+   * @description
+   * Values of the tabs rendered from the list.
+   *
+   * @type {WritableSignal<readonly string[]>}
+   */
+  public readonly views: WritableSignal<readonly string[]> = signal<readonly string[]>([]);
+  // #endregion
+}
+
 describe('CwTabs', () => {
   describe('with buttons and panels', () => {
     let fixture: ComponentFixture<SectionsHost>;
@@ -492,6 +542,25 @@ describe('CwTabs', () => {
       expect(fixture.componentInstance.followed()).toBe(false);
       expect(fixture.componentInstance.view()).toBe('');
     });
+  });
+
+  it('activates a tab in the change that creates it', async () => {
+    const fixture: ComponentFixture<CreatedHost> = TestBed.createComponent(CreatedHost);
+    await fixture.whenStable();
+    const host: HTMLElement = fixture.nativeElement as HTMLElement;
+
+    fixture.componentInstance.views.set(['Urgences']);
+    fixture.componentInstance.view.set('Urgences');
+    await fixture.whenStable();
+
+    const created: HTMLElement = byRole(host, 'tab', 'Urgences');
+    expect(created.getAttribute('aria-selected')).toBe('true');
+    expect(created.getAttribute('tabindex')).toBe('0');
+    expect(byRole(host, 'tab', 'Liste').getAttribute('tabindex')).toBe('-1');
+    const panel: HTMLElement = byRole(host, 'tabpanel', 'Urgences');
+    expect(created.getAttribute('aria-controls')).toBe(panel.id);
+    expect(panel.hidden).toBe(false);
+    expect(byRole(host, 'tabpanel', 'Liste').hidden).toBe(true);
   });
 
   it('takes its default variant and size from provideCwTabs', async () => {

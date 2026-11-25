@@ -9,6 +9,7 @@
     "types": ["vite/client"],
     /* The entry points of @cadenway/ui, from their sources. */
     "paths": {
+      "@cadenway/icons": ["../../packages/icons/src/public-api.ts"],
       "@cadenway/ui/core": ["../../packages/ui/core/public-api.ts"],
       "@cadenway/ui/components/*": ["../../packages/ui/components/*/public-api.ts"]
     }

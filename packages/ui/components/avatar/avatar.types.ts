@@ -12,11 +12,13 @@ export type CwAvatarSize = 'xs' | 'sm' | 'default' | 'lg';
  * Type CwAvatarPresence
  *
  * @description
- * Presence shown by the dot: online or away; a null input means offline.
+ * Presence shown by the dot: online, away, do not disturb (`dnd`, a bar across the dot) or
+ * invisible (connected but shown offline, a hollow dot), as the statuses of the mockup's user menu
+ * (`App.dc.html`, `USER_STATUSES`); a null input means offline and shows no dot.
  *
- * @type {'online' | 'away'}
+ * @type {'online' | 'away' | 'dnd' | 'invisible'}
  */
-export type CwAvatarPresence = 'online' | 'away';
+export type CwAvatarPresence = 'online' | 'away' | 'dnd' | 'invisible';
 
 /**
  * Interface CwAvatarLabels
@@ -58,6 +60,31 @@ export interface CwAvatarLabels {
    * @type {string}
    */
   readonly away: string;
+
+  /**
+   * Property dnd
+   * @readonly
+   *
+   * @description
+   * Suffix read after the name of a person who does not want to be disturbed, without
+   * parentheses. Optional in the type so existing label objects stay valid; `CW_AVATAR_LABELS`
+   * always defines it.
+   *
+   * @type {string | undefined}
+   */
+  readonly dnd?: string;
+
+  /**
+   * Property invisible
+   * @readonly
+   *
+   * @description
+   * Suffix read after the name of a person connected but shown offline, without parentheses.
+   * Optional in the type so existing label objects stay valid; `CW_AVATAR_LABELS` always defines it.
+   *
+   * @type {string | undefined}
+   */
+  readonly invisible?: string;
 
   /**
    * Property disabled

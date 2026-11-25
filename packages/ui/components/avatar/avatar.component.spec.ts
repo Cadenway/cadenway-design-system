@@ -130,6 +130,17 @@ describe('CwAvatar', () => {
     expect(spoken(avatars()[0])).toBe('Inès Duval (absent)');
   });
 
+  it('reads the do-not-disturb and invisible presences', async () => {
+    component.presence.set('dnd');
+    await fixture.whenStable();
+    expect(spoken(avatars()[0])).toBe('Inès Duval (ne pas déranger)');
+    expect(avatars()[0].getAttribute('title')).toBe('Inès Duval (ne pas déranger)');
+
+    component.presence.set('invisible');
+    await fixture.whenStable();
+    expect(spoken(avatars()[0])).toBe('Inès Duval (invisible)');
+  });
+
   it('keeps the initials until the photo loads and comes back to them on error', async () => {
     component.photo.set('/photos/ines.jpg');
     await fixture.whenStable();
@@ -178,5 +189,18 @@ describe('provideCwAvatarLabels', () => {
     fixture.detectChanges();
     const host: HTMLElement = fixture.nativeElement as HTMLElement;
     expect(host.textContent).toContain('Unknown user');
+  });
+
+  it('reads provided presence texts', async () => {
+    TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [provideCwAvatarLabels({ dnd: 'do not disturb', invisible: 'invisible' })],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.componentInstance.presence.set('dnd');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const ines: Element | null = (fixture.nativeElement as HTMLElement).querySelector('cw-avatar');
+    expect(ines?.getAttribute('title')).toBe('Inès Duval (do not disturb)');
   });
 });

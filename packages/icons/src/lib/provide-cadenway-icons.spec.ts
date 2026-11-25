@@ -41,11 +41,16 @@ describe('provideCadenwayIcons', () => {
     const count = (pattern: RegExp): number =>
       CADENWAY_ICON_NAMES.filter((name) => pattern.test(name)).length;
 
-    expect(CADENWAY_ICON_NAMES).toHaveLength(285);
+    expect(CADENWAY_ICON_NAMES).toHaveLength(286);
     expect(count(/^phosphor.*Bold$/)).toBe(217);
-    expect(count(/^phosphor.*Fill$/)).toBe(57);
+    expect(count(/^phosphor.*Fill$/)).toBe(58);
     expect(count(/^svgl/)).toBe(7);
     expect(count(/^flag/)).toBe(4);
     expect([...CADENWAY_ICON_NAMES].sort()).toEqual(CADENWAY_ICON_NAMES);
+  });
+
+  it('registers the Fill twin of the inbox tray', () => {
+    expect(CADENWAY_ICON_NAMES).toContain('phosphorTrayBold');
+    expect(CADENWAY_ICON_NAMES).toContain('phosphorTrayFill');
   });
 });

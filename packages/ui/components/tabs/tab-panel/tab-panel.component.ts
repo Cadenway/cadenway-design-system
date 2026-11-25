@@ -12,6 +12,7 @@ import { ɵFOCUS } from '@cadenway/ui/core';
 
 import { TAB_PANEL } from '../tab-panel.token';
 import { CwTabs } from '../tabs.component';
+import { requiredInputBound } from '../tabs-bound';
 
 /**
  * Constant HORIZONTAL
@@ -70,6 +71,19 @@ export class CwTabPanel {
    * @type {InputSignal<string>}
    */
   public readonly value: InputSignal<string> = input.required<string>();
+
+  /**
+   * Property bound
+   * @readonly
+   *
+   * @description
+   * Whether the required `value` has been set; the set ignores a panel created by a `@for` until
+   * then, as it does for `CwTab.bound` (NG0950).
+   * @internal
+   *
+   * @type {Signal<boolean>}
+   */
+  public readonly bound: Signal<boolean> = requiredInputBound(this.value);
 
   /**
    * Property root

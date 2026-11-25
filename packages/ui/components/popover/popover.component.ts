@@ -50,7 +50,12 @@ import {
 import type { Subscription } from 'rxjs';
 
 import { CwPopoverArrow } from './popover-arrow/popover-arrow.component';
-import type { CwPopoverAlign, CwPopoverSide, CwPopoverSize } from './popover.types';
+import type {
+  CwPopoverAlign,
+  CwPopoverPadding,
+  CwPopoverSide,
+  CwPopoverSize,
+} from './popover.types';
 
 /* Literal class strings (Popover sheet and preview of the Design System artifact). The panel reveals
    from the trigger corner (`animate-menu-in` through `--menu-from`) and closes with
@@ -81,6 +86,7 @@ const WIDTHS: Record<CwPopoverSize, string> = {
   sm: 'w-56',
   default: 'w-72',
   lg: 'w-80',
+  xl: 'w-96',
 };
 
 // The content scrolls inside the panel, so the arrow (outside the panel's box) is never clipped.
@@ -97,6 +103,21 @@ const CONTENT: string =
   'grid max-h-[max(96px,min(400px,calc(100dvh-32px)))] gap-3 overflow-y-auto ' +
   'in-data-[presentation=sheet]:max-h-none in-data-[presentation=sheet]:min-h-0';
 
+// Mockup `App.dc.html`, inbox: the panel is a column of sections and its list scrolls by itself
+// (`max-h-[26rem]`), so the 400 px cap of padded content would scroll the header away. The
+// content only stays within the viewport.
+/**
+ * Constant FLUSH_CONTENT
+ *
+ * @description
+ * Unpadded content classes: a column whose children draw their own spacing and scroll regions.
+ *
+ * @type {string}
+ */
+const FLUSH_CONTENT: string =
+  'flex max-h-[calc(100dvh-32px)] min-h-0 flex-col overflow-y-auto ' +
+  'in-data-[presentation=sheet]:max-h-none';
+
 /**
  * Constant PADDINGS
  *
@@ -109,6 +130,7 @@ const PADDINGS: Record<CwPopoverSize, string> = {
   sm: 'p-3',
   default: 'p-4',
   lg: 'p-4',
+  xl: 'p-4',
 };
 
 /**
@@ -145,7 +167,9 @@ const VIEWPORT_MARGIN: number = 8;
  * closes on Escape, on an outside click (`closeOnOutsideClick`), on a new click of the trigger, on
  * a `button[cwPopoverClose]`, and when the focus tabs out of it; the focus returns to the trigger
  * unless the user moved it elsewhere. `modal` traps the focus and blocks the page behind a
- * transparent backdrop. The `cw-popover` element itself renders nothing in place.
+ * transparent backdrop. `size` sets the width (224 to 384 px) and `padding="none"` hands the
+ * inner spacing to the content (the mockup's inbox panel). The `cw-popover` element itself renders
+ * nothing in place.
  *
  * With `provideCwPhoneSheets` (`@cadenway/ui/core`), below 768 px the panel opens as a sheet docked
  * above the bottom tab bar, full width between gutters (mockup `App.dc.html`); the keyboard, the focus,
@@ -254,6 +278,18 @@ export class CwPopover {
    * @type {InputSignal<CwPopoverSize>}
    */
   public readonly size: InputSignal<CwPopoverSize> = input<CwPopoverSize>('default');
+
+  /**
+   * Property padding
+   * @readonly
+   *
+   * @description
+   * Inner spacing: `default` pads the content by size; `none` lets the content lay out its own
+   * sections, edge to edge (with `size="xl"`, the mockup's inbox panel).
+   *
+   * @type {InputSignal<CwPopoverPadding>}
+   */
+  public readonly padding: InputSignal<CwPopoverPadding> = input<CwPopoverPadding>('default');
 
   /**
    * Property ariaLabel
@@ -438,12 +474,12 @@ export class CwPopover {
    * @readonly
    *
    * @description
-   * Content classes for the current size.
+   * Content classes for the current size and padding.
    *
    * @type {Signal<string>}
    */
-  protected readonly contentClasses: Signal<string> = computed(
-    () => `${CONTENT} ${PADDINGS[this.size()]}`,
+  protected readonly contentClasses: Signal<string> = computed(() =>
+    this.padding() === 'none' ? FLUSH_CONTENT : `${CONTENT} ${PADDINGS[this.size()]}`,
   );
 
   /**

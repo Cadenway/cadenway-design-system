@@ -41,6 +41,12 @@ import { CwPopover } from './popover.component';
       <a href="#aide">En savoir plus</a>
     </cw-popover>
 
+    <button type="button" [cwPopoverTrigger]="inbox">Boîte de réception</button>
+    <cw-popover #inbox size="xl" padding="none" ariaLabel="Boîte de réception">
+      <p>Boîte de réception</p>
+      <button type="button" cwPopoverClose>Tout afficher dans l’accueil</button>
+    </cw-popover>
+
     <button type="button">Ailleurs</button>
   `,
 })
@@ -241,6 +247,27 @@ describe('CwPopover', () => {
     fixture.componentInstance.shareOpen.set(false);
     await fixture.whenStable();
     expect(dialog('Partager « Sprint 14 »')).toBeUndefined();
+  });
+
+  it('opens a 384 px panel whose content is laid out edge to edge', async () => {
+    button(host, 'Boîte de réception').click();
+    await fixture.whenStable();
+
+    const panel: HTMLElement = within('Boîte de réception');
+    const content: Element | null = panel.lastElementChild;
+    expect(panel.classList).toContain('w-96');
+    expect(content?.classList).toContain('flex-col');
+    expect(content?.className).not.toMatch(/(^|\s)(p-\d|gap-\d)/);
+    expect(panel.contains(document.activeElement)).toBe(true);
+  });
+
+  it('pads the content by default', async () => {
+    button(host, 'Partager').click();
+    await fixture.whenStable();
+
+    const content: Element | null = within('Partager « Sprint 14 »').lastElementChild;
+    expect(content?.classList).toContain('p-4');
+    expect(content?.classList).toContain('gap-3');
   });
 
   it('marks a modal panel and keeps the focus inside it', async () => {
