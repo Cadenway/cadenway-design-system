@@ -277,7 +277,7 @@
             <tbody
               role="rowgroup"
               class="group/col"
-              [class]="bodyMotion()"
+              [class]="bodyMotion() + ' ' + phoneBlock()"
               [attr.data-collapsible]="group.key === null ? null : ''"
               [attr.data-state]="group.key === null ? null : group.collapsed ? 'closed' : 'open'"
             >

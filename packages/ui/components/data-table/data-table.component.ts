@@ -1940,6 +1940,32 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
   protected readonly cards: Signal<boolean> = computed(() => this.phoneLayout() === 'cards');
 
   /**
+   * Property phoneViewport
+   *
+   * @description
+   * Tracks the viewport breakpoint used by the phone grid styles.
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  private readonly phoneViewport: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property navigationColumns
+   *
+   * @description
+   * Columns available to keyboard navigation in the current layout.
+   *
+   * @type {Signal<ResolvedColumn<T>[]>}
+   * @readonly
+   */
+  private readonly navigationColumns: Signal<ResolvedColumn<T>[]> = computed(() =>
+    this.phoneViewport() && !this.cards()
+      ? this.visibleColumns().filter((column) => this.phoneKept().has(column.key))
+      : this.visibleColumns(),
+  );
+
+  /**
    * Property phoneBlock
    *
    * @description
@@ -2997,7 +3023,10 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * @readonly
    */
   protected readonly isEmpty: Signal<boolean> = computed(
-    () => this.pageRows().length === 0 && this.declaredGroups().size === 0,
+    () =>
+      this.pageRows().length === 0 &&
+      this.declaredGroups().size === 0 &&
+      !(this.groupBy() === null && this.addRow() && this.editable()),
   );
 
   /**
@@ -3089,6 +3118,22 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
       });
     });
     if (isPlatformBrowser(inject(PLATFORM_ID))) {
+      effect((onCleanup) => {
+        const view: Window | null = this.host.ownerDocument.defaultView;
+        if (!view) return;
+        const update: () => void = (): void => {
+          const browser: Partial<Window> = view;
+          this.phoneViewport.set(
+            typeof browser.matchMedia === 'function' &&
+              browser.matchMedia('(width < 48rem)').matches,
+          );
+        };
+        update();
+        view.addEventListener('resize', update);
+        onCleanup(() => {
+          view.removeEventListener('resize', update);
+        });
+      });
       afterNextRender(() => {
         effect(
           (onCleanup) => {
@@ -3255,14 +3300,41 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
       write: () => {
         this.groupEntries();
         if (this.virtual()) this.virtualSegments();
-        this.visibleColumns();
+        this.navigationColumns();
         this.loading();
         this.error();
         this.bannerState();
         this.editing();
         const active: ActiveCell | null = this.active();
         const table: HTMLTableElement = this.tableRef().nativeElement;
-        const target: HTMLElement | null = this.cellElement(active) ?? this.defaultCell();
+        const activeRow: HTMLElement | undefined = active
+          ? this.navRows().find((row) => row.dataset['cwRow'] === active.row)
+          : undefined;
+        const hiddenActive: boolean =
+          !!active &&
+          !!activeRow &&
+          this.phoneViewport() &&
+          !this.cards() &&
+          this.visibleColumns().some(
+            (column) => column.key === active.col && !this.phoneKept().has(column.key),
+          );
+        const target: HTMLElement | null =
+          this.cellElement(active) ??
+          (hiddenActive
+            ? activeRow?.querySelector<HTMLElement>('[data-cw-cell]:not(.max-md\\:hidden)')
+            : null) ??
+          this.defaultCell();
+        if (active && target && hiddenActive) {
+          const col: string | undefined = target.dataset['cwCol'];
+          if (col) this.active.set({ row: active.row, col });
+          if (
+            table.contains(table.ownerDocument.activeElement) &&
+            (table.ownerDocument.activeElement as HTMLElement)
+              .closest('[data-cw-cell]')
+              ?.getAttribute('data-cw-col') === active.col
+          )
+            target.focus();
+        }
         // A handle without an explicit width reports the rendered one (aria-valuenow is required).
         for (const handle of Array.from(table.querySelectorAll<HTMLElement>('[data-cw-resize]'))) {
           if (!handle.hasAttribute('aria-valuenow')) {
@@ -4389,8 +4461,9 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
     if (rowIndex < 0) return false;
     const ctrl: boolean = event.ctrlKey || event.metaKey;
     const cellsOf: (row: HTMLElement) => HTMLElement[] = (row: HTMLElement): HTMLElement[] =>
-      Array.from(row.children).filter((child): child is HTMLElement =>
-        child.hasAttribute('data-cw-cell'),
+      Array.from(row.children).filter(
+        (child): child is HTMLElement =>
+          child.hasAttribute('data-cw-cell') && this.navigableCell(child as HTMLElement),
       );
     const cells: HTMLElement[] = cellsOf(rows[rowIndex]);
     const colIndex: number = Math.max(
@@ -4500,7 +4573,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
     if (event.altKey || (ctrl && event.key.startsWith('Arrow'))) return false;
     const columns: string[] = [
       ...(this.selectable() ? [SELECT] : []),
-      ...this.visibleColumns().map((column) => column.key),
+      ...this.navigationColumns().map((column) => column.key),
     ];
     const currentGroup: boolean = index >= offset && model.lines[index - offset].entry === null;
     const currentSingle: boolean = currentGroup || (banner && index === 1);
@@ -4592,6 +4665,19 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
   }
 
   /**
+   * Method navigableCell
+   *
+   * @description
+   * Excludes phone-hidden data columns from the rendered navigation model.
+   *
+   * @param {HTMLElement} cell - Rendered grid cell.
+   * @returns {boolean} Whether the cell is available for navigation.
+   */
+  private navigableCell(cell: HTMLElement): boolean {
+    return !(this.phoneViewport() && !this.cards() && cell.classList.contains('max-md:hidden'));
+  }
+
+  /**
    * Method cellElement
    *
    * @description
@@ -4606,8 +4692,9 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
       (candidate) => candidate.dataset['cwRow'] === active.row,
     );
     if (!row) return null;
-    const cells: HTMLElement[] = Array.from(row.children).filter((child): child is HTMLElement =>
-      child.hasAttribute('data-cw-cell'),
+    const cells: HTMLElement[] = Array.from(row.children).filter(
+      (child): child is HTMLElement =>
+        child.hasAttribute('data-cw-cell') && this.navigableCell(child as HTMLElement),
     );
     return (
       cells.find((cell) => cell.dataset['cwCol'] === active.col) ??

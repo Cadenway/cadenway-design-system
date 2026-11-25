@@ -766,5 +766,15 @@ export const PhoneGrid: Story = {
       name: 'Tâches de Produit',
     }).parentElement;
     await expect(scroller?.scrollWidth).toBeLessThanOrEqual(scroller?.clientWidth ?? 0);
+    const row: HTMLElement | null = scroller?.querySelector('tr[data-cw-row^="r:"]') ?? null;
+    if (!row) throw new Error('Data row missing');
+    const name: HTMLElement | null = row.querySelector('[data-cw-col="name"]');
+    const due: HTMLElement | null = row.querySelector('[data-cw-col="due"]');
+    if (!name || !due) throw new Error('Phone grid cells missing');
+    name.focus();
+    await userEvent.keyboard('{End}');
+    await expect(due).toHaveFocus();
+    await userEvent.keyboard('{ArrowLeft}');
+    await expect(name).toHaveFocus();
   },
 };

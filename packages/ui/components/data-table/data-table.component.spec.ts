@@ -1798,7 +1798,7 @@ describe('keyboard labels in the bulk bar', () => {
       [page]="null"
       [data]="data()"
       [virtual]="virtual()"
-      groupBy="status"
+      [groupBy]="groupBy()"
       [groups]="groups()"
       [groupLabel]="groupLabel"
       [addRow]="addRow()"
@@ -1839,6 +1839,17 @@ class ListHost {
    * @readonly
    */
   public readonly virtual: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property groupBy
+   *
+   * @description
+   * Column used to group the list, or null for a flat list.
+   *
+   * @type {WritableSignal<string | null>}
+   * @readonly
+   */
+  public readonly groupBy: WritableSignal<string | null> = signal<string | null>('status');
 
   /**
    * Property groups
@@ -2019,6 +2030,16 @@ describe('CwDataTable list view', () => {
   });
 
   describe('trailing add rows', () => {
+    it('creates the first row of an empty flat list', async () => {
+      component.groupBy.set(null);
+      component.groups.set([]);
+      component.data.set([]);
+      await fixture.whenStable();
+      expect(addButtons(host)).toHaveLength(1);
+      addButtons(host)[0].click();
+      expect(component.added).toEqual([null]);
+    });
+
     it('ends each open group with an add row, counted in the grid', async () => {
       expect(addButtons(host)).toHaveLength(4);
       // 4 rows, the header, 4 groups and 4 add rows.
@@ -2077,7 +2098,66 @@ describe('CwDataTable list view', () => {
     it('turns rows into cards by default', () => {
       expect(host.querySelector('thead')?.classList).toContain('max-md:hidden');
       expect(dataRows(host)[0].classList).toContain('max-md:flex');
+      expect(dataRows(host)[0].parentElement?.classList).toContain('max-md:block');
     });
+
+    for (const virtual of [false, true]) {
+      it(`keeps keyboard navigation on phone-visible columns (virtual: ${String(virtual)})`, async () => {
+        const original: PropertyDescriptor | undefined = Object.getOwnPropertyDescriptor(
+          window,
+          'matchMedia',
+        );
+        let mobile: boolean = false;
+        Object.defineProperty(window, 'matchMedia', {
+          configurable: true,
+          value: () => ({ matches: mobile }),
+        });
+        try {
+          component.virtual.set(virtual);
+          component.phoneLayout.set('grid');
+          window.dispatchEvent(new Event('resize'));
+          await fixture.whenStable();
+          const cells: HTMLElement[] = byRole(dataRows(host)[0], 'gridcell');
+          cells[1].focus();
+          key(cells[1], { key: 'ArrowRight' });
+          await fixture.whenStable();
+          expect(document.activeElement).toBe(cells[2]);
+          mobile = true;
+          window.dispatchEvent(new Event('resize'));
+          await fixture.whenStable();
+          expect(cells[2].tabIndex).toBe(-1);
+          expect(document.activeElement).not.toBe(cells[2]);
+          cells[3].focus();
+          key(cells[3], { key: 'Home' });
+          await fixture.whenStable();
+          expect(document.activeElement).toBe(cells[0]);
+          key(cells[0], { key: 'End' });
+          await fixture.whenStable();
+          expect(document.activeElement).toBe(cells[3]);
+          key(cells[3], { key: 'ArrowLeft' });
+          await fixture.whenStable();
+          expect(document.activeElement).toBe(cells[1]);
+          key(cells[1], { key: 'ArrowRight' });
+          await fixture.whenStable();
+          expect(document.activeElement).toBe(cells[3]);
+          await fixture.whenStable();
+          expect(cells[2].tabIndex).toBe(-1);
+          expect(cells[3].tabIndex).toBe(0);
+          component.phoneLayout.set('cards');
+          await fixture.whenStable();
+          key(cells[3], { key: 'ArrowLeft' });
+          await fixture.whenStable();
+          expect(document.activeElement).toBe(cells[2]);
+          component.phoneLayout.set('grid');
+          await fixture.whenStable();
+          expect(cells[2].tabIndex).toBe(-1);
+          expect(document.activeElement).not.toBe(cells[2]);
+        } finally {
+          if (original) Object.defineProperty(window, 'matchMedia', original);
+          else Reflect.deleteProperty(window, 'matchMedia');
+        }
+      });
+    }
 
     it('keeps a grid of the first column and the phone columns in grid mode', async () => {
       component.phoneLayout.set('grid');
