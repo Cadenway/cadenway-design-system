@@ -17,12 +17,14 @@ import {
   type Signal,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
+import { _IdGenerator } from '@angular/cdk/a11y';
 import { CwRipple, ɵFOCUS, ɵLOCALE, ɵperLocale } from '@cadenway/ui/core';
 import { CwSkeleton } from '@cadenway/ui/components/skeleton';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorChartBarBold } from '@ng-icons/phosphor-icons/bold';
 
 import { CHART_LABELS } from './chart-labels.token';
+import { CW_CHART_OTHERS_KEY } from './chart.constants';
 import {
   areaPath,
   labelWidth,
@@ -39,6 +41,8 @@ import type {
   CwChartCategorySelect,
   CwChartColor,
   CwChartDatum,
+  CwChartLabels,
+  CwChartMarker,
   CwChartOrientation,
   CwChartSeries,
   CwChartSize,
@@ -910,10 +914,86 @@ interface Tooltip {
 }
 
 /**
+ * Interface MarkerShape
+ *
+ * @description
+ * A reference marker placed on the vertical frame: its line, its label and its description.
+ */
+interface MarkerShape {
+  // #region Properties
+  /**
+   * Property key
+   *
+   * @description
+   * Stable key of the marker in the plot.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly key: string;
+
+  /**
+   * Property x
+   *
+   * @description
+   * Horizontal position of the line, the center of its category.
+   *
+   * @type {number}
+   * @readonly
+   */
+  readonly x: number;
+
+  /**
+   * Property labelX
+   *
+   * @description
+   * Horizontal position of the label, 4 px beside the line.
+   *
+   * @type {number}
+   * @readonly
+   */
+  readonly labelX: number;
+
+  /**
+   * Property anchor
+   *
+   * @description
+   * Text anchor of the label: after the line, or before it near the right edge.
+   *
+   * @type {'start' | 'end'}
+   * @readonly
+   */
+  readonly anchor: 'start' | 'end';
+
+  /**
+   * Property label
+   *
+   * @description
+   * Text written at the top of the line.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly label: string;
+
+  /**
+   * Property description
+   *
+   * @description
+   * Text read by screen readers for this marker.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly description: string;
+  // #endregion
+}
+
+/**
  * Component CwChart
  *
  * @description
- * A dashboard chart drawn in SVG by Cadenway, without a third-party library: grouped or stacked bars, horizontal bars on a capacity track, lines, areas with a dashed reference, or a ring (Chart sheet of the Design System artifact). For one key figure use `cw-stat`; for exact values to compare row by row, `table[cwTable]`. `data` holds one entry per category, read by the `x` key; `series` lists the drawn keys in order, each with one of the five data colors (five series at most). The ring sums each series over `data` and shows the total with `unit` in its center. Values go through `valueFormat` (`Intl.NumberFormat` in the locale of `provideCwLocale`, `fr-FR` by default) on the axis, the tooltip, the legend and the data table; categories through `categoryFormat` in the tooltip. Accessibility: the plot is one tab stop, a `role="img"` named by `ariaLabel` (a summary of the data); a visually hidden table repeats every value; ← → (↑ ↓ for horizontal bars), Home and End move the active category, announced politely (« S44 : Terminées 18, En retard 1 ») and shown in the tooltip; Escape closes the tooltip; Enter or a click emits `categorySelect`. The legend is a row of `aria-pressed` buttons that hide or show a series. `loading` draws skeletons with `aria-busy`; without any value, the empty state shows `emptyText`. No entry animation, the tooltip follows without transition. Style hooks: `data-type`, `data-size`, `aria-busy` on the host, `data-active` on the plot.
+ * A dashboard chart drawn in SVG by Cadenway, without a third-party library: grouped or stacked bars, horizontal bars on a capacity track, lines, areas with a dashed reference, or a ring (Chart sheet of the Design System artifact). For one key figure use `cw-stat`; for exact values to compare row by row, `table[cwTable]`. `data` holds one entry per category, read by the `x` key; `series` lists the drawn keys in order, each with one of the five data colors (five series at most; past `maxSeries`, the last ones are summed into one « Others » series). `markers` draw vertical reference lines with a label (« Today ») on vertical bars, lines and areas, described to screen readers. The ring sums each series over `data` and shows the total with `unit` in its center. Values go through `valueFormat` (`Intl.NumberFormat` in the locale of `provideCwLocale`, `fr-FR` by default) on the axis, the tooltip, the legend and the data table; categories through `categoryFormat` in the tooltip. Accessibility: the plot is one tab stop, a `role="img"` named by `ariaLabel` (a summary of the data); a visually hidden table repeats every value; ← → (↑ ↓ for horizontal bars), Home and End move the active category, announced politely (« S44 : Terminées 18, En retard 1 ») and shown in the tooltip; Escape closes the tooltip; Enter or a click emits `categorySelect`. The legend is a row of `aria-pressed` buttons that hide or show a series. `loading` draws skeletons with `aria-busy`; without any value, the empty state shows `emptyText`. No entry animation, the tooltip follows without transition. Style hooks: `data-type`, `data-size`, `aria-busy` on the host, `data-active` on the plot.
  */
 @Component({
   selector: 'cw-chart',
@@ -1151,6 +1231,60 @@ export class CwChart {
   );
 
   /**
+   * Property markers
+   *
+   * @description
+   * Vertical reference lines of a vertical bar, line or area chart, each on the center of its category with its label at the top (« Today »); ignored by horizontal bars and the ring. None by default.
+   *
+   * @type {InputSignal<readonly CwChartMarker[]>}
+   * @readonly
+   */
+  public readonly markers: InputSignal<readonly CwChartMarker[]> = input<readonly CwChartMarker[]>(
+    [],
+  );
+
+  /**
+   * Property maxSeries
+   *
+   * @description
+   * Largest number of drawn series: when `series` holds more, the first `maxSeries − 1` stay and the rest are summed, category by category, into one series named `othersLabel` in `othersColor`, under the key `CW_CHART_OTHERS_KEY`. Give the series in the order to keep (largest first). `null` (the default) draws every series; values below 2 count as 2.
+   *
+   * @type {InputSignalWithTransform<number | null, unknown>}
+   * @readonly
+   */
+  public readonly maxSeries: InputSignalWithTransform<number | null, unknown> = input<
+    number | null,
+    unknown
+  >(null, {
+    transform: (value: unknown) =>
+      value === null || value === undefined || value === '' ? null : numberAttribute(value),
+  });
+
+  /**
+   * Property othersLabel
+   *
+   * @description
+   * Name of the « Others » series built past `maxSeries`.
+   *
+   * @type {InputSignal<string>}
+   * @readonly
+   */
+  public readonly othersLabel: InputSignal<string> = input<string>(
+    inject(CHART_LABELS).othersLabel,
+  );
+
+  /**
+   * Property othersColor
+   *
+   * @description
+   * Data color of the « Others » series built past `maxSeries`; `chart-5` by default.
+   *
+   * @type {InputSignal<CwChartColor>}
+   * @readonly
+   */
+  public readonly othersColor: InputSignal<CwChartColor> = input<CwChartColor>('chart-5');
+
+  /**
    * Property categorySelect
    *
    * @description
@@ -1172,6 +1306,28 @@ export class CwChart {
    * @readonly
    */
   private readonly host: HTMLElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+
+  /**
+   * Property labels
+   *
+   * @description
+   * Texts provided for this injector, merged over the defaults.
+   *
+   * @type {Required<CwChartLabels>}
+   * @readonly
+   */
+  private readonly labels: Required<CwChartLabels> = inject(CHART_LABELS);
+
+  /**
+   * Property markersId
+   *
+   * @description
+   * Identifier of the hidden description of the markers, referenced by the plot.
+   *
+   * @type {string}
+   * @readonly
+   */
+  protected readonly markersId: string = inject(_IdGenerator).getId('cw-chart-markers-');
 
   /**
    * Property width
@@ -1266,6 +1422,70 @@ export class CwChart {
   );
 
   /**
+   * Property folded
+   *
+   * @description
+   * The drawn series and data: `series` and `data` themselves, or, past `maxSeries`, the kept series plus the « Others » series and each entry with its sum.
+   *
+   * @type {Signal<{ series: readonly CwChartSeries[]; data: readonly CwChartDatum[] }>}
+   * @readonly
+   */
+  private readonly folded: Signal<{
+    series: readonly CwChartSeries[];
+    data: readonly CwChartDatum[];
+  }> = computed(() => {
+    const series: readonly CwChartSeries[] = this.series();
+    const data: readonly CwChartDatum[] = this.data();
+    const limit: number | null = this.maxSeries();
+    if (limit === null || series.length <= Math.max(2, limit)) return { series, data };
+    const kept: readonly CwChartSeries[] = series.slice(0, Math.max(2, limit) - 1);
+    const rest: readonly CwChartSeries[] = series.slice(kept.length);
+    const others: CwChartSeries = {
+      key: CW_CHART_OTHERS_KEY,
+      label: this.othersLabel(),
+      color: this.othersColor(),
+    };
+    return {
+      series: [...kept, others],
+      data: data.map((row) => {
+        const values: number[] = rest.flatMap((item) => {
+          const value: number | null = numeric(row, item.key);
+          return value === null ? [] : [value];
+        });
+        // No value in any folded series is a gap, as for any other series.
+        const sum: number | null = values.length
+          ? values.reduce((total, value) => total + value, 0)
+          : null;
+        return { ...row, [CW_CHART_OTHERS_KEY]: sum };
+      }),
+    };
+  });
+
+  /**
+   * Property shownSeries
+   *
+   * @description
+   * Series drawn by the chart, after the `maxSeries` rule: the legend, the tooltip and the data table list them.
+   *
+   * @type {Signal<readonly CwChartSeries[]>}
+   * @readonly
+   */
+  protected readonly shownSeries: Signal<readonly CwChartSeries[]> = computed(
+    () => this.folded().series,
+  );
+
+  /**
+   * Property shownData
+   *
+   * @description
+   * Entries drawn by the chart, with the « Others » sum past `maxSeries`.
+   *
+   * @type {Signal<readonly CwChartDatum[]>}
+   * @readonly
+   */
+  private readonly shownData: Signal<readonly CwChartDatum[]> = computed(() => this.folded().data);
+
+  /**
    * Property visibleSeries
    *
    * @description
@@ -1276,7 +1496,7 @@ export class CwChart {
    */
   protected readonly visibleSeries: Signal<CwChartSeries[]> = computed(() => {
     const hidden: ReadonlySet<string> = this.hidden();
-    return this.series().filter((series) => !hidden.has(series.key));
+    return this.shownSeries().filter((series) => !hidden.has(series.key));
   });
 
   /**
@@ -1290,8 +1510,10 @@ export class CwChart {
    */
   protected readonly empty: Signal<boolean> = computed(() => {
     const data: readonly Readonly<Record<string, string | number | null | undefined>>[] =
-      this.data();
-    return !this.series().some((series) => data.some((row) => numeric(row, series.key) !== null));
+      this.shownData();
+    return !this.shownSeries().some((series) =>
+      data.some((row) => numeric(row, series.key) !== null),
+    );
   });
 
   /**
@@ -1317,7 +1539,7 @@ export class CwChart {
    * @readonly
    */
   protected readonly keys: Signal<string[]> = computed(() =>
-    this.data().map((row) => {
+    this.shownData().map((row) => {
       const value: string | number | null | undefined = row[this.x()];
       return value === null || value === undefined ? '' : String(value);
     }),
@@ -1348,7 +1570,7 @@ export class CwChart {
     const height: number = HEIGHTS[this.size()];
     const series: CwChartSeries[] = this.visibleSeries();
     const data: readonly Readonly<Record<string, string | number | null | undefined>>[] =
-      this.data();
+      this.shownData();
     let max: number = 0;
     for (const row of data) {
       if (this.type() === 'bar' && this.stacked()) {
@@ -1434,7 +1656,7 @@ export class CwChart {
     const { y, bottom }: { y: (value: number) => number; bottom: number } = this.frame();
     const series: CwChartSeries[] = this.visibleSeries();
     const data: readonly Readonly<Record<string, string | number | null | undefined>>[] =
-      this.data();
+      this.shownData();
     const shapes: BarShape[] = [];
     for (const category of this.categories()) {
       const row: Readonly<Record<string, string | number | null | undefined>> =
@@ -1491,7 +1713,7 @@ export class CwChart {
     const { y, bottom }: { y: (value: number) => number; bottom: number } = this.frame();
     const categories: readonly Category[] = this.categories();
     const data: readonly Readonly<Record<string, string | number | null | undefined>>[] =
-      this.data();
+      this.shownData();
     return this.visibleSeries().map((item) => {
       const points: ({ x: number; y: number } | null)[] = categories.map((category) => {
         const value: number | null = numeric(data[category.index], item.key);
@@ -1544,7 +1766,7 @@ export class CwChart {
       if (index === null || (this.type() !== 'line' && this.type() !== 'area')) return [];
       const category: Category | undefined = this.categories().at(index);
       const row: Readonly<Record<string, string | number | null | undefined>> | undefined =
-        this.data().at(index);
+        this.shownData().at(index);
       if (!category || !row) return [];
       const { y }: { y: (value: number) => number } = this.frame();
       return this.visibleSeries().flatMap((item) => {
@@ -1554,6 +1776,40 @@ export class CwChart {
           : [{ key: item.key, x: category.center, y: y(value), dotClass: DOTS[item.color] }];
       });
     });
+
+  /**
+   * Property markerShapes
+   *
+   * @description
+   * The reference markers of a vertical chart whose category is in `data`, placed on its frame.
+   *
+   * @type {Signal<readonly MarkerShape[]>}
+   * @readonly
+   */
+  protected readonly markerShapes: Signal<readonly MarkerShape[]> = computed<
+    readonly MarkerShape[]
+  >(() => {
+    const markers: readonly CwChartMarker[] = this.markers();
+    if (markers.length === 0 || this.type() === 'donut' || this.horizontal()) return [];
+    const categories: readonly Category[] = this.categories();
+    const { right }: { right: number } = this.frame();
+    const format: CwChartCategoryFormat = this.categoryFormat();
+    return markers.flatMap((marker, index) => {
+      const category: Category | undefined = categories.find((item) => item.key === marker.x);
+      if (!category) return [];
+      // The label goes after the line, or before it when it would overflow the plot's right edge.
+      const end: boolean = category.center + 4 + labelWidth(marker.label) > right;
+      const shape: MarkerShape = {
+        key: `${String(index)}:${marker.x}`,
+        x: category.center,
+        labelX: round(category.center + (end ? -4 : 4)),
+        anchor: end ? 'end' : 'start',
+        label: marker.label,
+        description: this.labels.marker(marker.label, format(marker.x)),
+      };
+      return [shape];
+    });
+  });
 
   /**
    * Property rows
@@ -1575,7 +1831,7 @@ export class CwChart {
     const width: number = this.width();
     const keys: string[] = this.keys();
     const data: readonly Readonly<Record<string, string | number | null | undefined>>[] =
-      this.data();
+      this.shownData();
     const series: CwChartSeries[] = this.visibleSeries();
     const format: CwChartValueFormat = this.valueFormat();
     const totals: number[] = data.map((row) =>
@@ -1634,7 +1890,7 @@ export class CwChart {
   protected readonly ring: Signal<{ slices: Slice[]; total: string } | null> = computed(() => {
     if (this.type() !== 'donut') return null;
     const data: readonly Readonly<Record<string, string | number | null | undefined>>[] =
-      this.data();
+      this.shownData();
     const values: { item: CwChartSeries; value: number }[] = this.visibleSeries()
       .map((item) => ({
         item,
@@ -1683,10 +1939,10 @@ export class CwChart {
    */
   protected readonly seriesTotals: Signal<Map<string, string>> = computed(() => {
     const data: readonly Readonly<Record<string, string | number | null | undefined>>[] =
-      this.data();
+      this.shownData();
     const format: CwChartValueFormat = this.valueFormat();
     return new Map(
-      this.series().map((item) => [
+      this.shownSeries().map((item) => [
         item.key,
         format(data.reduce((sum, row) => sum + (numeric(row, item.key) ?? 0), 0)),
       ]),
@@ -1703,7 +1959,7 @@ export class CwChart {
    * @readonly
    */
   private readonly count: Signal<number> = computed(() =>
-    this.type() === 'donut' ? (this.ring()?.slices.length ?? 0) : this.data().length,
+    this.type() === 'donut' ? (this.ring()?.slices.length ?? 0) : this.shownData().length,
   );
 
   /**
@@ -1739,7 +1995,7 @@ export class CwChart {
       };
     }
     const row: Readonly<Record<string, string | number | null | undefined>> | undefined =
-      this.data().at(index);
+      this.shownData().at(index);
     const key: string | undefined = this.keys().at(index);
     if (!row || key === undefined) return null;
     const lines: { key: string; label: string; value: string; swatch: string }[] =
@@ -1819,10 +2075,10 @@ export class CwChart {
     const format: CwChartValueFormat = this.valueFormat();
     const categoryFormat: CwChartCategoryFormat = this.categoryFormat();
     const keys: string[] = this.keys();
-    return this.data().map((row, index) => ({
+    return this.shownData().map((row, index) => ({
       key: keys[index],
       label: categoryFormat(keys[index]),
-      cells: this.series().map((item) => {
+      cells: this.shownSeries().map((item) => {
         const value: number | null = numeric(row, item.key);
         return { key: item.key, value: value === null ? '—' : format(value) };
       }),
@@ -2034,9 +2290,9 @@ export class CwChart {
       return;
     }
     const row: Readonly<Record<string, string | number | null | undefined>> | undefined =
-      this.data().at(index);
+      this.shownData().at(index);
     if (!row) return;
-    for (const item of this.series()) {
+    for (const item of this.shownSeries()) {
       const value: number | null = numeric(row, item.key);
       if (value !== null) values[item.key] = value;
     }

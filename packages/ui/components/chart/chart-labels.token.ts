@@ -10,9 +10,8 @@ import type { CwChartLabels } from './chart.types';
  * @description
  * Injector-scoped texts merged over the defaults.
  *
- * @type {InjectionToken<CwChartLabels>}
+ * @type {InjectionToken<Required<CwChartLabels>>}
  */
-export const CHART_LABELS: InjectionToken<CwChartLabels> = ɵlabelsToken<CwChartLabels>(
-  'CHART_LABELS',
-  CW_CHART_LABELS,
-);
+export const CHART_LABELS: InjectionToken<Required<CwChartLabels>> = ɵlabelsToken<
+  Required<CwChartLabels>
+>('CHART_LABELS', CW_CHART_LABELS);

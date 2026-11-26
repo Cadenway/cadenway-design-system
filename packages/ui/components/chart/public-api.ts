@@ -10,6 +10,7 @@ export type {
   CwChartCategorySelect,
   CwChartColor,
   CwChartDatum,
+  CwChartMarker,
   CwChartOrientation,
   CwChartSeries,
   CwChartSize,
@@ -17,6 +18,6 @@ export type {
   CwChartValueFormat,
 } from './chart.types';
 
-export { CW_CHART_LABELS } from './chart.constants';
+export { CW_CHART_LABELS, CW_CHART_OTHERS_KEY } from './chart.constants';
 export { provideCwChartLabels } from './chart.providers';
 export type { CwChartLabels } from './chart.types';

@@ -354,3 +354,82 @@ export const Keyboard: Story = {
     await expect(scope.getByRole('status')).toHaveTextContent('Choisie : S42');
   },
 };
+
+/** Burndown with a « today » marker: a dashed vertical line and its label on day 7, described to screen readers. */
+export const TodayMarker: Story = {
+  render: () => ({
+    props: {
+      data: BURNDOWN,
+      series: [
+        { key: 'real', label: 'Réel', color: 'chart-1' },
+        { key: 'ideal', label: 'Idéal', color: 'chart-5', dashed: true },
+      ],
+      markers: [{ x: 'J7', label: 'Aujourd’hui' }],
+      day: (x: string) => `Jour ${x.slice(1)}`,
+    },
+    template: card(
+      'Burndown — Sprint 14',
+      'Points restants par jour',
+      `<cw-chart type="line" [data]="data" x="day" [series]="series" [markers]="markers"
+                 [categoryFormat]="day" ariaLabel="Points restants par jour" />`,
+    ),
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const plot: HTMLElement = within(light(canvasElement)).getByRole('img', {
+      name: 'Points restants par jour',
+    });
+    await expect(plot).toHaveAccessibleDescription('Aujourd’hui : Jour 7.');
+  },
+};
+
+/**
+ * Constant PEOPLE_DAYS
+ *
+ * @description
+ * Hours per day for seven people, more than the five data colors.
+ *
+ * @type {CwChartDatum[]}
+ */
+const PEOPLE_DAYS: CwChartDatum[] = [
+  { day: 'L 23', cm: 6, ir: 5, hd: 4, lp: 3, ab: 2, sr: 1, ld: 1 },
+  { day: 'M 24', cm: 5, ir: 6, hd: 3, lp: 2, ab: 2, sr: 2, ld: 0 },
+  { day: 'M 25', cm: 4, ir: 4, hd: 5, lp: 3, ab: 1, sr: 1, ld: 2 },
+  { day: 'J 26', cm: 6, ir: 3, hd: 4, lp: 4, ab: 3, sr: 0, ld: 1 },
+  { day: 'V 27', cm: 3, ir: 5, hd: 2, lp: 2, ab: 2, sr: 2, ld: 1 },
+];
+
+/**
+ * Constant PEOPLE_SERIES
+ *
+ * @description
+ * One series per person, largest first; the last ones are summed into « Others ».
+ *
+ * @type {CwChartSeries[]}
+ */
+const PEOPLE_SERIES: CwChartSeries[] = [
+  { key: 'cm', label: 'Camille M.', color: 'chart-1' },
+  { key: 'ir', label: 'Inès R.', color: 'chart-2' },
+  { key: 'hd', label: 'Hugo D.', color: 'chart-3' },
+  { key: 'lp', label: 'Léa P.', color: 'chart-4' },
+  { key: 'ab', label: 'Adam B.', color: 'chart-5' },
+  { key: 'sr', label: 'Sarah R.', color: 'chart-5' },
+  { key: 'ld', label: 'Louis D.', color: 'chart-5' },
+];
+
+/** Seven people in stacked bars with `maxSeries` 5: four people stay, the other three are summed into « Others » in `chart-5`. */
+export const OthersSeries: Story = {
+  render: () => ({
+    props: { data: PEOPLE_DAYS, series: PEOPLE_SERIES },
+    template: card(
+      'Temps par jour',
+      'Par personne, semaine 48',
+      `<cw-chart [data]="data" x="day" [series]="series" stacked [maxSeries]="5"
+                 ariaLabel="Temps saisi par jour et par personne, semaine 48" />`,
+    ),
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: HTMLElement = light(canvasElement);
+    await expect(within(scope).getByRole('button', { name: 'Autres' })).toBeVisible();
+    await expect(within(scope).queryByRole('button', { name: 'Sarah R.' })).toBeNull();
+  },
+};

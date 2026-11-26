@@ -194,5 +194,59 @@ export interface CwChartLabels {
    * @readonly
    */
   readonly capacityLabel: string;
+
+  /**
+   * Property othersLabel
+   *
+   * @description
+   * Name of the series that sums the series past `maxSeries`, in the legend, the tooltip and the data table.
+   *
+   * @type {string | undefined}
+   * @readonly
+   */
+  readonly othersLabel?: string;
+
+  /**
+   * Property marker
+   *
+   * @description
+   * Description of a reference marker read by screen readers, from its label and its formatted category (« Aujourd’hui : Jour 7 »).
+   *
+   * @type {((label: string, category: string) => string) | undefined}
+   * @readonly
+   */
+  readonly marker?: (label: string, category: string) => string;
+  // #endregion
+}
+
+/**
+ * Interface CwChartMarker
+ *
+ * @description
+ * A vertical reference line drawn across the plot of a vertical bar, line or area chart, at the center of the category whose key is `x` (« today » on a burndown). A marker whose category is not in `data` is not drawn.
+ */
+export interface CwChartMarker {
+  // #region Properties
+  /**
+   * Property x
+   *
+   * @description
+   * Category key the marker stands on, as read by the chart's `x` key.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly x: string;
+
+  /**
+   * Property label
+   *
+   * @description
+   * Short text written at the top of the line and read by screen readers (« Today »).
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly label: string;
   // #endregion
 }
