@@ -337,14 +337,25 @@ const TOTAL_COL: string = '__total';
 const EMPTY_CELL: CwHeatGridCell<never> = { value: 0, items: [] };
 
 /**
- * Constant FOCUSABLE
+ * Constant EDITABLE
  *
  * @description
- * Controls inside a cell that leave the tab order outside the active cell.
+ * Editable elements inside a cell: they keep their own keys and clicks.
  *
  * @type {string}
  */
-const FOCUSABLE: string = 'a[href], button, input, select, textarea, [tabindex]';
+const EDITABLE: string =
+  'input, textarea, select, [contenteditable]:not([contenteditable="false"])';
+
+/**
+ * Constant FOCUSABLE
+ *
+ * @description
+ * Controls inside a cell, editable elements included: they keep their own clicks and leave the tab order outside the active cell.
+ *
+ * @type {string}
+ */
+const FOCUSABLE: string = `a[href], button, [tabindex], ${EDITABLE}`;
 
 /* Mockup App.dc.html, workload: jade below 85 %, balise above, grenat past the capacity. */
 /**
@@ -1102,7 +1113,7 @@ export class CwHeatGrid<T> {
     const target: HTMLElement | null = event.target instanceof HTMLElement ? event.target : null;
     const cell: HTMLElement | null | undefined = target?.closest<HTMLElement>('[data-cw-cell]');
     if (!target || !cell) return;
-    if (target.closest('input, textarea, select, [contenteditable="true"]')) return;
+    if (target.closest(EDITABLE)) return;
     const rowKey: string = cell.closest<HTMLElement>('[data-cw-row]')?.dataset['cwRow'] ?? '';
     const colKey: string = cell.dataset['cwCol'] ?? '';
     if ((event.key === 'Enter' || event.key === ' ') && target === cell) {

@@ -386,6 +386,99 @@ describe('CwHeatGrid', () => {
   });
 });
 
+/**
+ * Component EditableHost
+ *
+ * @description
+ * Hosts a heat grid whose items are editable notes.
+ */
+@Component({
+  imports: [CwHeatGrid, CwHeatGridChipDef],
+  template: `
+    <cw-heat-grid ariaLabel="Workload" [rows]="rows" [columns]="columns" [capacity]="6">
+      <ng-template cwHeatGridChip let-item>
+        <span contenteditable="true" [attr.aria-label]="'Note ' + item.key">{{ item.key }}</span>
+      </ng-template>
+    </cw-heat-grid>
+  `,
+})
+class EditableHost {
+  // #region Properties
+  /**
+   * Property rows
+   *
+   * @description
+   * Rows given to the grid.
+   *
+   * @type {readonly CwHeatGridRow<Item>[]}
+   * @readonly
+   */
+  public readonly rows: readonly CwHeatGridRow<Item>[] = ROWS;
+
+  /**
+   * Property columns
+   *
+   * @description
+   * Columns given to the grid.
+   *
+   * @type {readonly CwHeatGridColumn[]}
+   * @readonly
+   */
+  public readonly columns: readonly CwHeatGridColumn[] = COLUMNS;
+  // #endregion
+}
+
+describe('CwHeatGrid with editable items', () => {
+  let fixture: ComponentFixture<EditableHost>;
+  let host: HTMLElement;
+
+  /**
+   * Function note
+   *
+   * @description
+   * Finds the editable note of an item by its accessible name.
+   *
+   * @param {string} key - Item key.
+   * @returns {HTMLElement} The editable note.
+   */
+  function note(key: string): HTMLElement {
+    const found: HTMLElement | null = host.querySelector<HTMLElement>(
+      `[contenteditable][aria-label="Note ${key}"]`,
+    );
+    if (!found) throw new Error(`No note ${key}`);
+    return found;
+  }
+
+  beforeEach(async () => {
+    fixture = TestBed.createComponent(EditableHost);
+    fixture.autoDetectChanges();
+    host = fixture.nativeElement as HTMLElement;
+    await fixture.whenStable();
+  });
+
+  afterEach(() => {
+    fixture.destroy();
+  });
+
+  it('keeps editable items out of the tab order outside the active cell', () => {
+    // CAD-1 is in the first day cell of the first row, the tab stop.
+    expect(note('CAD-1').hasAttribute('tabindex')).toBe(false);
+    expect(note('CAD-2').getAttribute('tabindex')).toBe('-1');
+  });
+
+  it('leaves the clicks and keys of an editable item to it', async () => {
+    const editable: HTMLElement = note('CAD-1');
+    editable.click();
+    await fixture.whenStable();
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+
+    editable.focus();
+    const event: KeyboardEvent = key(editable, { key: 'ArrowRight' });
+    expect(event.defaultPrevented).toBe(false);
+    expect(document.activeElement).toBe(editable);
+  });
+});
+
 describe('provideCwHeatGridLabels', () => {
   it('replaces the texts of the grid', () => {
     TestBed.configureTestingModule({
