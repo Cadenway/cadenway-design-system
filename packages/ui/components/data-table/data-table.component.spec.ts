@@ -1,6 +1,7 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideCwKbdLabels } from '@cadenway/ui/components/kbd';
+import { CwMenu, CwMenuItem } from '@cadenway/ui/components/menu';
 import { provideCwLocale } from '@cadenway/ui/core';
 import { vi } from 'vitest';
 
@@ -8,6 +9,7 @@ import { CwCellDef } from './cell/cell.directive';
 import { CwCellEditorDef } from './cell-editor/cell-editor.directive';
 import { CwDataTableColumn } from './data-table-column/data-table-column.component';
 import { CwDataTableEmpty } from './data-table-empty/data-table-empty.directive';
+import { CwFooterCellDef } from './footer-cell/footer-cell.directive';
 import { CwDataTable } from './data-table.component';
 import { provideCwDataTableTexts } from './data-table.providers';
 import type {
@@ -2375,5 +2377,266 @@ describe('CwDataTable list view', () => {
       await fixture.whenStable();
       expect(component.nearEnds()).toBe(0);
     });
+  });
+});
+
+/**
+ * Function sumEstimates
+ *
+ * @description
+ * Footer aggregate of the estimate column used by the fixture.
+ *
+ * @param {readonly Task[]} rows - Every row of the table.
+ * @returns {string} The summed estimate, as the mockup's sheet footer writes it.
+ */
+function sumEstimates(rows: readonly Task[]): string {
+  return `Σ ${String(rows.reduce((total, row) => total + row.estimate, 0))} h`;
+}
+
+/**
+ * Component FooterHost
+ *
+ * @description
+ * Hosts a table with footer aggregates and a row context menu.
+ */
+@Component({
+  imports: [CwDataTable, CwDataTableColumn, CwCellDef, CwFooterCellDef, CwMenu, CwMenuItem],
+  template: `
+    <cw-data-table
+      ariaLabel="Sheet"
+      [data]="data()"
+      [virtual]="virtual()"
+      [loading]="loading()"
+      [page]="null"
+      [rowContextMenu]="withMenu() ? rowMenu : null"
+    >
+      <cw-data-table-column key="name" header="Name">
+        <ng-template cwCell let-task>
+          <span>{{ task.name }}</span>
+          <input aria-label="Rename" />
+        </ng-template>
+        <ng-template cwFooterCell let-rows>{{ rows.length }} tasks</ng-template>
+      </cw-data-table-column>
+      <cw-data-table-column key="status" header="Status" />
+      <cw-data-table-column key="estimate" header="Estimate" align="end" [footer]="sum" />
+    </cw-data-table>
+
+    <cw-menu #rowMenu ariaLabel="Row actions">
+      <button cwMenuItem (triggered)="picked.set(rowMenu.data())">Open</button>
+    </cw-menu>
+  `,
+})
+class FooterHost {
+  // #region Properties
+  /**
+   * Property data
+   *
+   * @description
+   * Rows displayed by the table.
+   *
+   * @type {WritableSignal<readonly Task[]>}
+   * @readonly
+   */
+  public readonly data: WritableSignal<readonly Task[]> = signal<readonly Task[]>(TASKS);
+
+  /**
+   * Property virtual
+   *
+   * @description
+   * Whether the table windows its rows.
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  public readonly virtual: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property loading
+   *
+   * @description
+   * Whether the table shows its loading state.
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  public readonly loading: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property withMenu
+   *
+   * @description
+   * Whether the table receives the row context menu.
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  public readonly withMenu: WritableSignal<boolean> = signal(true);
+
+  /**
+   * Property sum
+   *
+   * @description
+   * Footer aggregate of the estimate column.
+   *
+   * @type {(rows: readonly Task[]) => string}
+   * @readonly
+   */
+  public readonly sum: (rows: readonly Task[]) => string = sumEstimates;
+
+  /**
+   * Property picked
+   *
+   * @description
+   * Row read by the menu item through the menu's data.
+   *
+   * @type {WritableSignal<unknown>}
+   * @readonly
+   */
+  public readonly picked: WritableSignal<unknown> = signal<unknown>(null);
+  // #endregion
+}
+
+describe('CwDataTable footer and row context menu', () => {
+  let fixture: ComponentFixture<FooterHost>;
+  let host: HTMLElement;
+  let component: FooterHost;
+
+  /**
+   * Function footerRow
+   *
+   * @description
+   * Finds the footer row of the grid.
+   * @returns {HTMLElement | null} The footer row, or null when it is not rendered.
+   */
+  function footerRow(): HTMLElement | null {
+    return host.querySelector<HTMLElement>('tfoot [role="row"]');
+  }
+
+  /**
+   * Function menuItem
+   *
+   * @description
+   * Finds the row menu's item in the overlay.
+   * @returns {HTMLElement | null} The menu item, or null when the menu is closed.
+   */
+  function menuItem(): HTMLElement | null {
+    return document.querySelector<HTMLElement>('[role="menuitem"]');
+  }
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(FooterHost);
+    fixture.autoDetectChanges();
+    host = fixture.nativeElement as HTMLElement;
+    component = fixture.componentInstance;
+  });
+
+  afterEach(() => {
+    fixture.destroy();
+  });
+
+  it('adds a footer row with the aggregates of every row, as the last grid row', () => {
+    const row: HTMLElement = required(footerRow());
+    const cells: string[] = byRole(row, 'gridcell').map((cell) => cell.textContent.trim());
+    // The selection column, then name, status and estimate.
+    expect(cells).toEqual(['', '4 tasks', '', 'Σ 18 h']);
+    const grid: HTMLElement = one(host, 'grid', 'Sheet');
+    expect(row.getAttribute('aria-rowindex')).toBe(grid.getAttribute('aria-rowcount'));
+    expect(grid.getAttribute('aria-rowcount')).toBe('6');
+  });
+
+  it('follows the data and hides the footer while loading or empty', async () => {
+    component.data.set(TASKS.slice(0, 2));
+    await fixture.whenStable();
+    expect(byRole(required(footerRow()), 'gridcell')[3]?.textContent.trim()).toBe('Σ 8 h');
+
+    component.loading.set(true);
+    await fixture.whenStable();
+    expect(footerRow()).toBeNull();
+
+    component.loading.set(false);
+    component.data.set([]);
+    await fixture.whenStable();
+    expect(footerRow()).toBeNull();
+  });
+
+  it('reaches the footer cells with the arrows', async () => {
+    const last: HTMLElement = required(dataRows(host).at(-1));
+    const cell: HTMLElement = required(byRole(last, 'gridcell')[3]);
+    cell.focus();
+    key(cell, { key: 'ArrowDown' });
+    await fixture.whenStable();
+    expect(document.activeElement?.textContent.trim()).toBe('Σ 18 h');
+  });
+
+  it('reaches the footer with Ctrl + End in virtual mode', async () => {
+    component.virtual.set(true);
+    await fixture.whenStable();
+    const first: HTMLElement = required(byRole(required(dataRows(host)[0]), 'gridcell')[1]);
+    first.focus();
+    key(first, { key: 'End', ctrlKey: true });
+    await fixture.whenStable();
+    expect(document.activeElement?.closest('tfoot')).not.toBeNull();
+    expect(document.activeElement?.textContent.trim()).toBe('Σ 18 h');
+  });
+
+  it('opens the row menu on a right click, with the row as its data', async () => {
+    const row: HTMLElement = required(dataRows(host)[1]);
+    const cell: HTMLElement = required(byRole(row, 'gridcell')[2]);
+    const event: MouseEvent = new MouseEvent('contextmenu', {
+      bubbles: true,
+      cancelable: true,
+      clientX: 20,
+      clientY: 20,
+    });
+    cell.dispatchEvent(event);
+    await fixture.whenStable();
+
+    expect(event.defaultPrevented).toBe(true);
+    expect(row.dataset['contextMenu']).toBe('open');
+    required(menuItem()).click();
+    await fixture.whenStable();
+
+    expect(component.picked()).toBe(TASKS[1]);
+    expect(row.hasAttribute('data-context-menu')).toBe(false);
+  });
+
+  it('opens the row menu on Shift + F10 and the Menu key, on its first item', async () => {
+    const cell: HTMLElement = required(byRole(required(dataRows(host)[2]), 'gridcell')[2]);
+    cell.focus();
+    const event: KeyboardEvent = key(cell, { key: 'F10', shiftKey: true });
+    await fixture.whenStable();
+    expect(event.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(menuItem());
+
+    key(required(menuItem()), { key: 'Escape' });
+    await fixture.whenStable();
+    expect(menuItem()).toBeNull();
+    expect(document.activeElement).toBe(cell);
+
+    key(cell, { key: 'ContextMenu' });
+    await fixture.whenStable();
+    expect(menuItem()).not.toBeNull();
+  });
+
+  it('keeps the browser menu outside data rows, in an editable field and without a menu', async () => {
+    const header: MouseEvent = new MouseEvent('contextmenu', { bubbles: true, cancelable: true });
+    required(byRole(host, 'columnheader')[1]).dispatchEvent(header);
+    const footer: MouseEvent = new MouseEvent('contextmenu', { bubbles: true, cancelable: true });
+    required(footerRow()).dispatchEvent(footer);
+    const field: MouseEvent = new MouseEvent('contextmenu', { bubbles: true, cancelable: true });
+    required(host.querySelector('input')).dispatchEvent(field);
+    await fixture.whenStable();
+    expect([header, footer, field].map((event) => event.defaultPrevented)).toEqual([
+      false,
+      false,
+      false,
+    ]);
+
+    component.withMenu.set(false);
+    await fixture.whenStable();
+    const row: MouseEvent = new MouseEvent('contextmenu', { bubbles: true, cancelable: true });
+    required(byRole(required(dataRows(host)[0]), 'gridcell')[2]).dispatchEvent(row);
+    expect(row.defaultPrevented).toBe(false);
+    expect(menuItem()).toBeNull();
   });
 });

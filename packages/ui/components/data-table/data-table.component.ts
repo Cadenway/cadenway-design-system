@@ -6,6 +6,7 @@ import {
   computed,
   contentChild,
   contentChildren,
+  DestroyRef,
   effect,
   ElementRef,
   inject,
@@ -22,6 +23,7 @@ import {
   type InputSignal,
   type ModelSignal,
   type OutputEmitterRef,
+  type OutputRefSubscription,
   type WritableSignal,
   type Signal,
 } from '@angular/core';
@@ -29,11 +31,13 @@ import { isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 import { PLATFORM_ID } from '@angular/core';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { CdkDrag, type CdkDragDrop, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
+import type { ConnectedPosition } from '@angular/cdk/overlay';
 import { CwAlert, CwAlertActions, CwAlertTitle } from '@cadenway/ui/components/alert';
 import { CwButton } from '@cadenway/ui/components/button';
 import { CwCheckbox } from '@cadenway/ui/components/checkbox';
 import { CwRipple, ɵFOCUS, ɵFOCUS_INSET, ɵLOCALE, ɵperLocale } from '@cadenway/ui/core';
 import { CwEmpty, CwEmptyHeader, CwEmptyTitle } from '@cadenway/ui/components/empty';
+import type { CwMenu, CwMenuFocus, CwMenuPoint } from '@cadenway/ui/components/menu';
 import { CwSkeleton } from '@cadenway/ui/components/skeleton';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -66,6 +70,7 @@ import type {
   CwDataTableSelection,
   CwDataTableTexts,
   CwDataTableProvidedTexts,
+  CwFooterCellContext,
   CwGroupContext,
   CwGroupDef,
   CwSort,
@@ -233,6 +238,28 @@ interface ResolvedColumn<T> {
    * @readonly
    */
   readonly editor: TemplateRef<CwCellEditorContext<T>> | undefined;
+
+  /**
+   * Property footer
+   *
+   * @description
+   * Aggregate function of the footer cell, when given.
+   *
+   * @type {((rows: readonly T[]) => unknown) | undefined}
+   * @readonly
+   */
+  readonly footer: ((rows: readonly T[]) => unknown) | undefined;
+
+  /**
+   * Property footerCell
+   *
+   * @description
+   * Projected footer cell template, when present.
+   *
+   * @type {TemplateRef<CwFooterCellContext<T>> | undefined}
+   * @readonly
+   */
+  readonly footerCell: TemplateRef<CwFooterCellContext<T>> | undefined;
   // #endregion
 }
 
@@ -568,6 +595,75 @@ const HEADER_HEIGHT: number = 36;
  * @type {string}
  */
 const HEADER: string = 'h';
+
+/**
+ * Constant FOOTER
+ *
+ * @description
+ * Key of the footer row, in `data-cw-row`.
+ *
+ * @type {string}
+ */
+const FOOTER: string = 'footer';
+
+/**
+ * Constant FOOTER_HEIGHT
+ *
+ * @description
+ * Height of the sticky footer row in pixels (h-9), kept clear when a cell scrolls into view.
+ *
+ * @type {number}
+ */
+const FOOTER_HEIGHT: number = 36;
+
+/* ContextMenu sheet, "Position": the row menu's top-left corner sits on the point, flipped up or
+   left when there is no room, as `[cwContextMenuTriggerFor]` places it. */
+/**
+ * Constant MENU_POSITIONS
+ *
+ * @description
+ * Overlay positions of the row context menu, anchored to a point.
+ *
+ * @type {readonly ConnectedPosition[]}
+ */
+const MENU_POSITIONS: readonly ConnectedPosition[] = [
+  { originX: 'start', originY: 'top', overlayX: 'start', overlayY: 'top' },
+  { originX: 'start', originY: 'top', overlayX: 'end', overlayY: 'top' },
+  { originX: 'start', originY: 'top', overlayX: 'start', overlayY: 'bottom' },
+  { originX: 'start', originY: 'top', overlayX: 'end', overlayY: 'bottom' },
+];
+
+/**
+ * Constant LONG_PRESS
+ *
+ * @description
+ * Touch hold, in milliseconds, that opens the row context menu (ContextMenu sheet, "États").
+ *
+ * @type {number}
+ */
+const LONG_PRESS: number = 500;
+
+/**
+ * Constant LONG_PRESS_SLOP
+ *
+ * @description
+ * Pointer movement in pixels that cancels a long press.
+ *
+ * @type {number}
+ */
+const LONG_PRESS_SLOP: number = 8;
+
+/* After Shift + F10, the Menu key or a long press the browser fires its own `contextmenu`: it is
+   swallowed for this long so the row menu does not reopen at another point. */
+/**
+ * Constant SWALLOW_AFTER_OPEN
+ *
+ * @description
+ * Interval in milliseconds during which the native `contextmenu` that follows an opening is ignored.
+ *
+ * @type {number}
+ */
+const SWALLOW_AFTER_OPEN: number = 800;
 /**
  * Constant DEFAULT_MIN_WIDTH
  *
@@ -914,7 +1010,7 @@ const VIRTUAL_HEIGHTS: Record<CwDataTableDensity, { row: number; group: number }
  * @type {string}
  */
 const ROW: string =
-  'group/row border-b transition-colors hover:bg-accent aria-selected:bg-selected motion-reduce:transition-none';
+  'group/row border-b transition-colors hover:bg-accent aria-selected:bg-selected data-[context-menu=open]:bg-selected motion-reduce:transition-none';
 
 /* Under 768 px the `cards` layout turns the table into cards (mockup `styles/app.css`,
    `.cw-cards`): the header row hides, each row wraps its cells, the first data cell takes the
@@ -1056,6 +1152,20 @@ const SKELETON_WIDTHS: string[] = [
 ];
 
 /**
+ * Function isEditableTarget
+ *
+ * @description
+ * Reports whether an event comes from an editable field, where the browser's own context menu stays.
+ *
+ * @param {EventTarget | null} target - Event target to inspect for an editable ancestor.
+ * @returns {boolean} Whether the target is an editable field or belongs to one.
+ */
+function isEditableTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  return target.isContentEditable || !!target.closest('input, textarea, select');
+}
+
+/**
  * Function isEmpty
  *
  * @description
@@ -1125,7 +1235,7 @@ function defaultTrackBy(row: unknown): string {
  * Component CwDataTable
  *
  * @description
- * The list of a view: a grid that sorts, groups, selects, edits and pages generic rows of 32, 36 or 44 px (DataTable and DataTableComplete sheets of the Design System artifact; mockup `App.dc.html` list view, `Organisation.dc.html` members). Columns come from `columns` (`CwColumnDef<T>[]`) or from `cw-data-table-column` children, which also bring the `ng-template[cwCell]` and `ng-template[cwCellEditor]` templates. Rows are identified by `trackBy` (`row.id` by default); `sort`, `selection`, `collapsed`, `density`, `page`, `pageSize`, `columnWidths`, `columnOrder` and `columnVisibility` are models. Without `manual` the table sorts (`value(row)` or `row[key]`, French collation, empty values last) and pages `data` itself; with `manual` the consumer sorts and pages on the server, passes the page in `data` and the count in `total`. `groupBy` folds rows by the displayed group key (empty for null or undefined; dates formatted in the configured locale), groups in `groupOrder` then in order of appearance; `groups` declares groups ahead of them, rendered even when empty and counted with their declared `count`; `ng-template[cwDataTableGroup]` draws the group label; `addRow` ends each open group with an « Ajouter une tâche » row that emits `rowAdd`. Bulk actions, statuses and labels belong to the consumer: the selection bar appears with `bulkActions` (or a projected `cw-data-table-bulk-bar`) and emits `bulkAction`. Keyboard (one tab stop, roving over the cells): arrows, Home / End, Ctrl + Home / End, Page Up / Down; Space ticks the row, Shift + Space or Shift + click selects a range from the anchor, Shift + ↑ ↓ extends, Ctrl + A ticks the page, Escape empties the selection; Enter opens the row or the editor of an editable cell, F2 the editor; in an editor Escape cancels and Tab moves to the next editable cell; ← → fold a group row; Enter / Space on a header sorts, Shift adds a criterion; Ctrl + Shift + ← → moves a column. The controls of the active cell are reached with Tab. A resize handle takes ← → (8 px, Shift 32 px), Home / End and Enter (fit to content). Announcements go through the CDK `LiveAnnouncer`. `rowMotion` requests the row entrance animation. In `virtual` mode `nearEnd` asks for the next page when the window nears the last line. Under 768 px the rows become cards, or with `phoneLayout="grid"` a compact grid of the first data column and the `phoneColumns`, under its header.
+ * The list of a view: a grid that sorts, groups, selects, edits and pages generic rows of 32, 36 or 44 px (DataTable and DataTableComplete sheets of the Design System artifact; mockup `App.dc.html` list view, `Organisation.dc.html` members). Columns come from `columns` (`CwColumnDef<T>[]`) or from `cw-data-table-column` children, which also bring the `ng-template[cwCell]`, `ng-template[cwCellEditor]` and `ng-template[cwFooterCell]` templates. A column `footer` function or `cwFooterCell` template adds a footer row, sticky at the bottom of the grid, that aggregates every row of `data` (counts, sums). `rowContextMenu` opens a `cw-menu` on a data row: right click at the pointer, a 500 ms long press on touch screens, Shift + F10 or the Menu key on the focused cell (first item focused); the menu reads the row through `data()`, the row carries `data-context-menu="open"` meanwhile, and an inner trigger that handles the event first, or an editable field, keeps its own menu. Rows are identified by `trackBy` (`row.id` by default); `sort`, `selection`, `collapsed`, `density`, `page`, `pageSize`, `columnWidths`, `columnOrder` and `columnVisibility` are models. Without `manual` the table sorts (`value(row)` or `row[key]`, French collation, empty values last) and pages `data` itself; with `manual` the consumer sorts and pages on the server, passes the page in `data` and the count in `total`. `groupBy` folds rows by the displayed group key (empty for null or undefined; dates formatted in the configured locale), groups in `groupOrder` then in order of appearance; `groups` declares groups ahead of them, rendered even when empty and counted with their declared `count`; `ng-template[cwDataTableGroup]` draws the group label; `addRow` ends each open group with an « Ajouter une tâche » row that emits `rowAdd`. Bulk actions, statuses and labels belong to the consumer: the selection bar appears with `bulkActions` (or a projected `cw-data-table-bulk-bar`) and emits `bulkAction`. Keyboard (one tab stop, roving over the cells): arrows, Home / End, Ctrl + Home / End, Page Up / Down; Space ticks the row, Shift + Space or Shift + click selects a range from the anchor, Shift + ↑ ↓ extends, Ctrl + A ticks the page, Escape empties the selection; Enter opens the row or the editor of an editable cell, F2 the editor; in an editor Escape cancels and Tab moves to the next editable cell; ← → fold a group row; Enter / Space on a header sorts, Shift adds a criterion; Ctrl + Shift + ← → moves a column. The controls of the active cell are reached with Tab. A resize handle takes ← → (8 px, Shift 32 px), Home / End and Enter (fit to content). Announcements go through the CDK `LiveAnnouncer`. `rowMotion` requests the row entrance animation. In `virtual` mode `nearEnd` asks for the next page when the window nears the last line. Under 768 px the rows become cards, or with `phoneLayout="grid"` a compact grid of the first data column and the `phoneColumns`, under its header.
  */
 @Component({
   selector: 'cw-data-table',
@@ -1652,6 +1762,17 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
   public readonly ariaLabel: InputSignal<string> = input.required<string>();
 
   /**
+   * Property rowContextMenu
+   *
+   * @description
+   * Menu opened on a data row by a right click, a long press, Shift + F10 or the Menu key, with the row as its `data()`; `null` (the default) keeps the browser's menu. Its actions must also exist in a visible menu, such as the row's `…` button (WCAG 2.1.1).
+   *
+   * @type {InputSignal<CwMenu | null>}
+   * @readonly
+   */
+  public readonly rowContextMenu: InputSignal<CwMenu | null> = input<CwMenu | null>(null);
+
+  /**
    * Property rowOpen
    *
    * @description
@@ -1870,6 +1991,58 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * @readonly
    */
   private readonly host: HTMLElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+
+  /**
+   * Property menuRow
+   *
+   * @description
+   * Key of the row whose context menu is open, `null` otherwise.
+   *
+   * @type {WritableSignal<string | null>}
+   * @readonly
+   */
+  protected readonly menuRow: WritableSignal<string | null> = signal<string | null>(null);
+
+  /**
+   * Property menuClosing
+   *
+   * @description
+   * Subscription to the `closed` output of the open row menu.
+   *
+   * @type {OutputRefSubscription | null}
+   */
+  private menuClosing: OutputRefSubscription | null = null;
+
+  /**
+   * Property swallowUntil
+   *
+   * @description
+   * Time until which the native `contextmenu` following a keyboard or touch opening is ignored.
+   *
+   * @type {number}
+   */
+  private swallowUntil: number = 0;
+
+  /**
+   * Property longPress
+   *
+   * @description
+   * Pending touch hold on a row and its origin.
+   *
+   * @type {{ timer: ReturnType<typeof setTimeout>; x: number; y: number } | null}
+   */
+  private longPress: { timer: ReturnType<typeof setTimeout>; x: number; y: number } | null = null;
+
+  /**
+   * Property footerKey
+   *
+   * @description
+   * Key of the footer row, in `data-cw-row`.
+   *
+   * @type {string}
+   * @readonly
+   */
+  protected readonly footerKey: string = FOOTER;
 
   /**
    * Property active
@@ -2301,6 +2474,9 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
         value: def.value ?? ((row: T) => (row as Record<string, unknown> | null)?.[key]),
         cell: child?.cell()?.template as TemplateRef<CwCellContext<T>> | undefined,
         editor,
+        footer: def.footer,
+        footerCell: (child?.ɵfooterCell() ?? undefined) as
+          TemplateRef<CwFooterCellContext<T>> | undefined,
       };
     });
   });
@@ -3107,8 +3283,88 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
     const entries: readonly GroupEntry<T>[] = this.groupEntries();
     const groups: number = this.groupBy() === null ? 0 : entries.length;
     const adds: number = entries.filter((group) => group.addIndex > 0).length;
-    return this.totalCount() + 1 + groups + adds;
+    return this.totalCount() + 1 + groups + adds + (this.footerShown() ? 1 : 0);
   });
+
+  /**
+   * Property footerShown
+   *
+   * @description
+   * Whether the footer row renders: a visible column has a `footer` function or a `cwFooterCell` template, and the grid shows rows (not loading, not in error, not empty).
+   *
+   * @type {Signal<boolean>}
+   * @readonly
+   */
+  protected readonly footerShown: Signal<boolean> = computed(
+    () =>
+      this.visibleColumns().some((column) => !!column.footer || !!column.footerCell) &&
+      !this.loading() &&
+      this.error() === null &&
+      !this.isEmpty(),
+  );
+
+  /**
+   * Property footerValues
+   *
+   * @description
+   * Result of each visible column's `footer` function over every row of `data`.
+   *
+   * @type {Signal<ReadonlyMap<string, unknown>>}
+   * @readonly
+   */
+  private readonly footerValues: Signal<ReadonlyMap<string, unknown>> = computed(() => {
+    if (!this.footerShown()) return new Map<string, unknown>();
+    const rows: readonly T[] = this.data();
+    return new Map<string, unknown>(
+      this.visibleColumns().flatMap((column) =>
+        column.footer ? [[column.key, column.footer(rows)] as [string, unknown]] : [],
+      ),
+    );
+  });
+
+  /**
+   * Property footerGroupClasses
+   *
+   * @description
+   * Classes of the footer group: sticky at the bottom of the scroller; a static block under the cards below 768 px.
+   *
+   * @type {Signal<string>}
+   * @readonly
+   */
+  protected readonly footerGroupClasses: Signal<string> = computed(
+    () => `sticky bottom-0 z-10 bg-background${this.cards() ? ' max-md:static max-md:block' : ''}`,
+  );
+
+  /**
+   * Property footerRowClasses
+   *
+   * @description
+   * Classes of the footer row: one header row high, small medium muted text (mockup `App.dc.html`, sheet footer); a wrapping line under the cards below 768 px.
+   *
+   * @type {Signal<string>}
+   * @readonly
+   */
+  protected readonly footerRowClasses: Signal<string> = computed(
+    () =>
+      `h-9 border-t text-xs font-medium text-muted-foreground${
+        this.cards()
+          ? ' max-md:flex max-md:h-auto max-md:flex-wrap max-md:items-center max-md:gap-x-3 max-md:gap-y-1 max-md:px-3 max-md:py-2'
+          : ''
+      }`,
+  );
+
+  /**
+   * Property footerSelectClasses
+   *
+   * @description
+   * Classes of the footer cell under the selection column.
+   *
+   * @type {Signal<string>}
+   * @readonly
+   */
+  protected readonly footerSelectClasses: Signal<string> = computed(
+    () => `w-9 pr-1 pl-3 align-middle ${ɵFOCUS_INSET}${this.cards() ? ' max-md:hidden' : ''}`,
+  );
   // #endregion
 
   // #region Constructor
@@ -3121,6 +3377,11 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * @constructor
    */
   public constructor() {
+    inject(DestroyRef).onDestroy(() => {
+      this.cancelLongPress();
+      this.menuClosing?.unsubscribe();
+      if (this.menuRow() !== null) this.rowContextMenu()?.close();
+    });
     if (isPlatformBrowser(inject(PLATFORM_ID))) {
       // nearEnd: once per approach of the end; a new `data` (the next page) or leaving the zone arms
       // it again, so a consumer that has no more rows is not called on every scroll frame.
@@ -3482,6 +3743,48 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
     return this.rowMotion()?.(entry.row) === 'in'
       ? `${this.rowClasses()} animate-row-in`
       : this.rowClasses();
+  }
+
+  /**
+   * Method footerCellClasses
+   *
+   * @description
+   * Builds classes for the footer cell of a data column, aligned as its cells.
+   *
+   * @param {ResolvedColumn<T>} column - Column of the footer cell.
+   * @returns {string} Classes for the footer cell.
+   */
+  protected footerCellClasses(column: ResolvedColumn<T>): string {
+    if (this.cards())
+      return `${CELL_BASE} ${CELL_ALIGN[column.align]} max-md:p-0 max-md:empty:hidden`;
+    return `${CELL_BASE} ${CELL_ALIGN[column.align]}${this.phoneHidden(column) ? ' max-md:hidden' : ''}`;
+  }
+
+  /**
+   * Method footerContext
+   *
+   * @description
+   * Builds the context of a `cwFooterCell` template.
+   *
+   * @param {ResolvedColumn<T>} column - Column of the footer cell.
+   * @returns {CwFooterCellContext<T>} Every row of `data` and the column's `footer` result.
+   */
+  protected footerContext(column: ResolvedColumn<T>): CwFooterCellContext<T> {
+    const rows: readonly T[] = this.data();
+    return { $implicit: rows, rows, value: this.footerValues().get(column.key) };
+  }
+
+  /**
+   * Method footerText
+   *
+   * @description
+   * Text of a footer cell without template: the `footer` result as text, empty without one.
+   *
+   * @param {ResolvedColumn<T>} column - Column of the footer cell.
+   * @returns {string} Text written in the footer cell.
+   */
+  protected footerText(column: ResolvedColumn<T>): string {
+    return toText(this.footerValues().get(column.key), this.locale);
   }
 
   /**
@@ -4343,6 +4646,21 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
     const ctrl: boolean = event.ctrlKey || event.metaKey;
 
     if (
+      entry &&
+      (event.key === 'ContextMenu' || (event.key === 'F10' && event.shiftKey)) &&
+      this.rowContextMenu() &&
+      !event.defaultPrevented &&
+      !isEditableTarget(target)
+    ) {
+      event.preventDefault();
+      // ContextMenu sheet, "Clavier": the menu opens on the focused element's top-left corner.
+      const { left, top }: DOMRect = target.getBoundingClientRect();
+      this.swallowUntil = performance.now() + SWALLOW_AFTER_OPEN;
+      this.openRowMenu({ x: left, y: top }, target, 'first', entry);
+      return;
+    }
+
+    if (
       rowKey === HEADER &&
       ctrl &&
       event.shiftKey &&
@@ -4589,12 +4907,19 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
     const model: VirtualModel<T> = this.virtualModel();
     const banner: boolean = this.bannerState() !== null;
     const offset: number = banner ? 2 : 1;
+    // The footer row follows the last line of the model.
+    const footerIndex: number = this.footerShown() ? model.lines.length + offset : -1;
+    const last: number = Math.max(footerIndex, model.lines.length + offset - 1);
+    const isLine: (position: number) => boolean = (position: number): boolean =>
+      position >= offset && position !== footerIndex;
     const index: number =
       rowKey === HEADER
         ? 0
         : rowKey === 'banner' && banner
           ? 1
-          : (this.lineIndices().get(rowKey) ?? -offset - 1) + offset;
+          : rowKey === FOOTER && footerIndex >= 0
+            ? footerIndex
+            : (this.lineIndices().get(rowKey) ?? -offset - 1) + offset;
     if (index < 0) return false;
     const ctrl: boolean = event.ctrlKey || event.metaKey;
     if (event.altKey || (ctrl && event.key.startsWith('Arrow'))) return false;
@@ -4602,7 +4927,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
       ...(this.selectable() ? [SELECT] : []),
       ...this.navigationColumns().map((column) => column.key),
     ];
-    const currentGroup: boolean = index >= offset && model.lines[index - offset].entry === null;
+    const currentGroup: boolean = isLine(index) && model.lines[index - offset].entry === null;
     const currentSingle: boolean = currentGroup || (banner && index === 1);
     const currentColumns: string[] = currentSingle ? ['group'] : columns;
     const rememberedCol: string =
@@ -4630,7 +4955,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
         column = 'first';
         break;
       case 'End':
-        if (ctrl) next = model.lines.length + offset - 1;
+        if (ctrl) next = last;
         column = 'last';
         break;
       case 'ArrowRight':
@@ -4644,11 +4969,17 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
       default:
         return false;
     }
-    next = Math.max(0, Math.min(model.lines.length + offset - 1, next));
+    next = Math.max(0, Math.min(last, next));
     const nextKey: string =
-      next === 0 ? HEADER : banner && next === 1 ? 'banner' : model.lines[next - offset].key;
+      next === 0
+        ? HEADER
+        : banner && next === 1
+          ? 'banner'
+          : next === footerIndex
+            ? FOOTER
+            : model.lines[next - offset].key;
     const targetGroup: boolean =
-      (banner && next === 1) || (next >= offset && model.lines[next - offset].entry === null);
+      (banner && next === 1) || (isLine(next) && model.lines[next - offset].entry === null);
     const targetColumns: string[] = targetGroup ? ['group'] : columns;
     if (targetColumns.length === 0) return true;
     let targetCol: string = rememberedCol;
@@ -4858,8 +5189,10 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
         const scroller: HTMLElement = this.scroller().nativeElement;
         const header: number = this.headerOffset(viewport);
         const top: number = model.offsets[index] + viewport.banner;
+        const footer: number =
+          this.footerShown() && !(viewport.mobile && this.cards()) ? FOOTER_HEIGHT : 0;
         const bottom: number =
-          model.offsets[index + 1] + viewport.banner + header - viewport.height;
+          model.offsets[index + 1] + viewport.banner + header + footer - viewport.height;
         const scrollTop: number = Math.max(
           0,
           top < viewport.top ? top : bottom > viewport.top ? bottom : viewport.top,
@@ -4879,6 +5212,143 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
       },
       { injector: this.injector },
     );
+  }
+
+  /**
+   * Method onContextMenu
+   *
+   * @description
+   * Opens the row context menu at the pointer on a right click in a data row.
+   *
+   * @param {MouseEvent} event - Native `contextmenu` event from the grid.
+   */
+  protected onContextMenu(event: MouseEvent): void {
+    // An inner trigger already handled it, or the browser's menu stays.
+    if (!this.rowContextMenu() || event.defaultPrevented || isEditableTarget(event.target)) return;
+    const located: { entry: RowEntry<T>; trigger: HTMLElement } | null = this.menuTarget(
+      event.target,
+    );
+    if (!located) return;
+    event.preventDefault();
+    this.cancelLongPress();
+    if (performance.now() < this.swallowUntil) return;
+    this.openRowMenu(
+      { x: event.clientX, y: event.clientY },
+      located.trigger,
+      'panel',
+      located.entry,
+    );
+  }
+
+  /**
+   * Method onPointerDown
+   *
+   * @description
+   * Starts the touch hold that opens the row context menu.
+   *
+   * @param {PointerEvent} event - Pointer event from the grid.
+   */
+  protected onPointerDown(event: PointerEvent): void {
+    this.cancelLongPress();
+    if (event.pointerType !== 'touch' || !this.rowContextMenu()) return;
+    if (isEditableTarget(event.target)) return;
+    const located: { entry: RowEntry<T>; trigger: HTMLElement } | null = this.menuTarget(
+      event.target,
+    );
+    if (!located) return;
+    const { clientX: x, clientY: y }: PointerEvent = event;
+    const timer: ReturnType<typeof setTimeout> = setTimeout(() => {
+      this.longPress = null;
+      this.swallowUntil = performance.now() + SWALLOW_AFTER_OPEN;
+      this.openRowMenu({ x, y }, located.trigger, 'panel', located.entry);
+    }, LONG_PRESS);
+    this.longPress = { timer, x, y };
+  }
+
+  /**
+   * Method onPointerMove
+   *
+   * @description
+   * Cancels a touch hold when the pointer moves too far.
+   *
+   * @param {PointerEvent} event - Pointer event from the grid.
+   */
+  protected onPointerMove(event: PointerEvent): void {
+    const press: { timer: ReturnType<typeof setTimeout>; x: number; y: number } | null =
+      this.longPress;
+    if (!press) return;
+    if (Math.hypot(event.clientX - press.x, event.clientY - press.y) > LONG_PRESS_SLOP) {
+      this.cancelLongPress();
+    }
+  }
+
+  /**
+   * Method cancelLongPress
+   *
+   * @description
+   * Cancels any pending touch hold.
+   */
+  protected cancelLongPress(): void {
+    if (!this.longPress) return;
+    clearTimeout(this.longPress.timer);
+    this.longPress = null;
+  }
+
+  /**
+   * Method menuTarget
+   *
+   * @description
+   * Finds the data row of an event and the element the menu returns the focus to: its cell, made the active cell, or the row itself (a card's padding).
+   *
+   * @param {EventTarget | null} target - Event target inside the grid.
+   * @returns {{ entry: RowEntry<T>; trigger: HTMLElement } | null} The row and the focus return target, or null outside a data row.
+   */
+  private menuTarget(
+    target: EventTarget | null,
+  ): { entry: RowEntry<T>; trigger: HTMLElement } | null {
+    if (!(target instanceof Element)) return null;
+    const row: HTMLElement | null = target.closest<HTMLElement>('tr[data-cw-row]');
+    const entry: RowEntry<T> | undefined = row
+      ? this.rowByKey().get(row.dataset['cwRow'] ?? '')
+      : undefined;
+    if (!row || !entry || !this.tableRef().nativeElement.contains(row)) return null;
+    const cell: HTMLElement | null = target.closest<HTMLElement>('[data-cw-cell]');
+    const col: string | undefined = cell?.dataset['cwCol'];
+    if (cell && col !== undefined) {
+      this.active.set({ row: entry.key, col });
+      return { entry, trigger: cell };
+    }
+    return { entry, trigger: row };
+  }
+
+  /**
+   * Method openRowMenu
+   *
+   * @description
+   * Opens `rowContextMenu` for a row and tracks it until the menu closes.
+   *
+   * @param {CwMenuPoint} point - Viewport point the menu's corner sits on.
+   * @param {HTMLElement} trigger - Element that gets the focus back when the menu closes.
+   * @param {CwMenuFocus} focus - Initial focus target within the menu.
+   * @param {RowEntry<T>} entry - Row the menu acts on.
+   */
+  private openRowMenu(
+    point: CwMenuPoint,
+    trigger: HTMLElement,
+    focus: CwMenuFocus,
+    entry: RowEntry<T>,
+  ): void {
+    const menu: CwMenu | null = this.rowContextMenu();
+    if (!menu) return;
+    // Opening again (another point, another row) closes the previous session first.
+    menu.open({ origin: point, trigger, focus, positions: MENU_POSITIONS, data: entry.row });
+    this.menuRow.set(entry.key);
+    this.menuClosing?.unsubscribe();
+    this.menuClosing = menu.closed.subscribe(() => {
+      this.menuClosing?.unsubscribe();
+      this.menuClosing = null;
+      this.menuRow.set(null);
+    });
   }
 
   /**

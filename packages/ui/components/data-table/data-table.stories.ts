@@ -7,6 +7,7 @@ import {
   CwEmptyMedia,
   CwEmptyTitle,
 } from '@cadenway/ui/components/empty';
+import { CwMenu, CwMenuItem, CwMenuSeparator } from '@cadenway/ui/components/menu';
 import { CwPriorityIcon } from '@cadenway/ui/components/priority-icon';
 import { CwStatusIcon } from '@cadenway/ui/components/status-icon';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -26,6 +27,7 @@ import { CwDataTableColumn } from './data-table-column/data-table-column.compone
 import { CwDataTableEmpty } from './data-table-empty/data-table-empty.directive';
 import { CwDataTableGroup } from './data-table-group/data-table-group.directive';
 import { CwDataTable } from './data-table.component';
+import { CwFooterCellDef } from './footer-cell/footer-cell.directive';
 import type { CwBulkAction, CwSort } from './data-table.types';
 
 /**
@@ -54,6 +56,10 @@ const meta: Meta = {
         CwEmptyHeader,
         CwEmptyMedia,
         CwEmptyTitle,
+        CwFooterCellDef,
+        CwMenu,
+        CwMenuItem,
+        CwMenuSeparator,
         CwPriorityIcon,
         CwStatusIcon,
         NgIcon,
@@ -778,5 +784,98 @@ export const PhoneGrid: Story = {
     await expect(due).toHaveFocus();
     await userEvent.keyboard('{ArrowLeft}');
     await expect(name).toHaveFocus();
+  },
+};
+
+/* The sheet view of the mockup (`App.dc.html`, « Feuille »): a sticky footer row with the count of
+   tasks, the count of done tasks and the sum of the estimates. */
+/**
+ * Constant SHEET_COLUMNS
+ *
+ * @description
+ * Columns of the sheet example, with their footer aggregates.
+ *
+ * @type {string}
+ */
+const SHEET_COLUMNS: string = `
+  <cw-data-table-column key="name" header="Nom" [minWidth]="200">
+    <ng-template cwCell let-t><span class="truncate font-medium">{{ t.name }}</span></ng-template>
+    <ng-template cwFooterCell let-rows>{{ rows.length }} {{ rows.length > 1 ? 'tâches' : 'tâche' }}</ng-template>
+  </cw-data-table-column>
+  <cw-data-table-column key="status" header="Statut" [width]="120" [footer]="doneCount">
+    <ng-template cwCell let-t>
+      <span class="flex items-center gap-1.5"><cw-status-icon [status]="t.status" />{{ statusLabels[t.status] }}</span>
+    </ng-template>
+  </cw-data-table-column>
+  <cw-data-table-column key="estimate" header="Estimation" align="end" [width]="112" [footer]="estimateSum" />`;
+
+/** The sheet's footer row: counts and sums of every row, sticky at the bottom of the grid, reached with the arrows. */
+export const FooterAggregates: Story = {
+  render: () => ({
+    props: {
+      ...PROPS,
+      doneCount: (rows: readonly { status: string }[]): string => {
+        const done: number = rows.filter((row) => row.status === 'done').length;
+        return `${String(done)} ${done > 1 ? 'terminées' : 'terminée'}`;
+      },
+      estimateSum: (rows: readonly { estimate: number }[]): string =>
+        `Σ ${String(rows.reduce((total, row) => total + row.estimate, 0))} pts`,
+    },
+    template: `
+      <cw-data-table class="h-80 w-full" ariaLabel="Feuille des tâches de Produit" [data]="tasks"
+                     [page]="null" [rowLabel]="rowLabel" [selectable]="false">
+        ${SHEET_COLUMNS}
+      </cw-data-table>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const grid: HTMLElement = within(light(canvasElement)).getByRole('grid', {
+      name: 'Feuille des tâches de Produit',
+    });
+    const footer: HTMLElement | null = grid.querySelector('tfoot tr');
+    if (!footer) throw new Error('Footer row missing');
+    await expect(footer).toHaveAttribute('aria-rowindex', grid.getAttribute('aria-rowcount'));
+    const cells: HTMLElement[] = within(footer).getAllByRole('gridcell');
+    await expect(cells[0]).toHaveTextContent(`${String(TASKS.length)} tâches`);
+    await userEvent.tab();
+    await userEvent.keyboard('{Control>}{End}{/Control}');
+    await expect(cells[cells.length - 1]).toHaveFocus();
+  },
+};
+
+/** A right click, Shift + F10 or the Menu key on a row opens its menu, the same actions as its `…` button. */
+export const RowContextMenu: Story = {
+  render: () => ({
+    props: { ...PROPS, picked: '' },
+    template: `
+      <div class="grid gap-2">
+        <cw-data-table class="w-full" ariaLabel="Tâches du sprint" [data]="tasks" [page]="null"
+                       [rowLabel]="rowLabel" [rowContextMenu]="rowMenu">
+          ${COLUMNS}
+        </cw-data-table>
+        <cw-menu #rowMenu ariaLabel="Actions de la tâche">
+          <button cwMenuItem (triggered)="picked = rowMenu.data()?.id">Ouvrir</button>
+          <button cwMenuItem (triggered)="picked = rowMenu.data()?.id">Copier le lien</button>
+          <cw-menu-separator />
+          <button cwMenuItem variant="destructive">Supprimer</button>
+        </cw-menu>
+        <span class="text-sm text-muted-foreground" role="status">Choisie : {{ picked || '—' }}</span>
+      </div>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: HTMLElement = light(canvasElement);
+    const grid: HTMLElement = within(scope).getByRole('grid', { name: 'Tâches du sprint' });
+    const row: HTMLElement | null = grid.querySelector('tr[data-cw-row^="r:"]');
+    const cell: HTMLElement | null = row?.querySelector('[data-cw-col="priority"]') ?? null;
+    if (!row || !cell) throw new Error('Data row missing');
+    cell.focus();
+    await userEvent.keyboard('{Shift>}{F10}{/Shift}');
+    const open: HTMLElement = await within(document.body).findByRole('menuitem', {
+      name: 'Ouvrir',
+    });
+    await expect(open).toHaveFocus();
+    await expect(row).toHaveAttribute('data-context-menu', 'open');
+    await userEvent.keyboard('{Enter}');
+    await expect(within(scope).getByRole('status')).toHaveTextContent(`Choisie : ${TASKS[0].id}`);
+    await expect(cell).toHaveFocus();
   },
 };

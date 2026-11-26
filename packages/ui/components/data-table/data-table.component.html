@@ -6,6 +6,7 @@
       #scroller
       class="relative min-h-0 flex-1 overflow-auto"
       [style.overflow-anchor]="virtual() ? 'none' : null"
+      [style.scroll-padding-bottom.px]="footerShown() ? 36 : null"
     >
       <table
         #table
@@ -22,6 +23,11 @@
         (keydown)="onKeydown($event)"
         (focusin)="onFocusin($event)"
         (focusout)="onFocusout($event)"
+        (contextmenu)="onContextMenu($event)"
+        (pointerdown)="onPointerDown($event)"
+        (pointermove)="onPointerMove($event)"
+        (pointerup)="cancelLongPress()"
+        (pointercancel)="cancelLongPress()"
       >
         <colgroup>
           @if (selectable()) {
@@ -360,6 +366,7 @@
                   [attr.data-cw-row]="entry.key"
                   [attr.aria-rowindex]="entry.rowIndex"
                   [attr.aria-selected]="selectable() ? isSelected(entry.id) : null"
+                  [attr.data-context-menu]="menuRow() === entry.key ? 'open' : null"
                   [class]="rowClassesOf(entry)"
                   (click)="onRowClick($event, entry)"
                 >
@@ -460,6 +467,44 @@
               </tr>
             </tbody>
           }
+        }
+        @if (footerShown()) {
+          <tfoot role="rowgroup" [class]="footerGroupClasses()">
+            <tr
+              role="row"
+              [attr.data-cw-row]="footerKey"
+              [attr.aria-rowindex]="ariaRowCount()"
+              [class]="footerRowClasses()"
+            >
+              @if (selectable()) {
+                <td
+                  role="gridcell"
+                  data-cw-cell
+                  [attr.data-cw-col]="selectKey"
+                  aria-colindex="1"
+                  [class]="footerSelectClasses()"
+                ></td>
+              }
+              @for (column of visibleColumns(); track column.key; let index = $index) {
+                <td
+                  role="gridcell"
+                  data-cw-cell
+                  [attr.data-cw-col]="column.key"
+                  [attr.aria-colindex]="index + (selectable() ? 2 : 1)"
+                  [class]="footerCellClasses(column)"
+                >
+                  @if (column.footerCell) {
+                    <ng-container
+                      [ngTemplateOutlet]="column.footerCell"
+                      [ngTemplateOutletContext]="footerContext(column)"
+                    />
+                  } @else {
+                    {{ footerText(column) }}
+                  }
+                </td>
+              }
+            </tr>
+          </tfoot>
         }
       </table>
 
