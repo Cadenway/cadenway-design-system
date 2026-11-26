@@ -42,6 +42,7 @@ describe('ɵContextMenuGesture', () => {
     expect(gesture.request(shiftF10, trigger)?.focus).toBe('first');
 
     const native: MouseEvent = new MouseEvent('contextmenu', { cancelable: true });
+    trigger.dispatchEvent(native);
     expect(gesture.request(native, trigger)).toBeNull();
     expect(native.defaultPrevented).toBe(true);
 
@@ -50,6 +51,33 @@ describe('ɵContextMenuGesture', () => {
       cancelable: true,
     });
     expect(gesture.request(menuKey, trigger)?.trigger).toBe(trigger);
+  });
+
+  it('swallows only the native menu paired with a keyboard opening, once', () => {
+    const other: HTMLElement = document.createElement('button');
+    document.body.append(other);
+    const shiftF10: KeyboardEvent = new KeyboardEvent('keydown', {
+      key: 'F10',
+      shiftKey: true,
+      cancelable: true,
+    });
+    trigger.dispatchEvent(shiftF10);
+    expect(gesture.request(shiftF10, trigger)).not.toBeNull();
+
+    const elsewhere: MouseEvent = new MouseEvent('contextmenu', { cancelable: true });
+    other.dispatchEvent(elsewhere);
+    expect(gesture.request(elsewhere, other)?.trigger).toBe(other);
+
+    const again: KeyboardEvent = new KeyboardEvent('keydown', { key: 'ContextMenu' });
+    trigger.dispatchEvent(again);
+    expect(gesture.request(again, trigger)).not.toBeNull();
+    const paired: MouseEvent = new MouseEvent('contextmenu', { cancelable: true });
+    trigger.dispatchEvent(paired);
+    expect(gesture.request(paired, trigger)).toBeNull();
+    const next: MouseEvent = new MouseEvent('contextmenu', { cancelable: true });
+    trigger.dispatchEvent(next);
+    expect(gesture.request(next, trigger)?.focus).toBe('panel');
+    other.remove();
   });
 
   it('keeps the browser menu in an editable field and for other keys', () => {

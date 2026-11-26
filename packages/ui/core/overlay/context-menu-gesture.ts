@@ -21,8 +21,8 @@ export const ɵAT_POINT: readonly ConnectedPosition[] = [
  * Constant SWALLOW_AFTER_OPEN
  *
  * @description
- * Time in milliseconds during which the browser's own `contextmenu`, fired after Shift + F10 or
- * the Menu key, is swallowed so the menu does not reopen at another point.
+ * Time in milliseconds during which the browser's own `contextmenu` that follows Shift + F10 or
+ * the Menu key, on the same element, is swallowed so the menu does not reopen at another point.
  *
  * @type {number}
  */
@@ -108,7 +108,8 @@ function isEditable(target: EventTarget | null): boolean {
  * focused element's top-left corner, focusing the first item (ContextMenu sheet, "Clavier"). The
  * gesture is prevented when a request is returned. Editable fields and events already handled by
  * an inner region return `null` and keep the browser's menu. One instance per brick: it remembers
- * a keyboard opening to swallow the browser's `contextmenu` that follows it.
+ * a keyboard opening to swallow the one browser `contextmenu` that follows it on the same element;
+ * a right click elsewhere, or a second one, opens normally.
  */
 export class ɵContextMenuGesture {
   // #region Properties
@@ -122,6 +123,16 @@ export class ɵContextMenuGesture {
    * @type {number}
    */
   private swallowUntil: number = 0;
+
+  /**
+   * Property swallowTarget
+   *
+   * @description
+   * Element of the last keyboard opening, whose paired native `contextmenu` is swallowed once.
+   *
+   * @type {EventTarget | null}
+   */
+  private swallowTarget: EventTarget | null = null;
   // #endregion
 
   // #region Methods
@@ -131,7 +142,8 @@ export class ɵContextMenuGesture {
    * @description
    * Reads a `contextmenu` or `keydown` event and returns where to open the menu, or `null` when the
    * event is not a context-menu gesture for this brick. A returned request has prevented the
-   * event's default; a swallowed `contextmenu` is prevented and returns `null`.
+   * event's default; the `contextmenu` that pairs with a keyboard opening (same target, the first
+   * one, within `SWALLOW_AFTER_OPEN`) is prevented and returns `null`.
    *
    * @param {MouseEvent | KeyboardEvent} event - `contextmenu` or `keydown` event.
    * @param {HTMLElement} trigger - Element the menu belongs to after a pointer gesture.
@@ -150,6 +162,7 @@ export class ɵContextMenuGesture {
       const focused: HTMLElement = event.target instanceof HTMLElement ? event.target : trigger;
       const { left, top }: DOMRect = focused.getBoundingClientRect();
       this.swallowUntil = performance.now() + SWALLOW_AFTER_OPEN;
+      this.swallowTarget = event.target;
       return {
         origin: { x: left, y: top },
         trigger: focused,
@@ -159,7 +172,10 @@ export class ɵContextMenuGesture {
     }
     if (event.type !== 'contextmenu') return null;
     event.preventDefault();
-    if (performance.now() < this.swallowUntil) return null;
+    const paired: boolean =
+      event.target === this.swallowTarget && performance.now() < this.swallowUntil;
+    this.swallowTarget = null;
+    if (paired) return null;
     return {
       origin: { x: event.clientX, y: event.clientY },
       trigger,

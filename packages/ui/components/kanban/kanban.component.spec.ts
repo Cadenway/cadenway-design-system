@@ -960,6 +960,25 @@ describe('CwKanban planning hooks', () => {
     expect(component.picked).toEqual([CARDS[2], CARDS[0]]);
   });
 
+  it('still opens the menu of another card right clicked just after a keyboard opening', async () => {
+    const first: HTMLElement = card(host, 'CAD-482');
+    first.focus();
+    press(first, 'F10', { shiftKey: true });
+    await fixture.whenStable();
+    press(document.activeElement as HTMLElement, 'Escape');
+    await fixture.whenStable();
+
+    const second: HTMLElement = card(host, 'CAD-488');
+    const event: MouseEvent = new MouseEvent('contextmenu', { bubbles: true, cancelable: true });
+    second.dispatchEvent(event);
+    await fixture.whenStable();
+    menuItem('Ouvrir').click();
+    await fixture.whenStable();
+
+    expect(event.defaultPrevented).toBe(true);
+    expect(component.picked).toEqual([CARDS[0]]);
+  });
+
   it('opens the column menu on a right click in a column and draws the header slot', async () => {
     const blocked: HTMLElement = group(host, 'Colonne Bloqué');
     expect(button(blocked, 'Actions Bloqué 0')).toBeTruthy();
