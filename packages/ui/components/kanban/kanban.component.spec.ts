@@ -733,6 +733,8 @@ describe('provideCwKanbanLabels', () => {
       [trackBy]="id"
       [groupBy]="status"
       [itemLabel]="label"
+      [lanes]="lanes()"
+      [swimlaneBy]="swimlaneBy()"
       [quickAdd]="quickAdd()"
       [loading]="loading()"
       [cardMenu]="cardMenu"
@@ -791,6 +793,32 @@ class PlanningHost {
    * @readonly
    */
   public readonly quickAdd: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property lanes
+   *
+   * @description
+   * Swimlanes of the board, none by default.
+   *
+   * @type {WritableSignal<readonly CwKanbanLane[]>}
+   * @readonly
+   */
+  public readonly lanes: WritableSignal<readonly CwKanbanLane[]> = signal<readonly CwKanbanLane[]>(
+    [],
+  );
+
+  /**
+   * Property swimlaneBy
+   *
+   * @description
+   * Lane accessor, null without swimlanes.
+   *
+   * @type {WritableSignal<((item: Card) => string) | null>}
+   * @readonly
+   */
+  public readonly swimlaneBy: WritableSignal<((item: Card) => string) | null> = signal<
+    ((item: Card) => string) | null
+  >(null);
 
   /**
    * Property loading
@@ -999,6 +1027,23 @@ describe('CwKanban planning hooks', () => {
     await fixture.whenStable();
 
     expect(document.activeElement).toBe(button(blocked, 'Replier la colonne Bloqué'));
+  });
+
+  it('opens the column menu from a right click in a swimlane cell, on its column', async () => {
+    component.lanes.set(LANES);
+    component.swimlaneBy.set((item: Card): string => item.priority);
+    await fixture.whenStable();
+    const cell: HTMLElement | null = host.querySelector(
+      '[role="list"][aria-label="En cours, Haute"]',
+    );
+    if (!cell) throw new Error('Lane cell missing');
+
+    cell.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
+    await fixture.whenStable();
+    menuItem('Masquer la colonne').click();
+    await fixture.whenStable();
+
+    expect(component.picked).toEqual([COLUMNS[1]]);
   });
 
   it('replaces the board with a named busy skeleton while loading', async () => {
