@@ -668,6 +668,7 @@ describe('provideCwCalendarViewLabels', () => {
       [loading]="loading()"
       [dayMenu]="dayMenu"
       (itemSchedule)="schedules.push($event)"
+      (itemMove)="moves.push($event)"
     />
     <cw-menu #dayMenu ariaLabel="Actions du jour">
       <button cwMenuItem (triggered)="picked.push(dayMenu.data())">
@@ -732,6 +733,17 @@ class PlanningHost {
    * @readonly
    */
   public readonly schedules: CwCalendarItemSchedule[] = [];
+
+  /**
+   * Property moves
+   *
+   * @description
+   * Recorded `itemMove` events.
+   *
+   * @type {CwCalendarItemMove<Task>[]}
+   * @readonly
+   */
+  public readonly moves: CwCalendarItemMove<Task>[] = [];
 
   /**
    * Property picked
@@ -850,6 +862,29 @@ describe('CwCalendarView planning hooks', () => {
     await fixture.whenStable();
 
     expect(component.schedules).toEqual([{ data: TASKS[7], date: day(24), allDay: true }]);
+  });
+
+  it('schedules an outside item whose data equals an item id instead of moving that item', async () => {
+    const lists: CdkDropList<unknown>[] = fixture.debugElement
+      .queryAll(By.directive(CdkDropList))
+      .map((element) => element.injector.get(CdkDropList) as CdkDropList<unknown>);
+    const outside: CdkDropList<unknown> | undefined = lists.find((list) => list.data === undefined);
+    const target: CdkDropList<DropData> | undefined = lists.find(
+      (list) => (list.data as DropData | undefined)?.date.getTime() === day(24).getTime(),
+    ) as CdkDropList<DropData> | undefined;
+    if (!outside || !target) throw new Error('Drop lists missing');
+
+    target.dropped.emit({
+      previousContainer: outside,
+      container: target,
+      previousIndex: 0,
+      currentIndex: 0,
+      item: { data: 'CAD-482', dropContainer: outside },
+    } as unknown as CdkDragDrop<DropData, DropData, unknown>);
+    await fixture.whenStable();
+
+    expect(component.moves).toEqual([]);
+    expect(component.schedules).toEqual([{ data: 'CAD-482', date: day(24), allDay: true }]);
   });
 
   it('places an outside item with the keyboard, and gives the focus back on Escape', async () => {

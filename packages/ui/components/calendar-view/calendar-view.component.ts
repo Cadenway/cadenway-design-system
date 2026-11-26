@@ -1916,9 +1916,22 @@ export class CwCalendarView<T> implements CalendarViewHost {
    */
   protected onEnter(key: string, event?: CdkDragEnter<DropData, unknown>): void {
     this.dragOver.set(key);
-    if (event && !this.entries().some((entry) => entry.id === event.item.data)) {
-      this.externalOver.set(key);
-    }
+    if (event && !this.ownsList(event.item.dropContainer)) this.externalOver.set(key);
+  }
+
+  /**
+   * Method ownsList
+   *
+   * @description
+   * Whether a drop list is one of this calendar's days or slots. A drag is the calendar's own when
+   * it comes from one of them; its data cannot tell, since an outside item may carry the same
+   * value as an item id.
+   *
+   * @param {{ readonly id: string } | null | undefined} list - Drop list a drag comes from.
+   * @returns {boolean} Whether the list belongs to this calendar.
+   */
+  private ownsList(list: { readonly id: string } | null | undefined): boolean {
+    return !!list && list.id.startsWith(this.dropListPrefix);
   }
 
   /**
@@ -1944,14 +1957,14 @@ export class CwCalendarView<T> implements CalendarViewHost {
   protected onDrop(event: CdkDragDrop<DropData, DropData, unknown>): void {
     this.externalOver.set(null);
     if (event.previousContainer === event.container) return;
-    const entry: Entry<T> | undefined = this.entries().find(
-      (candidate) => candidate.id === event.item.data,
-    );
-    if (entry) {
-      this.moveEntry(entry, event.container.data);
+    if (this.ownsList(event.previousContainer)) {
+      const entry: Entry<T> | undefined = this.entries().find(
+        (candidate) => candidate.id === event.item.data,
+      );
+      if (entry) this.moveEntry(entry, event.container.data);
       return;
     }
-    // Not one of ours: an outside item from a list connected through `dropListIds`.
+    // From a list outside the calendar, connected through `dropListIds`.
     const { date, slot }: DropData = event.container.data;
     this.itemSchedule.emit({
       data: event.item.data,
