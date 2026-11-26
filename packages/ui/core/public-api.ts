@@ -16,6 +16,8 @@ export { ɵConnectedPanel } from './overlay/connected-panel.service';
 export type { ɵConnectedPanelConfig } from './overlay/connected-panel.service';
 export { provideCwPhoneSheets, ɵphoneSheet } from './overlay/phone-sheet';
 export type { CwPhoneSheetConfig, ɵPhoneSheet } from './overlay/phone-sheet';
+export { ɵAT_POINT, ɵContextMenuGesture } from './overlay/context-menu-gesture';
+export type { ɵContextMenuRequest } from './overlay/context-menu-gesture';
 export { ɵModalOverlay } from './overlay/modal-overlay.service';
 export type { ɵModalOverlayConfig } from './overlay/modal-overlay.service';
 export { ɵPanelStack } from './overlay/panel-stack.service';

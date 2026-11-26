@@ -1,0 +1,65 @@
+import { ɵAT_POINT, ɵContextMenuGesture, type ɵContextMenuRequest } from './context-menu-gesture';
+
+describe('ɵContextMenuGesture', () => {
+  let gesture: ɵContextMenuGesture;
+  let trigger: HTMLElement;
+
+  beforeEach(() => {
+    gesture = new ɵContextMenuGesture();
+    trigger = document.createElement('button');
+    document.body.append(trigger);
+  });
+
+  afterEach(() => {
+    trigger.remove();
+  });
+
+  it('opens at the pointer on a right click and prevents the browser menu', () => {
+    const event: MouseEvent = new MouseEvent('contextmenu', {
+      cancelable: true,
+      clientX: 40,
+      clientY: 60,
+    });
+
+    const request: ɵContextMenuRequest | null = gesture.request(event, trigger);
+
+    expect(request).toEqual({
+      origin: { x: 40, y: 60 },
+      trigger,
+      focus: 'panel',
+      positions: ɵAT_POINT,
+    });
+    expect(event.defaultPrevented).toBe(true);
+  });
+
+  it('opens on the first item with Shift + F10 and the Menu key, then swallows the native menu', () => {
+    const shiftF10: KeyboardEvent = new KeyboardEvent('keydown', {
+      key: 'F10',
+      shiftKey: true,
+      cancelable: true,
+    });
+    trigger.dispatchEvent(shiftF10);
+    expect(gesture.request(shiftF10, trigger)?.focus).toBe('first');
+
+    const native: MouseEvent = new MouseEvent('contextmenu', { cancelable: true });
+    expect(gesture.request(native, trigger)).toBeNull();
+    expect(native.defaultPrevented).toBe(true);
+
+    const menuKey: KeyboardEvent = new KeyboardEvent('keydown', {
+      key: 'ContextMenu',
+      cancelable: true,
+    });
+    expect(gesture.request(menuKey, trigger)?.trigger).toBe(trigger);
+  });
+
+  it('keeps the browser menu in an editable field and for other keys', () => {
+    const field: HTMLInputElement = document.createElement('input');
+    trigger.append(field);
+    const inField: MouseEvent = new MouseEvent('contextmenu', { bubbles: true, cancelable: true });
+    field.dispatchEvent(inField);
+
+    expect(gesture.request(inField, trigger)).toBeNull();
+    expect(inField.defaultPrevented).toBe(false);
+    expect(gesture.request(new KeyboardEvent('keydown', { key: 'F10' }), trigger)).toBeNull();
+  });
+});
