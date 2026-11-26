@@ -351,6 +351,25 @@ const NUMBER_FORMAT: (locale: string) => CwChartValueFormat = ɵperLocale((local
 });
 
 /**
+ * Function othersKey
+ *
+ * @description
+ * Chooses the key of the « Others » series: `CW_CHART_OTHERS_KEY`, or the first of `CW_CHART_OTHERS_KEY-2`, `-3`… that no series and not the category key use, so that the sum written into each entry never replaces a value the chart reads.
+ *
+ * @param {readonly CwChartSeries[]} series - Every given series.
+ * @param {string} x - Key of the category in each entry.
+ * @returns {string} A key free in the drawn entries.
+ */
+function othersKey(series: readonly CwChartSeries[], x: string): string {
+  const taken: Set<string> = new Set<string>([x, ...series.map((item) => item.key)]);
+  let key: string = CW_CHART_OTHERS_KEY;
+  for (let suffix: number = 2; taken.has(key); suffix += 1) {
+    key = `${CW_CHART_OTHERS_KEY}-${String(suffix)}`;
+  }
+  return key;
+}
+
+/**
  * Function identity
  *
  * @description
@@ -1247,7 +1266,7 @@ export class CwChart {
    * Property maxSeries
    *
    * @description
-   * Largest number of drawn series: when `series` holds more, the first `maxSeries − 1` stay and the rest are summed, category by category, into one series named `othersLabel` in `othersColor`, under the key `CW_CHART_OTHERS_KEY`. Give the series in the order to keep (largest first). `null` (the default) draws every series; values below 2 count as 2.
+   * Largest number of drawn series: when `series` holds more, the first `maxSeries − 1` stay and the rest are summed, category by category, into one series named `othersLabel` in `othersColor`, under the key `CW_CHART_OTHERS_KEY` (followed by `-2`, `-3`… when a series or the `x` key already uses it, so the sum never overwrites a value of the caller's data). Give the series in the order to keep (largest first). `null` (the default) draws every series; values below 2 count as 2.
    *
    * @type {InputSignalWithTransform<number | null, unknown>}
    * @readonly
@@ -1440,8 +1459,9 @@ export class CwChart {
     if (limit === null || series.length <= Math.max(2, limit)) return { series, data };
     const kept: readonly CwChartSeries[] = series.slice(0, Math.max(2, limit) - 1);
     const rest: readonly CwChartSeries[] = series.slice(kept.length);
+    const key: string = othersKey(series, this.x());
     const others: CwChartSeries = {
-      key: CW_CHART_OTHERS_KEY,
+      key,
       label: this.othersLabel(),
       color: this.othersColor(),
     };
@@ -1456,7 +1476,7 @@ export class CwChart {
         const sum: number | null = values.length
           ? values.reduce((total, value) => total + value, 0)
           : null;
-        return { ...row, [CW_CHART_OTHERS_KEY]: sum };
+        return { ...row, [key]: sum };
       }),
     };
   });

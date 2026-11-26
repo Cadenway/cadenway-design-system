@@ -561,3 +561,166 @@ describe('provideCwChartLabels for markers and Others', () => {
     expect(element.textContent).toContain('Today (Tue).');
   });
 });
+
+/**
+ * Component CollisionHost
+ *
+ * @description
+ * Hosts a bar chart whose series or category key may already be the « Others » key.
+ */
+@Component({
+  imports: [CwChart],
+  template: `
+    <cw-chart
+      [data]="data()"
+      [x]="x()"
+      [series]="series()"
+      [maxSeries]="3"
+      [legend]="true"
+      ariaLabel="Hours per day"
+      (categorySelect)="selected.set($event)"
+    />
+  `,
+})
+class CollisionHost {
+  // #region Properties
+  /**
+   * Property x
+   *
+   * @description
+   * Category key given to the chart.
+   *
+   * @type {WritableSignal<string>}
+   * @readonly
+   */
+  public readonly x: WritableSignal<string> = signal('day');
+
+  /**
+   * Property data
+   *
+   * @description
+   * Data given to the chart.
+   *
+   * @type {WritableSignal<readonly CwChartDatum[]>}
+   * @readonly
+   */
+  public readonly data: WritableSignal<readonly CwChartDatum[]> = signal<readonly CwChartDatum[]>([
+    { day: 'Mon', [CW_CHART_OTHERS_KEY]: 4, ben: 3, cleo: 2, dan: 1 },
+    { day: 'Tue', [CW_CHART_OTHERS_KEY]: 5, ben: 2, cleo: 1, dan: 1 },
+  ]);
+
+  /**
+   * Property series
+   *
+   * @description
+   * Series given to the chart; the first one uses the « Others » key.
+   *
+   * @type {WritableSignal<readonly CwChartSeries[]>}
+   * @readonly
+   */
+  public readonly series: WritableSignal<readonly CwChartSeries[]> = signal<
+    readonly CwChartSeries[]
+  >([
+    { key: CW_CHART_OTHERS_KEY, label: 'Ana', color: 'chart-1' },
+    { key: 'ben', label: 'Ben', color: 'chart-2' },
+    { key: 'cleo', label: 'Cleo', color: 'chart-3' },
+    { key: 'dan', label: 'Dan', color: 'chart-4' },
+  ]);
+
+  /**
+   * Property selected
+   *
+   * @description
+   * Last category emitted by the chart.
+   *
+   * @type {WritableSignal<CwChartCategorySelect | null>}
+   * @readonly
+   */
+  public readonly selected: WritableSignal<CwChartCategorySelect | null> =
+    signal<CwChartCategorySelect | null>(null);
+  // #endregion
+}
+
+describe('CwChart « Others » key', () => {
+  let fixture: ComponentFixture<CollisionHost>;
+  let host: HTMLElement;
+  let component: CollisionHost;
+
+  /**
+   * Function rows
+   *
+   * @description
+   * Reads the rows of the hidden data table.
+   * @returns {string[][]} Cell texts, row by row, the category first.
+   */
+  function rows(): string[][] {
+    return Array.from(host.querySelectorAll('table tbody tr')).map((row) =>
+      Array.from(row.children).map((cell) => cell.textContent.trim()),
+    );
+  }
+
+  /**
+   * Function select
+   *
+   * @description
+   * Chooses the first category with the keyboard.
+   */
+  async function select(): Promise<void> {
+    const plot: HTMLElement | null = host.querySelector<HTMLElement>('[role="img"][tabindex="0"]');
+    plot?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    await fixture.whenStable();
+  }
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(CollisionHost);
+    fixture.autoDetectChanges();
+    host = fixture.nativeElement as HTMLElement;
+    component = fixture.componentInstance;
+  });
+
+  it('keeps a series already named with the « Others » key and sums the rest under another key', async () => {
+    const headers: string[] = Array.from(host.querySelectorAll('table thead th')).map((th) =>
+      th.textContent.trim(),
+    );
+    expect(headers).toEqual(['Catégorie', 'Ana', 'Ben', 'Autres']);
+    expect(rows()).toEqual([
+      ['Mon', '4', '3', '3'],
+      ['Tue', '5', '2', '2'],
+    ]);
+    // Grouped bars: one per drawn series of the first category, each its own shape.
+    expect(host.querySelectorAll('svg path')).toHaveLength(6);
+
+    await select();
+    expect(component.selected()).toEqual({
+      x: 'Mon',
+      values: { [CW_CHART_OTHERS_KEY]: 4, ben: 3, [`${CW_CHART_OTHERS_KEY}-2`]: 3 },
+    });
+  });
+
+  it('keeps a category key named with the « Others » key', async () => {
+    component.x.set(CW_CHART_OTHERS_KEY);
+    component.series.set([
+      { key: 'ana', label: 'Ana', color: 'chart-1' },
+      { key: 'ben', label: 'Ben', color: 'chart-2' },
+      { key: 'cleo', label: 'Cleo', color: 'chart-3' },
+      { key: 'dan', label: 'Dan', color: 'chart-4' },
+    ]);
+    component.data.set([
+      { [CW_CHART_OTHERS_KEY]: 'Mon', ana: 4, ben: 3, cleo: 2, dan: 1 },
+      { [CW_CHART_OTHERS_KEY]: 'Tue', ana: 5, ben: 2, cleo: 1, dan: 1 },
+    ]);
+    await fixture.whenStable();
+
+    expect(rows()).toEqual([
+      ['Mon', '4', '3', '3'],
+      ['Tue', '5', '2', '2'],
+    ]);
+    expect(host.querySelector('svg')?.textContent).toContain('Mon');
+
+    await select();
+    expect(component.selected()).toEqual({
+      x: 'Mon',
+      values: { ana: 4, ben: 3, [`${CW_CHART_OTHERS_KEY}-2`]: 3 },
+    });
+  });
+});

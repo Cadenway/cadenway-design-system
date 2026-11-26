@@ -20,7 +20,7 @@ export const CW_CHART_LABELS: Required<CwChartLabels> = {
  * Constant CW_CHART_OTHERS_KEY
  *
  * @description
- * Series key of the « Others » series a chart builds when `series` holds more than `maxSeries` entries: the key `categorySelect` reports its value under.
+ * Series key of the « Others » series a chart builds when `series` holds more than `maxSeries` entries: the key `categorySelect` reports its value under. When a series or the chart's `x` key already uses it, the chart takes `__others-2`, then `__others-3`…, so it never overwrites the caller's values.
  *
  * @type {string}
  */
