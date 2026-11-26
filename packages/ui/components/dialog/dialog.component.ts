@@ -73,7 +73,9 @@ const LAYOUTS: Readonly<Record<'simple' | 'scrollable', string>> = {
 const SIZES: Record<CwDialogSize, string> = {
   sm: 'w-[calc(100vw-2rem)] max-w-sm',
   default: 'w-[calc(100vw-2rem)] max-w-md',
+  md: 'w-[calc(100vw-2rem)] max-w-lg',
   lg: 'w-[calc(100vw-2rem)] max-w-2xl',
+  xl: 'w-[calc(100vw-2rem)] max-w-4xl',
   full: 'h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)]',
 };
 
@@ -142,7 +144,8 @@ export class CwDialog implements CwDialogContext {
    * @readonly
    *
    * @description
-   * Maximum dialog size.
+   * Maximum dialog size: `sm` 384 px, `default` 448 px, `md` 512 px, `lg` 672 px, `xl` 896 px
+   * or `full`.
    *
    * @type {InputSignal<CwDialogSize>}
    */

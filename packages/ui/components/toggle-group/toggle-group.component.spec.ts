@@ -121,7 +121,123 @@ class ModelHost {
   // #endregion
 }
 
+/**
+ * Interface Option
+ *
+ * @description
+ * Option rendered as one toggle item by a `@for`.
+ */
+interface Option {
+  // #region Properties
+  /**
+   * Property value
+   * @readonly
+   *
+   * @description
+   * Value of the item.
+   *
+   * @type {string}
+   */
+  readonly value: string;
+
+  /**
+   * Property label
+   * @readonly
+   *
+   * @description
+   * Visible text of the item.
+   *
+   * @type {string}
+   */
+  readonly label: string;
+  // #endregion
+}
+
+/**
+ * Class LoopHost
+ *
+ * @description
+ * Hosts a single-choice group whose items come from a `@for`, the shape that raised NG0950 when the
+ * item that is on was not the first one rendered.
+ */
+@Component({
+  imports: [CwToggleGroup, CwToggleGroupItem],
+  template: `
+    <cw-toggle-group variant="outline" ariaLabel="Grouper par" [(value)]="groupBy">
+      @for (option of options(); track option.value) {
+        <button cwToggleGroupItem [value]="option.value">{{ option.label }}</button>
+      }
+    </cw-toggle-group>
+  `,
+})
+class LoopHost {
+  // #region Properties
+  /**
+   * Property options
+   * @readonly
+   *
+   * @description
+   * Items of the group, in rendering order.
+   *
+   * @type {WritableSignal<readonly Option[]>}
+   */
+  public readonly options: WritableSignal<readonly Option[]> = signal<readonly Option[]>([
+    { value: 'status', label: 'Statut' },
+    { value: 'priority', label: 'Priorité' },
+    { value: 'assignee', label: 'Assigné' },
+  ]);
+
+  /**
+   * Property groupBy
+   * @readonly
+   *
+   * @description
+   * Current grouping selection, on the third item.
+   *
+   * @type {WritableSignal<CwToggleGroupValue>}
+   */
+  public readonly groupBy: WritableSignal<CwToggleGroupValue> =
+    signal<CwToggleGroupValue>('assignee');
+  // #endregion
+}
+
 describe('CwToggleGroup', () => {
+  describe('with items from a @for', () => {
+    it('renders when the item that is on is the third one', async () => {
+      const fixture: ComponentFixture<LoopHost> = TestBed.createComponent(LoopHost);
+      fixture.autoDetectChanges();
+      await fixture.whenStable();
+      const groupBy: HTMLElement = group(fixture.nativeElement as HTMLElement, 'Grouper par');
+
+      const assignee: HTMLButtonElement = item(groupBy, 'Assigné');
+      expect(assignee.getAttribute('aria-checked')).toBe('true');
+      expect(assignee.tabIndex).toBe(0);
+      expect(item(groupBy, 'Statut').getAttribute('aria-checked')).toBe('false');
+      expect(item(groupBy, 'Statut').tabIndex).toBe(-1);
+    });
+
+    it('renders when the items change and the item that is on is the third new one', async () => {
+      const fixture: ComponentFixture<LoopHost> = TestBed.createComponent(LoopHost);
+      fixture.autoDetectChanges();
+      await fixture.whenStable();
+
+      fixture.componentInstance.options.set([
+        { value: 'list', label: 'Liste' },
+        { value: 'sprint', label: 'Sprint' },
+        { value: 'tag', label: 'Étiquette' },
+      ]);
+      fixture.componentInstance.groupBy.set('tag');
+      await fixture.whenStable();
+      const groupBy: HTMLElement = group(fixture.nativeElement as HTMLElement, 'Grouper par');
+
+      const tag: HTMLButtonElement = item(groupBy, 'Étiquette');
+      expect(tag.getAttribute('aria-checked')).toBe('true');
+      expect(tag.tabIndex).toBe(0);
+      expect(item(groupBy, 'Liste').tabIndex).toBe(-1);
+      expect(item(groupBy, 'Sprint').tabIndex).toBe(-1);
+    });
+  });
+
   describe('with models', () => {
     let host: HTMLElement;
     let component: ModelHost;

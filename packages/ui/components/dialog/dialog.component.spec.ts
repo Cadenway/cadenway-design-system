@@ -10,7 +10,7 @@ import { CwDialogTitle } from './dialog-title/dialog-title.directive';
 import { CwDialogTrigger } from './dialog-trigger/dialog-trigger.directive';
 import { CwDialog } from './dialog.component';
 import { provideCwDialogLabels } from './dialog.providers';
-import type { CwDialogCloseReason } from './dialog.types';
+import type { CwDialogCloseReason, CwDialogSize } from './dialog.types';
 
 /**
  * Component Host
@@ -340,6 +340,100 @@ describe('CwDialog', () => {
     const window: HTMLElement = await openFromTrigger();
 
     expect(() => button(window, 'Fermer')).toThrow();
+  });
+});
+
+/**
+ * Component SizedHost
+ *
+ * @description
+ * Hosts an open dialog whose size the test changes.
+ */
+@Component({
+  imports: [CwDialog, CwDialogHeader, CwDialogTitle],
+  template: `
+    <cw-dialog [open]="true" [size]="size()">
+      <cw-dialog-header>
+        <h2 cwDialogTitle>Statuts de l'espace</h2>
+      </cw-dialog-header>
+    </cw-dialog>
+  `,
+})
+class SizedHost {
+  // #region Properties
+  /**
+   * Property size
+   * @readonly
+   *
+   * @description
+   * Size given to the dialog.
+   *
+   * @type {WritableSignal<CwDialogSize>}
+   */
+  public readonly size: WritableSignal<CwDialogSize> = signal<CwDialogSize>('default');
+  // #endregion
+}
+
+describe('CwDialog size', () => {
+  let fixture: ComponentFixture<SizedHost>;
+
+  /**
+   * Function panel
+   *
+   * @description
+   * Returns the panel of the open dialog, which carries the size.
+   *
+   * @returns {HTMLElement} Panel inside the dialog window.
+   */
+  function panel(): HTMLElement {
+    const found: Element | null | undefined = dialog()?.firstElementChild;
+    if (!(found instanceof HTMLElement)) throw new Error('Dialog not open');
+    return found;
+  }
+
+  beforeEach(async () => {
+    fixture = TestBed.createComponent(SizedHost);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+  });
+
+  afterEach(() => {
+    fixture.destroy();
+  });
+
+  it('is 448 px wide by default', () => {
+    expect(panel().dataset['size']).toBe('default');
+    expect(panel().classList).toContain('max-w-md');
+  });
+
+  it('is 512 px wide with size md, between default and lg', async () => {
+    fixture.componentInstance.size.set('md');
+    await fixture.whenStable();
+
+    expect(panel().dataset['size']).toBe('md');
+    expect(panel().classList).toContain('max-w-lg');
+    expect(panel().classList).not.toContain('max-w-md');
+    expect(panel().classList).not.toContain('max-w-2xl');
+  });
+
+  it('is 896 px wide with size xl, between lg and full', async () => {
+    fixture.componentInstance.size.set('xl');
+    await fixture.whenStable();
+
+    expect(panel().dataset['size']).toBe('xl');
+    expect(panel().classList).toContain('max-w-4xl');
+    expect(panel().classList).not.toContain('max-w-2xl');
+    expect(panel().classList).toContain('max-md:max-w-none');
+  });
+
+  it('keeps 672 px for size lg and fills the screen under 768 px at every size', async () => {
+    fixture.componentInstance.size.set('lg');
+    await fixture.whenStable();
+    expect(panel().classList).toContain('max-w-2xl');
+
+    fixture.componentInstance.size.set('md');
+    await fixture.whenStable();
+    expect(panel().classList).toContain('max-md:max-w-none');
   });
 });
 

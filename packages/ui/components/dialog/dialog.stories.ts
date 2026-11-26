@@ -236,10 +236,13 @@ export const ScrollableWithoutClose: Story = {
   },
 };
 
-/** The four sizes: `sm` 384 px, `default` 448 px, `lg` 672 px, `full` the screen less 16 px. */
+/**
+ * The six sizes: `sm` 384 px, `default` 448 px, `md` 512 px (Space statuses), `lg` 672 px, `xl`
+ * 896 px (sprint report), `full` the screen less 16 px.
+ */
 export const Sizes: Story = {
   render: () => ({
-    props: { sizes: ['sm', 'default', 'lg', 'full'] },
+    props: { sizes: ['sm', 'default', 'md', 'lg', 'xl', 'full'] },
     template: `
       <div class="flex flex-wrap gap-2">
         @for (size of sizes; track size) {
@@ -262,6 +265,24 @@ export const Sizes: Story = {
       name: 'Taille lg',
     });
     await expect(dialog.firstElementChild).toHaveAttribute('data-size', 'lg');
+
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(document.body.querySelector('[role="dialog"]')).toBeNull());
+
+    await userEvent.click(within(light(canvasElement)).getByRole('button', { name: 'md' }));
+    const medium: HTMLElement = await within(document.body).findByRole('dialog', {
+      name: 'Taille md',
+    });
+    await expect(medium.firstElementChild).toHaveAttribute('data-size', 'md');
+
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(document.body.querySelector('[role="dialog"]')).toBeNull());
+
+    await userEvent.click(within(light(canvasElement)).getByRole('button', { name: 'xl' }));
+    const wide: HTMLElement = await within(document.body).findByRole('dialog', {
+      name: 'Taille xl',
+    });
+    await expect(wide.firstElementChild).toHaveAttribute('data-size', 'xl');
 
     await userEvent.keyboard('{Escape}');
     await waitFor(() => expect(document.body.querySelector('[role="dialog"]')).toBeNull());
