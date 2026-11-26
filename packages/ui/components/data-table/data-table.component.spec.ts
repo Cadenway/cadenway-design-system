@@ -2409,6 +2409,7 @@ function sumEstimates(rows: readonly Task[]): string {
       [loading]="loading()"
       [page]="null"
       [rowContextMenu]="withMenu() ? rowMenu : null"
+      (rowOpen)="opened.set($event)"
     >
       <cw-data-table-column key="name" header="Name">
         <ng-template cwCell let-task>
@@ -2493,6 +2494,17 @@ class FooterHost {
    * @readonly
    */
   public readonly picked: WritableSignal<unknown> = signal<unknown>(null);
+
+  /**
+   * Property opened
+   *
+   * @description
+   * Last row the table asked to open.
+   *
+   * @type {WritableSignal<Task | null>}
+   * @readonly
+   */
+  public readonly opened: WritableSignal<Task | null> = signal<Task | null>(null);
   // #endregion
 }
 
@@ -2616,6 +2628,41 @@ describe('CwDataTable footer and row context menu', () => {
     key(cell, { key: 'ContextMenu' });
     await fixture.whenStable();
     expect(menuItem()).not.toBeNull();
+  });
+
+  it('opens the row menu on a long press and swallows the click that ends it', async () => {
+    const cell: HTMLElement = required(byRole(required(dataRows(host)[0]), 'gridcell')[1]);
+    /**
+     * Function touch
+     *
+     * @description
+     * Dispatches a touch pointer event on the first data cell.
+     *
+     * @param {string} type - Pointer event type.
+     */
+    const touch: (type: string) => void = (type: string): void => {
+      cell.dispatchEvent(
+        new PointerEvent(type, { bubbles: true, cancelable: true, pointerType: 'touch' }),
+      );
+    };
+
+    touch('pointerdown');
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 550);
+    });
+    await fixture.whenStable();
+    expect(menuItem()).not.toBeNull();
+    touch('pointerup');
+    const ending: MouseEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
+    cell.dispatchEvent(ending);
+    expect(ending.defaultPrevented).toBe(true);
+    expect(component.opened()).toBeNull();
+
+    // A short tap afterwards still opens the row.
+    touch('pointerdown');
+    touch('pointerup');
+    cell.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    expect(component.opened()).toBe(TASKS[0]);
   });
 
   it('keeps the browser menu outside data rows, in an editable field and without a menu', async () => {

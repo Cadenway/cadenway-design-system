@@ -2034,6 +2034,16 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
   private longPress: { timer: ReturnType<typeof setTimeout>; x: number; y: number } | null = null;
 
   /**
+   * Property pressOpened
+   *
+   * @description
+   * Whether a long press just opened the row menu: the click the browser fires when the finger lifts is then swallowed, so the row neither opens nor toggles.
+   *
+   * @type {boolean}
+   */
+  private pressOpened: boolean = false;
+
+  /**
    * Property footerKey
    *
    * @description
@@ -3569,6 +3579,13 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
     this.host.addEventListener(
       'click',
       (event) => {
+        // The click that ends a long press belongs to the menu it opened, not to the row.
+        if (this.pressOpened) {
+          this.pressOpened = false;
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
         const target: Element | null = event.target as Element | null;
         if (!event.shiftKey || !target?.closest('[data-cw-select]')) return;
         const rowKey: string | undefined =
@@ -5250,6 +5267,8 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    */
   protected onPointerDown(event: PointerEvent): void {
     this.cancelLongPress();
+    // A new press starts clean, even when the previous one ended without a click.
+    this.pressOpened = false;
     if (event.pointerType !== 'touch' || !this.rowContextMenu()) return;
     if (isEditableTarget(event.target)) return;
     const located: { entry: RowEntry<T>; trigger: HTMLElement } | null = this.menuTarget(
@@ -5260,6 +5279,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
     const timer: ReturnType<typeof setTimeout> = setTimeout(() => {
       this.longPress = null;
       this.swallowUntil = performance.now() + SWALLOW_AFTER_OPEN;
+      this.pressOpened = true;
       this.openRowMenu({ x, y }, located.trigger, 'panel', located.entry);
     }, LONG_PRESS);
     this.longPress = { timer, x, y };
