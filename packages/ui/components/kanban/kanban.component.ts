@@ -476,9 +476,9 @@ export class CwKanban<T> implements KanbanBoard {
    * Property columnMenu
    *
    * @description
-   * Menu opened by a right click in a column or its swimlane cells, or Shift + F10 and the Menu key from
-   * its controls, with the `CwKanbanColumn` as the menu's `data()`; `null` (the default) keeps the
-   * browser's menu.
+   * Menu opened by a right click in a column or its swimlane cells, or Shift + F10 and the Menu
+   * key from its controls, with the `CwKanbanColumn` as the menu's `data()`; `null` (the default)
+   * keeps the browser's menu.
    *
    * @type {InputSignal<CwMenu | null>}
    * @readonly
