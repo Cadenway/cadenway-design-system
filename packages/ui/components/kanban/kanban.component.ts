@@ -1405,7 +1405,7 @@ export class CwKanban<T> implements KanbanBoard {
    *
    * @param {MouseEvent | KeyboardEvent} event - `contextmenu` or `keydown` event of the column.
    * @param {CwKanbanColumn} column - Column the menu acts on.
-   * @param {HTMLElement} element - Column element the menu belongs to.
+   * @param {HTMLElement} element - Column element, the trigger when the column has no fold button.
    */
   public onColumnContextMenu(
     event: MouseEvent | KeyboardEvent,
@@ -1414,7 +1414,11 @@ export class CwKanban<T> implements KanbanBoard {
   ): void {
     const menu: CwMenu | null = this.columnMenu();
     if (!menu) return;
-    const request: ɵContextMenuRequest | null = this.menuGesture.request(event, element);
+    // The column and lane cells are not focusable: after a right click the menu belongs to the
+    // column's fold button, which takes the focus back when it closes.
+    const trigger: HTMLElement =
+      this.find('[data-kanban-toggle]', 'kanbanToggle', column.id) ?? element;
+    const request: ɵContextMenuRequest | null = this.menuGesture.request(event, trigger);
     if (request) menu.open({ ...request, data: column });
   }
 

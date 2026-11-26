@@ -991,6 +991,16 @@ describe('CwKanban planning hooks', () => {
     expect(component.picked).toEqual([COLUMNS[2]]);
   });
 
+  it('gives the focus back to the column fold button when its menu closes', async () => {
+    const blocked: HTMLElement = group(host, 'Colonne Bloqué');
+    blocked.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
+    await fixture.whenStable();
+    press(document.activeElement as HTMLElement, 'Escape');
+    await fixture.whenStable();
+
+    expect(document.activeElement).toBe(button(blocked, 'Replier la colonne Bloqué'));
+  });
+
   it('replaces the board with a named busy skeleton while loading', async () => {
     component.loading.set(true);
     await fixture.whenStable();
