@@ -1,5 +1,15 @@
 # @cadenway/ui
 
+## 0.10.0
+
+### Minor Changes
+
+- 68f3a11: Add the `md` and `xl` sizes to `cw-dialog` (`CwDialogSize`). `md` is 512 px (`max-w-lg`), between `default` (448 px) and `lg` (672 px), for the Space statuses, sharing and keyboard shortcuts dialogs of the mockup `App.dc.html`. `xl` is 896 px (`max-w-4xl`), between `lg` and `full`, for its sprint report and custom fields dialogs. Existing sizes and the default are unchanged; under 768 px the window still fills the screen.
+
+### Patch Changes
+
+- 68f3a11: Fix NG0950 in `cw-toggle-group` when its items come from a `@for` and the item that is on is not the first one rendered. The group placed its Tab stop by reading the required `value` of every item from the host bindings of the first item, before Angular had set the inputs of the next ones. Items now report when their `value` is set (`CwToggleGroupItem.hasValue`), and until then the group treats them as off. Selection, roving tabindex and keyboard behavior are unchanged.
+
 ## 0.9.0
 
 ### Minor Changes
