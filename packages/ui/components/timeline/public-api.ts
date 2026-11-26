@@ -5,6 +5,7 @@
  */
 
 export { CwTimelineBarDef } from './timeline-bar/timeline-bar.directive';
+export { CwTimelineNameDef } from './timeline-name/timeline-name.directive';
 export { CwTimelineToolbar } from './timeline-toolbar/timeline-toolbar.directive';
 export { CwTimeline } from './timeline.component';
 export type {
@@ -17,6 +18,8 @@ export type {
   CwTimelineItem,
   CwTimelineItemChange,
   CwTimelineLabels,
+  CwTimelineMilestoneDisplay,
+  CwTimelineNameContext,
   CwTimelineRange,
   CwTimelineScale,
   CwTimelineSchedule,

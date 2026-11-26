@@ -35,11 +35,14 @@ function days(count: number): string {
  * Constant CW_TIMELINE_LABELS
  *
  * @description
- * French ruler labels and accessible announcements from the Timeline sheet.
+ * French ruler labels and accessible announcements from the Timeline sheet; every text is defined,
+ * the optional ones included. The texts added after 0.8.0 (`durationHeader`, `duration`, `reveal`,
+ * `fitted`, `loading`, `empty`) default to English source copy, translated by the application
+ * through `provideCwTimelineLabels`.
  *
- * @type {CwTimelineLabels}
+ * @type {Required<CwTimelineLabels>}
  */
-export const CW_TIMELINE_LABELS: CwTimelineLabels = {
+export const CW_TIMELINE_LABELS: Required<CwTimelineLabels> = {
   range: rangeText,
   move: moveText,
   nameHeader: 'Tâche',
@@ -68,4 +71,14 @@ export const CW_TIMELINE_LABELS: CwTimelineLabels = {
   zoom: (percent: number): string => `Zoom : ${String(percent)} %`,
   /** Percentage of a bar: « 60 % ». */
   percent: (value: number): string => `${String(value)} %`,
+  durationHeader: 'Duration',
+  /** Duration column: « 3 d ». */
+  duration: (days: number): string => `${String(days)} d`,
+  /** Chip of an item outside the window: « Show Import spaces (from 24 to 26 Nov) ». */
+  reveal: (name: string, range: string): string => `Show ${name} (${range})`,
+  /** Announcement after `fit()`. */
+  fitted: (count: number): string =>
+    `Window fitted to ${String(count)} dated ${count > 1 ? 'items' : 'item'}`,
+  loading: 'Loading the timeline',
+  empty: 'No items to show.',
 };

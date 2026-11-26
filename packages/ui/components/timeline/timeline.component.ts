@@ -18,9 +18,11 @@ import {
   type ModelSignal,
   type OutputEmitterRef,
   type Signal,
+  type TemplateRef,
   type WritableSignal,
 } from '@angular/core';
 import { CwAvatar } from '@cadenway/ui/components/avatar';
+import { CwSkeleton } from '@cadenway/ui/components/skeleton';
 import {
   ɵLOCALE,
   ɵaddDays,
@@ -40,10 +42,16 @@ import {
   type CwStatusLabels,
 } from '@cadenway/ui/components/status-icon';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { phosphorCalendarPlusBold, phosphorCaretDownBold } from '@ng-icons/phosphor-icons/bold';
+import {
+  phosphorCalendarPlusBold,
+  phosphorCaretDownBold,
+  phosphorCaretLeftBold,
+  phosphorCaretRightBold,
+} from '@ng-icons/phosphor-icons/bold';
 import { phosphorDiamondFill, phosphorWarningCircleFill } from '@ng-icons/phosphor-icons/fill';
 
 import { CwTimelineBarDef } from './timeline-bar/timeline-bar.directive';
+import { CW_TIMELINE_LABELS } from './timeline.constants';
 import {
   dayMonth,
   isWeekend,
@@ -61,6 +69,8 @@ import type {
   CwTimelineItem,
   CwTimelineItemChange,
   CwTimelineLabels,
+  CwTimelineMilestoneDisplay,
+  CwTimelineNameContext,
   CwTimelineRange,
   CwTimelineScale,
   CwTimelineSchedule,
@@ -987,6 +997,40 @@ interface ItemRow {
    * @type {{ readonly x: number; readonly width: number } | null}
    */
   readonly ghost: { readonly x: number; readonly width: number } | null;
+
+  /**
+   * Property duration
+   * @readonly
+   *
+   * @description
+   * Duration text of a dated item with `showDuration`, else null.
+   *
+   * @type {string | null}
+   */
+  readonly duration: string | null;
+
+  /**
+   * Property chip
+   * @readonly
+   *
+   * @description
+   * Marker of a dated item outside the window with `showOffWindow`: its side, the date it shows
+   * and its accessible name; null otherwise.
+   *
+   * @type {{ readonly before: boolean; readonly text: string; readonly label: string } | null}
+   */
+  readonly chip: { readonly before: boolean; readonly text: string; readonly label: string } | null;
+
+  /**
+   * Property nameContext
+   * @readonly
+   *
+   * @description
+   * Context given to the `cwTimelineName` template.
+   *
+   * @type {CwTimelineNameContext}
+   */
+  readonly nameContext: CwTimelineNameContext;
   // #endregion
 }
 
@@ -1356,6 +1400,85 @@ function rangeFor(scale: CwTimelineScale, anchor: Date): CwTimelineRange {
 }
 
 /**
+ * Constant CHIP
+ *
+ * @description
+ * Classes of the chip of a bar outside the window, placed at the left or right edge by the
+ * template (mockup `App.dc.html`, Gantt).
+ *
+ * @type {string}
+ */
+const CHIP: string =
+  'absolute top-2.5 isolate inline-flex h-5 items-center gap-0.5 rounded-md border bg-background px-1.5 text-[11px] whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground [&_ng-icon]:[--ng-icon__size:0.75rem]';
+
+/**
+ * Constant FIT_MARGIN
+ *
+ * @description
+ * Days kept before the first and after the last item by `fit()` (mockup `App.dc.html`, « Ajuster »).
+ *
+ * @type {number}
+ */
+const FIT_MARGIN: number = 2;
+
+/**
+ * Constant SKELETON_ROWS
+ *
+ * @description
+ * Rows of the loading skeleton: name width, bar start and bar width in percent (mockup
+ * `App.dc.html`, « Chargement du diagramme de Gantt »).
+ *
+ * @type {readonly { readonly name: number; readonly left: number; readonly width: number }[]}
+ */
+const SKELETON_ROWS: readonly {
+  readonly name: number;
+  readonly left: number;
+  readonly width: number;
+}[] = [
+  { name: 60, left: 4, width: 18 },
+  { name: 45, left: 10, width: 26 },
+  { name: 70, left: 18, width: 14 },
+  { name: 50, left: 24, width: 30 },
+  { name: 65, left: 34, width: 20 },
+  { name: 40, left: 40, width: 24 },
+  { name: 55, left: 52, width: 16 },
+  { name: 75, left: 58, width: 22 },
+  { name: 45, left: 66, width: 18 },
+];
+
+/**
+ * Function fitWindow
+ *
+ * @description
+ * The window `fit()` gives a scale: its default length from the first day (snapped to the week or
+ * the month of the scale), stretched to reach `end`.
+ *
+ * @param {CwTimelineScale} scale - Scale of the window.
+ * @param {Date} start - First day to show.
+ * @param {Date} end - Last day to show.
+ *
+ * @returns {CwTimelineRange} Window covering both days.
+ */
+function fitWindow(scale: CwTimelineScale, start: Date, end: Date): CwTimelineRange {
+  let from: Date = start;
+  let to: Date;
+  switch (scale) {
+    case 'day':
+      to = ɵaddDays(from, 20);
+      break;
+    case 'week':
+      from = ɵstartOfWeek(start);
+      to = ɵaddDays(from, 12 * 7 - 1);
+      break;
+    case 'month':
+      from = ɵstartOfMonth(start);
+      to = ɵaddDays(ɵaddMonths(from, 6), -1);
+      break;
+  }
+  return { start: from, end: ɵdaysBetween(to, end) > 0 ? end : to };
+}
+
+/**
  * Function shiftByUnit
  *
  * @description
@@ -1485,6 +1608,14 @@ function arrowHead(x: number, y: number): string {
  * and Ctrl + / Ctrl − walk the eight zoom steps of the integration guide, from month to day, and
  * Ctrl + 0 resets the column width.
  *
+ * Planning: `showDuration` adds a duration to each dated row (« 3 d ») under a « Duration » header;
+ * `ng-template[cwTimelineName]` (`CwTimelineNameDef`) replaces the content of the name cells;
+ * `fit()` picks the scale and the window that show every dated item; `milestoneDisplay="lines"`
+ * draws milestones as dashed lines across the grid with a marker in the ruler instead of rows;
+ * `showOffWindow` marks the rows whose bar is outside the window with a chip (« ‹ 3 nov. »,
+ * « 2 déc. › ») that brings it into view, also with Enter on the row; `loading` draws a skeleton
+ * named by the `loading` text; with no row, the `empty` text is drawn under the ruler.
+ *
  * Accessibility: a named `role="treegrid"` with one tab stop; ↑ ↓ move between rows, Home and End
  * jump; on a group ← → collapse and expand; on a bar ← → move it by one unit of the scale, Shift
  * changes its end, Alt its start; Space selects (Ctrl + Space adds), Enter opens, Escape cancels a
@@ -1498,11 +1629,13 @@ function arrowHead(x: number, y: number): string {
  */
 @Component({
   selector: 'cw-timeline',
-  imports: [NgIcon, NgTemplateOutlet, CwAvatar, CwStatusIcon],
+  imports: [NgIcon, NgTemplateOutlet, CwAvatar, CwSkeleton, CwStatusIcon],
   providers: [
     provideIcons({
       phosphorCalendarPlusBold,
       phosphorCaretDownBold,
+      phosphorCaretLeftBold,
+      phosphorCaretRightBold,
       phosphorDiamondFill,
       phosphorWarningCircleFill,
     }),
@@ -1733,6 +1866,63 @@ export class CwTimeline {
   );
 
   /**
+   * Property showDuration
+   * @readonly
+   *
+   * @description
+   * Adds the duration of each dated item, in calendar days with both ends included, at the end of
+   * its name cell, under the `durationHeader` text (mockup `App.dc.html`, Gantt « Durée »). Off by
+   * default.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   */
+  public readonly showDuration: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property milestoneDisplay
+   * @readonly
+   *
+   * @description
+   * `rows` (the default) gives each milestone a row in its group; `lines` draws a dashed line at
+   * its date across the whole grid, with a named marker in the ruler, and no row.
+   *
+   * @type {InputSignal<CwTimelineMilestoneDisplay>}
+   */
+  public readonly milestoneDisplay: InputSignal<CwTimelineMilestoneDisplay> =
+    input<CwTimelineMilestoneDisplay>('rows');
+
+  /**
+   * Property showOffWindow
+   * @readonly
+   *
+   * @description
+   * Marks each dated row whose bar is outside the window with a chip at the edge it lies beyond:
+   * its end date on the left, its start date on the right. The chip, and Enter on the row, move the
+   * window to the bar, its length kept. Off by default.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   */
+  public readonly showOffWindow: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property loading
+   * @readonly
+   *
+   * @description
+   * Draws a skeleton of rows and bars instead of the grid while the first read runs; the toolbar
+   * slot stays.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   */
+  public readonly loading: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
+
+  /**
    * Property itemChange
    * @readonly
    *
@@ -1800,6 +1990,42 @@ export class CwTimeline {
   protected readonly barDef: Signal<CwTimelineBarDef | undefined> = contentChild(CwTimelineBarDef);
 
   /**
+   * Property nameTemplate
+   * @readonly
+   *
+   * @description
+   * Template registered by a projected `CwTimelineNameDef`, overriding the content of the name
+   * cells. The slot registers itself rather than being a content query, so the component's
+   * published query metadata stays as released (the type contract check of `tests/packaging`).
+   *
+   * @type {WritableSignal<TemplateRef<CwTimelineNameContext> | undefined>}
+   */
+  protected readonly nameTemplate: WritableSignal<TemplateRef<CwTimelineNameContext> | undefined> =
+    signal<TemplateRef<CwTimelineNameContext> | undefined>(undefined);
+
+  /**
+   * Property skeletonRows
+   * @readonly
+   *
+   * @description
+   * Rows of the loading skeleton.
+   *
+   * @type {typeof SKELETON_ROWS}
+   */
+  protected readonly skeletonRows: typeof SKELETON_ROWS = SKELETON_ROWS;
+
+  /**
+   * Property chipClass
+   * @readonly
+   *
+   * @description
+   * Classes of the off-window chips.
+   *
+   * @type {string}
+   */
+  protected readonly chipClass: string = CHIP;
+
+  /**
    * Property host
    * @readonly
    *
@@ -1843,6 +2069,20 @@ export class CwTimeline {
    * @readonly
    */
   private readonly providedLabels: CwTimelineLabels = inject(TIMELINE_LABELS);
+
+  /**
+   * Property texts
+   * @readonly
+   *
+   * @description
+   * The provided texts over the defaults, so the texts added after 0.8.0 are always defined.
+   *
+   * @type {Required<CwTimelineLabels>}
+   */
+  protected readonly texts: Required<CwTimelineLabels> = {
+    ...CW_TIMELINE_LABELS,
+    ...this.providedLabels,
+  };
 
   /**
    * Property statusLabels
@@ -2031,7 +2271,8 @@ export class CwTimeline {
   protected readonly sections: Signal<readonly Section[]> = computed<readonly Section[]>(() => {
     const groups: readonly CwTimelineGroup[] = this.groups();
     const items: readonly CwTimelineItem[] = this.items();
-    const milestones: readonly CwMilestone[] = this.milestones();
+    const milestones: readonly CwMilestone[] =
+      this.milestoneDisplay() === 'rows' ? this.milestones() : [];
     const collapsed: Set<string> = new Set<string>(this.collapsedGroups());
     const known: Set<string> = new Set<string>(groups.map((group) => group.id));
     let top: number = 0;
@@ -2121,6 +2362,48 @@ export class CwTimeline {
   protected readonly bodyHeight: Signal<number> = computed(
     () => this.visibleRows().length * ROW_HEIGHT,
   );
+
+  /**
+   * Property empty
+   * @readonly
+   *
+   * @description
+   * Whether there is no row to draw, which shows the `empty` text; the grid itself then takes the
+   * tab stop, so its scrollable ruler stays reachable from the keyboard.
+   *
+   * @type {Signal<boolean>}
+   */
+  protected readonly empty: Signal<boolean> = computed(() => this.visibleRows().length === 0);
+
+  /**
+   * Property milestoneLines
+   * @readonly
+   *
+   * @description
+   * Milestones inside the window as lines (`milestoneDisplay="lines"`): position, name and
+   * accessible name of their ruler marker.
+   *
+   * @type {Signal<readonly { key: string; x: number; label: string; ariaLabel: string }[]>}
+   */
+  protected readonly milestoneLines: Signal<
+    readonly { key: string; x: number; label: string; ariaLabel: string }[]
+  > = computed(() => {
+    if (this.milestoneDisplay() !== 'lines') return [];
+    const axis: Axis = this.axis();
+    return this.milestones().flatMap((mark) => {
+      const date: Date = ɵstartOfDay(mark.date);
+      const x: number = axis.xOf(date) + axis.dayWidth / 2;
+      if (x < 0 || x > axis.width) return [];
+      return [
+        {
+          key: mark.id,
+          x: Math.round(x * 100) / 100,
+          label: mark.label,
+          ariaLabel: this.texts.milestone(mark.label, dayMonth(date, this.locale)),
+        },
+      ];
+    });
+  });
 
   /**
    * Property tabStop
@@ -2857,6 +3140,7 @@ export class CwTimeline {
     const dragging: boolean =
       !!drag && drag.mode !== 'link' && drag.moved && drag.ids.includes(item.id);
     const own: Dates | null = datesOf(item);
+    const bar: BarView | null = dates ? this.barView(item, dates, selected, dragging, drag) : null;
     return {
       kind: 'item',
       key: `i:${item.id}`,
@@ -2865,9 +3149,112 @@ export class CwTimeline {
       item,
       dates,
       selected,
-      bar: dates ? this.barView(item, dates, selected, dragging, drag) : null,
+      bar,
       ghost: dragging && own ? this.span(own) : null,
+      duration:
+        dates && this.showDuration()
+          ? this.texts.duration(ɵdaysBetween(dates.start, dates.end) + 1)
+          : null,
+      chip: dates && !bar && this.showOffWindow() ? this.chipOf(item, dates) : null,
+      nameContext: { $implicit: item, dates, level },
     };
+  }
+
+  /**
+   * Method chipOf
+   * @method chipOf
+   *
+   * @description
+   * Builds the marker of a dated item whose bar lies outside the window.
+   *
+   * @param {CwTimelineItem} item - Item outside the window.
+   * @param {Dates} dates - Its dates.
+   *
+   * @returns {{ before: boolean; text: string; label: string }} Side, date text and accessible name.
+   */
+  private chipOf(
+    item: CwTimelineItem,
+    dates: Dates,
+  ): { before: boolean; text: string; label: string } {
+    const before: boolean = ɵdaysBetween(dates.end, this.effectiveRange().start) > 0;
+    return {
+      before,
+      // Mockup App.dc.html: before the window the chip shows the end, after it the start.
+      text: dayMonth(before ? dates.end : dates.start, this.locale),
+      label: this.texts.reveal(item.name, this.texts.range(dates.start, dates.end, this.locale)),
+    };
+  }
+
+  /**
+   * Method reveal
+   * @method reveal
+   *
+   * @description
+   * Moves the window, its length kept, so that an item outside it shows with `FIT_MARGIN` days
+   * around its near end.
+   *
+   * @param {ItemRow} row - Row of the item outside the window.
+   */
+  protected reveal(row: ItemRow): void {
+    if (!row.dates || !row.chip) return;
+    const range: CwTimelineRange = this.effectiveRange();
+    const length: number = ɵdaysBetween(range.start, range.end);
+    const start: Date = row.chip.before
+      ? ɵaddDays(row.dates.start, -FIT_MARGIN)
+      : ɵaddDays(row.dates.end, FIT_MARGIN - length);
+    this.range.set({ start, end: ɵaddDays(start, length) });
+  }
+
+  /**
+   * Method registerNameTemplate
+   * @method registerNameTemplate
+   *
+   * @description
+   * Slot handler (`CwTimelineNameDef`), not for consumers: sets the name cell template, or clears
+   * it when the slot is destroyed.
+   *
+   * @param {TemplateRef<CwTimelineNameContext> | undefined} template - Template of the slot.
+   */
+  public registerNameTemplate(template: TemplateRef<CwTimelineNameContext> | undefined): void {
+    this.nameTemplate.set(template);
+  }
+
+  /**
+   * Method fit
+   * @method fit
+   *
+   * @description
+   * Fits the window to the dated items (mockup `App.dc.html`, « Ajuster »): the first scale whose
+   * window holds them all with `FIT_MARGIN` days on each side (day, then week, then month,
+   * stretched when even that is too short), at zoom 1, from two days before the first start.
+   * Announces the `fitted` text. Does nothing without a dated item.
+   *
+   * @returns {boolean} Whether the window changed; false when no item has dates.
+   */
+  public fit(): boolean {
+    const dated: Dates[] = this.items()
+      .map((item) => datesOf(item))
+      .filter((dates) => dates !== null);
+    const first: Dates | undefined = dated.at(0);
+    if (!first) return false;
+    let start: Date = first.start;
+    let end: Date = first.end;
+    for (const dates of dated) {
+      if (ɵdaysBetween(dates.start, start) > 0) start = dates.start;
+      if (ɵdaysBetween(end, dates.end) > 0) end = dates.end;
+    }
+    const from: Date = ɵaddDays(start, -FIT_MARGIN);
+    const to: Date = ɵaddDays(end, FIT_MARGIN);
+    const scale: CwTimelineScale =
+      (['day', 'week', 'month'] as const).find((candidate) => {
+        const window: CwTimelineRange = fitWindow(candidate, from, from);
+        return ɵdaysBetween(to, window.end) >= 0;
+      }) ?? 'month';
+    this.scale.set(scale);
+    this.zoom.set(1);
+    this.range.set(fitWindow(scale, from, to));
+    void this.announcer.announce(this.texts.fitted(dated.length), 'polite');
+    return true;
   }
 
   /**
@@ -3187,7 +3574,8 @@ export class CwTimeline {
     }
     if (event.key === 'Enter') {
       event.preventDefault();
-      if (row.dates) this.open.emit(row.item);
+      if (row.chip) this.reveal(row);
+      else if (row.dates) this.open.emit(row.item);
       else if (!this.readonly()) {
         const today: Date = this.todayDate();
         this.schedule.emit({ item: row.item, start: today, end: today });

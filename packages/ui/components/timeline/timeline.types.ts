@@ -517,6 +517,61 @@ export interface CwTimelineBarContext {
 }
 
 /**
+ * Type CwTimelineMilestoneDisplay
+ *
+ * @description
+ * How milestones are drawn: `rows`, one row per milestone in its group (the default), or `lines`,
+ * a dashed line across the whole grid at its date with a marker in the ruler (mockup
+ * `App.dc.html`, Gantt).
+ *
+ * @type {'rows' | 'lines'}
+ */
+export type CwTimelineMilestoneDisplay = 'rows' | 'lines';
+
+/**
+ * Interface CwTimelineNameContext
+ *
+ * @description
+ * Context of the `ng-template[cwTimelineName]` that draws the content of an item's name cell.
+ */
+export interface CwTimelineNameContext {
+  // #region Properties
+  /**
+   * Property $implicit
+   *
+   * @description
+   * The item of the row.
+   *
+   * @type {CwTimelineItem}
+   * @readonly
+   */
+  readonly $implicit: CwTimelineItem;
+
+  /**
+   * Property dates
+   *
+   * @description
+   * The item's dates as drawn (a drag preview included), or null when it is undated.
+   *
+   * @type {CwTimelineRange | null}
+   * @readonly
+   */
+  readonly dates: CwTimelineRange | null;
+
+  /**
+   * Property level
+   *
+   * @description
+   * Nesting level of the row: 1 at the top, 2 inside a group.
+   *
+   * @type {1 | 2}
+   * @readonly
+   */
+  readonly level: 1 | 2;
+  // #endregion
+}
+
+/**
  * Interface CwTimelineLabels
  *
  * @description
@@ -701,5 +756,73 @@ export interface CwTimelineLabels {
    * @readonly
    */
   readonly percent: (value: number) => string;
+
+  /**
+   * Property durationHeader
+   *
+   * @description
+   * Header of the duration column (`showDuration`). Optional, like every text added after 0.8.0,
+   * so that existing label objects stay valid; the timeline falls back to the default.
+   *
+   * @type {string | undefined}
+   * @readonly
+   */
+  readonly durationHeader?: string;
+
+  /**
+   * Property duration
+   *
+   * @description
+   * Duration of a dated item in calendar days, start and end included (`showDuration`).
+   *
+   * @type {((days: number) => string) | undefined}
+   * @readonly
+   */
+  readonly duration?: (days: number) => string;
+
+  /**
+   * Property reveal
+   *
+   * @description
+   * Accessible name of the chip of an item outside the window (`showOffWindow`): the item's name
+   * and its range (`range`).
+   *
+   * @type {((name: string, range: string) => string) | undefined}
+   * @readonly
+   */
+  readonly reveal?: (name: string, range: string) => string;
+
+  /**
+   * Property fitted
+   *
+   * @description
+   * Announced after `fit()`, with the number of dated items the window now covers.
+   *
+   * @type {((count: number) => string) | undefined}
+   * @readonly
+   */
+  readonly fitted?: (count: number) => string;
+
+  /**
+   * Property loading
+   *
+   * @description
+   * Accessible name of the loading skeleton (`loading`).
+   *
+   * @type {string | undefined}
+   * @readonly
+   */
+  readonly loading?: string;
+
+  /**
+   * Property empty
+   *
+   * @description
+   * Text drawn when there is no row to show (no item, no milestone row).
+   *
+   * @type {string | undefined}
+   * @readonly
+   */
+  readonly empty?: string;
   // #endregion
 }
