@@ -1,0 +1,257 @@
+<div class="min-h-0 flex-1 overflow-auto rounded-lg border bg-background">
+  <table
+    #table
+    role="grid"
+    tabindex="-1"
+    [attr.aria-label]="ariaLabel()"
+    [attr.aria-busy]="loading() ? 'true' : null"
+    class="w-max min-w-full border-separate border-spacing-0 text-sm"
+    (keydown)="onKeydown($event)"
+    (focusin)="onFocusin($event)"
+  >
+    <thead>
+      <tr role="row">
+        <th
+          role="columnheader"
+          scope="col"
+          class="sticky top-0 left-0 z-30 w-52 min-w-52 border-r border-b bg-background px-3 pb-2 text-left align-bottom text-xs font-medium whitespace-nowrap text-muted-foreground max-md:w-36 max-md:min-w-36"
+        >
+          {{ copy().rowHeader }}
+        </th>
+        @for (column of columns(); track column.key) {
+          <th role="columnheader" scope="col" [class]="headClasses(column)">
+            <span class="sr-only">{{ column.label }}</span>
+            <span class="flex flex-col items-center justify-center gap-0.5" aria-hidden="true">
+              @if (column.caption) {
+                <span class="text-[10px] leading-none whitespace-nowrap text-muted-foreground">{{
+                  column.caption
+                }}</span>
+              }
+              <span
+                class="inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-xs leading-none font-medium whitespace-nowrap tabular-nums"
+                [class]="column.current ? 'bg-foreground text-background' : 'text-foreground'"
+                >{{ column.short ?? column.label }}</span
+              >
+            </span>
+          </th>
+        }
+        <th
+          role="columnheader"
+          scope="col"
+          class="sticky top-0 z-20 w-48 min-w-48 border-b border-l bg-background px-3 pb-2 text-left align-bottom text-xs font-medium whitespace-nowrap text-muted-foreground"
+        >
+          {{ copy().totalHeader }}
+        </th>
+      </tr>
+    </thead>
+
+    @if (loading()) {
+      <tbody aria-hidden="true">
+        @for (index of skeletonRows; track index) {
+          <tr class="h-16">
+            <td class="sticky left-0 border-r border-b bg-background px-3 py-2">
+              <div class="flex items-center gap-2">
+                <div cwSkeleton class="size-6 rounded-full"></div>
+                <div cwSkeleton class="h-3 w-24"></div>
+              </div>
+            </td>
+            @for (column of columns(); track column.key) {
+              <td class="border-b border-l p-1.5 align-top">
+                <div cwSkeleton class="h-5 w-full rounded-md"></div>
+              </td>
+            }
+            <td class="border-b border-l px-3 py-2">
+              <div cwSkeleton class="h-3 w-20"></div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    } @else {
+      <tbody>
+        @for (entry of view(); track entry.row.key) {
+          <tr role="row" [attr.data-cw-row]="entry.row.key">
+            <th
+              role="rowheader"
+              scope="row"
+              data-cw-cell
+              [attr.data-cw-col]="headerCol"
+              [attr.tabindex]="isTabStop(entry.row.key, headerCol) ? 0 : -1"
+              class="sticky left-0 z-10 w-52 min-w-52 border-r border-b bg-background px-3 py-2 text-left font-normal outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset max-md:w-36 max-md:min-w-36"
+            >
+              <span class="flex min-w-0 items-center gap-2">
+                @if (entry.row.placeholder) {
+                  <span
+                    class="flex size-6 shrink-0 items-center justify-center rounded-full border border-dashed border-input text-muted-foreground [&_ng-icon]:[--ng-icon__size:0.75rem]"
+                    aria-hidden="true"
+                  >
+                    <ng-icon name="phosphorUserBold" />
+                  </span>
+                } @else {
+                  <span class="flex shrink-0" aria-hidden="true">
+                    <cw-avatar size="sm" [name]="entry.row.label" [src]="entry.row.src ?? null" />
+                  </span>
+                }
+                <span class="min-w-0 truncate text-sm font-medium">{{ entry.row.label }}</span>
+              </span>
+            </th>
+            @for (day of entry.cells; track day.column.key) {
+              <td
+                role="gridcell"
+                data-cw-cell
+                [attr.data-cw-col]="day.column.key"
+                [attr.tabindex]="isTabStop(entry.row.key, day.column.key) ? 0 : -1"
+                aria-haspopup="dialog"
+                [attr.aria-expanded]="isOpen(entry.row.key, day.column.key)"
+                [attr.data-level]="day.level"
+                [attr.data-state]="isOpen(entry.row.key, day.column.key) ? 'open' : 'closed'"
+                [class]="cellClasses(day.column)"
+                (click)="onCellClick($event, entry, day)"
+              >
+                <div class="flex flex-col gap-1" data-cw-heat-anchor>
+                  <span class="sr-only">{{ day.label }}</span>
+                  <div class="flex flex-col gap-1 rounded-md px-1.5 py-1" aria-hidden="true">
+                    <span
+                      class="flex items-center gap-1 text-xs whitespace-nowrap tabular-nums"
+                      [class.text-muted-foreground]="day.level === 'none'"
+                    >
+                      {{ day.text }}
+                      @if (day.level === 'over') {
+                        <ng-icon
+                          name="phosphorWarningCircleFill"
+                          class="text-destructive [--ng-icon__size:0.75rem]"
+                        />
+                      }
+                    </span>
+                    <span class="block h-1 w-full overflow-hidden rounded-full bg-track">
+                      <span
+                        class="block h-full rounded-full transition-[width] duration-300 ease-snap motion-reduce:transition-none"
+                        [class]="fills[day.level]"
+                        [style.width.%]="day.width"
+                      ></span>
+                    </span>
+                  </div>
+                  @if (chipTemplate(); as chip) {
+                    @for (item of day.chips; track $index) {
+                      <div class="min-w-0">
+                        <ng-container
+                          [ngTemplateOutlet]="chip"
+                          [ngTemplateOutletContext]="
+                            itemContext(item, entry.row, day.column, 'cell')
+                          "
+                        />
+                      </div>
+                    }
+                  }
+                  @if (day.hidden > 0) {
+                    <button type="button" data-cw-heat-more [class]="moreClasses">
+                      {{ copy().more(day.hidden)
+                      }}<span class="sr-only"
+                        >, {{ copy().moreLabel(day.chips.length + day.hidden) }}</span
+                      >
+                    </button>
+                  }
+                </div>
+              </td>
+            }
+            <td
+              role="gridcell"
+              data-cw-cell
+              [attr.data-cw-col]="totalCol"
+              [attr.tabindex]="isTabStop(entry.row.key, totalCol) ? 0 : -1"
+              class="w-48 min-w-48 border-b border-l px-3 py-2 align-middle outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+            >
+              <div class="flex flex-col justify-center gap-1.5">
+                <div class="flex items-baseline justify-between gap-2">
+                  <span class="text-sm font-medium whitespace-nowrap tabular-nums"
+                    >{{ entry.totalText }}
+                    @if (entry.capacity !== null) {
+                      <span class="font-normal text-muted-foreground">
+                        / {{ entry.capacityText }}</span
+                      >
+                    }
+                  </span>
+                  @if (entry.note) {
+                    <span class="sr-only">, </span>
+                    <span
+                      class="flex items-center gap-1 text-xs whitespace-nowrap"
+                      [class]="
+                        entry.level === 'over' ? 'text-destructive' : 'text-muted-foreground'
+                      "
+                    >
+                      @if (entry.level === 'over') {
+                        <ng-icon
+                          name="phosphorWarningCircleFill"
+                          class="[--ng-icon__size:0.875rem]"
+                          aria-hidden="true"
+                        />
+                      }
+                      {{ entry.note }}
+                    </span>
+                  }
+                </div>
+                @if (totalTemplate(); as total) {
+                  <ng-container
+                    [ngTemplateOutlet]="total"
+                    [ngTemplateOutletContext]="entry.totalContext"
+                  />
+                }
+                @if (entry.capacity !== null) {
+                  <cw-meter
+                    size="sm"
+                    [value]="entry.total"
+                    [max]="entry.capacity"
+                    [zone]="entry.meterZone"
+                    [ariaLabel]="entry.meterLabel"
+                  />
+                }
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    }
+  </table>
+  @if (loading()) {
+    <p role="status" class="sr-only">{{ copy().loading }}</p>
+  }
+  @if (!loading() && rows().length === 0) {
+    <p role="status" class="sticky left-0 w-72 px-3 py-6 text-sm text-muted-foreground">
+      {{ copy().emptyText }}
+    </p>
+  }
+</div>
+
+<cw-popover
+  size="lg"
+  padding="none"
+  [ariaLabel]="openView()?.title"
+  (openChange)="onPopoverOpenChange($event)"
+>
+  @if (openView(); as open) {
+    <div class="flex flex-col gap-0.5 p-1">
+      <div class="flex items-center gap-2 px-2 pt-1.5 pb-1">
+        <p class="min-w-0 truncate text-sm font-medium">{{ open.title }}</p>
+        <span
+          class="ml-auto shrink-0 text-xs whitespace-nowrap text-muted-foreground tabular-nums"
+          >{{ open.sum }}</span
+        >
+      </div>
+      @if (open.cell.cell.items?.length) {
+        @if (chipTemplate(); as chip) {
+          @for (item of open.cell.cell.items; track $index) {
+            <ng-container
+              [ngTemplateOutlet]="chip"
+              [ngTemplateOutletContext]="
+                itemContext(item, open.row.row, open.cell.column, 'popover')
+              "
+            />
+          }
+        }
+      } @else {
+        <p class="px-2 py-3 text-center text-xs text-muted-foreground">
+          {{ copy().emptyCell }}
+        </p>
+      }
+    </div>
+  }
+</cw-popover>
