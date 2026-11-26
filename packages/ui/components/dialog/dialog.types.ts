@@ -2,11 +2,13 @@
  * Type CwDialogSize
  *
  * @description
- * Maximum width or full-screen layout of a dialog.
+ * Maximum width or full-screen layout of a dialog: `sm` 384 px, `default` 448 px, `md` 512 px (the
+ * Space statuses, sharing and keyboard shortcuts dialogs, `max-w-lg` in the mockup `App.dc.html`),
+ * `lg` 672 px, `full` the screen less 16 px on each side.
  *
- * @type {'sm' | 'default' | 'lg' | 'full'}
+ * @type {'sm' | 'default' | 'md' | 'lg' | 'full'}
  */
-export type CwDialogSize = 'sm' | 'default' | 'lg' | 'full';
+export type CwDialogSize = 'sm' | 'default' | 'md' | 'lg' | 'full';
 
 /**
  * Type CwDialogCloseReason
