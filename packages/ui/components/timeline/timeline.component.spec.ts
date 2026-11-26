@@ -746,10 +746,10 @@ describe('CwTimeline planning', () => {
   }
 
   it('draws the name template and the duration column', () => {
-    expect(host.querySelector('[role="columnheader"]')?.textContent).toContain('Duration');
+    expect(host.querySelector('[role="columnheader"]')?.textContent).toContain('Durée');
     const csv: HTMLElement = nameCell("Corriger l'export CSV");
     expect(csv.textContent).toContain('csv');
-    expect(csv.textContent).toContain('4 d');
+    expect(csv.textContent).toContain('4 j');
     expect(nameCell('Raccourcis de la Liste').textContent).toContain('—');
   });
 
@@ -767,7 +767,7 @@ describe('CwTimeline planning', () => {
 
   it('marks a bar outside the window with a chip that brings it into view', async () => {
     const chip: HTMLButtonElement | null = host.querySelector<HTMLButtonElement>(
-      'button[aria-label^="Show Préparer la version"]',
+      'button[aria-label^="Afficher Préparer la version"]',
     );
     expect(chip?.textContent).toContain('30 nov.');
 
@@ -775,7 +775,7 @@ describe('CwTimeline planning', () => {
     await fixture.whenStable();
 
     expect(component.range()).toEqual({ start: day(19), end: day(32) });
-    expect(host.querySelector('button[aria-label^="Show Préparer la version"]')).toBeNull();
+    expect(host.querySelector('button[aria-label^="Afficher Préparer la version"]')).toBeNull();
   });
 
   it('reveals an off-window bar with Enter on its row', async () => {
@@ -798,7 +798,7 @@ describe('CwTimeline planning', () => {
 
     expect(component.scale()).toBe('week');
     expect(component.range()?.start).toEqual(day(2));
-    expect(announce).toHaveBeenLastCalledWith('Window fitted to 3 dated items', 'polite');
+    expect(announce).toHaveBeenLastCalledWith('Vue ajustée aux 3 tâches datées', 'polite');
   });
 
   it('does not fit without a dated item', () => {
@@ -813,7 +813,7 @@ describe('CwTimeline planning', () => {
     component.loading.set(true);
     await fixture.whenStable();
     const status: HTMLElement | null = host.querySelector('[role="status"]');
-    expect(status?.getAttribute('aria-label')).toBe('Loading the timeline');
+    expect(status?.getAttribute('aria-label')).toBe('Chargement du diagramme de Gantt');
     expect(status?.getAttribute('aria-busy')).toBe('true');
     expect(host.querySelector('[role="treegrid"]')).toBeNull();
 
@@ -821,7 +821,9 @@ describe('CwTimeline planning', () => {
     component.items.set([]);
     await fixture.whenStable();
     const grid: HTMLElement | null = host.querySelector('[role="treegrid"]');
-    expect(grid?.textContent).toContain('No items to show.');
+    expect(grid?.textContent).toContain(
+      'Aucune tâche ne correspond à la recherche ou aux filtres.',
+    );
     expect(grid?.tabIndex).toBe(0);
   });
 });

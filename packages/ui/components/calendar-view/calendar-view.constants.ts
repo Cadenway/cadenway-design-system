@@ -4,7 +4,7 @@ import type { CwCalendarViewLabels, CwCalendarViewProvidedLabels } from './calen
  * Constant CW_CALENDAR_VIEW_LABELS
  *
  * @description
- * The default texts of the calendar view, word for word from the Calendar View sheet and the mockup (`App.dc.html`, vue Calendrier); every text is defined, the optional ones included. The texts added after 0.8.0 (`loading`, `scheduled`) default to English source copy, translated by the application through `provideCwCalendarViewLabels`. A `labels` input overrides any of them.
+ * The default texts of the calendar view, word for word from the Calendar View sheet and the mockup (`App.dc.html`, vue Calendrier); every text is defined, the optional ones included. A `labels` input overrides any of them.
  *
  * @type {Required<CwCalendarViewLabels>}
  */
@@ -32,8 +32,10 @@ export const CW_CALENDAR_VIEW_LABELS: Required<CwCalendarViewLabels> = {
   grabbed: '{item} saisie. Flèches pour choisir le jour, Espace pour déposer, Échap pour annuler.',
   moved: '{item} déplacée au {date}',
   cancelled: 'Déplacement annulé.',
-  loading: 'Loading the calendar',
-  scheduled: '{item} scheduled on {date}',
+  // Mockup App.dc.html: the calendar skeleton's `aria-label`.
+  loading: 'Chargement du calendrier',
+  // Mockup App.dc.html: the toast after a drop on a day, « <id> replanifiée » / « Échéance : <date>. ».
+  scheduled: '{item} replanifiée. Échéance : {date}.',
 };
 
 /**

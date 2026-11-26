@@ -425,7 +425,7 @@ function undated(list: readonly StoryTask[]): StoryTask[] {
   return list.filter((task) => task.span === null);
 }
 
-/** Loading: the header stays, a skeleton grid named « Loading the calendar » replaces the days. */
+/** Loading: the header stays, a skeleton grid named « Chargement du calendrier » replaces the days. */
 export const Loading: Story = {
   render: () => ({
     props,
@@ -435,7 +435,7 @@ export const Loading: Story = {
     const scope: { getByRole: (role: string, options?: { name?: string }) => HTMLElement } = within(
       light(canvasElement),
     );
-    await expect(scope.getByRole('status', { name: 'Loading the calendar' })).toHaveAttribute(
+    await expect(scope.getByRole('status', { name: 'Chargement du calendrier' })).toHaveAttribute(
       'aria-busy',
       'true',
     );

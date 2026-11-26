@@ -532,7 +532,7 @@ export const KeyboardMove: Story = {
   },
 };
 
-/** Loading: a skeleton per column, named « Loading the board » until the application translates it. */
+/** Loading: a skeleton per column, named « Chargement du tableau ». */
 export const Loading: Story = {
   render: () => ({
     props,
@@ -544,7 +544,7 @@ export const Loading: Story = {
     const scope: { getByRole: (role: string, options?: { name?: string }) => HTMLElement } = within(
       light(canvasElement),
     );
-    await expect(scope.getByRole('status', { name: 'Loading the board' })).toHaveAttribute(
+    await expect(scope.getByRole('status', { name: 'Chargement du tableau' })).toHaveAttribute(
       'aria-busy',
       'true',
     );

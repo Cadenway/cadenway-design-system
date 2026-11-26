@@ -383,7 +383,7 @@ export const Keyboard: Story = {
 
 /**
  * The Gantt of a list (mockup `App.dc.html`): a `cwTimelineName` cell with the task key, the
- * « Duration » column, milestones as dashed lines with a ruler marker, a chip for « Notifications
+ * « Durée » column, milestones as dashed lines with a ruler marker, a chip for « Notifications
  * e-mail » outside the window, and « Ajuster » calling `fit()` from the toolbar.
  */
 export const GanttPlanning: Story = {
@@ -412,13 +412,17 @@ export const GanttPlanning: Story = {
     await expect(
       scope.getByRole('img', { name: 'Jalon Revue de sprint 14, 20 nov.' }),
     ).toBeVisible();
-    await expect(scope.getByRole('button', { name: /^Show Notifications e-mail/ })).toBeVisible();
+    await expect(
+      scope.getByRole('button', { name: /^Afficher Notifications e-mail/ }),
+    ).toBeVisible();
     await userEvent.click(scope.getByRole('button', { name: 'Ajuster' }));
-    await expect(scope.queryByRole('button', { name: /^Show Notifications e-mail/ })).toBeNull();
+    await expect(
+      scope.queryByRole('button', { name: /^Afficher Notifications e-mail/ }),
+    ).toBeNull();
   },
 };
 
-/** Loading: a skeleton of rows and bars named « Loading the timeline »; the toolbar stays. */
+/** Loading: a skeleton of rows and bars named « Chargement du diagramme de Gantt »; the toolbar stays. */
 export const Loading: Story = {
   render: () => ({
     props: PROPS,
@@ -431,10 +435,9 @@ export const Loading: Story = {
     const scope: { getByRole: (role: string, options?: { name?: string }) => HTMLElement } = within(
       light(canvasElement),
     );
-    await expect(scope.getByRole('status', { name: 'Loading the timeline' })).toHaveAttribute(
-      'aria-busy',
-      'true',
-    );
+    await expect(
+      scope.getByRole('status', { name: 'Chargement du diagramme de Gantt' }),
+    ).toHaveAttribute('aria-busy', 'true');
   },
 };
 

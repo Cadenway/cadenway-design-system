@@ -977,7 +977,7 @@ describe('CwKanban planning hooks', () => {
     await fixture.whenStable();
 
     const status: HTMLElement | null = host.querySelector('[role="status"]');
-    expect(status?.getAttribute('aria-label')).toBe('Loading the board');
+    expect(status?.getAttribute('aria-label')).toBe('Chargement du tableau');
     expect(status?.getAttribute('aria-busy')).toBe('true');
     expect(host.querySelector('[role="region"]')).toBeNull();
     expect(host.querySelectorAll('[role="status"] > div')).toHaveLength(3);

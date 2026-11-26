@@ -1608,7 +1608,7 @@ function arrowHead(x: number, y: number): string {
  * and Ctrl + / Ctrl − walk the eight zoom steps of the integration guide, from month to day, and
  * Ctrl + 0 resets the column width.
  *
- * Planning: `showDuration` adds a duration to each dated row (« 3 d ») under a « Duration » header;
+ * Planning: `showDuration` adds a duration to each dated row (« 3 j ») under a « Durée » header;
  * `ng-template[cwTimelineName]` (`CwTimelineNameDef`) replaces the content of the name cells;
  * `fit()` picks the scale and the window that show every dated item; `milestoneDisplay="lines"`
  * draws milestones as dashed lines across the grid with a marker in the ruler instead of rows;

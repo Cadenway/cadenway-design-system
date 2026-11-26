@@ -875,7 +875,7 @@ describe('CwCalendarView planning hooks', () => {
 
     expect(component.schedules).toEqual([{ data: TASKS[7], date: day(13), allDay: true }]);
     expect(announce).toHaveBeenLastCalledWith(
-      'Sans échéance scheduled on vendredi 13 novembre',
+      'Sans échéance replanifiée. Échéance : vendredi 13 novembre.',
       'polite',
     );
   });
@@ -908,7 +908,7 @@ describe('CwCalendarView planning hooks', () => {
     await fixture.whenStable();
 
     const status: HTMLElement | null = host.querySelector('[role="status"]');
-    expect(status?.getAttribute('aria-label')).toBe('Loading the calendar');
+    expect(status?.getAttribute('aria-label')).toBe('Chargement du calendrier');
     expect(status?.getAttribute('aria-busy')).toBe('true');
     expect(host.querySelector('[role="grid"]')).toBeNull();
   });

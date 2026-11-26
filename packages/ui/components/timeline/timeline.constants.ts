@@ -35,10 +35,8 @@ function days(count: number): string {
  * Constant CW_TIMELINE_LABELS
  *
  * @description
- * French ruler labels and accessible announcements from the Timeline sheet; every text is defined,
- * the optional ones included. The texts added after 0.8.0 (`durationHeader`, `duration`, `reveal`,
- * `fitted`, `loading`, `empty`) default to English source copy, translated by the application
- * through `provideCwTimelineLabels`.
+ * French ruler labels and accessible announcements from the Timeline sheet and the Gantt of the
+ * mockup (`App.dc.html`); every text is defined, the optional ones included.
  *
  * @type {Required<CwTimelineLabels>}
  */
@@ -71,14 +69,20 @@ export const CW_TIMELINE_LABELS: Required<CwTimelineLabels> = {
   zoom: (percent: number): string => `Zoom : ${String(percent)} %`,
   /** Percentage of a bar: « 60 % ». */
   percent: (value: number): string => `${String(value)} %`,
-  durationHeader: 'Duration',
-  /** Duration column: « 3 d ». */
-  duration: (days: number): string => `${String(days)} d`,
-  /** Chip of an item outside the window: « Show Import spaces (from 24 to 26 Nov) ». */
-  reveal: (name: string, range: string): string => `Show ${name} (${range})`,
-  /** Announcement after `fit()`. */
+  /** Header of the duration column, from the mockup's Gantt: « Durée ». */
+  durationHeader: 'Durée',
+  /** Duration column, from the mockup's Gantt: « 3 j ». */
+  duration: (days: number): string => `${String(days)} j`,
+  /** Chip of an item outside the window, from the mockup's Gantt: « Afficher CAD-485 (du 24 au 26 nov.) ». */
+  reveal: (name: string, range: string): string => `Afficher ${name} (${range})`,
+  /**
+   * Announcement after `fit()`, written after the mockup's « Ajuster aux 7 tâches datées »:
+   * « Vue ajustée aux 7 tâches datées ».
+   */
   fitted: (count: number): string =>
-    `Window fitted to ${String(count)} dated ${count > 1 ? 'items' : 'item'}`,
-  loading: 'Loading the timeline',
-  empty: 'No items to show.',
+    count > 1 ? `Vue ajustée aux ${String(count)} tâches datées` : 'Vue ajustée à la tâche datée',
+  /** The mockup's Gantt skeleton `aria-label`. */
+  loading: 'Chargement du diagramme de Gantt',
+  /** The mockup's empty Gantt. */
+  empty: 'Aucune tâche ne correspond à la recherche ou aux filtres.',
 };
