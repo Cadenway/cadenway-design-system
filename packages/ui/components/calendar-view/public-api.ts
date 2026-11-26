@@ -9,9 +9,11 @@ export { CwCalendarView } from './calendar-view.component';
 export { CW_CALENDAR_VIEW_LABELS } from './calendar-view.constants';
 export type {
   CwCalendarCreate,
+  CwCalendarDayMenuData,
   CwCalendarItemContext,
   CwCalendarItemMove,
   CwCalendarItemPlace,
+  CwCalendarItemSchedule,
   CwCalendarKeyFn,
   CwCalendarSlotMinutes,
   CwCalendarSpan,

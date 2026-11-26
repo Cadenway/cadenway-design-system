@@ -4,11 +4,11 @@ import type { CwCalendarViewLabels, CwCalendarViewProvidedLabels } from './calen
  * Constant CW_CALENDAR_VIEW_LABELS
  *
  * @description
- * The default texts of the calendar view, word for word from the Calendar View sheet and the mockup (`App.dc.html`, vue Calendrier). A `labels` input overrides any of them.
+ * The default texts of the calendar view, word for word from the Calendar View sheet and the mockup (`App.dc.html`, vue Calendrier); every text is defined, the optional ones included. The texts added after 0.8.0 (`loading`, `scheduled`) default to English source copy, translated by the application through `provideCwCalendarViewLabels`. A `labels` input overrides any of them.
  *
- * @type {CwCalendarViewLabels}
+ * @type {Required<CwCalendarViewLabels>}
  */
-export const CW_CALENDAR_VIEW_LABELS: CwCalendarViewLabels = {
+export const CW_CALENDAR_VIEW_LABELS: Required<CwCalendarViewLabels> = {
   today: 'Aujourd’hui',
   previousMonth: 'Mois précédent',
   nextMonth: 'Mois suivant',
@@ -32,6 +32,8 @@ export const CW_CALENDAR_VIEW_LABELS: CwCalendarViewLabels = {
   grabbed: '{item} saisie. Flèches pour choisir le jour, Espace pour déposer, Échap pour annuler.',
   moved: '{item} déplacée au {date}',
   cancelled: 'Déplacement annulé.',
+  loading: 'Loading the calendar',
+  scheduled: '{item} scheduled on {date}',
 };
 
 /**
@@ -40,9 +42,9 @@ export const CW_CALENDAR_VIEW_LABELS: CwCalendarViewLabels = {
  * @description
  * Complete French defaults used by the labels provider and token.
  *
- * @type {CwCalendarViewProvidedLabels}
+ * @type {Required<CwCalendarViewProvidedLabels>}
  */
-const PROVIDED_LABELS: CwCalendarViewProvidedLabels = {
+const PROVIDED_LABELS: Required<CwCalendarViewProvidedLabels> = {
   ...CW_CALENDAR_VIEW_LABELS,
   ariaLabel: 'Calendrier',
 };
@@ -53,8 +55,8 @@ const PROVIDED_LABELS: CwCalendarViewProvidedLabels = {
  * @description
  * Returns the complete French defaults for the provider and token.
  *
- * @returns {CwCalendarViewProvidedLabels} Complete default texts.
+ * @returns {Required<CwCalendarViewProvidedLabels>} Complete default texts.
  */
-export function getProvidedLabels(): CwCalendarViewProvidedLabels {
+export function getProvidedLabels(): Required<CwCalendarViewProvidedLabels> {
   return PROVIDED_LABELS;
 }

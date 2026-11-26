@@ -1,9 +1,10 @@
 import { LiveAnnouncer } from '@angular/cdk/a11y';
-import { CdkDropList, type CdkDrag, type CdkDragDrop } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDropList, type CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component, signal, type DebugElement, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { By } from '@angular/platform-browser';
+import { CwMenu, CwMenuItem } from '@cadenway/ui/components/menu';
 import { provideCwLocale } from '@cadenway/ui/core';
 
 import { provideCwCalendarViewLabels } from './calendar-view.providers';
@@ -13,6 +14,7 @@ import type { DropData } from './calendar-view.token';
 import type {
   CwCalendarCreate,
   CwCalendarItemMove,
+  CwCalendarItemSchedule,
   CwCalendarSpan,
   CwCalendarViewMode,
 } from './calendar-view.types';
@@ -632,5 +634,282 @@ describe('provideCwCalendarViewLabels', () => {
     const host: HTMLElement = fixture.nativeElement as HTMLElement;
     expect(host.textContent).toContain('Today');
     fixture.destroy();
+  });
+});
+
+/**
+ * Component PlanningHost
+ *
+ * @description
+ * Hosts a month calendar beside an outside list of undated tasks, with the day menu and the
+ * loading state.
+ */
+@Component({
+  imports: [CdkDrag, CdkDropList, CwCalendarView, CwMenu, CwMenuItem],
+  template: `
+    <div cdkDropList [cdkDropListConnectedTo]="calendar.dropListIds()">
+      <button
+        type="button"
+        cdkDrag
+        [cdkDragData]="undated"
+        (keydown.space)="calendar.scheduleWithKeyboard(undated, undated.name)"
+      >
+        {{ undated.name }}
+      </button>
+    </div>
+    <cw-calendar-view
+      #calendar
+      [items]="items"
+      [trackBy]="id"
+      [itemLabel]="name"
+      [itemSpan]="span"
+      [today]="today"
+      [date]="today"
+      [loading]="loading()"
+      [dayMenu]="dayMenu"
+      (itemSchedule)="schedules.push($event)"
+    />
+    <cw-menu #dayMenu ariaLabel="Actions du jour">
+      <button cwMenuItem (triggered)="picked.push(dayMenu.data())">
+        Nouvelle tâche ce jour-là
+      </button>
+    </cw-menu>
+  `,
+})
+class PlanningHost {
+  // #region Properties
+  /**
+   * Property items
+   *
+   * @description
+   * Dated tasks drawn by the calendar.
+   *
+   * @type {Task[]}
+   * @readonly
+   */
+  public readonly items: Task[] = TASKS.slice(0, 1);
+
+  /**
+   * Property undated
+   *
+   * @description
+   * The outside task to schedule.
+   *
+   * @type {Task}
+   * @readonly
+   */
+  public readonly undated: Task = TASKS[7];
+
+  /**
+   * Property today
+   *
+   * @description
+   * Current day of the fixture.
+   *
+   * @type {Date}
+   * @readonly
+   */
+  public readonly today: Date = day(12);
+
+  /**
+   * Property loading
+   *
+   * @description
+   * Whether the calendar shows its loading skeleton.
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  public readonly loading: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property schedules
+   *
+   * @description
+   * Recorded `itemSchedule` events.
+   *
+   * @type {CwCalendarItemSchedule[]}
+   * @readonly
+   */
+  public readonly schedules: CwCalendarItemSchedule[] = [];
+
+  /**
+   * Property picked
+   *
+   * @description
+   * Data the day menu acted on.
+   *
+   * @type {unknown[]}
+   * @readonly
+   */
+  public readonly picked: unknown[] = [];
+
+  /**
+   * Property id
+   *
+   * @description
+   * Reads a task identifier.
+   *
+   * @type {(task: Task) => string}
+   * @readonly
+   */
+  public readonly id: (task: Task) => string = (task: Task): string => task.id;
+
+  /**
+   * Property name
+   *
+   * @description
+   * Reads a task name.
+   *
+   * @type {(task: Task) => string}
+   * @readonly
+   */
+  public readonly name: (task: Task) => string = (task: Task): string => task.name;
+
+  /**
+   * Property span
+   *
+   * @description
+   * Reads when a task happens.
+   *
+   * @type {(task: Task) => CwCalendarSpan | null}
+   * @readonly
+   */
+  public readonly span: (task: Task) => CwCalendarSpan | null = (
+    task: Task,
+  ): CwCalendarSpan | null => task.span;
+  // #endregion
+}
+
+/**
+ * Function menuItem
+ *
+ * @description
+ * Finds an item of an open menu by its visible name.
+ *
+ * @param {string} name - Visible menu item text.
+ * @returns {HTMLElement} Matching menu item.
+ */
+function menuItem(name: string): HTMLElement {
+  const found: HTMLElement | undefined = Array.from(
+    document.querySelectorAll<HTMLElement>('[role="menuitem"]'),
+  ).find((element) => element.textContent.trim() === name);
+  if (!found) throw new Error(`No menu item named ${name}`);
+  return found;
+}
+
+describe('CwCalendarView planning hooks', () => {
+  let fixture: ComponentFixture<PlanningHost>;
+  let host: HTMLElement;
+  let component: PlanningHost;
+  let announce: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    announce = vi.fn(() => Promise.resolve());
+    TestBed.configureTestingModule({
+      providers: [{ provide: LiveAnnouncer, useValue: { announce } }],
+    });
+    fixture = TestBed.createComponent(PlanningHost);
+    fixture.autoDetectChanges();
+    host = fixture.nativeElement as HTMLElement;
+    component = fixture.componentInstance;
+  });
+
+  afterEach(() => {
+    fixture.destroy();
+  });
+
+  it('names its day lists so an outside list can connect to them', () => {
+    const calendar: CwCalendarView<Task> = fixture.debugElement
+      .query(By.directive(CwCalendarView))
+      .injector.get(CwCalendarView<Task>);
+    const ids: string[] = calendar.dropListIds();
+
+    expect(ids).toHaveLength(42);
+    expect(host.querySelector(`[id="${ids[0] ?? ''}"]`)?.getAttribute('role')).toBe('gridcell');
+  });
+
+  it('emits itemSchedule when an outside item is dropped on a day', async () => {
+    const lists: CdkDropList<unknown>[] = fixture.debugElement
+      .queryAll(By.directive(CdkDropList))
+      .map((element) => element.injector.get(CdkDropList) as CdkDropList<unknown>);
+    const outside: CdkDropList<unknown> | undefined = lists.find((list) => list.data === undefined);
+    const target: CdkDropList<DropData> | undefined = lists.find(
+      (list) => (list.data as DropData | undefined)?.date.getTime() === day(24).getTime(),
+    ) as CdkDropList<DropData> | undefined;
+    const drag: CdkDrag<unknown> | undefined = outside?.getSortedItems()[0];
+    if (!outside || !target || !drag) throw new Error('Drop lists missing');
+
+    target.dropped.emit({
+      previousContainer: outside,
+      container: target,
+      previousIndex: 0,
+      currentIndex: 0,
+      item: drag,
+    } as unknown as CdkDragDrop<DropData, DropData, unknown>);
+    await fixture.whenStable();
+
+    expect(component.schedules).toEqual([{ data: TASKS[7], date: day(24), allDay: true }]);
+  });
+
+  it('places an outside item with the keyboard, and gives the focus back on Escape', async () => {
+    const source: HTMLButtonElement | null = host.querySelector('button[cdkDrag]');
+    if (!source) throw new Error('Outside item missing');
+    source.focus();
+    press(source, ' ');
+    await fixture.whenStable();
+    const start: HTMLElement = document.activeElement as HTMLElement;
+    expect(start.getAttribute('aria-current')).toBe('date');
+
+    press(start, 'Escape');
+    await fixture.whenStable();
+    expect(document.activeElement).toBe(source);
+    expect(component.schedules).toEqual([]);
+
+    press(source, ' ');
+    await fixture.whenStable();
+    press(document.activeElement as HTMLElement, 'ArrowRight');
+    await fixture.whenStable();
+    press(document.activeElement as HTMLElement, 'Enter');
+    await fixture.whenStable();
+
+    expect(component.schedules).toEqual([{ data: TASKS[7], date: day(13), allDay: true }]);
+    expect(announce).toHaveBeenLastCalledWith(
+      'Sans échéance scheduled on vendredi 13 novembre',
+      'polite',
+    );
+  });
+
+  it('opens the day menu on a right click and on Shift + F10, on that day', async () => {
+    const target: HTMLElement = cell(host, 'mardi 24 novembre 2026');
+    target.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
+    await fixture.whenStable();
+    menuItem('Nouvelle tâche ce jour-là').click();
+    await fixture.whenStable();
+
+    const today: HTMLElement = cell(host, 'jeudi 12 novembre 2026, 1 tâche');
+    today.focus();
+    today.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'F10', shiftKey: true, bubbles: true, cancelable: true }),
+    );
+    await fixture.whenStable();
+    expect(document.activeElement).toBe(menuItem('Nouvelle tâche ce jour-là'));
+    menuItem('Nouvelle tâche ce jour-là').click();
+    await fixture.whenStable();
+
+    expect(component.picked).toEqual([
+      { date: day(24), allDay: true },
+      { date: day(12), allDay: true },
+    ]);
+  });
+
+  it('replaces the grid with a named busy skeleton while loading', async () => {
+    component.loading.set(true);
+    await fixture.whenStable();
+
+    const status: HTMLElement | null = host.querySelector('[role="status"]');
+    expect(status?.getAttribute('aria-label')).toBe('Loading the calendar');
+    expect(status?.getAttribute('aria-busy')).toBe('true');
+    expect(host.querySelector('[role="grid"]')).toBeNull();
   });
 });

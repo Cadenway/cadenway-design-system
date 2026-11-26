@@ -1,12 +1,14 @@
+import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
 import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 
 import { CwButton } from '@cadenway/ui/components/button';
+import { CwMenu, CwMenuItem } from '@cadenway/ui/components/menu';
 import { CwStatusIcon, type CwStatusKey } from '@cadenway/ui/components/status-icon';
 
 import { CwCalendarItemDef } from './calendar-item-def/calendar-item-def.directive';
 import { CwCalendarView } from './calendar-view.component';
-import type { CwCalendarSpan } from './calendar-view.types';
+import type { CwCalendarItemSchedule, CwCalendarSpan } from './calendar-view.types';
 
 /**
  * Constant meta
@@ -19,7 +21,18 @@ import type { CwCalendarSpan } from './calendar-view.types';
 const meta: Meta = {
   title: 'UI/CalendarView',
   decorators: [
-    moduleMetadata({ imports: [CwButton, CwCalendarItemDef, CwCalendarView, CwStatusIcon] }),
+    moduleMetadata({
+      imports: [
+        CdkDrag,
+        CdkDropList,
+        CwButton,
+        CwCalendarItemDef,
+        CwCalendarView,
+        CwMenu,
+        CwMenuItem,
+        CwStatusIcon,
+      ],
+    }),
   ],
 };
 
@@ -377,5 +390,141 @@ export const KeyboardMove: Story = {
         ),
       ).toBeVisible(),
     );
+  },
+};
+
+/**
+ * Function scheduleOn
+ *
+ * @description
+ * Gives an outside task the day it was dropped on, as the consumer of `itemSchedule` does.
+ *
+ * @param {readonly StoryTask[]} list - Current tasks.
+ * @param {CwCalendarItemSchedule} event - The scheduled task and its day.
+ * @returns {StoryTask[]} Tasks with the scheduled one dated.
+ */
+function scheduleOn(list: readonly StoryTask[], event: CwCalendarItemSchedule): StoryTask[] {
+  const scheduled: StoryTask = event.data as StoryTask;
+  return list.map((task) =>
+    task.id === scheduled.id
+      ? { ...task, span: { start: event.date, end: event.date, allDay: true } }
+      : task,
+  );
+}
+
+/**
+ * Function undated
+ *
+ * @description
+ * The tasks without a date, listed beside the calendar.
+ *
+ * @param {readonly StoryTask[]} list - Current tasks.
+ * @returns {StoryTask[]} Undated tasks.
+ */
+function undated(list: readonly StoryTask[]): StoryTask[] {
+  return list.filter((task) => task.span === null);
+}
+
+/** Loading: the header stays, a skeleton grid named « Loading the calendar » replaces the days. */
+export const Loading: Story = {
+  render: () => ({
+    props,
+    template: `<cw-calendar-view ${VIEW} loading [date]="november" />`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole: (role: string, options?: { name?: string }) => HTMLElement } = within(
+      light(canvasElement),
+    );
+    await expect(scope.getByRole('status', { name: 'Loading the calendar' })).toHaveAttribute(
+      'aria-busy',
+      'true',
+    );
+  },
+};
+
+/**
+ * Undated tasks beside the month (mockup `App.dc.html`, « Sans échéance »): drag one onto a day,
+ * or press Space on it, choose the day with the arrows and press Enter; `itemSchedule` dates it.
+ */
+export const ScheduleFromOutside: Story = {
+  render: () => ({
+    props: { ...props, scheduleOn, undated },
+    template: `
+      <div class="flex w-full flex-col gap-4 xl:flex-row">
+        <cw-calendar-view #calendar ${VIEW} [date]="november"
+          (itemSchedule)="tasks = scheduleOn(tasks, $event)">${ITEM}</cw-calendar-view>
+        <aside class="flex w-full shrink-0 flex-col gap-2 xl:w-64"
+          [attr.aria-label]="'Sans échéance' + (cwTheme === 'dark' ? ', thème sombre' : '')">
+          <p class="text-xs text-muted-foreground">Glissez une tâche sur un jour pour la planifier.</p>
+          <div cdkDropList cdkDropListSortingDisabled [cdkDropListConnectedTo]="calendar.dropListIds()"
+            class="flex flex-col gap-1.5">
+            @for (task of undated(tasks); track task.id) {
+              <button type="button" cdkDrag [cdkDragData]="task"
+                class="flex w-full items-center gap-2 rounded-lg border bg-card px-2.5 py-2 text-left text-sm"
+                (keydown.space)="$event.preventDefault(); calendar.scheduleWithKeyboard(task, task.name)">
+                <cw-status-icon [status]="task.status" />
+                <span class="min-w-0 flex-1 truncate">{{ task.name }}</span>
+              </button>
+            } @empty {
+              <p class="rounded-lg border border-dashed px-3 py-4 text-center text-xs text-muted-foreground">
+                Toutes les tâches ont une échéance.
+              </p>
+            }
+          </div>
+        </aside>
+      </div>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+      getByText: (text: string | RegExp) => HTMLElement;
+    } = within(light(canvasElement));
+    scope.getByRole('button', { name: 'Ajouter les notifications par e-mail' }).focus();
+    await userEvent.keyboard(' ');
+    await waitFor(() =>
+      expect(scope.getByRole('gridcell', { name: /^jeudi 12 novembre 2026/ })).toHaveFocus(),
+    );
+    await userEvent.keyboard('{ArrowRight}');
+    await userEvent.keyboard('{Enter}');
+    await waitFor(() =>
+      expect(
+        within(scope.getByRole('gridcell', { name: /^vendredi 13 novembre 2026/ })).getByRole(
+          'button',
+          { name: 'Ajouter les notifications par e-mail' },
+        ),
+      ).toBeVisible(),
+    );
+    await expect(scope.getByText('Toutes les tâches ont une échéance.')).toBeVisible();
+  },
+};
+
+/** Day menu (mockup `App.dc.html`): a right click on a day, or Shift + F10 on the focused day. */
+export const DayMenu: Story = {
+  render: () => ({
+    props: { ...props, picked: '' },
+    template: `
+      <p class="text-sm text-muted-foreground" aria-live="polite">Last action: {{ picked || '—' }}</p>
+      <cw-calendar-view ${VIEW} [date]="november" [dayMenu]="dayMenu">${ITEM}</cw-calendar-view>
+      <cw-menu #dayMenu ariaLabel="Actions du jour">
+        <button cwMenuItem (triggered)="picked = 'Nouvelle tâche le ' + dayMenu.data()?.date.getDate()">Nouvelle tâche ce jour-là</button>
+        <button cwMenuItem (triggered)="picked = 'Aller à aujourd’hui'">Aller à aujourd’hui</button>
+      </cw-menu>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+      getByText: (text: string) => HTMLElement;
+    } = within(light(canvasElement));
+    const page: {
+      findByRole: (role: string, options?: { name?: string }) => Promise<HTMLElement>;
+    } = within(document.body);
+    scope.getByRole('gridcell', { name: /^jeudi 12 novembre 2026/ }).focus();
+    await userEvent.keyboard('{Shift>}{F10}{/Shift}');
+    const first: HTMLElement = await page.findByRole('menuitem', {
+      name: 'Nouvelle tâche ce jour-là',
+    });
+    await waitFor(() => expect(first).toHaveFocus());
+    await userEvent.keyboard('{Enter}');
+    await waitFor(() => expect(scope.getByText('Last action: Nouvelle tâche le 12')).toBeVisible());
   },
 };
