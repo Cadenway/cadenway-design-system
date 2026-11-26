@@ -1,0 +1,112 @@
+@if (loading()) {
+  <div role="status" class="flex flex-col gap-5">
+    <span class="sr-only">{{ copy().loading }}</span>
+    @for (width of skeletonRows; track $index) {
+      <div class="flex gap-3" aria-hidden="true">
+        <div cwSkeleton class="size-8 shrink-0 rounded-full"></div>
+        <div class="flex min-w-0 flex-1 flex-col gap-2 pt-1">
+          <div cwSkeleton class="h-3" [class]="width"></div>
+          <div cwSkeleton class="h-2.5 w-24"></div>
+        </div>
+      </div>
+    }
+  </div>
+} @else if (entries().length === 0) {
+  <div
+    class="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-input p-8 text-center"
+  >
+    <div
+      class="flex size-8 items-center justify-center rounded-lg bg-muted text-muted-foreground"
+      aria-hidden="true"
+    >
+      <ng-icon name="phosphorPulseBold" />
+    </div>
+    <p role="status" class="text-sm font-medium">{{ copy().emptyText }}</p>
+    @if (hasProjectedEmpty()) {
+      <ng-content select="[cwActivityFeedEmpty]" />
+    }
+  </div>
+} @else {
+  <div class="flex flex-col gap-5">
+    @for (group of groups(); track group.key) {
+      <div
+        class="flex flex-col"
+        [attr.role]="group.heading ? 'group' : null"
+        [attr.aria-labelledby]="group.heading ? group.headingId : null"
+      >
+        @if (group.heading) {
+          <div
+            role="heading"
+            [attr.aria-level]="headingLevel()"
+            [id]="group.headingId"
+            class="sticky top-0 z-10 flex items-center gap-1.5 bg-background py-1.5 text-xs font-medium whitespace-nowrap text-muted-foreground"
+          >
+            {{ group.heading }}<span class="tabular-nums">{{ group.count }}</span>
+          </div>
+        }
+        <ol class="flex flex-col" [attr.aria-label]="group.heading ? null : ariaLabel()">
+          @for (item of group.entries; track item.entry.id) {
+            <li
+              class="group/act relative flex gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-accent motion-reduce:transition-none"
+            >
+              <span
+                class="absolute top-10 bottom-0 left-6 w-px -translate-x-1/2 bg-border group-last/act:hidden"
+                aria-hidden="true"
+              ></span>
+              <span class="relative flex shrink-0" aria-hidden="true">
+                @if (item.entry.actor.icon) {
+                  <span
+                    class="flex size-8 items-center justify-center rounded-full border bg-background text-muted-foreground [&_ng-icon]:[--ng-icon__size:0.875rem]"
+                  >
+                    <ng-icon [name]="item.entry.actor.icon" />
+                  </span>
+                } @else {
+                  <cw-avatar [name]="item.entry.actor.name" [src]="item.entry.actor.src ?? null" />
+                }
+              </span>
+              <div class="flex min-w-0 flex-1 flex-col gap-1.5">
+                <p class="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm leading-6">
+                  <span class="max-w-full truncate font-medium">{{ item.entry.actor.name }}</span
+                  >&ngsp;
+                  @if (summaryTemplate(); as summary) {
+                    <ng-container
+                      [ngTemplateOutlet]="summary"
+                      [ngTemplateOutletContext]="item.context"
+                    />
+                  } @else {
+                    @for (segment of item.segments; track $index) {
+                      <span [class]="segment.classes">{{ segment.text }}</span
+                      >&ngsp;
+                    }
+                  }
+                </p>
+                @if (item.entry.quote) {
+                  <p
+                    class="line-clamp-2 border-l-2 border-line-control pl-2 text-sm text-muted-foreground"
+                  >
+                    {{ item.entry.quote }}
+                  </p>
+                }
+                @if (detailTemplate(); as detail) {
+                  <div class="flex min-w-0">
+                    <ng-container
+                      [ngTemplateOutlet]="detail"
+                      [ngTemplateOutletContext]="item.context"
+                    />
+                  </div>
+                }
+              </div>
+              @if (item.time) {
+                <time
+                  [attr.datetime]="item.datetime"
+                  class="shrink-0 pt-0.5 text-xs leading-6 whitespace-nowrap text-muted-foreground tabular-nums"
+                  >{{ item.time }}</time
+                >
+              }
+            </li>
+          }
+        </ol>
+      </div>
+    }
+  </div>
+}
