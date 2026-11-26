@@ -8,6 +8,7 @@ describe('@cadenway/ui/kanban public API', () => {
       'CW_KANBAN_LABELS',
       'CwKanban',
       'CwKanbanCardDef',
+      'CwKanbanColumnMenuDef',
       'CwKanbanEmptyDef',
       'CwKanbanLaneMarkerDef',
       'provideCwKanbanLabels',

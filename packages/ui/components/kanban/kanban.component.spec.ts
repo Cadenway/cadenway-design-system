@@ -4,12 +4,16 @@ import { Component, signal, type DebugElement, type WritableSignal } from '@angu
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 
+import { CwMenu, CwMenuItem, CwMenuTriggerFor } from '@cadenway/ui/components/menu';
+
 import { CwKanban } from './kanban.component';
 import { CwKanbanCardDef } from './kanban-card-def/kanban-card-def.directive';
+import { CwKanbanColumnMenuDef } from './kanban-column-menu-def/kanban-column-menu-def.directive';
 import { CwKanbanEmptyDef } from './kanban-empty-def/kanban-empty-def.directive';
 import { provideCwKanbanLabels } from './kanban.providers';
 import type { KanbanCellData } from './kanban.token';
 import type {
+  CwKanbanAddRequest,
   CwKanbanColumn,
   CwKanbanCreate,
   CwKanbanLane,
@@ -709,5 +713,273 @@ describe('provideCwKanbanLabels', () => {
 
     expect(todo.textContent).toContain('2 tasks');
     expect(button(todo, 'Ajouter une tâche dans À faire')).toBeTruthy();
+  });
+});
+
+/**
+ * Component PlanningHost
+ *
+ * @description
+ * Hosts a board with the planning hooks: add requests without the quick add, card and column
+ * menus, the column header slot and the loading state.
+ */
+@Component({
+  imports: [CwKanban, CwKanbanColumnMenuDef, CwMenu, CwMenuItem, CwMenuTriggerFor],
+  template: `
+    <cw-kanban
+      ariaLabel="Tableau de Sprint 14"
+      [columns]="columns"
+      [items]="items"
+      [trackBy]="id"
+      [groupBy]="status"
+      [itemLabel]="label"
+      [quickAdd]="quickAdd()"
+      [loading]="loading()"
+      [cardMenu]="cardMenu"
+      [columnMenu]="columnMenu"
+      (addRequest)="requests.push($event)"
+    >
+      <ng-template cwKanbanColumnMenu let-column let-count="count">
+        <button
+          type="button"
+          [attr.aria-label]="'Actions ' + column.label + ' ' + count"
+          [cwMenuTriggerFor]="columnMenu"
+        >
+          ...
+        </button>
+      </ng-template>
+    </cw-kanban>
+    <cw-menu #cardMenu ariaLabel="Actions de la carte">
+      <button cwMenuItem (triggered)="picked.push(cardMenu.data())">Ouvrir</button>
+    </cw-menu>
+    <cw-menu #columnMenu ariaLabel="Actions de la colonne">
+      <button cwMenuItem (triggered)="picked.push(columnMenu.data())">Masquer la colonne</button>
+    </cw-menu>
+  `,
+})
+class PlanningHost {
+  // #region Properties
+  /**
+   * Property columns
+   *
+   * @description
+   * Columns supplied to the board.
+   *
+   * @type {CwKanbanColumn[]}
+   * @readonly
+   */
+  public readonly columns: CwKanbanColumn[] = COLUMNS;
+
+  /**
+   * Property items
+   *
+   * @description
+   * Cards displayed by the board.
+   *
+   * @type {readonly Card[]}
+   * @readonly
+   */
+  public readonly items: readonly Card[] = CARDS;
+
+  /**
+   * Property quickAdd
+   *
+   * @description
+   * Whether the inline quick add opens on an add request.
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  public readonly quickAdd: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property loading
+   *
+   * @description
+   * Whether the board shows its loading skeleton.
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  public readonly loading: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property requests
+   *
+   * @description
+   * Recorded add requests.
+   *
+   * @type {CwKanbanAddRequest[]}
+   * @readonly
+   */
+  public readonly requests: CwKanbanAddRequest[] = [];
+
+  /**
+   * Property picked
+   *
+   * @description
+   * Data the menus acted on.
+   *
+   * @type {unknown[]}
+   * @readonly
+   */
+  public readonly picked: unknown[] = [];
+  // #endregion
+
+  // #region Methods
+  /**
+   * Method id
+   *
+   * @description
+   * Reads a card identifier.
+   *
+   * @param {Card} item - Card to read.
+   * @returns {string} Card identifier.
+   */
+  public id(item: Card): string {
+    return item.id;
+  }
+
+  /**
+   * Method status
+   *
+   * @description
+   * Reads the column of a card.
+   *
+   * @param {Card} item - Card to read.
+   * @returns {string} Column identifier.
+   */
+  public status(item: Card): string {
+    return item.status;
+  }
+
+  /**
+   * Method label
+   *
+   * @description
+   * Reads the accessible name of a card.
+   *
+   * @param {Card} item - Card to read.
+   * @returns {string} Card name.
+   */
+  public label(item: Card): string {
+    return `${item.id} — ${item.name}`;
+  }
+  // #endregion
+}
+
+/**
+ * Function menuItem
+ *
+ * @description
+ * Finds an item of an open menu by its visible name.
+ *
+ * @param {string} name - Visible menu item text.
+ * @returns {HTMLElement} Matching menu item.
+ */
+function menuItem(name: string): HTMLElement {
+  const found: HTMLElement | undefined = Array.from(
+    document.querySelectorAll<HTMLElement>('[role="menuitem"]'),
+  ).find((element) => element.textContent.trim() === name);
+  if (!found) throw new Error(`No menu item named ${name}`);
+  return found;
+}
+
+describe('CwKanban planning hooks', () => {
+  let fixture: ComponentFixture<PlanningHost>;
+  let host: HTMLElement;
+  let component: PlanningHost;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: LiveAnnouncer, useValue: { announce: vi.fn(() => Promise.resolve()) } },
+      ],
+    });
+    fixture = TestBed.createComponent(PlanningHost);
+    fixture.autoDetectChanges();
+    host = fixture.nativeElement as HTMLElement;
+    component = fixture.componentInstance;
+  });
+
+  afterEach(() => {
+    fixture.destroy();
+  });
+
+  it('emits addRequest from the header, the footer and N without opening the quick add', async () => {
+    const todo: HTMLElement = group(host, 'Colonne À faire');
+    button(todo, 'Ajouter une tâche dans À faire').click();
+    button(todo, 'Ajouter une tâche').click();
+    press(card(host, 'CAD-482'), 'n');
+    await fixture.whenStable();
+
+    expect(component.requests).toEqual([
+      { column: 'todo', lane: null },
+      { column: 'todo', lane: null },
+      { column: 'progress', lane: null },
+    ]);
+    expect(host.querySelector('input')).toBeNull();
+  });
+
+  it('still opens the quick add after the request when quickAdd is on', async () => {
+    component.quickAdd.set(true);
+    await fixture.whenStable();
+    button(group(host, 'Colonne À faire'), 'Ajouter une tâche dans À faire').click();
+    await fixture.whenStable();
+
+    expect(component.requests).toEqual([{ column: 'todo', lane: null }]);
+    expect(host.querySelector('input')).not.toBeNull();
+  });
+
+  it('opens the card menu on a right click and on Shift + F10, on that item', async () => {
+    const target: HTMLElement = card(host, 'CAD-482');
+    const event: MouseEvent = new MouseEvent('contextmenu', {
+      bubbles: true,
+      cancelable: true,
+      clientX: 10,
+      clientY: 10,
+    });
+    target.dispatchEvent(event);
+    await fixture.whenStable();
+
+    expect(event.defaultPrevented).toBe(true);
+    expect(
+      document.querySelector('[role="menu"][aria-label="Actions de la carte"]'),
+    ).not.toBeNull();
+    menuItem('Ouvrir').click();
+    await fixture.whenStable();
+    expect(component.picked).toEqual([CARDS[2]]);
+
+    const other: HTMLElement = card(host, 'CAD-488');
+    other.focus();
+    press(other, 'F10', { shiftKey: true });
+    await fixture.whenStable();
+    expect(document.activeElement).toBe(menuItem('Ouvrir'));
+    menuItem('Ouvrir').click();
+    await fixture.whenStable();
+    expect(component.picked).toEqual([CARDS[2], CARDS[0]]);
+  });
+
+  it('opens the column menu on a right click in a column and draws the header slot', async () => {
+    const blocked: HTMLElement = group(host, 'Colonne Bloqué');
+    expect(button(blocked, 'Actions Bloqué 0')).toBeTruthy();
+
+    blocked.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
+    await fixture.whenStable();
+    menuItem('Masquer la colonne').click();
+    await fixture.whenStable();
+
+    expect(component.picked).toEqual([COLUMNS[2]]);
+  });
+
+  it('replaces the board with a named busy skeleton while loading', async () => {
+    component.loading.set(true);
+    await fixture.whenStable();
+
+    const status: HTMLElement | null = host.querySelector('[role="status"]');
+    expect(status?.getAttribute('aria-label')).toBe('Loading the board');
+    expect(status?.getAttribute('aria-busy')).toBe('true');
+    expect(host.querySelector('[role="region"]')).toBeNull();
+    expect(host.querySelectorAll('[role="status"] > div')).toHaveLength(3);
   });
 });

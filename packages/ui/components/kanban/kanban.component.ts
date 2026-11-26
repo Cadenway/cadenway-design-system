@@ -24,7 +24,12 @@ import {
   type Signal,
 } from '@angular/core';
 
+import type { CwMenu } from '@cadenway/ui/components/menu';
+import { CwSkeleton } from '@cadenway/ui/components/skeleton';
+import { ɵContextMenuGesture, type ɵContextMenuRequest } from '@cadenway/ui/core';
+
 import { KanbanColumnPart } from './kanban-column/kanban-column.component';
+import { CW_KANBAN_LABELS } from './kanban.constants';
 import { CwKanbanCardDef } from './kanban-card-def/kanban-card-def.directive';
 import { KANBAN_LABELS } from './kanban-labels.token';
 import { CwKanbanEmptyDef } from './kanban-empty-def/kanban-empty-def.directive';
@@ -41,9 +46,11 @@ import {
   type KanbanLaneView,
 } from './kanban.token';
 import type {
+  CwKanbanAddRequest,
   CwKanbanCardContext,
   CwKanbanColumn,
   CwKanbanColumnCollapse,
+  CwKanbanColumnMenuContext,
   CwKanbanCreate,
   CwKanbanDensity,
   CwKanbanEmptyContext,
@@ -206,14 +213,30 @@ function toWidth(value: unknown): number {
 }
 
 /**
+ * Constant SKELETON_COLUMNS
+ *
+ * @description
+ * The loading skeleton without columns: four columns of three cards, title and name widths in
+ * percent (mockup `App.dc.html`, « Chargement du tableau »).
+ *
+ * @type {readonly { readonly title: number; readonly cards: readonly number[] }[]}
+ */
+const SKELETON_COLUMNS: readonly { readonly title: number; readonly cards: readonly number[] }[] = [
+  { title: 40, cards: [80, 60, 70] },
+  { title: 30, cards: [65, 85, 55] },
+  { title: 45, cards: [75, 50, 80] },
+  { title: 35, cards: [60, 70, 65] },
+];
+
+/**
  * Component CwKanban
  *
  * @description
- * The board of a list or a sprint: cards in columns, optionally in swimlanes, moved with the mouse or the keyboard, with a work-in-progress limit per column (Kanban sheet of the Design System artifact). Generic: `columns` and `lanes` come from the consumer, `items` are any `T`; `trackBy` gives an item's id, `groupBy` its column id and `swimlaneBy` its lane id (swimlanes show when both `swimlaneBy` and `lanes` are set). Items whose column (or lane) is unknown are not drawn. The board draws each card's frame and states; the content comes from `ng-template[cwKanbanCard]` (`CwKanbanCardDef`), the empty-column text from `ng-template[cwKanbanEmpty]`, the lane marker from `ng-template[cwKanbanLaneMarker]`; a `[cwKanbanToolbar]` element is projected above the board. A drop (CDK drag-drop, or Space, arrows and Space) moves the card at once and emits `moved`; the parent persists it, or gives the previous `items` back to undo it: any new `items` resets the board. A drop that exceeds `wipLimits[column]` also emits `wipExceeded` (the drop stays allowed). Enter or a click emits `open`; Ctrl + click and Ctrl + Space toggle the card in `selection`; the quick add emits `created` on Enter and stays open. `density`, `collapsedColumns`, `collapsedLanes` and `selection` are two-way models. `readonly` turns off dragging and creation. Keyboard: one tab stop on the active card; arrows move between cards (left and right skip folded columns), Shift + arrows extend the selection, N opens the quick add; a grabbed card follows the arrows (Home and End: top and bottom), Space drops it, Escape puts it back. Every step is announced through the CDK `LiveAnnouncer`, assertive. Style hooks: `data-density` and `data-dragging` on the host.
+ * The board of a list or a sprint: cards in columns, optionally in swimlanes, moved with the mouse or the keyboard, with a work-in-progress limit per column (Kanban sheet of the Design System artifact). Generic: `columns` and `lanes` come from the consumer, `items` are any `T`; `trackBy` gives an item's id, `groupBy` its column id and `swimlaneBy` its lane id (swimlanes show when both `swimlaneBy` and `lanes` are set). Items whose column (or lane) is unknown are not drawn. The board draws each card's frame and states; the content comes from `ng-template[cwKanbanCard]` (`CwKanbanCardDef`), the empty-column text from `ng-template[cwKanbanEmpty]`, the lane marker from `ng-template[cwKanbanLaneMarker]`; a `[cwKanbanToolbar]` element is projected above the board. A drop (CDK drag-drop, or Space, arrows and Space) moves the card at once and emits `moved`; the parent persists it, or gives the previous `items` back to undo it: any new `items` resets the board. A drop that exceeds `wipLimits[column]` also emits `wipExceeded` (the drop stays allowed). Enter or a click emits `open`; Ctrl + click and Ctrl + Space toggle the card in `selection`; the quick add emits `created` on Enter and stays open. `density`, `collapsedColumns`, `collapsedLanes` and `selection` are two-way models. `readonly` turns off dragging and creation. Every add request (« + » in a header or footer, « Ajouter une tâche » in an empty column, N on a card) emits `addRequest` with the column and lane; `quickAdd=false` turns the inline quick add off, so the consumer opens its own creation dialog. `cardMenu` and `columnMenu` take a `cw-menu`: a right click, Shift + F10 or the Menu key on a card opens `cardMenu` on that item (read back through the menu's `data()`); a right click in a column, or Shift + F10 and the Menu key from its header, opens `columnMenu` on the `CwKanbanColumn`; every action of these menus must also exist in a visible control (WCAG 2.1.1), for example in the `ng-template[cwKanbanColumnMenu]` slot (`CwKanbanColumnMenuDef`) drawn in each open column header. `loading` replaces the board with a skeleton named by the `loading` text (`role="status"`, `aria-busy`). Keyboard: one tab stop on the active card; arrows move between cards (left and right skip folded columns), Shift + arrows extend the selection, N opens the quick add; a grabbed card follows the arrows (Home and End: top and bottom), Space drops it, Escape puts it back. Every step is announced through the CDK `LiveAnnouncer`, assertive. Style hooks: `data-density` and `data-dragging` on the host.
  */
 @Component({
   selector: 'cw-kanban',
-  imports: [CdkDropListGroup, KanbanColumnPart, KanbanLanePart],
+  imports: [CdkDropListGroup, CwSkeleton, KanbanColumnPart, KanbanLanePart],
   providers: [{ provide: KANBAN_BOARD, useExisting: CwKanban }],
   host: {
     class: 'flex min-w-0 flex-col gap-3',
@@ -424,6 +447,59 @@ export class CwKanban<T> implements KanbanBoard {
   public readonly ariaLabel: InputSignal<string> = input.required<string>();
 
   /**
+   * Property quickAdd
+   *
+   * @description
+   * Whether an add request opens the inline quick add (the default). Off, « + », « Ajouter une
+   * tâche » and N only emit `addRequest`, so the consumer opens its own creation dialog.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   * @readonly
+   */
+  public readonly quickAdd: InputSignalWithTransform<boolean, unknown> = input(true, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property cardMenu
+   *
+   * @description
+   * Menu opened on a card by a right click, Shift + F10 or the Menu key, with the item as the
+   * menu's `data()`; `null` (the default) keeps the browser's menu.
+   *
+   * @type {InputSignal<CwMenu | null>}
+   * @readonly
+   */
+  public readonly cardMenu: InputSignal<CwMenu | null> = input<CwMenu | null>(null);
+
+  /**
+   * Property columnMenu
+   *
+   * @description
+   * Menu opened by a right click in a column, or Shift + F10 and the Menu key from a control of
+   * its header, with the `CwKanbanColumn` as the menu's `data()`; `null` (the default) keeps the
+   * browser's menu.
+   *
+   * @type {InputSignal<CwMenu | null>}
+   * @readonly
+   */
+  public readonly columnMenu: InputSignal<CwMenu | null> = input<CwMenu | null>(null);
+
+  /**
+   * Property loading
+   *
+   * @description
+   * Draws a skeleton of the columns (four without `columns`) instead of the board while the first
+   * read runs; the toolbar slot stays.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   * @readonly
+   */
+  public readonly loading: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
+
+  /**
    * Property labels
    *
    * @description
@@ -456,6 +532,18 @@ export class CwKanban<T> implements KanbanBoard {
    * @readonly
    */
   public readonly created: OutputEmitterRef<CwKanbanCreate> = output<CwKanbanCreate>();
+
+  /**
+   * Property addRequest
+   *
+   * @description
+   * An add request for a column and lane, emitted before the quick add opens (when `quickAdd` is
+   * on) and never on a read-only board.
+   *
+   * @type {OutputEmitterRef<CwKanbanAddRequest>}
+   * @readonly
+   */
+  public readonly addRequest: OutputEmitterRef<CwKanbanAddRequest> = output<CwKanbanAddRequest>();
 
   /**
    * Property columnCollapse
@@ -582,6 +670,32 @@ export class CwKanban<T> implements KanbanBoard {
     contentChild(CwKanbanLaneMarkerDef);
 
   /**
+   * Property columnMenuSlot
+   *
+   * @description
+   * Template registered by a projected `CwKanbanColumnMenuDef`. The slot registers itself rather
+   * than being a content query, so the component's published query metadata stays as released
+   * (the type contract check of `tests/packaging`).
+   *
+   * @type {WritableSignal<TemplateRef<CwKanbanColumnMenuContext> | undefined>}
+   * @readonly
+   */
+  private readonly columnMenuSlot: WritableSignal<
+    TemplateRef<CwKanbanColumnMenuContext> | undefined
+  > = signal<TemplateRef<CwKanbanColumnMenuContext> | undefined>(undefined);
+
+  /**
+   * Property menuGesture
+   *
+   * @description
+   * Recognizes the context-menu gestures of the cards and columns.
+   *
+   * @type {ɵContextMenuGesture}
+   * @readonly
+   */
+  private readonly menuGesture: ɵContextMenuGesture = new ɵContextMenuGesture();
+
+  /**
    * Property cardTemplate
    *
    * @description
@@ -619,18 +733,52 @@ export class CwKanban<T> implements KanbanBoard {
     computed(() => this.laneMarkerDef()?.template);
 
   /**
+   * Property columnMenuTemplate
+   *
+   * @description
+   * The column header slot template (`CwKanbanColumnMenuDef`).
+   *
+   * @type {Signal<TemplateRef<CwKanbanColumnMenuContext> | undefined>}
+   * @readonly
+   */
+  public readonly columnMenuTemplate: Signal<TemplateRef<CwKanbanColumnMenuContext> | undefined> =
+    computed(() => this.columnMenuSlot());
+
+  /**
+   * Property skeletonColumns
+   *
+   * @description
+   * Columns of the loading skeleton: one per column, else four.
+   *
+   * @type {Signal<readonly { readonly title: number; readonly cards: readonly number[] }[]>}
+   * @readonly
+   */
+  protected readonly skeletonColumns: Signal<
+    readonly { readonly title: number; readonly cards: readonly number[] }[]
+  > = computed(() => {
+    const count: number = this.columns().length || SKELETON_COLUMNS.length;
+    return Array.from(
+      { length: count },
+      (_, index) => SKELETON_COLUMNS[index % SKELETON_COLUMNS.length],
+    );
+  });
+
+  /**
    * Property texts
    *
    * @description
-   * The provided texts with the `labels` overrides.
+   * The provided texts with the `labels` overrides, over the defaults for the optional texts.
    *
-   * @type {Signal<CwKanbanLabels>}
+   * @type {Signal<Required<CwKanbanLabels>>}
    * @readonly
    */
-  public readonly texts: Signal<CwKanbanLabels> = computed<CwKanbanLabels>(() => ({
-    ...this.providedLabels,
-    ...this.labels(),
-  }));
+  public readonly texts: Signal<Required<CwKanbanLabels>> = computed<Required<CwKanbanLabels>>(
+    () => ({
+      ...CW_KANBAN_LABELS,
+      ...this.providedLabels,
+      ...this.labels(),
+    }),
+  );
 
   /**
    * Property dragging
@@ -1039,6 +1187,10 @@ export class CwKanban<T> implements KanbanBoard {
    * @param {KanbanCellView} cell - Cell involved in the interaction.
    */
   public onCardKeydown(event: KeyboardEvent, card: KanbanCardView, cell: KanbanCellView): void {
+    if (!this.grab() && this.openCardMenu(event, card)) {
+      event.stopPropagation();
+      return;
+    }
     const handled: boolean = this.grab()
       ? this.onGrabbedKey(event, card.id)
       : this.onCardKey(event, card, cell);
@@ -1205,6 +1357,89 @@ export class CwKanban<T> implements KanbanBoard {
   }
 
   /**
+   * Method registerColumnMenu
+   *
+   * @description
+   * Slot handler (`CwKanbanColumnMenuDef`), not for consumers: sets the column header template,
+   * or clears it when the slot is destroyed.
+   *
+   * @param {TemplateRef<CwKanbanColumnMenuContext> | undefined} template - Template of the slot.
+   */
+  public registerColumnMenu(template: TemplateRef<CwKanbanColumnMenuContext> | undefined): void {
+    this.columnMenuSlot.set(template);
+  }
+
+  /**
+   * Method requestAdd
+   *
+   * @description
+   * Part handler (`KanbanBoard`), not for consumers.
+   *
+   * @param {string} column - Column identifier.
+   * @param {string | null} lane - Swimlane identifier, or null.
+   */
+  public requestAdd(column: string, lane: string | null): void {
+    if (this.readonly()) return;
+    this.addRequest.emit({ column, lane });
+    if (this.quickAdd()) this.openQuickAdd(column, lane);
+  }
+
+  /**
+   * Method onCardContextMenu
+   *
+   * @description
+   * Part handler (`KanbanBoard`), not for consumers.
+   *
+   * @param {MouseEvent | KeyboardEvent} event - `contextmenu` or `keydown` event of the card.
+   * @param {KanbanCardView} card - Card the menu acts on.
+   */
+  public onCardContextMenu(event: MouseEvent | KeyboardEvent, card: KanbanCardView): void {
+    this.openCardMenu(event, card);
+  }
+
+  /**
+   * Method onColumnContextMenu
+   *
+   * @description
+   * Part handler (`KanbanBoard`), not for consumers.
+   *
+   * @param {MouseEvent | KeyboardEvent} event - `contextmenu` or `keydown` event of the column.
+   * @param {CwKanbanColumn} column - Column the menu acts on.
+   * @param {HTMLElement} element - Column element the menu belongs to.
+   */
+  public onColumnContextMenu(
+    event: MouseEvent | KeyboardEvent,
+    column: CwKanbanColumn,
+    element: HTMLElement,
+  ): void {
+    const menu: CwMenu | null = this.columnMenu();
+    if (!menu) return;
+    const request: ɵContextMenuRequest | null = this.menuGesture.request(event, element);
+    if (request) menu.open({ ...request, data: column });
+  }
+
+  /**
+   * Method openCardMenu
+   *
+   * @description
+   * Opens `cardMenu` on a card when the event is a context-menu gesture.
+   *
+   * @param {MouseEvent | KeyboardEvent} event - `contextmenu` or `keydown` event of the card.
+   * @param {KanbanCardView} card - Card the menu acts on.
+   * @returns {boolean} Whether the menu opened.
+   */
+  private openCardMenu(event: MouseEvent | KeyboardEvent, card: KanbanCardView): boolean {
+    const menu: CwMenu | null = this.cardMenu();
+    const element: EventTarget | null = event.currentTarget;
+    if (!menu || !(element instanceof HTMLElement)) return false;
+    const request: ɵContextMenuRequest | null = this.menuGesture.request(event, element);
+    if (!request) return false;
+    this.active.set(card.id);
+    menu.open({ ...request, data: card.item });
+    return true;
+  }
+
+  /**
    * Method cellView
    *
    * @description
@@ -1310,7 +1545,7 @@ export class CwKanban<T> implements KanbanBoard {
       case 'n':
       case 'N':
         if (ctrl || event.altKey || this.readonly()) return false;
-        this.openQuickAdd(cell.column.id, cell.lane?.id ?? null);
+        this.requestAdd(cell.column.id, cell.lane?.id ?? null);
         return true;
       default:
         return false;

@@ -4,11 +4,11 @@ import type { CwKanbanLabels } from './kanban.types';
  * Constant CW_KANBAN_LABELS
  *
  * @description
- * The default texts of the board, word for word from the Kanban sheet and the mockup (`App.dc.html`, vue Tableau). A `labels` input overrides any of them.
+ * The default texts of the board, word for word from the Kanban sheet and the mockup (`App.dc.html`, vue Tableau); every text is defined, the optional ones included. The texts added after 0.8.0 (`loading`) default to English source copy, translated by the application through `provideCwKanbanLabels`. A `labels` input overrides any of them.
  *
- * @type {CwKanbanLabels}
+ * @type {Required<CwKanbanLabels>}
  */
-export const CW_KANBAN_LABELS: CwKanbanLabels = {
+export const CW_KANBAN_LABELS: Required<CwKanbanLabels> = {
   add: 'Ajouter une tâche',
   addIn: 'Ajouter une tâche dans {column}',
   collapse: 'Replier la colonne {column}',
@@ -34,4 +34,5 @@ export const CW_KANBAN_LABELS: CwKanbanLabels = {
   positionInLane: 'Colonne {column}, couloir {lane}, position {position} sur {total}.',
   dropped: '{item} déposée dans {column}, position {position} sur {total}.',
   cancelled: 'Déplacement annulé.',
+  loading: 'Loading the board',
 };
