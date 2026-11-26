@@ -411,7 +411,12 @@ export class CwToggleGroup implements FormValueControl<CwToggleGroupValue>, Cont
     const last: CwToggleGroupItem | null = this.lastFocused();
     if (last && enabled.includes(last)) return last;
     const selected: readonly string[] = this.selected();
-    return enabled.find((item) => selected.includes(item.value())) ?? enabled.at(0) ?? null;
+    // An item from a `@for` may not have its `value` yet (`hasValue`): it counts as off until it does.
+    return (
+      enabled.find((item) => item.hasValue() && selected.includes(item.value())) ??
+      enabled.at(0) ??
+      null
+    );
   });
 
   /**

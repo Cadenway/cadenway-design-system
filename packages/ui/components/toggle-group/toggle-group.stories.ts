@@ -197,3 +197,36 @@ export const Keyboard: Story = {
     await expect(status).toHaveAttribute('aria-checked', 'true');
   },
 };
+
+/**
+ * Items from a `@for`, the item that is on rendered third: the group renders (no NG0950) and Tab
+ * enters on that item.
+ */
+export const FromLoop: Story = {
+  render: () => ({
+    props: {
+      groupBy: 'assignee',
+      options: [
+        { value: 'status', label: 'Statut' },
+        { value: 'priority', label: 'Priorité' },
+        { value: 'assignee', label: 'Assigné' },
+      ],
+    },
+    template: `
+      <cw-toggle-group variant="outline" ariaLabel="Grouper par" [(value)]="groupBy">
+        @for (option of options; track option.value) {
+          <button cwToggleGroupItem [value]="option.value">{{ option.label }}</button>
+        }
+      </cw-toggle-group>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole(role: string, options?: { name?: string }): HTMLElement } = within(
+      light(canvasElement),
+    );
+    const assignee: HTMLElement = scope.getByRole('radio', { name: 'Assigné' });
+
+    await expect(assignee).toHaveAttribute('aria-checked', 'true');
+    await userEvent.tab();
+    await expect(assignee).toHaveFocus();
+  },
+};

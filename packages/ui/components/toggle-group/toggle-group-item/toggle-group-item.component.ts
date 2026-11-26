@@ -2,6 +2,7 @@ import {
   booleanAttribute,
   Component,
   computed,
+  effect,
   ElementRef,
   forwardRef,
   HostAttributeToken,
@@ -10,6 +11,8 @@ import {
   type InputSignal,
   type InputSignalWithTransform,
   type Signal,
+  signal,
+  type WritableSignal,
 } from '@angular/core';
 import type { FocusableOption } from '@angular/cdk/a11y';
 import { CwRipple } from '@cadenway/ui/core';
@@ -75,7 +78,8 @@ const ITEM_SIZES: Record<CwToggleGroupSize, string> = {
  * Takes the variant and size of its group, `role="radio"` and `aria-checked` in single choice,
  * `aria-pressed` in multiple choice, `data-state="on|off"`, and `tabindex` 0 only on the group's Tab
  * stop. Sets `type="button"` when no type is given. An icon-only item needs an `aria-label`. Every
- * press draws the ripple (`CwRipple`), except under reduced motion.
+ * press draws the ripple (`CwRipple`), except under reduced motion. Items may come from a `@for`:
+ * until Angular has set an item's `value`, the group treats it as off (`hasValue`).
  */
 @Component({
   selector: 'button[cwToggleGroupItem]',
@@ -181,6 +185,32 @@ export class CwToggleGroupItem {
   public readonly keyOption: FocusableOption = optionOf(this);
 
   /**
+   * Property initialized
+   * @readonly
+   *
+   * @description
+   * Set when Angular first checks the item, that is once it has set the required `value` input.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  private readonly initialized: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property hasValue
+   * @readonly
+   *
+   * @description
+   * Whether `value` can be read. The group reads every item's value to place its Tab stop, from the
+   * host bindings of each item; in a `@for`, each item is its own view and the first one is checked
+   * before the next ones have their inputs, so reading their required `value` would throw NG0950.
+   * The group treats the items for which this is still false as off, and places its Tab stop again
+   * once they turn true.
+   *
+   * @type {Signal<boolean>}
+   */
+  public readonly hasValue: Signal<boolean> = this.initialized.asReadonly();
+
+  /**
    * Property single
    * @readonly
    *
@@ -216,6 +246,23 @@ export class CwToggleGroupItem {
   protected readonly classes: Signal<string> = computed(
     () => `${ITEM_BASE} ${ITEM_VARIANTS[this.group.variant()]} ${ITEM_SIZES[this.group.size()]}`,
   );
+  // #endregion
+
+  // #region Constructor
+  /**
+   * Constructor
+   * @constructor
+   *
+   * @description
+   * Marks the item's inputs as set. An effect created by a component runs when Angular checks that
+   * component, after it has set the component's inputs; no lifecycle hook is needed, so the
+   * published declaration of the class stays as released.
+   */
+  public constructor() {
+    effect(() => {
+      this.initialized.set(true);
+    });
+  }
   // #endregion
 
   // #region Methods
