@@ -416,6 +416,16 @@ describe('CwDialog size', () => {
     expect(panel().classList).not.toContain('max-w-2xl');
   });
 
+  it('is 896 px wide with size xl, between lg and full', async () => {
+    fixture.componentInstance.size.set('xl');
+    await fixture.whenStable();
+
+    expect(panel().dataset['size']).toBe('xl');
+    expect(panel().classList).toContain('max-w-4xl');
+    expect(panel().classList).not.toContain('max-w-2xl');
+    expect(panel().classList).toContain('max-md:max-w-none');
+  });
+
   it('keeps 672 px for size lg and fills the screen under 768 px at every size', async () => {
     fixture.componentInstance.size.set('lg');
     await fixture.whenStable();
