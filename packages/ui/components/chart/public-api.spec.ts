@@ -6,6 +6,7 @@ describe('@cadenway/ui/chart public API', () => {
   it('exports exactly the pinned names', () => {
     expect(Object.keys(publicApi).sort()).toEqual([
       'CW_CHART_LABELS',
+      'CW_CHART_OTHERS_KEY',
       'CwChart',
       'provideCwChartLabels',
     ]);

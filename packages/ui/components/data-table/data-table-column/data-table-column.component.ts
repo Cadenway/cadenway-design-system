@@ -5,14 +5,17 @@ import {
   contentChild,
   input,
   numberAttribute,
+  signal,
   type InputSignalWithTransform,
   type InputSignal,
   type Signal,
+  type TemplateRef,
+  type WritableSignal,
 } from '@angular/core';
 
 import { CwCellDef } from '../cell/cell.directive';
 import { CwCellEditorDef } from '../cell-editor/cell-editor.directive';
-import type { CwColumnAlign, CwColumnDef } from '../data-table.types';
+import type { CwColumnAlign, CwColumnDef, CwFooterCellContext } from '../data-table.types';
 
 /**
  * Function optionalNumber
@@ -44,7 +47,7 @@ function optionalBoolean(value: unknown): boolean | undefined {
  * Component CwDataTableColumn
  *
  * @description
- * Declares a column of `cw-data-table` in the template, with its cell rendering (`ng-template[cwCell]`) and its editor (`ng-template[cwCellEditor]`) (DataTable sheet of the Design System artifact). It renders nothing itself. Its inputs are those of `CwColumnDef`; when the table also receives a `columns` array, a child column with the same `key` only brings its templates and overrides the fields it sets.
+ * Declares a column of `cw-data-table` in the template, with its cell rendering (`ng-template[cwCell]`), its editor (`ng-template[cwCellEditor]`) and its footer cell (`ng-template[cwFooterCell]`) (DataTable sheet of the Design System artifact). It renders nothing itself. Its inputs are those of `CwColumnDef`; when the table also receives a `columns` array, a child column with the same `key` only brings its templates and overrides the fields it sets.
  */
 @Component({
   selector: 'cw-data-table-column',
@@ -213,6 +216,19 @@ export class CwDataTableColumn {
   >(undefined);
 
   /**
+   * Property footer
+   *
+   * @description
+   * Aggregate of the column for the footer row, computed over every row of the table's `data`.
+   *
+   * @type {InputSignal<((rows: never) => unknown) | undefined>}
+   * @readonly
+   */
+  public readonly footer: InputSignal<((rows: never) => unknown) | undefined> = input<
+    ((rows: never) => unknown) | undefined
+  >(undefined);
+
+  /**
    * Property cell
    *
    * @description
@@ -234,6 +250,18 @@ export class CwDataTableColumn {
    */
   public readonly editor: Signal<CwCellEditorDef<unknown> | undefined> =
     contentChild(CwCellEditorDef);
+
+  /**
+   * Property ɵfooterCell
+   *
+   * @description
+   * The footer cell template, set by the `ng-template[cwFooterCell]` inside this column. The template registers itself instead of being queried, so the column's published metadata keeps its queries. Not public API.
+   *
+   * @type {WritableSignal<TemplateRef<CwFooterCellContext<unknown>> | null>}
+   * @readonly
+   */
+  public readonly ɵfooterCell: WritableSignal<TemplateRef<CwFooterCellContext<unknown>> | null> =
+    signal<TemplateRef<CwFooterCellContext<unknown>> | null>(null);
 
   /**
    * Property definition
@@ -260,6 +288,7 @@ export class CwDataTableColumn {
       hideable: this.hideable(),
       editable: this.editable(),
       value: this.value(),
+      footer: this.footer(),
     };
     return Object.fromEntries(
       Object.entries(fields).filter(([, value]: [string, unknown]) => value !== undefined),

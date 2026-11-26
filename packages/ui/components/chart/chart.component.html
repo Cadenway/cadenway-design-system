@@ -67,7 +67,7 @@
       </div>
       @if (legend()) {
         <div class="grid min-w-0 flex-1 gap-2 text-xs">
-          @for (item of series(); track item.key) {
+          @for (item of shownSeries(); track item.key) {
             <button
               type="button"
               cwRipple
@@ -91,6 +91,7 @@
       tabindex="0"
       [class]="plotClasses"
       [attr.aria-label]="ariaLabel()"
+      [attr.aria-describedby]="markerShapes().length ? markersId : null"
       [attr.data-active]="activeKey()"
       (keydown)="onKeydown($event)"
       (pointermove)="onPointerMove($event)"
@@ -227,6 +228,24 @@
               }
             }
           }
+          @for (marker of markerShapes(); track marker.key) {
+            <line
+              [attr.x1]="marker.x"
+              [attr.x2]="marker.x"
+              y1="6"
+              [attr.y2]="f.bottom"
+              stroke-dasharray="2 3"
+              class="stroke-primary/50"
+            />
+            <text
+              [attr.x]="marker.labelX"
+              y="14"
+              [attr.text-anchor]="marker.anchor"
+              class="fill-muted-foreground text-[10px] font-medium"
+            >
+              {{ marker.label }}
+            </text>
+          }
           @for (category of categories(); track $index) {
             @if (category.showLabel) {
               <text
@@ -247,7 +266,7 @@
     </div>
     @if (legend()) {
       <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-        @for (item of series(); track item.key) {
+        @for (item of shownSeries(); track item.key) {
           <button
             type="button"
             cwRipple
@@ -266,6 +285,13 @@
       </div>
     }
   }
+  @if (markerShapes().length) {
+    <div [id]="markersId" class="sr-only">
+      @for (marker of markerShapes(); track marker.key) {
+        <span>{{ marker.description }}. </span>
+      }
+    </div>
+  }
   <div class="sr-only" aria-live="polite">{{ announcement() }}</div>
   <table class="sr-only">
     <caption>
@@ -276,7 +302,7 @@
     <thead>
       <tr>
         <th scope="col">{{ categoryHeader() }}</th>
-        @for (item of series(); track item.key) {
+        @for (item of shownSeries(); track item.key) {
           <th scope="col">{{ item.label }}</th>
         }
       </tr>

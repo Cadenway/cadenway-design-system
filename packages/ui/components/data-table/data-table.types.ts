@@ -212,6 +212,60 @@ export interface CwColumnDef<T> {
    * @readonly
    */
   readonly value?: (row: T) => unknown;
+
+  /**
+   * Property footer
+   *
+   * @description
+   * Aggregate of the column for the footer row, computed over every row of `data` (all pages and groups): a count, a sum (« Σ 42 h »). Text is written as is; any other value goes to the `cwFooterCell` template as `value`. A column without `footer` nor `cwFooterCell` template has an empty footer cell; the footer row shows once a visible column has one.
+   *
+   * @type {((rows: readonly T[]) => unknown) | undefined}
+   * @readonly
+   */
+  readonly footer?: (rows: readonly T[]) => unknown;
+  // #endregion
+}
+
+/**
+ * Interface CwFooterCellContext
+ *
+ * @description
+ * Context of a `ng-template[cwFooterCell]`: `let-rows` (the implicit value, every row of `data`) and `let-value="value"` (the column's `footer` result, `undefined` without it).
+ */
+export interface CwFooterCellContext<T> {
+  // #region Properties
+  /**
+   * Property $implicit
+   *
+   * @description
+   * Every row of `data`.
+   *
+   * @type {readonly T[]}
+   * @readonly
+   */
+  readonly $implicit: readonly T[];
+
+  /**
+   * Property rows
+   *
+   * @description
+   * Every row of `data`, under a name.
+   *
+   * @type {readonly T[]}
+   * @readonly
+   */
+  readonly rows: readonly T[];
+
+  /**
+   * Property value
+   *
+   * @description
+   * Result of the column's `footer` function, `undefined` without it.
+   *
+   * @type {unknown}
+   * @readonly
+   */
+  readonly value: unknown;
   // #endregion
 }
 

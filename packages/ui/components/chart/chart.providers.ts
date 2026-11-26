@@ -9,7 +9,7 @@ import type { CwChartLabels } from './chart.types';
  * Function provideCwChartLabels
  *
  * @description
- * Replaces texts below this injector, merged over parent texts and French defaults. `emptyText`, `categoryHeader` and `capacityLabel` inputs still override these texts.
+ * Replaces texts below this injector, merged over parent texts and the defaults of `CW_CHART_LABELS`. `emptyText`, `categoryHeader`, `capacityLabel` and `othersLabel` inputs still override these texts.
  * A factory runs once in an injection context on first use.
  *
  * @param {Partial<CwChartLabels> | (() => Partial<CwChartLabels>)} labels - Texts or a factory returning them.
