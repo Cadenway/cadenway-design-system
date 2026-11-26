@@ -385,6 +385,72 @@ export interface CwKanbanEmptyContext {
 }
 
 /**
+ * Interface CwKanbanAddRequest
+ *
+ * @description
+ * A request to add a card to a column (and lane): « + » in a column header or footer, « Ajouter une
+ * tâche » in an empty column, or N on a card. Emitted by `addRequest`, so the consumer can open its
+ * own creation dialog with the column preset.
+ */
+export interface CwKanbanAddRequest {
+  // #region Properties
+  /**
+   * Property column
+   *
+   * @description
+   * Identifier of the column the card is added to.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly column: string;
+
+  /**
+   * Property lane
+   *
+   * @description
+   * Identifier of the swimlane, or null without swimlanes or from a column header.
+   *
+   * @type {string | null}
+   * @readonly
+   */
+  readonly lane: string | null;
+  // #endregion
+}
+
+/**
+ * Interface CwKanbanColumnMenuContext
+ *
+ * @description
+ * Context of the `ng-template[cwKanbanColumnMenu]` slot drawn in an open column header.
+ */
+export interface CwKanbanColumnMenuContext {
+  // #region Properties
+  /**
+   * Property $implicit
+   *
+   * @description
+   * The column whose header draws the slot.
+   *
+   * @type {CwKanbanColumn}
+   * @readonly
+   */
+  readonly $implicit: CwKanbanColumn;
+
+  /**
+   * Property count
+   *
+   * @description
+   * Number of cards drawn in the column.
+   *
+   * @type {number}
+   * @readonly
+   */
+  readonly count: number;
+  // #endregion
+}
+
+/**
  * Interface CwKanbanLaneMarkerContext
  *
  * @description
@@ -665,5 +731,17 @@ export interface CwKanbanLabels {
    * @readonly
    */
   readonly cancelled: string;
+
+  /**
+   * Property loading
+   *
+   * @description
+   * Accessible name of the loading skeleton (`loading`). Optional so that existing label objects
+   * stay valid; the board falls back to the default.
+   *
+   * @type {string | undefined}
+   * @readonly
+   */
+  readonly loading?: string;
   // #endregion
 }

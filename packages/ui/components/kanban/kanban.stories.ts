@@ -1,8 +1,17 @@
-import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vite';
+import {
+  type Meta,
+  type StoryObj,
+  applicationConfig,
+  moduleMetadata,
+} from '@storybook/angular-vite';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { phosphorDotsThreeBold } from '@ng-icons/phosphor-icons/bold';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 
 import { CwAvatar, CwAvatarGroup } from '@cadenway/ui/components/avatar';
 import { CwBadge } from '@cadenway/ui/components/badge';
+import { CwButton } from '@cadenway/ui/components/button';
+import { CwMenu, CwMenuItem, CwMenuTriggerFor } from '@cadenway/ui/components/menu';
 import {
   CW_PRIORITY_LABELS,
   CwPriorityIcon,
@@ -11,6 +20,7 @@ import {
 
 import { CwKanban } from './kanban.component';
 import { CwKanbanCardDef } from './kanban-card-def/kanban-card-def.directive';
+import { CwKanbanColumnMenuDef } from './kanban-column-menu-def/kanban-column-menu-def.directive';
 import { CwKanbanEmptyDef } from './kanban-empty-def/kanban-empty-def.directive';
 import { CwKanbanLaneMarkerDef } from './kanban-lane-marker-def/kanban-lane-marker-def.directive';
 import type { CwKanbanColumn, CwKanbanLane } from './kanban.types';
@@ -31,13 +41,20 @@ const meta: Meta = {
         CwAvatar,
         CwAvatarGroup,
         CwBadge,
+        CwButton,
         CwKanban,
         CwKanbanCardDef,
+        CwKanbanColumnMenuDef,
         CwKanbanEmptyDef,
         CwKanbanLaneMarkerDef,
+        CwMenu,
+        CwMenuItem,
+        CwMenuTriggerFor,
         CwPriorityIcon,
+        NgIcon,
       ],
     }),
+    applicationConfig({ providers: [provideIcons({ phosphorDotsThreeBold })] }),
   ],
 };
 
@@ -512,5 +529,99 @@ export const KeyboardMove: Story = {
     await expect(within(blocked).getByRole('article', { name: /^CAD-488/ })).not.toHaveAttribute(
       'data-grabbed',
     );
+  },
+};
+
+/** Loading: a skeleton per column, named « Chargement du tableau ». */
+export const Loading: Story = {
+  render: () => ({
+    props,
+    template: `
+      <cw-kanban ${NAME} loading [columns]="columns.slice(0, 4)" [items]="[]" [trackBy]="id"
+        [groupBy]="status" [itemLabel]="label" class="w-full" />`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole: (role: string, options?: { name?: string }) => HTMLElement } = within(
+      light(canvasElement),
+    );
+    await expect(scope.getByRole('status', { name: 'Chargement du tableau' })).toHaveAttribute(
+      'aria-busy',
+      'true',
+    );
+  },
+};
+
+/**
+ * Add requests without the quick add (`quickAdd=false`): « + », the footer and N emit
+ * `addRequest`, so the application opens its own creation dialog with the column's status.
+ */
+export const AddRequest: Story = {
+  render: () => ({
+    props: { ...props, requested: '' },
+    template: `
+      <cw-kanban ${NAME} [quickAdd]="false" [columns]="columns.slice(0, 2)" [items]="tasks"
+        [trackBy]="id" [groupBy]="status" [itemLabel]="label" class="w-full"
+        (addRequest)="requested = $event.column">
+        <p cwKanbanToolbar class="text-sm text-muted-foreground" aria-live="polite">Requested: {{ requested || '—' }}</p>
+        ${CARD}
+      </cw-kanban>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+      getByText: (text: string) => HTMLElement;
+      queryByRole: (role: string) => HTMLElement | null;
+    } = within(light(canvasElement));
+    await userEvent.click(scope.getByRole('button', { name: 'Ajouter une tâche dans En cours' }));
+    await waitFor(() => expect(scope.getByText('Requested: progress')).toBeVisible());
+    await expect(scope.queryByRole('textbox')).toBeNull();
+  },
+};
+
+/**
+ * Card and column menus (mockup `App.dc.html`, task menu and column menu): a right click,
+ * Shift + F10 or the Menu key on a card opens the card menu; a right click in a column opens the
+ * column menu, also reached from the « … » button of the `cwKanbanColumnMenu` header slot.
+ */
+export const ContextMenus: Story = {
+  render: () => ({
+    props: { ...props, picked: '' },
+    template: `
+      <cw-kanban ${NAME} [columns]="columns.slice(0, 3)" [items]="tasks" [trackBy]="id"
+        [groupBy]="status" [itemLabel]="label" [cardMenu]="cardMenu" [columnMenu]="columnMenu"
+        class="w-full">
+        <p cwKanbanToolbar class="text-sm text-muted-foreground" aria-live="polite">Last action: {{ picked || '—' }}</p>
+        ${CARD}
+        <ng-template cwKanbanColumnMenu let-column>
+          <button cwButton variant="ghost" size="icon-xs" class="text-muted-foreground"
+            [attr.aria-label]="'Actions de la colonne ' + column.label" [cwMenuTriggerFor]="columnMenu">
+            <ng-icon name="phosphorDotsThreeBold" aria-hidden="true" />
+          </button>
+        </ng-template>
+      </cw-kanban>
+      <cw-menu #cardMenu ariaLabel="Actions de la tâche">
+        <button cwMenuItem (triggered)="picked = 'Ouvrir ' + cardMenu.data()?.id">Ouvrir</button>
+        <button cwMenuItem (triggered)="picked = 'Copier le lien ' + cardMenu.data()?.id">Copier le lien</button>
+      </cw-menu>
+      <cw-menu #columnMenu ariaLabel="Actions de la colonne">
+        <button cwMenuItem (triggered)="picked = 'Nouvelle tâche dans « ' + columnMenu.data()?.label + ' »'">Nouvelle tâche dans la colonne</button>
+        <button cwMenuItem (triggered)="picked = 'Masquer ' + columnMenu.data()?.label">Masquer la colonne</button>
+      </cw-menu>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+      getByText: (text: string) => HTMLElement;
+    } = within(light(canvasElement));
+    const page: {
+      findByRole: (role: string, options?: { name?: string }) => Promise<HTMLElement>;
+    } = within(document.body);
+    const card: HTMLElement = scope.getByRole('article', { name: /^CAD-482/ });
+    card.focus();
+    await userEvent.keyboard('{Shift>}{F10}{/Shift}');
+    const open: HTMLElement = await page.findByRole('menuitem', { name: 'Ouvrir' });
+    await waitFor(() => expect(open).toHaveFocus());
+    await userEvent.keyboard('{Enter}');
+    await waitFor(() => expect(scope.getByText('Last action: Ouvrir CAD-482')).toBeVisible());
   },
 };

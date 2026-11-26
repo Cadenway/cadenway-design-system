@@ -178,6 +178,85 @@ export interface CwCalendarCreate {
 }
 
 /**
+ * Interface CwCalendarItemSchedule
+ *
+ * @description
+ * An item from outside the calendar (an undated task dragged from a side panel, or placed with
+ * the keyboard through `scheduleWithKeyboard`) dropped on a day or a week slot. Emitted by
+ * `itemSchedule`; the consumer gives the item its date.
+ */
+export interface CwCalendarItemSchedule {
+  // #region Properties
+  /**
+   * Property data
+   *
+   * @description
+   * The outside item: the `cdkDragData` of the dragged element, or the data given to
+   * `scheduleWithKeyboard`.
+   *
+   * @type {unknown}
+   * @readonly
+   */
+  readonly data: unknown;
+
+  /**
+   * Property date
+   *
+   * @description
+   * The day dropped on (its start), or the time of the week slot.
+   *
+   * @type {Date}
+   * @readonly
+   */
+  readonly date: Date;
+
+  /**
+   * Property allDay
+   *
+   * @description
+   * Whether the drop was on a whole day (month day or all-day row) rather than a timed slot.
+   *
+   * @type {boolean}
+   * @readonly
+   */
+  readonly allDay: boolean;
+  // #endregion
+}
+
+/**
+ * Interface CwCalendarDayMenuData
+ *
+ * @description
+ * What the day menu (`dayMenu`) acts on, read back through the menu's `data()`: the day, or the
+ * time of the week slot.
+ */
+export interface CwCalendarDayMenuData {
+  // #region Properties
+  /**
+   * Property date
+   *
+   * @description
+   * The day (its start), or the time of the week slot.
+   *
+   * @type {Date}
+   * @readonly
+   */
+  readonly date: Date;
+
+  /**
+   * Property allDay
+   *
+   * @description
+   * Whether the menu was opened on a whole day rather than a timed slot.
+   *
+   * @type {boolean}
+   * @readonly
+   */
+  readonly allDay: boolean;
+  // #endregion
+}
+
+/**
  * Type CwCalendarItemPlace
  *
  * @description
@@ -490,6 +569,30 @@ export interface CwCalendarViewLabels {
    * @readonly
    */
   readonly cancelled: string;
+
+  /**
+   * Property loading
+   *
+   * @description
+   * Accessible name of the loading skeleton (`loading`). Optional so that existing label objects
+   * stay valid; the calendar falls back to the default.
+   *
+   * @type {string | undefined}
+   * @readonly
+   */
+  readonly loading?: string;
+
+  /**
+   * Property scheduled
+   *
+   * @description
+   * Announced when an outside item is placed with the keyboard: `{item}`, `{date}`. Optional; the
+   * calendar falls back to the default.
+   *
+   * @type {string | undefined}
+   * @readonly
+   */
+  readonly scheduled?: string;
   // #endregion
 }
 

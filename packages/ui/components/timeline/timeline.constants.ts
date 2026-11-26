@@ -35,11 +35,12 @@ function days(count: number): string {
  * Constant CW_TIMELINE_LABELS
  *
  * @description
- * French ruler labels and accessible announcements from the Timeline sheet.
+ * French ruler labels and accessible announcements from the Timeline sheet and the Gantt of the
+ * mockup (`App.dc.html`); every text is defined, the optional ones included.
  *
- * @type {CwTimelineLabels}
+ * @type {Required<CwTimelineLabels>}
  */
-export const CW_TIMELINE_LABELS: CwTimelineLabels = {
+export const CW_TIMELINE_LABELS: Required<CwTimelineLabels> = {
   range: rangeText,
   move: moveText,
   nameHeader: 'Tâche',
@@ -68,4 +69,20 @@ export const CW_TIMELINE_LABELS: CwTimelineLabels = {
   zoom: (percent: number): string => `Zoom : ${String(percent)} %`,
   /** Percentage of a bar: « 60 % ». */
   percent: (value: number): string => `${String(value)} %`,
+  /** Header of the duration column, from the mockup's Gantt: « Durée ». */
+  durationHeader: 'Durée',
+  /** Duration column, from the mockup's Gantt: « 3 j ». */
+  duration: (days: number): string => `${String(days)} j`,
+  /** Chip of an item outside the window, from the mockup's Gantt: « Afficher CAD-485 (du 24 au 26 nov.) ». */
+  reveal: (name: string, range: string): string => `Afficher ${name} (${range})`,
+  /**
+   * Announcement after `fit()`, written after the mockup's « Ajuster aux 7 tâches datées »:
+   * « Vue ajustée aux 7 tâches datées ».
+   */
+  fitted: (count: number): string =>
+    count > 1 ? `Vue ajustée aux ${String(count)} tâches datées` : 'Vue ajustée à la tâche datée',
+  /** The mockup's Gantt skeleton `aria-label`. */
+  loading: 'Chargement du diagramme de Gantt',
+  /** The mockup's empty Gantt. */
+  empty: 'Aucune tâche ne correspond à la recherche ou aux filtres.',
 };

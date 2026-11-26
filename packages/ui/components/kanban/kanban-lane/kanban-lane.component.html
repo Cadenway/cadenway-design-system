@@ -25,6 +25,8 @@
           <cw-kanban-cell
             [cell]="cell"
             inLane
+            (contextmenu)="onCellMenu($event, cell)"
+            (keydown)="onCellMenu($event, cell)"
             class="flex min-h-[34px] shrink-0 flex-col gap-1.5 px-1.5"
             [style.width.px]="slot.width"
           />

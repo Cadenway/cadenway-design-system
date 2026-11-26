@@ -33,6 +33,7 @@
         [attr.data-dimmed]="card.dimmed ? '' : null"
         (click)="board.onCardClick($event, card)"
         (keydown)="board.onCardKeydown($event, card, current)"
+        (contextmenu)="board.onCardContextMenu($event, card)"
         (focus)="board.onCardFocus(card)"
       >
         @if (board.cardTemplate(); as template) {
@@ -90,7 +91,7 @@
           size="sm"
           class="pointer-events-auto"
           [attr.data-kanban-add]="current.column.id"
-          (click)="board.openQuickAdd(current.column.id, null)"
+          (click)="board.requestAdd(current.column.id, null)"
         >
           <ng-icon name="phosphorPlusBold" aria-hidden="true" />
           {{ board.texts().add }}

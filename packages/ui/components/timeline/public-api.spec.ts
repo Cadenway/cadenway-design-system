@@ -8,6 +8,7 @@ describe('@cadenway/ui/timeline public API', () => {
       'CW_TIMELINE_LABELS',
       'CwTimeline',
       'CwTimelineBarDef',
+      'CwTimelineNameDef',
       'CwTimelineToolbar',
       'provideCwTimelineLabels',
     ]);

@@ -4,6 +4,7 @@ import { CwToggleGroup, CwToggleGroupItem } from '@cadenway/ui/components/toggle
 import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular-vite';
 import { expect, userEvent, within } from 'storybook/test';
 
+import { CwTimelineNameDef } from './timeline-name/timeline-name.directive';
 import { CwTimelineToolbar } from './timeline-toolbar/timeline-toolbar.directive';
 import { CwTimeline } from './timeline.component';
 import type {
@@ -30,6 +31,7 @@ const meta: Meta = {
     moduleMetadata({
       imports: [
         CwTimeline,
+        CwTimelineNameDef,
         CwTimelineToolbar,
         CwButton,
         CwToggle,
@@ -377,4 +379,74 @@ export const Keyboard: Story = {
       'true',
     );
   },
+};
+
+/**
+ * The Gantt of a list (mockup `App.dc.html`): a `cwTimelineName` cell with the task key, the
+ * « Durée » column, milestones as dashed lines with a ruler marker, a chip for « Notifications
+ * e-mail » outside the window, and « Ajuster » calling `fit()` from the toolbar.
+ */
+export const GanttPlanning: Story = {
+  render: () => ({
+    props: { ...PROPS, range: { start: day(9), end: day(22) }, scale: 'day' },
+    template: `
+      <cw-timeline #timeline class="w-full" ariaLabel="Diagramme de Gantt" showDuration showOffWindow
+                   milestoneDisplay="lines" [items]="items" [dependencies]="dependencies"
+                   [milestones]="milestones" [today]="today" [(scale)]="scale" [(range)]="range"
+                   (itemChange)="items = move(items, $event)" (schedule)="items = schedule(items, $event)">
+        <div cwTimelineToolbar class="flex flex-wrap items-center gap-2">
+          <button cwButton variant="ghost" (click)="timeline.fit()">Ajuster</button>
+          <button cwButton variant="outline" (click)="range = null">Aujourd'hui</button>
+        </div>
+        <ng-template cwTimelineName let-item>
+          <span class="min-w-0 flex-1 truncate text-sm font-medium">{{ item.name }}</span>
+          <span class="shrink-0 font-mono text-xs text-muted-foreground">{{ item.id }}</span>
+        </ng-template>
+      </cw-timeline>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+      queryByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement | null;
+    } = within(light(canvasElement));
+    await expect(
+      scope.getByRole('img', { name: 'Jalon Revue de sprint 14, 20 nov.' }),
+    ).toBeVisible();
+    await expect(
+      scope.getByRole('button', { name: /^Afficher Notifications e-mail/ }),
+    ).toBeVisible();
+    await userEvent.click(scope.getByRole('button', { name: 'Ajuster' }));
+    await expect(
+      scope.queryByRole('button', { name: /^Afficher Notifications e-mail/ }),
+    ).toBeNull();
+  },
+};
+
+/** Loading: a skeleton of rows and bars named « Chargement du diagramme de Gantt »; the toolbar stays. */
+export const Loading: Story = {
+  render: () => ({
+    props: PROPS,
+    template: `
+      <cw-timeline class="w-full" ariaLabel="Diagramme de Gantt" loading [items]="[]" [today]="today">
+        <div cwTimelineToolbar><button cwButton variant="outline" disabled>Aujourd'hui</button></div>
+      </cw-timeline>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole: (role: string, options?: { name?: string }) => HTMLElement } = within(
+      light(canvasElement),
+    );
+    await expect(
+      scope.getByRole('status', { name: 'Chargement du diagramme de Gantt' }),
+    ).toHaveAttribute('aria-busy', 'true');
+  },
+};
+
+/** Empty: no item matches, the ruler stays and the `empty` text shows under it. */
+export const Empty: Story = {
+  render: () => ({
+    props: { ...PROPS, range: { start: day(9), end: day(22) } },
+    template: `
+      <cw-timeline class="w-full" ariaLabel="Diagramme de Gantt" [items]="[]" [today]="today"
+                   [range]="range" />`,
+  }),
 };

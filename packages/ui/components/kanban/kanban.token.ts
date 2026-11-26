@@ -4,6 +4,7 @@ import { InjectionToken, type Signal, type TemplateRef } from '@angular/core';
 import type {
   CwKanbanCardContext,
   CwKanbanColumn,
+  CwKanbanColumnMenuContext,
   CwKanbanDensity,
   CwKanbanEmptyContext,
   CwKanbanLabels,
@@ -574,10 +575,10 @@ export interface KanbanBoard {
    * @description
    * Labels used by the board.
    *
-   * @type {Signal<CwKanbanLabels>}
+   * @type {Signal<Required<CwKanbanLabels>>}
    * @readonly
    */
-  readonly texts: Signal<CwKanbanLabels>;
+  readonly texts: Signal<Required<CwKanbanLabels>>;
 
   /**
    * Property cardTemplate
@@ -622,6 +623,17 @@ export interface KanbanBoard {
    * @readonly
    */
   readonly instructionsId: string;
+
+  /**
+   * Property columnMenuTemplate
+   *
+   * @description
+   * Projected template drawn in open column headers (`CwKanbanColumnMenuDef`).
+   *
+   * @type {Signal<TemplateRef<CwKanbanColumnMenuContext> | undefined>}
+   * @readonly
+   */
+  readonly columnMenuTemplate: Signal<TemplateRef<CwKanbanColumnMenuContext> | undefined>;
   // #endregion
   // #region Methods
   /**
@@ -791,6 +803,56 @@ export interface KanbanBoard {
    * @param {string} lane - Identifier of the swimlane, or null.
    */
   toggleLane(lane: string): void;
+
+  /**
+   * Method registerColumnMenu
+   *
+   * @description
+   * Sets the column header slot template, or clears it.
+   *
+   * @param {TemplateRef<CwKanbanColumnMenuContext> | undefined} template - Template of the slot.
+   */
+  registerColumnMenu(template: TemplateRef<CwKanbanColumnMenuContext> | undefined): void;
+
+  /**
+   * Method requestAdd
+   *
+   * @description
+   * Asks to add a card to a column and lane: emits `addRequest`, then opens the quick add when it
+   * is on. Does nothing on a read-only board.
+   *
+   * @param {string} column - Column identifier.
+   * @param {string | null} lane - Swimlane identifier, or null.
+   */
+  requestAdd(column: string, lane: string | null): void;
+
+  /**
+   * Method onCardContextMenu
+   *
+   * @description
+   * Opens the card menu (`cardMenu`) on a right click, Shift + F10 or the Menu key on a card.
+   *
+   * @param {MouseEvent | KeyboardEvent} event - `contextmenu` or `keydown` event of the card.
+   * @param {KanbanCardView} card - Card the menu acts on.
+   */
+  onCardContextMenu(event: MouseEvent | KeyboardEvent, card: KanbanCardView): void;
+
+  /**
+   * Method onColumnContextMenu
+   *
+   * @description
+   * Opens the column menu (`columnMenu`) on a right click in a column, or Shift + F10 and the Menu
+   * key from a control of its header.
+   *
+   * @param {MouseEvent | KeyboardEvent} event - `contextmenu` or `keydown` event of the column.
+   * @param {CwKanbanColumn} column - Column the menu acts on.
+   * @param {HTMLElement} element - Column element the menu belongs to.
+   */
+  onColumnContextMenu(
+    event: MouseEvent | KeyboardEvent,
+    column: CwKanbanColumn,
+    element: HTMLElement,
+  ): void;
   // #endregion
 }
 

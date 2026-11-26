@@ -1,4 +1,4 @@
-import { LiveAnnouncer } from '@angular/cdk/a11y';
+import { LiveAnnouncer, _IdGenerator } from '@angular/cdk/a11y';
 import {
   CdkDrag,
   CdkDragPlaceholder,
@@ -6,6 +6,7 @@ import {
   CdkDropList,
   CdkDropListGroup,
   type CdkDragDrop,
+  type CdkDragEnter,
 } from '@angular/cdk/drag-drop';
 import { NgTemplateOutlet } from '@angular/common';
 import {
@@ -39,7 +40,11 @@ import {
 } from '@ng-icons/phosphor-icons/bold';
 
 import { CwButton } from '@cadenway/ui/components/button';
+import type { CwMenu } from '@cadenway/ui/components/menu';
+import { CwSkeleton } from '@cadenway/ui/components/skeleton';
 import {
+  ɵContextMenuGesture,
+  type ɵContextMenuRequest,
   ɵFOCUS_INSET,
   ɵLOCALE,
   ɵaddMonths,
@@ -58,6 +63,7 @@ import {
 } from '@cadenway/ui/components/toggle-group';
 
 import type { CwCalendarViewProvidedLabels } from './calendar-view.types';
+import { getProvidedLabels } from './calendar-view.constants';
 import { CalendarDayPart } from './calendar-day/calendar-day.component';
 import { CwCalendarItemDef } from './calendar-item-def/calendar-item-def.directive';
 import {
@@ -74,9 +80,11 @@ import { CALENDAR_VIEW_LABELS } from './calendar-view-labels.token';
 import { addDays, atMinutes, formatTime, minutesOf } from './calendar-view.dates';
 import type {
   CwCalendarCreate,
+  CwCalendarDayMenuData,
   CwCalendarItemContext,
   CwCalendarItemMove,
   CwCalendarItemPlace,
+  CwCalendarItemSchedule,
   CwCalendarKeyFn,
   CwCalendarSlotMinutes,
   CwCalendarSpan,
@@ -670,6 +678,84 @@ function cellKey(date: Date, slot: number | null): string {
 }
 
 /**
+ * Function parseCellKey
+ *
+ * @description
+ * Reads the day and slot back from a cell key (`cellKey`).
+ *
+ * @param {string} key - Cell key, `20261118:day` or `20261118:540`.
+ * @returns {{ date: Date; slot: number | null }} Day (at its start) and slot minutes, or null.
+ */
+function parseCellKey(key: string): { date: Date; slot: number | null } {
+  const [day = '0', slot = 'day']: string[] = key.split(':');
+  const value: number = Number(day);
+  const date: Date = new Date(
+    Math.floor(value / 10000),
+    (Math.floor(value / 100) % 100) - 1,
+    value % 100,
+  );
+  return { date, slot: slot === 'day' ? null : Number(slot) };
+}
+
+/**
+ * Interface Grab
+ *
+ * @description
+ * A keyboard move in progress: a calendar item, or an outside item placed through
+ * `scheduleWithKeyboard`.
+ */
+interface Grab {
+  // #region Properties
+  /**
+   * Property id
+   *
+   * @description
+   * Identifier of the calendar item; empty for an outside item.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly id: string;
+
+  /**
+   * Property from
+   *
+   * @description
+   * Cell the move started from.
+   *
+   * @type {Cursor}
+   * @readonly
+   */
+  readonly from: Cursor;
+
+  /**
+   * Property external
+   *
+   * @description
+   * The outside item, its name for announcements and the element to focus again on Escape.
+   *
+   * @type {{ readonly data: unknown; readonly label: string; readonly origin: HTMLElement | null } | undefined}
+   * @readonly
+   */
+  readonly external?: {
+    readonly data: unknown;
+    readonly label: string;
+    readonly origin: HTMLElement | null;
+  };
+  // #endregion
+}
+
+/**
+ * Constant SKELETON_WEEKS
+ *
+ * @description
+ * Rows of the loading skeleton: five weeks, as the mockup's « Chargement du calendrier ».
+ *
+ * @type {number}
+ */
+const SKELETON_WEEKS: number = 5;
+
+/**
  * Function capitalize
  *
  * @description
@@ -700,7 +786,7 @@ function toSlot(value: unknown): CwCalendarSlotMinutes {
  * Component CwCalendarView
  *
  * @description
- * The calendar of a list, a sprint or « Mes tâches »: each item on its day, in a month grid or a week of hourly slots, moved from day to day or slot to slot (Calendar View sheet of the Design System artifact). Generic: `items` are any `T`; `trackBy` gives an item's id, `itemLabel` its name, `itemSpan` when it happens (`null`: not drawn, count it in `unscheduledCount`). The calendar draws the frames (pill, bar across days, hourly block, popover row) and their states; the content comes from `ng-template[cwCalendarItem]` (`CwCalendarItemDef`). A `[cwCalendarActions]` element is projected at the end of the header (« Créer une tâche »). Month view: six weeks from `weekStartsOn` (Monday), `maxPerDay` lines a day then « +n autres », which opens the day in a popover; items over several days are one bar across the week, reserving the first line of the days they cover. Week view: an all-day row, then the `hours` range in slots of `slotMinutes`, blocks as tall as their duration, and the current time on today's column. `showWeekends=false` drops Saturday and Sunday. `view` and `date` (the day shown) are models; `today` marks the current day (`aria-current="date"`). A drop (CDK drag-drop, or Space, arrows and Space) moves the item at once and emits `itemMove` with its new span, duration kept; any new `items` resets the calendar. « + » on a day, a double click on a slot, N and « Ajouter une tâche » of the popover emit `create`; a click or Enter on an item emits `open`; « Sans date » emits `unscheduledOpen`. `readonly` turns off dragging and creation. Keyboard (`role="grid"`, one focusable cell): arrows move by a day or a week (in the week view, up and down by a slot), Home and End go to the ends of the week, Page Up and Page Down change month (week), T comes back to today, M and S switch views, Enter on a day opens its popover, N creates. Moves are announced through the CDK `LiveAnnouncer`. Style hook: `data-view` on the host.
+ * The calendar of a list, a sprint or « Mes tâches »: each item on its day, in a month grid or a week of hourly slots, moved from day to day or slot to slot (Calendar View sheet of the Design System artifact). Generic: `items` are any `T`; `trackBy` gives an item's id, `itemLabel` its name, `itemSpan` when it happens (`null`: not drawn, count it in `unscheduledCount`). The calendar draws the frames (pill, bar across days, hourly block, popover row) and their states; the content comes from `ng-template[cwCalendarItem]` (`CwCalendarItemDef`). A `[cwCalendarActions]` element is projected at the end of the header (« Créer une tâche »). Month view: six weeks from `weekStartsOn` (Monday), `maxPerDay` lines a day then « +n autres », which opens the day in a popover; items over several days are one bar across the week, reserving the first line of the days they cover. Week view: an all-day row, then the `hours` range in slots of `slotMinutes`, blocks as tall as their duration, and the current time on today's column. `showWeekends=false` drops Saturday and Sunday. `view` and `date` (the day shown) are models; `today` marks the current day (`aria-current="date"`). A drop (CDK drag-drop, or Space, arrows and Space) moves the item at once and emits `itemMove` with its new span, duration kept; any new `items` resets the calendar. « + » on a day, a double click on a slot, N and « Ajouter une tâche » of the popover emit `create`; a click or Enter on an item emits `open`; « Sans date » emits `unscheduledOpen`. Outside items (undated tasks of a side panel) are scheduled by dropping them on a day: give their `cdkDropList` `[cdkDropListConnectedTo]="calendar.dropListIds()"`, or call `scheduleWithKeyboard(data, label)` from them (the arrows choose the day, Space or Enter drop, Escape cancels and focuses the item again); both emit `itemSchedule` with the data and the day. `dayMenu` takes a `cw-menu` opened by a right click on a day or slot, or Shift + F10 and the Menu key on a focused cell, with a `CwCalendarDayMenuData` as the menu's `data()`; every action of the menu must also exist in a visible control (WCAG 2.1.1). `loading` replaces the grid with a skeleton named by the `loading` text. `readonly` turns off dragging and creation. Keyboard (`role="grid"`, one focusable cell): arrows move by a day or a week (in the week view, up and down by a slot), Home and End go to the ends of the week, Page Up and Page Down change month (week), T comes back to today, M and S switch views, Enter on a day opens its popover, N creates. Moves are announced through the CDK `LiveAnnouncer`. Style hook: `data-view` on the host.
  */
 @Component({
   selector: 'cw-calendar-view',
@@ -712,6 +798,7 @@ function toSlot(value: unknown): CwCalendarSlotMinutes {
     CdkDropList,
     CdkDropListGroup,
     CwButton,
+    CwSkeleton,
     CwToggleGroup,
     CwToggleGroupItem,
     NgIcon,
@@ -949,6 +1036,32 @@ export class CwCalendarView<T> implements CalendarViewHost {
   >({});
 
   /**
+   * Property dayMenu
+   *
+   * @description
+   * Menu opened by a right click on a day or a slot, or Shift + F10 and the Menu key on a focused
+   * cell, with a `CwCalendarDayMenuData` as the menu's `data()`; `null` (the default) keeps the
+   * browser's menu.
+   *
+   * @type {InputSignal<CwMenu | null>}
+   * @readonly
+   */
+  public readonly dayMenu: InputSignal<CwMenu | null> = input<CwMenu | null>(null);
+
+  /**
+   * Property loading
+   *
+   * @description
+   * Draws a skeleton of the grid instead of the days while the first read runs; the header stays.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   * @readonly
+   */
+  public readonly loading: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
+
+  /**
    * Property itemMove
    *
    * @description
@@ -970,6 +1083,18 @@ export class CwCalendarView<T> implements CalendarViewHost {
    * @readonly
    */
   public readonly create: OutputEmitterRef<CwCalendarCreate> = output<CwCalendarCreate>();
+
+  /**
+   * Property itemSchedule
+   *
+   * @description
+   * An outside item dropped on a day or slot, with the pointer or through `scheduleWithKeyboard`.
+   *
+   * @type {OutputEmitterRef<CwCalendarItemSchedule>}
+   * @readonly
+   */
+  public readonly itemSchedule: OutputEmitterRef<CwCalendarItemSchedule> =
+    output<CwCalendarItemSchedule>();
 
   /**
    * Property open
@@ -1053,16 +1178,65 @@ export class CwCalendarView<T> implements CalendarViewHost {
    * Property texts
    *
    * @description
-   * The provided texts with the `labels` overrides.
+   * The provided texts with the `labels` overrides, over the defaults for the optional texts.
    *
-   * @type {Signal<CwCalendarViewProvidedLabels>}
+   * @type {Signal<Required<CwCalendarViewProvidedLabels>>}
    * @readonly
    */
-  public readonly texts: Signal<CwCalendarViewProvidedLabels> =
-    computed<CwCalendarViewProvidedLabels>(() => ({
-      ...this.providedLabels,
-      ...this.labels(),
-    }));
+  public readonly texts: Signal<Required<CwCalendarViewProvidedLabels>> = computed<
+    Required<CwCalendarViewProvidedLabels>
+  >(() => ({
+    ...getProvidedLabels(),
+    ...this.providedLabels,
+    ...this.labels(),
+  }));
+
+  /**
+   * Property dropListPrefix
+   *
+   * @description
+   * Prefix of the ids of the day and slot drop lists, unique to this calendar.
+   *
+   * @type {string}
+   * @readonly
+   */
+  protected readonly dropListPrefix: string = inject(_IdGenerator).getId('cw-calendar-drop-');
+
+  /**
+   * Property menuGesture
+   *
+   * @description
+   * Recognizes the context-menu gestures of the days and slots.
+   *
+   * @type {ɵContextMenuGesture}
+   * @readonly
+   */
+  private readonly menuGesture: ɵContextMenuGesture = new ɵContextMenuGesture();
+
+  /**
+   * Property externalOver
+   *
+   * @description
+   * Key of the cell under an outside item dragged with the pointer.
+   *
+   * @type {WritableSignal<string | null>}
+   * @readonly
+   */
+  private readonly externalOver: WritableSignal<string | null> = signal<string | null>(null);
+
+  /**
+   * Property skeletonRows
+   *
+   * @description
+   * Rows and cells of the loading skeleton, one cell per shown weekday.
+   *
+   * @type {Signal<readonly (readonly number[])[]>}
+   * @readonly
+   */
+  protected readonly skeletonRows: Signal<readonly (readonly number[])[]> = computed(() => {
+    const days: number[] = this.weekdays();
+    return Array.from({ length: SKELETON_WEEKS }, () => days);
+  });
 
   /**
    * Property classes
@@ -1133,11 +1307,10 @@ export class CwCalendarView<T> implements CalendarViewHost {
    * @description
    * Item and original cursor held during a keyboard move.
    *
-   * @type {WritableSignal<{ readonly id: string; readonly from: Cursor; } | null>}
+   * @type {WritableSignal<Grab | null>}
    * @readonly
    */
-  private readonly grabbed: WritableSignal<{ readonly id: string; readonly from: Cursor } | null> =
-    signal<{ readonly id: string; readonly from: Cursor } | null>(null);
+  private readonly grabbed: WritableSignal<Grab | null> = signal<Grab | null>(null);
 
   /**
    * Property dragging
@@ -1516,7 +1689,7 @@ export class CwCalendarView<T> implements CalendarViewHost {
       weekdayLong: Intl.DateTimeFormat;
     } = this.formats();
     const now: Date = this.now();
-    const grabbed: { readonly id: string; readonly from: Cursor } | null = this.grabbed();
+    const grabbed: Grab | null = this.grabbed();
     const target: string | null = this.dropTargetKey();
     const blocks: Map<string, BlockView[]> = new Map<string, BlockView[]>();
     let delay: number = 0;
@@ -1584,7 +1757,32 @@ export class CwCalendarView<T> implements CalendarViewHost {
       const cursor: Cursor = this.activeCursor();
       return cellKey(cursor.date, cursor.slot);
     }
-    return this.dragging() ? this.dragOver() : null;
+    return this.dragging() ? this.dragOver() : this.externalOver();
+  });
+
+  /**
+   * Property dropListIds
+   *
+   * @description
+   * Ids of the day and slot drop lists drawn now. An outside `cdkDropList` connected to them
+   * (`[cdkDropListConnectedTo]`, which takes a mutable array) drops its items on the calendar, which
+   * emits `itemSchedule`.
+   *
+   * @type {Signal<string[]>}
+   * @readonly
+   */
+  public readonly dropListIds: Signal<string[]> = computed(() => {
+    // From the dates alone, not the laid-out items: an outside list declared before the calendar
+    // reads them before the calendar's required inputs are set.
+    if (this.view() === 'month') {
+      return this.monthDays()
+        .flat()
+        .map((date) => this.dropListPrefix + cellKey(date, null));
+    }
+    const slots: (number | null)[] = [null, ...this.slotMinutesList()];
+    return this.daysOfWeek(this.shown()).flatMap((date) =>
+      slots.map((slot) => this.dropListPrefix + cellKey(date, slot)),
+    );
   });
   // #endregion
 
@@ -1711,28 +1909,131 @@ export class CwCalendarView<T> implements CalendarViewHost {
    * Method onEnter
    *
    * @description
-   * Updates the current drag target.
+   * Updates the current drag target, and the outside item's target.
    *
    * @param {string} key - Grid or keyboard key.
+   * @param {CdkDragEnter<DropData, unknown>} [event] - Entry event, to tell outside items apart.
    */
-  protected onEnter(key: string): void {
+  protected onEnter(key: string, event?: CdkDragEnter<DropData, unknown>): void {
     this.dragOver.set(key);
+    if (event && !this.ownsList(event.item.dropContainer)) this.externalOver.set(key);
+  }
+
+  /**
+   * Method ownsList
+   *
+   * @description
+   * Whether a drop list is one of this calendar's days or slots. A drag is the calendar's own when
+   * it comes from one of them; its data cannot tell, since an outside item may carry the same
+   * value as an item id.
+   *
+   * @param {{ readonly id: string } | null | undefined} list - Drop list a drag comes from.
+   * @returns {boolean} Whether the list belongs to this calendar.
+   */
+  private ownsList(list: { readonly id: string } | null | undefined): boolean {
+    return !!list && list.id.startsWith(this.dropListPrefix);
+  }
+
+  /**
+   * Method onExit
+   *
+   * @description
+   * Forgets the cell an outside item leaves.
+   *
+   * @param {string} key - Key of the cell left.
+   */
+  protected onExit(key: string): void {
+    if (this.externalOver() === key) this.externalOver.set(null);
   }
 
   /**
    * Method onDrop
    *
    * @description
-   * Moves a dragged item to its drop target.
+   * Moves a dragged item to its drop target, or emits `itemSchedule` for an outside item.
    *
-   * @param {CdkDragDrop<DropData, DropData, string>} event - Drag or keyboard event.
+   * @param {CdkDragDrop<DropData, DropData, unknown>} event - Drag or keyboard event.
    */
-  protected onDrop(event: CdkDragDrop<DropData, DropData, string>): void {
+  protected onDrop(event: CdkDragDrop<DropData, DropData, unknown>): void {
+    this.externalOver.set(null);
     if (event.previousContainer === event.container) return;
-    const entry: Entry<T> | undefined = this.entries().find(
-      (candidate) => candidate.id === event.item.data,
-    );
-    if (entry) this.moveEntry(entry, event.container.data);
+    if (this.ownsList(event.previousContainer)) {
+      const entry: Entry<T> | undefined = this.entries().find(
+        (candidate) => candidate.id === event.item.data,
+      );
+      if (entry) this.moveEntry(entry, event.container.data);
+      return;
+    }
+    // From a list outside the calendar, connected through `dropListIds`.
+    const { date, slot }: DropData = event.container.data;
+    this.itemSchedule.emit({
+      data: event.item.data,
+      date: slot === null ? ɵstartOfDay(date) : atMinutes(date, slot),
+      allDay: slot === null,
+    });
+  }
+
+  /**
+   * Method scheduleWithKeyboard
+   *
+   * @description
+   * Starts placing an outside item with the keyboard, the path that matches dragging it onto a
+   * day: the focus moves to the active cell, the arrows choose the day (or slot), Space or Enter
+   * emit `itemSchedule` and announce the `scheduled` text, Escape cancels and focuses the element
+   * that was focused when the call was made. Does nothing on a read-only calendar.
+   *
+   * @param {unknown} data - The outside item, given back in `itemSchedule`.
+   * @param {string} label - Name of the item, for the announcements.
+   */
+  public scheduleWithKeyboard(data: unknown, label: string): void {
+    if (this.readonly() || this.loading()) return;
+    const from: Cursor = this.activeCursor();
+    const focused: Element | null = document.activeElement;
+    this.grabbed.set({
+      id: '',
+      from,
+      external: { data, label, origin: focused instanceof HTMLElement ? focused : null },
+    });
+    this.focusCell(from);
+    this.announce(this.format(this.texts().grabbed, { item: label }));
+  }
+
+  /**
+   * Method onGridContextMenu
+   *
+   * @description
+   * Opens `dayMenu` on the day or slot under a right click.
+   *
+   * @param {MouseEvent} event - `contextmenu` event of the grid.
+   */
+  protected onGridContextMenu(event: MouseEvent): void {
+    this.openDayMenu(event);
+  }
+
+  /**
+   * Method openDayMenu
+   *
+   * @description
+   * Opens `dayMenu` on the cell of a context-menu gesture.
+   *
+   * @param {MouseEvent | KeyboardEvent} event - `contextmenu` or `keydown` event inside a cell.
+   * @returns {boolean} Whether the menu opened.
+   */
+  private openDayMenu(event: MouseEvent | KeyboardEvent): boolean {
+    const menu: CwMenu | null = this.dayMenu();
+    const cell: HTMLElement | null =
+      event.target instanceof Element ? event.target.closest<HTMLElement>('[data-cell]') : null;
+    const key: string | undefined = cell?.dataset['cell'];
+    if (!menu || !cell || key === undefined) return false;
+    const request: ɵContextMenuRequest | null = this.menuGesture.request(event, cell);
+    if (!request) return false;
+    const { date, slot }: { date: Date; slot: number | null } = parseCellKey(key);
+    const data: CwCalendarDayMenuData = {
+      date: slot === null ? date : atMinutes(date, slot),
+      allDay: slot === null,
+    };
+    menu.open({ ...request, data });
+    return true;
   }
 
   /**
@@ -1771,7 +2072,8 @@ export class CwCalendarView<T> implements CalendarViewHost {
     if (!cell || event.altKey || event.ctrlKey || event.metaKey) return;
     const onCell: boolean = event.target === cell;
     const cursor: Cursor = this.activeCursor();
-    const grabbed: { readonly id: string; readonly from: Cursor } | null = this.grabbed();
+    const grabbed: Grab | null = this.grabbed();
+    if (!grabbed && this.openDayMenu(event)) return;
     const week: boolean = this.view() === 'week';
     let next: Cursor | null = null;
     switch (event.key) {
@@ -1815,7 +2117,8 @@ export class CwCalendarView<T> implements CalendarViewHost {
       case 'Escape':
         if (!grabbed) return;
         this.grabbed.set(null);
-        this.focusCell(grabbed.from);
+        if (grabbed.external?.origin) grabbed.external.origin.focus();
+        else this.focusCell(grabbed.from);
         this.announce(this.texts().cancelled);
         event.preventDefault();
         return;
@@ -1868,14 +2171,27 @@ export class CwCalendarView<T> implements CalendarViewHost {
    * Method dropGrabbed
    *
    * @description
-   * Drops a keyboard-grabbed item at the cursor.
+   * Drops a keyboard-grabbed item at the cursor; an outside item emits `itemSchedule`.
    *
    * @param {Cursor} cursor - Current keyboard position.
    */
   private dropGrabbed(cursor: Cursor): void {
-    const grabbed: { readonly id: string; readonly from: Cursor } | null = this.grabbed();
+    const grabbed: Grab | null = this.grabbed();
     this.grabbed.set(null);
     if (!grabbed) return;
+    if (grabbed.external) {
+      const date: Date =
+        cursor.slot === null ? ɵstartOfDay(cursor.date) : atMinutes(cursor.date, cursor.slot);
+      this.itemSchedule.emit({ data: grabbed.external.data, date, allDay: cursor.slot === null });
+      this.announce(
+        this.format(this.texts().scheduled, {
+          item: grabbed.external.label,
+          date: this.formats().dayMonth.format(date),
+        }),
+      );
+      this.focusCell(cursor);
+      return;
+    }
     const entry: Entry<T> | undefined = this.entries().find(
       (candidate) => candidate.id === grabbed.id,
     );

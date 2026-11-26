@@ -7,7 +7,12 @@ import { CwRipple } from '@cadenway/ui/core';
 
 import { KanbanCellPart } from '../kanban-cell/kanban-cell.component';
 import { COUNTER } from '../kanban.styles';
-import { KANBAN_BOARD, type KanbanBoard, type KanbanLaneView } from '../kanban.token';
+import {
+  KANBAN_BOARD,
+  type KanbanBoard,
+  type KanbanCellView,
+  type KanbanLaneView,
+} from '../kanban.token';
 
 /* Literal class strings (Kanban sheet and preview of the Design System artifact): the lane folds
    with the shared collapsible motion, `grid-rows-[0fr]` ↔ `grid-rows-[1fr]` with a fade, 300 ms. */
@@ -175,6 +180,21 @@ export class KanbanLanePart {
       event.preventDefault();
       this.board.toggleLane(this.model().lane.id);
     }
+  }
+
+  /**
+   * Method onCellMenu
+   *
+   * @description
+   * Hands a right click or a menu key in a lane cell to the board's column menu, with the cell's
+   * column: in swimlanes the cells are not inside their column element.
+   *
+   * @param {MouseEvent | KeyboardEvent} event - `contextmenu` or `keydown` event of the cell.
+   * @param {KanbanCellView} cell - Cell receiving the event.
+   */
+  protected onCellMenu(event: MouseEvent | KeyboardEvent, cell: KanbanCellView): void {
+    const element: EventTarget | null = event.currentTarget;
+    if (element instanceof HTMLElement) this.board.onColumnContextMenu(event, cell.column, element);
   }
   // #endregion
 }

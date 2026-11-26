@@ -1,9 +1,11 @@
-import { Component, signal, type WritableSignal } from '@angular/core';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
+import { Component, signal, viewChild, type Signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideCwLocale } from '@cadenway/ui/core';
 
 import { provideCwTimelineLabels } from './timeline.providers';
 import { CwTimeline } from './timeline.component';
+import { CwTimelineNameDef } from './timeline-name/timeline-name.directive';
 import type {
   CwDependency,
   CwMilestone,
@@ -582,5 +584,246 @@ describe('provideCwTimelineLabels', () => {
     const element: HTMLElement = fixture.nativeElement as HTMLElement;
     expect(element.textContent).toContain('Task');
     expect(element.querySelector('[aria-label*="custom range"]')).toBeTruthy();
+  });
+});
+
+/**
+ * Class PlanningHost
+ *
+ * @description
+ * Hosts a Gantt-like timeline: durations, a name-cell template, milestone lines, off-window chips,
+ * the loading and empty states, and `fit()`.
+ */
+@Component({
+  imports: [CwTimeline, CwTimelineNameDef],
+  template: `
+    <cw-timeline
+      #timeline
+      ariaLabel="Diagramme de Gantt"
+      showDuration
+      showOffWindow
+      milestoneDisplay="lines"
+      [items]="items()"
+      [milestones]="milestones"
+      [today]="today"
+      [loading]="loading()"
+      [(scale)]="scale"
+      [(range)]="range"
+    >
+      <ng-template cwTimelineName let-item let-dates="dates">
+        <span class="truncate">{{ item.name }}</span>
+        <span>{{ item.id }}</span>
+        @if (!dates) {
+          <span>—</span>
+        }
+      </ng-template>
+    </cw-timeline>
+  `,
+})
+class PlanningHost {
+  // #region Properties
+  /**
+   * Property timeline
+   * @readonly
+   *
+   * @description
+   * The timeline under test.
+   *
+   * @type {Signal<CwTimeline>}
+   */
+  public readonly timeline: Signal<CwTimeline> = viewChild.required(CwTimeline);
+
+  /**
+   * Property items
+   * @readonly
+   *
+   * @description
+   * Items of the fixture, one of them after the window.
+   *
+   * @type {WritableSignal<readonly CwTimelineItem[]>}
+   */
+  public readonly items: WritableSignal<readonly CwTimelineItem[]> = signal<
+    readonly CwTimelineItem[]
+  >([
+    ...ITEMS.slice(0, 2),
+    { id: 'later', name: 'Préparer la version', status: 'todo', start: day(30), end: day(30) },
+    ITEMS[3],
+  ]);
+
+  /**
+   * Property milestones
+   * @readonly
+   *
+   * @description
+   * Milestones drawn as lines.
+   *
+   * @type {CwMilestone[]}
+   */
+  public readonly milestones: CwMilestone[] = MILESTONES;
+
+  /**
+   * Property today
+   * @readonly
+   *
+   * @description
+   * Current day of the fixture.
+   *
+   * @type {Date}
+   */
+  public readonly today: Date = day(12);
+
+  /**
+   * Property loading
+   * @readonly
+   *
+   * @description
+   * Whether the timeline shows its skeleton.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly loading: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property scale
+   * @readonly
+   *
+   * @description
+   * Selected axis scale.
+   *
+   * @type {WritableSignal<CwTimelineScale>}
+   */
+  public readonly scale: WritableSignal<CwTimelineScale> = signal<CwTimelineScale>('day');
+
+  /**
+   * Property range
+   * @readonly
+   *
+   * @description
+   * Visible window: 9 to 22 November.
+   *
+   * @type {WritableSignal<CwTimelineRange | null>}
+   */
+  public readonly range: WritableSignal<CwTimelineRange | null> = signal<CwTimelineRange | null>({
+    start: day(9),
+    end: day(22),
+  });
+  // #endregion
+}
+
+describe('CwTimeline planning', () => {
+  let host: HTMLElement;
+  let component: PlanningHost;
+  let fixture: ComponentFixture<PlanningHost>;
+  let announce: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    announce = vi.fn(() => Promise.resolve());
+    TestBed.configureTestingModule({
+      providers: [{ provide: LiveAnnouncer, useValue: { announce } }],
+    });
+    fixture = TestBed.createComponent(PlanningHost);
+    fixture.autoDetectChanges();
+    host = fixture.nativeElement as HTMLElement;
+    component = fixture.componentInstance;
+  });
+
+  /**
+   * Function nameCell
+   *
+   * @description
+   * Finds the name cell of the row whose cell text contains a name.
+   *
+   * @param {string} name - Item name.
+   *
+   * @returns {HTMLElement} Matching name cell.
+   */
+  function nameCell(name: string): HTMLElement {
+    const found: HTMLElement | undefined = Array.from(
+      host.querySelectorAll<HTMLElement>('[role="row"] > [role="gridcell"]:first-child'),
+    ).find((element) => element.textContent.includes(name));
+    if (!found) throw new Error(`No name cell ${name}`);
+    return found;
+  }
+
+  it('draws the name template and the duration column', () => {
+    expect(host.querySelector('[role="columnheader"]')?.textContent).toContain('Durée');
+    const csv: HTMLElement = nameCell("Corriger l'export CSV");
+    expect(csv.textContent).toContain('csv');
+    expect(csv.textContent).toContain('4 j');
+    expect(nameCell('Raccourcis de la Liste').textContent).toContain('—');
+  });
+
+  it('draws milestones as lines with a named marker in the ruler, not as rows', () => {
+    expect(
+      host.querySelector('[role="img"][aria-label="Jalon Revue de sprint 14, 20 nov."]'),
+    ).not.toBeNull();
+    expect(host.querySelector('svg line[stroke-dasharray]')).not.toBeNull();
+    expect(
+      Array.from(host.querySelectorAll('[role="row"]')).some((row) =>
+        row.textContent.includes('Revue de sprint 14'),
+      ),
+    ).toBe(false);
+  });
+
+  it('marks a bar outside the window with a chip that brings it into view', async () => {
+    const chip: HTMLButtonElement | null = host.querySelector<HTMLButtonElement>(
+      'button[aria-label^="Afficher Préparer la version"]',
+    );
+    expect(chip?.textContent).toContain('30 nov.');
+
+    chip?.click();
+    await fixture.whenStable();
+
+    expect(component.range()).toEqual({ start: day(19), end: day(32) });
+    expect(host.querySelector('button[aria-label^="Afficher Préparer la version"]')).toBeNull();
+  });
+
+  it('reveals an off-window bar with Enter on its row', async () => {
+    const row: HTMLElement | undefined = Array.from(
+      host.querySelectorAll<HTMLElement>('[role="row"][data-focus-key]'),
+    ).find((element) => element.textContent.includes('Préparer la version'));
+    if (!row) throw new Error('Row missing');
+    row.focus();
+    row.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }),
+    );
+    await fixture.whenStable();
+
+    expect(component.range()?.start).toEqual(day(19));
+  });
+
+  it('fits the window to the dated items and announces it', async () => {
+    expect(component.timeline().fit()).toBe(true);
+    await fixture.whenStable();
+
+    expect(component.scale()).toBe('week');
+    expect(component.range()?.start).toEqual(day(2));
+    expect(announce).toHaveBeenLastCalledWith('Vue ajustée aux 3 tâches datées', 'polite');
+  });
+
+  it('does not fit without a dated item', () => {
+    component.items.set([ITEMS[3]]);
+    fixture.detectChanges();
+
+    expect(component.timeline().fit()).toBe(false);
+    expect(component.range()).toEqual({ start: day(9), end: day(22) });
+  });
+
+  it('draws a named busy skeleton while loading, and the empty text without rows', async () => {
+    component.loading.set(true);
+    await fixture.whenStable();
+    const status: HTMLElement | null = host.querySelector('[role="status"]');
+    expect(status?.getAttribute('aria-label')).toBe('Chargement du diagramme de Gantt');
+    expect(status?.getAttribute('aria-busy')).toBe('true');
+    expect(host.querySelector('[role="treegrid"]')).toBeNull();
+
+    component.loading.set(false);
+    component.items.set([]);
+    await fixture.whenStable();
+    const grid: HTMLElement | null = host.querySelector('[role="treegrid"]');
+    expect(grid?.textContent).toContain(
+      'Aucune tâche ne correspond à la recherche ou aux filtres.',
+    );
+    expect(grid?.tabIndex).toBe(0);
   });
 });

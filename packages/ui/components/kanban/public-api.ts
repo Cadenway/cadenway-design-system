@@ -7,14 +7,17 @@
 
 export { CwKanban } from './kanban.component';
 export { CwKanbanCardDef } from './kanban-card-def/kanban-card-def.directive';
+export { CwKanbanColumnMenuDef } from './kanban-column-menu-def/kanban-column-menu-def.directive';
 export { CW_KANBAN_LABELS } from './kanban.constants';
 export { provideCwKanbanLabels } from './kanban.providers';
 export { CwKanbanEmptyDef } from './kanban-empty-def/kanban-empty-def.directive';
 export { CwKanbanLaneMarkerDef } from './kanban-lane-marker-def/kanban-lane-marker-def.directive';
 export type {
+  CwKanbanAddRequest,
   CwKanbanCardContext,
   CwKanbanColumn,
   CwKanbanColumnCollapse,
+  CwKanbanColumnMenuContext,
   CwKanbanCreate,
   CwKanbanDensity,
   CwKanbanDropIndicator,

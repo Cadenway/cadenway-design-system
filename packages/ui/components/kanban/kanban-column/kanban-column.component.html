@@ -50,13 +50,19 @@
       <span class="sr-only">{{ model().countLabel }}</span>
     </span>
     <span class="flex-1"></span>
+    @if (board.columnMenuTemplate(); as template) {
+      <ng-container
+        [ngTemplateOutlet]="template"
+        [ngTemplateOutletContext]="{ $implicit: column, count: model().count }"
+      />
+    }
     @if (!headerOnly() && !board.readonly()) {
       <button
         type="button"
         cwRipple
         [class]="headerButton"
         [attr.aria-label]="model().addLabel"
-        (click)="board.openQuickAdd(column.id, null)"
+        (click)="board.requestAdd(column.id, null)"
       >
         <ng-icon name="phosphorPlusBold" aria-hidden="true" />
       </button>
@@ -94,7 +100,7 @@
         cwRipple
         [class]="footerButton"
         [attr.data-kanban-add]="column.id"
-        (click)="board.openQuickAdd(column.id, null)"
+        (click)="board.requestAdd(column.id, null)"
       >
         <ng-icon name="phosphorPlusBold" aria-hidden="true" />
         {{ board.texts().add }}

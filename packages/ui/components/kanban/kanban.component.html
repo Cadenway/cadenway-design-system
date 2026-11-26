@@ -1,35 +1,69 @@
 <ng-content select="[cwKanbanToolbar]" />
 <span [id]="instructionsId" hidden>{{ texts().instructions }}</span>
-<div
-  role="region"
-  cdkDropListGroup
-  class="relative flex items-stretch gap-2 overflow-x-auto"
-  [attr.aria-label]="ariaLabel()"
->
-  @if (swimlanes()) {
-    <div class="relative min-w-fit flex-1">
-      <div aria-hidden="true" class="absolute inset-0 flex gap-2">
-        @for (column of columnViews(); track column.column.id) {
-          <div
-            class="shrink-0 rounded-xl bg-canvas"
-            [style.width.px]="column.collapsed ? 36 : column.width"
-          ></div>
+@if (loading()) {
+  <div
+    role="status"
+    aria-busy="true"
+    class="flex items-stretch gap-2 overflow-hidden"
+    [attr.aria-label]="texts().loading"
+  >
+    @for (column of skeletonColumns(); track $index) {
+      <div
+        aria-hidden="true"
+        class="flex shrink-0 flex-col gap-2 rounded-xl bg-canvas p-2"
+        [style.width.px]="columnWidth()"
+      >
+        <div class="flex h-7 items-center gap-2 px-1.5">
+          <div cwSkeleton class="size-4 rounded-full"></div>
+          <div cwSkeleton class="h-3" [style.width.%]="column.title"></div>
+          <div cwSkeleton class="h-3 w-4"></div>
+        </div>
+        @for (width of column.cards; track $index) {
+          <div class="flex flex-col gap-2.5 rounded-xl border bg-card p-3">
+            <div cwSkeleton class="h-2.5 w-14"></div>
+            <div cwSkeleton class="h-3" [style.width.%]="width"></div>
+            <div class="flex items-center gap-2">
+              <div cwSkeleton class="h-5 w-14 rounded-full"></div>
+              <div cwSkeleton class="h-3 w-12"></div>
+              <div cwSkeleton class="ml-auto size-6 rounded-full"></div>
+            </div>
+          </div>
         }
       </div>
-      <div class="relative">
-        <div class="flex gap-2">
+    }
+  </div>
+} @else {
+  <div
+    role="region"
+    cdkDropListGroup
+    class="relative flex items-stretch gap-2 overflow-x-auto"
+    [attr.aria-label]="ariaLabel()"
+  >
+    @if (swimlanes()) {
+      <div class="relative min-w-fit flex-1">
+        <div aria-hidden="true" class="absolute inset-0 flex gap-2">
           @for (column of columnViews(); track column.column.id) {
-            <cw-kanban-column [model]="column" headerOnly />
+            <div
+              class="shrink-0 rounded-xl bg-canvas"
+              [style.width.px]="column.collapsed ? 36 : column.width"
+            ></div>
           }
         </div>
-        @for (lane of laneViews(); track lane.lane.id) {
-          <cw-kanban-lane [model]="lane" />
-        }
+        <div class="relative">
+          <div class="flex gap-2">
+            @for (column of columnViews(); track column.column.id) {
+              <cw-kanban-column [model]="column" headerOnly />
+            }
+          </div>
+          @for (lane of laneViews(); track lane.lane.id) {
+            <cw-kanban-lane [model]="lane" />
+          }
+        </div>
       </div>
-    </div>
-  } @else {
-    @for (column of columnViews(); track column.column.id) {
-      <cw-kanban-column [model]="column" />
+    } @else {
+      @for (column of columnViews(); track column.column.id) {
+        <cw-kanban-column [model]="column" />
+      }
     }
-  }
-</div>
+  </div>
+}
