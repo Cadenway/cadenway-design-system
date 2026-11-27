@@ -260,9 +260,12 @@ export class CwDialog implements CwDialogContext {
    *
    * @description
    * Whether a browser history navigation (Back or Forward) closes the dialog; `true` by default.
-   * Read when the dialog opens. Such a close sets `open` to false and emits `closed` with the reason
-   * `action`. Set it to false for a dialog that must outlive history navigation, such as a
+   * Read when the dialog opens, and applied over an application's `DEFAULT_DIALOG_CONFIG`. Such a
+   * close sets `open` to false and emits `closed` with the reason `action`, at once and even while
+   * `pending`. Set it to false for a dialog that must outlive history navigation, such as a
    * full-screen flow whose consumer binds `[open]` one way and would otherwise lose the window.
+   * Boolean only, on purpose: `true` is the CDK's `popstate` disposal, and the CDK's other modes
+   * (such as closing on any URL change, router navigations included) stay out of the brick's API.
    *
    * @type {InputSignalWithTransform<boolean, unknown>}
    */
@@ -563,6 +566,9 @@ export class CwDialog implements CwDialogContext {
         if (this.closeOnOverlayClick()) this.requestClose('overlay');
       },
       onExternalClose: () => {
+        // The exit path (`detach`) does not run: forget the trigger here, so a later `[(open)]`
+        // does not return the focus to it.
+        this.origin = null;
         this.open.set(false);
         this.closed.emit('action');
       },

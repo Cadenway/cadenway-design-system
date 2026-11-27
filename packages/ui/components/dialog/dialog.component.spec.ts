@@ -370,6 +370,27 @@ describe('CwDialog', () => {
     expect(host.reasons).toEqual([]);
   });
 
+  it('forgets its trigger after a navigation close, so a reopening through [(open)] does not focus it', async () => {
+    await openFromTrigger();
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    await fixture.whenStable();
+    const elsewhere: HTMLButtonElement = document.createElement('button');
+    elsewhere.textContent = 'Ailleurs';
+    document.body.append(elsewhere);
+    elsewhere.focus();
+
+    host.open.set(true);
+    await fixture.whenStable();
+    const reopened: HTMLElement | null = dialog();
+    if (!reopened) throw new Error('Dialog not reopened');
+    press(reopened.querySelector('input') ?? reopened, 'Escape');
+    await fixture.whenStable();
+
+    expect(dialog()).toBeNull();
+    expect(document.activeElement).toBe(elsewhere);
+    elsewhere.remove();
+  });
+
   it('hides the close button when showClose is false', async () => {
     host.showClose.set(false);
     const window: HTMLElement = await openFromTrigger();

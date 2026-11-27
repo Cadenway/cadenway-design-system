@@ -19,6 +19,9 @@ export type CwDialogSize = 'sm' | 'default' | 'md' | 'lg' | 'xl' | 'full' | 'scr
  * @description
  * Why a dialog closed, emitted by `closed` once the exit animation ends: Escape, a click on the
  * backdrop, the close button or a `button[cwDialogClose]`, or the consumer (`[(open)]`, `close()`).
+ * A browser Back or Forward (with `closeOnNavigation`, the default) also emits `action`, but right
+ * away and without the exit animation, since the CDK has already removed the window; `pending`
+ * does not hold it back.
  *
  * @type {'escape' | 'overlay' | 'close' | 'action'}
  */

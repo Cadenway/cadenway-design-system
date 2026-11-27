@@ -232,9 +232,10 @@ export interface ɵModalOverlayConfig {
    * @readonly
    *
    * @description
-   * Whether a browser history navigation (Back or Forward, a `popstate`) disposes the modal; `true`
-   * by default, as in the CDK. Read when the modal attaches. When the CDK disposes it, the owner
-   * hears of it through `onExternalClose`.
+   * Whether a browser history navigation (Back or Forward, a `popstate`) disposes the modal. Left
+   * unset, the CDK decides: an application's `DEFAULT_DIALOG_CONFIG`, otherwise `true`. Read when
+   * the modal attaches. When the CDK disposes it, the owner hears of it through `onExternalClose`,
+   * at once, without the exit animation.
    *
    * @type {boolean | undefined}
    */
@@ -247,7 +248,7 @@ export interface ɵModalOverlayConfig {
  * @class ɵModalOverlay
  *
  * @description
- * The CDK Dialog life cycle behind the panel of `cw-dialog` and `cw-alert-dialog`: opens a template
+ * The CDK Dialog life cycle behind the panel of `cw-dialog`, `cw-sheet` and `cw-alert-dialog`: opens a template
  * as a modal (focus trap, scroll block, backdrop, `aria-hidden` on the rest of the page, focus
  * returned on close), plays the exit animation before the overlay is disposed, and tells whether an
  * Escape belongs to a popup opened inside the modal.
@@ -352,7 +353,6 @@ export class ɵModalOverlay {
       viewContainerRef: config.viewContainerRef,
       // The owner decides on Escape and backdrop clicks (reasons, `pending`, inner popups).
       disableClose: true,
-      closeOnNavigation: config.closeOnNavigation ?? true,
       autoFocus: config.autoFocus,
       restoreFocus: config.restoreFocus ?? true,
       // The CDK adds each class with `classList.add`: one token per entry.
@@ -363,6 +363,10 @@ export class ɵModalOverlay {
       ...(config.maxWidth ? { maxWidth: config.maxWidth } : {}),
       ...(config.width ? { width: config.width } : {}),
       ...(config.height ? { height: config.height } : {}),
+      // Set only when the owner decides, so an application's `DEFAULT_DIALOG_CONFIG` still applies.
+      ...(config.closeOnNavigation === undefined
+        ? {}
+        : { closeOnNavigation: config.closeOnNavigation }),
     });
     this.ref = ref;
     ref.overlayRef.backdropElement?.toggleAttribute('hidden', config.hideBackdrop === true);

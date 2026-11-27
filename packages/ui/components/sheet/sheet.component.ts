@@ -439,6 +439,9 @@ export class CwSheet implements CwSheetContext {
         if (this.closeOnOverlayClick()) this.requestClose('overlay');
       },
       onExternalClose: () => {
+        // The exit path (`detach`) does not run: forget the trigger here, so a later `[(open)]`
+        // does not return the focus to it.
+        this.origin = null;
         this.open.set(false);
         this.closed.emit('action');
       },
