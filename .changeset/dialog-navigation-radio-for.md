@@ -2,7 +2,7 @@
 '@cadenway/ui': minor
 ---
 
-Add `closeOnNavigation` to `cw-dialog`, `true` by default. The CDK closes a dialog on a browser Back or Forward (`popstate`); set the input to `false` for a dialog that must stay open through history navigation, such as a full-screen flow whose consumer binds `[open]` one way. The value is read when the dialog opens. With the default, such a close still sets `open` to false and emits `closed` with the reason `action`, as before. `cw-sheet` and `cw-alert-dialog` keep closing on navigation, unless an application's `DEFAULT_DIALOG_CONFIG` says otherwise.
+Add an optional `closeOnNavigation` input to `cw-dialog`. The CDK closes a dialog on a browser Back or Forward (`popstate`); set the input to `false` for a dialog that must stay open through history navigation, such as a full-screen flow whose consumer binds `[open]` one way, or to `true` to close on navigation whatever the application configures. Left unset (the default), the CDK default and any application `DEFAULT_DIALOG_CONFIG` apply, exactly as before. The value is read when the dialog opens. A navigation close still sets `open` to false and emits `closed` with the reason `action`. `cw-sheet` and `cw-alert-dialog` keep following the CDK default and `DEFAULT_DIALOG_CONFIG`.
 
 Fix the focus after a navigation close of `cw-dialog` and `cw-sheet`: they no longer keep the trigger that opened them, so reopening one through `[(open)]` returns the focus to the element focused before it opened, not to that old trigger.
 

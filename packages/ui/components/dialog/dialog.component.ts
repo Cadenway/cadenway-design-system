@@ -121,6 +121,22 @@ const PANE_LAYOUTS: Readonly<Record<'window' | 'screen', PaneLayout>> = {
   screen: { width: '100%', height: '100%', maxWidth: '100%', hideBackdrop: true },
 } as const;
 
+/**
+ * Function optionalBoolean
+ *
+ * @description
+ * Reads a boolean input that may stay unset: `undefined` and `null` keep it unset, so the brick
+ * leaves the decision to the CDK and the application's `DEFAULT_DIALOG_CONFIG`; any other value
+ * follows `booleanAttribute`, so the bare attribute form means `true`.
+ *
+ * @param {unknown} value - Bound value or attribute text.
+ *
+ * @returns {boolean | undefined} The boolean value, or undefined when unset.
+ */
+function optionalBoolean(value: unknown): boolean | undefined {
+  return value === undefined || value === null ? undefined : booleanAttribute(value);
+}
+
 // The body takes the remaining height when the window is taller than its content (`full`, mobile).
 /**
  * Constant BODIES
@@ -155,7 +171,8 @@ const BODIES: Readonly<Record<'simple' | 'full' | 'screen' | 'scrollable', strin
  * Escape, a backdrop click, the close button (`showClose`, named `closeLabel`) and
  * `button[cwDialogClose]` close it; Escape first closes a popup still open inside it (a menu, a
  * select). While `pending`, none of them closes it and `cwDialogClose` buttons are `aria-disabled`.
- * A browser Back or Forward closes it too, unless `closeOnNavigation` is false.
+ * A browser Back or Forward closes it too, as the CDK does, unless `closeOnNavigation` or the
+ * application's `DEFAULT_DIALOG_CONFIG` says otherwise.
  * `closed` emits the reason once the exit animation ends. `scrollable` pins the header and footer
  * and scrolls the body (a focusable region; mark the first field `cdkFocusInitial` in a scrollable
  * form). Under 768 px the window fills the screen.
@@ -259,19 +276,22 @@ export class CwDialog implements CwDialogContext {
    * @readonly
    *
    * @description
-   * Whether a browser history navigation (Back or Forward) closes the dialog; `true` by default.
-   * Read when the dialog opens, and applied over an application's `DEFAULT_DIALOG_CONFIG`. Such a
-   * close sets `open` to false and emits `closed` with the reason `action`, at once and even while
-   * `pending`. Set it to false for a dialog that must outlive history navigation, such as a
-   * full-screen flow whose consumer binds `[open]` one way and would otherwise lose the window.
-   * Boolean only, on purpose: `true` is the CDK's `popstate` disposal, and the CDK's other modes
-   * (such as closing on any URL change, router navigations included) stay out of the brick's API.
+   * Whether a browser history navigation (Back or Forward) closes the dialog. Unset by default
+   * (`undefined`, or `null`): the CDK decides, that is the application's `DEFAULT_DIALOG_CONFIG`,
+   * otherwise `true`, as before this input existed. An explicit `true` or `false` wins over that
+   * configuration. Read when the dialog opens. Such a close sets `open` to false and emits `closed`
+   * with the reason `action`, at once and even while `pending`. Set it to false for a dialog that
+   * must outlive history navigation, such as a full-screen flow whose consumer binds `[open]` one
+   * way and would otherwise lose the window. Boolean only, on purpose: `true` is the CDK's
+   * `popstate` disposal, and the CDK's other modes (such as closing on any URL change, router
+   * navigations included) stay out of the brick's API.
    *
-   * @type {InputSignalWithTransform<boolean, unknown>}
+   * @type {InputSignalWithTransform<boolean | undefined, unknown>}
    */
-  public readonly closeOnNavigation: InputSignalWithTransform<boolean, unknown> = input(true, {
-    transform: booleanAttribute,
-  });
+  public readonly closeOnNavigation: InputSignalWithTransform<boolean | undefined, unknown> = input<
+    boolean | undefined,
+    unknown
+  >(undefined, { transform: optionalBoolean });
 
   /**
    * Property pending
@@ -557,7 +577,7 @@ export class CwDialog implements CwDialogContext {
       describedBy: this.description() ? this.descriptionId : null,
       autoFocus: 'first-tabbable',
       restoreFocus: this.origin,
-      closeOnNavigation: this.closeOnNavigation(),
+      ...this.navigationSetting(),
       ...this.paneLayout(),
       onKeydown: (event) => {
         this.onKeydown(event);
@@ -573,6 +593,20 @@ export class CwDialog implements CwDialogContext {
         this.closed.emit('action');
       },
     });
+  }
+
+  /**
+   * Method navigationSetting
+   *
+   * @description
+   * The overlay's navigation setting, only when `closeOnNavigation` is set, so an unset input
+   * leaves the CDK default and the application's `DEFAULT_DIALOG_CONFIG` in force.
+   *
+   * @returns {Pick<ɵModalOverlayConfig, 'closeOnNavigation'>} The setting to spread, or nothing.
+   */
+  private navigationSetting(): Pick<ɵModalOverlayConfig, 'closeOnNavigation'> {
+    const closeOnNavigation: boolean | undefined = this.closeOnNavigation();
+    return closeOnNavigation === undefined ? {} : { closeOnNavigation };
   }
 
   /**

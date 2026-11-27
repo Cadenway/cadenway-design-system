@@ -294,8 +294,9 @@ export const Sizes: Story = {
  * viewport on the canvas surface, no border, radius or backdrop; the consumer lays out a centered
  * column and names the window with its own `h1` (`[id]="dialog.titleId"`). Here only the explicit
  * button closes it (`closeOnEscape`, `closeOnOverlayClick` and `showClose` off); the focus stays
- * trapped inside and returns to the trigger. `closeOnNavigation` is off too: by default a browser
- * Back or Forward closes a dialog, which a flow whose consumer binds `[open]` one way would lose.
+ * trapped inside and returns to the trigger. `closeOnNavigation` is off too: unless the
+ * application's `DEFAULT_DIALOG_CONFIG` says otherwise, a browser Back or Forward closes a dialog,
+ * which a flow whose consumer binds `[open]` one way would lose.
  * English source copy, as the webapp writes it.
  */
 export const Screen: Story = {

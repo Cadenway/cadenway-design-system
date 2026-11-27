@@ -1,3 +1,4 @@
+import { DEFAULT_DIALOG_CONFIG } from '@angular/cdk/dialog';
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { CwButton } from '@cadenway/ui/components/button';
@@ -103,11 +104,13 @@ class Host {
    * @readonly
    *
    * @description
-   * Whether a browser history navigation closes the dialog.
+   * Whether a browser history navigation closes the dialog; unset by default.
    *
-   * @type {WritableSignal<boolean>}
+   * @type {WritableSignal<boolean | undefined>}
    */
-  public readonly navigationCloses: WritableSignal<boolean> = signal(true);
+  public readonly navigationCloses: WritableSignal<boolean | undefined> = signal<
+    boolean | undefined
+  >(undefined);
 
   /**
    * Property showClose
@@ -347,7 +350,7 @@ describe('CwDialog', () => {
     expect(host.reasons).toEqual([]);
   });
 
-  it('closes on a browser Back or Forward by default, with the reason action', async () => {
+  it('closes on a browser Back or Forward without input or application config, with the reason action', async () => {
     await openFromTrigger();
 
     window.dispatchEvent(new PopStateEvent('popstate'));
@@ -685,6 +688,53 @@ describe('CwDialog size screen', () => {
 
     expect(dialog()).toBeNull();
     expect(fixture.componentInstance.reasons).toEqual(['escape', 'close', 'close']);
+  });
+});
+
+describe('CwDialog under DEFAULT_DIALOG_CONFIG', () => {
+  /**
+   * Function openUnder
+   *
+   * @description
+   * Opens the host dialog from its trigger under an application dialog configuration.
+   *
+   * @param {boolean | undefined} navigationCloses - Value bound to `closeOnNavigation`.
+   *
+   * @returns {Promise<ComponentFixture<Host>>} Fixture with the dialog open.
+   */
+  async function openUnder(navigationCloses: boolean | undefined): Promise<ComponentFixture<Host>> {
+    TestBed.configureTestingModule({
+      providers: [{ provide: DEFAULT_DIALOG_CONFIG, useValue: { closeOnNavigation: false } }],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.componentInstance.navigationCloses.set(navigationCloses);
+    fixture.autoDetectChanges();
+    button(fixture.nativeElement as HTMLElement, 'Renommer').click();
+    await fixture.whenStable();
+    if (!dialog()) throw new Error('Dialog not open');
+    return fixture;
+  }
+
+  it('follows the application and stays open on a browser Back or Forward without the input', async () => {
+    const fixture: ComponentFixture<Host> = await openUnder(undefined);
+
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    await fixture.whenStable();
+
+    expect(dialog()).not.toBeNull();
+    expect(fixture.componentInstance.open()).toBe(true);
+    fixture.destroy();
+  });
+
+  it('closes on a browser Back or Forward when the input is explicitly true', async () => {
+    const fixture: ComponentFixture<Host> = await openUnder(true);
+
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    await fixture.whenStable();
+
+    expect(dialog()).toBeNull();
+    expect(fixture.componentInstance.reasons).toEqual(['action']);
+    fixture.destroy();
   });
 });
 
