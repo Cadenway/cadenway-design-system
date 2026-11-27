@@ -182,7 +182,7 @@ export const ChoiceCards: Story = {
 /**
  * Choice cards without dot (`[indicator]="false"`), the onboarding templates of the mockup
  * (`App.dc.html`): the selected card is shown by its fill and border alone, and the card draws the
- * focus ring. English source copy, as the webapp writes it.
+ * focus ring and the disabled dimming. English source copy, as the webapp writes it.
  */
 export const CardsWithoutIndicator: Story = {
   render: () => ({
@@ -195,6 +195,10 @@ export const CardsWithoutIndicator: Story = {
         <cw-radio-group-item variant="card" value="marketing" [indicator]="false">
           <span class="text-sm leading-5 font-medium">Marketing</span>
           <span class="text-xs text-muted-foreground">Campaigns and content calendar.</span>
+        </cw-radio-group-item>
+        <cw-radio-group-item variant="card" value="design" [indicator]="false" disabled>
+          <span class="text-sm leading-5 font-medium">Design</span>
+          <span class="text-xs text-muted-foreground">Unavailable on this plan.</span>
         </cw-radio-group-item>
       </cw-radio-group>`,
   }),

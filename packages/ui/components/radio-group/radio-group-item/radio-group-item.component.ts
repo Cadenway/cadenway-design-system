@@ -57,17 +57,20 @@ const CARD: string =
   'flex w-full cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors hover:bg-accent has-[[data-state=checked]]:border-foreground/40 has-[[data-state=checked]]:bg-selected has-disabled:cursor-not-allowed motion-reduce:transition-none';
 
 /* Without its dot the radio is visually hidden but stays the focused control, so the card draws
-   the focus ring that the radio would have drawn. */
+   the cues the radio would have drawn: the focus ring, the dimming and the end of the hover veil
+   when disabled, the destructive border when invalid. */
 /**
  * Constant CARD_WITHOUT_INDICATOR
  *
  * @description
- * Extra card classes when the radio dot is hidden: the focus ring moves to the card.
+ * Extra card classes when the radio dot is hidden: the focus ring, the disabled and the invalid
+ * cues move to the card.
  *
  * @type {string}
  */
 const CARD_WITHOUT_INDICATOR: string =
-  'outline-hidden has-focus-visible:ring-2 has-focus-visible:ring-ring has-focus-visible:ring-offset-2 has-focus-visible:ring-offset-background';
+  'outline-hidden has-focus-visible:ring-2 has-focus-visible:ring-ring has-focus-visible:ring-offset-2 has-focus-visible:ring-offset-background ' +
+  'has-disabled:opacity-50 has-disabled:hover:bg-transparent has-[[aria-invalid=true]]:border-destructive';
 
 /**
  * Constant HOSTS
@@ -145,8 +148,9 @@ class RadioOption implements FocusableOption {
  * `card`: a choice card, the whole card the radio's label: the radio and the projected content
  * (title, description) in a bordered card, `bg-accent` on hover, `bg-selected` with a
  * `foreground/40` border once selected. `[indicator]="false"` hides the dot of a card, which then
- * shows its selection by its fill and border alone and draws the focus ring itself; the radio stays
- * the focused, announced control. A disabled option is dimmed and skipped by the arrows.
+ * shows its selection by its fill and border alone and draws the focus ring, the disabled dimming
+ * and the invalid border itself; the radio stays the focused, announced control. A disabled option
+ * is dimmed and skipped by the arrows.
  */
 @Component({
   selector: 'cw-radio-group-item',
