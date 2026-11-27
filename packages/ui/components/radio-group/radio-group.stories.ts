@@ -180,6 +180,43 @@ export const ChoiceCards: Story = {
 };
 
 /**
+ * Choice cards without dot (`[indicator]="false"`), the onboarding templates of the mockup
+ * (`App.dc.html`): the selected card is shown by its fill and border alone, and the card draws the
+ * focus ring and the disabled dimming. English source copy, as the webapp writes it.
+ */
+export const CardsWithoutIndicator: Story = {
+  render: () => ({
+    template: `
+      <cw-radio-group ariaLabel="Space template" value="dev" class="grid w-full max-w-xl grid-cols-1 gap-2 sm:grid-cols-2">
+        <cw-radio-group-item variant="card" value="dev" [indicator]="false">
+          <span class="text-sm leading-5 font-medium">Software development</span>
+          <span class="text-xs text-muted-foreground">Backlog, sprints and bugs.</span>
+        </cw-radio-group-item>
+        <cw-radio-group-item variant="card" value="marketing" [indicator]="false">
+          <span class="text-sm leading-5 font-medium">Marketing</span>
+          <span class="text-xs text-muted-foreground">Campaigns and content calendar.</span>
+        </cw-radio-group-item>
+        <cw-radio-group-item variant="card" value="design" [indicator]="false" disabled>
+          <span class="text-sm leading-5 font-medium">Design</span>
+          <span class="text-xs text-muted-foreground">Unavailable on this plan.</span>
+        </cw-radio-group-item>
+      </cw-radio-group>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole(role: string, options?: { name?: string | RegExp }): HTMLElement;
+    } = within(light(canvasElement));
+    const development: HTMLElement = scope.getByRole('radio', { name: /Software development/ });
+    const marketing: HTMLElement = scope.getByRole('radio', { name: /Marketing/ });
+
+    development.focus();
+    await userEvent.keyboard('{ArrowDown}');
+    await expect(marketing).toHaveFocus();
+    await expect(marketing).toHaveAttribute('aria-checked', 'true');
+  },
+};
+
+/**
  * Tab enters on the selected option; the arrows select the next one, wrapping around and skipping
  * the disabled option.
  */

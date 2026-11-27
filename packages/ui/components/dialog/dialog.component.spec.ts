@@ -437,6 +437,201 @@ describe('CwDialog size', () => {
   });
 });
 
+/**
+ * Component ScreenHost
+ *
+ * @description
+ * Hosts an edge-to-edge dialog opened from a trigger, with the default close behaviour.
+ */
+@Component({
+  imports: [CwButton, CwDialog, CwDialogClose, CwDialogTrigger],
+  template: `
+    <button cwButton variant="outline" [cwDialogTrigger]="setup">Set up</button>
+    <cw-dialog #setup [size]="size()" [scrollable]="scrollable()" (closed)="reasons.push($event)">
+      <h1 [id]="setup.titleId">Welcome to Atelier Nord</h1>
+      <input aria-label="Space name" value="Product" />
+      <button cwButton cwDialogClose>Set up later</button>
+    </cw-dialog>
+  `,
+})
+class ScreenHost {
+  // #region Properties
+  /**
+   * Property size
+   * @readonly
+   *
+   * @description
+   * Size given to the dialog, `screen` unless a test changes it.
+   *
+   * @type {WritableSignal<CwDialogSize>}
+   */
+  public readonly size: WritableSignal<CwDialogSize> = signal<CwDialogSize>('screen');
+
+  /**
+   * Property scrollable
+   * @readonly
+   *
+   * @description
+   * Whether the dialog asks for a scrollable body.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly scrollable: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property reasons
+   * @readonly
+   *
+   * @description
+   * Recorded dialog close reasons.
+   *
+   * @type {CwDialogCloseReason[]}
+   */
+  public readonly reasons: CwDialogCloseReason[] = [];
+  // #endregion
+}
+
+describe('CwDialog size screen', () => {
+  let fixture: ComponentFixture<ScreenHost>;
+  let trigger: HTMLButtonElement;
+
+  /**
+   * Function openScreen
+   *
+   * @description
+   * Opens the edge-to-edge dialog from its trigger.
+   *
+   * @returns {Promise<HTMLElement>} Dialog element after the trigger opens it.
+   */
+  async function openScreen(): Promise<HTMLElement> {
+    trigger.focus();
+    trigger.click();
+    await fixture.whenStable();
+    const found: HTMLElement | null = dialog();
+    if (!found) throw new Error('Dialog not open');
+    return found;
+  }
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(ScreenHost);
+    fixture.autoDetectChanges();
+    trigger = button(fixture.nativeElement as HTMLElement, 'Set up');
+  });
+
+  afterEach(() => {
+    fixture.destroy();
+  });
+
+  it('covers the viewport on the canvas surface without window frame', async () => {
+    const window: HTMLElement = await openScreen();
+    const panel: Element | null = window.firstElementChild;
+
+    expect(window.getAttribute('aria-modal')).toBe('true');
+    expect(panel?.getAttribute('data-size')).toBe('screen');
+    expect(panel?.classList).toContain('size-full');
+    expect(panel?.classList).toContain('bg-canvas');
+    expect(panel?.classList).not.toContain('rounded-xl');
+    expect(panel?.classList).not.toContain('border');
+    expect(panel?.classList).not.toContain('p-6');
+  });
+
+  // The pane is `100%` of the overlay container, not `100vw`, which would include the scrollbar the
+  // scroll block keeps.
+  it('fills the overlay container and hides the backdrop', async () => {
+    const window: HTMLElement = await openScreen();
+
+    expect(window.parentElement?.style.width).toBe('100%');
+    expect(window.parentElement?.style.height).toBe('100%');
+    expect(backdrop().hidden).toBe(true);
+  });
+
+  it('makes the body a focusable scroll region by default', async () => {
+    const window: HTMLElement = await openScreen();
+    const body: Element | null | undefined = window
+      .querySelector('h1')
+      ?.closest('[data-size] > div');
+
+    expect(body?.getAttribute('tabindex')).toBe('0');
+    expect(body?.classList).toContain('overflow-y-auto');
+  });
+
+  it('keeps the body unpadded and makes it a focusable scroll region when scrollable', async () => {
+    fixture.componentInstance.scrollable.set(true);
+    const window: HTMLElement = await openScreen();
+    const body: Element | null | undefined = window
+      .querySelector('h1')
+      ?.closest('[data-size] > div');
+
+    expect(body?.getAttribute('tabindex')).toBe('0');
+    expect(body?.classList).not.toContain('px-6');
+  });
+
+  it('becomes a window over a clickable backdrop when the size changes to default while open', async () => {
+    await openScreen();
+
+    fixture.componentInstance.size.set('default');
+    await fixture.whenStable();
+
+    const window: HTMLElement | null = dialog();
+    expect(window?.firstElementChild?.getAttribute('data-size')).toBe('default');
+    expect(window?.parentElement?.style.width).toBe('');
+    expect(backdrop().hidden).toBe(false);
+    expect(fixture.componentInstance.reasons).toEqual([]);
+
+    backdrop().click();
+    await fixture.whenStable();
+
+    expect(dialog()).toBeNull();
+    expect(fixture.componentInstance.reasons).toEqual(['overlay']);
+  });
+
+  it('covers the screen without backdrop when the size changes to screen while open', async () => {
+    fixture.componentInstance.size.set('default');
+    await openScreen();
+    expect(backdrop().hidden).toBe(false);
+
+    fixture.componentInstance.size.set('screen');
+    await fixture.whenStable();
+
+    const window: HTMLElement | null = dialog();
+    expect(window?.firstElementChild?.getAttribute('data-size')).toBe('screen');
+    expect(window?.parentElement?.style.width).toBe('100%');
+    expect(backdrop().hidden).toBe(true);
+    expect(window?.contains(document.activeElement)).toBe(true);
+    expect(fixture.componentInstance.reasons).toEqual([]);
+  });
+
+  it('is named by the consumer heading and keeps the focus inside', async () => {
+    const window: HTMLElement = await openScreen();
+    const title: HTMLElement | null = document.getElementById(
+      window.getAttribute('aria-labelledby') ?? '',
+    );
+
+    expect(title?.textContent.trim()).toBe('Welcome to Atelier Nord');
+    expect(window.contains(document.activeElement)).toBe(true);
+  });
+
+  it('keeps the Escape, close button and cwDialogClose behaviour of the other sizes', async () => {
+    let window: HTMLElement = await openScreen();
+    press(window.querySelector('input') ?? window, 'Escape');
+    await fixture.whenStable();
+    expect(dialog()).toBeNull();
+    expect(document.activeElement).toBe(trigger);
+
+    window = await openScreen();
+    button(window, 'Fermer').click();
+    await fixture.whenStable();
+    expect(dialog()).toBeNull();
+
+    window = await openScreen();
+    button(window, 'Set up later').click();
+    await fixture.whenStable();
+
+    expect(dialog()).toBeNull();
+    expect(fixture.componentInstance.reasons).toEqual(['escape', 'close', 'close']);
+  });
+});
+
 describe('provideCwDialogLabels', () => {
   it('names the close button of the dialogs below it', async () => {
     TestBed.configureTestingModule({ providers: [provideCwDialogLabels({ close: 'Close' })] });

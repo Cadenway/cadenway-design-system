@@ -163,3 +163,48 @@ export const Keyboard: Story = {
     await expect(scope.getByText(/Étape 1 sur 4/)).toBeVisible();
   },
 };
+
+/**
+ * Segmented bar (`variant="segments"`), the onboarding assistant of the mockup (`App.dc.html`): one
+ * bar per step, filled up to the current one, the labels below, no step clickable and no position
+ * line; the consumer writes « Step 2 of 4 » and moves with its own buttons. English source copy, as
+ * the webapp writes it.
+ */
+export const Segments: Story = {
+  render: () => ({
+    props: { step: 1 },
+    template: `
+      <div class="flex w-full max-w-xl flex-col gap-6">
+        <cw-stepper #wizard variant="segments" ariaLabel="Steps" [(selected)]="step">
+          <cw-step label="Space" />
+          <cw-step label="Template" />
+          <cw-step label="Team" />
+          <cw-step label="Import" />
+        </cw-stepper>
+        <div class="flex flex-col gap-4 rounded-xl border bg-card p-5">
+          <p class="text-xs font-medium text-muted-foreground">Step {{ step + 1 }} of 4</p>
+          <div class="flex items-center gap-2">
+            <button cwButton variant="ghost" (click)="wizard.previous()">Back</button>
+            <button cwButton class="ml-auto" (click)="wizard.next()">Continue</button>
+          </div>
+        </div>
+      </div>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole(role: string, options?: { name?: string }): HTMLElement;
+      getByText(text: RegExp): HTMLElement;
+    } = within(light(canvasElement));
+    const list: HTMLElement = scope.getByRole('list', { name: 'Steps' });
+    await expect(within(list).queryAllByRole('button')).toHaveLength(0);
+    await expect(within(list).getAllByRole('listitem')[1]).toHaveAttribute('aria-current', 'step');
+    await expect(scope.getByText(/Step 2 of 4/)).toBeVisible();
+
+    await userEvent.click(scope.getByRole('button', { name: 'Continue' }));
+    await expect(within(list).getAllByRole('listitem')[2]).toHaveAttribute('aria-current', 'step');
+    await expect(scope.getByText(/Step 3 of 4/)).toBeVisible();
+
+    await userEvent.click(scope.getByRole('button', { name: 'Back' }));
+    await expect(within(list).getAllByRole('listitem')[1]).toHaveAttribute('aria-current', 'step');
+  },
+};

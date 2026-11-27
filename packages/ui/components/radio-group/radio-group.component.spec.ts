@@ -190,6 +190,141 @@ describe('CwRadioGroup', () => {
     });
   });
 
+  describe('card without indicator', () => {
+    /**
+     * Class IndicatorHost
+     *
+     * @description
+     * Hosts choice cards whose radio dot is hidden.
+     */
+    @Component({
+      imports: [CwRadioGroup, CwRadioGroupItem],
+      template: `
+        <cw-radio-group
+          ariaLabel="Space template"
+          [(value)]="template"
+          [invalid]="invalid()"
+          [touched]="invalid()"
+        >
+          <cw-radio-group-item variant="card" value="dev" [indicator]="false">
+            Software development
+          </cw-radio-group-item>
+          <cw-radio-group-item variant="card" value="marketing" [indicator]="false">
+            Marketing
+          </cw-radio-group-item>
+          <cw-radio-group-item variant="card" value="design" [indicator]="false" disabled>
+            Design
+          </cw-radio-group-item>
+        </cw-radio-group>
+      `,
+    })
+    class IndicatorHost {
+      // #region Properties
+      /**
+       * Property template
+       * @readonly
+       *
+       * @description
+       * Selected template.
+       *
+       * @type {WritableSignal<string | null>}
+       */
+      public readonly template: WritableSignal<string | null> = signal<string | null>('dev');
+
+      /**
+       * Property invalid
+       * @readonly
+       *
+       * @description
+       * Whether the group shows a touched invalid state.
+       *
+       * @type {WritableSignal<boolean>}
+       */
+      public readonly invalid: WritableSignal<boolean> = signal(false);
+      // #endregion
+    }
+
+    /**
+     * Function card
+     *
+     * @description
+     * Finds the card that labels a radio.
+     *
+     * @param {HTMLElement} scope - Fixture containing the cards.
+     * @param {HTMLButtonElement} control - Radio labelled by the card.
+     *
+     * @returns {HTMLLabelElement} Card of the radio.
+     */
+    function card(scope: HTMLElement, control: HTMLButtonElement): HTMLLabelElement {
+      const found: HTMLLabelElement | null = scope.querySelector<HTMLLabelElement>(
+        `label[for="${control.id}"]`,
+      );
+      if (!found) throw new Error('No card');
+      return found;
+    }
+
+    let host: HTMLElement;
+    let fixture: ComponentFixture<IndicatorHost>;
+
+    beforeEach(async () => {
+      fixture = TestBed.createComponent(IndicatorHost);
+      fixture.autoDetectChanges();
+      await fixture.whenStable();
+      host = fixture.nativeElement as HTMLElement;
+    });
+
+    it('keeps each card a named, checkable and focusable radio', async () => {
+      const marketing: HTMLButtonElement = radio(host, 'Marketing');
+      expect(radio(host, 'Software development').getAttribute('aria-checked')).toBe('true');
+      expect(radio(host, 'Software development').tabIndex).toBe(0);
+
+      host.querySelector<HTMLLabelElement>(`label[for="${marketing.id}"]`)?.click();
+      await fixture.whenStable();
+
+      expect(fixture.componentInstance.template()).toBe('marketing');
+      expect(marketing.getAttribute('aria-checked')).toBe('true');
+      expect(marketing.tabIndex).toBe(0);
+    });
+
+    it('moves the selection and the focus with the arrows', async () => {
+      radio(host, 'Software development').focus();
+      press(radio(host, 'Software development'), 'ArrowDown');
+      await fixture.whenStable();
+
+      expect(fixture.componentInstance.template()).toBe('marketing');
+      expect(document.activeElement).toBe(radio(host, 'Marketing'));
+    });
+
+    it('dims a disabled card, ends its hover veil and skips it', async () => {
+      const design: HTMLButtonElement = radio(host, 'Design');
+      expect(design.disabled).toBe(true);
+      expect(card(host, design).classList).toContain('has-disabled:opacity-50');
+      expect(card(host, design).classList).toContain('has-disabled:hover:bg-transparent');
+
+      card(host, design).click();
+      await fixture.whenStable();
+      expect(fixture.componentInstance.template()).toBe('dev');
+
+      radio(host, 'Marketing').focus();
+      press(radio(host, 'Marketing'), 'ArrowDown');
+      await fixture.whenStable();
+      expect(fixture.componentInstance.template()).toBe('dev');
+    });
+
+    it('draws the invalid border on the card once the group is invalid', async () => {
+      const marketing: HTMLButtonElement = radio(host, 'Marketing');
+      expect(marketing.hasAttribute('aria-invalid')).toBe(false);
+
+      fixture.componentInstance.invalid.set(true);
+      await fixture.whenStable();
+
+      expect(marketing.getAttribute('aria-invalid')).toBe('true');
+      expect(card(host, marketing).classList).toContain(
+        'has-[[aria-invalid=true]]:border-destructive',
+      );
+    });
+  });
+
   it('is the value accessor of a reactive form control and reports its invalid state', async () => {
     /**
      * Class ReactiveHost

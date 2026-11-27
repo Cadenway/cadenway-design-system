@@ -8,7 +8,53 @@
   }
 </ng-template>
 
-@if (vertical()) {
+@if (segmented()) {
+  <ol [attr.aria-label]="ariaLabel()" class="grid w-full auto-cols-fr grid-flow-col gap-2">
+    @for (view of views(); track view.step) {
+      <li
+        class="flex min-w-0 flex-col gap-1.5"
+        [attr.aria-current]="view.index === current() ? 'step' : null"
+        [attr.data-state]="view.state"
+        [attr.data-optional]="view.step.optional() ? '' : null"
+      >
+        <span
+          aria-hidden="true"
+          class="h-1 rounded-full transition-colors motion-reduce:transition-none"
+          [class]="view.segmentClasses"
+        ></span>
+        <span class="flex min-w-0 items-baseline gap-1">
+          <ng-container
+            [ngTemplateOutlet]="label"
+            [ngTemplateOutletContext]="{ $implicit: view }"
+          />
+        </span>
+      </li>
+    }
+  </ol>
+  @for (view of errors(); track view.step) {
+    <p role="alert" class="mt-2 flex items-center gap-1.5 text-sm text-destructive">
+      <ng-icon name="phosphorWarningCircleBold" size="1rem" class="shrink-0" aria-hidden="true" />{{
+        view.step.error()
+      }}
+    </p>
+  }
+  @if (currentView(); as view) {
+    @if (view.state !== 'error' && view.step.description()) {
+      <p class="mt-2 text-sm text-muted-foreground">{{ view.step.description() }}</p>
+    }
+    @for (shown of [view]; track shown.step) {
+      <div
+        #panel
+        role="group"
+        tabindex="-1"
+        class="mt-4 animate-item-in outline-hidden empty:hidden motion-reduce:animate-none"
+        [attr.aria-labelledby]="shown.labelId"
+      >
+        <ng-container [ngTemplateOutlet]="shown.step.panelTemplate() ?? null" />
+      </div>
+    }
+  }
+} @else if (vertical()) {
   <ol [attr.aria-label]="ariaLabel()" [class]="listClasses()">
     @for (view of views(); track view.step; let last = $last) {
       <li

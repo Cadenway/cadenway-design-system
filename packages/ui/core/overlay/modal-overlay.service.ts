@@ -189,6 +189,43 @@ export interface ɵModalOverlayConfig {
    * @type {string | undefined}
    */
   readonly maxWidth?: string;
+
+  /**
+   * Property width
+   * @readonly
+   *
+   * @description
+   * Width of the pane; by default none, the panel classes sizing it. A panel that covers the screen
+   * passes `100%`, which fills the overlay container without the scrollbar `100vw` would include.
+   *
+   * @type {string | undefined}
+   */
+  readonly width?: string;
+
+  /**
+   * Property height
+   * @readonly
+   *
+   * @description
+   * Height of the pane; by default none, the panel classes sizing it.
+   *
+   * @type {string | undefined}
+   */
+  readonly height?: string;
+
+  /**
+   * Property hideBackdrop
+   * @readonly
+   *
+   * @description
+   * Hides the backdrop; `false` by default. A panel that already covers the whole screen hides it,
+   * so no tint fades in behind it. The backdrop element stays, so `resize` can show it again while
+   * the modal is open. Focus trapping, scroll blocking and hiding the rest of the page do not
+   * depend on it.
+   *
+   * @type {boolean | undefined}
+   */
+  readonly hideBackdrop?: boolean;
   // #endregion
 }
 
@@ -310,8 +347,11 @@ export class ɵModalOverlay {
       disableAnimations: true,
       ...(config.positionStrategy ? { positionStrategy: config.positionStrategy } : {}),
       ...(config.maxWidth ? { maxWidth: config.maxWidth } : {}),
+      ...(config.width ? { width: config.width } : {}),
+      ...(config.height ? { height: config.height } : {}),
     });
     this.ref = ref;
+    ref.overlayRef.backdropElement?.toggleAttribute('hidden', config.hideBackdrop === true);
     this.leaving = false;
     ref.keydownEvents.subscribe(config.onKeydown);
     ref.backdropClick.subscribe(config.onBackdropClick);
@@ -321,6 +361,29 @@ export class ɵModalOverlay {
       this.leaving = false;
       config.onExternalClose();
     });
+  }
+
+  /**
+   * Method resize
+   * @method resize
+   *
+   * @description
+   * Applies a new pane size and backdrop visibility to the open modal, for an owner whose size
+   * changes while it is open; does nothing while no modal is attached. Missing values return to the
+   * defaults: no width, height or maximum width on the pane, and a visible backdrop.
+   *
+   * @param {Pick<ɵModalOverlayConfig, 'width' | 'height' | 'maxWidth' | 'hideBackdrop'>} layout - Pane size and backdrop visibility to apply.
+   */
+  public resize(
+    layout: Pick<ɵModalOverlayConfig, 'width' | 'height' | 'maxWidth' | 'hideBackdrop'>,
+  ): void {
+    if (!this.ref) return;
+    this.ref.overlayRef.updateSize({
+      width: layout.width ?? '',
+      height: layout.height ?? '',
+      maxWidth: layout.maxWidth ?? '',
+    });
+    this.ref.overlayRef.backdropElement?.toggleAttribute('hidden', layout.hideBackdrop === true);
   }
 
   /**

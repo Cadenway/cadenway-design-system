@@ -23,7 +23,7 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { CwButton } from '@cadenway/ui/components/button';
-import { ɵFOCUS_INSET, ɵModalOverlay } from '@cadenway/ui/core';
+import { ɵFOCUS_INSET, ɵModalOverlay, type ɵModalOverlayConfig } from '@cadenway/ui/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorXBold } from '@ng-icons/phosphor-icons/bold';
 
@@ -31,6 +31,16 @@ import { CwDialogDescription } from './dialog-description/dialog-description.dir
 import { DIALOG_LABELS } from './dialog-labels.token';
 import { CW_DIALOG, type CwDialogContext } from './dialog.token';
 import type { CwDialogCloseReason, CwDialogSize } from './dialog.types';
+
+/**
+ * Type PaneLayout
+ *
+ * @description
+ * Pane size and backdrop visibility the modal overlay applies for a dialog size.
+ *
+ * @type {Pick<ɵModalOverlayConfig, 'width' | 'height' | 'maxWidth' | 'hideBackdrop'>}
+ */
+type PaneLayout = Pick<ɵModalOverlayConfig, 'width' | 'height' | 'maxWidth' | 'hideBackdrop'>;
 
 /* Literal class strings (Dialog sheet and preview of the Design System artifact), so Tailwind finds
    them in the compiled package. Under 768 px every size fills the screen (integration guide,
@@ -47,6 +57,21 @@ const PANEL: string =
   'relative flex flex-col rounded-xl border bg-popover text-popover-foreground shadow-xl outline-none ' +
   'animate-pop-in motion-reduce:animate-none data-[state=closed]:animate-pop-out motion-reduce:data-[state=closed]:animate-none ' +
   'max-md:h-dvh max-md:max-h-none max-md:w-screen max-md:max-w-none max-md:rounded-none max-md:border-0';
+
+/* Mockup App.dc.html, onboarding assistant: `fixed inset-0 bg-canvas`, no window around the content.
+   The panel already covers the page, so it fades instead of popping and draws no shadow. */
+/**
+ * Constant SCREEN_PANEL
+ *
+ * @description
+ * Base classes for the edge-to-edge panel of size `screen`, which replace the window classes and
+ * the layout padding: the consumer lays out the content.
+ *
+ * @type {string}
+ */
+const SCREEN_PANEL: string =
+  'relative flex flex-col bg-canvas text-foreground outline-none ' +
+  'animate-fade-in motion-reduce:animate-none data-[state=closed]:animate-fade-out motion-reduce:data-[state=closed]:animate-none';
 
 /**
  * Constant LAYOUTS
@@ -77,7 +102,24 @@ const SIZES: Record<CwDialogSize, string> = {
   lg: 'w-[calc(100vw-2rem)] max-w-2xl',
   xl: 'w-[calc(100vw-2rem)] max-w-4xl',
   full: 'h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)]',
+  // The pane is `100%` of the overlay container (`PANE_LAYOUTS`): `100vw` would add the width of
+  // the scrollbar the CDK scroll block keeps.
+  screen: 'size-full',
 };
+
+/**
+ * Constant PANE_LAYOUTS
+ *
+ * @description
+ * Pane layouts: a window keeps the overlay defaults (its panel classes size it, over a backdrop);
+ * `screen` fills the overlay container and hides the backdrop it covers anyway.
+ *
+ * @type {Readonly<Record<'window' | 'screen', PaneLayout>>}
+ */
+const PANE_LAYOUTS: Readonly<Record<'window' | 'screen', PaneLayout>> = {
+  window: {},
+  screen: { width: '100%', height: '100%', maxWidth: '100%', hideBackdrop: true },
+} as const;
 
 // The body takes the remaining height when the window is taller than its content (`full`, mobile).
 /**
@@ -86,11 +128,12 @@ const SIZES: Record<CwDialogSize, string> = {
  * @description
  * Body layout classes.
  *
- * @type {Readonly<Record<'simple' | 'full' | 'scrollable', string>>}
+ * @type {Readonly<Record<'simple' | 'full' | 'screen' | 'scrollable', string>>}
  */
-const BODIES: Readonly<Record<'simple' | 'full' | 'scrollable', string>> = {
+const BODIES: Readonly<Record<'simple' | 'full' | 'screen' | 'scrollable', string>> = {
   simple: 'min-h-0 min-w-0 flex-1 empty:hidden max-md:overflow-y-auto',
   full: 'min-h-0 min-w-0 flex-1 overflow-y-auto empty:hidden',
+  screen: `min-h-0 min-w-0 flex-1 overflow-y-auto empty:hidden ${ɵFOCUS_INSET}`,
   scrollable: `min-h-0 flex-1 overflow-y-auto px-6 py-3 [scrollbar-color:var(--color-track)_transparent] [scrollbar-width:thin] ${ɵFOCUS_INSET}`,
 } as const;
 
@@ -115,6 +158,13 @@ const BODIES: Readonly<Record<'simple' | 'full' | 'scrollable', string>> = {
  * `closed` emits the reason once the exit animation ends. `scrollable` pins the header and footer
  * and scrolls the body (a focusable region; mark the first field `cdkFocusInitial` in a scrollable
  * form). Under 768 px the window fills the screen.
+ *
+ * `size="screen"` covers the whole viewport on the canvas surface, without border, radius, shadow,
+ * padding or backdrop: the body fills the height, scrolls as a focusable region and stays unpadded
+ * (`scrollable` then only pins the header and footer), and the consumer lays out the content.
+ * Focus trapping, Escape
+ * and the close button behave as at the other sizes. Changing `size` while open resizes the window
+ * and shows or hides the backdrop in place, without closing it.
  */
 @Component({
   selector: 'cw-dialog',
@@ -144,8 +194,8 @@ export class CwDialog implements CwDialogContext {
    * @readonly
    *
    * @description
-   * Maximum dialog size: `sm` 384 px, `default` 448 px, `md` 512 px, `lg` 672 px, `xl` 896 px
-   * or `full`.
+   * Maximum dialog size: `sm` 384 px, `default` 448 px, `md` 512 px, `lg` 672 px, `xl` 896 px,
+   * `full` (the screen less 16 px, over a backdrop) or `screen` (the whole viewport, no backdrop).
    *
    * @type {InputSignal<CwDialogSize>}
    */
@@ -281,10 +331,10 @@ export class CwDialog implements CwDialogContext {
    *
    * @type {Signal<string>}
    */
-  protected readonly panelClasses: Signal<string> = computed(
-    () =>
-      `${PANEL} ${this.scrollable() ? LAYOUTS.scrollable : LAYOUTS.simple} ${SIZES[this.size()]}`,
-  );
+  protected readonly panelClasses: Signal<string> = computed(() => {
+    if (this.size() === 'screen') return `${SCREEN_PANEL} ${SIZES.screen}`;
+    return `${PANEL} ${this.scrollable() ? LAYOUTS.scrollable : LAYOUTS.simple} ${SIZES[this.size()]}`;
+  });
 
   /**
    * Property bodyClasses
@@ -296,9 +346,37 @@ export class CwDialog implements CwDialogContext {
    * @type {Signal<string>}
    */
   protected readonly bodyClasses: Signal<string> = computed(() => {
+    if (this.size() === 'screen') return BODIES.screen;
     if (this.scrollable()) return BODIES.scrollable;
     return this.size() === 'full' ? BODIES.full : BODIES.simple;
   });
+
+  /**
+   * Property bodyFocusable
+   * @readonly
+   *
+   * @description
+   * Whether the body is a focusable scroll region: a `scrollable` dialog, and always a `screen` one
+   * (its body always scrolls), so a keyboard can reach overflowing static content.
+   *
+   * @type {Signal<boolean>}
+   */
+  protected readonly bodyFocusable: Signal<boolean> = computed(
+    () => this.scrollable() || this.size() === 'screen',
+  );
+
+  /**
+   * Property paneLayout
+   * @readonly
+   *
+   * @description
+   * Pane size and backdrop visibility for the current size.
+   *
+   * @type {Signal<PaneLayout>}
+   */
+  private readonly paneLayout: Signal<PaneLayout> = computed(() =>
+    this.size() === 'screen' ? PANE_LAYOUTS.screen : PANE_LAYOUTS.window,
+  );
 
   /**
    * Property template
@@ -388,6 +466,14 @@ export class CwDialog implements CwDialogContext {
         else this.detach();
       });
     });
+    // A size change while open (`screen` and a window) updates the pane and the backdrop in place:
+    // they are overlay settings, read otherwise only when the overlay attaches.
+    effect(() => {
+      const layout: PaneLayout = this.paneLayout();
+      untracked(() => {
+        this.overlay.resize(layout);
+      });
+    });
     inject(DestroyRef).onDestroy(() => {
       this.overlay.dispose();
     });
@@ -451,6 +537,7 @@ export class CwDialog implements CwDialogContext {
       describedBy: this.description() ? this.descriptionId : null,
       autoFocus: 'first-tabbable',
       restoreFocus: this.origin,
+      ...this.paneLayout(),
       onKeydown: (event) => {
         this.onKeydown(event);
       },

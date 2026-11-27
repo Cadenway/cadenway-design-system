@@ -6,7 +6,7 @@
     [attr.aria-busy]="pending() ? 'true' : null"
   >
     <ng-content select="cw-dialog-header" />
-    <div [class]="bodyClasses()" [attr.tabindex]="scrollable() ? 0 : null">
+    <div [class]="bodyClasses()" [attr.tabindex]="bodyFocusable() ? 0 : null">
       <ng-content />
     </div>
     <ng-content select="cw-dialog-footer" />
