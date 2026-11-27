@@ -357,6 +357,150 @@ describe('CwStepper', () => {
   });
 });
 
+/**
+ * Class SegmentsHost
+ *
+ * @description
+ * Hosts the onboarding assistant's segmented bar, driven by the consumer's own buttons.
+ */
+@Component({
+  imports: [CwStepper, CwStep],
+  template: `
+    <cw-stepper #wizard variant="segments" ariaLabel="Steps" [(selected)]="step">
+      <cw-step label="Space" />
+      <cw-step label="Template" />
+      <cw-step label="Team" [error]="teamError()" />
+      <cw-step label="Import" />
+    </cw-stepper>
+  `,
+})
+class SegmentsHost {
+  // #region Properties
+  /**
+   * Property wizard
+   * @readonly
+   *
+   * @description
+   * Segmented stepper controlled by the fixture.
+   *
+   * @type {Signal<CwStepper>}
+   */
+  public readonly wizard: Signal<CwStepper> = viewChild.required<CwStepper>('wizard');
+
+  /**
+   * Property step
+   * @readonly
+   *
+   * @description
+   * Selected step.
+   *
+   * @type {WritableSignal<number>}
+   */
+  public readonly step: WritableSignal<number> = signal(1);
+
+  /**
+   * Property teamError
+   * @readonly
+   *
+   * @description
+   * Optional error message of the team step.
+   *
+   * @type {WritableSignal<string | null>}
+   */
+  public readonly teamError: WritableSignal<string | null> = signal<string | null>(null);
+  // #endregion
+}
+
+describe('CwStepper variant segments', () => {
+  let fixture: ComponentFixture<SegmentsHost>;
+  let host: HTMLElement;
+  let component: SegmentsHost;
+  let announced: string[];
+
+  beforeEach(async () => {
+    announced = [];
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: LiveAnnouncer,
+          useValue: {
+            announce: (message: string) => {
+              announced.push(message);
+              return Promise.resolve();
+            },
+          },
+        },
+      ],
+    });
+    fixture = TestBed.createComponent(SegmentsHost);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    host = fixture.nativeElement as HTMLElement;
+    component = fixture.componentInstance;
+  });
+
+  it('lists one item per step, the current one marked and every state in hidden text', () => {
+    const ol: HTMLElement = list(host, 'Steps');
+
+    expect(ol.parentElement?.getAttribute('data-variant')).toBe('segments');
+    expect(steps(ol)).toEqual([
+      'Space — étape 1, terminée',
+      'Template — étape 2, en cours',
+      'Team — étape 3, à venir',
+      'Import — étape 4, à venir',
+    ]);
+    expect(Array.from(ol.children, (li) => li.getAttribute('aria-current'))).toEqual([
+      null,
+      'step',
+      null,
+      null,
+    ]);
+  });
+
+  it('makes no step clickable, even a done one', () => {
+    expect(host.querySelectorAll('cw-stepper button')).toHaveLength(0);
+  });
+
+  it('writes no position line of its own', () => {
+    expect(host.textContent).not.toContain('Étape 2 sur 4');
+  });
+
+  it('moves with next() and previous() and announces the new step', async () => {
+    component.wizard().next();
+    await fixture.whenStable();
+    expect(component.step()).toBe(2);
+    expect(list(host, 'Steps').children[2].getAttribute('aria-current')).toBe('step');
+
+    component.wizard().previous();
+    await fixture.whenStable();
+
+    expect(component.step()).toBe(1);
+    expect(announced).toEqual(['Étape 3 sur 4 : Team', 'Étape 2 sur 4 : Template']);
+  });
+
+  it('counts the steps before a selection made by the consumer as done', async () => {
+    component.step.set(3);
+    await fixture.whenStable();
+
+    expect(steps(list(host, 'Steps'))).toEqual([
+      'Space — étape 1, terminée',
+      'Template — étape 2, terminée',
+      'Team — étape 3, terminée',
+      'Import — étape 4, en cours',
+    ]);
+  });
+
+  it('shows an error as an alert under the bar', async () => {
+    component.teamError.set('The invitation could not be sent.');
+    await fixture.whenStable();
+
+    expect(host.querySelector('cw-stepper [role="alert"]')?.textContent.trim()).toBe(
+      'The invitation could not be sent.',
+    );
+    expect(list(host, 'Steps').children[2].getAttribute('data-state')).toBe('error');
+  });
+});
+
 describe('provideCwStepperLabels', () => {
   it('uses supplied text in the hosted declarations', () => {
     TestBed.configureTestingModule({

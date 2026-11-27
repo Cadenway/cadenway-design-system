@@ -12,6 +12,7 @@ export type {
   CwStepperProvidedLabels,
   CwStepperOrientation,
   CwStepperSize,
+  CwStepperVariant,
 } from './stepper.types';
 
 export { CW_STEPPER_LABELS } from './stepper.constants';

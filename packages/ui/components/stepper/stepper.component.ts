@@ -39,6 +39,7 @@ import type {
   CwStepperLabels,
   CwStepperOrientation,
   CwStepperSize,
+  CwStepperVariant,
 } from './stepper.types';
 
 /* Literal class strings (Stepper sheet and preview of the Design System artifact). */
@@ -118,6 +119,39 @@ const TEXT: Record<CwStepperSize | 'vertical', string> = {
   default: 'text-sm whitespace-nowrap',
   sm: 'text-xs whitespace-nowrap',
   vertical: 'text-sm leading-5',
+};
+
+/* Mockup App.dc.html, onboarding assistant: a 4 px bar per step, filled up to the current one, and
+   a label below. Ink instead of the mockup's `bg-primary`: amethyst is never a fill (tokens usage
+   rules), as for `cw-progress`. */
+/**
+ * Constant SEGMENT
+ *
+ * @description
+ * Bar classes for each step state of the `segments` variant.
+ *
+ * @type {Record<CwStepState, string>}
+ */
+const SEGMENT: Record<CwStepState, string> = {
+  done: 'bg-foreground',
+  current: 'bg-foreground',
+  todo: 'bg-track',
+  error: 'bg-destructive',
+};
+
+/**
+ * Constant SEGMENT_LABEL
+ *
+ * @description
+ * Label classes for each step state of the `segments` variant: only the current step is in ink.
+ *
+ * @type {Record<CwStepState, string>}
+ */
+const SEGMENT_LABEL: Record<CwStepState, string> = {
+  done: 'text-muted-foreground',
+  current: 'text-foreground',
+  todo: 'text-muted-foreground',
+  error: 'text-destructive',
 };
 
 /**
@@ -206,6 +240,17 @@ interface StepView {
   readonly labelClasses: string;
 
   /**
+   * Property segmentClasses
+   * @readonly
+   *
+   * @description
+   * Bar classes of the step in the `segments` variant.
+   *
+   * @type {string}
+   */
+  readonly segmentClasses: string;
+
+  /**
    * Property hiddenState
    * @readonly
    *
@@ -241,9 +286,15 @@ interface StepView {
  *
  * Keyboard: Tab goes from one reachable step to the next, then into the panel; ← → (↑ ↓ when
  * vertical) move between reachable steps, Home and End to the first and last; Enter and Space go
- * to the focused step. `data-orientation` on the host, `data-state="done|current|todo|error"` and
- * `data-optional` on each step, `aria-current="step"` on the current one. Texts are French by
- * default, overridable through `labels`.
+ * to the focused step. `data-orientation` and `data-variant` on the host,
+ * `data-state="done|current|todo|error"` and `data-optional` on each step, `aria-current="step"` on
+ * the current one. Texts are French by default, overridable through `labels`.
+ *
+ * `variant="segments"` draws a segmented progress bar instead (one bar per step, equal widths, the
+ * label below): one row whatever `orientation` and `size`, no step is a button and no position line
+ * is written, so the consumer shows « Étape 3 sur 5 » itself and moves with `[(selected)]`, `next()`
+ * and `previous()`. The list keeps its name, `aria-current="step"` and the hidden state of each
+ * step; errors and the current panel render as in a horizontal stepper.
  */
 @Component({
   selector: 'cw-stepper',
@@ -252,7 +303,8 @@ interface StepView {
   host: {
     class: 'block',
     '(keydown)': 'onKeydown($event)',
-    '[attr.data-orientation]': 'orientation()',
+    '[attr.data-orientation]': 'segmented() ? "horizontal" : orientation()',
+    '[attr.data-variant]': 'variant()',
     '[attr.data-size]': 'effectiveSize()',
   },
   templateUrl: './stepper.component.html',
@@ -292,6 +344,18 @@ export class CwStepper {
    * @type {InputSignal<CwStepperSize>}
    */
   public readonly size: InputSignal<CwStepperSize> = input<CwStepperSize>('default');
+
+  /**
+   * Property variant
+   * @readonly
+   *
+   * @description
+   * Numbered indicators with connectors (`default`) or a segmented bar of non-interactive steps
+   * without position line (`segments`); `segments` ignores `orientation` and `size`.
+   *
+   * @type {InputSignal<CwStepperVariant>}
+   */
+  public readonly variant: InputSignal<CwStepperVariant> = input<CwStepperVariant>('default');
 
   /**
    * Property selected
@@ -495,7 +559,20 @@ export class CwStepper {
    *
    * @type {Signal<boolean>}
    */
-  protected readonly vertical: Signal<boolean> = computed(() => this.orientation() === 'vertical');
+  protected readonly vertical: Signal<boolean> = computed(
+    () => !this.segmented() && this.orientation() === 'vertical',
+  );
+
+  /**
+   * Property segmented
+   * @readonly
+   *
+   * @description
+   * Whether the stepper draws the `segments` variant.
+   *
+   * @type {Signal<boolean>}
+   */
+  protected readonly segmented: Signal<boolean> = computed(() => this.variant() === 'segments');
 
   /**
    * Property effectiveSize
@@ -507,7 +584,7 @@ export class CwStepper {
    * @type {Signal<CwStepperSize>}
    */
   protected readonly effectiveSize: Signal<CwStepperSize> = computed<CwStepperSize>(() =>
-    this.vertical() ? 'default' : this.size(),
+    this.vertical() || this.segmented() ? 'default' : this.size(),
   );
 
   /**
@@ -584,6 +661,7 @@ export class CwStepper {
     const steps: readonly CwStep[] = this.steps();
     const current: number = this.current();
     const text: CwStepperLabels = this.text();
+    const segmented: boolean = this.segmented();
     const sizeText: string = this.vertical() ? TEXT.vertical : TEXT[this.effectiveSize()];
     return steps.map((step, index) => {
       const state: CwStepState = this.stateOf(index);
@@ -591,10 +669,14 @@ export class CwStepper {
         step,
         index,
         state,
-        reachable: this.canGo(index),
+        // Mockup App.dc.html: the assistant's steps are never clickable.
+        reachable: !segmented && this.canGo(index),
         crossed: state === 'done' || index < current,
         labelId: `${this.baseId}-label-${String(index)}`,
-        labelClasses: `${sizeText} ${LABEL[state]}`,
+        labelClasses: segmented
+          ? `text-xs font-medium ${SEGMENT_LABEL[state]}`
+          : `${sizeText} ${LABEL[state]}`,
+        segmentClasses: SEGMENT[state],
         hiddenState: ` — ${text.step} ${String(index + 1)}, ${text[state]}`,
       };
     });
@@ -692,7 +774,7 @@ export class CwStepper {
    * @param {number} index - Index of the requested step.
    */
   protected go(index: number): void {
-    if (this.canGo(index)) this.move(index);
+    if (!this.segmented() && this.canGo(index)) this.move(index);
   }
 
   /**
@@ -729,7 +811,11 @@ export class CwStepper {
   private stateOf(index: number): CwStepState {
     const step: CwStep = this.steps()[index];
     if (step.error()) return 'error';
-    if (index === this.current()) return 'current';
+    const current: number = this.current();
+    if (index === current) return 'current';
+    // Mockup App.dc.html: the bar is filled up to the current step, which the consumer may set
+    // directly; only a step explicitly marked `[completed]="false"` stays to do.
+    if (this.segmented() && index < current && step.completed() !== false) return 'done';
     return this.isCompleted(index) ? 'done' : 'todo';
   }
 
