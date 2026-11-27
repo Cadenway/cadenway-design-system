@@ -21,10 +21,7 @@
   </button>
 </ng-template>
 @if (variant() === 'card') {
-  <label
-    [for]="id()"
-    class="flex w-full cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors hover:bg-accent has-[[data-state=checked]]:border-foreground/40 has-[[data-state=checked]]:bg-selected has-disabled:cursor-not-allowed motion-reduce:transition-none"
-  >
+  <label [for]="id()" [class]="cardClasses()">
     <ng-container [ngTemplateOutlet]="radio" />
     <span class="flex min-w-0 flex-col gap-0.5"><ng-content /></span>
   </label>

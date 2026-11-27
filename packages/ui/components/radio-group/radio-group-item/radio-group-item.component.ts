@@ -18,7 +18,7 @@ import { CwRadioGroup } from '../radio-group.component';
 import type { CwRadioGroupItemVariant } from '../radio-group.types';
 
 /* Literal class strings (Radio Group sheet and preview of the Design System artifact), so Tailwind
-   finds them in the compiled package. The card classes are in the template. */
+   finds them in the compiled package. */
 /**
  * Constant RADIO
  *
@@ -43,6 +43,31 @@ const RADIOS: Record<CwRadioGroupItemVariant, string> = {
   // In a card the radio sits on the first 20 px line of the title.
   card: `${RADIO} mt-0.5`,
 };
+
+/**
+ * Constant CARD
+ *
+ * @description
+ * Choice card classes: `bg-accent` on hover, `bg-selected` with a `foreground/40` border once
+ * selected.
+ *
+ * @type {string}
+ */
+const CARD: string =
+  'flex w-full cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors hover:bg-accent has-[[data-state=checked]]:border-foreground/40 has-[[data-state=checked]]:bg-selected has-disabled:cursor-not-allowed motion-reduce:transition-none';
+
+/* Without its dot the radio is visually hidden but stays the focused control, so the card draws
+   the focus ring that the radio would have drawn. */
+/**
+ * Constant CARD_WITHOUT_INDICATOR
+ *
+ * @description
+ * Extra card classes when the radio dot is hidden: the focus ring moves to the card.
+ *
+ * @type {string}
+ */
+const CARD_WITHOUT_INDICATOR: string =
+  'outline-hidden has-focus-visible:ring-2 has-focus-visible:ring-ring has-focus-visible:ring-offset-2 has-focus-visible:ring-offset-background';
 
 /**
  * Constant HOSTS
@@ -119,7 +144,9 @@ class RadioOption implements FocusableOption {
  * `default`: the bare radio; name it with a `<label for>` (its `id`), the description beside it.
  * `card`: a choice card, the whole card the radio's label: the radio and the projected content
  * (title, description) in a bordered card, `bg-accent` on hover, `bg-selected` with a
- * `foreground/40` border once selected. A disabled option is dimmed and skipped by the arrows.
+ * `foreground/40` border once selected. `[indicator]="false"` hides the dot of a card, which then
+ * shows its selection by its fill and border alone and draws the focus ring itself; the radio stays
+ * the focused, announced control. A disabled option is dimmed and skipped by the arrows.
  */
 @Component({
   selector: 'cw-radio-group-item',
@@ -180,6 +207,20 @@ export class CwRadioGroupItem {
    */
   public readonly variant: InputSignal<CwRadioGroupItemVariant> =
     input<CwRadioGroupItemVariant>('default');
+
+  /**
+   * Property indicator
+   * @readonly
+   *
+   * @description
+   * Whether a `card` shows its radio dot; `true` by default. Ignored by the bare `default` radio,
+   * which is nothing but its dot.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   */
+  public readonly indicator: InputSignalWithTransform<boolean, unknown> = input(true, {
+    transform: booleanAttribute,
+  });
 
   /**
    * Property group
@@ -248,7 +289,22 @@ export class CwRadioGroupItem {
    *
    * @type {Signal<string>}
    */
-  protected readonly radioClasses: Signal<string> = computed(() => RADIOS[this.variant()]);
+  protected readonly radioClasses: Signal<string> = computed(() =>
+    this.variant() === 'card' && !this.indicator() ? 'sr-only' : RADIOS[this.variant()],
+  );
+
+  /**
+   * Property cardClasses
+   * @readonly
+   *
+   * @description
+   * Card classes, with the focus ring on the card when the dot is hidden.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly cardClasses: Signal<string> = computed(() =>
+    this.indicator() ? CARD : `${CARD} ${CARD_WITHOUT_INDICATOR}`,
+  );
 
   /**
    * Property option

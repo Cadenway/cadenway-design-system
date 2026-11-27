@@ -190,6 +190,74 @@ describe('CwRadioGroup', () => {
     });
   });
 
+  describe('card without indicator', () => {
+    /**
+     * Class IndicatorHost
+     *
+     * @description
+     * Hosts choice cards whose radio dot is hidden.
+     */
+    @Component({
+      imports: [CwRadioGroup, CwRadioGroupItem],
+      template: `
+        <cw-radio-group ariaLabel="Space template" [(value)]="template">
+          <cw-radio-group-item variant="card" value="dev" [indicator]="false">
+            Software development
+          </cw-radio-group-item>
+          <cw-radio-group-item variant="card" value="marketing" [indicator]="false">
+            Marketing
+          </cw-radio-group-item>
+        </cw-radio-group>
+      `,
+    })
+    class IndicatorHost {
+      // #region Properties
+      /**
+       * Property template
+       * @readonly
+       *
+       * @description
+       * Selected template.
+       *
+       * @type {WritableSignal<string | null>}
+       */
+      public readonly template: WritableSignal<string | null> = signal<string | null>('dev');
+      // #endregion
+    }
+
+    let host: HTMLElement;
+    let fixture: ComponentFixture<IndicatorHost>;
+
+    beforeEach(async () => {
+      fixture = TestBed.createComponent(IndicatorHost);
+      fixture.autoDetectChanges();
+      await fixture.whenStable();
+      host = fixture.nativeElement as HTMLElement;
+    });
+
+    it('keeps each card a named, checkable and focusable radio', async () => {
+      const marketing: HTMLButtonElement = radio(host, 'Marketing');
+      expect(radio(host, 'Software development').getAttribute('aria-checked')).toBe('true');
+      expect(radio(host, 'Software development').tabIndex).toBe(0);
+
+      host.querySelector<HTMLLabelElement>(`label[for="${marketing.id}"]`)?.click();
+      await fixture.whenStable();
+
+      expect(fixture.componentInstance.template()).toBe('marketing');
+      expect(marketing.getAttribute('aria-checked')).toBe('true');
+      expect(marketing.tabIndex).toBe(0);
+    });
+
+    it('moves the selection and the focus with the arrows', async () => {
+      radio(host, 'Software development').focus();
+      press(radio(host, 'Software development'), 'ArrowDown');
+      await fixture.whenStable();
+
+      expect(fixture.componentInstance.template()).toBe('marketing');
+      expect(document.activeElement).toBe(radio(host, 'Marketing'));
+    });
+  });
+
   it('is the value accessor of a reactive form control and reports its invalid state', async () => {
     /**
      * Class ReactiveHost
