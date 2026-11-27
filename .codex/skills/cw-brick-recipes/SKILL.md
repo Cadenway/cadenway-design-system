@@ -80,7 +80,7 @@ tasks beyond the display contracts of `cw-status-icon` and `cw-priority-icon`"):
 | InputGroup | `input-group` | `cw-input-group`, `input[cwInputGroupInput]`, `textarea[cwInputGroupTextarea]`, `cw-input-group-addon`, `-text`, `button[cwInputGroupButton]` | group `size`; addon `align`: inline-start, inline-end, block-start, block-end; button `size`: xs, icon-xs, sm, icon-sm, `variant` = ghost | native accessor |
 | Checkbox | `checkbox` | `cw-checkbox` | `checked`, `indeterminate` (models); `disabled`; `id`; `ariaLabel` | `role="checkbox"`; forms pattern |
 | Switch | `switch` | `cw-switch` | `checked` (model); `size`: sm, default; `disabled`; `id`; `ariaLabel` | `role="switch"` |
-| RadioGroup | `radio-group` | `cw-radio-group`, `cw-radio-group-item` | `value` (model); `orientation`; `disabled`; `required`; `ariaLabel`; item `value`, `disabled`. Choice cards and chips are its card style | roving tabindex |
+| RadioGroup | `radio-group` | `cw-radio-group`, `cw-radio-group-item` | `value` (model); `orientation`; `disabled`; `required`; `ariaLabel`; item `value`, `disabled`, `variant`: default, card, `indicator` = true (card dot). Choice cards and chips are its card style | roving tabindex |
 | Toggle | `toggle` | `button[cwToggle]` | `pressed` (model); `variant`: default, outline; `size`: sm, default, lg | — |
 | ToggleGroup | `toggle-group` | `cw-toggle-group`, `button[cwToggleGroupItem]` | `type`: single, multiple; `value` (model); `variant`; `size`; `spacing`; `orientation`; `ariaLabel` | roving tabindex |
 | InputOTP | `input-otp` | `cw-input-otp`, `-group`, `-slot`, `-separator` | `length` = 6; `pattern`: digits, alphanumeric; `value` (model); out `complete` | one hidden native input |
@@ -118,7 +118,7 @@ Select and Combobox open their panel docked above the bottom tab bar below 768 p
 
 | Brick | Entry | Selectors | API | Primitive |
 | --- | --- | --- | --- | --- |
-| Dialog | `dialog` | `cw-dialog`, `[cwDialogTrigger]`, `cw-dialog-header`, `h2[cwDialogTitle]`, `p[cwDialogDescription]`, `cw-dialog-footer`, `button[cwDialogClose]` | `open` (model); `size`: sm, default, lg, full; `scrollable`; `showClose`; `closeOnEscape`; `closeOnOverlayClick`; `pending`; `closeLabel` = Fermer; out `closed` (escape, overlay, close, action). Full screen under 768 px | CDK Dialog and Overlay, focus trap |
+| Dialog | `dialog` | `cw-dialog`, `[cwDialogTrigger]`, `cw-dialog-header`, `h2[cwDialogTitle]`, `p[cwDialogDescription]`, `cw-dialog-footer`, `button[cwDialogClose]` | `open` (model); `size`: sm, default, md, lg, xl, full, screen (edge to edge, no backdrop); `scrollable`; `showClose`; `closeOnEscape`; `closeOnOverlayClick`; `pending`; `closeLabel` = Fermer; out `closed` (escape, overlay, close, action). Full screen under 768 px | CDK Dialog and Overlay, focus trap |
 | Sheet | `sheet` | `cw-sheet`, `[cwSheetTrigger]`, `cw-sheet-header`, `h2[cwSheetTitle]`, `p[cwSheetDescription]`, `cw-sheet-body`, `cw-sheet-footer`, `button[cwSheetClose]` | `open` (model); `side`: right, left, top, bottom; `size`: sm, default, lg, full; `showClose`; `closeOnEscape`; `closeOnOverlayClick`; `closeLabel` = Fermer; out `closed` (escape, overlay, close, action). `right` enters with `animate-sheet-in`, `bottom` with `animate-drawer-in` | CDK Dialog docked by a global position, focus trap |
 | AlertDialog | `alert-dialog` | `cw-alert-dialog`, `[cwAlertDialogTrigger]`, `cw-alert-dialog-media`, `h2[cwAlertDialogTitle]`, `p[cwAlertDialogDescription]`, `button[cwAlertDialogCancel]`, `button[cwAlertDialogAction]` | `open` (model); `variant`: default, destructive; `size`: sm, default; `confirmText` (type the name to confirm); `confirmLabel`; `pending`; outs `confirm`, `cancel` | CDK Dialog (`role="alertdialog"`) |
 | Toast | `toast` | `cw-toaster`; `CwToastService` | `position` = bottom-right; `expand`; `visibleToasts` = 3; `duration` per tone (6 s in the mockup); `closeButton`; `hotkey` = F8; action and undo through `action.run()` | CDK Overlay; live region |
@@ -137,7 +137,7 @@ Select and Combobox open their panel docked above the bottom tab bar below 768 p
 | Accordion | `accordion` | `cw-accordion`, `-item`, `button[cwAccordionTrigger]`, `cw-accordion-content` | `type`: single, multiple; `collapsible` = true; `value` (model); `variant`: default, card | Aria Accordion |
 | Collapsible | `collapsible` | `cw-collapsible`, `[cwCollapsibleTrigger]`, `cw-collapsible-content` | `expanded` (model); `disabled` | `aria-expanded` + grid rows |
 | Pagination | `pagination` | `cw-pagination`, `a[cwPaginationLink]`, `cw-pagination-ellipsis` | `page`, `pageSize` (models); `total` (required); `pageSizes`; `variant`: full, simple; `size`; `siblings`; `showFirstLast`; `showRange` | — |
-| Stepper | `stepper` | `cw-stepper` (+ `CwStep`) | `orientation`; `size`; `selected` (model); `linear` = true; `ariaLabel` = Progression; step `label`, `description`, `optional`, `completed`, `error`, `editable` | CDK Stepper |
+| Stepper | `stepper` | `cw-stepper` (+ `CwStep`) | `orientation`; `size`; `variant`: default, segments (segmented bar, steps not clickable, no position line); `selected` (model); `linear` = true; `ariaLabel` = Progression; step `label`, `description`, `optional`, `completed`, `error`, `editable` | CDK Stepper |
 
 ## Wave 5: data and composed blocks
 
