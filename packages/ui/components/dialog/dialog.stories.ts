@@ -289,6 +289,68 @@ export const Sizes: Story = {
   },
 };
 
+/**
+ * Edge to edge (`size="screen"`), the onboarding assistant of the mockup (`App.dc.html`): the whole
+ * viewport on the canvas surface, no border, radius or backdrop; the consumer lays out a centered
+ * column and names the window with its own `h1` (`[id]="dialog.titleId"`). Here only the explicit
+ * button closes it (`closeOnEscape`, `closeOnOverlayClick` and `showClose` off); the focus stays
+ * trapped inside and returns to the trigger. English source copy, as the webapp writes it.
+ */
+export const Screen: Story = {
+  render: () => ({
+    template: `
+      <button cwButton variant="outline" [cwDialogTrigger]="setup">Set up the workspace</button>
+      <cw-dialog
+        #setup
+        size="screen"
+        [closeOnEscape]="false"
+        [closeOnOverlayClick]="false"
+        [showClose]="false"
+      >
+        <div class="flex min-h-full items-start justify-center px-4 py-8 sm:items-center sm:py-10">
+          <div class="flex w-full max-w-xl flex-col gap-6">
+            <div class="flex items-center gap-2">
+              <span class="text-base font-bold">Cadenway</span>
+              <button cwButton variant="ghost" size="sm" class="ml-auto" cwDialogClose>Set up later</button>
+            </div>
+            <div class="flex flex-col gap-6 rounded-xl border bg-card p-5 sm:p-8">
+              <div class="flex flex-col gap-1">
+                <p class="text-xs font-medium text-muted-foreground">Step 1 of 4</p>
+                <h1 class="text-2xl font-semibold tracking-tight" [id]="setup.titleId">Welcome to Atelier Nord</h1>
+              </div>
+              <cw-field>
+                <label cwFieldLabel>Space name</label>
+                <input cwInput value="Product" />
+              </cw-field>
+              <div class="flex justify-end">
+                <button cwButton>Continue</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </cw-dialog>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const trigger: HTMLElement = within(light(canvasElement)).getByRole('button', {
+      name: 'Set up the workspace',
+    });
+    await userEvent.click(trigger);
+    const dialog: HTMLElement = await within(document.body).findByRole('dialog', {
+      name: 'Welcome to Atelier Nord',
+    });
+    await expect(dialog.firstElementChild).toHaveAttribute('data-size', 'screen');
+    await expect(document.body.querySelector('.cdk-overlay-backdrop')).toBeNull();
+    await waitFor(() => expect(dialog.contains(document.activeElement)).toBe(true));
+
+    await userEvent.keyboard('{Escape}');
+    await expect(within(document.body).getByRole('dialog')).toBeInTheDocument();
+
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Set up later' }));
+    await waitFor(() => expect(document.body.querySelector('[role="dialog"]')).toBeNull());
+    await expect(trigger).toHaveFocus();
+  },
+};
+
 /** While `pending`, Escape and the close buttons are ignored; the consumer closes it when done. */
 export const Pending: Story = {
   render: () => {

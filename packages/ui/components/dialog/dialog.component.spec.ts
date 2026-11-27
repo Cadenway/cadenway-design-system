@@ -437,6 +437,120 @@ describe('CwDialog size', () => {
   });
 });
 
+/**
+ * Component ScreenHost
+ *
+ * @description
+ * Hosts an edge-to-edge dialog opened from a trigger, with the default close behaviour.
+ */
+@Component({
+  imports: [CwButton, CwDialog, CwDialogClose, CwDialogTrigger],
+  template: `
+    <button cwButton variant="outline" [cwDialogTrigger]="setup">Set up</button>
+    <cw-dialog #setup size="screen" (closed)="reasons.push($event)">
+      <h1 [id]="setup.titleId">Welcome to Atelier Nord</h1>
+      <input aria-label="Space name" value="Product" />
+      <button cwButton cwDialogClose>Set up later</button>
+    </cw-dialog>
+  `,
+})
+class ScreenHost {
+  // #region Properties
+  /**
+   * Property reasons
+   * @readonly
+   *
+   * @description
+   * Recorded dialog close reasons.
+   *
+   * @type {CwDialogCloseReason[]}
+   */
+  public readonly reasons: CwDialogCloseReason[] = [];
+  // #endregion
+}
+
+describe('CwDialog size screen', () => {
+  let fixture: ComponentFixture<ScreenHost>;
+  let trigger: HTMLButtonElement;
+
+  /**
+   * Function openScreen
+   *
+   * @description
+   * Opens the edge-to-edge dialog from its trigger.
+   *
+   * @returns {Promise<HTMLElement>} Dialog element after the trigger opens it.
+   */
+  async function openScreen(): Promise<HTMLElement> {
+    trigger.focus();
+    trigger.click();
+    await fixture.whenStable();
+    const found: HTMLElement | null = dialog();
+    if (!found) throw new Error('Dialog not open');
+    return found;
+  }
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(ScreenHost);
+    fixture.autoDetectChanges();
+    trigger = button(fixture.nativeElement as HTMLElement, 'Set up');
+  });
+
+  afterEach(() => {
+    fixture.destroy();
+  });
+
+  it('covers the viewport on the canvas surface without window frame', async () => {
+    const window: HTMLElement = await openScreen();
+    const panel: Element | null = window.firstElementChild;
+
+    expect(window.getAttribute('aria-modal')).toBe('true');
+    expect(panel?.getAttribute('data-size')).toBe('screen');
+    expect(panel?.classList).toContain('w-screen');
+    expect(panel?.classList).toContain('h-dvh');
+    expect(panel?.classList).toContain('bg-canvas');
+    expect(panel?.classList).not.toContain('rounded-xl');
+    expect(panel?.classList).not.toContain('border');
+    expect(panel?.classList).not.toContain('p-6');
+  });
+
+  it('draws no backdrop', async () => {
+    const window: HTMLElement = await openScreen();
+
+    expect(window.parentElement?.parentElement?.previousElementSibling ?? null).toBeNull();
+  });
+
+  it('is named by the consumer heading and keeps the focus inside', async () => {
+    const window: HTMLElement = await openScreen();
+    const title: HTMLElement | null = document.getElementById(
+      window.getAttribute('aria-labelledby') ?? '',
+    );
+
+    expect(title?.textContent.trim()).toBe('Welcome to Atelier Nord');
+    expect(window.contains(document.activeElement)).toBe(true);
+  });
+
+  it('keeps the Escape, close button and cwDialogClose behaviour of the other sizes', async () => {
+    let window: HTMLElement = await openScreen();
+    press(window.querySelector('input') ?? window, 'Escape');
+    await fixture.whenStable();
+    expect(dialog()).toBeNull();
+    expect(document.activeElement).toBe(trigger);
+
+    window = await openScreen();
+    button(window, 'Fermer').click();
+    await fixture.whenStable();
+    expect(dialog()).toBeNull();
+
+    window = await openScreen();
+    button(window, 'Set up later').click();
+    await fixture.whenStable();
+
+    expect(dialog()).toBeNull();
+    expect(fixture.componentInstance.reasons).toEqual(['escape', 'close', 'close']);
+  });
+});
+
 describe('provideCwDialogLabels', () => {
   it('names the close button of the dialogs below it', async () => {
     TestBed.configureTestingModule({ providers: [provideCwDialogLabels({ close: 'Close' })] });

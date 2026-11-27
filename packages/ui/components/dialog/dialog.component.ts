@@ -48,6 +48,21 @@ const PANEL: string =
   'animate-pop-in motion-reduce:animate-none data-[state=closed]:animate-pop-out motion-reduce:data-[state=closed]:animate-none ' +
   'max-md:h-dvh max-md:max-h-none max-md:w-screen max-md:max-w-none max-md:rounded-none max-md:border-0';
 
+/* Mockup App.dc.html, onboarding assistant: `fixed inset-0 bg-canvas`, no window around the content.
+   The panel already covers the page, so it fades instead of popping and draws no shadow. */
+/**
+ * Constant SCREEN_PANEL
+ *
+ * @description
+ * Base classes for the edge-to-edge panel of size `screen`, which replace the window classes and
+ * the layout padding: the consumer lays out the content.
+ *
+ * @type {string}
+ */
+const SCREEN_PANEL: string =
+  'relative flex flex-col bg-canvas text-foreground outline-none ' +
+  'animate-fade-in motion-reduce:animate-none data-[state=closed]:animate-fade-out motion-reduce:data-[state=closed]:animate-none';
+
 /**
  * Constant LAYOUTS
  *
@@ -77,6 +92,7 @@ const SIZES: Record<CwDialogSize, string> = {
   lg: 'w-[calc(100vw-2rem)] max-w-2xl',
   xl: 'w-[calc(100vw-2rem)] max-w-4xl',
   full: 'h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)]',
+  screen: 'h-dvh max-h-dvh w-screen',
 };
 
 // The body takes the remaining height when the window is taller than its content (`full`, mobile).
@@ -115,6 +131,10 @@ const BODIES: Readonly<Record<'simple' | 'full' | 'scrollable', string>> = {
  * `closed` emits the reason once the exit animation ends. `scrollable` pins the header and footer
  * and scrolls the body (a focusable region; mark the first field `cdkFocusInitial` in a scrollable
  * form). Under 768 px the window fills the screen.
+ *
+ * `size="screen"` covers the whole viewport on the canvas surface, without border, radius, shadow,
+ * padding or backdrop: the body fills the height and scrolls, and the consumer lays out the content.
+ * Focus trapping, Escape and the close button behave as at the other sizes.
  */
 @Component({
   selector: 'cw-dialog',
@@ -144,8 +164,8 @@ export class CwDialog implements CwDialogContext {
    * @readonly
    *
    * @description
-   * Maximum dialog size: `sm` 384 px, `default` 448 px, `md` 512 px, `lg` 672 px, `xl` 896 px
-   * or `full`.
+   * Maximum dialog size: `sm` 384 px, `default` 448 px, `md` 512 px, `lg` 672 px, `xl` 896 px,
+   * `full` (the screen less 16 px, over a backdrop) or `screen` (the whole viewport, no backdrop).
    *
    * @type {InputSignal<CwDialogSize>}
    */
@@ -281,10 +301,10 @@ export class CwDialog implements CwDialogContext {
    *
    * @type {Signal<string>}
    */
-  protected readonly panelClasses: Signal<string> = computed(
-    () =>
-      `${PANEL} ${this.scrollable() ? LAYOUTS.scrollable : LAYOUTS.simple} ${SIZES[this.size()]}`,
-  );
+  protected readonly panelClasses: Signal<string> = computed(() => {
+    if (this.size() === 'screen') return `${SCREEN_PANEL} ${SIZES.screen}`;
+    return `${PANEL} ${this.scrollable() ? LAYOUTS.scrollable : LAYOUTS.simple} ${SIZES[this.size()]}`;
+  });
 
   /**
    * Property bodyClasses
@@ -297,7 +317,7 @@ export class CwDialog implements CwDialogContext {
    */
   protected readonly bodyClasses: Signal<string> = computed(() => {
     if (this.scrollable()) return BODIES.scrollable;
-    return this.size() === 'full' ? BODIES.full : BODIES.simple;
+    return this.size() === 'full' || this.size() === 'screen' ? BODIES.full : BODIES.simple;
   });
 
   /**
@@ -451,6 +471,8 @@ export class CwDialog implements CwDialogContext {
       describedBy: this.description() ? this.descriptionId : null,
       autoFocus: 'first-tabbable',
       restoreFocus: this.origin,
+      // `screen` covers the page: the CDK's 80vw cap goes and there is no backdrop to show or click.
+      ...(this.size() === 'screen' ? { maxWidth: '100vw', hasBackdrop: false } : {}),
       onKeydown: (event) => {
         this.onKeydown(event);
       },

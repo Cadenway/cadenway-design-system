@@ -189,6 +189,19 @@ export interface ɵModalOverlayConfig {
    * @type {string | undefined}
    */
   readonly maxWidth?: string;
+
+  /**
+   * Property hasBackdrop
+   * @readonly
+   *
+   * @description
+   * Whether the modal draws its backdrop; `true` by default. A panel that already covers the whole
+   * screen turns it off, so no tint fades in behind it and no backdrop click can occur. Focus
+   * trapping, scroll blocking and hiding the rest of the page do not depend on it.
+   *
+   * @type {boolean | undefined}
+   */
+  readonly hasBackdrop?: boolean;
   // #endregion
 }
 
@@ -310,6 +323,7 @@ export class ɵModalOverlay {
       disableAnimations: true,
       ...(config.positionStrategy ? { positionStrategy: config.positionStrategy } : {}),
       ...(config.maxWidth ? { maxWidth: config.maxWidth } : {}),
+      ...(config.hasBackdrop === false ? { hasBackdrop: false } : {}),
     });
     this.ref = ref;
     this.leaving = false;
