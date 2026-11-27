@@ -155,6 +155,7 @@ const BODIES: Readonly<Record<'simple' | 'full' | 'screen' | 'scrollable', strin
  * Escape, a backdrop click, the close button (`showClose`, named `closeLabel`) and
  * `button[cwDialogClose]` close it; Escape first closes a popup still open inside it (a menu, a
  * select). While `pending`, none of them closes it and `cwDialogClose` buttons are `aria-disabled`.
+ * A browser Back or Forward closes it too, unless `closeOnNavigation` is false.
  * `closed` emits the reason once the exit animation ends. `scrollable` pins the header and footer
  * and scrolls the body (a focusable region; mark the first field `cdkFocusInitial` in a scrollable
  * form). Under 768 px the window fills the screen.
@@ -250,6 +251,22 @@ export class CwDialog implements CwDialogContext {
    * @type {InputSignalWithTransform<boolean, unknown>}
    */
   public readonly closeOnOverlayClick: InputSignalWithTransform<boolean, unknown> = input(true, {
+    transform: booleanAttribute,
+  });
+
+  /**
+   * Property closeOnNavigation
+   * @readonly
+   *
+   * @description
+   * Whether a browser history navigation (Back or Forward) closes the dialog; `true` by default.
+   * Read when the dialog opens. Such a close sets `open` to false and emits `closed` with the reason
+   * `action`. Set it to false for a dialog that must outlive history navigation, such as a
+   * full-screen flow whose consumer binds `[open]` one way and would otherwise lose the window.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   */
+  public readonly closeOnNavigation: InputSignalWithTransform<boolean, unknown> = input(true, {
     transform: booleanAttribute,
   });
 
@@ -537,6 +554,7 @@ export class CwDialog implements CwDialogContext {
       describedBy: this.description() ? this.descriptionId : null,
       autoFocus: 'first-tabbable',
       restoreFocus: this.origin,
+      closeOnNavigation: this.closeOnNavigation(),
       ...this.paneLayout(),
       onKeydown: (event) => {
         this.onKeydown(event);

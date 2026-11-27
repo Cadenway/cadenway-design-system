@@ -226,6 +226,19 @@ export interface ɵModalOverlayConfig {
    * @type {boolean | undefined}
    */
   readonly hideBackdrop?: boolean;
+
+  /**
+   * Property closeOnNavigation
+   * @readonly
+   *
+   * @description
+   * Whether a browser history navigation (Back or Forward, a `popstate`) disposes the modal; `true`
+   * by default, as in the CDK. Read when the modal attaches. When the CDK disposes it, the owner
+   * hears of it through `onExternalClose`.
+   *
+   * @type {boolean | undefined}
+   */
+  readonly closeOnNavigation?: boolean;
   // #endregion
 }
 
@@ -339,6 +352,7 @@ export class ɵModalOverlay {
       viewContainerRef: config.viewContainerRef,
       // The owner decides on Escape and backdrop clicks (reasons, `pending`, inner popups).
       disableClose: true,
+      closeOnNavigation: config.closeOnNavigation ?? true,
       autoFocus: config.autoFocus,
       restoreFocus: config.restoreFocus ?? true,
       // The CDK adds each class with `classList.add`: one token per entry.

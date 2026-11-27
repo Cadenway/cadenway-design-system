@@ -36,6 +36,7 @@ import type { CwDialogCloseReason, CwDialogSize } from './dialog.types';
       [(open)]="open"
       [pending]="pending()"
       [closeOnOverlayClick]="overlayCloses()"
+      [closeOnNavigation]="navigationCloses()"
       [showClose]="showClose()"
       (closed)="reasons.push($event)"
     >
@@ -96,6 +97,17 @@ class Host {
    * @type {WritableSignal<boolean>}
    */
   public readonly overlayCloses: WritableSignal<boolean> = signal(true);
+
+  /**
+   * Property navigationCloses
+   * @readonly
+   *
+   * @description
+   * Whether a browser history navigation closes the dialog.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  public readonly navigationCloses: WritableSignal<boolean> = signal(true);
 
   /**
    * Property showClose
@@ -332,6 +344,29 @@ describe('CwDialog', () => {
     expect(dialog()).not.toBeNull();
     expect(panel?.getAttribute('aria-busy')).toBe('true');
     expect(button(window, 'Annuler').getAttribute('aria-disabled')).toBe('true');
+    expect(host.reasons).toEqual([]);
+  });
+
+  it('closes on a browser Back or Forward by default, with the reason action', async () => {
+    await openFromTrigger();
+
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    await fixture.whenStable();
+
+    expect(dialog()).toBeNull();
+    expect(host.open()).toBe(false);
+    expect(host.reasons).toEqual(['action']);
+  });
+
+  it('stays open on a browser Back or Forward when closeOnNavigation is false', async () => {
+    host.navigationCloses.set(false);
+    await openFromTrigger();
+
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    await fixture.whenStable();
+
+    expect(dialog()).not.toBeNull();
+    expect(host.open()).toBe(true);
     expect(host.reasons).toEqual([]);
   });
 
