@@ -128,12 +128,12 @@ const PANE_LAYOUTS: Readonly<Record<'window' | 'screen', PaneLayout>> = {
  * @description
  * Body layout classes.
  *
- * @type {Readonly<Record<'simple' | 'full' | 'screenScrollable' | 'scrollable', string>>}
+ * @type {Readonly<Record<'simple' | 'full' | 'screen' | 'scrollable', string>>}
  */
-const BODIES: Readonly<Record<'simple' | 'full' | 'screenScrollable' | 'scrollable', string>> = {
+const BODIES: Readonly<Record<'simple' | 'full' | 'screen' | 'scrollable', string>> = {
   simple: 'min-h-0 min-w-0 flex-1 empty:hidden max-md:overflow-y-auto',
   full: 'min-h-0 min-w-0 flex-1 overflow-y-auto empty:hidden',
-  screenScrollable: `min-h-0 min-w-0 flex-1 overflow-y-auto empty:hidden ${ɵFOCUS_INSET}`,
+  screen: `min-h-0 min-w-0 flex-1 overflow-y-auto empty:hidden ${ɵFOCUS_INSET}`,
   scrollable: `min-h-0 flex-1 overflow-y-auto px-6 py-3 [scrollbar-color:var(--color-track)_transparent] [scrollbar-width:thin] ${ɵFOCUS_INSET}`,
 } as const;
 
@@ -160,8 +160,9 @@ const BODIES: Readonly<Record<'simple' | 'full' | 'screenScrollable' | 'scrollab
  * form). Under 768 px the window fills the screen.
  *
  * `size="screen"` covers the whole viewport on the canvas surface, without border, radius, shadow,
- * padding or backdrop: the body fills the height, scrolls and stays unpadded (`scrollable` then
- * pins the header and footer and makes the body a focusable scroll region), and the consumer lays out the content. Focus trapping, Escape
+ * padding or backdrop: the body fills the height, scrolls as a focusable region and stays unpadded
+ * (`scrollable` then only pins the header and footer), and the consumer lays out the content.
+ * Focus trapping, Escape
  * and the close button behave as at the other sizes. Changing `size` while open resizes the window
  * and shows or hides the backdrop in place, without closing it.
  */
@@ -345,7 +346,7 @@ export class CwDialog implements CwDialogContext {
    * @type {Signal<string>}
    */
   protected readonly bodyClasses: Signal<string> = computed(() => {
-    if (this.size() === 'screen') return this.scrollable() ? BODIES.screenScrollable : BODIES.full;
+    if (this.size() === 'screen') return BODIES.screen;
     if (this.scrollable()) return BODIES.scrollable;
     return this.size() === 'full' ? BODIES.full : BODIES.simple;
   });
@@ -355,12 +356,14 @@ export class CwDialog implements CwDialogContext {
    * @readonly
    *
    * @description
-   * Whether the body is a focusable scroll region: any `scrollable` dialog, `screen` included, so a
-   * keyboard can reach overflowing static content.
+   * Whether the body is a focusable scroll region: a `scrollable` dialog, and always a `screen` one
+   * (its body always scrolls), so a keyboard can reach overflowing static content.
    *
    * @type {Signal<boolean>}
    */
-  protected readonly bodyFocusable: Signal<boolean> = computed(() => this.scrollable());
+  protected readonly bodyFocusable: Signal<boolean> = computed(
+    () => this.scrollable() || this.size() === 'screen',
+  );
 
   /**
    * Property paneLayout

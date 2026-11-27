@@ -545,6 +545,16 @@ describe('CwDialog size screen', () => {
     expect(backdrop().hidden).toBe(true);
   });
 
+  it('makes the body a focusable scroll region by default', async () => {
+    const window: HTMLElement = await openScreen();
+    const body: Element | null | undefined = window
+      .querySelector('h1')
+      ?.closest('[data-size] > div');
+
+    expect(body?.getAttribute('tabindex')).toBe('0');
+    expect(body?.classList).toContain('overflow-y-auto');
+  });
+
   it('keeps the body unpadded and makes it a focusable scroll region when scrollable', async () => {
     fixture.componentInstance.scrollable.set(true);
     const window: HTMLElement = await openScreen();
