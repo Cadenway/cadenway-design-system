@@ -151,8 +151,34 @@ interface Option {
    * @type {string}
    */
   readonly label: string;
+
+  /**
+   * Property disabled
+   * @readonly
+   *
+   * @description
+   * Whether the card is disabled; enabled when absent.
+   *
+   * @type {boolean | undefined}
+   */
+  readonly disabled?: boolean;
   // #endregion
 }
+
+/**
+ * Constant TEAM_SIZES
+ *
+ * @description
+ * The four team size cards rendered by the `@for` hosts, in rendering order.
+ *
+ * @type {readonly Option[]}
+ */
+const TEAM_SIZES: readonly Option[] = [
+  { value: 'solo', label: 'Seul' },
+  { value: 'small', label: '2 à 10' },
+  { value: 'medium', label: '11 à 50' },
+  { value: 'large', label: 'Plus de 50' },
+];
 
 /**
  * Class LoopHost
@@ -166,7 +192,7 @@ interface Option {
   template: `
     <cw-radio-group ariaLabel="Taille de l'équipe" [(value)]="size">
       @for (option of options(); track option.value) {
-        <cw-radio-group-item variant="card" [value]="option.value">{{
+        <cw-radio-group-item variant="card" [value]="option.value" [disabled]="option.disabled">{{
           option.label
         }}</cw-radio-group-item>
       }
@@ -184,12 +210,8 @@ class LoopHost {
    *
    * @type {WritableSignal<readonly Option[]>}
    */
-  public readonly options: WritableSignal<readonly Option[]> = signal<readonly Option[]>([
-    { value: 'solo', label: 'Seul' },
-    { value: 'small', label: '2 à 10' },
-    { value: 'medium', label: '11 à 50' },
-    { value: 'large', label: 'Plus de 50' },
-  ]);
+  public readonly options: WritableSignal<readonly Option[]> =
+    signal<readonly Option[]>(TEAM_SIZES);
 
   /**
    * Property size
@@ -204,11 +226,75 @@ class LoopHost {
   // #endregion
 }
 
+/**
+ * Class LoopFormHost
+ *
+ * @description
+ * Hosts choice cards from a `@for` in a group bound to a reactive form control.
+ */
+@Component({
+  imports: [CwRadioGroup, CwRadioGroupItem, ReactiveFormsModule],
+  template: `
+    <cw-radio-group ariaLabel="Taille de l'équipe" [formControl]="size">
+      @for (option of options; track option.value) {
+        <cw-radio-group-item variant="card" [value]="option.value">{{
+          option.label
+        }}</cw-radio-group-item>
+      }
+    </cw-radio-group>
+  `,
+})
+class LoopFormHost {
+  // #region Properties
+  /**
+   * Property options
+   * @readonly
+   *
+   * @description
+   * Cards of the group, in rendering order.
+   *
+   * @type {readonly Option[]}
+   */
+  public readonly options: readonly Option[] = TEAM_SIZES;
+
+  /**
+   * Property size
+   * @readonly
+   *
+   * @description
+   * Team size control, on the third card from the start.
+   *
+   * @type {FormControl<string | null>}
+   */
+  public readonly size: FormControl<string | null> = new FormControl<string | null>('medium');
+  // #endregion
+}
+
 describe('CwRadioGroup', () => {
   describe('with items from a @for', () => {
     let host: HTMLElement;
     let component: LoopHost;
     let fixture: ComponentFixture<LoopHost>;
+
+    /**
+     * Function render
+     *
+     * @description
+     * Renders a separate `@for` group whose cards and value are set before its first render.
+     *
+     * @param {readonly Option[]} options - Cards of the group.
+     * @param {string | null} size - Value of the group.
+     *
+     * @returns {Promise<HTMLElement>} Element of the rendered fixture.
+     */
+    async function render(options: readonly Option[], size: string | null): Promise<HTMLElement> {
+      const rendered: ComponentFixture<LoopHost> = TestBed.createComponent(LoopHost);
+      rendered.componentInstance.options.set(options);
+      rendered.componentInstance.size.set(size);
+      rendered.autoDetectChanges();
+      await rendered.whenStable();
+      return rendered.nativeElement as HTMLElement;
+    }
 
     beforeEach(async () => {
       fixture = TestBed.createComponent(LoopHost);
@@ -244,15 +330,72 @@ describe('CwRadioGroup', () => {
     });
 
     it('makes the first card the tab stop when no card is checked before the first render', async () => {
-      const empty: ComponentFixture<LoopHost> = TestBed.createComponent(LoopHost);
-      empty.componentInstance.size.set(null);
-      empty.autoDetectChanges();
-      await empty.whenStable();
-      const element: HTMLElement = empty.nativeElement as HTMLElement;
+      const element: HTMLElement = await render(TEAM_SIZES, null);
 
       expect(radio(element, 'Seul').tabIndex).toBe(0);
       expect(radio(element, '11 à 50').getAttribute('aria-checked')).toBe('false');
       expect(radio(element, '11 à 50').tabIndex).toBe(-1);
+    });
+
+    it('makes the second card the tab stop when the first is disabled and none is checked', async () => {
+      const element: HTMLElement = await render(
+        TEAM_SIZES.map((option, index) => (index === 0 ? { ...option, disabled: true } : option)),
+        null,
+      );
+
+      expect(radio(element, 'Seul').disabled).toBe(true);
+      expect(radio(element, 'Seul').tabIndex).toBe(-1);
+      expect(radio(element, '2 à 10').tabIndex).toBe(0);
+      expect(radio(element, '11 à 50').tabIndex).toBe(-1);
+    });
+
+    it('makes the first enabled card the tab stop when the checked card is disabled', async () => {
+      const element: HTMLElement = await render(
+        TEAM_SIZES.map((option) =>
+          option.value === 'medium' ? { ...option, disabled: true } : option,
+        ),
+        'medium',
+      );
+
+      expect(radio(element, '11 à 50').getAttribute('aria-checked')).toBe('true');
+      expect(radio(element, '11 à 50').tabIndex).toBe(-1);
+      expect(radio(element, 'Seul').tabIndex).toBe(0);
+    });
+
+    it('keeps the tab stop on the checked card when a card is prepended, then moves it once that card is removed', async () => {
+      const agency: Option = { value: 'agency', label: 'Agence' };
+      component.options.set([agency, ...TEAM_SIZES]);
+      await fixture.whenStable();
+
+      expect(radio(host, 'Agence').tabIndex).toBe(-1);
+      expect(radio(host, '11 à 50').tabIndex).toBe(0);
+
+      component.options.set([agency, ...TEAM_SIZES.filter((option) => option.value !== 'medium')]);
+      await fixture.whenStable();
+
+      expect(component.size()).toBe('medium');
+      expect(radio(host, 'Agence').tabIndex).toBe(0);
+      for (const name of ['Seul', '2 à 10', 'Plus de 50']) {
+        expect(radio(host, name).tabIndex).toBe(-1);
+      }
+    });
+
+    it('renders under a reactive form control whose initial value is the third card', async () => {
+      const form: ComponentFixture<LoopFormHost> = TestBed.createComponent(LoopFormHost);
+      form.autoDetectChanges();
+      await form.whenStable();
+      const element: HTMLElement = form.nativeElement as HTMLElement;
+
+      expect(radio(element, '11 à 50').getAttribute('aria-checked')).toBe('true');
+      expect(radio(element, '11 à 50').tabIndex).toBe(0);
+      expect(radio(element, 'Seul').tabIndex).toBe(-1);
+
+      radio(element, '11 à 50').focus();
+      press(radio(element, '11 à 50'), 'ArrowUp');
+      await form.whenStable();
+
+      expect(form.componentInstance.size.value).toBe('small');
+      expect(radio(element, '2 à 10').tabIndex).toBe(0);
     });
 
     it('renders when the cards change and the checked card is the third new one', async () => {

@@ -345,7 +345,8 @@ export class CwRadioGroupItem {
    * the template of each option; in a `@for`, each option is its own view and the first one is
    * checked before the next ones have their inputs, so reading their required `value` would throw
    * NG0950. The group leaves out the options for which this is still false, and places its Tab stop
-   * again once they turn true.
+   * again once they turn true. For the group only; not meant for consumers.
+   * @internal
    *
    * @type {Signal<boolean>}
    */
