@@ -122,7 +122,155 @@ class ModelHost {
   // #endregion
 }
 
+/**
+ * Interface Option
+ *
+ * @description
+ * Option rendered as one choice card by a `@for`.
+ */
+interface Option {
+  // #region Properties
+  /**
+   * Property value
+   * @readonly
+   *
+   * @description
+   * Value of the card.
+   *
+   * @type {string}
+   */
+  readonly value: string;
+
+  /**
+   * Property label
+   * @readonly
+   *
+   * @description
+   * Visible text of the card.
+   *
+   * @type {string}
+   */
+  readonly label: string;
+  // #endregion
+}
+
+/**
+ * Class LoopHost
+ *
+ * @description
+ * Hosts choice cards that come from a `@for`, the shape that raised NG0950 when the checked card was
+ * not the first one rendered.
+ */
+@Component({
+  imports: [CwRadioGroup, CwRadioGroupItem],
+  template: `
+    <cw-radio-group ariaLabel="Taille de l'équipe" [(value)]="size">
+      @for (option of options(); track option.value) {
+        <cw-radio-group-item variant="card" [value]="option.value">{{
+          option.label
+        }}</cw-radio-group-item>
+      }
+    </cw-radio-group>
+  `,
+})
+class LoopHost {
+  // #region Properties
+  /**
+   * Property options
+   * @readonly
+   *
+   * @description
+   * Cards of the group, in rendering order.
+   *
+   * @type {WritableSignal<readonly Option[]>}
+   */
+  public readonly options: WritableSignal<readonly Option[]> = signal<readonly Option[]>([
+    { value: 'solo', label: 'Seul' },
+    { value: 'small', label: '2 à 10' },
+    { value: 'medium', label: '11 à 50' },
+    { value: 'large', label: 'Plus de 50' },
+  ]);
+
+  /**
+   * Property size
+   * @readonly
+   *
+   * @description
+   * Selected team size, set to the third card before the first render.
+   *
+   * @type {WritableSignal<string | null>}
+   */
+  public readonly size: WritableSignal<string | null> = signal<string | null>('medium');
+  // #endregion
+}
+
 describe('CwRadioGroup', () => {
+  describe('with items from a @for', () => {
+    let host: HTMLElement;
+    let component: LoopHost;
+    let fixture: ComponentFixture<LoopHost>;
+
+    beforeEach(async () => {
+      fixture = TestBed.createComponent(LoopHost);
+      fixture.autoDetectChanges();
+      await fixture.whenStable();
+      host = fixture.nativeElement as HTMLElement;
+      component = fixture.componentInstance;
+    });
+
+    it('renders when the checked card is the third of four and makes it the only tab stop', () => {
+      expect(radio(host, '11 à 50').getAttribute('aria-checked')).toBe('true');
+      expect(radio(host, '11 à 50').tabIndex).toBe(0);
+      for (const name of ['Seul', '2 à 10', 'Plus de 50']) {
+        expect(radio(host, name).getAttribute('aria-checked')).toBe('false');
+        expect(radio(host, name).tabIndex).toBe(-1);
+      }
+    });
+
+    it('selects with the arrows and moves the tab stop, wrapping around', async () => {
+      radio(host, '11 à 50').focus();
+
+      press(radio(host, '11 à 50'), 'ArrowDown');
+      await fixture.whenStable();
+      expect(component.size()).toBe('large');
+      expect(document.activeElement).toBe(radio(host, 'Plus de 50'));
+      expect(radio(host, 'Plus de 50').tabIndex).toBe(0);
+      expect(radio(host, '11 à 50').tabIndex).toBe(-1);
+
+      press(radio(host, 'Plus de 50'), 'ArrowDown');
+      await fixture.whenStable();
+      expect(component.size()).toBe('solo');
+      expect(radio(host, 'Seul').tabIndex).toBe(0);
+    });
+
+    it('makes the first card the tab stop when no card is checked before the first render', async () => {
+      const empty: ComponentFixture<LoopHost> = TestBed.createComponent(LoopHost);
+      empty.componentInstance.size.set(null);
+      empty.autoDetectChanges();
+      await empty.whenStable();
+      const element: HTMLElement = empty.nativeElement as HTMLElement;
+
+      expect(radio(element, 'Seul').tabIndex).toBe(0);
+      expect(radio(element, '11 à 50').getAttribute('aria-checked')).toBe('false');
+      expect(radio(element, '11 à 50').tabIndex).toBe(-1);
+    });
+
+    it('renders when the cards change and the checked card is the third new one', async () => {
+      component.options.set([
+        { value: 'a', label: 'Produit' },
+        { value: 'b', label: 'Design' },
+        { value: 'c', label: 'Ingénierie' },
+        { value: 'd', label: 'Marketing' },
+      ]);
+      component.size.set('c');
+      await fixture.whenStable();
+
+      expect(radio(host, 'Ingénierie').getAttribute('aria-checked')).toBe('true');
+      expect(radio(host, 'Ingénierie').tabIndex).toBe(0);
+      expect(radio(host, 'Produit').tabIndex).toBe(-1);
+    });
+  });
+
   describe('with models', () => {
     let host: HTMLElement;
     let component: ModelHost;

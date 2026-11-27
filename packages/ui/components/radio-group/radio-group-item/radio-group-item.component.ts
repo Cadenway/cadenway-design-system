@@ -2,13 +2,16 @@ import {
   booleanAttribute,
   Component,
   computed,
+  effect,
   ElementRef,
   inject,
   input,
+  signal,
   viewChild,
   type InputSignal,
   type InputSignalWithTransform,
   type Signal,
+  type WritableSignal,
 } from '@angular/core';
 import { type FocusableOption, _IdGenerator } from '@angular/cdk/a11y';
 import { NgTemplateOutlet } from '@angular/common';
@@ -150,7 +153,8 @@ class RadioOption implements FocusableOption {
  * `foreground/40` border once selected. `[indicator]="false"` hides the dot of a card, which then
  * shows its selection by its fill and border alone and draws the focus ring, the disabled dimming
  * and the invalid border itself; the radio stays the focused, announced control. A disabled option
- * is dimmed and skipped by the arrows.
+ * is dimmed and skipped by the arrows. Options may come from a `@for`: until Angular has set an
+ * option's `value`, the group leaves it out of its Tab stop (`hasValue`).
  */
 @Component({
   selector: 'cw-radio-group-item',
@@ -320,6 +324,49 @@ export class CwRadioGroupItem {
    * @type {FocusableOption}
    */
   public readonly option: FocusableOption = new RadioOption(this);
+
+  /**
+   * Property initialized
+   * @readonly
+   *
+   * @description
+   * Set when Angular first checks the option, that is once it has set the required `value` input.
+   *
+   * @type {WritableSignal<boolean>}
+   */
+  private readonly initialized: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property hasValue
+   * @readonly
+   *
+   * @description
+   * Whether `value` can be read. The group reads every option's value to place its Tab stop, from
+   * the template of each option; in a `@for`, each option is its own view and the first one is
+   * checked before the next ones have their inputs, so reading their required `value` would throw
+   * NG0950. The group leaves out the options for which this is still false, and places its Tab stop
+   * again once they turn true.
+   *
+   * @type {Signal<boolean>}
+   */
+  public readonly hasValue: Signal<boolean> = this.initialized.asReadonly();
+  // #endregion
+
+  // #region Constructor
+  /**
+   * Constructor
+   * @constructor
+   *
+   * @description
+   * Marks the option's inputs as set. An effect created by a component runs when Angular checks that
+   * component, after it has set the component's inputs; no lifecycle hook is needed, as in
+   * `cw-toggle-group`.
+   */
+  public constructor() {
+    effect(() => {
+      this.initialized.set(true);
+    });
+  }
   // #endregion
 
   // #region Methods

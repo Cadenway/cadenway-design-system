@@ -344,12 +344,16 @@ export class CwRadioGroup implements FormValueControl<string | null>, ControlVal
    * @readonly
    *
    * @description
-   * Selected enabled option or the first enabled option.
+   * Selected enabled option or the first enabled option. An option from a `@for` whose `value` is
+   * not set yet (`hasValue`) is left out until it is, so the Tab stop never reads a required input
+   * before Angular has set it (NG0950).
    *
    * @type {Signal<CwRadioGroupItem | undefined>}
    */
   public readonly tabStop: Signal<CwRadioGroupItem | undefined> = computed(() => {
-    const enabled: CwRadioGroupItem[] = this.items().filter((item) => !item.isDisabled());
+    const enabled: CwRadioGroupItem[] = this.items().filter(
+      (item) => item.hasValue() && !item.isDisabled(),
+    );
     return enabled.find((item) => item.value() === this.value()) ?? enabled.at(0);
   });
 
