@@ -339,7 +339,7 @@ export const Screen: Story = {
       name: 'Welcome to Atelier Nord',
     });
     await expect(dialog.firstElementChild).toHaveAttribute('data-size', 'screen');
-    await expect(document.body.querySelector('.cdk-overlay-backdrop')).toBeNull();
+    await expect(document.body.querySelector('.cdk-overlay-backdrop')).toHaveAttribute('hidden');
     await waitFor(() => expect(dialog.contains(document.activeElement)).toBe(true));
 
     await userEvent.keyboard('{Escape}');
