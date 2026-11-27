@@ -1,3 +1,4 @@
+import { DEFAULT_DIALOG_CONFIG } from '@angular/cdk/dialog';
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { CwButton } from '@cadenway/ui/components/button';
@@ -36,6 +37,7 @@ import type { CwDialogCloseReason, CwDialogSize } from './dialog.types';
       [(open)]="open"
       [pending]="pending()"
       [closeOnOverlayClick]="overlayCloses()"
+      [closeOnNavigation]="navigationCloses()"
       [showClose]="showClose()"
       (closed)="reasons.push($event)"
     >
@@ -96,6 +98,19 @@ class Host {
    * @type {WritableSignal<boolean>}
    */
   public readonly overlayCloses: WritableSignal<boolean> = signal(true);
+
+  /**
+   * Property navigationCloses
+   * @readonly
+   *
+   * @description
+   * Whether a browser history navigation closes the dialog; unset by default.
+   *
+   * @type {WritableSignal<boolean | undefined>}
+   */
+  public readonly navigationCloses: WritableSignal<boolean | undefined> = signal<
+    boolean | undefined
+  >(undefined);
 
   /**
    * Property showClose
@@ -333,6 +348,50 @@ describe('CwDialog', () => {
     expect(panel?.getAttribute('aria-busy')).toBe('true');
     expect(button(window, 'Annuler').getAttribute('aria-disabled')).toBe('true');
     expect(host.reasons).toEqual([]);
+  });
+
+  it('closes on a browser Back or Forward without input or application config, with the reason action', async () => {
+    await openFromTrigger();
+
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    await fixture.whenStable();
+
+    expect(dialog()).toBeNull();
+    expect(host.open()).toBe(false);
+    expect(host.reasons).toEqual(['action']);
+  });
+
+  it('stays open on a browser Back or Forward when closeOnNavigation is false', async () => {
+    host.navigationCloses.set(false);
+    await openFromTrigger();
+
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    await fixture.whenStable();
+
+    expect(dialog()).not.toBeNull();
+    expect(host.open()).toBe(true);
+    expect(host.reasons).toEqual([]);
+  });
+
+  it('forgets its trigger after a navigation close, so a reopening through [(open)] does not focus it', async () => {
+    await openFromTrigger();
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    await fixture.whenStable();
+    const elsewhere: HTMLButtonElement = document.createElement('button');
+    elsewhere.textContent = 'Ailleurs';
+    document.body.append(elsewhere);
+    elsewhere.focus();
+
+    host.open.set(true);
+    await fixture.whenStable();
+    const reopened: HTMLElement | null = dialog();
+    if (!reopened) throw new Error('Dialog not reopened');
+    press(reopened.querySelector('input') ?? reopened, 'Escape');
+    await fixture.whenStable();
+
+    expect(dialog()).toBeNull();
+    expect(document.activeElement).toBe(elsewhere);
+    elsewhere.remove();
   });
 
   it('hides the close button when showClose is false', async () => {
@@ -629,6 +688,53 @@ describe('CwDialog size screen', () => {
 
     expect(dialog()).toBeNull();
     expect(fixture.componentInstance.reasons).toEqual(['escape', 'close', 'close']);
+  });
+});
+
+describe('CwDialog under DEFAULT_DIALOG_CONFIG', () => {
+  /**
+   * Function openUnder
+   *
+   * @description
+   * Opens the host dialog from its trigger under an application dialog configuration.
+   *
+   * @param {boolean | undefined} navigationCloses - Value bound to `closeOnNavigation`.
+   *
+   * @returns {Promise<ComponentFixture<Host>>} Fixture with the dialog open.
+   */
+  async function openUnder(navigationCloses: boolean | undefined): Promise<ComponentFixture<Host>> {
+    TestBed.configureTestingModule({
+      providers: [{ provide: DEFAULT_DIALOG_CONFIG, useValue: { closeOnNavigation: false } }],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.componentInstance.navigationCloses.set(navigationCloses);
+    fixture.autoDetectChanges();
+    button(fixture.nativeElement as HTMLElement, 'Renommer').click();
+    await fixture.whenStable();
+    if (!dialog()) throw new Error('Dialog not open');
+    return fixture;
+  }
+
+  it('follows the application and stays open on a browser Back or Forward without the input', async () => {
+    const fixture: ComponentFixture<Host> = await openUnder(undefined);
+
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    await fixture.whenStable();
+
+    expect(dialog()).not.toBeNull();
+    expect(fixture.componentInstance.open()).toBe(true);
+    fixture.destroy();
+  });
+
+  it('closes on a browser Back or Forward when the input is explicitly true', async () => {
+    const fixture: ComponentFixture<Host> = await openUnder(true);
+
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    await fixture.whenStable();
+
+    expect(dialog()).toBeNull();
+    expect(fixture.componentInstance.reasons).toEqual(['action']);
+    fixture.destroy();
   });
 });
 

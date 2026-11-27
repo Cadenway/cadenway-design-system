@@ -246,3 +246,37 @@ export const Keyboard: Story = {
     await expect(scope.getByRole('radio', { name: 'Calendrier' })).toBeChecked();
   },
 };
+
+/**
+ * Choice cards from a `@for`, the checked card rendered third of four: the group renders (no
+ * NG0950) and Tab enters on that card. English source copy, as the webapp writes it.
+ */
+export const FromLoop: Story = {
+  render: () => ({
+    props: {
+      size: 'medium',
+      options: [
+        { value: 'solo', label: 'Just me' },
+        { value: 'small', label: '2 to 10' },
+        { value: 'medium', label: '11 to 50' },
+        { value: 'large', label: 'More than 50' },
+      ],
+    },
+    template: `
+      <cw-radio-group ariaLabel="Team size" [(value)]="size" class="grid w-96 gap-2">
+        @for (option of options; track option.value) {
+          <cw-radio-group-item variant="card" [value]="option.value">{{ option.label }}</cw-radio-group-item>
+        }
+      </cw-radio-group>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: { getByRole(role: string, options?: { name?: string }): HTMLElement } = within(
+      light(canvasElement),
+    );
+    const medium: HTMLElement = scope.getByRole('radio', { name: '11 to 50' });
+
+    await expect(medium).toHaveAttribute('aria-checked', 'true');
+    await userEvent.tab();
+    await expect(medium).toHaveFocus();
+  },
+};

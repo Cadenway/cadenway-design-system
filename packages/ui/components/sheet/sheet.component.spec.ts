@@ -1,4 +1,5 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
+import { DEFAULT_DIALOG_CONFIG } from '@angular/cdk/dialog';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { CwButton } from '@cadenway/ui/components/button';
 
@@ -260,6 +261,40 @@ describe('CwSheet', () => {
     expect(host.reasons).toEqual(['action']);
   });
 
+  it('closes on a browser Back or Forward with the reason action', async () => {
+    await openFromTrigger();
+
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    await fixture.whenStable();
+
+    expect(sheet()).toBeNull();
+    expect(host.open()).toBe(false);
+    expect(host.reasons).toEqual(['action']);
+  });
+
+  it('forgets its trigger after a navigation close, so a reopening through [(open)] does not focus it', async () => {
+    await openFromTrigger();
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    await fixture.whenStable();
+    const elsewhere: HTMLButtonElement = document.createElement('button');
+    elsewhere.textContent = 'Ailleurs';
+    document.body.append(elsewhere);
+    elsewhere.focus();
+
+    host.open.set(true);
+    await fixture.whenStable();
+    const reopened: HTMLElement | null = sheet();
+    if (!reopened) throw new Error('Sheet not reopened');
+    reopened.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+    );
+    await fixture.whenStable();
+
+    expect(sheet()).toBeNull();
+    expect(document.activeElement).toBe(elsewhere);
+    elsewhere.remove();
+  });
+
   it('opens again when reopened during its exit animation', async () => {
     const window: HTMLElement = await openFromTrigger();
     const panel: HTMLElement | null = window.querySelector<HTMLElement>('[data-side]');
@@ -291,6 +326,25 @@ describe('provideCwSheetLabels', () => {
     if (!window) throw new Error('Sheet not open');
 
     expect(button(window, 'Close')).toBeTruthy();
+    fixture.destroy();
+  });
+});
+
+describe('DEFAULT_DIALOG_CONFIG', () => {
+  it('keeps a sheet open on a browser Back or Forward when the application turns closeOnNavigation off', async () => {
+    TestBed.configureTestingModule({
+      providers: [{ provide: DEFAULT_DIALOG_CONFIG, useValue: { closeOnNavigation: false } }],
+    });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    button(fixture.nativeElement as HTMLElement, 'Ouvrir CAD-482').click();
+    await fixture.whenStable();
+
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    await fixture.whenStable();
+
+    expect(sheet()).not.toBeNull();
+    expect(fixture.componentInstance.open()).toBe(true);
     fixture.destroy();
   });
 });
