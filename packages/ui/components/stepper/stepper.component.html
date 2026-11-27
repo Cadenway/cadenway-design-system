@@ -39,6 +39,9 @@
     </p>
   }
   @if (currentView(); as view) {
+    @if (view.state !== 'error' && view.step.description()) {
+      <p class="mt-2 text-sm text-muted-foreground">{{ view.step.description() }}</p>
+    }
     @for (shown of [view]; track shown.step) {
       <div
         #panel

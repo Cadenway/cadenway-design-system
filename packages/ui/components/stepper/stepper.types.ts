@@ -24,8 +24,9 @@ export type CwStepperSize = 'default' | 'sm';
  * @description
  * How a stepper draws its steps: `default` numbered indicators joined by connectors, the reached
  * steps as buttons and the position line under the row; `segments` a segmented progress bar, one
- * bar per step with its label below, no step clickable and no position line, for a journey whose
- * screen writes the position itself (the onboarding assistant of the mockup `App.dc.html`).
+ * bar per step with its label below, filled up to the current step by position alone, no step
+ * clickable and no position line, for a journey whose screen writes the position itself (the
+ * onboarding assistant of the mockup `App.dc.html`).
  *
  * @type {'default' | 'segments'}
  */

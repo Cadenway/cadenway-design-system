@@ -293,8 +293,11 @@ interface StepView {
  * `variant="segments"` draws a segmented progress bar instead (one bar per step, equal widths, the
  * label below): one row whatever `orientation` and `size`, no step is a button and no position line
  * is written, so the consumer shows « Étape 3 sur 5 » itself and moves with `[(selected)]`, `next()`
- * and `previous()`. The list keeps its name, `aria-current="step"` and the hidden state of each
- * step; errors and the current panel render as in a horizontal stepper.
+ * and `previous()`. The state follows the position alone: the steps before the current one are
+ * done and filled, the current one is filled, the later ones are to do and empty, a step in error
+ * is red; `completed` does not change it. The list keeps its name, `aria-current="step"` and the
+ * hidden state of each step; the current step's description, the errors and the current panel
+ * render under the bar.
  */
 @Component({
   selector: 'cw-stepper',
@@ -351,7 +354,8 @@ export class CwStepper {
    *
    * @description
    * Numbered indicators with connectors (`default`) or a segmented bar of non-interactive steps
-   * without position line (`segments`); `segments` ignores `orientation` and `size`.
+   * without position line, filled up to the current step (`segments`); `segments` ignores
+   * `orientation`, `size` and the steps' `completed`.
    *
    * @type {InputSignal<CwStepperVariant>}
    */
@@ -813,9 +817,10 @@ export class CwStepper {
     if (step.error()) return 'error';
     const current: number = this.current();
     if (index === current) return 'current';
-    // Mockup App.dc.html: the bar is filled up to the current step, which the consumer may set
-    // directly; only a step explicitly marked `[completed]="false"` stays to do.
-    if (this.segmented() && index < current && step.completed() !== false) return 'done';
+    // Mockup App.dc.html (`i <= step`): the bar is filled up to the current step by position
+    // alone, whether the consumer set the selection directly or went back, and the hidden state
+    // says what the bar shows; `completed` and the passed steps do not change it.
+    if (this.segmented()) return index < current ? 'done' : 'todo';
     return this.isCompleted(index) ? 'done' : 'todo';
   }
 
