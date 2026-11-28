@@ -7,6 +7,7 @@ import {
   phosphorArrowRightBold,
   phosphorCircleHalfBold,
   phosphorCopyBold,
+  phosphorDesktopBold,
   phosphorDotsThreeBold,
   phosphorFolderSimpleBold,
   phosphorGearBold,
@@ -16,6 +17,7 @@ import {
   phosphorPencilSimpleBold,
   phosphorSignOutBold,
   phosphorSlidersHorizontalBold,
+  phosphorSunBold,
   phosphorTrashBold,
   phosphorUserBold,
 } from '@ng-icons/phosphor-icons/bold';
@@ -30,6 +32,7 @@ import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { CwMenuGroup } from './menu-group/menu-group.component';
 import { CwMenuItemCheckbox } from './menu-item-checkbox/menu-item-checkbox.component';
 import { CwMenuItemRadio } from './menu-item-radio/menu-item-radio.component';
+import { CwMenuItemValue } from './menu-item-value/menu-item-value.component';
 import { CwMenuItem } from './menu-item/menu-item.component';
 import { CwMenuLabel } from './menu-label/menu-label.component';
 import { CwMenuRadioGroup } from './menu-radio-group/menu-radio-group.component';
@@ -58,6 +61,7 @@ const meta: Meta = {
         CwMenuItem,
         CwMenuItemCheckbox,
         CwMenuItemRadio,
+        CwMenuItemValue,
         CwMenuRadioGroup,
         CwMenuGroup,
         CwMenuLabel,
@@ -75,6 +79,7 @@ const meta: Meta = {
           phosphorArrowRightBold,
           phosphorCircleHalfBold,
           phosphorCopyBold,
+          phosphorDesktopBold,
           phosphorDotsThreeBold,
           phosphorFolderSimpleBold,
           phosphorGearBold,
@@ -84,6 +89,7 @@ const meta: Meta = {
           phosphorPencilSimpleBold,
           phosphorSignOutBold,
           phosphorSlidersHorizontalBold,
+          phosphorSunBold,
           phosphorTrashBold,
           phosphorUserBold,
         }),
@@ -185,7 +191,8 @@ export const Actions: Story = {
   }),
 };
 
-/** Options: checkbox groups and a radio group under inset labels; ticking keeps the menu open. */
+/** Options: checkbox items under an inset label, a radio group whose choice carries the check on
+ *  the right; ticking keeps the menu open. */
 export const Options: Story = {
   render: () => ({
     props: { subtasks: true, labels: true, done: false, groupBy: 'statut' },
@@ -199,7 +206,7 @@ export const Options: Story = {
         </cw-menu-group>
         <cw-menu-separator />
         <cw-menu-radio-group [(value)]="groupBy">
-          <cw-menu-label inset>Grouper par</cw-menu-label>
+          <cw-menu-label>Grouper par</cw-menu-label>
           <button cwMenuItemRadio value="statut">Statut</button>
           <button cwMenuItemRadio value="assigne">Assigné</button>
           <button cwMenuItemRadio value="priorite">Priorité</button>
@@ -224,9 +231,11 @@ export const Options: Story = {
   },
 };
 
-/** Account: header with avatar, name and address, settings, the Thème submenu, sign out. */
+/** Account: header with avatar, name and address, settings, the Thème submenu with its current
+ *  value next to the chevron, sign out. */
 export const Account: Story = {
   render: () => ({
+    props: { theme: 'Clair' },
     template: `
       <cw-menu inline ariaLabel="Compte">
         <div class="flex items-center gap-2 px-2 py-1.5">
@@ -240,14 +249,18 @@ export const Account: Story = {
         <button cwMenuItem><ng-icon name="phosphorUserBold" /> Profil</button>
         <button cwMenuItem aria-keyshortcuts="Control+,"><ng-icon name="phosphorGearBold" /> Réglages <cw-menu-shortcut>Ctrl ,</cw-menu-shortcut></button>
         <button cwMenuItem aria-keyshortcuts="?"><ng-icon name="phosphorKeyboardBold" /> Raccourcis clavier <cw-menu-shortcut>?</cw-menu-shortcut></button>
-        <button cwMenuItem [cwMenuTriggerFor]="theme"><ng-icon name="phosphorMoonBold" /> Thème</button>
+        <button cwMenuItem [cwMenuTriggerFor]="themes">
+          <ng-icon name="phosphorMoonBold" /> Thème <cw-menu-item-value>{{ theme }}</cw-menu-item-value>
+        </button>
         <cw-menu-separator />
         <button cwMenuItem><ng-icon name="phosphorSignOutBold" /> Se déconnecter</button>
       </cw-menu>
-      <cw-menu #theme>
-        <button cwMenuItem selected>Clair</button>
-        <button cwMenuItem>Sombre</button>
-        <button cwMenuItem>Système</button>
+      <cw-menu #themes>
+        <cw-menu-radio-group [(value)]="theme">
+          <button cwMenuItemRadio value="Clair"><ng-icon name="phosphorSunBold" /> Clair</button>
+          <button cwMenuItemRadio value="Sombre"><ng-icon name="phosphorMoonBold" /> Sombre</button>
+          <button cwMenuItemRadio value="Système"><ng-icon name="phosphorDesktopBold" /> Système</button>
+        </cw-menu-radio-group>
       </cw-menu>`,
   }),
 };
