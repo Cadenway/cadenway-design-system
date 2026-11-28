@@ -47,6 +47,11 @@ import { CwPopover } from './popover.component';
       <button type="button" cwPopoverClose>Tout afficher dans l’accueil</button>
     </cw-popover>
 
+    <button type="button" [cwPopoverTrigger]="reminder">Rappel</button>
+    <cw-popover #reminder width="content" ariaLabel="Rappel">
+      <p>Aujourd’hui, 11 h</p>
+    </cw-popover>
+
     <button type="button">Ailleurs</button>
   `,
 })
@@ -259,6 +264,16 @@ describe('CwPopover', () => {
     expect(content?.classList).toContain('flex-col');
     expect(content?.className).not.toMatch(/(^|\s)(p-\d|gap-\d)/);
     expect(panel.contains(document.activeElement)).toBe(true);
+  });
+
+  it('follows its content from the width of its size with width="content"', async () => {
+    button(host, 'Rappel').click();
+    await fixture.whenStable();
+
+    const panel: HTMLElement = within('Rappel');
+    expect(panel.classList).toContain('w-max');
+    expect(panel.classList).toContain('min-w-72');
+    expect(panel.classList).not.toContain('w-72');
   });
 
   it('pads the content by default', async () => {

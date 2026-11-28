@@ -31,6 +31,19 @@ export type CwPopoverAlign = 'start' | 'center' | 'end';
 export type CwPopoverSize = 'sm' | 'default' | 'lg' | 'xl';
 
 /**
+ * Type CwPopoverWidth
+ *
+ * @description
+ * How the panel's width is set: `fixed` keeps the width of its `size`; `content` lets the panel
+ * follow its content (`w-max`), never narrower than the width of its `size` and never wider than
+ * the viewport minus 8 px gutters (mockup `App.dc.html`: the filter panel, a 34 rem grid, and the
+ * reminder panel, `w-max min-w-72`).
+ *
+ * @type {'fixed' | 'content'}
+ */
+export type CwPopoverWidth = 'fixed' | 'content';
+
+/**
  * Type CwPopoverPadding
  *
  * @description

@@ -164,6 +164,36 @@ export const Help: Story = {
   }),
 };
 
+/**
+ * `width="content"`: the panel follows its content, at least 288 px and at most the viewport
+ * (mockup `App.dc.html`, the filter panel: a 34 rem grid, two columns on a phone, four above).
+ */
+export const ContentWidth: Story = {
+  render: () => ({
+    template: `
+      <div class="h-56">
+        <button cwButton variant="outline" [cwPopoverTrigger]="filter">Filtrer</button>
+        <cw-popover #filter align="start" width="content" [ariaLabel]="cwTheme === 'light' ? 'Filtres' : 'Filtres, thème sombre'" [open]="true">
+          <div class="grid w-[34rem] max-w-full grid-cols-2 gap-3 sm:grid-cols-4">
+            @for (field of ['Statut', 'Responsable', 'Priorité', 'Étiquettes']; track field) {
+              <div class="grid gap-1.5">
+                <p class="text-xs font-medium text-muted-foreground">{{ field }}</p>
+                <button cwButton variant="outline" size="sm">Tous</button>
+              </div>
+            }
+          </div>
+        </cw-popover>
+      </div>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const panel: HTMLElement = within(light(canvasElement)).getByRole('dialog', {
+      name: 'Filtres',
+    });
+    // 34 rem of content, 16 px of padding on each side and the 1 px borders.
+    await expect(Math.round(panel.getBoundingClientRect().width)).toBeGreaterThan(288);
+  },
+};
+
 /** The four sides, with the arrow and `align="center"`; each flips when it lacks room. */
 export const Sides: Story = {
   render: () => ({
