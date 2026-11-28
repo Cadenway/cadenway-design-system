@@ -22,6 +22,19 @@ import { CwKbd } from './kbd.directive';
 })
 class Host {}
 
+/**
+ * Class DialogKeyHost
+ * @class DialogKeyHost
+ *
+ * @description
+ * Test host rendering one key of the keyboard shortcuts dialog.
+ */
+@Component({
+  imports: [CwKbd],
+  template: `<kbd cwKbd size="xl">?</kbd>`,
+})
+class DialogKeyHost {}
+
 describe('CwKbd', () => {
   it('keeps the native kbd element and exposes its size and variant as hooks', () => {
     const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
@@ -33,5 +46,17 @@ describe('CwKbd', () => {
     expect(keys.map((key) => key.textContent)).toEqual(['?', 'Ctrl', 'Maj', 'P']);
     expect(keys[0].getAttribute('data-size')).toBe('lg');
     expect(keys[1].getAttribute('data-variant')).toBe('default');
+  });
+
+  it('sizes a shortcuts dialog key at 24 px with extra-small text', () => {
+    const fixture: ComponentFixture<DialogKeyHost> = TestBed.createComponent(DialogKeyHost);
+    fixture.detectChanges();
+    const key: HTMLElement | null = (fixture.nativeElement as HTMLElement).querySelector('kbd');
+    if (!key) throw new Error('Key missing');
+
+    expect(key.getAttribute('data-size')).toBe('xl');
+    expect(key.classList).toContain('h-6');
+    expect(key.classList).toContain('min-w-6');
+    expect(key.classList).toContain('text-xs');
   });
 });
