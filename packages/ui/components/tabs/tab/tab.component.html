@@ -1,4 +1,9 @@
 <ng-content />
 @if (count() !== undefined) {
-  <span class="sr-only">, </span><span [class]="countClasses()">{{ count() }}</span>
+  @if (countLabel(); as label) {
+    <span class="sr-only">, {{ label }}</span
+    ><span aria-hidden="true" [class]="countClasses()">{{ count() }}</span>
+  } @else {
+    <span class="sr-only">, </span><span [class]="countClasses()">{{ count() }}</span>
+  }
 }

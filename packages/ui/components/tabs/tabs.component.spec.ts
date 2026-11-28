@@ -574,3 +574,42 @@ describe('CwTabs', () => {
     expect(bound?.getAttribute('data-variant')).toBe('segmented');
   });
 });
+
+/**
+ * Component CountLabelHost
+ *
+ * @description
+ * Hosts a tab whose counter has a spoken form.
+ */
+@Component({
+  imports: [CwTabs, CwTabsList, CwTab],
+  template: `
+    <cw-tabs variant="bar" value="pieces">
+      <cw-tabs-list ariaLabel="Sections de la tâche">
+        <button cwTab value="pieces" [count]="2" countLabel="2 pièces jointes">Pièces jointes</button>
+      </cw-tabs-list>
+    </cw-tabs>
+  `,
+})
+class CountLabelHost {}
+
+describe('CwTab countLabel', () => {
+  it('reads the spoken count after the label and hides the bare number', async () => {
+    const fixture: ComponentFixture<CountLabelHost> = TestBed.createComponent(CountLabelHost);
+    await fixture.whenStable();
+    const tab: HTMLElement | null = (fixture.nativeElement as HTMLElement).querySelector(
+      '[role="tab"]',
+    );
+    const hidden: HTMLElement | null | undefined = tab?.querySelector('[aria-hidden="true"]');
+    const spoken: string = Array.from(tab?.childNodes ?? [])
+      .filter((node) => node.nodeType !== Node.COMMENT_NODE)
+      .filter((node) => !(node instanceof HTMLElement && node.getAttribute('aria-hidden')))
+      .map((node) => node.textContent)
+      .join('')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    expect(hidden?.textContent).toBe('2');
+    expect(spoken).toBe('Pièces jointes, 2 pièces jointes');
+  });
+});
