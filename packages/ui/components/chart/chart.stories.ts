@@ -454,7 +454,8 @@ const COMPLETED: CwChartDatum[] = [
 ];
 
 /** The dashboards' weekly completion card (mockup `App.dc.html`): `size="lg"` (192 px, 12 px axis
- *  text, wide bars), the current week lighter, values on the highest bar and the current week. */
+ *  text, wide bars), the current week lighter, values on the highest bar and the current week (a
+ *  week at 0 would be labelled on the baseline). */
 export const Completion: Story = {
   render: () => ({
     props: {
@@ -473,5 +474,27 @@ export const Completion: Story = {
       name: 'Tâches terminées par semaine, de S38 à S45',
     });
     await expect(plot.querySelector('svg')).toHaveAttribute('height', '192');
+  },
+};
+
+/** `valueLabels="all"` on grouped bars: one label per category, its highest value, so labels never
+ *  sit over each other; a label that would touch its left neighbour is dropped. */
+export const GroupedValueLabels: Story = {
+  render: () => ({
+    props: { data: WEEKS, series: DONE_LATE },
+    template: card(
+      'Tâches par semaine',
+      'Espace Produit, 6 semaines',
+      `<cw-chart [data]="data" x="week" [series]="series" valueLabels="all"
+                 ariaLabel="Tâches terminées et en retard par semaine, valeurs affichées" />`,
+    ),
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const plot: HTMLElement = within(light(canvasElement)).getByRole('img', {
+      name: 'Tâches terminées et en retard par semaine, valeurs affichées',
+    });
+    const labels: Element[] = Array.from(plot.querySelectorAll('svg text.font-medium'));
+    await expect(labels.length).toBeGreaterThan(0);
+    await expect(labels.length).toBeLessThanOrEqual(WEEKS.length);
   },
 };

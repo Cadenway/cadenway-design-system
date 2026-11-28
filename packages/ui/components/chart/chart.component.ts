@@ -610,17 +610,6 @@ interface BarShape {
    * @readonly
    */
   readonly fill: string;
-
-  /**
-   * Property tag
-   *
-   * @description
-   * Value written above the bar (`valueLabels`), or undefined.
-   *
-   * @type {BarTag | undefined}
-   * @readonly
-   */
-  readonly tag?: BarTag;
   // #endregion
 }
 
@@ -628,10 +617,21 @@ interface BarShape {
  * Interface BarTag
  *
  * @description
- * A value label drawn above a vertical bar.
+ * A value label drawn above the bars of a category.
  */
 interface BarTag {
   // #region Properties
+  /**
+   * Property key
+   *
+   * @description
+   * Category the label belongs to.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly key: string;
+
   /**
    * Property x
    *
@@ -1424,8 +1424,11 @@ export class CwChart {
    *
    * @description
    * Values written above vertical bars: `none` (default), `all`, or `peak` (the highest bars and the
-   * `current` category). They go through `valueFormat` and are hidden from assistive technologies,
-   * which read the data table.
+   * `current` category). One label per category: the stack total when stacked, else the category's
+   * highest value (the bar itself with one series); a category at 0 is labelled on the baseline, one
+   * without any value is not. Left to right, a label that would touch the previous one is dropped.
+   * They go through `valueFormat` and are hidden from assistive technologies, which read the data
+   * table.
    *
    * @type {InputSignal<CwChartValueLabels>}
    * @readonly
@@ -1815,26 +1818,54 @@ export class CwChart {
    * Property peakValue
    *
    * @description
-   * Highest bar of the shown data: the largest stack total when stacked, the largest single value
-   * otherwise; 0 without data.
+   * Highest labelled value of the shown data (`categoryValue` of each category): the largest stack
+   * total when stacked, the largest single value otherwise; 0 without data.
    *
    * @type {Signal<number>}
    * @readonly
    */
   protected readonly peakValue: Signal<number> = computed(() => {
-    const series: CwChartSeries[] = this.visibleSeries();
     let peak: number = 0;
-    for (const row of this.shownData()) {
-      if (this.stacked()) {
-        peak = Math.max(
-          peak,
-          series.reduce((sum, item) => sum + Math.max(0, numeric(row, item.key) ?? 0), 0),
-        );
-      } else {
-        for (const item of series) peak = Math.max(peak, numeric(row, item.key) ?? 0);
-      }
-    }
+    for (const row of this.shownData()) peak = Math.max(peak, this.categoryValue(row) ?? 0);
     return peak;
+  });
+
+  /**
+   * Property barTags
+   *
+   * @description
+   * Value labels of the vertical bars (`valueLabels`), one per category at most: the stack total when
+   * stacked, else the highest value of the category (the bar itself with one series). A category at
+   * 0 is labelled on the baseline; one without any value gets none. Left to right, a label that
+   * would come within 4 px of the previous one is dropped, measured at the axis font size.
+   *
+   * @type {Signal<readonly BarTag[]>}
+   * @readonly
+   */
+  protected readonly barTags: Signal<readonly BarTag[]> = computed<readonly BarTag[]>(() => {
+    const labels: CwChartValueLabels = this.valueLabels();
+    if (labels === 'none' || this.type() !== 'bar' || this.horizontal()) return [];
+    const { y }: { y: (value: number) => number } = this.frame();
+    const data: readonly Readonly<Record<string, string | number | null | undefined>>[] =
+      this.shownData();
+    const current: string | null = this.current();
+    const peak: number = this.peakValue();
+    const format: CwChartValueFormat = this.valueFormat();
+    const fontSize: number = AXIS_FONT_SIZES[this.size()];
+    const tags: BarTag[] = [];
+    let previousRight: number = -Infinity;
+    for (const category of this.categories()) {
+      const value: number | null = this.categoryValue(data[category.index]);
+      if (value === null) continue;
+      const highlighted: boolean = value === peak || (current !== null && category.key === current);
+      if (labels === 'peak' && !highlighted) continue;
+      const text: string = format(value);
+      const half: number = labelWidth(text, fontSize) / 2;
+      if (category.center - half < previousRight + 4) continue;
+      previousRight = category.center + half;
+      tags.push({ key: category.key, x: category.center, y: round(y(value) - 6), text });
+    }
+    return tags;
   });
 
   /**
@@ -1857,24 +1888,6 @@ export class CwChart {
     // with 4 px top corners.
     const radius: number = large ? 4 : 2;
     const current: string | null = this.current();
-    const labels: CwChartValueLabels = this.valueLabels();
-    const format: CwChartValueFormat = this.valueFormat();
-    const peak: number = labels === 'peak' ? this.peakValue() : 0;
-    const tagged: (value: number, category: Category) => boolean = (
-      value: number,
-      category: Category,
-    ): boolean =>
-      labels === 'all' ||
-      (labels === 'peak' && (value === peak || (current !== null && category.key === current)));
-    const tag: (value: number, x: number, top: number) => BarTag = (
-      value: number,
-      x: number,
-      top: number,
-    ): BarTag => ({
-      x: round(x),
-      y: round(top - 6),
-      text: format(value),
-    });
     const shapes: BarShape[] = [];
     for (const category of this.categories()) {
       const row: Readonly<Record<string, string | number | null | undefined>> =
@@ -1898,7 +1911,6 @@ export class CwChart {
             id: `${category.key}:${item.key}`,
             path: roundedRect(x, top, width, height, radius, { topLeft: last, topRight: last }),
             fill: FILLS[item.color] + tone,
-            tag: last && tagged(sum, category) ? tag(sum, category.center, top) : undefined,
           });
         });
       } else {
@@ -1920,7 +1932,6 @@ export class CwChart {
               topRight: true,
             }),
             fill: FILLS[item.color] + tone,
-            tag: tagged(value, category) ? tag(value, x + width / 2, top) : undefined,
           });
         });
       }
@@ -2347,6 +2358,28 @@ export class CwChart {
   // #endregion
 
   // #region Methods
+  /**
+   * Method categoryValue
+   *
+   * @description
+   * The value a category's label shows: the sum of its positive values when stacked, else its
+   * highest value among the visible series.
+   *
+   * @param {Readonly<Record<string, string | number | null | undefined>>} row - Datum of the category.
+   * @returns {number | null} Labelled value, or null when no visible series has a value.
+   */
+  private categoryValue(
+    row: Readonly<Record<string, string | number | null | undefined>>,
+  ): number | null {
+    const values: number[] = this.visibleSeries()
+      .map((item) => numeric(row, item.key))
+      .filter((value): value is number => value !== null);
+    if (values.length === 0) return null;
+    return this.stacked()
+      ? values.reduce((sum, value) => sum + Math.max(0, value), 0)
+      : Math.max(0, ...values);
+  }
+
   /**
    * Method isVisible
    *

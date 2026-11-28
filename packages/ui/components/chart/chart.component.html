@@ -182,17 +182,15 @@
             @for (bar of bars(); track bar.id) {
               <path [attr.d]="bar.path" [class]="bar.fill" />
             }
-            @for (bar of bars(); track bar.id) {
-              @if (bar.tag; as tag) {
-                <text
-                  [attr.x]="tag.x"
-                  [attr.y]="tag.y"
-                  text-anchor="middle"
-                  [class]="'fill-foreground font-medium tabular-nums ' + axisText()"
-                >
-                  {{ tag.text }}
-                </text>
-              }
+            @for (tag of barTags(); track tag.key) {
+              <text
+                [attr.x]="tag.x"
+                [attr.y]="tag.y"
+                text-anchor="middle"
+                [class]="'fill-foreground font-medium tabular-nums ' + axisText()"
+              >
+                {{ tag.text }}
+              </text>
             }
           } @else {
             @for (line of lines(); track line.key) {
