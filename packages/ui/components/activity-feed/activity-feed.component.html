@@ -47,7 +47,7 @@
         <ol class="flex flex-col" [attr.aria-label]="group.heading ? null : ariaLabel()">
           @for (item of group.entries; track item.entry.id) {
             <li
-              class="group/act relative flex gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-accent motion-reduce:transition-none"
+              class="group/act relative flex gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-muted motion-reduce:transition-none"
             >
               <span
                 class="absolute top-10 bottom-0 left-6 w-px -translate-x-1/2 bg-border group-last/act:hidden"
