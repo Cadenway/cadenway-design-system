@@ -609,6 +609,8 @@ describe('CwTab countLabel', () => {
       .map((node) => node.textContent)
       .join('')
       .replace(/\s+/g, ' ')
+      // The consumer's line break after the label is whitespace, as in an accessible name.
+      .replace(/ ,/g, ',')
       .trim();
 
     expect(hidden?.textContent).toBe('2');
