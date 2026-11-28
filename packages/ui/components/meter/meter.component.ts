@@ -208,7 +208,8 @@ const NUMBER_FORMAT: (locale: string) => (value: number) => string = ɵperLocale
  * (95 % of the range) or over `threshold`; optimum when `optimum` is set and the value lies in
  * `[low, high]`; high from `high` (80 % of the range); normal below. `zone` forces it for a
  * qualitative scale where low values are the bad ones (password strength). `threshold` draws the
- * capacity mark, colors the part over it in grenat and writes « +N » in the header.
+ * capacity mark, colors the part over it in grenat and writes « +N » in the header. `marker` only
+ * draws an alert mark at a value (the quotas' 80 % of the mockup `Organisation.dc.html`).
  *
  * The track is one `role="meter"` element (also in `segmented` and `stacked`) with
  * `aria-valuenow`, `aria-valuemin`, `aria-valuemax` and `aria-valuetext` (the `format` output, plus
@@ -363,6 +364,25 @@ export class CwMeter {
    * @type {InputSignalWithTransform<number | undefined, unknown>}
    */
   public readonly threshold: InputSignalWithTransform<number | undefined, unknown> = input<
+    number | undefined,
+    unknown
+  >(undefined, {
+    transform: optionalNumber,
+  });
+
+  /**
+   * Property marker
+   * @readonly
+   *
+   * @description
+   * An alert level drawn as a 14 px vertical mark on the track, without changing the zone, the
+   * value text or the fill (mockup `Organisation.dc.html`, the quotas: the 80 % alert threshold,
+   * explained once by the consumer next to the section title). Decorative: say what it means in
+   * visible text.
+   *
+   * @type {InputSignalWithTransform<number | undefined, unknown>}
+   */
+  public readonly marker: InputSignalWithTransform<number | undefined, unknown> = input<
     number | undefined,
     unknown
   >(undefined, {
