@@ -409,6 +409,28 @@ export const Detailed: Story = {
   }),
 };
 
+/** The board in a 420 px high frame (`class="h-full"`): every column's track runs to its bottom,
+ *  the cards scrolling inside it (mockup `App.dc.html`, the board view). */
+export const FillsHeight: Story = {
+  render: () => ({
+    props,
+    template: `
+      <div class="flex h-[420px] w-full flex-col">
+        <cw-kanban ${NAME} [columns]="columns" [items]="tasks" [trackBy]="id" [groupBy]="status"
+          [itemLabel]="label" [columnWidth]="236" class="h-full w-full">
+          ${CARD}
+        </cw-kanban>
+      </div>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const groups: HTMLElement[] = Array.from(
+      canvasElement.querySelectorAll<HTMLElement>('cw-kanban-column[role="group"]'),
+    );
+    const heights: number[] = groups.map((group) => Math.round(group.getBoundingClientRect().height));
+    await expect(new Set(heights).size).toBe(1);
+  },
+};
+
 /** Compact density: one 34 px line per card. */
 export const Compact: Story = {
   render: () => ({
