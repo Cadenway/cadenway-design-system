@@ -24,7 +24,9 @@ import type { CwSidebarSpace } from '../sidebar-space/sidebar-space.component';
 import { CwSidebar } from '../sidebar.component';
 
 /* Literal class strings (Sidebar sheet and preview of the Design System artifact): a row of the
-   sidebar with the inset focus ring; current is `bg-selected` and `font-medium`, never a color. */
+   sidebar with the inset focus ring. Selected is violet: the current row is a 5 % primary tint with
+   primary, medium-weight text and the filled icon (mockup App.dc.html, the current list of a space:
+   `bg-primary/5 font-medium text-primary`); its count stays muted and regular. */
 /**
  * Constant ROW
  *
@@ -35,7 +37,8 @@ import { CwSidebar } from '../sidebar.component';
  */
 const ROW: string =
   'relative isolate flex w-full min-w-0 items-center gap-2 overflow-hidden rounded-md px-2 text-left text-sm transition-colors hover:bg-accent ' +
-  'data-[active=true]:bg-selected data-[active=true]:font-medium [&_ng-icon]:shrink-0 [&_ng-icon]:[--ng-icon__size:1rem] ' +
+  'data-[active=true]:bg-primary/5 data-[active=true]:font-medium data-[active=true]:text-primary ' +
+  '[&_ng-icon]:shrink-0 [&_ng-icon]:[--ng-icon__size:1rem] ' +
   ɵFOCUS_INSET;
 
 // Main items are 32 px; the lists of a space, 28 px.
@@ -52,7 +55,8 @@ const ROW_HEIGHTS: { readonly item: 'h-8'; readonly subitem: 'h-7' } = {
   subitem: 'h-7',
 } as const;
 
-/* The rail's 32 px icon buttons stand alone, so they take the offset focus ring. */
+/* The rail's 32 px icon buttons stand alone, so they take the offset focus ring; the current one
+   takes the same primary tint as a current row. */
 /**
  * Constant RAIL
  *
@@ -63,7 +67,7 @@ const ROW_HEIGHTS: { readonly item: 'h-8'; readonly subitem: 'h-7' } = {
  */
 const RAIL: string =
   'relative isolate flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md transition-colors hover:bg-accent ' +
-  'data-[active=true]:bg-selected [&_ng-icon]:shrink-0 [&_ng-icon]:[--ng-icon__size:1rem] ' +
+  'data-[active=true]:bg-primary/5 data-[active=true]:text-primary [&_ng-icon]:shrink-0 [&_ng-icon]:[--ng-icon__size:1rem] ' +
   ɵFOCUS;
 
 /**
@@ -83,7 +87,7 @@ function filled(icon: string): string {
  * Component CwSidebarItem
  *
  * @description
- * A link of the sidebar: icon, label, count (Sidebar sheet of the Design System artifact). Put it on an `<a>` inside a `cw-sidebar-group` or a `cw-sidebar-space` (where it is a 28 px sub-item); the label is its content. `icon` is an ng-icons name of the Bold weight; the current item shows the Fill weight in `text-primary`: register both (`provideIcons`). `count` is shown muted on the right (open tasks, unread) and read after the label as `countLabel` (« 3 non lus »), or as the number. `active` marks the current page: `data-active="true"`, `aria-current="page"`, `bg-selected` and `font-medium`; bind it to the router (`routerLinkActive`), which `@cadenway/ui` does not depend on. In the icon rail the item is a 32 px icon button named by its label and count, with a tooltip on the right (`tooltip`, by default the label and the count) on hover and keyboard focus; the count becomes a dot. Following the link closes the phone drawer.
+ * A link of the sidebar: icon, label, count (Sidebar sheet of the Design System artifact). Put it on an `<a>` inside a `cw-sidebar-group` or a `cw-sidebar-space` (where it is a 28 px sub-item); the label is its content. `icon` is an ng-icons name of the Bold weight; the current item shows the Fill weight in `text-primary`: register both (`provideIcons`). `count` is shown muted on the right (open tasks, unread) and read after the label as `countLabel` (« 3 non lus »), or as the number. `active` marks the current page: `data-active="true"`, `aria-current="page"`, a `bg-primary/5` tint with `text-primary` and `font-medium`, and the Fill icon (mockup App.dc.html: selected is violet); bind it to the router (`routerLinkActive`), which `@cadenway/ui` does not depend on. In the icon rail the item is a 32 px icon button named by its label and count, with a tooltip on the right (`tooltip`, by default the label and the count) on hover and keyboard focus; the count becomes a dot. Following the link closes the phone drawer.
  */
 @Component({
   selector: 'a[cwSidebarItem]',

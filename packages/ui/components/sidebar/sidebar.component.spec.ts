@@ -254,6 +254,13 @@ describe('CwSidebar', () => {
     expect(link(host, 'Boîte de réception, 3 non lus').hasAttribute('aria-current')).toBe(false);
   });
 
+  it('shows the filled icon on the current item and the bold one elsewhere', () => {
+    expect(link(host, 'Accueil').querySelector('ng-icon')?.innerHTML).toBe(phosphorHouseFill);
+    expect(link(host, 'Boîte de réception, 3 non lus').querySelector('ng-icon')?.innerHTML).toBe(
+      phosphorTrayBold,
+    );
+  });
+
   it('opens a space on click, → and ←, through its two-way binding', async () => {
     const trigger: HTMLButtonElement = spaceTrigger(host);
     const lists: HTMLElement | null = document.getElementById(
