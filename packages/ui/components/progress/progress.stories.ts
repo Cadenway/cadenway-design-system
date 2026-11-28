@@ -61,24 +61,27 @@ function light(canvasElement: HTMLElement): HTMLElement {
   return scope;
 }
 
-/** The three variants at the three sizes, at 60 %. */
+/** The four variants at the three sizes, at 60 %; `primary` is the mockup's violet bar. */
 export const VariantsAndSizes: Story = {
   render: () => ({
     template: `
-      <div class="grid w-full max-w-xl grid-cols-[5rem_1fr_1fr_1fr] items-center gap-x-5 gap-y-3 text-xs text-muted-foreground">
-        <span></span><code>default</code><code>success</code><code>destructive</code>
+      <div class="grid w-full max-w-xl grid-cols-[5rem_1fr_1fr_1fr_1fr] items-center gap-x-5 gap-y-3 text-xs text-muted-foreground">
+        <span></span><code>default</code><code>success</code><code>destructive</code><code>primary</code>
         <span>sm · 4 px</span>
         <cw-progress size="sm" [value]="60" ariaLabel="Exemple default sm" />
         <cw-progress size="sm" variant="success" [value]="60" ariaLabel="Exemple success sm" />
         <cw-progress size="sm" variant="destructive" [value]="60" ariaLabel="Exemple destructive sm" />
+        <cw-progress size="sm" variant="primary" [value]="60" ariaLabel="Exemple primary sm" />
         <span>default · 6 px</span>
         <cw-progress [value]="60" ariaLabel="Exemple default default" />
         <cw-progress variant="success" [value]="60" ariaLabel="Exemple success default" />
         <cw-progress variant="destructive" [value]="60" ariaLabel="Exemple destructive default" />
+        <cw-progress variant="primary" [value]="60" ariaLabel="Exemple primary default" />
         <span>lg · 8 px</span>
         <cw-progress size="lg" [value]="60" ariaLabel="Exemple default lg" />
         <cw-progress size="lg" variant="success" [value]="60" ariaLabel="Exemple success lg" />
         <cw-progress size="lg" variant="destructive" [value]="60" ariaLabel="Exemple destructive lg" />
+        <cw-progress size="lg" variant="primary" [value]="60" ariaLabel="Exemple primary lg" />
       </div>`,
   }),
 };

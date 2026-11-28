@@ -23,6 +23,7 @@ import { CwProgress } from './progress.component';
     />
     <cw-progress [value]="sprint()" ariaLabel="Avancement du sprint 14" />
     <cw-progress [value]="null" ariaLabel="Analyse du fichier" />
+    <cw-progress variant="primary" [value]="40" ariaLabel="Prise en main" />
   `,
 })
 class Host {
@@ -96,6 +97,13 @@ describe('CwProgress', () => {
     expect(subtasks.dataset['state']).toBe('loading');
     expect(subtasks.dataset['variant']).toBe('success');
     expect(subtasks.dataset['size']).toBe('sm');
+  });
+
+  it('fills a primary bar in violet', () => {
+    const start: HTMLElement = bar(host, 'Prise en main');
+
+    expect(start.dataset['variant']).toBe('primary');
+    expect(start.querySelector('.bg-primary')).not.toBeNull();
   });
 
   it('reads the rounded percentage by default', () => {

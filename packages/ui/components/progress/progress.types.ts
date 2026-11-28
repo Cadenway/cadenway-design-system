@@ -2,11 +2,12 @@
  * Type CwProgressVariant
  *
  * @description
- * Fill color: ink by default, jade for completion and grenat for an overrun.
+ * Fill color: ink by default, jade for completion, grenat for an overrun, and `primary` violet
+ * where the mockup draws the bar in the brand color (`App.dc.html`, the getting-started bar).
  *
- * @type {'default' | 'success' | 'destructive'}
+ * @type {'default' | 'success' | 'destructive' | 'primary'}
  */
-export type CwProgressVariant = 'default' | 'success' | 'destructive';
+export type CwProgressVariant = 'default' | 'success' | 'destructive' | 'primary';
 
 /**
  * Type CwProgressSize

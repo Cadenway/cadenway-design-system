@@ -33,6 +33,17 @@ export type CwStepperSize = 'default' | 'sm';
 export type CwStepperVariant = 'default' | 'segments';
 
 /**
+ * Type CwStepperTone
+ *
+ * @description
+ * Fill of the done and current bars of the `segments` variant: ink (`default`) or the mockup's
+ * violet (`primary`, `App.dc.html`, the onboarding assistant).
+ *
+ * @type {'default' | 'primary'}
+ */
+export type CwStepperTone = 'default' | 'primary';
+
+/**
  * Type CwStepState
  *
  * @description

@@ -39,6 +39,7 @@ import type {
   CwStepperLabels,
   CwStepperOrientation,
   CwStepperSize,
+  CwStepperTone,
   CwStepperVariant,
 } from './stepper.types';
 
@@ -122,8 +123,8 @@ const TEXT: Record<CwStepperSize | 'vertical', string> = {
 };
 
 /* Mockup App.dc.html, onboarding assistant: a 4 px bar per step, filled up to the current one, and
-   a label below. Ink instead of the mockup's `bg-primary`: amethyst is never a fill (tokens usage
-   rules), as for `cw-progress`. */
+   a label below. Ink by default (amethyst is not a fill unless asked), as for `cw-progress`;
+   `tone="primary"` draws the mockup's `bg-primary`. */
 /**
  * Constant SEGMENT
  *
@@ -135,6 +136,21 @@ const TEXT: Record<CwStepperSize | 'vertical', string> = {
 const SEGMENT: Record<CwStepState, string> = {
   done: 'bg-foreground',
   current: 'bg-foreground',
+  todo: 'bg-track',
+  error: 'bg-destructive',
+};
+
+/**
+ * Constant PRIMARY_SEGMENT
+ *
+ * @description
+ * Bar classes for each step state of the `segments` variant in the `primary` tone.
+ *
+ * @type {Record<CwStepState, string>}
+ */
+const PRIMARY_SEGMENT: Record<CwStepState, string> = {
+  done: 'bg-primary',
+  current: 'bg-primary',
   todo: 'bg-track',
   error: 'bg-destructive',
 };
@@ -360,6 +376,18 @@ export class CwStepper {
    * @type {InputSignal<CwStepperVariant>}
    */
   public readonly variant: InputSignal<CwStepperVariant> = input<CwStepperVariant>('default');
+
+  /**
+   * Property tone
+   * @readonly
+   *
+   * @description
+   * Fill of the done and current bars of the `segments` variant: ink (`default`) or violet
+   * (`primary`); ignored by the `default` variant.
+   *
+   * @type {InputSignal<CwStepperTone>}
+   */
+  public readonly tone: InputSignal<CwStepperTone> = input<CwStepperTone>('default');
 
   /**
    * Property selected
@@ -680,7 +708,7 @@ export class CwStepper {
         labelClasses: segmented
           ? `text-xs font-medium ${SEGMENT_LABEL[state]}`
           : `${sizeText} ${LABEL[state]}`,
-        segmentClasses: SEGMENT[state],
+        segmentClasses: (this.tone() === 'primary' ? PRIMARY_SEGMENT : SEGMENT)[state],
         hiddenState: ` — ${text.step} ${String(index + 1)}, ${text[state]}`,
       };
     });
