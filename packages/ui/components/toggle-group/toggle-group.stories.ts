@@ -1,5 +1,6 @@
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
+  phosphorCheckBold,
   phosphorCircleHalfBold,
   phosphorFlagBold,
   phosphorTextBBold,
@@ -36,6 +37,7 @@ const meta: Meta = {
     applicationConfig({
       providers: [
         provideIcons({
+          phosphorCheckBold,
           phosphorCircleHalfBold,
           phosphorFlagBold,
           phosphorTextBBold,
@@ -115,6 +117,71 @@ export const SingleOutline: Story = {
         <button cwToggleGroupItem value="assignee"><ng-icon name="phosphorUserBold" /> Assigné</button>
       </cw-toggle-group>`,
   }),
+};
+
+/**
+ * Multiple choice, `outline`, `xs`, spaced and wrapping: the activity type chips of the mockup
+ * (`App.dc.html`). A chosen chip is violet, its icon in `text-primary`.
+ */
+export const Chips: Story = {
+  render: () => ({
+    props: { kinds: ['status'] },
+    template: `
+      <cw-toggle-group type="multiple" variant="outline" size="xs" spacing="1" class="flex-wrap gap-1.5" ariaLabel="Types d’activité" [(value)]="kinds">
+        <button cwToggleGroupItem value="status"><ng-icon name="phosphorCircleHalfBold" /> Statut</button>
+        <button cwToggleGroupItem value="priority"><ng-icon name="phosphorFlagBold" /> Priorité</button>
+        <button cwToggleGroupItem value="assignee"><ng-icon name="phosphorUserBold" /> Assignation</button>
+      </cw-toggle-group>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const group: HTMLElement = within(canvasElement).getAllByRole('group', {
+      name: 'Types d’activité',
+    })[0];
+    const priority: HTMLElement = within(group).getByRole('button', { name: 'Priorité' });
+    await expect(Math.round(priority.getBoundingClientRect().height)).toBe(28);
+    await userEvent.click(priority);
+    await expect(priority).toHaveAttribute('aria-pressed', 'true');
+  },
+};
+
+/**
+ * `swatch`: 32 px color circles ringed in violet when chosen, wrapping 8 px apart (mockup
+ * `App.dc.html`, the onboarding space colors).
+ */
+export const Swatches: Story = {
+  render: () => ({
+    props: {
+      color: 'azur',
+      colors: [
+        { value: 'azur', label: 'Azur', swatch: 'bg-azur' },
+        { value: 'jade', label: 'Jade', swatch: 'bg-jade' },
+        { value: 'indigo', label: 'Indigo', swatch: 'bg-indigo' },
+        { value: 'cornaline', label: 'Cornaline', swatch: 'bg-cornaline' },
+        { value: 'fuchsia', label: 'Fuchsia', swatch: 'bg-fuchsia' },
+      ],
+    },
+    template: `
+      <cw-toggle-group variant="swatch" ariaLabel="Couleur" [(value)]="color">
+        @for (c of colors; track c.value) {
+          <button cwToggleGroupItem [value]="c.value" [attr.aria-label]="c.label">
+            <span class="flex items-center justify-center text-background" [class]="c.swatch">
+              @if (color === c.value) {
+                <ng-icon name="phosphorCheckBold" size="0.875rem" />
+              }
+            </span>
+          </button>
+        }
+      </cw-toggle-group>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const group: HTMLElement = within(canvasElement).getAllByRole('radiogroup', {
+      name: 'Couleur',
+    })[0];
+    const jade: HTMLElement = within(group).getByRole('radio', { name: 'Jade' });
+    await expect(Math.round(jade.getBoundingClientRect().width)).toBe(32);
+    await userEvent.click(jade);
+    await expect(jade).toHaveAttribute('aria-checked', 'true');
+  },
 };
 
 /** The three sizes; `sm` items keep `rounded-md` corners. */

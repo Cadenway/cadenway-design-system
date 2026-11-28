@@ -51,13 +51,14 @@ const RADIOS: Record<CwRadioGroupItemVariant, string> = {
  * Constant CARD
  *
  * @description
- * Choice card classes: `bg-accent` on hover, `bg-selected` with a `foreground/40` border once
- * selected.
+ * Choice card classes: `bg-accent` on hover; once selected violet, `bg-primary/5` with a
+ * `primary/50` border, `bg-primary/10` on hover (mockup `Compte.dc.html`, the status cards, and
+ * `App.dc.html`, the onboarding templates).
  *
  * @type {string}
  */
 const CARD: string =
-  'flex w-full cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors hover:bg-accent has-[[data-state=checked]]:border-foreground/40 has-[[data-state=checked]]:bg-selected has-disabled:cursor-not-allowed motion-reduce:transition-none';
+  'flex w-full cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors hover:bg-accent has-[[data-state=checked]]:border-primary/50 has-[[data-state=checked]]:bg-primary/5 has-[[data-state=checked]]:hover:bg-primary/10 has-disabled:cursor-not-allowed motion-reduce:transition-none';
 
 /* Without its dot the radio is visually hidden but stays the focused control, so the card draws
    the cues the radio would have drawn: the focus ring, the dimming and the end of the hover veil
@@ -149,8 +150,8 @@ class RadioOption implements FocusableOption {
  *
  * `default`: the bare radio; name it with a `<label for>` (its `id`), the description beside it.
  * `card`: a choice card, the whole card the radio's label: the radio and the projected content
- * (title, description) in a bordered card, `bg-accent` on hover, `bg-selected` with a
- * `foreground/40` border once selected. `[indicator]="false"` hides the dot of a card, which then
+ * (title, description) in a bordered card, `bg-accent` on hover, violet once selected
+ * (`bg-primary/5` with a `primary/50` border). `[indicator]="false"` hides the dot of a card, which then
  * shows its selection by its fill and border alone and draws the focus ring, the disabled dimming
  * and the invalid border itself; the radio stays the focused, announced control. A disabled option
  * is dimmed and skipped by the arrows. Options may come from a `@for`: until Angular has set an

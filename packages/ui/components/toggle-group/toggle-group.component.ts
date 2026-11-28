@@ -36,7 +36,9 @@ import type {
 } from './toggle-group.types';
 
 /* Attached items (spacing 0): inner corners cancelled, shared borders merged, the focused item above
-   its neighbors so its ring shows whole. `sm` items have `rounded-md` corners. */
+   its neighbors so its ring shows whole. `xs` and `sm` items have `rounded-md` corners. Spaced
+   groups keep their gap behind `:where()`, so a consumer's gap class wins (mockup App.dc.html:
+   the activity type chips are 6 px apart and wrap). */
 /**
  * Constant ATTACHED
  *
@@ -67,8 +69,22 @@ const ATTACHED: Record<CwToggleGroupOrientation, Record<'sm' | 'other', string>>
  * @type {Record<CwToggleGroupOrientation, string>}
  */
 const SPACED: Record<CwToggleGroupOrientation, string> = {
-  horizontal: 'flex w-fit items-center gap-1',
-  vertical: 'flex w-fit flex-col gap-1',
+  horizontal: 'flex w-fit items-center [:where(&)]:gap-1',
+  vertical: 'flex w-fit flex-col [:where(&)]:gap-1',
+};
+
+// Mockup App.dc.html, onboarding: the color swatches wrap, 8 px apart.
+/**
+ * Constant SWATCHES
+ *
+ * @description
+ * Layout classes of a `swatch` group, always spaced.
+ *
+ * @type {Record<CwToggleGroupOrientation, string>}
+ */
+const SWATCHES: Record<CwToggleGroupOrientation, string> = {
+  horizontal: 'flex flex-wrap items-center [:where(&)]:gap-2',
+  vertical: 'flex w-fit flex-col [:where(&)]:gap-2',
 };
 
 /**
@@ -430,8 +446,10 @@ export class CwToggleGroup implements FormValueControl<CwToggleGroupValue>, Cont
    */
   protected readonly classes: Signal<string> = computed(() => {
     const orientation: CwToggleGroupOrientation = this.orientation();
+    if (this.variant() === 'swatch') return SWATCHES[orientation];
     if (this.spacing() > 0) return SPACED[orientation];
-    return ATTACHED[orientation][this.size() === 'sm' ? 'sm' : 'other'];
+    const size: CwToggleGroupSize = this.size();
+    return ATTACHED[orientation][size === 'sm' || size === 'xs' ? 'sm' : 'other'];
   });
   // #endregion
 

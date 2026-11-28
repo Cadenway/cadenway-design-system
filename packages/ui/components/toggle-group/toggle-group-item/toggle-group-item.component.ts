@@ -34,24 +34,33 @@ import type { CwToggleGroupSize, CwToggleGroupVariant } from '../toggle-group.ty
  * @type {string}
  */
 const ITEM_BASE: string =
-  'relative isolate overflow-hidden inline-flex items-center justify-center gap-2 text-sm font-medium whitespace-nowrap text-muted-foreground ' +
-  'transition-[color,background-color,box-shadow] motion-reduce:transition-none hover:bg-accent hover:text-foreground ' +
+  'relative isolate overflow-hidden inline-flex items-center justify-center font-medium whitespace-nowrap ' +
+  'transition-[color,background-color,border-color,box-shadow] motion-reduce:transition-none ' +
   'disabled:pointer-events-none disabled:opacity-50 ' +
-  'data-[state=on]:bg-selected data-[state=on]:text-foreground data-[state=on]:hover:bg-selected ' +
-  '[&_ng-icon]:pointer-events-none [&_ng-icon]:shrink-0 [&_ng-icon]:[--ng-icon__size:1rem] ' +
+  '[&_ng-icon]:pointer-events-none [&_ng-icon]:shrink-0 ' +
   'outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background';
 
 /**
  * Constant ITEM_VARIANTS
  *
  * @description
- * Visual classes for each group variant.
+ * Visual classes for each group variant. Mockup `App.dc.html`: a selected outline chip is violet
+ * (`border-primary/50 bg-primary/5`, its icon `text-primary`; the activity type chips), a swatch
+ * is a 32 px circle ringed in violet when chosen (the onboarding space colors).
  *
  * @type {Record<CwToggleGroupVariant, string>}
  */
 const ITEM_VARIANTS: Record<CwToggleGroupVariant, string> = {
-  default: 'bg-transparent',
-  outline: 'border border-input bg-transparent',
+  default:
+    'bg-transparent text-muted-foreground hover:bg-accent hover:text-foreground ' +
+    'data-[state=on]:bg-selected data-[state=on]:text-foreground data-[state=on]:hover:bg-selected',
+  outline:
+    'border border-input bg-transparent text-muted-foreground hover:bg-accent hover:text-foreground ' +
+    'data-[state=on]:border-primary/50 data-[state=on]:bg-primary/5 data-[state=on]:text-foreground data-[state=on]:hover:bg-primary/5 ' +
+    'data-[state=on]:[&_ng-icon]:text-primary',
+  swatch:
+    'size-8 shrink-0 rounded-full p-0.5 ring-2 ring-transparent data-[state=on]:ring-primary/60 ' +
+    '*:size-full *:rounded-full',
 };
 
 /**
@@ -63,9 +72,10 @@ const ITEM_VARIANTS: Record<CwToggleGroupVariant, string> = {
  * @type {Record<CwToggleGroupSize, string>}
  */
 const ITEM_SIZES: Record<CwToggleGroupSize, string> = {
-  sm: 'h-7 min-w-7 rounded-md px-1.5',
-  default: 'h-8 min-w-8 rounded-lg px-2',
-  lg: 'h-9 min-w-9 rounded-lg px-2.5',
+  xs: 'h-7 min-w-7 gap-1.5 rounded-md px-2 text-xs [&_ng-icon]:[--ng-icon__size:0.875rem]',
+  sm: 'h-7 min-w-7 gap-2 rounded-md px-1.5 text-sm [&_ng-icon]:[--ng-icon__size:1rem]',
+  default: 'h-8 min-w-8 gap-2 rounded-lg px-2 text-sm [&_ng-icon]:[--ng-icon__size:1rem]',
+  lg: 'h-9 min-w-9 gap-2 rounded-lg px-2.5 text-sm [&_ng-icon]:[--ng-icon__size:1rem]',
 };
 
 /**
@@ -78,7 +88,9 @@ const ITEM_SIZES: Record<CwToggleGroupSize, string> = {
  * Takes the variant and size of its group, `role="radio"` and `aria-checked` in single choice,
  * `aria-pressed` in multiple choice, `data-state="on|off"`, and `tabindex` 0 only on the group's Tab
  * stop. Sets `type="button"` when no type is given. An icon-only item needs an `aria-label`. Every
- * press draws the ripple (`CwRipple`), except under reduced motion. Items may come from a `@for`:
+ * press draws the ripple (`CwRipple`), except under reduced motion. In a `swatch` group the item is
+ * a 32 px circle whose projected child (a colored span, a check inside it when on) fills it; it
+ * needs an `aria-label`, the color's name. Items may come from a `@for`:
  * until Angular has set an item's `value`, the group treats it as off (`hasValue`).
  */
 @Component({
@@ -243,9 +255,12 @@ export class CwToggleGroupItem {
    *
    * @type {Signal<string>}
    */
-  protected readonly classes: Signal<string> = computed(
-    () => `${ITEM_BASE} ${ITEM_VARIANTS[this.group.variant()]} ${ITEM_SIZES[this.group.size()]}`,
-  );
+  protected readonly classes: Signal<string> = computed(() => {
+    const variant: CwToggleGroupVariant = this.group.variant();
+    // A swatch is a fixed 32 px circle: the group's size does not apply to it.
+    const size: string = variant === 'swatch' ? '' : ITEM_SIZES[this.group.size()];
+    return `${ITEM_BASE} ${ITEM_VARIANTS[variant]} ${size}`;
+  });
   // #endregion
 
   // #region Constructor
