@@ -14,7 +14,11 @@ Align a third batch of bricks with the mockup (`App.dc.html`, `Compte.dc.html`).
   76 px default); a fuller week grows 30 px (outlined) or 22 px (default) a line, so no item is
   clipped and the bars across days keep their lines. A bar across days is now positioned on its
   line over the days it covers: its `absolute` lost to the pill's `relative`, which left it in
-  the flow of its first day, one day wide and clipped.
+  the flow of its first day, one day wide and clipped. Now that a bar can be grabbed on any of its
+  days, a pointer drag moves it by the days between the day it was grabbed by and the drop day
+  (a Monday–Wednesday bar grabbed on Tuesday and dropped on Wednesday starts on Tuesday), and a
+  drop back on that day emits no `itemMove`. Pills, blocks and keyboard moves keep moving the
+  item's start onto the target.
 - `cw-card`: a standard card holding a `cw-card-footer` drops its bottom padding, and the footer
   frames itself with `py-3` (12 px above and below its content, the mockup's `Compte.dc.html`
   blocks) instead of 12 px above and the card's 16 px below. Cards without a footer and `sm`

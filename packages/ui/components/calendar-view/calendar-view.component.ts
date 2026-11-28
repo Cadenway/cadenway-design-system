@@ -1282,7 +1282,9 @@ export class CwCalendarView<T> implements CalendarViewHost {
    * Property itemMove
    *
    * @description
-   * An item dropped on another day or slot.
+   * An item dropped on another day or slot, with its new span. A bar across days dragged with the
+   * pointer moves by the days between the day it was grabbed by and the drop day; a drop that
+   * leaves the span unchanged emits nothing.
    *
    * @type {OutputEmitterRef<CwCalendarItemMove<T>>}
    * @readonly
@@ -1539,6 +1541,17 @@ export class CwCalendarView<T> implements CalendarViewHost {
    * @readonly
    */
   private readonly dragging: WritableSignal<string | null> = signal<string | null>(null);
+
+  /**
+   * Property barGrab
+   *
+   * @description
+   * The bar last pressed with the pointer and the day it was pressed on; read and cleared by the
+   * drop (the CDK ends the drag before it drops, so the drag end cannot clear it).
+   *
+   * @type {{ id: string; day: Date } | null}
+   */
+  private barGrab: { id: string; day: Date } | null = null;
 
   /**
    * Property dragOver
@@ -2119,6 +2132,26 @@ export class CwCalendarView<T> implements CalendarViewHost {
   }
 
   /**
+   * Method onBarPointerdown
+   *
+   * @description
+   * Part handler (`CalendarViewHost`), not for consumers. Measured on the press, before the CDK
+   * replaces the bar with its placeholder: the day under the pointer, from its share of the bar.
+   *
+   * @param {MouseEvent} event - Press on the bar.
+   * @param {BarView} bar - The pressed bar.
+   */
+  public onBarPointerdown(event: MouseEvent, bar: BarView): void {
+    const target: EventTarget | null = event.currentTarget;
+    if (!(target instanceof HTMLElement)) return;
+    const rect: DOMRect = target.getBoundingClientRect();
+    const index: number =
+      rect.width > 0 ? Math.floor(((event.clientX - rect.left) / rect.width) * bar.days.length) : 0;
+    const day: Date | undefined = bar.days.at(Math.min(Math.max(index, 0), bar.days.length - 1));
+    this.barGrab = day ? { id: bar.id, day } : null;
+  }
+
+  /**
    * Method onDragEnd
    *
    * @description
@@ -2180,12 +2213,18 @@ export class CwCalendarView<T> implements CalendarViewHost {
    */
   protected onDrop(event: CdkDragDrop<DropData, DropData, unknown>): void {
     this.externalOver.set(null);
-    if (event.previousContainer === event.container) return;
     if (this.ownsList(event.previousContainer)) {
       const entry: Entry<T> | undefined = this.entries().find(
         (candidate) => candidate.id === event.item.data,
       );
-      if (entry) this.moveEntry(entry, event.container.data);
+      const grab: { id: string; day: Date } | null = this.barGrab;
+      this.barGrab = null;
+      const grabbedBy: Date | undefined = entry && grab?.id === entry.id ? grab.day : undefined;
+      // A bar moves by the days between the day it was grabbed by and the target, so it can land
+      // back in the list it is drawn in (its first day); a pill or a block moves by its start, and
+      // its own list keeps it where it is (a 9:10 block stays off the 9:00 slot's start).
+      if (!entry || (!grabbedBy && event.previousContainer === event.container)) return;
+      this.moveEntry(entry, event.container.data, grabbedBy);
       return;
     }
     // From a list outside the calendar, connected through `dropListIds`.
@@ -2436,12 +2475,14 @@ export class CwCalendarView<T> implements CalendarViewHost {
    * Method moveEntry
    *
    * @description
-   * Gives an item its new span (duration kept) and emits `itemMove`.
+   * Gives an item its new span (duration kept) and emits `itemMove`, unless the span is unchanged.
    *
    * @param {Entry<T>} entry - Calendar entry to move or render.
    * @param {DropData} to - Target day or time slot.
+   * @param {Date} [from] - Day the item was grabbed by, which lands on the target day; its start
+   * by default.
    */
-  private moveEntry(entry: Entry<T>, to: DropData): void {
+  private moveEntry(entry: Entry<T>, to: DropData, from?: Date): void {
     const { start, end, allDay }: CwCalendarSpan = entry.span;
     let span: CwCalendarSpan;
     if (to.slot !== null) {
@@ -2453,8 +2494,15 @@ export class CwCalendarView<T> implements CalendarViewHost {
       span = { start: ɵstartOfDay(to.date), end: ɵstartOfDay(to.date), allDay: true };
     } else {
       // Onto a day: the item keeps its times and its number of days.
-      const shift: number = ɵdaysBetween(start, to.date);
+      const shift: number = ɵdaysBetween(from ?? start, to.date);
       span = { start: addDays(start, shift), end: addDays(end, shift), allDay };
+    }
+    if (
+      span.allDay === allDay &&
+      span.start.getTime() === start.getTime() &&
+      span.end.getTime() === end.getTime()
+    ) {
+      return;
     }
     this.moved.update((moved) => new Map(moved).set(entry.id, span));
     this.itemMove.emit({ item: entry.item, ...span });
@@ -2764,6 +2812,7 @@ export class CwCalendarView<T> implements CalendarViewHost {
               width: `calc(100% * ${String(span)} / ${String(count)} - 8px)`,
               continues,
               range,
+              days: days.slice(bar.from, bar.to + 1),
             };
           }),
         all: all.map((entry) => this.itemView(entry, 'list', false, 0)),

@@ -78,6 +78,7 @@
     [attr.title]="bar.title"
     [attr.aria-label]="bar.title"
     [attr.tabindex]="day.tabStop ? 0 : -1"
+    (pointerdown)="host.onBarPointerdown($event, bar)"
     (cdkDragStarted)="host.onDragStart(bar.id)"
     (cdkDragEnded)="host.onDragEnd()"
     (click)="host.openItem(bar.context)"

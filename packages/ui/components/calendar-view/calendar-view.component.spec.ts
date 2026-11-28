@@ -576,6 +576,58 @@ describe('CwCalendarView', () => {
     );
   });
 
+  /**
+   * Function dropBar
+   *
+   * @description
+   * Presses the 16–18 November bar at a share of its width, then drops it on a day with the
+   * pointer through the CDK drop event.
+   *
+   * @param {number} share - Share of the bar's width under the pointer, from 0 to 1.
+   * @param {number} target - Day of November the bar is dropped on.
+   */
+  async function dropBar(share: number, target: number): Promise<void> {
+    const bar: HTMLButtonElement = button(host, 'Maquetter la vue Calendrier, du 16 au 18 nov.');
+    vi.spyOn(bar, 'getBoundingClientRect').mockReturnValue(new DOMRect(100, 0, 300, 26));
+    bar.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, clientX: 100 + 300 * share }));
+    const lists: CdkDropList<DropData>[] = fixture.debugElement
+      .queryAll(By.directive(CdkDropList))
+      .map((element) => element.injector.get(CdkDropList) as unknown as CdkDropList<DropData>);
+    const source: CdkDropList<DropData> | undefined = lists.find((list) =>
+      list.getSortedItems().some((drag) => drag.data === 'CAD-479'),
+    );
+    const container: CdkDropList<DropData> | undefined = lists.find(
+      (list) => list.data.date.getTime() === day(target).getTime(),
+    );
+    const drag: CdkDrag<string> | undefined = source
+      ?.getSortedItems()
+      .find((candidate) => candidate.data === 'CAD-479');
+    if (!source || !container || !drag) throw new Error('Drop lists missing');
+    container.dropped.emit({
+      previousContainer: source,
+      container,
+      previousIndex: 0,
+      currentIndex: 0,
+      item: drag,
+    } as unknown as CdkDragDrop<DropData, DropData, string>);
+    await fixture.whenStable();
+  }
+
+  it('moves a bar grabbed by its middle day by the days between that day and the target', async () => {
+    await dropBar(0.5, 18);
+
+    expect(component.moves).toEqual([
+      { item: TASKS[4], start: day(17), end: day(19), allDay: true },
+    ]);
+  });
+
+  it('leaves a bar dropped on the day it was grabbed by where it is', async () => {
+    await dropBar(0.5, 17);
+    await dropBar(0.1, 16);
+
+    expect(component.moves).toEqual([]);
+  });
+
   it('switches to the week view with its all-day row and hourly slots', async () => {
     button(host, 'Semaine').click();
     await fixture.whenStable();

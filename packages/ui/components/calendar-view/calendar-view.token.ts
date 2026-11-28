@@ -218,6 +218,17 @@ export interface BarView extends ItemView {
    * @readonly
    */
   readonly range: string;
+
+  /**
+   * Property days
+   *
+   * @description
+   * The days the bar covers in its row, in column order, to tell which day a pointer grabs it by.
+   *
+   * @type {readonly Date[]}
+   * @readonly
+   */
+  readonly days: readonly Date[];
   // #endregion
 }
 
@@ -638,6 +649,18 @@ export interface CalendarViewHost {
    * @param {string} id - Identifier of the dragged or focused item.
    */
   onDragStart(id: string): void;
+
+  /**
+   * Method onBarPointerdown
+   *
+   * @description
+   * Records the day of a bar under the pointer when it is pressed, so a drop moves the item by
+   * the days between that day and the target, not its start onto the target.
+   *
+   * @param {MouseEvent} event - Press on the bar.
+   * @param {BarView} bar - The pressed bar.
+   */
+  onBarPointerdown(event: MouseEvent, bar: BarView): void;
 
   /**
    * Method onDragEnd
