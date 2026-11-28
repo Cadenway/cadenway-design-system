@@ -12,7 +12,7 @@ menu item entrance: 420 ms on the spring easing, out of a 3 px blur and a 6 px s
 `@cadenway/ui`, new inputs and variants (existing visuals unchanged unless listed below):
 
 - `cw-popover`: `width` (`'fixed'` default, `'content'`: follows the content from the width of its
-  `size` up to the viewport). New type `CwPopoverWidth`.
+  `size`, both bounds kept within the viewport less 16 px). New type `CwPopoverWidth`.
 - `cw-menu`: `sideOffset` (px, 4 by default) and `minWidth` (`'32'` default to `'72'`, Tailwind
   spacing steps). New type `CwMenuMinWidth`.
 - `cw-toggle-group`: `size="xs"` (28 px chip, 12 px text, 14 px icons, 6 px gap) and
@@ -20,7 +20,8 @@ menu item entrance: 420 ms on the spring easing, out of a 3 px blur and a 6 px s
 - `cw-progress`: `variant="primary"` (violet bar). `cw-stepper`: `tone` (`'default'` ink,
   `'primary'` violet segments). New type `CwStepperTone`.
 - `cw-dialog`: sizes `2xl` (1024 px) and `tall` (1024 px, 88 % of the viewport high), `placement`
-  (`'center'` default, `'top'`: pinned 8vh from the top from 768 px), `padding` (`'none'` leaves the
+  (`'center'` default, `'top'`: pinned 8vh from the top from 768 px, following the breakpoint while
+  open), `padding` (`'none'` leaves the
   body unpadded); `cw-dialog-header` `variant="bar"` (a wrapping row over a rule, 16 px title).
   New types `CwDialogPlacement`, `CwDialogPadding`, `CwDialogHeaderVariant`.
 - `cw-command-dialog`: `fieldEnd` (an `ng-template` drawn at the end of the field row), and
@@ -30,7 +31,8 @@ menu item entrance: 420 ms on the spring easing, out of a 3 px blur and a 6 px s
   an `h2`, « Aujourd'hui » and 28 px arrows grouped at the end) and `viewToggle` (`true` default).
   New label `navigation`, new types `CwCalendarViewVariant`, `CwCalendarViewToolbar`.
 - `cw-meter`: `marker` (an alert mark at a value, decorative).
-- `cw-toolbar`: `wrap` (controls wrap onto new rows instead of moving into « Plus »).
+- `cw-toolbar`: `wrap` (controls, and the controls of a group wider than the bar, wrap onto new
+  rows instead of moving into « Plus »).
 - `cw-data-table`: `editOn` (`'dblclick'` default, `'click'`). New type `CwDataTableEditTrigger`.
 - `cwSidebarItem`: `activeIcon` (`null` keeps `icon`, a name replaces the Fill weight).
 - `cwTab`: `countLabel` (spoken form of `count`).
@@ -48,7 +50,7 @@ Visible changes for every consumer (mockup rules: selected is violet, check on t
   (`border-primary/50 bg-primary/10 text-primary`).
 - `cw-sidebar-space` in the icon rail: the space holding the current page takes the violet tint
   (`bg-primary/5`) instead of `bg-selected`. A current `cwSidebarItem` whose Fill twin is not
-  registered keeps its Bold icon instead of drawing a blank one; its count is read inside the label
+  registered, without an icon loader, keeps its Bold icon instead of drawing a blank one; its count is read inside the label
   text (« Boîte de réception, 3 non lus »).
 - `cwButton size="lg"`: `gap-1.5 px-3` (`px-2.5` with an icon) instead of `gap-2 px-4`;
   `input[cwInput] size="lg"`: `px-2.5` instead of `px-3`.
