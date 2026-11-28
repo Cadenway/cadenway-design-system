@@ -1,6 +1,6 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideIcons } from '@ng-icons/core';
+import { provideIcons, provideNgIconLoader } from '@ng-icons/core';
 import {
   phosphorFunnelSimpleBold,
   phosphorHouseBold,
@@ -741,5 +741,24 @@ describe('CwSidebar current icons', () => {
     expect(link(host, 'Boîte de réception').querySelector('ng-icon')?.innerHTML).toBe(
       phosphorFunnelSimpleBold,
     );
+  });
+});
+
+describe('CwSidebar current icons with an icon loader', () => {
+  it('keeps the Fill name of a current item, which the loader may serve', async () => {
+    const requested: string[] = [];
+    TestBed.configureTestingModule({
+      providers: [
+        provideNgIconLoader((name: string) => {
+          requested.push(name);
+          return '<svg></svg>';
+        }),
+      ],
+    });
+    const fixture: ComponentFixture<IconHost> = TestBed.createComponent(IconHost);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+
+    expect(requested).toContain('phosphorFunnelSimpleFill');
   });
 });
