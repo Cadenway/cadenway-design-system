@@ -503,6 +503,21 @@ describe('CwMenu', () => {
     expect(subtasks.querySelector('ng-icon')).toBeNull();
   });
 
+  it('animates and staggers its items only without a reduced-motion preference', async () => {
+    button(host, 'Affichage').click();
+    await fixture.whenStable();
+    const tokens: string[] = menuNamed('Affichage').className.split(/\s+/);
+    const motion: string[] = tokens.filter(
+      (token) => token.includes('animate-menu-item') || token.includes('animation-delay'),
+    );
+
+    // Both directions, upwards included, and every delay sit behind `motion-safe`, so reduced
+    // motion leaves neither an animation nor a delay that would keep an item hidden.
+    expect(motion.some((token) => token.includes('animate-menu-item-up'))).toBe(true);
+    expect(motion.filter((token) => token.includes('animation-delay'))).toHaveLength(12);
+    expect(motion.every((token) => token.startsWith('motion-safe:'))).toBe(true);
+  });
+
   it('opens at its side offset with its minimum width', async () => {
     button(host, 'Organisation').click();
     await fixture.whenStable();

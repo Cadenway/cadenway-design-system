@@ -63,7 +63,8 @@ import type {
    between the `minWidth` floor (`min-w-32` by default) and `max-w-sm` (integration guide,
    "Placement des menus"). The CDK overlay pane is a flex box capped to the room left in the
    viewport: the panel stretches to it and scrolls. Mockup `App.dc.html`: items enter with
-   `animate-menu-item` (`animate-menu-item-up` in a menu opened upwards), 80 ms then +35 ms
+   `animate-menu-item` (`animate-menu-item-up` in a menu opened upwards), 80 ms then +35 ms, and
+   none of it under reduced motion
    (`stagger-0` to `stagger-8`), twelve at most. */
 /**
  * Constant PANEL
@@ -77,11 +78,15 @@ const PANEL: string =
   'flex min-h-0 max-w-sm flex-col overflow-y-auto rounded-lg border bg-popover p-1 text-popover-foreground shadow-md outline-hidden ' +
   'focus-visible:ring-2 focus-visible:ring-ring ' +
   'animate-menu-in motion-reduce:animate-none data-[state=closed]:pointer-events-none data-[state=closed]:animate-menu-out ' +
-  '*:shrink-0 *:animate-menu-item data-[side=top]:*:animate-menu-item-up *:motion-reduce:animate-none ' +
-  '[&>*:nth-child(1)]:[animation-delay:80ms] [&>*:nth-child(2)]:[animation-delay:115ms] [&>*:nth-child(3)]:[animation-delay:150ms] ' +
-  '[&>*:nth-child(4)]:[animation-delay:185ms] [&>*:nth-child(5)]:[animation-delay:220ms] [&>*:nth-child(6)]:[animation-delay:255ms] ' +
-  '[&>*:nth-child(7)]:[animation-delay:290ms] [&>*:nth-child(8)]:[animation-delay:325ms] [&>*:nth-child(9)]:[animation-delay:360ms] ' +
-  '[&>*:nth-child(10)]:[animation-delay:395ms] [&>*:nth-child(11)]:[animation-delay:430ms] [&>*:nth-child(12)]:[animation-delay:465ms] ' +
+  '*:shrink-0 ' +
+  // The entrance and its stagger exist only under `motion-safe`: a reduced-motion override would
+  // lose to the side-specific selector, and a delay with `backwards` fill would keep the items
+  // hidden.
+  'motion-safe:*:animate-menu-item motion-safe:data-[side=top]:*:animate-menu-item-up ' +
+  'motion-safe:[&>*:nth-child(1)]:[animation-delay:80ms] motion-safe:[&>*:nth-child(2)]:[animation-delay:115ms] motion-safe:[&>*:nth-child(3)]:[animation-delay:150ms] ' +
+  'motion-safe:[&>*:nth-child(4)]:[animation-delay:185ms] motion-safe:[&>*:nth-child(5)]:[animation-delay:220ms] motion-safe:[&>*:nth-child(6)]:[animation-delay:255ms] ' +
+  'motion-safe:[&>*:nth-child(7)]:[animation-delay:290ms] motion-safe:[&>*:nth-child(8)]:[animation-delay:325ms] motion-safe:[&>*:nth-child(9)]:[animation-delay:360ms] ' +
+  'motion-safe:[&>*:nth-child(10)]:[animation-delay:395ms] motion-safe:[&>*:nth-child(11)]:[animation-delay:430ms] motion-safe:[&>*:nth-child(12)]:[animation-delay:465ms] ' +
   // A phone sheet (`provideCwPhoneSheets`) fills the width of its pane.
   'in-data-[presentation=sheet]:w-full in-data-[presentation=sheet]:max-w-none';
 
