@@ -123,15 +123,17 @@ const FLUSH_CONTENT: string =
  * Constant MIN_WIDTHS
  *
  * @description
- * Minimum panel width classes by size, for a panel whose width follows its content.
+ * Minimum panel width classes by size, for a panel whose width follows its content. The minimum
+ * never exceeds the viewport less its 8 px margins, so an `xl` panel (384 px) still fits a 375 px
+ * phone.
  *
  * @type {Record<CwPopoverSize, string>}
  */
 const MIN_WIDTHS: Record<CwPopoverSize, string> = {
-  sm: 'min-w-56',
-  default: 'min-w-72',
-  lg: 'min-w-80',
-  xl: 'min-w-96',
+  sm: 'min-w-[min(14rem,calc(100vw-1rem))]',
+  default: 'min-w-[min(18rem,calc(100vw-1rem))]',
+  lg: 'min-w-[min(20rem,calc(100vw-1rem))]',
+  xl: 'min-w-[min(24rem,calc(100vw-1rem))]',
 };
 
 // Mockup App.dc.html: the filter and reminder panels grow with their content (`w-max`) and stay
