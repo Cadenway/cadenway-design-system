@@ -1426,7 +1426,8 @@ export class CwChart {
    * Values written above vertical bars: `none` (default), `all`, or `peak` (the highest bars and the
    * `current` category). One label per category: the stack total when stacked, else the category's
    * highest value (the bar itself with one series); a category at 0 is labelled on the baseline, one
-   * without any value is not. Left to right, a label that would touch the previous one is dropped.
+   * without any value is not. Negative values are neither drawn nor labelled: a category whose
+   * highest value is negative, or a stack with a negative part, gets no label. Left to right, a label that would touch the previous one is dropped.
    * They go through `valueFormat` and are hidden from assistive technologies, which read the data
    * table.
    *
@@ -1836,7 +1837,8 @@ export class CwChart {
    * @description
    * Value labels of the vertical bars (`valueLabels`), one per category at most: the stack total when
    * stacked, else the highest value of the category (the bar itself with one series). A category at
-   * 0 is labelled on the baseline; one without any value gets none. Left to right, a label that
+   * 0 is labelled on the baseline; one without any value, whose highest value is negative, or whose
+   * stack has a negative part gets none. Left to right, a label that
    * would come within 4 px of the previous one is dropped, measured at the axis font size.
    *
    * @type {Signal<readonly BarTag[]>}
@@ -2362,11 +2364,12 @@ export class CwChart {
    * Method categoryValue
    *
    * @description
-   * The value a category's label shows: the sum of its positive values when stacked, else its
-   * highest value among the visible series.
+   * The value a category's label shows, only when it states what the bars draw (negative values
+   * are not drawn): the stack total when stacked, else its highest value among the visible series.
    *
    * @param {Readonly<Record<string, string | number | null | undefined>>} row - Datum of the category.
-   * @returns {number | null} Labelled value, or null when no visible series has a value.
+   * @returns {number | null} Labelled value; null when no visible series has a value, when the
+   * highest unstacked value is negative, or when a stacked part is negative.
    */
   private categoryValue(
     row: Readonly<Record<string, string | number | null | undefined>>,
@@ -2375,9 +2378,14 @@ export class CwChart {
       .map((item) => numeric(row, item.key))
       .filter((value): value is number => value !== null);
     if (values.length === 0) return null;
-    return this.stacked()
-      ? values.reduce((sum, value) => sum + Math.max(0, value), 0)
-      : Math.max(0, ...values);
+    if (this.stacked()) {
+      // The drawn stack leaves negative parts out, so its total would not be what is shown.
+      return values.some((value) => value < 0)
+        ? null
+        : values.reduce((sum, value) => sum + value, 0);
+    }
+    const highest: number = Math.max(...values);
+    return highest < 0 ? null : highest;
   }
 
   /**

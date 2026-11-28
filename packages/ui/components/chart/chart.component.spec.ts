@@ -1017,6 +1017,45 @@ describe('CwChart value labels', () => {
     expect(tags().map((label) => label.text)).toEqual(['18', '22']);
   });
 
+  it('labels no unstacked category whose values are all negative', async () => {
+    fixture.componentInstance.current.set(null);
+    fixture.componentInstance.valueLabels.set('all');
+    fixture.componentInstance.data.set([
+      { week: 'S43', done: 4 },
+      { week: 'S44', done: -3 },
+    ]);
+    await fixture.whenStable();
+    expect(tags().map((label) => label.text)).toEqual(['4']);
+  });
+
+  it('labels a mixed unstacked category with its highest positive value', async () => {
+    fixture.componentInstance.series.set([
+      { key: 'done', label: 'Terminées', color: 'chart-2' },
+      { key: 'late', label: 'En retard', color: 'chart-4' },
+    ]);
+    fixture.componentInstance.current.set(null);
+    fixture.componentInstance.valueLabels.set('all');
+    fixture.componentInstance.data.set([{ week: 'S43', done: 5, late: -2 }]);
+    await fixture.whenStable();
+    expect(tags().map((label) => label.text)).toEqual(['5']);
+  });
+
+  it('labels no stacked category with a negative part', async () => {
+    fixture.componentInstance.series.set([
+      { key: 'done', label: 'Terminées', color: 'chart-2' },
+      { key: 'late', label: 'En retard', color: 'chart-4' },
+    ]);
+    fixture.componentInstance.stacked.set(true);
+    fixture.componentInstance.current.set(null);
+    fixture.componentInstance.valueLabels.set('all');
+    fixture.componentInstance.data.set([
+      { week: 'S43', done: 3, late: 1 },
+      { week: 'S44', done: 6, late: -2 },
+    ]);
+    await fixture.whenStable();
+    expect(tags().map((label) => label.text)).toEqual(['4']);
+  });
+
   it('drops a label that would overlap its left neighbour', async () => {
     fixture.componentInstance.current.set(null);
     fixture.componentInstance.valueLabels.set('all');
