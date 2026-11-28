@@ -20,7 +20,9 @@ import type { CwButtonSize, CwButtonVariant } from './button.types';
  *
  * @description
  * Shared button classes from the Button sheet, kept literal so Tailwind finds them in the package.
- * The icon size is passed to `ng-icon` through `--ng-icon__size`.
+ * The icon size is passed to `ng-icon` through `--ng-icon__size`, set once per size in `SIZES`: two
+ * arbitrary-property utilities on the same variable share a specificity, so the later one in the
+ * stylesheet would win whatever the size.
  *
  * @type {string}
  */
@@ -29,7 +31,7 @@ const BASE: string =
   'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ' +
   'disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 ' +
   'aria-busy:pointer-events-none aria-busy:cursor-progress ' +
-  '[&_ng-icon]:pointer-events-none [&_ng-icon]:shrink-0 [&_ng-icon]:[--ng-icon__size:1rem] ' +
+  '[&_ng-icon]:pointer-events-none [&_ng-icon]:shrink-0 ' +
   '[&>[cwSpinner]+ng-icon]:hidden';
 
 /**
@@ -55,19 +57,22 @@ const VARIANTS: Record<CwButtonVariant, string> = {
  * Constant SIZES
  *
  * @description
- * Literal height, spacing and icon-size classes for each button size.
+ * Literal height, spacing and icon-size classes for each button size. Each size sets the icon size
+ * exactly once: 14 px for `xs` and `icon-xs`, 16 px otherwise (mockup App.dc.html, `size-3.5`
+ * icons in 24 px buttons, `size-4` in 28 px and larger ones).
  *
  * @type {Record<CwButtonSize, string>}
  */
 const SIZES: Record<CwButtonSize, string> = {
   xs: 'h-6 gap-1 rounded-md px-2 text-xs has-[>ng-icon]:px-1.5 [&_ng-icon]:[--ng-icon__size:0.875rem]',
-  sm: 'h-7 gap-1.5 rounded-md px-2.5 text-sm has-[>ng-icon]:px-2',
-  default: 'h-8 gap-1.5 rounded-lg px-3 text-sm has-[>ng-icon]:px-2.5',
-  lg: 'h-9 gap-2 rounded-lg px-4 text-sm has-[>ng-icon]:px-3',
+  sm: 'h-7 gap-1.5 rounded-md px-2.5 text-sm has-[>ng-icon]:px-2 [&_ng-icon]:[--ng-icon__size:1rem]',
+  default:
+    'h-8 gap-1.5 rounded-lg px-3 text-sm has-[>ng-icon]:px-2.5 [&_ng-icon]:[--ng-icon__size:1rem]',
+  lg: 'h-9 gap-2 rounded-lg px-4 text-sm has-[>ng-icon]:px-3 [&_ng-icon]:[--ng-icon__size:1rem]',
   'icon-xs': 'size-6 rounded-md text-sm [&_ng-icon]:[--ng-icon__size:0.875rem]',
-  'icon-sm': 'size-7 rounded-md text-sm',
-  icon: 'size-8 rounded-lg text-sm',
-  'icon-lg': 'size-9 rounded-lg text-sm',
+  'icon-sm': 'size-7 rounded-md text-sm [&_ng-icon]:[--ng-icon__size:1rem]',
+  icon: 'size-8 rounded-lg text-sm [&_ng-icon]:[--ng-icon__size:1rem]',
+  'icon-lg': 'size-9 rounded-lg text-sm [&_ng-icon]:[--ng-icon__size:1rem]',
 };
 
 /**

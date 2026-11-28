@@ -2,6 +2,7 @@ import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CwButton } from './button.component';
+import type { CwButtonSize } from './button.types';
 
 /**
  * Class Host
@@ -70,6 +71,52 @@ class Host {
 }
 
 /**
+ * Class SizedHost
+ * @class SizedHost
+ *
+ * @description
+ * Test host rendering one icon button whose size the test changes.
+ */
+@Component({
+  imports: [CwButton],
+  template: `<button cwButton [size]="size()" aria-label="Fermer"></button>`,
+})
+class SizedHost {
+  // #region Properties
+  /**
+   * Property size
+   * @readonly
+   *
+   * @description
+   * Size given to the rendered button.
+   *
+   * @type {WritableSignal<CwButtonSize>}
+   * @default 'default'
+   */
+  public readonly size: WritableSignal<CwButtonSize> = signal<CwButtonSize>('default');
+  // #endregion
+}
+
+/**
+ * Constant ICON_SIZES
+ *
+ * @description
+ * Icon size each button size must set, from the mockup (14 px in 24 px buttons, 16 px above).
+ *
+ * @type {Record<CwButtonSize, string>}
+ */
+const ICON_SIZES: Record<CwButtonSize, string> = {
+  xs: '0.875rem',
+  sm: '1rem',
+  default: '1rem',
+  lg: '1rem',
+  'icon-xs': '0.875rem',
+  'icon-sm': '1rem',
+  icon: '1rem',
+  'icon-lg': '1rem',
+};
+
+/**
  * Function byName
  *
  * @description
@@ -134,5 +181,26 @@ describe('CwButton', () => {
 
   it('names an icon button by its aria-label', () => {
     expect(byName(host, "Plus d'actions").dataset['size']).toBe('icon-sm');
+  });
+});
+
+describe('CwButton sizes', () => {
+  it('sets exactly one icon size per button size', async () => {
+    const fixture: ComponentFixture<SizedHost> = TestBed.createComponent(SizedHost);
+    fixture.autoDetectChanges();
+    const button: HTMLElement | null = (fixture.nativeElement as HTMLElement).querySelector(
+      'button',
+    );
+    if (!button) throw new Error('Button missing');
+
+    for (const [size, iconSize] of Object.entries(ICON_SIZES) as [CwButtonSize, string][]) {
+      fixture.componentInstance.size.set(size);
+      await fixture.whenStable();
+      const declared: string[] = Array.from(button.classList).filter((name) =>
+        name.includes('--ng-icon__size'),
+      );
+
+      expect(declared, size).toEqual([`[&_ng-icon]:[--ng-icon__size:${iconSize}]`]);
+    }
   });
 });
