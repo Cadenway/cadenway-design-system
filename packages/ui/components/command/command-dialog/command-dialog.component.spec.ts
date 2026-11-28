@@ -27,9 +27,13 @@ import { CwCommandDialog } from './command-dialog.component';
   ],
   template: `
     <button type="button">Rechercher</button>
-    <cw-command-dialog [(open)]="open" [(search)]="search" [clearOnEscape]="clearOnEscape()">
+    <cw-command-dialog
+      [(open)]="open"
+      [(search)]="search"
+      [clearOnEscape]="clearOnEscape()"
+      [fieldEnd]="escape"
+    >
       <input cwCommandInput aria-label="Rechercher une commande, une tâche, un espace" />
-      <kbd cwCommandDialogHeader>Échap</kbd>
       <cw-command-list>
         <cw-command-group heading="Suggestions">
           <cw-command-item (selected)="ran.set($event); open.set(false)">
@@ -40,6 +44,7 @@ import { CwCommandDialog } from './command-dialog.component';
       </cw-command-list>
       <cw-command-footer />
     </cw-command-dialog>
+    <ng-template #escape><kbd>Échap</kbd></ng-template>
   `,
 })
 class Host {
@@ -191,7 +196,7 @@ describe('CwCommandDialog', () => {
     expect(palette()).toBeNull();
   });
 
-  it('projects a header element at the end of the field row', async () => {
+  it('draws the fieldEnd template at the end of the field row', async () => {
     component.open.set(true);
     await fixture.whenStable();
     const hint: Element | null | undefined = field().parentElement?.lastElementChild;

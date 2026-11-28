@@ -23,7 +23,7 @@ menu item entrance: 420 ms on the spring easing, out of a 3 px blur and a 6 px s
   (`'center'` default, `'top'`: pinned 8vh from the top from 768 px), `padding` (`'none'` leaves the
   body unpadded); `cw-dialog-header` `variant="bar"` (a wrapping row over a rule, 16 px title).
   New types `CwDialogPlacement`, `CwDialogPadding`, `CwDialogHeaderVariant`.
-- `cw-command-dialog`: an `[cwCommandDialogHeader]` slot at the end of the field row, and
+- `cw-command-dialog`: `fieldEnd` (an `ng-template` drawn at the end of the field row), and
   `clearOnEscape` (`true` default; `false` closes on the first Escape).
 - `cw-calendar-view`: `variant="outlined"` (the mockup's month: 96 px days, other months on
   `bg-muted`, today in a filled circle, bordered chips, 24 px « + »), `toolbar="title"` (the month as

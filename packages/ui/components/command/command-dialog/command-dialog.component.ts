@@ -21,6 +21,7 @@ import {
   type WritableSignal,
   type Signal,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorMagnifyingGlassBold } from '@ng-icons/phosphor-icons/bold';
 import { ɵafterExitAnimation } from '@cadenway/ui/core';
@@ -72,11 +73,11 @@ const BACKDROP_OUT: string = 'animate-fade-out';
  * Component CwCommandDialog
  *
  * @description
- * The `Ctrl K` command palette: a command in a modal dialog, placed a third from the top (Command sheet of the Design System artifact, "Palette"). Holds the same parts as `cw-command` (`input[cwCommandInput]`, `cw-command-list`, `cw-command-footer`…) and the same `search`, `filter`, `loading` and `loop` inputs. `[(open)]` shows it in a CDK Dialog (`role="dialog"`, `aria-modal`, named by `ariaLabel`, focus trapped in it, the field focused, the focus given back on close). Ctrl K (⌘ K) opens or closes it from anywhere unless `shortcut` is off; Escape clears the search, then closes (with `clearOnEscape` off it closes at once, as in the mockup `App.dc.html`); a click on the veil closes. The search is emptied at each opening. An element marked `[cwCommandDialogHeader]` is projected at the end of the field's row, after the spinner: the mockup's « Échap » key hint (`kbd[cwKbd]`).
+ * The `Ctrl K` command palette: a command in a modal dialog, placed a third from the top (Command sheet of the Design System artifact, "Palette"). Holds the same parts as `cw-command` (`input[cwCommandInput]`, `cw-command-list`, `cw-command-footer`…) and the same `search`, `filter`, `loading` and `loop` inputs. `[(open)]` shows it in a CDK Dialog (`role="dialog"`, `aria-modal`, named by `ariaLabel`, focus trapped in it, the field focused, the focus given back on close). Ctrl K (⌘ K) opens or closes it from anywhere unless `shortcut` is off; Escape clears the search, then closes (with `clearOnEscape` off it closes at once, as in the mockup `App.dc.html`); a click on the veil closes. The search is emptied at each opening. `fieldEnd` takes an `ng-template` drawn at the end of the field's row, after the spinner: the mockup's « Échap » key hint (`kbd[cwKbd]`).
  */
 @Component({
   selector: 'cw-command-dialog',
-  imports: [CwSpinner, NgIcon],
+  imports: [CwSpinner, NgIcon, NgTemplateOutlet],
   providers: [CommandState, provideIcons({ phosphorMagnifyingGlassBold })],
   host: {
     '(document:keydown)': 'onDocumentKeydown($event)',
@@ -183,6 +184,19 @@ export class CwCommandDialog implements CommandHost {
   public readonly clearOnEscape: InputSignalWithTransform<boolean, unknown> = input(true, {
     transform: booleanAttribute,
   });
+
+  /**
+   * Property fieldEnd
+   *
+   * @description
+   * Template drawn at the end of the field's row, after the spinner (mockup `App.dc.html`: the
+   * « Échap » key hint); nothing by default.
+   *
+   * @type {InputSignal<TemplateRef<unknown> | null>}
+   * @readonly
+   */
+  public readonly fieldEnd: InputSignal<TemplateRef<unknown> | null> =
+    input<TemplateRef<unknown> | null>(null);
 
   /**
    * Property dialog
