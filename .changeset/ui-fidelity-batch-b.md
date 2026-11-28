@@ -60,7 +60,9 @@ Visible changes for every consumer (mockup rules: selected is violet, check on t
 - `cw-activity-feed`: an entry row hovers in `bg-muted` instead of `bg-accent`.
 - `cw-kanban`: given a height, the board and its column tracks fill it (`min-h-0 flex-1`).
 - `cw-calendar-view`: a day's « + » is named with its weekday (« Créer une tâche le mardi 3
-  novembre »).
+  novembre »). With `maxPerDay` above 2, the default month days grow 22 px a line beyond their
+  76 px (the outlined ones 30 px beyond 96 px), so no item is clipped and « +n autres » stays
+  reachable.
 - Consumer layout classes now win over brick defaults, which sit behind `[:where(&)]:`: the gap of
   `fieldset[cwFieldSet]`; the margin, size and weight of `legend[cwFieldLegend]`; the gap and padding
   of `cw-card` and `cw-empty`; the `mb-1` of `cw-empty-media`; the full width of `cw-alert`; the gap

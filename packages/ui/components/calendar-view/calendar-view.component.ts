@@ -102,7 +102,8 @@ import type {
  * Constant CELL
  *
  * @description
- * Classes for a month day cell.
+ * Classes for a month day cell. Its fixed 76 px fits two lines; a day holding more takes its
+ * height from `defaultHeight`.
  *
  * @type {string}
  */
@@ -524,6 +525,21 @@ const OUTLINED_LINE: 30 = 30;
  */
 function outlinedHeight(lines: number): number {
   return Math.max(96, OUTLINED_TOP + lines * OUTLINED_LINE - 4 + 6);
+}
+
+/**
+ * Function defaultHeight
+ *
+ * @description
+ * Height of a month day of the `default` variant holding `lines` item lines: the first line's
+ * top (26 px), the 20 px lines 22 px apart, the 4 px bottom padding; at least the sheet's 76 px,
+ * which two lines fit.
+ *
+ * @param {number} lines - Visible item lines of the day (`maxPerDay`).
+ * @returns {number} Height in pixels.
+ */
+function defaultHeight(lines: number): number {
+  return Math.max(76, MONTH_TOP + lines * LINE - 2 + 4);
 }
 
 /**
@@ -1127,7 +1143,7 @@ export class CwCalendarView<T> implements CalendarViewHost {
    * @description
    * Lines a day in the month view before « +n autres ». In the `outlined` variant every day of
    * the grid grows to hold them (96 px for two, +30 px a line), so no item is clipped and the bars
-   * across days keep their lines; the default variant keeps its 76 px days.
+   * across days keep their lines; in the default variant 76 px hold two, +22 px a line.
    *
    * @type {InputSignalWithTransform<number, unknown>}
    * @readonly
@@ -2673,7 +2689,7 @@ export class CwCalendarView<T> implements CalendarViewHost {
         numberClass: (outlined ? OUTLINED_NUMBERS : NUMBERS)[
           today ? 'today' : outside ? 'outside' : 'plain'
         ],
-        height: outlined ? outlinedHeight(lines) : null,
+        height: allDayRow ? null : outlined ? outlinedHeight(lines) : defaultHeight(lines),
         headClass: HEADS[variant],
         addClass: outlined ? OUTLINED_ADD : ADD,
         spacerClass: SPACERS[variant],

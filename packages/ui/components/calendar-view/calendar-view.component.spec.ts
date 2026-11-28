@@ -134,6 +134,7 @@ const TASKS: Task[] = [
       [itemSpan]="span"
       [today]="today"
       [showWeekends]="weekends()"
+      [maxPerDay]="maxPerDay()"
       [readonly]="readonly()"
       [unscheduledCount]="1"
       [(view)]="view"
@@ -205,6 +206,17 @@ class Host {
    * @readonly
    */
   public readonly weekends: WritableSignal<boolean> = signal(true);
+
+  /**
+   * Property maxPerDay
+   *
+   * @description
+   * Visible item lines a day in the month view.
+   *
+   * @type {WritableSignal<number>}
+   * @readonly
+   */
+  public readonly maxPerDay: WritableSignal<number> = signal(2);
 
   /**
    * Property readonly
@@ -423,6 +435,23 @@ describe('CwCalendarView', () => {
     expect(cell(host, 'mardi 17 novembre 2026, 2 tâches').textContent).toContain(
       'Notifications par e-mail',
     );
+  });
+
+  it('grows its days to maxPerDay lines, so every item is visible or behind « +n autres »', async () => {
+    component.maxPerDay.set(3);
+    await fixture.whenStable();
+    // Thursday 12 November holds four one-day items: two pills and « +2 autres » on three lines.
+    const today: HTMLElement | null = host.querySelector('[role="gridcell"][aria-current="date"]');
+
+    expect(today?.style.height).toBe('94px');
+    expect(today?.querySelectorAll('button[title]')).toHaveLength(2);
+    expect(today?.querySelector('[data-more]')?.textContent.trim()).toBe('+2 autres');
+  });
+
+  it('keeps its 76 px days for two lines', () => {
+    const today: HTMLElement | null = host.querySelector('[role="gridcell"][aria-current="date"]');
+
+    expect(today?.style.height).toBe('76px');
   });
 
   it('opens an item on click and creates on a day', () => {
