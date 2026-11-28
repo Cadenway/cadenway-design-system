@@ -4,7 +4,7 @@ import { provideCwLocale } from '@cadenway/ui/core';
 
 import { provideCwAvatarLabels } from './avatar.providers';
 import { CwAvatar } from './avatar.component';
-import type { CwAvatarPresence } from './avatar.types';
+import type { CwAvatarPresence, CwAvatarRing } from './avatar.types';
 
 /**
  * Class Host
@@ -19,6 +19,7 @@ import type { CwAvatarPresence } from './avatar.types';
       name="Inès Duval"
       [src]="photo()"
       [presence]="presence()"
+      [ring]="ring()"
       (imageError)="errors.set(errors() + 1)"
     />
     <cw-avatar />
@@ -49,6 +50,17 @@ class Host {
    */
   public readonly presence: WritableSignal<CwAvatarPresence | null> =
     signal<CwAvatarPresence | null>(null);
+
+  /**
+   * Property ring
+   *
+   * @description
+   * Surface given to the first avatar.
+   *
+   * @type {WritableSignal<CwAvatarRing>}
+   * @readonly
+   */
+  public readonly ring: WritableSignal<CwAvatarRing> = signal<CwAvatarRing>('background');
 
   /**
    * Property errors
@@ -118,6 +130,18 @@ describe('CwAvatar', () => {
     expect(spoken(unknown)).toBe('Utilisateur inconnu');
     expect(samuel.getAttribute('title')).toBe('Samuel Roux (désactivé)');
     expect(samuel.hasAttribute('data-disabled')).toBe(true);
+  });
+
+  it('rings the presence dot with the surface the avatar sits on', async () => {
+    component.presence.set('online');
+    await fixture.whenStable();
+    const dot: Element | null = avatars()[0].querySelector(':scope > [aria-hidden="true"]');
+    expect(dot?.classList).toContain('ring-background');
+
+    component.ring.set('canvas');
+    await fixture.whenStable();
+    expect(dot?.classList).toContain('ring-canvas');
+    expect(dot?.classList).not.toContain('ring-background');
   });
 
   it('reads the presence, never by color alone', async () => {
