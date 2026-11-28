@@ -313,6 +313,51 @@ export const Outlined: Story = {
   },
 };
 
+/**
+ * Outlined month with `maxPerDay` at 3: each week is as tall as the lines its fullest day uses
+ * (the mockup's `min-h-24` rows), so only the week of the 12th grows to 126 px and every chip
+ * stays inside its day.
+ */
+export const OutlinedRowsFitContent: Story = {
+  render: () => ({
+    props,
+    template: `
+      <cw-calendar-view ${VIEW} variant="outlined" toolbar="title" viewToggle="false" [maxPerDay]="3" [date]="november">
+        ${ITEM}
+      </cw-calendar-view>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const cells: HTMLElement[] = Array.from(
+      light(canvasElement).querySelectorAll<HTMLElement>('[role="gridcell"]'),
+    );
+    const heights: number[] = cells.map((cell) => Math.round(cell.getBoundingClientRect().height));
+    const today: HTMLElement | undefined = cells.find((cell) => cell.ariaCurrent === 'date');
+    await expect(Math.round(today?.getBoundingClientRect().height ?? 0)).toBe(126);
+    await expect(heights.filter((height) => height === 126)).toHaveLength(7);
+    await expect(heights.filter((height) => height === 96)).toHaveLength(35);
+    for (const cell of cells) {
+      const bottom: number = cell.getBoundingClientRect().bottom;
+      for (const item of Array.from(
+        cell.querySelectorAll<HTMLElement>('button[title], [data-more]'),
+      )) {
+        await expect(item.getBoundingClientRect().bottom).toBeLessThanOrEqual(bottom + 0.5);
+      }
+    }
+    // The bar from the 16th to the 18th lies on the first line of its week, over three days
+    // (`offset*` ignores the entrance transform).
+    const bar: HTMLElement | null = light(canvasElement).querySelector<HTMLElement>(
+      'button[title="Maquetter la vue Calendrier, du 16 au 18 nov."]',
+    );
+    const sixteenth: HTMLElement | undefined = cells.find((cell) =>
+      cell.textContent.includes('lundi 16 novembre 2026'),
+    );
+    await expect(bar?.offsetTop).toBe(34);
+    await expect(
+      Math.abs((bar?.offsetWidth ?? 0) - (3 * (sixteenth?.offsetWidth ?? 0) - 8)),
+    ).toBeLessThanOrEqual(2);
+  },
+};
+
 /** Week: the all-day row, hourly slots from 9:00 to 13:00, timed blocks and the current time. */
 export const Week: Story = {
   render: () => ({

@@ -331,9 +331,9 @@ export interface DayView {
    * Property height
    *
    * @description
-   * Height in pixels of a month day, from the visible lines and the variant, so every line fits
-   * and the bars across days keep their positions; null for the week's all-day cells, whose
-   * classes size them.
+   * Height in pixels of a month day, shared by its week: from the lines the week's fullest day
+   * uses and the variant, so every line fits and the bars across days keep their positions; null
+   * for the week's all-day cells, whose classes size them.
    *
    * @type {number | null}
    * @readonly

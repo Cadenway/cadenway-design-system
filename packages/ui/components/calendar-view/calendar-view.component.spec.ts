@@ -448,6 +448,21 @@ describe('CwCalendarView', () => {
     expect(today?.querySelector('[data-more]')?.textContent.trim()).toBe('+2 autres');
   });
 
+  it('grows only the weeks that use more lines than two', async () => {
+    component.maxPerDay.set(4);
+    await fixture.whenStable();
+    const heights: string[] = Array.from(
+      host.querySelectorAll<HTMLElement>('[role="gridcell"]'),
+      (cell) => cell.style.height,
+    );
+
+    // The week of the 12th holds its four items on four lines; the other weeks keep 76 px.
+    expect(heights.slice(14, 21)).toEqual(Array.from({ length: 7 }, () => '116px'));
+    expect(heights.filter((height) => height !== '116px')).toEqual(
+      Array.from({ length: 35 }, () => '76px'),
+    );
+  });
+
   it('keeps its 76 px days for two lines', () => {
     const today: HTMLElement | null = host.querySelector('[role="gridcell"][aria-current="date"]');
 
@@ -1126,6 +1141,33 @@ describe('CwCalendarView outlined, with the title toolbar', () => {
     expect(today?.style.height).toBe('156px');
     expect(today?.querySelectorAll('button[title]')).toHaveLength(4);
     expect(today?.querySelector('[data-more]')).toBeNull();
+  });
+
+  it('sizes each week to the lines its fullest day uses, never below 96 px', async () => {
+    fixture.componentInstance.maxPerDay.set(3);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const rows: HTMLElement[][] = Array.from(
+      host.querySelectorAll<HTMLElement>('[role="grid"] [role="row"]'),
+    )
+      .map((row) => Array.from(row.querySelectorAll<HTMLElement>('[role="gridcell"]')))
+      .filter((cells) => cells.length > 0);
+    const heights: string[][] = rows.map((cells) => cells.map((cell) => cell.style.height));
+
+    // The week of the 12th uses three lines (two chips and « +2 autres »); the week of the 16th
+    // two (the bar and the 17th's chip); the others none or one.
+    expect(heights.map((week) => new Set(week).size)).toEqual([1, 1, 1, 1, 1, 1]);
+    expect(heights.map((week) => week[0])).toEqual([
+      '96px',
+      '96px',
+      '126px',
+      '96px',
+      '96px',
+      '96px',
+    ]);
+    const seventeenth: HTMLElement | undefined = rows.at(3)?.at(1);
+    expect(seventeenth?.textContent).toContain('Notifications par e-mail');
+    expect(seventeenth?.querySelector('[data-more]')).toBeNull();
   });
 
   it('keeps 96 px days for two lines, the mockup height', () => {

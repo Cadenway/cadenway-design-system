@@ -102,8 +102,8 @@ import type {
  * Constant CELL
  *
  * @description
- * Classes for a month day cell. Its fixed 76 px fits two lines; a day holding more takes its
- * height from `defaultHeight`.
+ * Classes for a month day cell. Its 76 px fit two lines; a week whose fullest day uses more
+ * takes its height from `defaultHeight`.
  *
  * @type {string}
  */
@@ -116,8 +116,8 @@ const CELL: string =
  *
  * @description
  * Classes for a month day of the `outlined` variant (mockup App.dc.html: `min-h-24 gap-1 p-1.5`).
- * Its height is set per day from `maxPerDay` (`outlinedHeight`), at least these 96 px, so every
- * line fits and the bars across days keep their fixed line positions.
+ * Its height is set per week from the lines its fullest day uses (`outlinedHeight`), at least
+ * these 96 px, so every line fits and the bars across days keep their fixed line positions.
  *
  * @type {string}
  */
@@ -263,12 +263,13 @@ const COLUMNS: { readonly 5: 'grid grid-cols-5'; readonly 7: 'grid grid-cols-7' 
  * Constant PILL
  *
  * @description
- * Classes for an item pill.
+ * Classes for an item pill, without its position: `itemView` adds `relative`, or `absolute` for
+ * a bar across days (both set `position`, and the later `relative` would win in the stylesheet).
  *
  * @type {string}
  */
 const PILL: string =
-  'relative isolate flex h-5 min-w-0 shrink-0 items-center gap-1 overflow-hidden rounded-sm px-1 text-left text-xs transition-colors ' +
+  'isolate flex h-5 min-w-0 shrink-0 items-center gap-1 overflow-hidden rounded-sm px-1 text-left text-xs transition-colors ' +
   'hover:bg-linear-to-b hover:from-hover hover:to-hover animate-item-in motion-reduce:animate-none [&_ng-icon]:[--ng-icon__size:0.75rem] ' +
   ɵFOCUS_INSET;
 
@@ -277,12 +278,12 @@ const PILL: string =
  *
  * @description
  * Item chip classes of the `outlined` month (mockup App.dc.html: `rounded-md border bg-card px-1.5
- * py-1 text-xs`, 26 px).
+ * py-1 text-xs`, 26 px), without its position, which `itemView` adds as for `PILL`.
  *
  * @type {string}
  */
 const OUTLINED_PILL: string =
-  'relative isolate flex h-[26px] min-w-0 shrink-0 items-center gap-1.5 overflow-hidden rounded-md border px-1.5 text-left text-xs transition-colors ' +
+  'isolate flex h-[26px] min-w-0 shrink-0 items-center gap-1.5 overflow-hidden rounded-md border px-1.5 text-left text-xs transition-colors ' +
   'hover:bg-linear-to-b hover:from-hover hover:to-hover animate-item-in motion-reduce:animate-none [&_ng-icon]:[--ng-icon__size:0.75rem] ' +
   ɵFOCUS_INSET;
 
@@ -520,7 +521,7 @@ const OUTLINED_LINE: 30 = 30;
  * padding, the 24 px number row, the 4 px gap), the lines and their gaps, the 6 px bottom
  * padding; 96 px for two lines, the mockup's `min-h-24`.
  *
- * @param {number} lines - Visible item lines of the day (`maxPerDay`).
+ * @param {number} lines - Item lines used by the fullest day of the week, at most `maxPerDay`.
  * @returns {number} Height in pixels.
  */
 function outlinedHeight(lines: number): number {
@@ -535,7 +536,7 @@ function outlinedHeight(lines: number): number {
  * top (26 px), the 20 px lines 22 px apart, the 4 px bottom padding; at least the sheet's 76 px,
  * which two lines fit.
  *
- * @param {number} lines - Visible item lines of the day (`maxPerDay`).
+ * @param {number} lines - Item lines used by the fullest day of the week, at most `maxPerDay`.
  * @returns {number} Height in pixels.
  */
 function defaultHeight(lines: number): number {
@@ -1089,9 +1090,9 @@ export class CwCalendarView<T> implements CalendarViewHost {
    * Property variant
    *
    * @description
-   * Look of the month grid: `default`, or `outlined` (days of at least 96 px, as tall as
-   * `maxPerDay` lines need; other months on `bg-muted`, today in a filled circle, bordered item
-   * chips).
+   * Look of the month grid: `default`, or `outlined` (days of at least 96 px, each week as tall
+   * as the lines its fullest day uses; other months on `bg-muted`, today in a filled circle,
+   * bordered item chips).
    *
    * @type {InputSignal<CwCalendarViewVariant>}
    * @readonly
@@ -1141,9 +1142,10 @@ export class CwCalendarView<T> implements CalendarViewHost {
    * Property maxPerDay
    *
    * @description
-   * Lines a day in the month view before « +n autres ». In the `outlined` variant every day of
-   * the grid grows to hold them (96 px for two, +30 px a line), so no item is clipped and the bars
-   * across days keep their lines; in the default variant 76 px hold two, +22 px a line.
+   * Lines a day in the month view before « +n autres ». Each week grows to the lines its fullest
+   * day uses, up to `maxPerDay`: in the `outlined` variant 96 px hold two, +30 px a line; in the
+   * default variant 76 px hold two, +22 px a line. No item is clipped and the bars across days
+   * keep their lines; a week using fewer lines keeps the variant's minimum.
    *
    * @type {InputSignalWithTransform<number, unknown>}
    * @readonly
@@ -2652,8 +2654,14 @@ export class CwCalendarView<T> implements CalendarViewHost {
     const outlined: boolean = !allDayRow && this.variant() === 'outlined';
     const variant: CwCalendarViewVariant = outlined ? 'outlined' : 'default';
     const line: number = outlined ? OUTLINED_LINE : LINE;
-    return days.map((date, index): DayView => {
-      const key: string = cellKey(date, null);
+    const placed: {
+      date: Date;
+      covered: { entry: Entry<T>; from: number; to: number; row: number }[];
+      reserved: number;
+      own: Entry<T>[];
+      shownSingles: Entry<T>[];
+      hidden: number;
+    }[] = days.map((date, index) => {
       const covered: { entry: Entry<T>; from: number; to: number; row: number }[] = bars.filter(
         (bar) => bar.from <= index && bar.to >= index,
       );
@@ -2663,6 +2671,27 @@ export class CwCalendarView<T> implements CalendarViewHost {
       const fits: boolean = own.length <= available;
       const shownSingles: Entry<T>[] = fits ? own : own.slice(0, Math.max(0, available - 1));
       const hidden: number = own.length - shownSingles.length;
+      return { date, covered, reserved, own, shownSingles, hidden };
+    });
+    // Mockup App.dc.html: month rows size to their content (`min-h-24`), so a week is as tall as
+    // the lines its fullest day uses (bar lines, pills, « +n autres »), never more than `lines`;
+    // the lines keep their fixed positions, so the bars across days stay aligned.
+    const usedLines: number = Math.min(
+      lines,
+      placed.reduce(
+        (max, day) =>
+          Math.max(max, day.reserved + day.shownSingles.length + (day.hidden > 0 ? 1 : 0)),
+        0,
+      ),
+    );
+    const height: number | null = allDayRow
+      ? null
+      : outlined
+        ? outlinedHeight(usedLines)
+        : defaultHeight(usedLines);
+    return placed.map((day, index): DayView => {
+      const { date, covered, reserved, own, shownSingles, hidden }: (typeof placed)[number] = day;
+      const key: string = cellKey(date, null);
       const today: boolean = ɵsameDay(date, now);
       const outside: boolean = !allDayRow && !ɵsameMonth(date, month);
       const all: Entry<T>[] = [...covered.map((bar) => bar.entry), ...own];
@@ -2689,7 +2718,7 @@ export class CwCalendarView<T> implements CalendarViewHost {
         numberClass: (outlined ? OUTLINED_NUMBERS : NUMBERS)[
           today ? 'today' : outside ? 'outside' : 'plain'
         ],
-        height: allDayRow ? null : outlined ? outlinedHeight(lines) : defaultHeight(lines),
+        height,
         headClass: HEADS[variant],
         addClass: outlined ? OUTLINED_ADD : ADD,
         spacerClass: SPACERS[variant],
@@ -2729,7 +2758,7 @@ export class CwCalendarView<T> implements CalendarViewHost {
                 from: String(bar.entry.span.start.getDate()),
                 to: formats.dayShort.format(bar.entry.span.end),
               }),
-              classes: `${base.classes} absolute${continues ? ' rounded-r-none' : ''}`,
+              classes: `${base.classes}${continues ? ' rounded-r-none' : ''}`,
               top: `${String(top + bar.row * line)}px`,
               left: `calc(100% * ${String(bar.from)} / ${String(count)} + 4px)`,
               width: `calc(100% * ${String(span)} / ${String(count)} - 8px)`,
@@ -2773,9 +2802,12 @@ export class CwCalendarView<T> implements CalendarViewHost {
     index: number,
     outlined: boolean = false,
   ): ItemView {
+    // A bar across days is placed on its line from the row (`top`, `left`, `width`), out of the
+    // flow of its first day, so the day neither pushes it down nor clips it.
+    const position: string = view === 'bar' ? 'absolute' : 'relative';
     const frame: string = outlined
-      ? `${OUTLINED_PILL} ${OUTLINED_PILL_TONES[grabbed ? 'grabbed' : 'rest']}`
-      : `${PILL} ${PILL_TONES[grabbed ? 'grabbed' : 'rest']}`;
+      ? `${position} ${OUTLINED_PILL} ${OUTLINED_PILL_TONES[grabbed ? 'grabbed' : 'rest']}`
+      : `${position} ${PILL} ${PILL_TONES[grabbed ? 'grabbed' : 'rest']}`;
     return {
       id: entry.id,
       title: entry.label,
