@@ -270,15 +270,17 @@ export const Overflow: Story = {
   },
 };
 
-/** `wrap`: the controls wrap onto a second row instead of moving into « Plus » (mockup
- *  `App.dc.html`, the list view row, `flex-wrap`). */
+/** `wrap`: the controls wrap onto new rows instead of moving into « Plus » (mockup `App.dc.html`,
+ *  the list view row, `flex-wrap`); a group wider than the bar wraps its own controls. */
 export const Wrap: Story = {
   render: () => ({
     template: `
-      <cw-toolbar ariaLabel="Vue Liste, sur deux lignes" wrap class="w-[360px]">
-        <button cwButton variant="outline" cwToolbarItem><ng-icon name="phosphorFunnelSimpleBold" /> Filtrer</button>
-        <button cwButton variant="outline" cwToolbarItem><ng-icon name="phosphorSortAscendingBold" /> Trier</button>
-        <button cwButton variant="outline" cwToolbarItem><ng-icon name="phosphorSquaresFourBold" /> Grouper</button>
+      <cw-toolbar ariaLabel="Vue Liste, sur deux lignes" wrap class="w-[240px]">
+        <cw-toolbar-group ariaLabel="Affichage">
+          <button cwButton variant="outline" cwToolbarItem><ng-icon name="phosphorFunnelSimpleBold" /> Filtrer</button>
+          <button cwButton variant="outline" cwToolbarItem><ng-icon name="phosphorSortAscendingBold" /> Trier</button>
+          <button cwButton variant="outline" cwToolbarItem><ng-icon name="phosphorSquaresFourBold" /> Grouper</button>
+        </cw-toolbar-group>
         <button cwButton variant="outline" cwToolbarItem><ng-icon name="phosphorDownloadSimpleBold" /> Exporter</button>
       </cw-toolbar>`,
   }),
@@ -287,6 +289,12 @@ export const Wrap: Story = {
     await expect(within(scope).getByRole('toolbar')).not.toHaveAttribute('data-overflowing');
     await expect(within(scope).getByRole('button', { name: 'Exporter' })).toBeVisible();
     await expect(within(scope).queryByRole('button', { name: 'Plus d’options' })).toBeNull();
+    // The group, wider than the bar, wraps inside it instead of running off its edge.
+    const bar: DOMRect = within(scope).getByRole('toolbar').getBoundingClientRect();
+    const group: DOMRect = within(scope)
+      .getByRole('group', { name: 'Affichage' })
+      .getBoundingClientRect();
+    await expect(group.right).toBeLessThanOrEqual(bar.right + 0.5);
   },
 };
 

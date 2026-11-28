@@ -55,6 +55,19 @@ const SIZES: Record<CwToolbarSize, string> = {
   sm: 'flex w-full min-w-0 items-center gap-1.5',
 };
 
+// A wrapping bar lets its groups shrink and wrap too: a `shrink-0` group wider than the bar would
+// otherwise run off its edge. The descendant selector outweighs the group's own `shrink-0`.
+/**
+ * Constant WRAP
+ *
+ * @description
+ * Classes of a wrapping bar and of the groups inside it.
+ *
+ * @type {string}
+ */
+const WRAP: string =
+  'flex-wrap [&_cw-toolbar-group]:min-w-0 [&_cw-toolbar-group]:shrink [&_cw-toolbar-group]:flex-wrap';
+
 /**
  * Function isHidden
  *
@@ -375,7 +388,7 @@ export class CwToolbar implements ToolbarHandle {
    * @type {Signal<string>}
    */
   protected readonly classes: Signal<string> = computed(
-    () => `${SIZES[this.size()]}${this.wrap() ? ' flex-wrap' : ''}`,
+    () => `${SIZES[this.size()]}${this.wrap() ? ` ${WRAP}` : ''}`,
   );
 
   /**

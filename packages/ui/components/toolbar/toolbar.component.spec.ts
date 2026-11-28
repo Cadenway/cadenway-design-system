@@ -373,6 +373,9 @@ describe('CwToolbar overflow', () => {
     const toolbar: HTMLElement | null = host.querySelector<HTMLElement>('[role="toolbar"]');
     expect(toolbar?.hasAttribute('data-overflowing')).toBe(false);
     expect(toolbar?.classList).toContain('flex-wrap');
+    // A group wider than the bar shrinks and wraps its own controls.
+    expect(toolbar?.classList).toContain('[&_cw-toolbar-group]:shrink');
+    expect(toolbar?.classList).toContain('[&_cw-toolbar-group]:flex-wrap');
     expect(button(host, 'Grouper').style.display).toBe('');
     expect(button(host, 'Exporter').style.display).toBe('');
   });
