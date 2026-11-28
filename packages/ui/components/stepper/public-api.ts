@@ -12,6 +12,7 @@ export type {
   CwStepperProvidedLabels,
   CwStepperOrientation,
   CwStepperSize,
+  CwStepperTone,
   CwStepperVariant,
 } from './stepper.types';
 

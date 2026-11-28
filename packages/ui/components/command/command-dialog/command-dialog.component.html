@@ -15,6 +15,9 @@
       @if (loading()) {
         <svg cwSpinner></svg>
       }
+      @if (fieldEnd(); as end) {
+        <ng-container [ngTemplateOutlet]="end" />
+      }
     </div>
     <ng-content />
   </div>

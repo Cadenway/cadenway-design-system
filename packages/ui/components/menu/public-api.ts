@@ -20,6 +20,7 @@ export type {
   CwMenuAlign,
   CwMenuFocus,
   CwMenuItemVariant,
+  CwMenuMinWidth,
   CwMenuOpenOptions,
   CwMenuPoint,
   CwMenuSide,

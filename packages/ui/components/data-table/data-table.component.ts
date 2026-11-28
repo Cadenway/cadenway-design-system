@@ -66,6 +66,7 @@ import type {
   CwColumnDef,
   CwColumnResizeEvent,
   CwDataTableDensity,
+  CwDataTableEditTrigger,
   CwDataTablePhoneLayout,
   CwDataTableSelection,
   CwDataTableTexts,
@@ -1651,6 +1652,22 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
   });
 
   /**
+   * Property editOn
+   *
+   * @description
+   * The pointer gesture that opens the editor of an editable cell: `dblclick` (default) or
+   * `click` (mockup `App.dc.html`, the sheet view: « Cliquez sur une cellule pour la modifier »).
+   * F2 opens it either way. Enter opens it on an editable cell, except on the first cell in
+   * `dblclick` mode, where Enter opens the row; with `click`, Enter edits an editable first cell
+   * too. A click or Enter on a non-editable first cell still opens the row.
+   *
+   * @type {InputSignal<CwDataTableEditTrigger>}
+   * @readonly
+   */
+  public readonly editOn: InputSignal<CwDataTableEditTrigger> =
+    input<CwDataTableEditTrigger>('dblclick');
+
+  /**
    * Property resizableColumns
    *
    * @description
@@ -2351,7 +2368,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * @readonly
    */
   protected readonly selectCellClasses: Signal<string> = computed(() =>
-    this.cards() ? `${CELL} w-9 pr-1 pl-3 max-md:order-first` : `${CELL_BASE} w-9 pr-1 pl-3`,
+    this.cards() ? `${CELL} w-10 pr-1 pl-3 max-md:order-first` : `${CELL_BASE} w-10 pr-1 pl-3`,
   );
 
   /**
@@ -2363,7 +2380,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * @type {string}
    * @readonly
    */
-  protected readonly selectHeadClasses: string = `w-9 pr-1 pl-3 align-middle ${ɵFOCUS_INSET}`;
+  protected readonly selectHeadClasses: string = `w-10 pr-1 pl-3 align-middle ${ɵFOCUS_INSET}`;
 
   /**
    * Property groupCellClasses
@@ -3373,7 +3390,7 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * @readonly
    */
   protected readonly footerSelectClasses: Signal<string> = computed(
-    () => `w-9 pr-1 pl-3 align-middle ${ɵFOCUS_INSET}${this.cards() ? ' max-md:hidden' : ''}`,
+    () => `w-10 pr-1 pl-3 align-middle ${ɵFOCUS_INSET}${this.cards() ? ' max-md:hidden' : ''}`,
   );
   // #endregion
 
@@ -4215,6 +4232,12 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
       this.toggleRow(entry.id, !this.isSelected(entry.id));
       return;
     }
+    if (this.editOn() === 'click' && cell) {
+      const column: ResolvedColumn<T> | undefined = this.visibleColumns().find(
+        (candidate) => candidate.key === cell.dataset['cwCol'],
+      );
+      if (column && (this.isEditing(entry, column) || this.startEdit(entry, column))) return;
+    }
     if (cell?.dataset['cwCol'] === this.visibleColumns()[0]?.key) {
       this.rowOpen.emit(entry.row);
     }
@@ -4733,8 +4756,11 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
         else if (group) this.toggleGroup(group);
         else if (rowKey === HEADER && column) this.toggleSort(column, event.shiftKey);
         else if (entry && column) {
+          // The first cell opens the row, unless cells edit on a single click: then Enter edits
+          // an editable first cell too, as the pointer does, and only a read-only one opens.
           const first: boolean = this.visibleColumns()[0]?.key === column.key;
-          if (first || !this.startEdit(entry, column)) this.rowOpen.emit(entry.row);
+          const opens: boolean = first && this.editOn() !== 'click';
+          if (opens || !this.startEdit(entry, column)) this.rowOpen.emit(entry.row);
         }
         return;
       case 'F2':

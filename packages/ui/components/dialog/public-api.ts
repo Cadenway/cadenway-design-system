@@ -13,4 +13,11 @@ export { CwDialogTitle } from './dialog-title/dialog-title.directive';
 export { CwDialogTrigger } from './dialog-trigger/dialog-trigger.directive';
 export { CW_DIALOG_LABELS } from './dialog.constants';
 export { provideCwDialogLabels } from './dialog.providers';
-export type { CwDialogCloseReason, CwDialogLabels, CwDialogSize } from './dialog.types';
+export type {
+  CwDialogCloseReason,
+  CwDialogHeaderVariant,
+  CwDialogLabels,
+  CwDialogPadding,
+  CwDialogPlacement,
+  CwDialogSize,
+} from './dialog.types';

@@ -33,6 +33,7 @@ import type { CwMeterFormat, CwMeterSeries } from './meter.types';
       note="Charge idéale"
     />
     <cw-meter label="Sièges" variant="segmented" [segments]="10" [value]="7" [max]="10" />
+    <cw-meter label="Appels API" [value]="62" [marker]="80" />
     <cw-meter
       label="Stockage par type"
       variant="stacked"
@@ -193,6 +194,17 @@ describe('CwMeter', () => {
     expect(sprint.getAttribute('aria-valuetext')).toBe('87 %, +7');
     expect(gauge(sprint).textContent).toContain('+7');
     expect(gauge(sprint).textContent).toContain('Capacité 45');
+  });
+
+  it('draws an alert marker without changing the value text or the zone', () => {
+    const api: HTMLElement = meterNamed(host, 'Appels API');
+    const mark: HTMLElement | null | undefined =
+      api.parentElement?.querySelector<HTMLElement>('[data-marker]');
+
+    expect(mark?.style.left).toBe('80%');
+    expect(mark?.getAttribute('aria-hidden')).toBe('true');
+    expect(api.getAttribute('aria-valuetext')).toBe('62 %');
+    expect(gauge(api).dataset['zone']).toBe('normal');
   });
 
   it('is optimum inside the band around the optimum', () => {

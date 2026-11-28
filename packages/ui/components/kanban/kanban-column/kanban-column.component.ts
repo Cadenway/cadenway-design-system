@@ -50,9 +50,9 @@ type Shape = 'open' | 'target' | 'folded' | 'header' | 'headerFolded';
  * @type {Record<Shape, string>}
  */
 const HOSTS: Record<Shape, string> = {
-  open: 'flex shrink-0 flex-col gap-2 rounded-xl bg-canvas p-2 transition-[width] duration-300 ease-snap motion-reduce:transition-none',
+  open: 'flex min-h-0 shrink-0 flex-col gap-2 rounded-xl bg-canvas p-2 transition-[width] duration-300 ease-snap motion-reduce:transition-none',
   target:
-    'flex shrink-0 flex-col gap-2 rounded-xl bg-canvas bg-linear-to-b from-selected to-selected p-2 transition-[width] duration-300 ease-snap motion-reduce:transition-none',
+    'flex min-h-0 shrink-0 flex-col gap-2 rounded-xl bg-canvas bg-linear-to-b from-selected to-selected p-2 transition-[width] duration-300 ease-snap motion-reduce:transition-none',
   folded:
     'flex shrink-0 rounded-xl bg-canvas transition-[width] duration-300 ease-snap motion-reduce:transition-none',
   header: 'flex h-9 shrink-0 items-center gap-2 pr-1.5 pl-3',

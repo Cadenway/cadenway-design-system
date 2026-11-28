@@ -154,6 +154,27 @@ export const ThresholdAndOverrun: Story = {
   },
 };
 
+/** Alert marker (`marker`): a mark at 80 % on each quota, its meaning written once next to the
+ *  section title (mockup `Organisation.dc.html`, the plan limits). */
+export const Marker: Story = {
+  render: () => ({
+    template: `
+      <div class="flex w-full max-w-md flex-col gap-5 rounded-xl border bg-card p-4">
+        <p class="flex items-center gap-1.5 text-xs text-muted-foreground"><span class="h-3.5 w-0.5 bg-foreground" aria-hidden="true"></span>seuil d'alerte à 80 %</p>
+        <cw-meter label="Membres" [value]="14" [max]="20" [marker]="16" />
+        <cw-meter label="Stockage" [value]="9" [max]="10" [marker]="8" />
+      </div>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const members: HTMLElement = within(light(canvasElement)).getByRole('meter', {
+      name: 'Membres',
+    });
+    const mark: HTMLElement | null | undefined =
+      members.parentElement?.querySelector<HTMLElement>('[data-marker]');
+    await expect(mark?.style.left).toBe('80%');
+  },
+};
+
 /** The three track heights: 4, 6 and 10 px. */
 export const Sizes: Story = {
   render: () => ({

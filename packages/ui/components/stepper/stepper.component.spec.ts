@@ -5,6 +5,7 @@ import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideCwStepperLabels } from './stepper.providers';
 import { CwStep } from './step/step.component';
 import { CwStepper } from './stepper.component';
+import type { CwStepperTone } from './stepper.types';
 
 /**
  * Class Host
@@ -366,7 +367,7 @@ describe('CwStepper', () => {
 @Component({
   imports: [CwStepper, CwStep],
   template: `
-    <cw-stepper #wizard variant="segments" ariaLabel="Steps" [(selected)]="step">
+    <cw-stepper #wizard variant="segments" ariaLabel="Steps" [tone]="tone()" [(selected)]="step">
       <cw-step label="Space" />
       <cw-step label="Template" description="Lists and sample tasks to start from." />
       <cw-step label="Team" [error]="teamError()" />
@@ -397,6 +398,17 @@ class SegmentsHost {
    * @type {WritableSignal<number>}
    */
   public readonly step: WritableSignal<number> = signal(1);
+
+  /**
+   * Property tone
+   * @readonly
+   *
+   * @description
+   * Fill of the done and current bars.
+   *
+   * @type {WritableSignal<CwStepperTone>}
+   */
+  public readonly tone: WritableSignal<CwStepperTone> = signal<CwStepperTone>('default');
 
   /**
    * Property teamError
@@ -438,7 +450,9 @@ function bars(ol: HTMLElement): string[] {
   return Array.from(ol.children, (li) => {
     const bar: Element | null = li.firstElementChild;
     if (bar?.classList.contains('bg-destructive')) return 'error';
-    return bar?.classList.contains('bg-foreground') ? 'filled' : 'empty';
+    return bar?.classList.contains('bg-foreground') || bar?.classList.contains('bg-primary')
+      ? 'filled'
+      : 'empty';
   });
 }
 
@@ -486,6 +500,15 @@ describe('CwStepper variant segments', () => {
       null,
       null,
     ]);
+  });
+
+  it('fills the done and current bars in violet with tone="primary"', async () => {
+    component.tone.set('primary');
+    await fixture.whenStable();
+    const ol: HTMLElement = list(host, 'Steps');
+
+    expect(bars(ol)).toEqual(['filled', 'filled', 'empty', 'empty']);
+    expect(ol.children[1].firstElementChild?.classList).toContain('bg-primary');
   });
 
   it('makes no step clickable, even a done one', () => {

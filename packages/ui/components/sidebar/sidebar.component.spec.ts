@@ -1,7 +1,11 @@
 import { Component, signal, type WritableSignal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideIcons } from '@ng-icons/core';
-import { phosphorHouseBold, phosphorTrayBold } from '@ng-icons/phosphor-icons/bold';
+import { provideIcons, provideNgIconLoader } from '@ng-icons/core';
+import {
+  phosphorFunnelSimpleBold,
+  phosphorHouseBold,
+  phosphorTrayBold,
+} from '@ng-icons/phosphor-icons/bold';
 import { phosphorHouseFill, phosphorTrayFill } from '@ng-icons/phosphor-icons/fill';
 
 import { provideCwSidebarLabels } from './sidebar.providers';
@@ -247,6 +251,15 @@ describe('CwSidebar', () => {
       'Espaces',
     );
     expect(link(host, 'Boîte de réception, 3 non lus')).toBeTruthy();
+  });
+
+  it('reads the count in the same text as the label', () => {
+    const inbox: HTMLAnchorElement = link(host, 'Boîte de réception, 3 non lus');
+    const label: Element | undefined = Array.from(inbox.children).find((child) =>
+      child.textContent.includes('Boîte de réception'),
+    );
+
+    expect(label?.textContent.replace(/\s+/g, ' ').trim()).toBe('Boîte de réception, 3 non lus');
   });
 
   it('marks the current item for assistive technologies', () => {
@@ -674,5 +687,78 @@ describe('provideCwSidebarLabels', () => {
     const host: HTMLElement = fixture.nativeElement as HTMLElement;
     expect(host.querySelector('[aria-label="Main navigation"]')).not.toBeNull();
     expect(host.querySelector('[aria-label="Collapse sidebar"]')).not.toBeNull();
+  });
+});
+
+/**
+ * Component IconHost
+ *
+ * @description
+ * Hosts current items whose icon has no registered Fill twin, or keeps its icon on purpose.
+ */
+@Component({
+  imports: [CwSidebar, CwSidebarGroup, CwSidebarItem],
+  providers: [provideIcons({ phosphorFunnelSimpleBold, phosphorHouseBold, phosphorHouseFill })],
+  template: `
+    <cw-sidebar>
+      <cw-sidebar-group>
+        <a cwSidebarItem href="/v/bugs" icon="phosphorFunnelSimpleBold" active>Bugs ouverts</a>
+        <a cwSidebarItem href="/accueil" icon="phosphorHouseBold" [activeIcon]="null" active
+          >Accueil</a
+        >
+        <a
+          cwSidebarItem
+          href="/boite"
+          icon="phosphorHouseBold"
+          activeIcon="phosphorFunnelSimpleBold"
+          active
+          >Boîte de réception</a
+        >
+      </cw-sidebar-group>
+    </cw-sidebar>
+  `,
+})
+class IconHost {}
+
+describe('CwSidebar current icons', () => {
+  let host: HTMLElement;
+
+  beforeEach(async () => {
+    const fixture: ComponentFixture<IconHost> = TestBed.createComponent(IconHost);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    host = fixture.nativeElement as HTMLElement;
+  });
+
+  it('keeps the Bold icon of a current item without a registered Fill twin', () => {
+    expect(link(host, 'Bugs ouverts').querySelector('ng-icon')?.innerHTML).toBe(
+      phosphorFunnelSimpleBold,
+    );
+  });
+
+  it('keeps the icon with activeIcon null and uses a given activeIcon', () => {
+    expect(link(host, 'Accueil').querySelector('ng-icon')?.innerHTML).toBe(phosphorHouseBold);
+    expect(link(host, 'Boîte de réception').querySelector('ng-icon')?.innerHTML).toBe(
+      phosphorFunnelSimpleBold,
+    );
+  });
+});
+
+describe('CwSidebar current icons with an icon loader', () => {
+  it('keeps the Fill name of a current item, which the loader may serve', async () => {
+    const requested: string[] = [];
+    TestBed.configureTestingModule({
+      providers: [
+        provideNgIconLoader((name: string) => {
+          requested.push(name);
+          return '<svg></svg>';
+        }),
+      ],
+    });
+    const fixture: ComponentFixture<IconHost> = TestBed.createComponent(IconHost);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+
+    expect(requested).toContain('phosphorFunnelSimpleFill');
   });
 });

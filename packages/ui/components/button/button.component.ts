@@ -38,7 +38,9 @@ const BASE: string =
  * Constant VARIANTS
  *
  * @description
- * Literal classes for each supported button appearance.
+ * Literal classes for each supported button appearance. A pressed outline toggle
+ * (`aria-pressed="true"`) turns violet (mockup App.dc.html, the « Jalons » filter:
+ * `border-primary/50 bg-primary/10 text-primary`).
  *
  * @type {Record<CwButtonVariant, string>}
  */
@@ -46,7 +48,9 @@ const VARIANTS: Record<CwButtonVariant, string> = {
   default: 'bg-foreground text-background hover:bg-foreground/90',
   destructive:
     'bg-destructive text-destructive-foreground hover:bg-grenat-text dark:bg-grenat-soft dark:text-grenat-text dark:hover:bg-grenat-soft/70',
-  outline: 'border border-input bg-transparent hover:bg-accent hover:text-accent-foreground',
+  outline:
+    'border border-input bg-transparent hover:bg-accent hover:text-accent-foreground ' +
+    'aria-pressed:border-primary/50 aria-pressed:bg-primary/10 aria-pressed:text-primary aria-pressed:hover:bg-primary/10 aria-pressed:hover:text-primary',
   secondary:
     'bg-secondary text-secondary-foreground hover:bg-linear-to-b hover:from-hover hover:to-hover',
   ghost: 'hover:bg-accent hover:text-accent-foreground',
@@ -68,7 +72,8 @@ const SIZES: Record<CwButtonSize, string> = {
   sm: 'h-7 gap-1.5 rounded-md px-2.5 text-sm has-[>ng-icon]:px-2 [&_ng-icon]:[--ng-icon__size:1rem]',
   default:
     'h-8 gap-1.5 rounded-lg px-3 text-sm has-[>ng-icon]:px-2.5 [&_ng-icon]:[--ng-icon__size:1rem]',
-  lg: 'h-9 gap-2 rounded-lg px-4 text-sm has-[>ng-icon]:px-3 [&_ng-icon]:[--ng-icon__size:1rem]',
+  // Mockup App.dc.html, onboarding « Continuer » and « Retour »: `h-9 gap-1.5 px-3`.
+  lg: 'h-9 gap-1.5 rounded-lg px-3 text-sm has-[>ng-icon]:px-2.5 [&_ng-icon]:[--ng-icon__size:1rem]',
   'icon-xs': 'size-6 rounded-md text-sm [&_ng-icon]:[--ng-icon__size:0.875rem]',
   'icon-sm': 'size-7 rounded-md text-sm [&_ng-icon]:[--ng-icon__size:1rem]',
   icon: 'size-8 rounded-lg text-sm [&_ng-icon]:[--ng-icon__size:1rem]',

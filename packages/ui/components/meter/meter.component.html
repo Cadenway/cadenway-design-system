@@ -22,7 +22,7 @@
 @if (loading()) {
   <span [class]="skeletonClasses()" aria-hidden="true"></span>
 } @else {
-  <div [class]="threshold() === undefined ? '' : 'relative'">
+  <div [class]="threshold() === undefined && marker() === undefined ? '' : 'relative'">
     <div
       role="meter"
       [class]="trackClasses()"
@@ -59,6 +59,14 @@
       <span
         class="absolute top-1/2 h-3.5 w-0.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-foreground ring-2 ring-background"
         [style.left.%]="percent(threshold() ?? 0)"
+        aria-hidden="true"
+      ></span>
+    }
+    @if (marker() !== undefined) {
+      <span
+        data-marker
+        class="absolute top-1/2 h-3.5 w-0.5 -translate-x-1/2 -translate-y-1/2 bg-foreground ring-2 ring-card"
+        [style.left.%]="percent(marker() ?? 0)"
         aria-hidden="true"
       ></span>
     }

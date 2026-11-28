@@ -101,6 +101,27 @@ export const Tones: Story = {
   },
 };
 
+/** Inset in a card: `class="mx-4 w-auto"` wins over the alert's full width, so it stays inside the
+ *  card (mockup `Compte.dc.html`, two-step verification off). */
+export const Inset: Story = {
+  render: () => ({
+    template: `
+      <div class="w-96 rounded-xl border bg-card py-4">
+        <cw-alert variant="warning" class="mx-4 w-auto">
+          <cw-alert-title>La validation en deux étapes est désactivée</cw-alert-title>
+        </cw-alert>
+      </div>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const alert: HTMLElement | null = light(canvasElement).querySelector('cw-alert');
+    const frame: HTMLElement | null | undefined = alert?.parentElement;
+    if (!alert || !frame) throw new Error('Alert missing');
+    await expect(alert.getBoundingClientRect().right).toBeLessThanOrEqual(
+      frame.getBoundingClientRect().right - 16,
+    );
+  },
+};
+
 /** Compact, the title alone: without action, with an action at the right, dismissible. */
 export const Compact: Story = {
   render: () => ({

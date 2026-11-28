@@ -14,7 +14,8 @@ import { CW_DIALOG, type CwDialogContext } from '../dialog.token';
  */
 const CLASSES: Readonly<Record<'simple' | 'scrollable', string>> = {
   simple: 'flex justify-end gap-2',
-  scrollable: 'flex items-center justify-end gap-2 border-t px-6 py-3',
+  // The side padding yields to the consumer's `px-*` (a footer under a `bar` header, 16 px).
+  scrollable: 'flex items-center justify-end gap-2 border-t [:where(&)]:px-6 py-3',
 } as const;
 
 /**

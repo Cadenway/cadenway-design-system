@@ -73,6 +73,17 @@ export interface CommandHost {
    * @readonly
    */
   readonly loop: Signal<boolean>;
+
+  /**
+   * Property clearOnEscape
+   *
+   * @description
+   * Whether Escape in the field clears a typed search before anything else; `true` when absent.
+   *
+   * @type {Signal<boolean> | undefined}
+   * @readonly
+   */
+  readonly clearOnEscape?: Signal<boolean>;
   // #endregion
 }
 
@@ -496,7 +507,8 @@ export class CommandState {
    * Method onKeydown
    *
    * @description
-   * The keys of the field: ↑ ↓ Home End move, Enter runs, Escape clears the search first.
+   * The keys of the field: ↑ ↓ Home End move, Enter runs, Escape clears the search first unless
+   * the host's `clearOnEscape` is off.
    *
    * @param {KeyboardEvent} event - Keyboard event from the search field.
    */
@@ -520,7 +532,7 @@ export class CommandState {
       }
       return;
     }
-    if (event.key === 'Escape' && this.search()) {
+    if (event.key === 'Escape' && this.search() && (this.host()?.clearOnEscape?.() ?? true)) {
       // Command sheet, "Clavier": Escape clears the search, then closes the palette.
       event.preventDefault();
       event.stopPropagation();

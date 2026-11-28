@@ -38,7 +38,8 @@ const SIZES: Record<CwProgressSize, string> = {
  * Constant FILLS
  *
  * @description
- * Fill-color classes for neutral, successful and destructive progress.
+ * Fill-color classes for neutral, successful, destructive and brand progress. Ink stays the
+ * default (amethyst is not a fill by default); `primary` opts into the mockup's violet bar.
  *
  * @type {Record<CwProgressVariant, string>}
  */
@@ -46,6 +47,7 @@ const FILLS: Record<CwProgressVariant, string> = {
   default: 'bg-foreground',
   success: 'bg-jade',
   destructive: 'bg-destructive',
+  primary: 'bg-primary',
 };
 
 /**

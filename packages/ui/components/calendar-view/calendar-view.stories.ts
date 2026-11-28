@@ -289,6 +289,30 @@ export const Month: Story = {
   }),
 };
 
+/**
+ * The mockup's month (`App.dc.html`, the calendar view): `variant="outlined"` (96 px days, other
+ * months on `bg-muted`, today's number filled, bordered chips, 24 px « + ») and
+ * `toolbar="title"` (the month as a heading, « Aujourd’hui » and the 28 px arrows at the end),
+ * without the view toggle.
+ */
+export const Outlined: Story = {
+  render: () => ({
+    props,
+    template: `
+      <cw-calendar-view ${VIEW} variant="outlined" toolbar="title" viewToggle="false" [maxPerDay]="2" [date]="november">
+        ${ITEM}
+      </cw-calendar-view>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const heading: HTMLElement | null = canvasElement.querySelector('h2');
+    await expect(heading).not.toBeNull();
+    const today: HTMLElement | null = canvasElement.querySelector(
+      '[role="gridcell"][aria-current="date"]',
+    );
+    await expect(Math.round(today?.getBoundingClientRect().height ?? 0)).toBe(96);
+  },
+};
+
 /** Week: the all-day row, hourly slots from 9:00 to 13:00, timed blocks and the current time. */
 export const Week: Story = {
   render: () => ({

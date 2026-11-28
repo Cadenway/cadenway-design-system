@@ -47,6 +47,16 @@ import { CwPopover } from './popover.component';
       <button type="button" cwPopoverClose>Tout afficher dans l’accueil</button>
     </cw-popover>
 
+    <button type="button" [cwPopoverTrigger]="reminder">Rappel</button>
+    <cw-popover #reminder width="content" ariaLabel="Rappel">
+      <p>Aujourd’hui, 11 h</p>
+    </cw-popover>
+
+    <button type="button" [cwPopoverTrigger]="wide">Filtres</button>
+    <cw-popover #wide width="content" size="xl" ariaLabel="Filtres">
+      <p>Aujourd’hui, 11 h</p>
+    </cw-popover>
+
     <button type="button">Ailleurs</button>
   `,
 })
@@ -259,6 +269,29 @@ describe('CwPopover', () => {
     expect(content?.classList).toContain('flex-col');
     expect(content?.className).not.toMatch(/(^|\s)(p-\d|gap-\d)/);
     expect(panel.contains(document.activeElement)).toBe(true);
+  });
+
+  it('follows its content from the width of its size with width="content"', async () => {
+    button(host, 'Rappel').click();
+    await fixture.whenStable();
+
+    const panel: HTMLElement = within('Rappel');
+    expect(panel.classList).toContain('w-max');
+    expect(panel.classList).toContain('min-w-[min(18rem,calc(100vw-1rem))]');
+    expect(panel.classList).not.toContain('w-72');
+  });
+
+  it('keeps the minimum width of a content-width panel within a phone viewport', async () => {
+    button(host, 'Filtres').click();
+    await fixture.whenStable();
+
+    // Without provideCwPhoneSheets the panel stays a panel: its 384 px minimum yields to the
+    // viewport less 16 px, and so does its maximum.
+    const panel: HTMLElement = within('Filtres');
+    expect(panel.closest('[data-presentation]')).toBeNull();
+    expect(panel.classList).toContain('min-w-[min(24rem,calc(100vw-1rem))]');
+    expect(panel.classList).toContain('max-w-[calc(100vw-1rem)]');
+    expect(panel.classList).not.toContain('min-w-96');
   });
 
   it('pads the content by default', async () => {

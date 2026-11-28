@@ -328,6 +328,64 @@ export interface DayView {
   readonly numberClass: string;
 
   /**
+   * Property height
+   *
+   * @description
+   * Height in pixels of a month day, from the visible lines and the variant, so every line fits
+   * and the bars across days keep their positions; null for the week's all-day cells, whose
+   * classes size them.
+   *
+   * @type {number | null}
+   * @readonly
+   */
+  readonly height: number | null;
+
+  /**
+   * Property monthLabel
+   *
+   * @description
+   * Short month name drawn beside the number of the first day of a month in the `outlined`
+   * variant (« nov. »), whose circle holds the number alone; null otherwise.
+   *
+   * @type {string | null}
+   * @readonly
+   */
+  readonly monthLabel: string | null;
+
+  /**
+   * Property headClass
+   *
+   * @description
+   * Classes for the row holding the day number and its « + » button.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly headClass: string;
+
+  /**
+   * Property addClass
+   *
+   * @description
+   * Classes for the day's « + » button.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly addClass: string;
+
+  /**
+   * Property spacerClass
+   *
+   * @description
+   * Classes for a line kept free for a bar crossing the day.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly spacerClass: string;
+
+  /**
    * Property today
    *
    * @description

@@ -546,6 +546,38 @@ export const InlineEdit: Story = {
   },
 };
 
+/** Edit on a single click (`editOn="click"`, mockup `App.dc.html`, the sheet view: « Cliquez sur
+ *  une cellule pour la modifier »); the selection column is 40 px wide. */
+export const EditOnClick: Story = {
+  render: () => ({
+    props: { ...PROPS },
+    template: `
+      <cw-data-table class="w-full" ariaLabel="Feuille de Produit" editOn="click" [data]="tasks" [page]="null"
+                     [rowLabel]="rowLabel">
+        <cw-data-table-column key="name" header="Nom">
+          <ng-template cwCell let-t><span class="truncate font-medium">{{ t.name }}</span></ng-template>
+          <ng-template cwCellEditor let-t let-commit="commit">
+            <input [attr.aria-label]="'Nom de ' + t.id" [value]="t.name"
+                   class="-mx-1.5 h-7 w-[calc(100%+12px)] rounded-md border border-input bg-background px-[5px] text-sm font-medium outline-hidden focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20"
+                   (keydown.enter)="commit($any($event.target).value)" (blur)="commit($any($event.target).value)" />
+          </ng-template>
+        </cw-data-table-column>
+        <cw-data-table-column key="estimate" header="Estimation" align="end" [width]="104" />
+      </cw-data-table>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+    } = within(light(canvasElement));
+    const cell: HTMLElement = scope.getByRole('gridcell', {
+      name: "Corriger l'export CSV des tâches",
+    });
+    await userEvent.click(cell);
+    await expect(scope.getByRole('textbox', { name: 'Nom de CAD-482' })).toHaveFocus();
+    await userEvent.keyboard('{Escape}');
+  },
+};
+
 /** Keyboard: one tab stop, arrows between cells, Space ticks the row, Escape empties the selection. */
 export const Keyboard: Story = {
   render: () => ({

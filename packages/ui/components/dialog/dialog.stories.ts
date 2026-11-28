@@ -237,12 +237,12 @@ export const ScrollableWithoutClose: Story = {
 };
 
 /**
- * The six sizes: `sm` 384 px, `default` 448 px, `md` 512 px (Space statuses), `lg` 672 px, `xl`
- * 896 px (sprint report), `full` the screen less 16 px.
+ * The window sizes: `sm` 384 px, `default` 448 px, `md` 512 px (Space statuses), `lg` 672 px,
+ * `xl` 896 px (sprint report), `2xl` 1024 px, `full` the screen less 16 px.
  */
 export const Sizes: Story = {
   render: () => ({
-    props: { sizes: ['sm', 'default', 'md', 'lg', 'xl', 'full'] },
+    props: { sizes: ['sm', 'default', 'md', 'lg', 'xl', '2xl', 'full'] },
     template: `
       <div class="flex flex-wrap gap-2">
         @for (size of sizes; track size) {
@@ -283,6 +283,77 @@ export const Sizes: Story = {
       name: 'Taille xl',
     });
     await expect(wide.firstElementChild).toHaveAttribute('data-size', 'xl');
+
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(document.body.querySelector('[role="dialog"]')).toBeNull());
+  },
+};
+
+/**
+ * Task creation (mockup `App.dc.html`): `xl`, pinned 8vh from the top (`placement="top"`) so it
+ * grows downwards, unpadded body (`padding="none"`) and a `bar` header with the mockup's `px-5`.
+ */
+export const PinnedWithBarHeader: Story = {
+  render: () => ({
+    template: `
+      <button cwButton variant="outline" [cwDialogTrigger]="create">Créer une tâche</button>
+      <cw-dialog #create size="xl" placement="top" padding="none" scrollable>
+        <cw-dialog-header variant="bar" class="px-5">
+          <h2 cwDialogTitle>Créer une tâche</h2>
+          <span class="text-sm text-muted-foreground">dans</span>
+          <button cwButton variant="outline" size="sm">Sprint 14</button>
+        </cw-dialog-header>
+        <div class="flex flex-col gap-3 px-5 py-4">
+          <p class="text-sm text-muted-foreground">Titre, description et propriétés de la tâche.</p>
+        </div>
+        <cw-dialog-footer class="px-5">
+          <button cwButton variant="outline" cwDialogClose>Annuler</button>
+          <button cwButton cwDialogClose>Créer la tâche</button>
+        </cw-dialog-footer>
+      </cw-dialog>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    await userEvent.click(
+      within(light(canvasElement)).getByRole('button', { name: 'Créer une tâche' }),
+    );
+    const dialog: HTMLElement = await within(document.body).findByRole('dialog', {
+      name: 'Créer une tâche',
+    });
+    const top: number = dialog.getBoundingClientRect().top;
+    await expect(Math.abs(top - window.innerHeight * 0.08)).toBeLessThan(2);
+
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(document.body.querySelector('[role="dialog"]')).toBeNull());
+  },
+};
+
+/**
+ * Detail sheet (mockup `App.dc.html`, the task sheet): `tall`, 1024 px wide and 88 % of the
+ * viewport high, centered so it sits 6vh from the top and the bottom, a `bar` header (16 px sides)
+ * and an unpadded body whose sections draw their own edges.
+ */
+export const Tall: Story = {
+  render: () => ({
+    template: `
+      <button cwButton variant="outline" [cwDialogTrigger]="sheet">Ouvrir CAD-482</button>
+      <cw-dialog #sheet size="tall" padding="none">
+        <cw-dialog-header variant="bar">
+          <h2 cwDialogTitle>Page quotas organisation</h2>
+        </cw-dialog-header>
+        <div class="grid h-full grid-cols-[1fr_18rem] max-md:grid-cols-1">
+          <div class="p-4 text-sm">Description et activité.</div>
+          <div class="border-l p-4 text-sm max-md:border-t max-md:border-l-0">Propriétés.</div>
+        </div>
+      </cw-dialog>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    await userEvent.click(
+      within(light(canvasElement)).getByRole('button', { name: 'Ouvrir CAD-482' }),
+    );
+    const dialog: HTMLElement = await within(document.body).findByRole('dialog', {
+      name: 'Page quotas organisation',
+    });
+    await expect(dialog.firstElementChild).toHaveAttribute('data-size', 'tall');
 
     await userEvent.keyboard('{Escape}');
     await waitFor(() => expect(document.body.querySelector('[role="dialog"]')).toBeNull());

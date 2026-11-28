@@ -201,7 +201,60 @@ class LoopHost {
   // #endregion
 }
 
+/**
+ * Class SwatchHost
+ *
+ * @description
+ * Hosts a `swatch` group of colors in single choice, sized `lg` to check that a swatch ignores the
+ * group's size.
+ */
+@Component({
+  imports: [CwToggleGroup, CwToggleGroupItem],
+  template: `
+    <cw-toggle-group variant="swatch" size="lg" ariaLabel="Couleur" [(value)]="color">
+      <button cwToggleGroupItem value="azur" aria-label="Azur">
+        <span class="bg-azur"></span>
+      </button>
+      <button cwToggleGroupItem value="jade" aria-label="Jade">
+        <span class="bg-jade"></span>
+      </button>
+    </cw-toggle-group>
+  `,
+})
+class SwatchHost {
+  // #region Properties
+  /**
+   * Property color
+   * @readonly
+   *
+   * @description
+   * Chosen color, Azur first.
+   *
+   * @type {WritableSignal<CwToggleGroupValue>}
+   */
+  public readonly color: WritableSignal<CwToggleGroupValue> = signal<CwToggleGroupValue>('azur');
+  // #endregion
+}
+
 describe('CwToggleGroup', () => {
+  describe('as swatches', () => {
+    it('is a radio group of fixed 32 px circles whatever its size', async () => {
+      const fixture: ComponentFixture<SwatchHost> = TestBed.createComponent(SwatchHost);
+      await fixture.whenStable();
+      const host: HTMLElement = fixture.nativeElement as HTMLElement;
+      const jade: HTMLElement | null = host.querySelector('[aria-label="Jade"]');
+
+      jade?.click();
+      await fixture.whenStable();
+
+      expect(fixture.componentInstance.color()).toBe('jade');
+      expect(jade?.getAttribute('role')).toBe('radio');
+      expect(jade?.getAttribute('aria-checked')).toBe('true');
+      expect(jade?.classList).toContain('size-8');
+      expect(jade?.classList).not.toContain('h-9');
+    });
+  });
+
   describe('with items from a @for', () => {
     it('renders when the item that is on is the third one', async () => {
       const fixture: ComponentFixture<LoopHost> = TestBed.createComponent(LoopHost);

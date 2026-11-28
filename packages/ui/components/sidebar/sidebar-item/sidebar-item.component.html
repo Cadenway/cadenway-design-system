@@ -9,7 +9,12 @@
 @if (iconName(); as name) {
   <ng-icon [name]="name" [class]="iconClasses()" aria-hidden="true" />
 }
-<span #label [class]="rail() ? 'sr-only' : 'truncate'"><ng-content /></span>
+<span [class]="rail() ? 'sr-only' : 'truncate'"
+  ><span #label><ng-content /></span>
+  @if (hasCount()) {
+    <span class="sr-only">, {{ spokenCount() }}</span>
+  }
+</span>
 @if (hasCount()) {
   @if (rail()) {
     <span
@@ -23,5 +28,4 @@
       >{{ count() }}</span
     >
   }
-  <span class="sr-only">, {{ spokenCount() }}</span>
 }

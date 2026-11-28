@@ -117,7 +117,8 @@ function optionalBoolean(value: unknown): boolean | undefined {
  * cancelled before any other listener, `routerLink` included). For a routed link, bind `active` from
  * the router (`routerLinkActive #rla="routerLinkActive" [active]="rla.isActive"`): it overrides the
  * value comparison, so the brick needs no router. Clicking a tab makes it the set's value. `count`
- * shows a counter after the label, read with it (« Sous-tâches, 5 »). The sheet wants the active
+ * shows a counter after the label, read with it (« Sous-tâches, 5 »), or as `countLabel` when given
+ * (« Sous-tâches, 5 sous-tâches »). The sheet wants the active
  * tab's icon filled: the icon turns `text-primary` here, the consumer swaps the Bold glyph for the
  * Fill one with `#tab="cwTab"` and `tab.isActive()`. Style hook: `data-state="active|inactive"`.
  */
@@ -198,6 +199,18 @@ export class CwTab {
   >(undefined, {
     transform: optionalNumber,
   });
+
+  /**
+   * Property countLabel
+   * @readonly
+   *
+   * @description
+   * Spoken form of `count`, read after the label instead of the bare number (« Membres, 18
+   * membres »); the visible counter is then hidden from assistive technologies.
+   *
+   * @type {InputSignal<string | undefined>}
+   */
+  public readonly countLabel: InputSignal<string | undefined> = input<string>();
 
   /**
    * Property active

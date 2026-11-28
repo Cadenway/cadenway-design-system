@@ -27,6 +27,7 @@ export type {
   CwColumnDef,
   CwColumnResizeEvent,
   CwDataTableDensity,
+  CwDataTableEditTrigger,
   CwDataTablePhoneLayout,
   CwDataTableSelection,
   CwDataTableTexts,

@@ -485,6 +485,28 @@ describe('CwDialog size', () => {
     expect(panel().classList).toContain('max-md:max-w-none');
   });
 
+  it('is 1024 px wide and 88 % of the viewport high with size tall', async () => {
+    fixture.componentInstance.size.set('tall');
+    await fixture.whenStable();
+
+    expect(panel().dataset['size']).toBe('tall');
+    expect(panel().classList).toContain('max-w-5xl');
+    expect(panel().classList).toContain('h-[88dvh]');
+    expect(panel().classList).toContain('max-md:h-dvh');
+  });
+
+  it('makes the always-scrolling body of a tall or full dialog a focusable scroll region', async () => {
+    for (const size of ['tall', 'full'] as const) {
+      fixture.componentInstance.size.set(size);
+      await fixture.whenStable();
+      const body: Element | undefined = Array.from(panel().children).find((child: Element) =>
+        child.classList.contains('overflow-y-auto'),
+      );
+
+      expect(body?.getAttribute('tabindex')).toBe('0');
+    }
+  });
+
   it('keeps 672 px for size lg and fills the screen under 768 px at every size', async () => {
     fixture.componentInstance.size.set('lg');
     await fixture.whenStable();
@@ -493,6 +515,239 @@ describe('CwDialog size', () => {
     fixture.componentInstance.size.set('md');
     await fixture.whenStable();
     expect(panel().classList).toContain('max-md:max-w-none');
+  });
+});
+
+/**
+ * Component PlacedHost
+ *
+ * @description
+ * Hosts the mockup's task creation dialog: pinned near the top, unpadded, with a bar header.
+ */
+@Component({
+  imports: [CwDialog, CwDialogHeader, CwDialogTitle],
+  template: `
+    <cw-dialog [open]="true" size="xl" placement="top" padding="none" scrollable>
+      <cw-dialog-header variant="bar" class="px-5">
+        <h2 cwDialogTitle>Créer une tâche</h2>
+      </cw-dialog-header>
+      <p>Titre de la tâche</p>
+    </cw-dialog>
+  `,
+})
+class PlacedHost {}
+
+describe('CwDialog placement, padding and bar header', () => {
+  let fixture: ComponentFixture<PlacedHost>;
+
+  beforeEach(async () => {
+    fixture = TestBed.createComponent(PlacedHost);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+  });
+
+  afterEach(() => {
+    fixture.destroy();
+  });
+
+  it('pins the window 8vh from the top of a wide screen', () => {
+    const pane: HTMLElement | null | undefined =
+      dialog()?.closest<HTMLElement>('.cdk-overlay-pane');
+
+    expect(pane?.style.marginTop).toBe('8vh');
+  });
+
+  it('leaves the body unpadded and lays the header out as a bar over a rule', () => {
+    const window: HTMLElement | null = dialog();
+    const header: HTMLElement | null | undefined = window?.querySelector('cw-dialog-header');
+    const body: Element | null | undefined = header?.nextElementSibling;
+
+    expect(header?.classList).toContain('border-b');
+    expect(header?.classList).toContain('flex-wrap');
+    expect(header?.classList).toContain('px-5');
+    expect(body?.className).not.toMatch(/(^|\s)(px|py|p)-\d/);
+  });
+});
+
+/**
+ * Component ResizedPlacedHost
+ *
+ * @description
+ * Hosts an open top-placed dialog whose size the test switches between a window and `screen`.
+ */
+@Component({
+  imports: [CwDialog, CwDialogHeader, CwDialogTitle],
+  template: `
+    <cw-dialog [open]="true" [size]="size()" placement="top">
+      <cw-dialog-header>
+        <h2 cwDialogTitle>Créer une tâche</h2>
+      </cw-dialog-header>
+    </cw-dialog>
+  `,
+})
+class ResizedPlacedHost {
+  // #region Properties
+  /**
+   * Property size
+   * @readonly
+   *
+   * @description
+   * Size given to the dialog.
+   *
+   * @type {WritableSignal<CwDialogSize>}
+   */
+  public readonly size: WritableSignal<CwDialogSize> = signal<CwDialogSize>('xl');
+  // #endregion
+}
+
+describe('CwDialog placement across the 768 px breakpoint', () => {
+  let wide: boolean;
+  let listeners: ((event: MediaQueryListEvent) => void)[];
+
+  /**
+   * Function cross
+   *
+   * @description
+   * Moves the emulated viewport across 768 px and notifies the media query listeners.
+   *
+   * @param {boolean} next - Whether the viewport is now at least 768 px wide.
+   */
+  function cross(next: boolean): void {
+    wide = next;
+    for (const listener of [...listeners]) listener({ matches: next } as MediaQueryListEvent);
+  }
+
+  /**
+   * Function pane
+   *
+   * @description
+   * Returns the overlay pane of the open dialog.
+   *
+   * @returns {HTMLElement | null | undefined} Pane holding the dialog window.
+   */
+  function pane(): HTMLElement | null | undefined {
+    return dialog()?.closest<HTMLElement>('.cdk-overlay-pane');
+  }
+
+  beforeEach(() => {
+    wide = true;
+    listeners = [];
+    vi.stubGlobal('matchMedia', (query: string) => ({
+      media: query,
+      get matches(): boolean {
+        return wide;
+      },
+      addEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => {
+        listeners.push(listener);
+      },
+      removeEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => {
+        listeners = listeners.filter((other) => other !== listener);
+      },
+    }));
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('drops the top offset on a phone and takes it back on a wide screen while open', async () => {
+    const fixture: ComponentFixture<PlacedHost> = TestBed.createComponent(PlacedHost);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    expect(pane()?.style.marginTop).toBe('8vh');
+
+    cross(false);
+    await fixture.whenStable();
+    expect(pane()?.style.marginTop).not.toBe('8vh');
+    expect(pane()?.parentElement?.style.alignItems).toBe('center');
+
+    cross(true);
+    await fixture.whenStable();
+    expect(pane()?.style.marginTop).toBe('8vh');
+
+    fixture.destroy();
+    expect(listeners).toHaveLength(0);
+  });
+
+  it('drops the top offset and the breakpoint watch when the window becomes a screen', async () => {
+    const fixture: ComponentFixture<ResizedPlacedHost> = TestBed.createComponent(ResizedPlacedHost);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    expect(pane()?.style.marginTop).toBe('8vh');
+    expect(listeners).toHaveLength(1);
+
+    fixture.componentInstance.size.set('screen');
+    await fixture.whenStable();
+    expect(pane()?.style.marginTop).not.toBe('8vh');
+    expect(listeners).toHaveLength(0);
+
+    cross(false);
+    cross(true);
+    await fixture.whenStable();
+    expect(pane()?.style.marginTop).not.toBe('8vh');
+    fixture.destroy();
+  });
+
+  it('takes the top offset and the breakpoint watch when a screen becomes a window', async () => {
+    const fixture: ComponentFixture<ResizedPlacedHost> = TestBed.createComponent(ResizedPlacedHost);
+    fixture.componentInstance.size.set('screen');
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    expect(pane()?.style.marginTop).not.toBe('8vh');
+    expect(listeners).toHaveLength(0);
+
+    fixture.componentInstance.size.set('xl');
+    await fixture.whenStable();
+    expect(pane()?.style.marginTop).toBe('8vh');
+    expect(listeners).toHaveLength(1);
+
+    cross(false);
+    await fixture.whenStable();
+    expect(pane()?.style.marginTop).not.toBe('8vh');
+    fixture.destroy();
+    expect(listeners).toHaveLength(0);
+  });
+
+  it('leaves full and tall windows centered with placement="top"', async () => {
+    const fixture: ComponentFixture<ResizedPlacedHost> = TestBed.createComponent(ResizedPlacedHost);
+    fixture.componentInstance.size.set('full');
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    expect(pane()?.style.marginTop).not.toBe('8vh');
+    expect(pane()?.parentElement?.style.alignItems).toBe('center');
+    expect(listeners).toHaveLength(0);
+
+    fixture.componentInstance.size.set('tall');
+    await fixture.whenStable();
+    expect(pane()?.style.marginTop).not.toBe('8vh');
+    expect(listeners).toHaveLength(0);
+    fixture.destroy();
+  });
+
+  it('keeps a pinned window within the viewport, its body scrolling between header and footer', async () => {
+    const fixture: ComponentFixture<ResizedPlacedHost> = TestBed.createComponent(ResizedPlacedHost);
+    fixture.componentInstance.size.set('default');
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const panel: Element | null | undefined = dialog()?.firstElementChild;
+    const body: Element | null | undefined =
+      panel?.querySelector('cw-dialog-header')?.nextElementSibling;
+
+    expect(pane()?.style.marginTop).toBe('8vh');
+    expect(panel?.classList).toContain('md:max-h-[calc(92dvh-1rem)]');
+    expect(body?.classList).toContain('md:overflow-y-auto');
+    expect(body?.getAttribute('tabindex')).toBe('0');
+    fixture.destroy();
+  });
+
+  it('opens centered on a phone', async () => {
+    wide = false;
+    const fixture: ComponentFixture<PlacedHost> = TestBed.createComponent(PlacedHost);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+
+    expect(pane()?.style.marginTop).not.toBe('8vh');
+    fixture.destroy();
   });
 });
 

@@ -134,6 +134,7 @@ const TASKS: Task[] = [
       [itemSpan]="span"
       [today]="today"
       [showWeekends]="weekends()"
+      [maxPerDay]="maxPerDay()"
       [readonly]="readonly()"
       [unscheduledCount]="1"
       [(view)]="view"
@@ -205,6 +206,17 @@ class Host {
    * @readonly
    */
   public readonly weekends: WritableSignal<boolean> = signal(true);
+
+  /**
+   * Property maxPerDay
+   *
+   * @description
+   * Visible item lines a day in the month view.
+   *
+   * @type {WritableSignal<number>}
+   * @readonly
+   */
+  public readonly maxPerDay: WritableSignal<number> = signal(2);
 
   /**
    * Property readonly
@@ -425,11 +437,28 @@ describe('CwCalendarView', () => {
     );
   });
 
+  it('grows its days to maxPerDay lines, so every item is visible or behind « +n autres »', async () => {
+    component.maxPerDay.set(3);
+    await fixture.whenStable();
+    // Thursday 12 November holds four one-day items: two pills and « +2 autres » on three lines.
+    const today: HTMLElement | null = host.querySelector('[role="gridcell"][aria-current="date"]');
+
+    expect(today?.style.height).toBe('94px');
+    expect(today?.querySelectorAll('button[title]')).toHaveLength(2);
+    expect(today?.querySelector('[data-more]')?.textContent.trim()).toBe('+2 autres');
+  });
+
+  it('keeps its 76 px days for two lines', () => {
+    const today: HTMLElement | null = host.querySelector('[role="gridcell"][aria-current="date"]');
+
+    expect(today?.style.height).toBe('76px');
+  });
+
   it('opens an item on click and creates on a day', () => {
     button(host, 'Corriger le tri').click();
     expect(component.opened.map((task) => task.id)).toEqual(['CAD-462']);
 
-    button(host, 'Créer une tâche le 3 novembre').click();
+    button(host, 'Créer une tâche le mardi 3 novembre').click();
     expect(component.creations).toEqual([{ date: day(3), allDay: true }]);
   });
 
@@ -946,5 +975,170 @@ describe('CwCalendarView planning hooks', () => {
     expect(status?.getAttribute('aria-label')).toBe('Chargement du calendrier');
     expect(status?.getAttribute('aria-busy')).toBe('true');
     expect(host.querySelector('[role="grid"]')).toBeNull();
+  });
+});
+
+/**
+ * Component OutlinedHost
+ *
+ * @description
+ * Hosts the mockup's month: `outlined` days, the `title` header, no view toggle.
+ */
+@Component({
+  imports: [CwCalendarView],
+  template: `
+    <cw-calendar-view
+      variant="outlined"
+      toolbar="title"
+      viewToggle="false"
+      [maxPerDay]="maxPerDay()"
+      [items]="items"
+      [trackBy]="id"
+      [itemLabel]="name"
+      [itemSpan]="span"
+      [today]="today"
+      [date]="today"
+    />
+  `,
+})
+class OutlinedHost {
+  // #region Properties
+  /**
+   * Property items
+   *
+   * @description
+   * Tasks shown in the calendar.
+   *
+   * @type {Task[]}
+   * @readonly
+   */
+  public readonly items: Task[] = TASKS;
+
+  /**
+   * Property today
+   *
+   * @description
+   * The current day, Thursday 12 November 2026.
+   *
+   * @type {Date}
+   * @readonly
+   */
+  public readonly today: Date = day(12, 10, 12);
+
+  /**
+   * Property maxPerDay
+   *
+   * @description
+   * Visible item lines a day.
+   *
+   * @type {WritableSignal<number>}
+   * @readonly
+   */
+  public readonly maxPerDay: WritableSignal<number> = signal(2);
+
+  /**
+   * Property id
+   *
+   * @description
+   * Reads a task's id.
+   *
+   * @type {(task: Task) => string}
+   * @readonly
+   */
+  public readonly id: (task: Task) => string = (task) => task.id;
+
+  /**
+   * Property name
+   *
+   * @description
+   * Reads a task's name.
+   *
+   * @type {(task: Task) => string}
+   * @readonly
+   */
+  public readonly name: (task: Task) => string = (task) => task.name;
+
+  /**
+   * Property span
+   *
+   * @description
+   * Reads a task's span.
+   *
+   * @type {(task: Task) => CwCalendarSpan | null}
+   * @readonly
+   */
+  public readonly span: (task: Task) => CwCalendarSpan | null = (task) => task.span;
+  // #endregion
+}
+
+describe('CwCalendarView outlined, with the title toolbar', () => {
+  let host: HTMLElement;
+  let fixture: ComponentFixture<OutlinedHost>;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [{ provide: LiveAnnouncer, useValue: { announce: () => Promise.resolve() } }],
+    });
+    fixture = TestBed.createComponent(OutlinedHost);
+    fixture.detectChanges();
+    host = fixture.nativeElement as HTMLElement;
+  });
+
+  it('heads the calendar with the month and groups the navigation at the end, without view toggle', () => {
+    const heading: HTMLElement | null = host.querySelector('h2');
+    const navigation: HTMLElement | null = host.querySelector(
+      '[role="group"][aria-label="Navigation du calendrier"]',
+    );
+
+    expect(heading?.textContent.trim()).toBe('Novembre 2026');
+    expect(navigation?.textContent).toContain('Aujourd’hui');
+    expect(host.querySelector('[role="radiogroup"]')).toBeNull();
+  });
+
+  it('keeps the number alone in the circle of the first day and names the month beside it', () => {
+    const first: HTMLElement | undefined = Array.from(
+      host.querySelectorAll<HTMLElement>('[role="gridcell"]'),
+    ).find((element) => element.textContent.includes('dimanche 1 novembre 2026'));
+    const circle: HTMLElement | null | undefined = first?.querySelector('.size-6');
+
+    expect(circle?.textContent.trim()).toBe('1');
+    expect(circle?.nextElementSibling?.textContent.trim()).toBe('nov.');
+  });
+
+  it('grows its days to maxPerDay lines, so every item is visible or behind « +n autres »', async () => {
+    fixture.componentInstance.maxPerDay.set(3);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    // Thursday 12 November holds four one-day items: two chips and « +2 autres » on three lines.
+    const today: HTMLElement | null = host.querySelector('[role="gridcell"][aria-current="date"]');
+    const chips: HTMLElement[] = Array.from(
+      today?.querySelectorAll<HTMLElement>('button[title]') ?? [],
+    );
+    const more: HTMLElement | null | undefined = today?.querySelector('[data-more]');
+
+    expect(today?.style.height).toBe('126px');
+    expect(chips).toHaveLength(2);
+    expect(more?.textContent.trim()).toBe('+2 autres');
+
+    fixture.componentInstance.maxPerDay.set(4);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(today?.style.height).toBe('156px');
+    expect(today?.querySelectorAll('button[title]')).toHaveLength(4);
+    expect(today?.querySelector('[data-more]')).toBeNull();
+  });
+
+  it('keeps 96 px days for two lines, the mockup height', () => {
+    const today: HTMLElement | null = host.querySelector('[role="gridcell"][aria-current="date"]');
+
+    expect(today?.style.height).toBe('96px');
+  });
+
+  it('marks the days of other months and fills the number of today', () => {
+    const outside: HTMLElement | null = host.querySelector('[role="gridcell"][data-outside]');
+    const today: HTMLElement | null = host.querySelector('[role="gridcell"][aria-current="date"]');
+
+    expect(outside?.classList).toContain('bg-muted');
+    expect(today?.querySelector('.bg-foreground')?.textContent.trim()).toBe('12');
   });
 });

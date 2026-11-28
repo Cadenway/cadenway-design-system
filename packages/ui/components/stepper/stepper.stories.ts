@@ -165,6 +165,24 @@ export const Keyboard: Story = {
 };
 
 /**
+ * Segmented bar in the mockup's violet (`tone="primary"`, `App.dc.html`, the onboarding
+ * assistant): the done and current bars in `bg-primary`.
+ */
+export const SegmentsPrimary: Story = {
+  render: () => ({
+    template: `
+      <div class="w-full max-w-xl">
+        <cw-stepper variant="segments" tone="primary" ariaLabel="Steps" [selected]="1">
+          <cw-step label="Space" />
+          <cw-step label="Template" />
+          <cw-step label="Team" />
+          <cw-step label="Import" />
+        </cw-stepper>
+      </div>`,
+  }),
+};
+
+/**
  * Segmented bar (`variant="segments"`), the onboarding assistant of the mockup (`App.dc.html`): one
  * bar per step, filled up to the current one, the labels below, no step clickable and no position
  * line; the consumer writes « Step 2 of 4 » and moves with its own buttons. English source copy, as

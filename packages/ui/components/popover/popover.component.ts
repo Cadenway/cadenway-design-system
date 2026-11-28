@@ -55,6 +55,7 @@ import type {
   CwPopoverPadding,
   CwPopoverSide,
   CwPopoverSize,
+  CwPopoverWidth,
 } from './popover.types';
 
 /* Literal class strings (Popover sheet and preview of the Design System artifact). The panel reveals
@@ -119,6 +120,36 @@ const FLUSH_CONTENT: string =
   'in-data-[presentation=sheet]:max-h-none';
 
 /**
+ * Constant MIN_WIDTHS
+ *
+ * @description
+ * Minimum panel width classes by size, for a panel whose width follows its content. The minimum
+ * never exceeds the viewport less its 8 px margins, so an `xl` panel (384 px) still fits a 375 px
+ * phone.
+ *
+ * @type {Record<CwPopoverSize, string>}
+ */
+const MIN_WIDTHS: Record<CwPopoverSize, string> = {
+  sm: 'min-w-[min(14rem,calc(100vw-1rem))]',
+  default: 'min-w-[min(18rem,calc(100vw-1rem))]',
+  lg: 'min-w-[min(20rem,calc(100vw-1rem))]',
+  xl: 'min-w-[min(24rem,calc(100vw-1rem))]',
+};
+
+// Mockup App.dc.html: the filter and reminder panels grow with their content (`w-max`) and stay
+// within the viewport's 8 px margins, where their content wraps.
+/**
+ * Constant CONTENT_WIDTH
+ *
+ * @description
+ * Width classes of a panel that follows its content.
+ *
+ * @type {string}
+ */
+const CONTENT_WIDTH: string =
+  'w-max max-w-[calc(100vw-1rem)] in-data-[presentation=sheet]:min-w-0 in-data-[presentation=sheet]:max-w-none';
+
+/**
  * Constant PADDINGS
  *
  * @description
@@ -167,7 +198,8 @@ const VIEWPORT_MARGIN: number = 8;
  * closes on Escape, on an outside click (`closeOnOutsideClick`), on a new click of the trigger, on
  * a `button[cwPopoverClose]`, and when the focus tabs out of it; the focus returns to the trigger
  * unless the user moved it elsewhere. `modal` traps the focus and blocks the page behind a
- * transparent backdrop. `size` sets the width (224 to 384 px) and `padding="none"` hands the
+ * transparent backdrop. `size` sets the width (224 to 384 px), `width="content"` lets it follow the
+ * content from that width up to the viewport, and `padding="none"` hands the
  * inner spacing to the content (the mockup's inbox panel). The `cw-popover` element itself renders
  * nothing in place.
  *
@@ -278,6 +310,18 @@ export class CwPopover {
    * @type {InputSignal<CwPopoverSize>}
    */
   public readonly size: InputSignal<CwPopoverSize> = input<CwPopoverSize>('default');
+
+  /**
+   * Property width
+   * @readonly
+   *
+   * @description
+   * How the width is set: `fixed` (default) keeps the width of `size`; `content` follows the
+   * content, at least the width of `size` and at most the viewport minus its margins.
+   *
+   * @type {InputSignal<CwPopoverWidth>}
+   */
+  public readonly width: InputSignal<CwPopoverWidth> = input<CwPopoverWidth>('fixed');
 
   /**
    * Property padding
@@ -466,7 +510,8 @@ export class CwPopover {
    * @type {Signal<string>}
    */
   protected readonly panelClasses: Signal<string> = computed(
-    () => `${PANEL} ${WIDTHS[this.size()]}`,
+    () =>
+      `${PANEL} ${this.width() === 'content' ? `${CONTENT_WIDTH} ${MIN_WIDTHS[this.size()]}` : WIDTHS[this.size()]}`,
   );
 
   /**

@@ -21,6 +21,8 @@ export type {
   CwCalendarViewLabels,
   CwCalendarViewProvidedLabels,
   CwCalendarViewMode,
+  CwCalendarViewToolbar,
+  CwCalendarViewVariant,
   CwCalendarWeekStart,
 } from './calendar-view.types';
 

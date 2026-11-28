@@ -148,7 +148,8 @@ export const Invalid: Story = {
   },
 };
 
-/** Choice cards: the whole card names its radio; selected, it turns `bg-selected`. */
+/** Choice cards: the whole card names its radio; selected, it turns violet (`bg-primary/5`,
+ *  `border-primary/50`). */
 export const ChoiceCards: Story = {
   render: () => ({
     template: `

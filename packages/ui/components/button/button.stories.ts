@@ -87,6 +87,27 @@ export const Variants: Story = {
   }),
 };
 
+/** An outline toggle: pressed (`aria-pressed="true"`), it turns violet (mockup `App.dc.html`, the
+ *  « Jalons » filter of a list); a click flips it. */
+export const PressedOutline: Story = {
+  render: () => ({
+    props: { pressed: true },
+    template: `
+      <button cwButton variant="outline" [attr.aria-pressed]="pressed" (click)="pressed = !pressed">
+        <ng-icon name="phosphorFunnelSimpleBold" /> Jalons
+      </button>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const toggle: HTMLElement = within(light(canvasElement)).getByRole('button', {
+      name: 'Jalons',
+    });
+    await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+    await expect(getComputedStyle(toggle).backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+    await userEvent.click(toggle);
+    await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+  },
+};
+
 /** Text sizes `xs` to `lg`, and the four icon sizes, each icon button named by `aria-label`. */
 export const Sizes: Story = {
   render: () => ({

@@ -202,7 +202,8 @@ export const InToolbar: Story = {
   }),
 };
 
-/** `bar`, 36 px: the sections of a task, counters, a disabled tab and the panels. */
+/** `bar`, 36 px: the sections of a task, counters (the comments one read as « 12 commentaires »
+ *  through `countLabel`), a disabled tab and the panels. */
 export const Bar: Story = {
   render: () => ({
     props: { section: 'details' },
@@ -213,7 +214,7 @@ export const Bar: Story = {
             <ng-icon [name]="details.isActive() ? 'phosphorTextAlignLeftFill' : 'phosphorTextAlignLeftBold'" />Détails</button>
           <button cwTab value="sous-taches" [count]="5" #subtasks="cwTab">
             <ng-icon [name]="subtasks.isActive() ? 'phosphorListChecksFill' : 'phosphorListChecksBold'" />Sous-tâches</button>
-          <button cwTab value="commentaires" [count]="12" #comments="cwTab">
+          <button cwTab value="commentaires" [count]="12" countLabel="12 commentaires" #comments="cwTab">
             <ng-icon [name]="comments.isActive() ? 'phosphorChatCircleFill' : 'phosphorChatCircleBold'" />Commentaires</button>
           <button cwTab value="activite" #activity="cwTab">
             <ng-icon [name]="activity.isActive() ? 'phosphorPulseFill' : 'phosphorPulseBold'" />Activité</button>

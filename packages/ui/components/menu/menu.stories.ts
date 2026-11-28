@@ -191,15 +191,15 @@ export const Actions: Story = {
   }),
 };
 
-/** Options: checkbox items under an inset label, a radio group whose choice carries the check on
- *  the right; ticking keeps the menu open. */
+/** Options: checkbox items and a radio group, each choice carrying its check on the right after
+ *  its label; ticking keeps the menu open. */
 export const Options: Story = {
   render: () => ({
     props: { subtasks: true, labels: true, done: false, groupBy: 'statut' },
     template: `
       <cw-menu inline ariaLabel="Affichage">
         <cw-menu-group>
-          <cw-menu-label inset>Afficher</cw-menu-label>
+          <cw-menu-label>Afficher</cw-menu-label>
           <button cwMenuItemCheckbox [(checked)]="subtasks">Sous-tâches</button>
           <button cwMenuItemCheckbox [(checked)]="labels">Étiquettes</button>
           <button cwMenuItemCheckbox [(checked)]="done">Tâches terminées</button>
@@ -228,6 +228,30 @@ export const Options: Story = {
       'aria-checked',
       'false',
     );
+  },
+};
+
+/** Minimum width: `minWidth="56"` keeps a menu of short items at 224 px (mockup `App.dc.html`,
+ *  the sort menu); the width still follows longer content up to `max-w-sm`. */
+export const MinWidth: Story = {
+  render: () => ({
+    template: `
+      <div class="flex flex-wrap items-start gap-2">
+        <cw-menu inline ariaLabel="Trier" minWidth="56">
+          <button cwMenuItem selected>Statut</button>
+          <button cwMenuItem>Priorité</button>
+          <button cwMenuItem>Échéance</button>
+        </cw-menu>
+        <cw-menu inline ariaLabel="Trier, sans largeur minimale">
+          <button cwMenuItem selected>Statut</button>
+          <button cwMenuItem>Priorité</button>
+          <button cwMenuItem>Échéance</button>
+        </cw-menu>
+      </div>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const menu: HTMLElement = within(light(canvasElement)).getByRole('menu', { name: 'Trier' });
+    await expect(Math.round(menu.getBoundingClientRect().width)).toBe(224);
   },
 };
 
@@ -314,7 +338,7 @@ export const Keyboard: Story = {
       </button>
       <cw-menu #display>
         <cw-menu-group>
-          <cw-menu-label inset>Afficher</cw-menu-label>
+          <cw-menu-label>Afficher</cw-menu-label>
           <button cwMenuItemCheckbox [(checked)]="subtasks">Sous-tâches</button>
           <button cwMenuItemCheckbox>Étiquettes</button>
         </cw-menu-group>

@@ -405,6 +405,20 @@ export class ɵModalOverlay {
   }
 
   /**
+   * Method reposition
+   * @method reposition
+   *
+   * @description
+   * Moves the open modal's pane with a new position strategy, for an owner whose placement
+   * depends on the viewport; does nothing while no modal is attached.
+   *
+   * @param {PositionStrategy} strategy - Position strategy to apply to the pane.
+   */
+  public reposition(strategy: PositionStrategy): void {
+    this.ref?.overlayRef.updatePositionStrategy(strategy);
+  }
+
+  /**
    * Method escapeBelongsElsewhere
    * @method escapeBelongsElsewhere
    *

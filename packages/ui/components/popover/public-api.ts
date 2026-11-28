@@ -12,5 +12,6 @@ export type {
   CwPopoverPadding,
   CwPopoverSide,
   CwPopoverSize,
+  CwPopoverWidth,
 } from './popover.types';
 export { CwPopoverTrigger } from './popover-trigger/popover-trigger.directive';

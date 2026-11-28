@@ -1,11 +1,13 @@
-<div class="flex flex-wrap items-center gap-2">
-  <button cwButton variant="outline" (click)="goToday()">{{ texts().today }}</button>
-  <div class="flex items-center">
+<ng-template #navigation let-small>
+  <button cwButton variant="outline" [size]="small ? 'sm' : 'default'" (click)="goToday()">
+    {{ texts().today }}
+  </button>
+  <div class="flex items-center" [class.gap-1]="small">
     <button
       cwButton
       variant="ghost"
-      size="icon"
       class="text-muted-foreground"
+      [size]="small ? 'icon-sm' : 'icon'"
       [attr.aria-label]="view() === 'month' ? texts().previousMonth : texts().previousWeek"
       (click)="step(-1)"
     >
@@ -14,18 +16,34 @@
     <button
       cwButton
       variant="ghost"
-      size="icon"
       class="text-muted-foreground"
+      [size]="small ? 'icon-sm' : 'icon'"
       [attr.aria-label]="view() === 'month' ? texts().nextMonth : texts().nextWeek"
       (click)="step(1)"
     >
       <ng-icon name="phosphorCaretRightBold" aria-hidden="true" />
     </button>
   </div>
-  <div class="text-base font-semibold" aria-live="polite">{{ title() }}</div>
-  <span class="flex-1"></span>
+</ng-template>
+
+<div class="flex flex-wrap items-center gap-2">
+  @if (titled()) {
+    <h2 class="text-base font-semibold" aria-live="polite">{{ title() }}</h2>
+  } @else {
+    <ng-container
+      [ngTemplateOutlet]="navigation"
+      [ngTemplateOutletContext]="{ $implicit: false }"
+    />
+    <div class="text-base font-semibold" aria-live="polite">{{ title() }}</div>
+    <span class="flex-1"></span>
+  }
   @if (unscheduledCount(); as count) {
-    <button cwButton variant="outline" (click)="unscheduledOpen.emit()">
+    <button
+      cwButton
+      variant="outline"
+      [size]="titled() ? 'sm' : 'default'"
+      (click)="unscheduledOpen.emit()"
+    >
       <ng-icon name="phosphorCalendarBlankBold" aria-hidden="true" />
       {{ texts().unscheduled }}
       <span
@@ -34,15 +52,30 @@
       >
     </button>
   }
-  <cw-toggle-group
-    variant="outline"
-    [ariaLabel]="texts().views"
-    [value]="view()"
-    (valueChange)="setView($event)"
-  >
-    <button cwToggleGroupItem value="month">{{ texts().month }}</button>
-    <button cwToggleGroupItem value="week">{{ texts().week }}</button>
-  </cw-toggle-group>
+  @if (titled()) {
+    <div
+      role="group"
+      class="ml-auto flex items-center gap-1"
+      [attr.aria-label]="texts().navigation"
+    >
+      <ng-container
+        [ngTemplateOutlet]="navigation"
+        [ngTemplateOutletContext]="{ $implicit: true }"
+      />
+    </div>
+  }
+  @if (viewToggle()) {
+    <cw-toggle-group
+      variant="outline"
+      [size]="titled() ? 'sm' : 'default'"
+      [ariaLabel]="texts().views"
+      [value]="view()"
+      (valueChange)="setView($event)"
+    >
+      <button cwToggleGroupItem value="month">{{ texts().month }}</button>
+      <button cwToggleGroupItem value="week">{{ texts().week }}</button>
+    </cw-toggle-group>
+  }
   <ng-content select="[cwCalendarActions]" />
 </div>
 
@@ -118,6 +151,7 @@
                   cdkDropList
                   cdkDropListSortingDisabled
                   [class]="day.cellClass"
+                  [style.height.px]="day.height"
                   [id]="dropListPrefix + day.key"
                   [cdkDropListData]="day.drop"
                   [cdkDropListDisabled]="readonly()"
@@ -182,6 +216,7 @@
                   cdkDropList
                   cdkDropListSortingDisabled
                   [class]="day.cellClass"
+                  [style.height.px]="day.height"
                   [id]="dropListPrefix + day.key"
                   [cdkDropListData]="day.drop"
                   [cdkDropListDisabled]="readonly()"

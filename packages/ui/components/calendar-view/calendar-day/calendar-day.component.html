@@ -8,13 +8,20 @@
 
 @let day = model();
 @if (header()) {
-  <div class="flex h-5 shrink-0 items-center justify-between pl-1">
-    <span aria-hidden="true" [class]="day.numberClass">{{ day.number }}</span>
+  <div [class]="day.headClass">
+    @if (day.monthLabel; as month) {
+      <span class="flex min-w-0 items-center gap-1" aria-hidden="true">
+        <span [class]="day.numberClass">{{ day.number }}</span>
+        <span class="truncate text-xs text-muted-foreground">{{ month }}</span>
+      </span>
+    } @else {
+      <span aria-hidden="true" [class]="day.numberClass">{{ day.number }}</span>
+    }
     @if (!host.readonly()) {
       <button
         type="button"
         cwRipple
-        [class]="host.classes.add"
+        [class]="day.addClass"
         [attr.tabindex]="day.tabStop ? 0 : -1"
         [attr.aria-label]="day.createLabel"
         (click)="host.createOn(day.date, null, true)"
@@ -25,7 +32,7 @@
   </div>
 }
 @for (line of day.spacers; track line) {
-  <div class="h-5 shrink-0" aria-hidden="true"></div>
+  <div [class]="day.spacerClass" aria-hidden="true"></div>
 }
 @for (pill of day.pills; track pill.id) {
   <button
