@@ -1647,6 +1647,24 @@ describe('CwDataTable', () => {
       expect(component.opened()).toBeNull();
     });
 
+    it('opens the editor of the first cell with Enter when editOn="click"', async () => {
+      component.editOn.set('click');
+      await stable();
+      key(nameCell(0), { key: 'Enter' });
+      await stable();
+
+      expect(host.querySelector('input[aria-label="Nom de la tâche"]')).toBeTruthy();
+      expect(component.opened()).toBeNull();
+    });
+
+    it('opens the row with Enter on the first cell by default', async () => {
+      key(nameCell(0), { key: 'Enter' });
+      await stable();
+
+      expect(host.querySelector('input[aria-label="Nom de la tâche"]')).toBeNull();
+      expect(component.opened()).toBe(TASKS[0]);
+    });
+
     it('opens the row on a single click of the first cell by default', async () => {
       nameCell(1).dispatchEvent(new MouseEvent('click', { bubbles: true }));
       await stable();

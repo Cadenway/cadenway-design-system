@@ -1657,7 +1657,9 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
    * @description
    * The pointer gesture that opens the editor of an editable cell: `dblclick` (default) or
    * `click` (mockup `App.dc.html`, the sheet view: « Cliquez sur une cellule pour la modifier »).
-   * Enter and F2 open it either way; a click on a non-editable first cell still opens the row.
+   * F2 opens it either way. Enter opens it on an editable cell, except on the first cell in
+   * `dblclick` mode, where Enter opens the row; with `click`, Enter edits an editable first cell
+   * too. A click or Enter on a non-editable first cell still opens the row.
    *
    * @type {InputSignal<CwDataTableEditTrigger>}
    * @readonly
@@ -4754,8 +4756,11 @@ export class CwDataTable<T> implements ɵCwDataTableContext {
         else if (group) this.toggleGroup(group);
         else if (rowKey === HEADER && column) this.toggleSort(column, event.shiftKey);
         else if (entry && column) {
+          // The first cell opens the row, unless cells edit on a single click: then Enter edits
+          // an editable first cell too, as the pointer does, and only a read-only one opens.
           const first: boolean = this.visibleColumns()[0]?.key === column.key;
-          if (first || !this.startEdit(entry, column)) this.rowOpen.emit(entry.row);
+          const opens: boolean = first && this.editOn() !== 'click';
+          if (opens || !this.startEdit(entry, column)) this.rowOpen.emit(entry.row);
         }
         return;
       case 'F2':
