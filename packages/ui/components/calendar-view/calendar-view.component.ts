@@ -2644,10 +2644,13 @@ export class CwCalendarView<T> implements CalendarViewHost {
         date,
         key,
         label: all.length > 0 ? `${name}, ${countText}` : name,
+        // The first of a month names its month: after the number in the default variant (« 1
+        // nov. »); beside the 24 px circle of the outlined one, which holds the number alone.
         number:
-          date.getDate() === 1 && !allDayRow
+          date.getDate() === 1 && !allDayRow && !outlined
             ? formats.dayShort.format(date)
             : String(date.getDate()),
+        monthLabel: date.getDate() === 1 && outlined ? formats.monthShort.format(date) : null,
         numberClass: (outlined ? OUTLINED_NUMBERS : NUMBERS)[
           today ? 'today' : outside ? 'outside' : 'plain'
         ],

@@ -9,7 +9,14 @@
 @let day = model();
 @if (header()) {
   <div [class]="day.headClass">
-    <span aria-hidden="true" [class]="day.numberClass">{{ day.number }}</span>
+    @if (day.monthLabel; as month) {
+      <span class="flex min-w-0 items-center gap-1" aria-hidden="true">
+        <span [class]="day.numberClass">{{ day.number }}</span>
+        <span class="truncate text-xs text-muted-foreground">{{ month }}</span>
+      </span>
+    } @else {
+      <span aria-hidden="true" [class]="day.numberClass">{{ day.number }}</span>
+    }
     @if (!host.readonly()) {
       <button
         type="button"

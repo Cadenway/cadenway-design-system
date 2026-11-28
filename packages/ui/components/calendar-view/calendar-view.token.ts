@@ -328,6 +328,18 @@ export interface DayView {
   readonly numberClass: string;
 
   /**
+   * Property monthLabel
+   *
+   * @description
+   * Short month name drawn beside the number of the first day of a month in the `outlined`
+   * variant (« nov. »), whose circle holds the number alone; null otherwise.
+   *
+   * @type {string | null}
+   * @readonly
+   */
+  readonly monthLabel: string | null;
+
+  /**
    * Property headClass
    *
    * @description

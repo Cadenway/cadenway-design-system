@@ -1053,6 +1053,16 @@ describe('CwCalendarView outlined, with the title toolbar', () => {
     expect(host.querySelector('[role="radiogroup"]')).toBeNull();
   });
 
+  it('keeps the number alone in the circle of the first day and names the month beside it', () => {
+    const first: HTMLElement | undefined = Array.from(
+      host.querySelectorAll<HTMLElement>('[role="gridcell"]'),
+    ).find((element) => element.textContent.includes('dimanche 1 novembre 2026'));
+    const circle: HTMLElement | null | undefined = first?.querySelector('.size-6');
+
+    expect(circle?.textContent.trim()).toBe('1');
+    expect(circle?.nextElementSibling?.textContent.trim()).toBe('nov.');
+  });
+
   it('marks the days of other months and fills the number of today', () => {
     const outside: HTMLElement | null = host.querySelector('[role="gridcell"][data-outside]');
     const today: HTMLElement | null = host.querySelector('[role="gridcell"][aria-current="date"]');

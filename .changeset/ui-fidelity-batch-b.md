@@ -21,14 +21,15 @@ menu item entrance: 420 ms on the spring easing, out of a 3 px blur and a 6 px s
 - `cw-progress`: `variant="primary"` (violet bar). `cw-stepper`: `tone` (`'default'` ink,
   `'primary'` violet segments). New type `CwStepperTone`.
 - `cw-dialog`: sizes `2xl` (1024 px) and `tall` (1024 px, 88 % of the viewport high), `placement`
-  (`'center'` default, `'top'`: pinned 8vh from the top from 768 px, following the breakpoint while
-  open), `padding` (`'none'` leaves the
+  (`'center'` default, `'top'`: pinned 8vh from the top from 768 px, following the breakpoint and
+  size or placement changes while open), `padding` (`'none'` leaves the
   body unpadded); `cw-dialog-header` `variant="bar"` (a wrapping row over a rule, 16 px title).
   New types `CwDialogPlacement`, `CwDialogPadding`, `CwDialogHeaderVariant`.
 - `cw-command-dialog`: `fieldEnd` (an `ng-template` drawn at the end of the field row), and
   `clearOnEscape` (`true` default; `false` closes on the first Escape).
 - `cw-calendar-view`: `variant="outlined"` (the mockup's month: 96 px days, other months on
-  `bg-muted`, today in a filled circle, bordered chips, 24 px « + »), `toolbar="title"` (the month as
+  `bg-muted`, today's number alone in a filled circle, the first of a month with its short month name beside the
+  circle, bordered chips, 24 px « + »), `toolbar="title"` (the month as
   an `h2`, « Aujourd'hui » and 28 px arrows grouped at the end) and `viewToggle` (`true` default).
   New label `navigation`, new types `CwCalendarViewVariant`, `CwCalendarViewToolbar`.
 - `cw-meter`: `marker` (an alert mark at a value, decorative).
