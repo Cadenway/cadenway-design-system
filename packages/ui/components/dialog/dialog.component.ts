@@ -1,12 +1,15 @@
 import { _IdGenerator } from '@angular/cdk/a11y';
+import { createGlobalPositionStrategy } from '@angular/cdk/overlay';
 import {
   booleanAttribute,
   Component,
   computed,
   contentChild,
   DestroyRef,
+  DOCUMENT,
   effect,
   inject,
+  Injector,
   input,
   model,
   output,
@@ -30,7 +33,12 @@ import { phosphorXBold } from '@ng-icons/phosphor-icons/bold';
 import { CwDialogDescription } from './dialog-description/dialog-description.directive';
 import { DIALOG_LABELS } from './dialog-labels.token';
 import { CW_DIALOG, type CwDialogContext } from './dialog.token';
-import type { CwDialogCloseReason, CwDialogSize } from './dialog.types';
+import type {
+  CwDialogCloseReason,
+  CwDialogPadding,
+  CwDialogPlacement,
+  CwDialogSize,
+} from './dialog.types';
 
 /**
  * Type PaneLayout
@@ -41,6 +49,27 @@ import type { CwDialogCloseReason, CwDialogSize } from './dialog.types';
  * @type {Pick<ɵModalOverlayConfig, 'width' | 'height' | 'maxWidth' | 'hideBackdrop'>}
  */
 type PaneLayout = Pick<ɵModalOverlayConfig, 'width' | 'height' | 'maxWidth' | 'hideBackdrop'>;
+
+/**
+ * Constant TOP_OFFSET
+ *
+ * @description
+ * Distance of a `placement="top"` window from the top of the viewport (mockup `App.dc.html`, the
+ * task creation dialog: `top-[8vh]`).
+ *
+ * @type {string}
+ */
+const TOP_OFFSET: string = '8vh';
+
+/**
+ * Constant WIDE_SCREEN
+ *
+ * @description
+ * Media query from which a window is a window; below it every size fills the screen.
+ *
+ * @type {string}
+ */
+const WIDE_SCREEN: string = '(min-width: 768px)';
 
 /* Literal class strings (Dialog sheet and preview of the Design System artifact), so Tailwind finds
    them in the compiled package. Under 768 px every size fills the screen (integration guide,
@@ -79,11 +108,14 @@ const SCREEN_PANEL: string =
  * @description
  * Panel layout classes.
  *
- * @type {Readonly<Record<'simple' | 'scrollable', string>>}
+ * @type {Readonly<Record<'simple' | 'flush' | 'scrollable' | 'scrollableTop', string>>}
  */
-const LAYOUTS: Readonly<Record<'simple' | 'scrollable', string>> = {
+const LAYOUTS: Readonly<Record<'simple' | 'flush' | 'scrollable' | 'scrollableTop', string>> = {
   simple: 'gap-4 p-6',
+  flush: '',
   scrollable: 'max-h-[calc(100dvh-2rem)]',
+  // Pinned 8vh from the top, the window stops 16 px above the bottom edge.
+  scrollableTop: 'max-h-[calc(92dvh-1rem)]',
 } as const;
 
 // The window always keeps 16 px from the screen edges (`calc(100% - 2rem)` of the viewport).
@@ -101,6 +133,9 @@ const SIZES: Record<CwDialogSize, string> = {
   md: 'w-[calc(100vw-2rem)] max-w-lg',
   lg: 'w-[calc(100vw-2rem)] max-w-2xl',
   xl: 'w-[calc(100vw-2rem)] max-w-4xl',
+  '2xl': 'w-[calc(100vw-2rem)] max-w-5xl',
+  // Mockup App.dc.html, task detail sheet: 6vh above, 88vh high, so 6vh below once centered.
+  tall: 'h-[88dvh] w-[calc(100vw-2rem)] max-w-5xl overflow-hidden',
   full: 'h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)]',
   // The pane is `100%` of the overlay container (`PANE_LAYOUTS`): `100vw` would add the width of
   // the scrollbar the CDK scroll block keeps.
@@ -144,13 +179,16 @@ function optionalBoolean(value: unknown): boolean | undefined {
  * @description
  * Body layout classes.
  *
- * @type {Readonly<Record<'simple' | 'full' | 'screen' | 'scrollable', string>>}
+ * @type {Readonly<Record<'simple' | 'full' | 'screen' | 'scrollable' | 'scrollableFlush', string>>}
  */
-const BODIES: Readonly<Record<'simple' | 'full' | 'screen' | 'scrollable', string>> = {
+const BODIES: Readonly<
+  Record<'simple' | 'full' | 'screen' | 'scrollable' | 'scrollableFlush', string>
+> = {
   simple: 'min-h-0 min-w-0 flex-1 empty:hidden max-md:overflow-y-auto',
   full: 'min-h-0 min-w-0 flex-1 overflow-y-auto empty:hidden',
   screen: `min-h-0 min-w-0 flex-1 overflow-y-auto empty:hidden ${ɵFOCUS_INSET}`,
   scrollable: `min-h-0 flex-1 overflow-y-auto px-6 py-3 [scrollbar-color:var(--color-track)_transparent] [scrollbar-width:thin] ${ɵFOCUS_INSET}`,
+  scrollableFlush: `min-h-0 flex-1 overflow-y-auto [scrollbar-color:var(--color-track)_transparent] [scrollbar-width:thin] ${ɵFOCUS_INSET}`,
 } as const;
 
 /**
@@ -213,11 +251,36 @@ export class CwDialog implements CwDialogContext {
    *
    * @description
    * Maximum dialog size: `sm` 384 px, `default` 448 px, `md` 512 px, `lg` 672 px, `xl` 896 px,
-   * `full` (the screen less 16 px, over a backdrop) or `screen` (the whole viewport, no backdrop).
+   * `2xl` 1024 px, `tall` (1024 px wide, 88 % of the viewport high), `full` (the screen less
+   * 16 px, over a backdrop) or `screen` (the whole viewport, no backdrop).
    *
    * @type {InputSignal<CwDialogSize>}
    */
   public readonly size: InputSignal<CwDialogSize> = input<CwDialogSize>('default');
+
+  /**
+   * Property placement
+   * @readonly
+   *
+   * @description
+   * Where the window sits from 768 px: `center` (default) or `top`, its top edge 8 % below the top
+   * of the viewport so it grows downwards. Read when the dialog opens; ignored by `screen`.
+   *
+   * @type {InputSignal<CwDialogPlacement>}
+   */
+  public readonly placement: InputSignal<CwDialogPlacement> = input<CwDialogPlacement>('center');
+
+  /**
+   * Property padding
+   * @readonly
+   *
+   * @description
+   * Inner spacing of the body: `default` pads it; `none` leaves the spacing to the content (a
+   * header `variant="bar"`, sections drawing their own edges).
+   *
+   * @type {InputSignal<CwDialogPadding>}
+   */
+  public readonly padding: InputSignal<CwDialogPadding> = input<CwDialogPadding>('default');
 
   /**
    * Property scrollable
@@ -373,7 +436,14 @@ export class CwDialog implements CwDialogContext {
    */
   protected readonly panelClasses: Signal<string> = computed(() => {
     if (this.size() === 'screen') return `${SCREEN_PANEL} ${SIZES.screen}`;
-    return `${PANEL} ${this.scrollable() ? LAYOUTS.scrollable : LAYOUTS.simple} ${SIZES[this.size()]}`;
+    const layout: string = this.scrollable()
+      ? this.placement() === 'top'
+        ? LAYOUTS.scrollableTop
+        : LAYOUTS.scrollable
+      : this.padding() === 'none'
+        ? LAYOUTS.flush
+        : LAYOUTS.simple;
+    return `${PANEL} ${layout} ${SIZES[this.size()]}`;
   });
 
   /**
@@ -387,8 +457,9 @@ export class CwDialog implements CwDialogContext {
    */
   protected readonly bodyClasses: Signal<string> = computed(() => {
     if (this.size() === 'screen') return BODIES.screen;
-    if (this.scrollable()) return BODIES.scrollable;
-    return this.size() === 'full' ? BODIES.full : BODIES.simple;
+    if (this.scrollable())
+      return this.padding() === 'none' ? BODIES.scrollableFlush : BODIES.scrollable;
+    return this.size() === 'full' || this.size() === 'tall' ? BODIES.full : BODIES.simple;
   });
 
   /**
@@ -454,6 +525,28 @@ export class CwDialog implements CwDialogContext {
    * @type {ViewContainerRef}
    */
   private readonly viewContainerRef: ViewContainerRef = inject(ViewContainerRef);
+
+  /**
+   * Property injector
+   * @readonly
+   *
+   * @description
+   * Injector used to build the position of a `placement="top"` window.
+   *
+   * @type {Injector}
+   */
+  private readonly injector: Injector = inject(Injector);
+
+  /**
+   * Property document
+   * @readonly
+   *
+   * @description
+   * Document whose window tells whether the screen is wide enough for a placed window.
+   *
+   * @type {Document}
+   */
+  private readonly document: Document = inject(DOCUMENT);
 
   /**
    * Property overlay
@@ -579,6 +672,7 @@ export class CwDialog implements CwDialogContext {
       restoreFocus: this.origin,
       ...this.navigationSetting(),
       ...this.paneLayout(),
+      ...this.position(),
       onKeydown: (event) => {
         this.onKeydown(event);
       },
@@ -593,6 +687,27 @@ export class CwDialog implements CwDialogContext {
         this.closed.emit('action');
       },
     });
+  }
+
+  /**
+   * Method position
+   *
+   * @description
+   * Position of a `placement="top"` window on a wide screen: pinned 8vh from the top and centered
+   * horizontally. Elsewhere nothing, and the CDK centers the pane (below 768 px the window fills
+   * the screen, so a top offset would push it down).
+   *
+   * @returns {Pick<ɵModalOverlayConfig, 'positionStrategy'>} The position strategy to pass, if any.
+   */
+  private position(): Pick<ɵModalOverlayConfig, 'positionStrategy'> {
+    if (this.placement() !== 'top' || this.size() === 'screen') return {};
+    const wide: boolean = this.document.defaultView?.matchMedia?.(WIDE_SCREEN).matches ?? true;
+    if (!wide) return {};
+    return {
+      positionStrategy: createGlobalPositionStrategy(this.injector)
+        .top(TOP_OFFSET)
+        .centerHorizontally(),
+    };
   }
 
   /**
