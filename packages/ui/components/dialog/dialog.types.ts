@@ -22,8 +22,10 @@ export type CwDialogSize =
  * @description
  * Where a window sits from 768 px: `center` (default) centers it in the viewport; `top` pins its
  * top edge 8 % below the top of the viewport, so it grows downwards when its content changes (the
- * task creation dialog, `top-[8vh]` in the mockup `App.dc.html`). Below 768 px every window fills
- * the screen.
+ * task creation dialog, `top-[8vh]` in the mockup `App.dc.html`), never past 16 px above the
+ * bottom edge, its body then scrolling between the header and the footer. Only sizes whose height
+ * follows the content are pinned: `tall`, `full` and `screen` stay centered. Below 768 px every
+ * window fills the screen.
  *
  * @type {'center' | 'top'}
  */

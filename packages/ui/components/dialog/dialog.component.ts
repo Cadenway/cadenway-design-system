@@ -112,15 +112,45 @@ const SCREEN_PANEL: string =
  * @description
  * Panel layout classes.
  *
- * @type {Readonly<Record<'simple' | 'flush' | 'scrollable' | 'scrollableTop', string>>}
+ * @type {Readonly<Record<'simple' | 'flush' | 'scrollable', string>>}
  */
-const LAYOUTS: Readonly<Record<'simple' | 'flush' | 'scrollable' | 'scrollableTop', string>> = {
+const LAYOUTS: Readonly<Record<'simple' | 'flush' | 'scrollable', string>> = {
   simple: 'gap-4 p-6',
   flush: '',
   scrollable: 'max-h-[calc(100dvh-2rem)]',
-  // Pinned 8vh from the top, the window stops 16 px above the bottom edge.
-  scrollableTop: 'max-h-[calc(92dvh-1rem)]',
 } as const;
+
+/**
+ * Constant PINNED
+ *
+ * @description
+ * Height limit of a window pinned 8vh from the top (`placement="top"`, from 768 px): it stops
+ * 16 px above the bottom edge, its body scrolling between the header and the footer.
+ *
+ * @type {string}
+ */
+const PINNED: string = 'md:max-h-[calc(92dvh-1rem)]';
+
+/**
+ * Constant PINNED_BODY
+ *
+ * @description
+ * Scrolling of the body of a pinned window that is not `scrollable` (which scrolls already).
+ *
+ * @type {string}
+ */
+const PINNED_BODY: string = `md:overflow-y-auto ${ɵFOCUS_INSET}`;
+
+/**
+ * Constant FIXED_HEIGHTS
+ *
+ * @description
+ * Sizes whose height does not follow the content: `placement="top"` leaves them centered, since
+ * an 8vh offset would push their bottom, and the footer, out of the viewport.
+ *
+ * @type {ReadonlySet<CwDialogSize>}
+ */
+const FIXED_HEIGHTS: ReadonlySet<CwDialogSize> = new Set<CwDialogSize>(['tall', 'full', 'screen']);
 
 // The window always keeps 16 px from the screen edges (`calc(100% - 2rem)` of the viewport).
 /**
@@ -268,7 +298,10 @@ export class CwDialog implements CwDialogContext {
    *
    * @description
    * Where the window sits from 768 px: `center` (default) or `top`, its top edge 8 % below the top
-   * of the viewport so it grows downwards. Read when the dialog opens; ignored by `screen`.
+   * of the viewport so it grows downwards, never past 16 px above the bottom edge (the body then
+   * scrolls between the header and the footer). Followed while open, across the 768 px breakpoint
+   * and size changes. Only sizes whose height follows the content are pinned: `tall`, `full` and
+   * `screen` stay centered.
    *
    * @type {InputSignal<CwDialogPlacement>}
    */
@@ -441,14 +474,26 @@ export class CwDialog implements CwDialogContext {
   protected readonly panelClasses: Signal<string> = computed(() => {
     if (this.size() === 'screen') return `${SCREEN_PANEL} ${SIZES.screen}`;
     const layout: string = this.scrollable()
-      ? this.placement() === 'top'
-        ? LAYOUTS.scrollableTop
-        : LAYOUTS.scrollable
+      ? LAYOUTS.scrollable
       : this.padding() === 'none'
         ? LAYOUTS.flush
         : LAYOUTS.simple;
-    return `${PANEL} ${layout} ${SIZES[this.size()]}`;
+    return `${PANEL} ${layout} ${SIZES[this.size()]}${this.pinned() ? ` ${PINNED}` : ''}`;
   });
+
+  /**
+   * Property pinned
+   * @readonly
+   *
+   * @description
+   * Whether the window is pinned 8vh from the top on a wide screen: `placement="top"` and a size
+   * whose height follows the content.
+   *
+   * @type {Signal<boolean>}
+   */
+  protected readonly pinned: Signal<boolean> = computed(
+    () => this.placement() === 'top' && !FIXED_HEIGHTS.has(this.size()),
+  );
 
   /**
    * Property bodyClasses
@@ -463,7 +508,8 @@ export class CwDialog implements CwDialogContext {
     if (this.size() === 'screen') return BODIES.screen;
     if (this.scrollable())
       return this.padding() === 'none' ? BODIES.scrollableFlush : BODIES.scrollable;
-    return this.size() === 'full' || this.size() === 'tall' ? BODIES.full : BODIES.simple;
+    if (this.size() === 'full' || this.size() === 'tall') return BODIES.full;
+    return this.pinned() ? `${BODIES.simple} ${PINNED_BODY}` : BODIES.simple;
   });
 
   /**
@@ -471,15 +517,16 @@ export class CwDialog implements CwDialogContext {
    * @readonly
    *
    * @description
-   * Whether the body is a focusable scroll region: a `scrollable` dialog, and always a `screen`,
-   * `full` or `tall` one (their body always scrolls), so a keyboard can reach overflowing static
-   * content.
+   * Whether the body is a focusable scroll region: a `scrollable` dialog, a pinned one (its body
+   * scrolls once the window reaches its height limit), and always a `screen`, `full` or `tall` one
+   * (their body always scrolls), so a keyboard can reach overflowing static content.
    *
    * @type {Signal<boolean>}
    */
   protected readonly bodyFocusable: Signal<boolean> = computed(
     () =>
       this.scrollable() ||
+      this.pinned() ||
       this.size() === 'screen' ||
       this.size() === 'full' ||
       this.size() === 'tall',
@@ -724,14 +771,13 @@ export class CwDialog implements CwDialogContext {
    * Method wideQuery
    *
    * @description
-   * The 768 px media query of a `placement="top"` window, or null when the placement is not
-   * `top`, the size is `screen` or the document has no `matchMedia` (a test DOM, where the screen
-   * counts as wide).
+   * The 768 px media query of a pinned window (`pinned`), or null when the window is not pinned
+   * or the document has no `matchMedia` (a test DOM, where the screen counts as wide).
    *
    * @returns {MediaQueryList | null} The query to read and watch, if any.
    */
   private wideQuery(): MediaQueryList | null {
-    if (this.placement() !== 'top' || this.size() === 'screen') return null;
+    if (!this.pinned()) return null;
     const view: (Window & typeof globalThis) | null = this.document.defaultView;
     if (!view || typeof view.matchMedia !== 'function') return null;
     return view.matchMedia(WIDE_SCREEN);
@@ -777,9 +823,8 @@ export class CwDialog implements CwDialogContext {
   private syncPosition(): void {
     if (!this.overlay.attached) return;
     this.watchBreakpoint();
-    const top: boolean = this.placement() === 'top' && this.size() !== 'screen';
     this.overlay.reposition(
-      top ? this.strategy(this.wideQuery()?.matches ?? true) : this.centered(),
+      this.pinned() ? this.strategy(this.wideQuery()?.matches ?? true) : this.centered(),
     );
   }
 
@@ -793,7 +838,7 @@ export class CwDialog implements CwDialogContext {
    * @returns {Pick<ɵModalOverlayConfig, 'positionStrategy'>} The position strategy to pass, if any.
    */
   private position(): Pick<ɵModalOverlayConfig, 'positionStrategy'> {
-    if (this.placement() !== 'top' || this.size() === 'screen') return {};
+    if (!this.pinned()) return {};
     return { positionStrategy: this.strategy(this.wideQuery()?.matches ?? true) };
   }
 

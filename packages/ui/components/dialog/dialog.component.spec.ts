@@ -708,6 +708,38 @@ describe('CwDialog placement across the 768 px breakpoint', () => {
     expect(listeners).toHaveLength(0);
   });
 
+  it('leaves full and tall windows centered with placement="top"', async () => {
+    const fixture: ComponentFixture<ResizedPlacedHost> = TestBed.createComponent(ResizedPlacedHost);
+    fixture.componentInstance.size.set('full');
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    expect(pane()?.style.marginTop).not.toBe('8vh');
+    expect(pane()?.parentElement?.style.alignItems).toBe('center');
+    expect(listeners).toHaveLength(0);
+
+    fixture.componentInstance.size.set('tall');
+    await fixture.whenStable();
+    expect(pane()?.style.marginTop).not.toBe('8vh');
+    expect(listeners).toHaveLength(0);
+    fixture.destroy();
+  });
+
+  it('keeps a pinned window within the viewport, its body scrolling between header and footer', async () => {
+    const fixture: ComponentFixture<ResizedPlacedHost> = TestBed.createComponent(ResizedPlacedHost);
+    fixture.componentInstance.size.set('default');
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const panel: Element | null | undefined = dialog()?.firstElementChild;
+    const body: Element | null | undefined =
+      panel?.querySelector('cw-dialog-header')?.nextElementSibling;
+
+    expect(pane()?.style.marginTop).toBe('8vh');
+    expect(panel?.classList).toContain('md:max-h-[calc(92dvh-1rem)]');
+    expect(body?.classList).toContain('md:overflow-y-auto');
+    expect(body?.getAttribute('tabindex')).toBe('0');
+    fixture.destroy();
+  });
+
   it('opens centered on a phone', async () => {
     wide = false;
     const fixture: ComponentFixture<PlacedHost> = TestBed.createComponent(PlacedHost);

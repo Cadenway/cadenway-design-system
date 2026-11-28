@@ -21,8 +21,9 @@ menu item entrance: 420 ms on the spring easing, out of a 3 px blur and a 6 px s
 - `cw-progress`: `variant="primary"` (violet bar). `cw-stepper`: `tone` (`'default'` ink,
   `'primary'` violet segments). New type `CwStepperTone`.
 - `cw-dialog`: sizes `2xl` (1024 px) and `tall` (1024 px, 88 % of the viewport high), `placement`
-  (`'center'` default, `'top'`: pinned 8vh from the top from 768 px, following the breakpoint and
-  size or placement changes while open), `padding` (`'none'` leaves the
+  (`'center'` default, `'top'`: pinned 8vh from the top from 768 px, at most 16 px above the bottom
+  edge with the body scrolling between header and footer, following the breakpoint and size or
+  placement changes while open; `tall`, `full` and `screen` stay centered), `padding` (`'none'` leaves the
   body unpadded); `cw-dialog-header` `variant="bar"` (a wrapping row over a rule, 16 px title).
   New types `CwDialogPlacement`, `CwDialogPadding`, `CwDialogHeaderVariant`.
 - `cw-command-dialog`: `fieldEnd` (an `ng-template` drawn at the end of the field row), and
