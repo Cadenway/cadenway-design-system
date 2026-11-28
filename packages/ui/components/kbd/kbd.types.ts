@@ -12,11 +12,13 @@ export type CwKbdVariant = 'default' | 'inverse';
  * Type CwKbdSize
  *
  * @description
- * Key height: 16 pixels for dense rows, 18 by default, or 20 for shortcut help.
+ * Key height: 16 pixels for dense rows (the command palette footer), 18 by default, 20 for inline
+ * shortcut help, or 24 for the keyboard shortcuts dialog (mockup App.dc.html, « Raccourcis
+ * clavier »: `h-6 min-w-6 px-1.5 text-xs`).
  *
- * @type {'sm' | 'default' | 'lg'}
+ * @type {'sm' | 'default' | 'lg' | 'xl'}
  */
-export type CwKbdSize = 'sm' | 'default' | 'lg';
+export type CwKbdSize = 'sm' | 'default' | 'lg' | 'xl';
 
 /**
  * Interface CwKbdLabels

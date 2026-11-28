@@ -10,6 +10,7 @@ export { CwMenuGroup } from './menu-group/menu-group.component';
 export { CwMenuItem } from './menu-item/menu-item.component';
 export { CwMenuItemCheckbox } from './menu-item-checkbox/menu-item-checkbox.component';
 export { CwMenuItemRadio } from './menu-item-radio/menu-item-radio.component';
+export { CwMenuItemValue } from './menu-item-value/menu-item-value.component';
 export { CwMenuLabel } from './menu-label/menu-label.component';
 export { CwMenuRadioGroup } from './menu-radio-group/menu-radio-group.component';
 export { CwMenuSeparator } from './menu-separator/menu-separator.component';

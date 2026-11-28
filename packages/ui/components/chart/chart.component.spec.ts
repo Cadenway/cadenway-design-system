@@ -12,6 +12,8 @@ import type {
   CwChartOrientation,
   CwChartSeries,
   CwChartType,
+  CwChartValueFormat,
+  CwChartValueLabels,
 } from './chart.types';
 
 /**
@@ -722,5 +724,472 @@ describe('CwChart « Others » key', () => {
       x: 'Mon',
       values: { ana: 4, ben: 3, [`${CW_CHART_OTHERS_KEY}-2`]: 3 },
     });
+  });
+});
+
+/**
+ * Constant COMPLETED
+ *
+ * @description
+ * Tasks completed per week, the last eight weeks of the mockup's dashboard (App.dc.html).
+ *
+ * @type {CwChartDatum[]}
+ */
+const COMPLETED: CwChartDatum[] = [
+  { week: 'S38', done: 6 },
+  { week: 'S39', done: 8 },
+  { week: 'S40', done: 5 },
+  { week: 'S41', done: 8 },
+  { week: 'S42', done: 6 },
+  { week: 'S43', done: 9 },
+  { week: 'S44', done: 7 },
+  { week: 'S45', done: 3 },
+];
+
+/**
+ * Component CompletionHost
+ *
+ * @description
+ * Hosts the dashboards' weekly completion chart: large plot, current week, value labels.
+ */
+@Component({
+  imports: [CwChart],
+  template: `
+    <cw-chart
+      size="lg"
+      [data]="data"
+      x="week"
+      [series]="series"
+      current="S45"
+      [valueLabels]="valueLabels()"
+      [legend]="false"
+      ariaLabel="Tâches terminées par semaine, S38 à S45"
+    />
+  `,
+})
+class CompletionHost {
+  // #region Properties
+  /**
+   * Property data
+   *
+   * @description
+   * Weekly completed tasks.
+   *
+   * @type {CwChartDatum[]}
+   * @readonly
+   */
+  public readonly data: CwChartDatum[] = COMPLETED;
+
+  /**
+   * Property series
+   *
+   * @description
+   * The single completed series.
+   *
+   * @type {CwChartSeries[]}
+   * @readonly
+   */
+  public readonly series: CwChartSeries[] = [{ key: 'done', label: 'Terminées', color: 'chart-1' }];
+
+  /**
+   * Property valueLabels
+   *
+   * @description
+   * Which bars carry their value.
+   *
+   * @type {WritableSignal<CwChartValueLabels>}
+   * @readonly
+   */
+  public readonly valueLabels: WritableSignal<CwChartValueLabels> =
+    signal<CwChartValueLabels>('peak');
+  // #endregion
+}
+
+describe('CwChart large completion chart', () => {
+  let host: HTMLElement;
+  let fixture: ComponentFixture<CompletionHost>;
+
+  /**
+   * Function texts
+   *
+   * @description
+   * Reads the texts drawn in the plot.
+   * @returns {string[]} Trimmed SVG texts in document order.
+   */
+  function texts(): string[] {
+    return Array.from(host.querySelectorAll('svg text')).map((text) => text.textContent.trim());
+  }
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(CompletionHost);
+    fixture.autoDetectChanges();
+    host = fixture.nativeElement as HTMLElement;
+  });
+
+  it('draws a 192 px plot with 12 px axis text', () => {
+    const svg: SVGElement | null = host.querySelector('svg');
+    expect(svg?.getAttribute('height')).toBe('192');
+    expect(host.querySelector('cw-chart')?.getAttribute('data-size')).toBe('lg');
+    const label: Element | undefined = Array.from(host.querySelectorAll('svg text')).find(
+      (text) => text.textContent.trim() === 'S38',
+    );
+    expect(label?.classList).toContain('text-xs');
+  });
+
+  it('labels the highest bar and the current week, which is drawn lighter', () => {
+    const lighter: Element[] = Array.from(host.querySelectorAll('svg path')).filter((path) =>
+      path.classList.contains('opacity-45'),
+    );
+    expect(lighter).toHaveLength(1);
+    const values: string[] = texts().filter((text) => /^\d+$/.test(text));
+    // The axis ticks (0, 5, 10) come first, then the bar values.
+    expect(values.slice(-2)).toEqual(['9', '3']);
+  });
+
+  it('labels every bar or none', async () => {
+    fixture.componentInstance.valueLabels.set('all');
+    await fixture.whenStable();
+    expect(
+      texts()
+        .filter((text) => /^\d+$/.test(text))
+        .slice(-8),
+    ).toEqual(['6', '8', '5', '8', '6', '9', '7', '3']);
+
+    fixture.componentInstance.valueLabels.set('none');
+    await fixture.whenStable();
+    expect(texts().filter((text) => text === '9')).toHaveLength(0);
+  });
+});
+
+/**
+ * Component LabelsHost
+ *
+ * @description
+ * Hosts a vertical bar chart whose data, series, stacking and value labels the tests change.
+ */
+@Component({
+  imports: [CwChart],
+  template: `
+    <cw-chart
+      [data]="data()"
+      x="week"
+      [series]="series()"
+      [stacked]="stacked()"
+      [current]="current()"
+      [valueLabels]="valueLabels()"
+      [valueFormat]="valueFormat()"
+      [markers]="markers()"
+      [legend]="false"
+      ariaLabel="Tâches par semaine"
+    />
+  `,
+})
+class LabelsHost {
+  // #region Properties
+  /**
+   * Property data
+   *
+   * @description
+   * Weekly values drawn by the chart.
+   *
+   * @type {WritableSignal<readonly CwChartDatum[]>}
+   * @readonly
+   */
+  public readonly data: WritableSignal<readonly CwChartDatum[]> = signal<readonly CwChartDatum[]>([
+    { week: 'S43', done: 4 },
+    { week: 'S44', done: 6 },
+    { week: 'S45', done: 0 },
+  ]);
+
+  /**
+   * Property series
+   *
+   * @description
+   * Series drawn by the chart.
+   *
+   * @type {WritableSignal<CwChartSeries[]>}
+   * @readonly
+   */
+  public readonly series: WritableSignal<CwChartSeries[]> = signal<CwChartSeries[]>([
+    { key: 'done', label: 'Terminées', color: 'chart-1' },
+  ]);
+
+  /**
+   * Property stacked
+   *
+   * @description
+   * Whether the series are stacked.
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  public readonly stacked: WritableSignal<boolean> = signal(false);
+
+  /**
+   * Property current
+   *
+   * @description
+   * Category still in progress.
+   *
+   * @type {WritableSignal<string | null>}
+   * @readonly
+   */
+  public readonly current: WritableSignal<string | null> = signal<string | null>('S45');
+
+  /**
+   * Property valueLabels
+   *
+   * @description
+   * Which bars carry their value.
+   *
+   * @type {WritableSignal<CwChartValueLabels>}
+   * @readonly
+   */
+  public readonly valueLabels: WritableSignal<CwChartValueLabels> =
+    signal<CwChartValueLabels>('peak');
+
+  /**
+   * Property valueFormat
+   *
+   * @description
+   * Formatter of the values; plain digits by default.
+   *
+   * @type {WritableSignal<CwChartValueFormat>}
+   * @readonly
+   */
+  public readonly valueFormat: WritableSignal<CwChartValueFormat> = signal<CwChartValueFormat>(
+    (value: number) => String(value),
+  );
+
+  /**
+   * Property markers
+   *
+   * @description
+   * Vertical reference lines.
+   *
+   * @type {WritableSignal<readonly CwChartMarker[]>}
+   * @readonly
+   */
+  public readonly markers: WritableSignal<readonly CwChartMarker[]> = signal<
+    readonly CwChartMarker[]
+  >([]);
+  // #endregion
+}
+
+describe('CwChart value labels', () => {
+  let host: HTMLElement;
+  let fixture: ComponentFixture<LabelsHost>;
+
+  /**
+   * Function tags
+   *
+   * @description
+   * Reads the value labels drawn above the bars, the texts in the plot with `font-medium`.
+   * @returns {{ text: string; y: number }[]} Label texts and baselines, left to right.
+   */
+  function tags(): { text: string; y: number }[] {
+    return Array.from(host.querySelectorAll('svg text'))
+      .filter((text) => text.classList.contains('font-medium'))
+      .map((text) => ({ text: text.textContent.trim(), y: Number(text.getAttribute('y')) }));
+  }
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(LabelsHost);
+    fixture.autoDetectChanges();
+    host = fixture.nativeElement as HTMLElement;
+  });
+
+  it('labels a current category at 0 on the baseline with peak', () => {
+    const labels: { text: string; y: number }[] = tags();
+    expect(labels.map((label) => label.text)).toEqual(['6', '0']);
+    expect(labels[1].y).toBeGreaterThan(labels[0].y);
+  });
+
+  it('labels a category at 0 with all, and skips one without any value', async () => {
+    fixture.componentInstance.current.set(null);
+    fixture.componentInstance.valueLabels.set('all');
+    fixture.componentInstance.data.set([
+      { week: 'S43', done: 4 },
+      { week: 'S44', done: 0 },
+      { week: 'S45', done: null },
+    ]);
+    await fixture.whenStable();
+    expect(tags().map((label) => label.text)).toEqual(['4', '0']);
+  });
+
+  it('labels an all-zero stacked column with its total', async () => {
+    fixture.componentInstance.series.set([
+      { key: 'done', label: 'Terminées', color: 'chart-2' },
+      { key: 'late', label: 'En retard', color: 'chart-4' },
+    ]);
+    fixture.componentInstance.stacked.set(true);
+    fixture.componentInstance.valueLabels.set('all');
+    fixture.componentInstance.data.set([
+      { week: 'S43', done: 3, late: 1 },
+      { week: 'S44', done: 0, late: 0 },
+    ]);
+    await fixture.whenStable();
+    expect(tags().map((label) => label.text)).toEqual(['4', '0']);
+  });
+
+  it('labels grouped bars once per category, with their highest value', async () => {
+    fixture.componentInstance.series.set([
+      { key: 'done', label: 'Terminées', color: 'chart-2' },
+      { key: 'late', label: 'En retard', color: 'chart-4' },
+    ]);
+    fixture.componentInstance.valueLabels.set('all');
+    fixture.componentInstance.data.set([
+      { week: 'S43', done: 18, late: 1 },
+      { week: 'S44', done: 14, late: 22 },
+    ]);
+    await fixture.whenStable();
+    expect(tags().map((label) => label.text)).toEqual(['18', '22']);
+  });
+
+  it('labels no unstacked category whose values are all negative', async () => {
+    fixture.componentInstance.current.set(null);
+    fixture.componentInstance.valueLabels.set('all');
+    fixture.componentInstance.data.set([
+      { week: 'S43', done: 4 },
+      { week: 'S44', done: -3 },
+    ]);
+    await fixture.whenStable();
+    expect(tags().map((label) => label.text)).toEqual(['4']);
+  });
+
+  it('labels a mixed unstacked category with its highest positive value', async () => {
+    fixture.componentInstance.series.set([
+      { key: 'done', label: 'Terminées', color: 'chart-2' },
+      { key: 'late', label: 'En retard', color: 'chart-4' },
+    ]);
+    fixture.componentInstance.current.set(null);
+    fixture.componentInstance.valueLabels.set('all');
+    fixture.componentInstance.data.set([{ week: 'S43', done: 5, late: -2 }]);
+    await fixture.whenStable();
+    expect(tags().map((label) => label.text)).toEqual(['5']);
+  });
+
+  it('labels no stacked category with a negative part', async () => {
+    fixture.componentInstance.series.set([
+      { key: 'done', label: 'Terminées', color: 'chart-2' },
+      { key: 'late', label: 'En retard', color: 'chart-4' },
+    ]);
+    fixture.componentInstance.stacked.set(true);
+    fixture.componentInstance.current.set(null);
+    fixture.componentInstance.valueLabels.set('all');
+    fixture.componentInstance.data.set([
+      { week: 'S43', done: 3, late: 1 },
+      { week: 'S44', done: 6, late: -2 },
+    ]);
+    await fixture.whenStable();
+    expect(tags().map((label) => label.text)).toEqual(['4']);
+  });
+
+  /**
+   * Function barCenter
+   *
+   * @description
+   * Horizontal center of the bar drawn in a data color, read from its path.
+   *
+   * @param {string} color - Data color of the bar's series.
+   * @returns {number} Center of the bar, in pixels.
+   */
+  function barCenter(color: string): number {
+    const path: string =
+      Array.from(host.querySelectorAll('svg path'))
+        .find((element) => element.classList.contains(`fill-${color}`))
+        ?.getAttribute('d') ?? '';
+    const xs: number[] = [
+      ...Array.from(path.matchAll(/(-?[\d.]+),/g), (match) => Number(match[1])),
+      ...Array.from(path.matchAll(/H(-?[\d.]+)/g), (match) => Number(match[1])),
+    ];
+    return (Math.min(...xs) + Math.max(...xs)) / 2;
+  }
+
+  /**
+   * Function tagX
+   *
+   * @description
+   * Horizontal position of the only value label.
+   * @returns {number} Label x, in pixels.
+   */
+  function tagX(): number {
+    const labels: Element[] = Array.from(host.querySelectorAll('svg text')).filter((text) =>
+      text.classList.contains('font-medium'),
+    );
+    expect(labels).toHaveLength(1);
+    return Number(labels[0].getAttribute('x'));
+  }
+
+  it('centers a grouped label on the bar holding the highest value', async () => {
+    fixture.componentInstance.series.set([
+      { key: 'done', label: 'Terminées', color: 'chart-1' },
+      { key: 'late', label: 'En retard', color: 'chart-2' },
+      { key: 'blocked', label: 'Bloquées', color: 'chart-3' },
+    ]);
+    fixture.componentInstance.current.set(null);
+    fixture.componentInstance.valueLabels.set('all');
+    fixture.componentInstance.data.set([{ week: 'S43', done: 9, late: 4, blocked: 2 }]);
+    await fixture.whenStable();
+    expect(tagX()).toBeCloseTo(barCenter('chart-1'), 0);
+
+    fixture.componentInstance.data.set([{ week: 'S43', done: 2, late: 4, blocked: 9 }]);
+    await fixture.whenStable();
+    expect(tagX()).toBeCloseTo(barCenter('chart-3'), 0);
+    expect(tagX()).toBeGreaterThan(barCenter('chart-1'));
+  });
+
+  it('keeps wide labels of the first and last categories inside the plot bounds', async () => {
+    fixture.componentInstance.valueFormat.set((value: number) => `${String(value)} tâches`);
+    fixture.componentInstance.current.set('S12');
+    fixture.componentInstance.data.set(
+      Array.from({ length: 12 }, (_, index) => ({
+        week: `S${String(index + 1)}`,
+        done: index === 0 ? 1000 : 5,
+      })),
+    );
+    await fixture.whenStable();
+    const width: number = Number(host.querySelector('svg')?.getAttribute('viewBox')?.split(' ')[2]);
+    const boxes: { left: number; right: number }[] = Array.from(host.querySelectorAll('svg text'))
+      .filter((text) => text.classList.contains('font-medium'))
+      .map((text) => {
+        const half: number = (text.textContent.trim().length * 5.5) / 2;
+        const x: number = Number(text.getAttribute('x'));
+        return { left: x - half, right: x + half };
+      });
+    // The value axis labels end 5 px before the plot's left bound (the gutter).
+    const tick: Element | undefined = Array.from(host.querySelectorAll('svg text')).find(
+      (text) => text.getAttribute('text-anchor') === 'end',
+    );
+    const gutter: number = Number(tick?.getAttribute('x')) + 5;
+    expect(boxes).toHaveLength(2);
+    expect(boxes[0].left).toBeGreaterThanOrEqual(gutter);
+    expect(boxes[1].right).toBeLessThanOrEqual(width);
+  });
+
+  it('pushes value labels below a marker label', async () => {
+    fixture.componentInstance.markers.set([{ x: 'S44', label: 'Aujourd’hui' }]);
+    await fixture.whenStable();
+    const texts: Element[] = Array.from(host.querySelectorAll('svg text'));
+    const marker: Element | undefined = texts.find(
+      (text) => text.textContent.trim() === 'Aujourd’hui',
+    );
+    const peak: Element | undefined = texts.find(
+      (text) => text.classList.contains('tabular-nums') && text.textContent.trim() === '6',
+    );
+    // Marker text ends at its baseline; the value label's box starts a font size above its own.
+    expect(Number(peak?.getAttribute('y')) - 10).toBeGreaterThan(Number(marker?.getAttribute('y')));
+  });
+
+  it('drops a label that would overlap its left neighbour', async () => {
+    fixture.componentInstance.current.set(null);
+    fixture.componentInstance.valueLabels.set('all');
+    fixture.componentInstance.data.set(
+      Array.from({ length: 40 }, (_, index) => ({ week: `S${String(index)}`, done: 12345 })),
+    );
+    await fixture.whenStable();
+    const count: number = tags().length;
+    expect(count).toBeGreaterThan(0);
+    expect(count).toBeLessThan(40);
   });
 });

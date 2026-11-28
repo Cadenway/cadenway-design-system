@@ -11,6 +11,7 @@ export type {
   CwAvatarLabels,
   CwAvatarProvidedLabels,
   CwAvatarPresence,
+  CwAvatarRing,
   CwAvatarSize,
 } from './avatar.types';
 

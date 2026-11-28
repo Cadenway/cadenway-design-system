@@ -40,11 +40,13 @@ const SIZES: Record<CwKbdVariant, Record<CwKbdSize, string>> = {
     sm: 'h-4 min-w-4 rounded-[4px] px-[3px] text-[9px]',
     default: 'h-[18px] min-w-[18px] rounded-[5px] px-1 text-[10px]',
     lg: 'h-5 min-w-5 rounded-md px-1.5 text-[11px]',
+    xl: 'h-6 min-w-6 rounded-[5px] px-1.5 text-xs',
   },
   inverse: {
     sm: 'h-4 min-w-4 rounded-[4px] px-1 text-[10px]',
     default: 'h-[18px] min-w-[18px] rounded-[4px] px-1 text-[10px]',
     lg: 'h-5 min-w-5 rounded-[4px] px-1.5 text-[11px]',
+    xl: 'h-6 min-w-6 rounded-[4px] px-1.5 text-xs',
   },
 };
 

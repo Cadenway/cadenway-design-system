@@ -20,14 +20,15 @@ import type { CwPopover } from '../popover.component';
  *
  * A click (Enter and Space on a button) toggles the panel and moves the focus into it. The host
  * carries `aria-haspopup="dialog"`, `aria-expanded`, `aria-controls` (while open) and
- * `data-state="open|closed"`; while open it takes the selected veil (`bg-selected`).
+ * `data-state="open|closed"`; while open it takes the selected veil (`bg-selected`). The veil is a
+ * fallback: it outranks a button's plain background (`bg-transparent` of `outline`) but yields to
+ * any state style of the host, such as the violet tint of an expanded `cwAppRailItem`
+ * (`aria-expanded:bg-primary/10`, mockup App.dc.html, the inbox rail button).
  */
 @Directive({
   selector: '[cwPopoverTrigger]',
   host: {
-    // The open trigger looks selected; the data variant outranks the background of any button
-    // variant (`bg-transparent` of `outline`).
-    class: 'data-[state=open]:bg-selected',
+    class: '[&:where([data-state=open])]:bg-selected',
     'aria-haspopup': 'dialog',
     '[attr.aria-expanded]': 'expanded()',
     '[attr.aria-controls]': 'expanded() ? cwPopoverTrigger().panelId : null',

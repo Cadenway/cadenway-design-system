@@ -258,3 +258,18 @@ export const PresenceStates: Story = {
     }
   },
 };
+
+/**
+ * The presence dot ringed with the surface the avatar sits on (`ring`): the shell's canvas in the
+ * app rail and the popover in the user menu (mockup `App.dc.html`), so it reads as cut out.
+ */
+export const PresenceRing: Story = {
+  render: () => ({
+    template: `
+      <div class="flex items-center gap-4">
+        <div class="rounded-lg bg-canvas p-3"><cw-avatar name="Camille Martin" presence="online" ring="canvas" /></div>
+        <div class="rounded-lg border bg-popover p-3"><cw-avatar name="Camille Martin" presence="dnd" ring="popover" /></div>
+        <div class="rounded-lg border bg-card p-3"><cw-avatar name="Camille Martin" presence="away" ring="card" /></div>
+      </div>`,
+  }),
+};

@@ -21,6 +21,18 @@ export type CwAvatarSize = 'xs' | 'sm' | 'default' | 'lg';
 export type CwAvatarPresence = 'online' | 'away' | 'dnd' | 'invisible';
 
 /**
+ * Type CwAvatarRing
+ *
+ * @description
+ * Surface the avatar sits on, whose color rings the presence dot so it reads as cut out of the
+ * disc: the page (`background`), the shell's canvas (the app rail), a menu or popover, a card or
+ * the sidebar (mockup App.dc.html: `ring-canvas` on the rail, `ring-popover` in the user menu).
+ *
+ * @type {'background' | 'canvas' | 'popover' | 'card' | 'sidebar'}
+ */
+export type CwAvatarRing = 'background' | 'canvas' | 'popover' | 'card' | 'sidebar';
+
+/**
  * Interface CwAvatarLabels
  *
  * @description

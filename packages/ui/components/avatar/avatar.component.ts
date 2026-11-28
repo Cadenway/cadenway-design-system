@@ -22,7 +22,7 @@ import { CW_AVATAR_LABELS } from './avatar.constants';
 import type { CwAvatarGroup } from './avatar-group/avatar-group.component';
 import { AVATAR_GROUP } from './avatar-group.token';
 import { ICON_SIZES, SIZES } from './avatar.styles';
-import type { CwAvatarLabels, CwAvatarPresence, CwAvatarSize } from './avatar.types';
+import type { CwAvatarLabels, CwAvatarPresence, CwAvatarRing, CwAvatarSize } from './avatar.types';
 
 /**
  * Constant INITIALS
@@ -50,9 +50,9 @@ const INITIALS: Record<CwAvatarSize, string> = {
  */
 const DOT_SIZES: Record<CwAvatarSize, string> = {
   xs: 'size-1.5',
-  sm: 'size-2',
-  default: 'size-2.5',
-  lg: 'size-3',
+  sm: 'size-2.5',
+  default: 'size-3',
+  lg: 'size-3.5',
 };
 
 /**
@@ -81,21 +81,38 @@ const DOT_COLORS: Record<CwAvatarPresence, string> = {
  */
 const BAR_SIZES: Record<CwAvatarSize, string> = {
   xs: 'h-px w-1',
-  sm: 'h-px w-1',
-  default: 'h-[1.5px] w-1.5',
-  lg: 'h-[2px] w-1.5',
+  sm: 'h-[1.5px] w-1.5',
+  default: 'h-[2px] w-1.5',
+  lg: 'h-[2px] w-2',
+};
+
+/**
+ * Constant RINGS
+ *
+ * @description
+ * Ring color of the presence dot for each surface the avatar can sit on.
+ *
+ * @type {Record<CwAvatarRing, string>}
+ */
+const RINGS: Record<CwAvatarRing, string> = {
+  background: 'ring-background',
+  canvas: 'ring-canvas',
+  popover: 'ring-popover',
+  card: 'ring-card',
+  sidebar: 'ring-sidebar',
 };
 
 /**
  * Constant DOT
  *
  * @description
- * Position and ring classes shared by presence indicators.
+ * Position and ring width shared by presence indicators: the dot overhangs the disc by 2 px at the
+ * bottom right (mockup App.dc.html, `-right-0.5 -bottom-0.5 size-3 ring-2` on a 32 px avatar).
  *
  * @type {string}
  */
 const DOT: string =
-  'absolute right-0 bottom-0 flex items-center justify-center rounded-full ring-2 ring-background';
+  'absolute -right-0.5 -bottom-0.5 flex items-center justify-center rounded-full ring-2';
 
 /**
  * Constant DISC
@@ -147,7 +164,9 @@ function initialsOf(name: string, locale: string): string {
  * loads and come back if it fails (`imageError` emits the image's error event). The full name, the
  * presence (`online`, `away`, `dnd` with a bar across the dot, `invisible` with a hollow one) and the
  * deactivated state are always in a visually hidden text and in the `title`, never
- * carried by color alone; the photo has `alt=""` so the name is not read twice. Inside a
+ * carried by color alone; the photo has `alt=""` so the name is not read twice. The presence dot
+ * overhangs the bottom right corner, ringed with the surface named by `ring` (`canvas` in the app
+ * rail, `popover` in a menu). Inside a
  * `cw-avatar-group` the avatar takes the group's size, is ringed with the background and is hidden
  * beyond the group's `max`. Decorative: wrap it in a `<button>` to make it clickable. Style hooks:
  * `data-size`, `data-disabled`.
@@ -223,6 +242,17 @@ export class CwAvatar {
   public readonly presence: InputSignal<CwAvatarPresence | null> = input<CwAvatarPresence | null>(
     null,
   );
+
+  /**
+   * Property ring
+   * @readonly
+   *
+   * @description
+   * Surface the avatar sits on, whose color rings the presence dot; `background` by default.
+   *
+   * @type {InputSignal<CwAvatarRing>}
+   */
+  public readonly ring: InputSignal<CwAvatarRing> = input<CwAvatarRing>('background');
 
   /**
    * Property disabled
@@ -402,7 +432,9 @@ export class CwAvatar {
    */
   protected readonly dotClasses: Signal<string> = computed(() => {
     const presence: CwAvatarPresence | null = this.presence();
-    return presence ? `${DOT} ${DOT_SIZES[this.effectiveSize()]} ${DOT_COLORS[presence]}` : '';
+    return presence
+      ? `${DOT} ${RINGS[this.ring()]} ${DOT_SIZES[this.effectiveSize()]} ${DOT_COLORS[presence]}`
+      : '';
   });
 
   /**

@@ -34,7 +34,7 @@ const VARIANTS: Record<CwMenuItemVariant, string> = {
  * Component CwMenuItem
  *
  * @description
- * An action of a `cw-menu`: Renommer, Dupliquer, Supprimer (DropdownMenu sheet of the Design System artifact). Put it on a native `<button>` inside the menu. Projected content: a leading `ng-icon` (muted), the label (an infinitive), then an optional `cw-menu-shortcut`. A click, Enter or Space emits `triggered` and closes every menu, the focus going back to the trigger. With `[cwMenuTriggerFor]` on it, the item opens a submenu instead (click, →, or 100 ms of hover) and shows a chevron. `variant="destructive"` for the destructive action, last, after a separator. `inset` aligns the label with checkbox and radio items. `selected` marks the current choice with a check on the right (`aria-current`), like the list a task already sits in under "Déplacer vers…". `disabled` keeps it listed, skipped by the arrows.
+ * An action of a `cw-menu`: Renommer, Dupliquer, Supprimer (DropdownMenu sheet of the Design System artifact). Put it on a native `<button>` inside the menu. Projected content: a leading `ng-icon` (muted), the label (an infinitive), then an optional `cw-menu-shortcut`. A click, Enter or Space emits `triggered` and closes every menu, the focus going back to the trigger. With `[cwMenuTriggerFor]` on it, the item opens a submenu instead (click, →, or 100 ms of hover) and shows a 14 px chevron at the right edge; a trailing `cw-menu-item-value` (the submenu's current choice) sits right before it (mockup App.dc.html, Statut and Thème in the account menu). `variant="destructive"` for the destructive action, last, after a separator. `inset` aligns the label with checkbox items. `selected` marks the current choice with a check on the right (`aria-current`), like the list a task already sits in under "Déplacer vers…". `disabled` keeps it listed, skipped by the arrows.
  */
 @Component({
   selector: 'button[cwMenuItem]',
@@ -71,7 +71,7 @@ export class CwMenuItem extends CwMenuItemBase {
    * Property inset
    *
    * @description
-   * Left padding of a checkbox or radio item, to align with them.
+   * Left padding of a checkbox item, to align with them.
    *
    * @type {InputSignalWithTransform<boolean, unknown>}
    * @readonly

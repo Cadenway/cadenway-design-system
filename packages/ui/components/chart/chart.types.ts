@@ -32,11 +32,28 @@ export type CwChartOrientation = 'vertical' | 'horizontal';
  * Type CwChartSize
  *
  * @description
- * Height of the plot: 150 px (`default`) or 120 px (`sm`).
+ * Height of the plot: 150 px (`default`), 120 px (`sm`), or 192 px (`lg`, the dashboards' weekly
+ * completion card of mockup App.dc.html: `h-48` plot, 12 px axis text, bars up to 36 px wide).
  *
- * @type {'sm' | 'default'}
+ * @type {'sm' | 'default' | 'lg'}
  */
-export type CwChartSize = 'sm' | 'default';
+export type CwChartSize = 'sm' | 'default' | 'lg';
+
+/**
+ * Type CwChartValueLabels
+ *
+ * @description
+ * Which vertical bars carry their value above them: none, every bar, or the highlights the mockup
+ * labels (App.dc.html, « Tâches terminées par semaine »): the highest bars and the `current`
+ * category. One label per category: a stacked column shows its total, grouped bars their highest
+ * value over the bar that holds it; 0 sits on the baseline, and a label that would overlap its left neighbour is dropped.
+ * Negative values are neither drawn nor labelled: a category whose highest value is negative, or a
+ * stack with a negative part, gets no label. Labels stay inside the plot, and with markers the plot
+ * leaves room for the marker labels above them.
+ *
+ * @type {'none' | 'all' | 'peak'}
+ */
+export type CwChartValueLabels = 'none' | 'all' | 'peak';
 
 /**
  * Interface CwChartSeries

@@ -5,6 +5,7 @@ import { provideCwPhoneSheets } from '@cadenway/ui/core';
 import { CwMenuGroup } from './menu-group/menu-group.component';
 import { CwMenuItemCheckbox } from './menu-item-checkbox/menu-item-checkbox.component';
 import { CwMenuItemRadio } from './menu-item-radio/menu-item-radio.component';
+import { CwMenuItemValue } from './menu-item-value/menu-item-value.component';
 import { CwMenuItem } from './menu-item/menu-item.component';
 import { CwMenuLabel } from './menu-label/menu-label.component';
 import { CwMenuRadioGroup } from './menu-radio-group/menu-radio-group.component';
@@ -147,6 +148,28 @@ class InlineHost {
   public readonly count: WritableSignal<number> = signal(0);
   // #endregion
 }
+
+/**
+ * Component ValueHost
+ *
+ * @description
+ * Hosts an inline menu whose submenu trigger shows the submenu's current value.
+ */
+@Component({
+  imports: [CwMenu, CwMenuItem, CwMenuItemValue, CwMenuTriggerFor],
+  template: `
+    <cw-menu inline ariaLabel="Compte">
+      <button cwMenuItem [cwMenuTriggerFor]="theme">
+        Thème <cw-menu-item-value>Sombre</cw-menu-item-value>
+      </button>
+    </cw-menu>
+    <cw-menu #theme>
+      <button cwMenuItem>Clair</button>
+      <button cwMenuItem selected>Sombre</button>
+    </cw-menu>
+  `,
+})
+class ValueHost {}
 
 /**
  * Function key
@@ -475,6 +498,17 @@ describe('CwMenu', () => {
     expect(menus()).toHaveLength(1);
   });
 
+  it('draws the check of the chosen radio item after its label, like a selected item', async () => {
+    button(host, 'Affichage').click();
+    await fixture.whenStable();
+    const panel: HTMLElement = menuNamed('Affichage');
+    const chosen: HTMLElement = item(panel, 'Statut');
+
+    expect(chosen.lastElementChild?.getAttribute('name')).toBe('phosphorCheckBold');
+    expect(chosen.firstChild?.textContent?.trim()).toBe('Statut');
+    expect(item(panel, 'Assigné').querySelector('ng-icon')).toBeNull();
+  });
+
   it('names its groups by their labels', async () => {
     button(host, 'Affichage').click();
     await fixture.whenStable();
@@ -488,6 +522,24 @@ describe('CwMenu', () => {
       'Afficher',
       'Grouper par',
     ]);
+  });
+});
+
+describe('CwMenuItemValue', () => {
+  it('keeps the value in the trigger name and the chevron right after it', async () => {
+    const fixture: ComponentFixture<ValueHost> = TestBed.createComponent(ValueHost);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const panel: HTMLElement | null = (fixture.nativeElement as HTMLElement).querySelector(
+      '[role="menu"]',
+    );
+    if (!panel) throw new Error('Inline panel missing');
+    const trigger: HTMLElement = item(panel, 'Thème');
+    const value: Element | null = trigger.querySelector('cw-menu-item-value');
+
+    expect(trigger.textContent.replace(/\s+/g, ' ').trim()).toBe('Thème Sombre');
+    expect(value?.nextElementSibling?.getAttribute('name')).toBe('phosphorCaretRightBold');
+    fixture.destroy();
   });
 });
 

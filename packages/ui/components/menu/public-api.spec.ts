@@ -10,6 +10,7 @@ describe('@cadenway/ui/menu public API', () => {
       'CwMenuItem',
       'CwMenuItemCheckbox',
       'CwMenuItemRadio',
+      'CwMenuItemValue',
       'CwMenuLabel',
       'CwMenuRadioGroup',
       'CwMenuSeparator',

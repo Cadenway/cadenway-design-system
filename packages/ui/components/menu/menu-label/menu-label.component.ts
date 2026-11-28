@@ -11,7 +11,7 @@ import {
  * Component CwMenuLabel
  *
  * @description
- * The heading of a part of a `cw-menu`: the object's key (CAD-482), a group's name (Afficher, Grouper par): DropdownMenu sheet of the Design System artifact. Small muted text, not focusable. Inside a `cw-menu-group` or a `cw-menu-radio-group` it names the group (`aria-labelledby`). `inset` aligns it with checkbox and radio items (`pl-8`).
+ * The heading of a part of a `cw-menu`: the object's key (CAD-482), a group's name (Afficher, Grouper par): DropdownMenu sheet of the Design System artifact. Small muted text, not focusable. Inside a `cw-menu-group` or a `cw-menu-radio-group` it names the group (`aria-labelledby`). `inset` aligns it with checkbox items (`pl-8`); radio items keep their label at the start, their check on the right.
  */
 @Component({
   selector: 'cw-menu-label',

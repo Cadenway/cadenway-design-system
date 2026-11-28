@@ -1,6 +1,4 @@
-<span class="pointer-events-none absolute left-2 flex size-4 items-center justify-center">
-  @if (checked()) {
-    <span class="size-2 rounded-full bg-foreground"></span>
-  }
-</span>
 <ng-content />
+@if (checked()) {
+  <ng-icon class="ml-auto text-foreground!" name="phosphorCheckBold" aria-hidden="true" />
+}

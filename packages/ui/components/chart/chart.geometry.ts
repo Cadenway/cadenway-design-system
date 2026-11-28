@@ -270,11 +270,13 @@ export function areaPath(run: readonly LinePoint[], baseline: number): string {
  * Function labelWidth
  *
  * @description
- * Rough width of a 10 px label, to size the gutters without measuring text in the DOM.
+ * Rough width of a label, to size the gutters without measuring text in the DOM: 5.5 px per
+ * character at 10 px, in proportion for other font sizes.
  *
  * @param {string} text - Text to measure approximately.
+ * @param {number} fontSize - Font size of the label, in pixels; 10 by default.
  * @returns {number} Estimated width in pixels.
  */
-export function labelWidth(text: string): number {
-  return text.length * 5.5;
+export function labelWidth(text: string, fontSize: number = 10): number {
+  return (text.length * 5.5 * fontSize) / 10;
 }

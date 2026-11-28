@@ -1,3 +1,4 @@
+import { CwAppRail, CwAppRailItem } from '@cadenway/ui/components/app-rail';
 import { CwButton } from '@cadenway/ui/components/button';
 import { CwInput } from '@cadenway/ui/components/input';
 import { CwLabel } from '@cadenway/ui/components/label';
@@ -8,10 +9,12 @@ import {
   phosphorCalendarBlankBold,
   phosphorCheckBold,
   phosphorCopyBold,
+  phosphorHouseBold,
   phosphorQuestionBold,
   phosphorTrayBold,
   phosphorUsersBold,
 } from '@ng-icons/phosphor-icons/bold';
+import { phosphorHouseFill } from '@ng-icons/phosphor-icons/fill';
 import {
   type Meta,
   type StoryObj,
@@ -42,6 +45,8 @@ const meta: Meta = {
         CwPopover,
         CwPopoverTrigger,
         CwPopoverClose,
+        CwAppRail,
+        CwAppRailItem,
         CwButton,
         CwInput,
         CwLabel,
@@ -56,6 +61,8 @@ const meta: Meta = {
           phosphorCalendarBlankBold,
           phosphorCheckBold,
           phosphorCopyBold,
+          phosphorHouseBold,
+          phosphorHouseFill,
           phosphorQuestionBold,
           phosphorTrayBold,
           phosphorUsersBold,
@@ -321,5 +328,44 @@ export const Flush: Story = {
     // No inner padding: the header starts at the panel's 1 px border.
     const header: HTMLElement | null = within(panel).getByText('Boîte de réception').parentElement;
     await expect(header?.getBoundingClientRect().left).toBe(panel.getBoundingClientRect().left + 1);
+  },
+};
+
+/**
+ * A rail item as the trigger (mockup `App.dc.html`, the inbox): open, it keeps the rail's violet
+ * tint of an expanded item, the same as the current page, instead of the grey selected veil.
+ */
+export const RailTrigger: Story = {
+  render: () => ({
+    template: `
+      <div class="flex h-56 items-start">
+        <nav cwAppRail [ariaLabel]="cwTheme === 'light' ? 'Applications' : 'Applications, thème sombre'">
+          <a cwAppRailItem href="#home" icon="phosphorHouseBold" current>Accueil</a>
+          <button cwAppRailItem icon="phosphorTrayBold" [cwPopoverTrigger]="inbox">Boîte de réception</button>
+        </nav>
+        <cw-popover #inbox side="right" align="start"
+                    [ariaLabel]="cwTheme === 'light' ? 'Boîte de réception' : 'Boîte de réception, thème sombre'">
+          <p class="text-sm">Aucune notification</p>
+        </cw-popover>
+      </div>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name: string }) => HTMLElement;
+      findByRole: (role: string, options?: { name: string }) => Promise<HTMLElement>;
+    } = within(light(canvasElement));
+    const trigger: HTMLElement = scope.getByRole('button', { name: 'Boîte de réception' });
+    const current: HTMLElement = scope.getByRole('link', { name: 'Accueil' });
+    // The current item draws the Fill twin of its icon, registered with the Bold one.
+    await expect(current.querySelector('ng-icon svg')).toBeInTheDocument();
+
+    await userEvent.click(trigger);
+    await scope.findByRole('dialog', { name: 'Boîte de réception' });
+    await expect(trigger).toHaveAttribute('data-state', 'open');
+    await waitFor(() =>
+      expect(getComputedStyle(trigger).backgroundColor).toBe(
+        getComputedStyle(current).backgroundColor,
+      ),
+    );
   },
 };

@@ -81,7 +81,8 @@ export const CombinationAndSequence: Story = {
   },
 };
 
-/** The three sizes: `sm` 16 px, `default` 18 px, `lg` 20 px. */
+/** The four sizes: `sm` 16 px (palette footer), `default` 18 px, `lg` 20 px, `xl` 24 px (shortcuts
+ *  dialog). */
 export const Sizes: Story = {
   render: () => ({
     template: `
@@ -89,6 +90,7 @@ export const Sizes: Story = {
         <cw-shortcut keys="ctrl+K" size="sm" />
         <cw-shortcut keys="ctrl+K" />
         <cw-shortcut keys="ctrl+K" size="lg" />
+        <cw-shortcut keys="ctrl+K" size="xl" />
       </div>`,
   }),
 };
@@ -118,16 +120,17 @@ export const InTooltip: Story = {
   },
 };
 
-/** In a sentence (`align-middle`) and in the shortcut help (`lg` in the help dialog). */
+/** In a sentence (`align-middle`) and in the shortcuts dialog (`xl`, mockup « Raccourcis
+ *  clavier »). */
 export const InText: Story = {
   render: () => ({
     template: `
       <div class="grid gap-3">
         <p class="text-sm text-muted-foreground">Appuyez sur <kbd cwKbd>?</kbd> pour afficher tous les raccourcis.</p>
         <dl class="grid grid-cols-[1fr_auto] items-center gap-x-6 gap-y-2 text-sm [&>dd]:justify-self-end">
-          <dt>Créer une tâche</dt><dd><cw-shortcut keys="c" size="lg" /></dd>
-          <dt>Aller à la boîte de réception</dt><dd><cw-shortcut keys="g i" size="lg" /></dd>
-          <dt>Fermer le panneau</dt><dd><cw-shortcut keys="esc" size="lg" /></dd>
+          <dt>Créer une tâche</dt><dd><cw-shortcut keys="c" size="xl" /></dd>
+          <dt>Aller à la boîte de réception</dt><dd><cw-shortcut keys="g i" size="xl" /></dd>
+          <dt>Fermer le panneau</dt><dd><cw-shortcut keys="esc" size="xl" /></dd>
         </dl>
       </div>`,
   }),
