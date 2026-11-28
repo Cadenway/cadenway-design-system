@@ -46,7 +46,7 @@ export type CwChartSize = 'sm' | 'default' | 'lg';
  * Which vertical bars carry their value above them: none, every bar, or the highlights the mockup
  * labels (App.dc.html, « Tâches terminées par semaine »): the highest bars and the `current`
  * category. One label per category: a stacked column shows its total, grouped bars their highest
- * value; 0 sits on the baseline, and a label that would overlap its left neighbour is dropped.
+ * value over the bar that holds it; 0 sits on the baseline, and a label that would overlap its left neighbour is dropped.
  * Negative values are neither drawn nor labelled: a category whose highest value is negative, or a
  * stack with a negative part, gets no label.
  *

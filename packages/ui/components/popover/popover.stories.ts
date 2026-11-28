@@ -14,6 +14,7 @@ import {
   phosphorTrayBold,
   phosphorUsersBold,
 } from '@ng-icons/phosphor-icons/bold';
+import { phosphorHouseFill } from '@ng-icons/phosphor-icons/fill';
 import {
   type Meta,
   type StoryObj,
@@ -61,6 +62,7 @@ const meta: Meta = {
           phosphorCheckBold,
           phosphorCopyBold,
           phosphorHouseBold,
+          phosphorHouseFill,
           phosphorQuestionBold,
           phosphorTrayBold,
           phosphorUsersBold,
@@ -354,6 +356,8 @@ export const RailTrigger: Story = {
     } = within(light(canvasElement));
     const trigger: HTMLElement = scope.getByRole('button', { name: 'Boîte de réception' });
     const current: HTMLElement = scope.getByRole('link', { name: 'Accueil' });
+    // The current item draws the Fill twin of its icon, registered with the Bold one.
+    await expect(current.querySelector('ng-icon svg')).toBeInTheDocument();
 
     await userEvent.click(trigger);
     await scope.findByRole('dialog', { name: 'Boîte de réception' });

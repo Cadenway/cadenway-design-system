@@ -1425,11 +1425,11 @@ export class CwChart {
    * @description
    * Values written above vertical bars: `none` (default), `all`, or `peak` (the highest bars and the
    * `current` category). One label per category: the stack total when stacked, else the category's
-   * highest value (the bar itself with one series); a category at 0 is labelled on the baseline, one
-   * without any value is not. Negative values are neither drawn nor labelled: a category whose
-   * highest value is negative, or a stack with a negative part, gets no label. Left to right, a label that would touch the previous one is dropped.
-   * They go through `valueFormat` and are hidden from assistive technologies, which read the data
-   * table.
+   * highest value, over the bar that holds it (the first on a tie); a category at 0 is labelled on
+   * the baseline, one without any value is not. Negative values are neither drawn nor labelled: a
+   * category whose highest value is negative, or a stack with a negative part, gets no label. Left
+   * to right, a label that would touch the previous one is dropped. They go through `valueFormat`
+   * and are hidden from assistive technologies, which read the data table.
    *
    * @type {InputSignal<CwChartValueLabels>}
    * @readonly
@@ -1836,9 +1836,10 @@ export class CwChart {
    *
    * @description
    * Value labels of the vertical bars (`valueLabels`), one per category at most: the stack total when
-   * stacked, else the highest value of the category (the bar itself with one series). A category at
-   * 0 is labelled on the baseline; one without any value, whose highest value is negative, or whose
-   * stack has a negative part gets none. Left to right, a label that
+   * stacked, else the highest value of the category (the bar itself with one series), centered on
+   * the column or on the bar supplying that value (the first one on a tie). A category at 0 is
+   * labelled on the baseline; one without any value, whose highest value is negative, or whose stack
+   * has a negative part gets none. Left to right, a label that
    * would come within 4 px of the previous one is dropped, measured at the axis font size.
    *
    * @type {Signal<readonly BarTag[]>}
@@ -1863,9 +1864,12 @@ export class CwChart {
       if (labels === 'peak' && !highlighted) continue;
       const text: string = format(value);
       const half: number = labelWidth(text, fontSize) / 2;
-      if (category.center - half < previousRight + 4) continue;
-      previousRight = category.center + half;
-      tags.push({ key: category.key, x: category.center, y: round(y(value) - 6), text });
+      const x: number = this.stacked()
+        ? category.center
+        : this.tagCenter(category, data[category.index], value);
+      if (x - half < previousRight + 4) continue;
+      previousRight = x + half;
+      tags.push({ key: category.key, x: round(x), y: round(y(value) - 6), text });
     }
     return tags;
   });
@@ -1917,15 +1921,14 @@ export class CwChart {
         });
       } else {
         const count: number = Math.max(1, series.length);
-        const width: number =
-          large && count === 1
-            ? clamp(category.bandWidth - 6, 2, 36)
-            : clamp((category.bandWidth * 0.8 - 2 * (count - 1)) / count, 2, 12);
-        const group: number = count * width + 2 * (count - 1);
         series.forEach((item, index) => {
           const value: number | null = numeric(row, item.key);
           if (value === null || value <= 0) return;
-          const x: number = category.center - group / 2 + index * (width + 2);
+          const { x, width }: { x: number; width: number } = this.groupedBar(
+            category,
+            count,
+            index,
+          );
           const top: number = y(value);
           shapes.push({
             id: `${category.key}:${item.key}`,
@@ -2386,6 +2389,62 @@ export class CwChart {
     }
     const highest: number = Math.max(...values);
     return highest < 0 ? null : highest;
+  }
+
+  /**
+   * Method groupedBar
+   *
+   * @description
+   * Left edge and width of one unstacked vertical bar: bars of a category sit side by side, 2 px
+   * apart, centered on it; a single `lg` bar fills its band less 6 px, up to 36 px (mockup
+   * App.dc.html, weekly completion chart).
+   *
+   * @param {Category} category - Category holding the bar.
+   * @param {number} count - Number of visible series.
+   * @param {number} index - Position of the bar's series among the visible series.
+   * @returns {{ x: number; width: number }} Left edge and width, in pixels.
+   */
+  private groupedBar(
+    category: Category,
+    count: number,
+    index: number,
+  ): { x: number; width: number } {
+    const width: number =
+      this.size() === 'lg' && count === 1
+        ? clamp(category.bandWidth - 6, 2, 36)
+        : clamp((category.bandWidth * 0.8 - 2 * (count - 1)) / count, 2, 12);
+    const group: number = count * width + 2 * (count - 1);
+    return { x: category.center - group / 2 + index * (width + 2), width };
+  }
+
+  /**
+   * Method tagCenter
+   *
+   * @description
+   * Horizontal center of the unstacked bar that supplies a category's labelled value: the first
+   * visible series holding it.
+   *
+   * @param {Category} category - Category of the label.
+   * @param {Readonly<Record<string, string | number | null | undefined>>} row - Datum of the category.
+   * @param {number} value - Labelled value, the category's highest.
+   * @returns {number} Center of that bar, in pixels.
+   */
+  private tagCenter(
+    category: Category,
+    row: Readonly<Record<string, string | number | null | undefined>>,
+    value: number,
+  ): number {
+    const series: CwChartSeries[] = this.visibleSeries();
+    const index: number = Math.max(
+      0,
+      series.findIndex((item) => numeric(row, item.key) === value),
+    );
+    const { x, width }: { x: number; width: number } = this.groupedBar(
+      category,
+      Math.max(1, series.length),
+      index,
+    );
+    return x + width / 2;
   }
 
   /**

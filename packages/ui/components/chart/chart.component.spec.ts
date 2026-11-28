@@ -1056,6 +1056,60 @@ describe('CwChart value labels', () => {
     expect(tags().map((label) => label.text)).toEqual(['4']);
   });
 
+  /**
+   * Function barCenter
+   *
+   * @description
+   * Horizontal center of the bar drawn in a data color, read from its path.
+   *
+   * @param {string} color - Data color of the bar's series.
+   * @returns {number} Center of the bar, in pixels.
+   */
+  function barCenter(color: string): number {
+    const path: string =
+      Array.from(host.querySelectorAll('svg path'))
+        .find((element) => element.classList.contains(`fill-${color}`))
+        ?.getAttribute('d') ?? '';
+    const xs: number[] = [
+      ...Array.from(path.matchAll(/(-?[\d.]+),/g), (match) => Number(match[1])),
+      ...Array.from(path.matchAll(/H(-?[\d.]+)/g), (match) => Number(match[1])),
+    ];
+    return (Math.min(...xs) + Math.max(...xs)) / 2;
+  }
+
+  /**
+   * Function tagX
+   *
+   * @description
+   * Horizontal position of the only value label.
+   * @returns {number} Label x, in pixels.
+   */
+  function tagX(): number {
+    const labels: Element[] = Array.from(host.querySelectorAll('svg text')).filter((text) =>
+      text.classList.contains('font-medium'),
+    );
+    expect(labels).toHaveLength(1);
+    return Number(labels[0].getAttribute('x'));
+  }
+
+  it('centers a grouped label on the bar holding the highest value', async () => {
+    fixture.componentInstance.series.set([
+      { key: 'done', label: 'Terminées', color: 'chart-1' },
+      { key: 'late', label: 'En retard', color: 'chart-2' },
+      { key: 'blocked', label: 'Bloquées', color: 'chart-3' },
+    ]);
+    fixture.componentInstance.current.set(null);
+    fixture.componentInstance.valueLabels.set('all');
+    fixture.componentInstance.data.set([{ week: 'S43', done: 9, late: 4, blocked: 2 }]);
+    await fixture.whenStable();
+    expect(tagX()).toBeCloseTo(barCenter('chart-1'), 0);
+
+    fixture.componentInstance.data.set([{ week: 'S43', done: 2, late: 4, blocked: 9 }]);
+    await fixture.whenStable();
+    expect(tagX()).toBeCloseTo(barCenter('chart-3'), 0);
+    expect(tagX()).toBeGreaterThan(barCenter('chart-1'));
+  });
+
   it('drops a label that would overlap its left neighbour', async () => {
     fixture.componentInstance.current.set(null);
     fixture.componentInstance.valueLabels.set('all');
