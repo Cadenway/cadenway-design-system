@@ -302,7 +302,8 @@ export const PaletteEscapeCloses: Story = {
     const palette: HTMLElement = await body.findByRole('dialog', { name: 'Palette de commandes' });
     const field: HTMLElement = within(palette).getByRole('combobox');
     await waitFor(() => expect(field).toHaveFocus());
-    await expect(within(palette).getByText('Échap')).toBeVisible();
+    // The header hint sits in the field row, next to the footer's own key hints.
+    await waitFor(() => expect(palette.querySelector('[cwCommandDialogHeader]')).toBeVisible());
 
     await userEvent.type(field, 'tableau');
     await userEvent.keyboard('{Escape}');
