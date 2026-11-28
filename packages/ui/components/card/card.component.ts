@@ -28,12 +28,14 @@ const BASE: string = 'flex flex-col rounded-xl border bg-card text-card-foregrou
  *
  * @description
  * Spacing classes for standard and dense cards, behind `:where()` so a consumer's `gap-*` or
- * padding class wins (mockup `Compte.dc.html`, the notification matrix: `gap-2`).
+ * padding class wins (mockup `Compte.dc.html`, the notification matrix: `gap-2`). A standard card
+ * holding a `cw-card-footer` drops its bottom padding, the footer's own `py-3` framing it
+ * (mockup `Compte.dc.html`, the profile blocks: `pt-4` card, `py-3` footer).
  *
  * @type {Record<CwCardSize, string>}
  */
 const SIZES: Record<CwCardSize, string> = {
-  default: '[:where(&)]:gap-4 [:where(&)]:py-4',
+  default: '[:where(&)]:gap-4 [:where(&)]:py-4 [:where(&)]:has-[>cw-card-footer]:pb-0',
   sm: '[:where(&)]:gap-2 [:where(&)]:p-3',
 };
 
