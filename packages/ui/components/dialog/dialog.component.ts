@@ -1,5 +1,9 @@
 import { _IdGenerator } from '@angular/cdk/a11y';
-import { createGlobalPositionStrategy } from '@angular/cdk/overlay';
+import {
+  createGlobalPositionStrategy,
+  type GlobalPositionStrategy,
+  type PositionStrategy,
+} from '@angular/cdk/overlay';
 import {
   booleanAttribute,
   Component,
@@ -549,6 +553,16 @@ export class CwDialog implements CwDialogContext {
   private readonly document: Document = inject(DOCUMENT);
 
   /**
+   * Property stopWatching
+   *
+   * @description
+   * Removes the breakpoint listener of an open `placement="top"` window; null otherwise.
+   *
+   * @type {(() => void) | null}
+   */
+  private stopWatching: (() => void) | null = null;
+
+  /**
    * Property overlay
    * @readonly
    *
@@ -608,6 +622,7 @@ export class CwDialog implements CwDialogContext {
       });
     });
     inject(DestroyRef).onDestroy(() => {
+      this.unwatchBreakpoint();
       this.overlay.dispose();
     });
   }
@@ -682,35 +697,93 @@ export class CwDialog implements CwDialogContext {
       onExternalClose: () => {
         // The exit path (`detach`) does not run: forget the trigger here, so a later `[(open)]`
         // does not return the focus to it.
+        this.unwatchBreakpoint();
         this.origin = null;
         this.open.set(false);
         this.closed.emit('action');
       },
     });
+    this.watchBreakpoint();
+  }
+
+  /**
+   * Method wideQuery
+   *
+   * @description
+   * The 768 px media query of a `placement="top"` window, or null when the placement is not
+   * `top`, the size is `screen` or the document has no `matchMedia` (a test DOM, where the screen
+   * counts as wide).
+   *
+   * @returns {MediaQueryList | null} The query to read and watch, if any.
+   */
+  private wideQuery(): MediaQueryList | null {
+    if (this.placement() !== 'top' || this.size() === 'screen') return null;
+    const view: (Window & typeof globalThis) | null = this.document.defaultView;
+    if (!view || typeof view.matchMedia !== 'function') return null;
+    return view.matchMedia(WIDE_SCREEN);
+  }
+
+  /**
+   * Method strategy
+   *
+   * @description
+   * Position of a `placement="top"` window: pinned 8vh from the top and centered horizontally on
+   * a wide screen; centered both ways below 768 px, where the window fills the screen and a top
+   * offset would push its footer off it.
+   *
+   * @param {boolean} wide - Whether the viewport is at least 768 px wide.
+   * @returns {PositionStrategy} The strategy for that viewport.
+   */
+  private strategy(wide: boolean): PositionStrategy {
+    const strategy: GlobalPositionStrategy = createGlobalPositionStrategy(
+      this.injector,
+    ).centerHorizontally();
+    return wide ? strategy.top(TOP_OFFSET) : strategy.centerVertically();
   }
 
   /**
    * Method position
    *
    * @description
-   * Position of a `placement="top"` window on a wide screen: pinned 8vh from the top and centered
-   * horizontally. Elsewhere nothing, and the CDK centers the pane (below 768 px the window fills
-   * the screen, so a top offset would push it down).
+   * Initial position of a `placement="top"` window (see `strategy`); nothing for the other
+   * placements, which the CDK centers.
    *
    * @returns {Pick<ɵModalOverlayConfig, 'positionStrategy'>} The position strategy to pass, if any.
    */
   private position(): Pick<ɵModalOverlayConfig, 'positionStrategy'> {
     if (this.placement() !== 'top' || this.size() === 'screen') return {};
-    const view: (Window & typeof globalThis) | null = this.document.defaultView;
-    // Without matchMedia (a test DOM), the screen counts as wide.
-    const wide: boolean =
-      !view || typeof view.matchMedia !== 'function' || view.matchMedia(WIDE_SCREEN).matches;
-    if (!wide) return {};
-    return {
-      positionStrategy: createGlobalPositionStrategy(this.injector)
-        .top(TOP_OFFSET)
-        .centerHorizontally(),
+    return { positionStrategy: this.strategy(this.wideQuery()?.matches ?? true) };
+  }
+
+  /**
+   * Method watchBreakpoint
+   *
+   * @description
+   * While a `placement="top"` window is open, moves it when the viewport crosses 768 px, so a
+   * window resized to a phone fills the screen from its top and the reverse.
+   */
+  private watchBreakpoint(): void {
+    this.unwatchBreakpoint();
+    const query: MediaQueryList | null = this.wideQuery();
+    if (!query) return;
+    const listener: (event: MediaQueryListEvent) => void = (event) => {
+      this.overlay.reposition(this.strategy(event.matches));
     };
+    query.addEventListener('change', listener);
+    this.stopWatching = () => {
+      query.removeEventListener('change', listener);
+    };
+  }
+
+  /**
+   * Method unwatchBreakpoint
+   *
+   * @description
+   * Removes the breakpoint listener of the open window, if any.
+   */
+  private unwatchBreakpoint(): void {
+    this.stopWatching?.();
+    this.stopWatching = null;
   }
 
   /**
@@ -734,6 +807,7 @@ export class CwDialog implements CwDialogContext {
    * Detaches the modal overlay and emits the close reason.
    */
   private detach(): void {
+    this.unwatchBreakpoint();
     if (!this.overlay.attached) return;
     const reason: CwDialogCloseReason = this.reason;
     this.state.set('closed');

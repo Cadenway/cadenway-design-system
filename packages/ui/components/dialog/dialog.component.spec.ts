@@ -557,6 +557,86 @@ describe('CwDialog placement, padding and bar header', () => {
   });
 });
 
+describe('CwDialog placement across the 768 px breakpoint', () => {
+  let wide: boolean;
+  let listeners: ((event: MediaQueryListEvent) => void)[];
+
+  /**
+   * Function cross
+   *
+   * @description
+   * Moves the emulated viewport across 768 px and notifies the media query listeners.
+   *
+   * @param {boolean} next - Whether the viewport is now at least 768 px wide.
+   */
+  function cross(next: boolean): void {
+    wide = next;
+    for (const listener of [...listeners]) listener({ matches: next } as MediaQueryListEvent);
+  }
+
+  /**
+   * Function pane
+   *
+   * @description
+   * Returns the overlay pane of the open dialog.
+   *
+   * @returns {HTMLElement | null | undefined} Pane holding the dialog window.
+   */
+  function pane(): HTMLElement | null | undefined {
+    return dialog()?.closest<HTMLElement>('.cdk-overlay-pane');
+  }
+
+  beforeEach(() => {
+    wide = true;
+    listeners = [];
+    vi.stubGlobal('matchMedia', (query: string) => ({
+      media: query,
+      get matches(): boolean {
+        return wide;
+      },
+      addEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => {
+        listeners.push(listener);
+      },
+      removeEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => {
+        listeners = listeners.filter((other) => other !== listener);
+      },
+    }));
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('drops the top offset on a phone and takes it back on a wide screen while open', async () => {
+    const fixture: ComponentFixture<PlacedHost> = TestBed.createComponent(PlacedHost);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    expect(pane()?.style.marginTop).toBe('8vh');
+
+    cross(false);
+    await fixture.whenStable();
+    expect(pane()?.style.marginTop).not.toBe('8vh');
+    expect(pane()?.parentElement?.style.alignItems).toBe('center');
+
+    cross(true);
+    await fixture.whenStable();
+    expect(pane()?.style.marginTop).toBe('8vh');
+
+    fixture.destroy();
+    expect(listeners).toHaveLength(0);
+  });
+
+  it('opens centered on a phone', async () => {
+    wide = false;
+    const fixture: ComponentFixture<PlacedHost> = TestBed.createComponent(PlacedHost);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+
+    expect(pane()?.style.marginTop).not.toBe('8vh');
+    fixture.destroy();
+  });
+});
+
 /**
  * Component ScreenHost
  *
