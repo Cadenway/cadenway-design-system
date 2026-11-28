@@ -31,7 +31,7 @@
       >
         <colgroup>
           @if (selectable()) {
-            <col class="w-9" />
+            <col class="w-10" />
           }
           @for (column of visibleColumns(); track column.key; let first = $first) {
             <col [style.width.px]="widthOf(column)" [class]="colClasses(column, first)" />
@@ -206,7 +206,7 @@
                 @if (selectable()) {
                   <td
                     role="gridcell"
-                    class="w-9 pr-1 pl-3 align-middle"
+                    class="w-10 pr-1 pl-3 align-middle"
                     [class]="cards() ? 'max-md:p-0' : ''"
                   >
                     <div cwSkeleton animation="shimmer" class="size-4 rounded-[4px]"></div>

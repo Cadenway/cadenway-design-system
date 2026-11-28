@@ -2,6 +2,17 @@
    System artifact). Rows are generic (`T`): the table knows nothing of what a row is. */
 
 /**
+ * Type CwDataTableEditTrigger
+ *
+ * @description
+ * The pointer gesture that opens the editor of an editable cell: a double click (`dblclick`) or
+ * a single click (`click`).
+ *
+ * @type {'dblclick' | 'click'}
+ */
+export type CwDataTableEditTrigger = 'dblclick' | 'click';
+
+/**
  * Type CwSortDirection
  *
  * @description
