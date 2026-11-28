@@ -88,7 +88,7 @@ const PANEL: string =
   'motion-safe:[&>*:nth-child(7)]:[animation-delay:290ms] motion-safe:[&>*:nth-child(8)]:[animation-delay:325ms] motion-safe:[&>*:nth-child(9)]:[animation-delay:360ms] ' +
   'motion-safe:[&>*:nth-child(10)]:[animation-delay:395ms] motion-safe:[&>*:nth-child(11)]:[animation-delay:430ms] motion-safe:[&>*:nth-child(12)]:[animation-delay:465ms] ' +
   // A phone sheet (`provideCwPhoneSheets`) fills the width of its pane.
-  'in-data-[presentation=sheet]:w-full in-data-[presentation=sheet]:max-w-none';
+  'in-data-[presentation=sheet]:w-full in-data-[presentation=sheet]:max-w-none in-data-[presentation=sheet]:min-w-0';
 
 /**
  * Constant MIN_WIDTHS
@@ -96,18 +96,20 @@ const PANEL: string =
  * @description
  * Literal minimum panel widths by `minWidth` (mockup `App.dc.html`: 208 px for the grouping menu,
  * 224 px for the list and sort menus, 240 px for the assignees, 256 px for the organization menu).
+ * Each minimum stays within the viewport less its 8 px margins, so a zoomed or narrow page keeps
+ * the panel on screen; a phone sheet drops it and fills its pane.
  *
  * @type {Record<CwMenuMinWidth, string>}
  */
 const MIN_WIDTHS: Record<CwMenuMinWidth, string> = {
-  '32': 'min-w-32',
-  '40': 'min-w-40',
-  '48': 'min-w-48',
-  '52': 'min-w-52',
-  '56': 'min-w-56',
-  '60': 'min-w-60',
-  '64': 'min-w-64',
-  '72': 'min-w-72',
+  '32': 'min-w-[min(8rem,calc(100vw-1rem))]',
+  '40': 'min-w-[min(10rem,calc(100vw-1rem))]',
+  '48': 'min-w-[min(12rem,calc(100vw-1rem))]',
+  '52': 'min-w-[min(13rem,calc(100vw-1rem))]',
+  '56': 'min-w-[min(14rem,calc(100vw-1rem))]',
+  '60': 'min-w-[min(15rem,calc(100vw-1rem))]',
+  '64': 'min-w-[min(16rem,calc(100vw-1rem))]',
+  '72': 'min-w-[min(18rem,calc(100vw-1rem))]',
 };
 
 /* Submenus open on the right of their item, top edges aligned (the panel's padding and border,
@@ -286,8 +288,9 @@ export class CwMenu {
    * Property minWidth
    *
    * @description
-   * Minimum width of the panel, a Tailwind spacing step: `32` (128 px, default) to `72` (288 px).
-   * The width still follows the content up to `max-w-sm`.
+   * Minimum width of the panel, a Tailwind spacing step: `32` (128 px, default) to `72` (288 px),
+   * never more than the viewport less 16 px, and none in a phone sheet. The width still follows
+   * the content up to `max-w-sm`.
    *
    * @type {InputSignal<CwMenuMinWidth>}
    * @readonly

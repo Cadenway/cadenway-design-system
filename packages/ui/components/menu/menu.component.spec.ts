@@ -38,7 +38,7 @@ import { CwMenu } from './menu.component';
     <button type="button" [cwMenuTriggerFor]="display">Affichage</button>
     <button type="button" [cwMenuTriggerFor]="organization">Organisation</button>
 
-    <cw-menu #organization side="right" sideOffset="12" minWidth="64">
+    <cw-menu #organization side="right" sideOffset="12" minWidth="72">
       <button cwMenuItem>Paramètres de l’organisation</button>
     </cw-menu>
 
@@ -524,8 +524,10 @@ describe('CwMenu', () => {
     const panel: HTMLElement = menuNamed('Organisation');
     const pane: HTMLElement | null = panel.closest<HTMLElement>('.cdk-overlay-pane');
 
-    expect(panel.classList).toContain('min-w-64');
-    expect(panel.classList).not.toContain('min-w-32');
+    // The largest minimum, 288 px, never exceeds the viewport less its margins.
+    expect(panel.classList).toContain('min-w-[min(18rem,calc(100vw-1rem))]');
+    expect(panel.classList).not.toContain('min-w-72');
+    expect(panel.classList).not.toContain('min-w-[min(8rem,calc(100vw-1rem))]');
     expect(pane?.style.transform).toBe('translateX(12px)');
   });
 
@@ -654,6 +656,22 @@ describe('CwMenu on a phone', () => {
     expect(pane?.getAttribute('data-presentation')).toBe('sheet');
     expect(pane?.style.width).toBe('calc(100% - 16px)');
     expect(pane?.style.maxHeight).toBe('calc(100dvh - 72px)');
+    fixture.destroy();
+  });
+
+  it('drops the minimum width in a phone sheet', async () => {
+    emulatePhone();
+    TestBed.configureTestingModule({ providers: [provideCwPhoneSheets()] });
+    const fixture: ComponentFixture<Host> = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    button(fixture.nativeElement as HTMLElement, 'Organisation').click();
+    await fixture.whenStable();
+    const panel: HTMLElement = menuNamed('Organisation');
+
+    expect(panel.closest('[data-presentation]')?.getAttribute('data-presentation')).toBe('sheet');
+    // The sheet's reset is a variant, so it wins over the clamped minimum inside the sheet.
+    expect(panel.classList).toContain('in-data-[presentation=sheet]:min-w-0');
+    expect(panel.className).not.toMatch(/(^|\s)min-w-\d/);
     fixture.destroy();
   });
 });

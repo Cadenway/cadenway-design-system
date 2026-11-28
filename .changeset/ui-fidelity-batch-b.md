@@ -14,7 +14,8 @@ menu item entrance: 420 ms on the spring easing, out of a 3 px blur and a 6 px s
 - `cw-popover`: `width` (`'fixed'` default, `'content'`: follows the content from the width of its
   `size`, both bounds kept within the viewport less 16 px). New type `CwPopoverWidth`.
 - `cw-menu`: `sideOffset` (px, 4 by default) and `minWidth` (`'32'` default to `'72'`, Tailwind
-  spacing steps). New type `CwMenuMinWidth`.
+  spacing steps, kept within the viewport less 16 px, none in a phone sheet). New type
+  `CwMenuMinWidth`.
 - `cw-toggle-group`: `size="xs"` (28 px chip, 12 px text, 14 px icons, 6 px gap) and
   `variant="swatch"` (32 px color circles ringed in violet when chosen, wrapping 8 px apart).
 - `cw-progress`: `variant="primary"` (violet bar). `cw-stepper`: `tone` (`'default'` ink,
