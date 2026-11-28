@@ -16,7 +16,7 @@ import {
 } from '@angular/core';
 import { ɵFOCUS, ɵFOCUS_INSET } from '@cadenway/ui/core';
 import { CwTooltip } from '@cadenway/ui/components/tooltip';
-import { NgIcon } from '@ng-icons/core';
+import { NgIcon, NgIconsToken } from '@ng-icons/core';
 
 import { SIDEBAR_ITEM } from '../sidebar-item.token';
 import { SIDEBAR_SPACE } from '../sidebar-space.token';
@@ -84,10 +84,26 @@ function filled(icon: string): string {
 }
 
 /**
+ * Function registered
+ *
+ * @description
+ * Whether an icon name is among the icons provided to an element (`provideIcons`). With no
+ * provided icons at all (a loader serves them), every name counts as registered.
+ *
+ * @param {readonly Record<string, string>[] | null} icons - Icon sets visible from the element.
+ * @param {string} name - Icon name to look for.
+ * @returns {boolean} Whether the name can be drawn.
+ */
+function registered(icons: readonly Record<string, string>[] | null, name: string): boolean {
+  if (!icons || icons.length === 0) return true;
+  return icons.some((set) => Object.hasOwn(set, name));
+}
+
+/**
  * Component CwSidebarItem
  *
  * @description
- * A link of the sidebar: icon, label, count (Sidebar sheet of the Design System artifact). Put it on an `<a>` inside a `cw-sidebar-group` or a `cw-sidebar-space` (where it is a 28 px sub-item); the label is its content. `icon` is an ng-icons name of the Bold weight; the current item shows the Fill weight in `text-primary`: register both (`provideIcons`). `count` is shown muted on the right (open tasks, unread) and read after the label as `countLabel` (« 3 non lus »), or as the number. `active` marks the current page: `data-active="true"`, `aria-current="page"`, a `bg-primary/5` tint with `text-primary` and `font-medium`, and the Fill icon (mockup App.dc.html: selected is violet); bind it to the router (`routerLinkActive`), which `@cadenway/ui` does not depend on. In the icon rail the item is a 32 px icon button named by its label and count, with a tooltip on the right (`tooltip`, by default the label and the count) on hover and keyboard focus; the count becomes a dot. Following the link closes the phone drawer.
+ * A link of the sidebar: icon, label, count (Sidebar sheet of the Design System artifact). Put it on an `<a>` inside a `cw-sidebar-group` or a `cw-sidebar-space` (where it is a 28 px sub-item); the label is its content. `icon` is an ng-icons name of the Bold weight; the current item shows the Fill weight in `text-primary` when it is registered (`provideIcons`), else the Bold one; `activeIcon` names another current icon, or `null` keeps `icon`. `count` is shown muted on the right (open tasks, unread) and read after the label as `countLabel` (« 3 non lus »), or as the number, inside the label element so a screen reader reads « Boîte de réception, 3 non lus » in one piece. `active` marks the current page: `data-active="true"`, `aria-current="page"`, a `bg-primary/5` tint with `text-primary` and `font-medium`, and the Fill icon (mockup App.dc.html: selected is violet); bind it to the router (`routerLinkActive`), which `@cadenway/ui` does not depend on. In the icon rail the item is a 32 px icon button named by its label and count, with a tooltip on the right (`tooltip`, by default the label and the count) on hover and keyboard focus; the count becomes a dot. Following the link closes the phone drawer.
  */
 @Component({
   selector: 'a[cwSidebarItem]',
@@ -116,6 +132,34 @@ export class CwSidebarItem {
    * @readonly
    */
   public readonly icon: InputSignal<string | undefined> = input<string>();
+
+  /**
+   * Property activeIcon
+   *
+   * @description
+   * Icon of the current item: by default (unset) the Fill weight of `icon` when it is registered,
+   * else `icon` itself; a name to use another icon; `null` to keep `icon` (mockup `App.dc.html`:
+   * a favorite saved view keeps its Bold funnel, which has no Fill twin).
+   *
+   * @type {InputSignal<string | null | undefined>}
+   * @readonly
+   */
+  public readonly activeIcon: InputSignal<string | null | undefined> = input<
+    string | null | undefined
+  >(undefined);
+
+  /**
+   * Property icons
+   *
+   * @description
+   * Icon sets provided to the item, to fall back to `icon` when its Fill twin is not registered.
+   *
+   * @type {readonly Record<string, string>[] | null}
+   * @readonly
+   */
+  private readonly icons: readonly Record<string, string>[] | null = inject(NgIconsToken, {
+    optional: true,
+  });
 
   /**
    * Property count
@@ -280,7 +324,12 @@ export class CwSidebarItem {
   protected readonly iconName: Signal<string | null> = computed(() => {
     const icon: string | undefined = this.icon();
     if (!icon) return null;
-    return this.active() ? filled(icon) : icon;
+    if (!this.active()) return icon;
+    const active: string | null | undefined = this.activeIcon();
+    if (active === null) return icon;
+    if (active !== undefined) return active;
+    const fill: string = filled(icon);
+    return registered(this.icons, fill) ? fill : icon;
   });
 
   /**

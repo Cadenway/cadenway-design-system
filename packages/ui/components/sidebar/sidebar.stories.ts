@@ -8,6 +8,7 @@ import {
   phosphorCaretUpDownBold,
   phosphorCheckSquareBold,
   phosphorDotsThreeBold,
+  phosphorFunnelSimpleBold,
   phosphorHouseBold,
   phosphorListBulletsBold,
   phosphorMagnifyingGlassBold,
@@ -83,6 +84,7 @@ const meta: Meta = {
           phosphorCheckSquareBold,
           phosphorCheckSquareFill,
           phosphorDotsThreeBold,
+          phosphorFunnelSimpleBold,
           phosphorHouseBold,
           phosphorHouseFill,
           phosphorListBulletsBold,
@@ -269,6 +271,31 @@ function frame(
 /** Expanded: folding spaces, the current item, counts, sprint progress, account. */
 export const Expanded: Story = {
   render: () => ({ template: frame('expanded') }),
+};
+
+/**
+ * A current item whose Bold icon has no Fill twin (mockup `App.dc.html`, a favorite saved view: the
+ * funnel stays Bold): the item keeps its icon instead of drawing a blank one. `activeIcon` names
+ * another current icon, `[activeIcon]="null"` keeps the icon on purpose.
+ */
+export const CurrentWithoutFill: Story = {
+  render: () => ({
+    template: `
+      <div class="relative flex h-40 w-full max-w-xs overflow-hidden rounded-lg border">
+        <cw-sidebar collapsible="none" [ariaLabel]="cwTheme === 'light' ? 'Favoris' : 'Favoris, thème sombre'">
+          <cw-sidebar-group label="Favoris">
+            <a cwSidebarItem href="#bugs" icon="phosphorFunnelSimpleBold" active>Bugs ouverts</a>
+            <a cwSidebarItem href="#backlog" icon="phosphorListBulletsBold">Backlog</a>
+          </cw-sidebar-group>
+        </cw-sidebar>
+      </div>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const current: HTMLElement = within(light(canvasElement)).getByRole('link', {
+      name: 'Bugs ouverts',
+    });
+    await expect(current.querySelector('ng-icon svg')).not.toBeNull();
+  },
 };
 
 /** Collapsed to the icon rail: icons only, a tooltip on hover and focus, the count as a dot. */

@@ -66,8 +66,9 @@ const TRIGGER: string =
   'relative isolate flex h-8 w-full min-w-0 items-center gap-2 overflow-hidden rounded-md px-2 text-left text-sm transition-colors hover:bg-accent [&_ng-icon]:shrink-0 ' +
   ɵFOCUS_INSET;
 
-/* In the rail a space is one 32 px button; it is `bg-selected` when it holds the current page
-   (Sidebar sheet, "États": « Courant dans un espace replié »). */
+/* In the rail a space is one 32 px button; when it holds the current page it takes the violet
+   tint of a current item, `bg-primary/5` (Sidebar sheet, "États": « Courant dans un espace
+   replié »; mockup App.dc.html: selected is violet). */
 /**
  * Constant RAIL
  *
@@ -77,7 +78,7 @@ const TRIGGER: string =
  * @type {string}
  */
 const RAIL: string =
-  'relative isolate flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md transition-colors hover:bg-accent data-[active=true]:bg-selected ' +
+  'relative isolate flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md transition-colors hover:bg-accent data-[active=true]:bg-primary/5 data-[active=true]:hover:bg-primary/10 ' +
   ɵFOCUS;
 
 /* Sidebar sheet, "Mouvement": grid rows from 0fr to 1fr with a fade, 300 ms `ease-snap`. */
