@@ -962,6 +962,7 @@ describe('CwCalendarView planning hooks', () => {
       variant="outlined"
       toolbar="title"
       viewToggle="false"
+      [maxPerDay]="maxPerDay()"
       [items]="items"
       [trackBy]="id"
       [itemLabel]="name"
@@ -994,6 +995,17 @@ class OutlinedHost {
    * @readonly
    */
   public readonly today: Date = day(12, 10, 12);
+
+  /**
+   * Property maxPerDay
+   *
+   * @description
+   * Visible item lines a day.
+   *
+   * @type {WritableSignal<number>}
+   * @readonly
+   */
+  public readonly maxPerDay: WritableSignal<number> = signal(2);
 
   /**
    * Property id
@@ -1032,12 +1044,13 @@ class OutlinedHost {
 
 describe('CwCalendarView outlined, with the title toolbar', () => {
   let host: HTMLElement;
+  let fixture: ComponentFixture<OutlinedHost>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [{ provide: LiveAnnouncer, useValue: { announce: () => Promise.resolve() } }],
     });
-    const fixture: ComponentFixture<OutlinedHost> = TestBed.createComponent(OutlinedHost);
+    fixture = TestBed.createComponent(OutlinedHost);
     fixture.detectChanges();
     host = fixture.nativeElement as HTMLElement;
   });
@@ -1061,6 +1074,35 @@ describe('CwCalendarView outlined, with the title toolbar', () => {
 
     expect(circle?.textContent.trim()).toBe('1');
     expect(circle?.nextElementSibling?.textContent.trim()).toBe('nov.');
+  });
+
+  it('grows its days to maxPerDay lines, so every item is visible or behind « +n autres »', async () => {
+    fixture.componentInstance.maxPerDay.set(3);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    // Thursday 12 November holds four one-day items: two chips and « +2 autres » on three lines.
+    const today: HTMLElement | null = host.querySelector('[role="gridcell"][aria-current="date"]');
+    const chips: HTMLElement[] = Array.from(
+      today?.querySelectorAll<HTMLElement>('button[title]') ?? [],
+    );
+    const more: HTMLElement | null | undefined = today?.querySelector('[data-more]');
+
+    expect(today?.style.height).toBe('126px');
+    expect(chips).toHaveLength(2);
+    expect(more?.textContent.trim()).toBe('+2 autres');
+
+    fixture.componentInstance.maxPerDay.set(4);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(today?.style.height).toBe('156px');
+    expect(today?.querySelectorAll('button[title]')).toHaveLength(4);
+    expect(today?.querySelector('[data-more]')).toBeNull();
+  });
+
+  it('keeps 96 px days for two lines, the mockup height', () => {
+    const today: HTMLElement | null = host.querySelector('[role="gridcell"][aria-current="date"]');
+
+    expect(today?.style.height).toBe('96px');
   });
 
   it('marks the days of other months and fills the number of today', () => {

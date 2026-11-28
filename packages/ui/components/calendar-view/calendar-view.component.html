@@ -151,6 +151,7 @@
                   cdkDropList
                   cdkDropListSortingDisabled
                   [class]="day.cellClass"
+                  [style.height.px]="day.height"
                   [id]="dropListPrefix + day.key"
                   [cdkDropListData]="day.drop"
                   [cdkDropListDisabled]="readonly()"
@@ -215,6 +216,7 @@
                   cdkDropList
                   cdkDropListSortingDisabled
                   [class]="day.cellClass"
+                  [style.height.px]="day.height"
                   [id]="dropListPrefix + day.key"
                   [cdkDropListData]="day.drop"
                   [cdkDropListDisabled]="readonly()"

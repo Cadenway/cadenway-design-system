@@ -114,8 +114,9 @@ const CELL: string =
  * Constant OUTLINED_CELL
  *
  * @description
- * Classes for a month day of the `outlined` variant (mockup App.dc.html: `min-h-24 gap-1 p-1.5`;
- * the height stays fixed so the bars across days keep their lines).
+ * Classes for a month day of the `outlined` variant (mockup App.dc.html: `min-h-24 gap-1 p-1.5`).
+ * Its height is set per day from `maxPerDay` (`outlinedHeight`), at least these 96 px, so every
+ * line fits and the bars across days keep their fixed line positions.
  *
  * @type {string}
  */
@@ -509,6 +510,21 @@ const OUTLINED_TOP: 34 = 34;
  * @type {30}
  */
 const OUTLINED_LINE: 30 = 30;
+
+/**
+ * Function outlinedHeight
+ *
+ * @description
+ * Height of an `outlined` month day holding `lines` item lines: the first line's top (6 px of
+ * padding, the 24 px number row, the 4 px gap), the lines and their gaps, the 6 px bottom
+ * padding; 96 px for two lines, the mockup's `min-h-24`.
+ *
+ * @param {number} lines - Visible item lines of the day (`maxPerDay`).
+ * @returns {number} Height in pixels.
+ */
+function outlinedHeight(lines: number): number {
+  return Math.max(96, OUTLINED_TOP + lines * OUTLINED_LINE - 4 + 6);
+}
 
 /**
  * Interface Entry
@@ -1057,8 +1073,9 @@ export class CwCalendarView<T> implements CalendarViewHost {
    * Property variant
    *
    * @description
-   * Look of the month grid: `default`, or `outlined` (96 px days, other months on `bg-muted`,
-   * today in a filled circle, bordered item chips).
+   * Look of the month grid: `default`, or `outlined` (days of at least 96 px, as tall as
+   * `maxPerDay` lines need; other months on `bg-muted`, today in a filled circle, bordered item
+   * chips).
    *
    * @type {InputSignal<CwCalendarViewVariant>}
    * @readonly
@@ -1108,7 +1125,9 @@ export class CwCalendarView<T> implements CalendarViewHost {
    * Property maxPerDay
    *
    * @description
-   * Lines a day in the month view before « +n autres ».
+   * Lines a day in the month view before « +n autres ». In the `outlined` variant every day of
+   * the grid grows to hold them (96 px for two, +30 px a line), so no item is clipped and the bars
+   * across days keep their lines; the default variant keeps its 76 px days.
    *
    * @type {InputSignalWithTransform<number, unknown>}
    * @readonly
@@ -2654,6 +2673,7 @@ export class CwCalendarView<T> implements CalendarViewHost {
         numberClass: (outlined ? OUTLINED_NUMBERS : NUMBERS)[
           today ? 'today' : outside ? 'outside' : 'plain'
         ],
+        height: outlined ? outlinedHeight(lines) : null,
         headClass: HEADS[variant],
         addClass: outlined ? OUTLINED_ADD : ADD,
         spacerClass: SPACERS[variant],

@@ -328,6 +328,18 @@ export interface DayView {
   readonly numberClass: string;
 
   /**
+   * Property height
+   *
+   * @description
+   * Height in pixels of an `outlined` month day, from the visible lines; null for the other
+   * days, whose classes size them.
+   *
+   * @type {number | null}
+   * @readonly
+   */
+  readonly height: number | null;
+
+  /**
    * Property monthLabel
    *
    * @description
