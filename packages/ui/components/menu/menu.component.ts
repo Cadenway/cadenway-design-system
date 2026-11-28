@@ -700,8 +700,8 @@ export class CwMenu {
     const positions: ConnectedPosition[] = [
       ...(options.positions ??
         (parent
-        ? SUBMENU_POSITIONS
-        : ɵpanelPositions(this.side(), this.align(), this.sideOffset()))),
+          ? SUBMENU_POSITIONS
+          : ɵpanelPositions(this.side(), this.align(), this.sideOffset()))),
     ];
     // Mockup App.dc.html: on a phone the rail's menus and submenus dock above the tab bar. The
     // pane stays in the overlay container, as on a large screen: inserted after its trigger, a

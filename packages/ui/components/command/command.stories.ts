@@ -298,9 +298,7 @@ export const PaletteEscapeCloses: Story = {
       findByRole: (role: string, options: { name: string }) => Promise<HTMLElement>;
       queryByRole: (role: string) => HTMLElement | null;
     } = within(document.body);
-    await userEvent.click(
-      within(canvasElement).getByRole('button', { name: 'Ouvrir la palette' }),
-    );
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Ouvrir la palette' }));
     const palette: HTMLElement = await body.findByRole('dialog', { name: 'Palette de commandes' });
     const field: HTMLElement = within(palette).getByRole('combobox');
     await waitFor(() => expect(field).toHaveFocus());

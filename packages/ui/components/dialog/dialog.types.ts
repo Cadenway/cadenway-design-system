@@ -14,15 +14,7 @@
  * @type {'sm' | 'default' | 'md' | 'lg' | 'xl' | '2xl' | 'tall' | 'full' | 'screen'}
  */
 export type CwDialogSize =
-  | 'sm'
-  | 'default'
-  | 'md'
-  | 'lg'
-  | 'xl'
-  | '2xl'
-  | 'tall'
-  | 'full'
-  | 'screen';
+  'sm' | 'default' | 'md' | 'lg' | 'xl' | '2xl' | 'tall' | 'full' | 'screen';
 
 /**
  * Type CwDialogPlacement

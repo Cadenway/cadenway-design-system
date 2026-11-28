@@ -212,8 +212,12 @@ class LoopHost {
   imports: [CwToggleGroup, CwToggleGroupItem],
   template: `
     <cw-toggle-group variant="swatch" size="lg" ariaLabel="Couleur" [(value)]="color">
-      <button cwToggleGroupItem value="azur" aria-label="Azur"><span class="bg-azur"></span></button>
-      <button cwToggleGroupItem value="jade" aria-label="Jade"><span class="bg-jade"></span></button>
+      <button cwToggleGroupItem value="azur" aria-label="Azur">
+        <span class="bg-azur"></span>
+      </button>
+      <button cwToggleGroupItem value="jade" aria-label="Jade">
+        <span class="bg-jade"></span>
+      </button>
     </cw-toggle-group>
   `,
 })

@@ -166,7 +166,9 @@ export const Marker: Story = {
       </div>`,
   }),
   play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
-    const members: HTMLElement = within(light(canvasElement)).getByRole('meter', { name: 'Membres' });
+    const members: HTMLElement = within(light(canvasElement)).getByRole('meter', {
+      name: 'Membres',
+    });
     const mark: HTMLElement | null | undefined =
       members.parentElement?.querySelector<HTMLElement>('[data-marker]');
     await expect(mark?.style.left).toBe('80%');

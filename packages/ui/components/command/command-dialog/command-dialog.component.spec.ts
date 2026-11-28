@@ -27,11 +27,7 @@ import { CwCommandDialog } from './command-dialog.component';
   ],
   template: `
     <button type="button">Rechercher</button>
-    <cw-command-dialog
-      [(open)]="open"
-      [(search)]="search"
-      [clearOnEscape]="clearOnEscape()"
-    >
+    <cw-command-dialog [(open)]="open" [(search)]="search" [clearOnEscape]="clearOnEscape()">
       <input cwCommandInput aria-label="Rechercher une commande, une tâche, un espace" />
       <kbd cwCommandDialogHeader>Échap</kbd>
       <cw-command-list>

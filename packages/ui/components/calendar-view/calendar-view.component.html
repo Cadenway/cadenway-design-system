@@ -30,7 +30,10 @@
   @if (titled()) {
     <h2 class="text-base font-semibold" aria-live="polite">{{ title() }}</h2>
   } @else {
-    <ng-container [ngTemplateOutlet]="navigation" [ngTemplateOutletContext]="{ $implicit: false }" />
+    <ng-container
+      [ngTemplateOutlet]="navigation"
+      [ngTemplateOutletContext]="{ $implicit: false }"
+    />
     <div class="text-base font-semibold" aria-live="polite">{{ title() }}</div>
     <span class="flex-1"></span>
   }
@@ -50,8 +53,15 @@
     </button>
   }
   @if (titled()) {
-    <div role="group" class="ml-auto flex items-center gap-1" [attr.aria-label]="texts().navigation">
-      <ng-container [ngTemplateOutlet]="navigation" [ngTemplateOutletContext]="{ $implicit: true }" />
+    <div
+      role="group"
+      class="ml-auto flex items-center gap-1"
+      [attr.aria-label]="texts().navigation"
+    >
+      <ng-container
+        [ngTemplateOutlet]="navigation"
+        [ngTemplateOutletContext]="{ $implicit: true }"
+      />
     </div>
   }
   @if (viewToggle()) {

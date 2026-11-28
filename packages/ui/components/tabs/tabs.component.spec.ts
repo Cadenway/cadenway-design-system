@@ -586,7 +586,9 @@ describe('CwTabs', () => {
   template: `
     <cw-tabs variant="bar" value="pieces">
       <cw-tabs-list ariaLabel="Sections de la tâche">
-        <button cwTab value="pieces" [count]="2" countLabel="2 pièces jointes">Pièces jointes</button>
+        <button cwTab value="pieces" [count]="2" countLabel="2 pièces jointes">
+          Pièces jointes
+        </button>
       </cw-tabs-list>
     </cw-tabs>
   `,

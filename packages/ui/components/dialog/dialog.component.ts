@@ -701,7 +701,10 @@ export class CwDialog implements CwDialogContext {
    */
   private position(): Pick<ɵModalOverlayConfig, 'positionStrategy'> {
     if (this.placement() !== 'top' || this.size() === 'screen') return {};
-    const wide: boolean = this.document.defaultView?.matchMedia?.(WIDE_SCREEN).matches ?? true;
+    const view: (Window & typeof globalThis) | null = this.document.defaultView;
+    // Without matchMedia (a test DOM), the screen counts as wide.
+    const wide: boolean =
+      !view || typeof view.matchMedia !== 'function' || view.matchMedia(WIDE_SCREEN).matches;
     if (!wide) return {};
     return {
       positionStrategy: createGlobalPositionStrategy(this.injector)

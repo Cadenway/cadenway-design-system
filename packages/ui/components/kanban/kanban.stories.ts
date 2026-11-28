@@ -426,7 +426,9 @@ export const FillsHeight: Story = {
     const groups: HTMLElement[] = Array.from(
       canvasElement.querySelectorAll<HTMLElement>('cw-kanban-column[role="group"]'),
     );
-    const heights: number[] = groups.map((group) => Math.round(group.getBoundingClientRect().height));
+    const heights: number[] = groups.map((group) =>
+      Math.round(group.getBoundingClientRect().height),
+    );
     await expect(new Set(heights).size).toBe(1);
   },
 };

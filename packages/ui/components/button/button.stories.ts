@@ -98,7 +98,9 @@ export const PressedOutline: Story = {
       </button>`,
   }),
   play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
-    const toggle: HTMLElement = within(light(canvasElement)).getByRole('button', { name: 'Jalons' });
+    const toggle: HTMLElement = within(light(canvasElement)).getByRole('button', {
+      name: 'Jalons',
+    });
     await expect(toggle).toHaveAttribute('aria-pressed', 'true');
     await expect(getComputedStyle(toggle).backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
     await userEvent.click(toggle);

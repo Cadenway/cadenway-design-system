@@ -111,14 +111,6 @@ const CELL: string =
   ɵFOCUS_INSET;
 
 /**
- * Constant ALL_DAY_CELL
- *
- * @description
- * Classes for an all-day week cell.
- *
- * @type {string}
- */
-/**
  * Constant OUTLINED_CELL
  *
  * @description
@@ -184,6 +176,14 @@ const SPACERS: Record<CwCalendarViewVariant, string> = {
   outlined: 'h-[26px] shrink-0',
 };
 
+/**
+ * Constant ALL_DAY_CELL
+ *
+ * @description
+ * Classes for an all-day week cell.
+ *
+ * @type {string}
+ */
 const ALL_DAY_CELL: string =
   'group/day flex h-11 min-w-0 flex-col gap-0.5 overflow-hidden p-0.5 transition-colors motion-reduce:transition-none ' +
   ɵFOCUS_INSET;
@@ -271,14 +271,6 @@ const PILL: string =
   ɵFOCUS_INSET;
 
 /**
- * Constant PILL_TONES
- *
- * @description
- * Item pill classes by drag state.
- *
- * @type {{ readonly rest: "bg-muted dark:bg-secondary"; readonly grabbed: "cursor-grabbing bg-popover shadow-lg rotate-1 motion-reduce:rotate-0"; }}
- */
-/**
  * Constant OUTLINED_PILL
  *
  * @description
@@ -305,6 +297,14 @@ const OUTLINED_PILL_TONES: Record<'rest' | 'grabbed', string> = {
   grabbed: 'cursor-grabbing bg-popover shadow-lg rotate-1 motion-reduce:rotate-0',
 };
 
+/**
+ * Constant PILL_TONES
+ *
+ * @description
+ * Item pill classes by drag state.
+ *
+ * @type {{ readonly rest: "bg-muted dark:bg-secondary"; readonly grabbed: "cursor-grabbing bg-popover shadow-lg rotate-1 motion-reduce:rotate-0"; }}
+ */
 const PILL_TONES: {
   readonly rest: 'bg-muted dark:bg-secondary';
   readonly grabbed: 'cursor-grabbing bg-popover shadow-lg rotate-1 motion-reduce:rotate-0';
@@ -347,14 +347,6 @@ const MORE: string =
   'outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background';
 
 /**
- * Constant ADD
- *
- * @description
- * Classes for a day create control.
- *
- * @type {string}
- */
-/**
  * Constant OUTLINED_ADD
  *
  * @description
@@ -367,6 +359,14 @@ const OUTLINED_ADD: string =
   'group-hover/day:opacity-100 group-focus-within/day:opacity-100 focus-visible:opacity-100 [&_ng-icon]:[--ng-icon__size:0.875rem] ' +
   'outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background';
 
+/**
+ * Constant ADD
+ *
+ * @description
+ * Classes for a day create control.
+ *
+ * @type {string}
+ */
 const ADD: string =
   'relative isolate flex size-5 shrink-0 items-center justify-center overflow-hidden rounded-sm text-muted-foreground opacity-0 transition-colors hover:bg-accent hover:text-foreground ' +
   'group-hover/day:opacity-100 group-focus-within/day:opacity-100 focus-visible:opacity-100 [&_ng-icon]:[--ng-icon__size:0.875rem] ' +

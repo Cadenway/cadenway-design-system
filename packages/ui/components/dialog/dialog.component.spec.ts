@@ -539,7 +539,8 @@ describe('CwDialog placement, padding and bar header', () => {
   });
 
   it('pins the window 8vh from the top of a wide screen', () => {
-    const pane: HTMLElement | null | undefined = dialog()?.closest<HTMLElement>('.cdk-overlay-pane');
+    const pane: HTMLElement | null | undefined =
+      dialog()?.closest<HTMLElement>('.cdk-overlay-pane');
 
     expect(pane?.style.marginTop).toBe('8vh');
   });
