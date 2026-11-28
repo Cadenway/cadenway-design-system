@@ -84,6 +84,25 @@ export const Simple: Story = {
   }),
 };
 
+/** Consumer spacing: `class="gap-2"` wins over the card's 16 px gap, its layout defaults sitting
+ *  behind `:where()` (mockup `Compte.dc.html`, the notification matrix under its title). */
+export const ConsumerSpacing: Story = {
+  render: () => ({
+    template: `
+      <cw-card class="w-80 gap-2" aria-label="Notifications">
+        <cw-card-content><div class="text-sm font-medium">Notifications</div></cw-card-content>
+        <cw-card-content><p class="text-sm text-muted-foreground">Choisissez où vous êtes prévenu.</p></cw-card-content>
+      </cw-card>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const card: HTMLElement | null = light(canvasElement).querySelector('cw-card');
+    if (!card) throw new Error('Card missing');
+    await expect(getComputedStyle(card).rowGap).toBe('8px');
+    // The default vertical padding stays.
+    await expect(getComputedStyle(card).paddingTop).toBe('16px');
+  },
+};
+
 /** Header with an action, content and a footer link: Réglages › Membres de l'espace. */
 export const HeaderActionFooter: Story = {
   render: () => ({

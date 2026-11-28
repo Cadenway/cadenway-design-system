@@ -35,7 +35,9 @@ import type { CwAlertSize, CwAlertVariant } from './alert.types';
  *
  * @type {string}
  */
-const BASE: string = 'flex w-full gap-3 rounded-lg border px-4 text-sm';
+// The full width sits behind `:where()`: a consumer's `w-auto` with side margins wins, so an
+// alert inset in a card does not overflow it (mockup `Compte.dc.html`, two-step verification).
+const BASE: string = 'flex [:where(&)]:w-full gap-3 rounded-lg border px-4 text-sm';
 
 /**
  * Constant VARIANTS

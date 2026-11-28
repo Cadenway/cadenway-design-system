@@ -27,13 +27,14 @@ const BASE: string = 'flex flex-col rounded-xl border bg-card text-card-foregrou
  * Constant SIZES
  *
  * @description
- * Spacing classes for standard and dense cards.
+ * Spacing classes for standard and dense cards, behind `:where()` so a consumer's `gap-*` or
+ * padding class wins (mockup `Compte.dc.html`, the notification matrix: `gap-2`).
  *
  * @type {Record<CwCardSize, string>}
  */
 const SIZES: Record<CwCardSize, string> = {
-  default: 'gap-4 py-4',
-  sm: 'gap-2 p-3',
+  default: '[:where(&)]:gap-4 [:where(&)]:py-4',
+  sm: '[:where(&)]:gap-2 [:where(&)]:p-3',
 };
 
 /**

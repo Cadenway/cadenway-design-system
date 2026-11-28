@@ -82,7 +82,7 @@ export class CwEmptyMedia {
    */
   protected readonly classes: Signal<string> = computed(
     () =>
-      `mb-1 flex shrink-0 items-center justify-center rounded-lg bg-muted ${MEDIA_SIZES[this.empty?.size() ?? 'default']} ${MEDIA_TONES[this.tone()]}`,
+      `[:where(&)]:mb-1 flex shrink-0 items-center justify-center rounded-lg bg-muted ${MEDIA_SIZES[this.empty?.size() ?? 'default']} ${MEDIA_TONES[this.tone()]}`,
   );
   // #endregion
 }

@@ -30,13 +30,14 @@ const VARIANTS: Record<CwEmptyVariant, string> = {
  * Constant SIZES
  *
  * @description
- * Padding and spacing classes for standard and compact empty states.
+ * Padding and spacing classes for standard and compact empty states, behind `:where()` so a
+ * consumer's `gap-*` or padding class wins.
  *
  * @type {Record<CwEmptySize, string>}
  */
 const SIZES: Record<CwEmptySize, string> = {
-  default: 'gap-4 p-6',
-  sm: 'gap-3 p-4',
+  default: '[:where(&)]:gap-4 [:where(&)]:p-6',
+  sm: '[:where(&)]:gap-3 [:where(&)]:p-4',
 };
 
 /**

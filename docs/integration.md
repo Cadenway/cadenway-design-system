@@ -25,6 +25,7 @@ Source: `cw-brick-recipes` ([Claude](../.claude/skills/cw-brick-recipes/SKILL.md
 
 - One secondary entry point per brick (`@cadenway/ui/components/button`, `@cadenway/ui/components/menu`…), folder `packages/ui/components/<entry>/`; shared helpers in `@cadenway/ui/core`.
 - Variants and sizes are inputs; no `class` input.
+- The native `class` attribute serves layout only. A default a consumer may adjust (gap, padding, margin, width, a field legend's type) sits behind `[:where(&)]:` (specificity 0), so the consumer's class wins without a variant (`cwFieldSet`, `cwFieldLegend`, `cw-card`, `cw-empty`, `cw-empty-media`, `cw-alert`, spaced `cw-toggle-group`, the dialog `bar` header and scrollable footer, `cwSkeleton`); colors, borders and radii stay in variants.
 - Scope: the bricks the mockup uses, in six waves (primitives and form controls, overlays and pickers, dialogs and feedback, navigation, data blocks, rich text). Artifact components the mockup does not use are not built until a consumer needs them.
 - Task-specific parts of the sheets (`CwTaskCard`, status and priority badges with other keys, task defaults in Kanban or DataTable) are adapted to the boundary: generic inputs here, task assembly in `cadenway-webapp`.
 
