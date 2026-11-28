@@ -449,9 +449,12 @@ export class CwToolbar implements ToolbarHandle {
       this.observer.observe(this.element);
     });
 
-    // Controls added or removed: measure again once they are rendered.
+    // Controls added or removed, or `wrap` switched: measure again once the bar is rendered with
+    // its new controls and classes (a wrap switch may not change the bar's size, so the
+    // ResizeObserver would not fire).
     effect(() => {
       this.items();
+      this.wrap();
       untracked(() => {
         afterNextRender(
           () => {

@@ -377,6 +377,35 @@ describe('CwToolbar overflow', () => {
     expect(button(host, 'Exporter').style.display).toBe('');
   });
 
+  it('shows the controls held in « Plus » when wrap turns on, without a resize', async () => {
+    resize(250);
+    await fixture.whenStable();
+    expect(button(host, 'Grouper').style.display).toBe('none');
+
+    fixture.componentInstance.wrap.set(true);
+    await fixture.whenStable();
+
+    const toolbar: HTMLElement | null = host.querySelector<HTMLElement>('[role="toolbar"]');
+    expect(toolbar?.hasAttribute('data-overflowing')).toBe(false);
+    expect(button(host, 'Grouper').style.display).toBe('');
+    expect(button(host, 'Trier').style.display).toBe('');
+  });
+
+  it('moves the controls that do not fit into « Plus » when wrap turns off, without a resize', async () => {
+    fixture.componentInstance.wrap.set(true);
+    await fixture.whenStable();
+    resize(250);
+    await fixture.whenStable();
+    expect(button(host, 'Grouper').style.display).toBe('');
+
+    fixture.componentInstance.wrap.set(false);
+    await fixture.whenStable();
+
+    const toolbar: HTMLElement | null = host.querySelector<HTMLElement>('[role="toolbar"]');
+    expect(toolbar?.hasAttribute('data-overflowing')).toBe(true);
+    expect(button(host, 'Grouper').style.display).toBe('none');
+  });
+
   it('never moves pinned controls', async () => {
     resize(150);
     await fixture.whenStable();
