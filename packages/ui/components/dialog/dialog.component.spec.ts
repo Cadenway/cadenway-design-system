@@ -557,6 +557,37 @@ describe('CwDialog placement, padding and bar header', () => {
   });
 });
 
+/**
+ * Component ResizedPlacedHost
+ *
+ * @description
+ * Hosts an open top-placed dialog whose size the test switches between a window and `screen`.
+ */
+@Component({
+  imports: [CwDialog, CwDialogHeader, CwDialogTitle],
+  template: `
+    <cw-dialog [open]="true" [size]="size()" placement="top">
+      <cw-dialog-header>
+        <h2 cwDialogTitle>Créer une tâche</h2>
+      </cw-dialog-header>
+    </cw-dialog>
+  `,
+})
+class ResizedPlacedHost {
+  // #region Properties
+  /**
+   * Property size
+   * @readonly
+   *
+   * @description
+   * Size given to the dialog.
+   *
+   * @type {WritableSignal<CwDialogSize>}
+   */
+  public readonly size: WritableSignal<CwDialogSize> = signal<CwDialogSize>('xl');
+  // #endregion
+}
+
 describe('CwDialog placement across the 768 px breakpoint', () => {
   let wide: boolean;
   let listeners: ((event: MediaQueryListEvent) => void)[];
@@ -622,6 +653,45 @@ describe('CwDialog placement across the 768 px breakpoint', () => {
     await fixture.whenStable();
     expect(pane()?.style.marginTop).toBe('8vh');
 
+    fixture.destroy();
+    expect(listeners).toHaveLength(0);
+  });
+
+  it('drops the top offset and the breakpoint watch when the window becomes a screen', async () => {
+    const fixture: ComponentFixture<ResizedPlacedHost> = TestBed.createComponent(ResizedPlacedHost);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    expect(pane()?.style.marginTop).toBe('8vh');
+    expect(listeners).toHaveLength(1);
+
+    fixture.componentInstance.size.set('screen');
+    await fixture.whenStable();
+    expect(pane()?.style.marginTop).not.toBe('8vh');
+    expect(listeners).toHaveLength(0);
+
+    cross(false);
+    cross(true);
+    await fixture.whenStable();
+    expect(pane()?.style.marginTop).not.toBe('8vh');
+    fixture.destroy();
+  });
+
+  it('takes the top offset and the breakpoint watch when a screen becomes a window', async () => {
+    const fixture: ComponentFixture<ResizedPlacedHost> = TestBed.createComponent(ResizedPlacedHost);
+    fixture.componentInstance.size.set('screen');
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    expect(pane()?.style.marginTop).not.toBe('8vh');
+    expect(listeners).toHaveLength(0);
+
+    fixture.componentInstance.size.set('xl');
+    await fixture.whenStable();
+    expect(pane()?.style.marginTop).toBe('8vh');
+    expect(listeners).toHaveLength(1);
+
+    cross(false);
+    await fixture.whenStable();
+    expect(pane()?.style.marginTop).not.toBe('8vh');
     fixture.destroy();
     expect(listeners).toHaveLength(0);
   });

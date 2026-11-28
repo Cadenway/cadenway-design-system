@@ -621,6 +621,15 @@ export class CwDialog implements CwDialogContext {
         this.overlay.resize(layout);
       });
     });
+    // So does the position: a size or placement change while open moves the pane and starts or
+    // stops following the 768 px breakpoint (a `screen` dialog is never offset).
+    effect(() => {
+      this.placement();
+      this.size();
+      untracked(() => {
+        this.syncPosition();
+      });
+    });
     inject(DestroyRef).onDestroy(() => {
       this.unwatchBreakpoint();
       this.overlay.dispose();
@@ -739,6 +748,34 @@ export class CwDialog implements CwDialogContext {
       this.injector,
     ).centerHorizontally();
     return wide ? strategy.top(TOP_OFFSET) : strategy.centerVertically();
+  }
+
+  /**
+   * Method centered
+   *
+   * @description
+   * The CDK's default dialog position: centered both ways.
+   *
+   * @returns {PositionStrategy} A centered global position strategy.
+   */
+  private centered(): PositionStrategy {
+    return createGlobalPositionStrategy(this.injector).centerHorizontally().centerVertically();
+  }
+
+  /**
+   * Method syncPosition
+   *
+   * @description
+   * Applies the position of the current size and placement to the open window and watches the
+   * breakpoint only when it is placed at the top; does nothing while closed.
+   */
+  private syncPosition(): void {
+    if (!this.overlay.attached) return;
+    this.watchBreakpoint();
+    const top: boolean = this.placement() === 'top' && this.size() !== 'screen';
+    this.overlay.reposition(
+      top ? this.strategy(this.wideQuery()?.matches ?? true) : this.centered(),
+    );
   }
 
   /**
