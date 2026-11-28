@@ -495,6 +495,18 @@ describe('CwDialog size', () => {
     expect(panel().classList).toContain('max-md:h-dvh');
   });
 
+  it('makes the always-scrolling body of a tall or full dialog a focusable scroll region', async () => {
+    for (const size of ['tall', 'full'] as const) {
+      fixture.componentInstance.size.set(size);
+      await fixture.whenStable();
+      const body: Element | undefined = Array.from(panel().children).find((child: Element) =>
+        child.classList.contains('overflow-y-auto'),
+      );
+
+      expect(body?.getAttribute('tabindex')).toBe('0');
+    }
+  });
+
   it('keeps 672 px for size lg and fills the screen under 768 px at every size', async () => {
     fixture.componentInstance.size.set('lg');
     await fixture.whenStable();

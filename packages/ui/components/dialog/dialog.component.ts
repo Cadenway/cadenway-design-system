@@ -189,7 +189,7 @@ const BODIES: Readonly<
   Record<'simple' | 'full' | 'screen' | 'scrollable' | 'scrollableFlush', string>
 > = {
   simple: 'min-h-0 min-w-0 flex-1 empty:hidden max-md:overflow-y-auto',
-  full: 'min-h-0 min-w-0 flex-1 overflow-y-auto empty:hidden',
+  full: `min-h-0 min-w-0 flex-1 overflow-y-auto empty:hidden ${ɵFOCUS_INSET}`,
   screen: `min-h-0 min-w-0 flex-1 overflow-y-auto empty:hidden ${ɵFOCUS_INSET}`,
   scrollable: `min-h-0 flex-1 overflow-y-auto px-6 py-3 [scrollbar-color:var(--color-track)_transparent] [scrollbar-width:thin] ${ɵFOCUS_INSET}`,
   scrollableFlush: `min-h-0 flex-1 overflow-y-auto [scrollbar-color:var(--color-track)_transparent] [scrollbar-width:thin] ${ɵFOCUS_INSET}`,
@@ -471,13 +471,18 @@ export class CwDialog implements CwDialogContext {
    * @readonly
    *
    * @description
-   * Whether the body is a focusable scroll region: a `scrollable` dialog, and always a `screen` one
-   * (its body always scrolls), so a keyboard can reach overflowing static content.
+   * Whether the body is a focusable scroll region: a `scrollable` dialog, and always a `screen`,
+   * `full` or `tall` one (their body always scrolls), so a keyboard can reach overflowing static
+   * content.
    *
    * @type {Signal<boolean>}
    */
   protected readonly bodyFocusable: Signal<boolean> = computed(
-    () => this.scrollable() || this.size() === 'screen',
+    () =>
+      this.scrollable() ||
+      this.size() === 'screen' ||
+      this.size() === 'full' ||
+      this.size() === 'tall',
   );
 
   /**
