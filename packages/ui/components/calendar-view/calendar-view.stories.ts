@@ -432,6 +432,82 @@ export const Keyboard: Story = {
   },
 };
 
+/**
+ * Pointer drag onto a day under a bar: « Notifications de mention » dragged from the 17th to the
+ * 18th, both covered by the 16–18 bar, lands on the 18th, not on the bar's first day.
+ */
+export const DragOverBar: Story = {
+  render: () => ({
+    props,
+    template: `<cw-calendar-view ${VIEW} [date]="november">${ITEM}</cw-calendar-view>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+    } = within(light(canvasElement));
+    const pill: HTMLElement = scope.getByRole('button', { name: 'Notifications de mention' });
+    const bar: HTMLElement = scope.getByRole('button', {
+      name: 'Maquetter la vue Calendrier, du 16 au 18 nov.',
+    });
+    const day: () => HTMLElement = () =>
+      scope.getByRole('gridcell', { name: /^mercredi 18 novembre 2026/ });
+    // Wait for the entrance animations, so the rectangles are final.
+    await waitFor(() => expect(getComputedStyle(bar).opacity).toBe('1'));
+    const from: DOMRect = pill.getBoundingClientRect();
+    const over: DOMRect = bar.getBoundingClientRect();
+    const cell: DOMRect = day().getBoundingClientRect();
+    const start: { clientX: number; clientY: number } = {
+      clientX: from.left + from.width / 2,
+      clientY: from.top + from.height / 2,
+    };
+    const end: { clientX: number; clientY: number } = {
+      clientX: cell.left + cell.width / 2,
+      clientY: over.top + over.height / 2,
+    };
+    // At rest the bar is under that point and stays clickable.
+    await expect(document.elementFromPoint(end.clientX, end.clientY)?.closest('button')).toBe(bar);
+    // Real mouse events, as the CDK reads them (`buttons` and `detail` tell them from a screen
+    // reader's simulated press).
+    const mouse: (type: string, at: { clientX: number; clientY: number }) => MouseEvent = (
+      type: string,
+      at: { clientX: number; clientY: number },
+    ): MouseEvent =>
+      new MouseEvent(type, {
+        bubbles: true,
+        cancelable: true,
+        button: 0,
+        buttons: 1,
+        detail: 1,
+        ...at,
+      });
+    const frame: () => Promise<void> = () =>
+      new Promise((resolve) => {
+        requestAnimationFrame(() => {
+          resolve();
+        });
+      });
+    pill.dispatchEvent(mouse('mousedown', start));
+    document.dispatchEvent(
+      mouse('mousemove', { clientX: start.clientX + 10, clientY: start.clientY }),
+    );
+    await frame();
+    await frame();
+    for (let step: number = 1; step <= 8; step++) {
+      document.dispatchEvent(
+        mouse('mousemove', {
+          clientX: start.clientX + ((end.clientX - start.clientX) * step) / 8,
+          clientY: start.clientY + ((end.clientY - start.clientY) * step) / 8,
+        }),
+      );
+      await frame();
+    }
+    document.dispatchEvent(mouse('mouseup', end));
+    await waitFor(() =>
+      expect(within(day()).getByRole('button', { name: 'Notifications de mention' })).toBeVisible(),
+    );
+  },
+};
+
 /** Space grabs an item, the arrows choose the day, Space drops it there. */
 export const KeyboardMove: Story = {
   render: () => ({

@@ -19,7 +19,9 @@ Align a third batch of bricks with the mockup (`App.dc.html`, `Compte.dc.html`).
   (a Monday–Wednesday bar grabbed on Tuesday and dropped on Wednesday starts on Tuesday), and a
   drop back on that day emits no `itemMove`. Pills, blocks and keyboard moves keep moving the
   item's start onto the target. An item or outside item released outside every day and slot is
-  left where it is (no `itemMove`, no `itemSchedule`).
+  left where it is (no `itemMove`, no `itemSchedule`). During a drag, bars let the pointer through
+  to the days they cover, so an item can be dropped on a day under a bar; they stay clickable
+  otherwise.
 - `cw-card`: a standard card holding a `cw-card-footer` drops its bottom padding, and the footer
   frames itself with `py-3` (12 px above and below its content, the mockup's `Compte.dc.html`
   blocks) instead of 12 px above and the card's 16 px below. Cards without a footer and `sm`

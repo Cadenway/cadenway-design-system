@@ -263,8 +263,9 @@ const COLUMNS: { readonly 5: 'grid grid-cols-5'; readonly 7: 'grid grid-cols-7' 
  * Constant PILL
  *
  * @description
- * Classes for an item pill, without its position: `itemView` adds `relative`, or `absolute` for
- * a bar across days (both set `position`, and the later `relative` would win in the stylesheet).
+ * Classes for an item pill, without its position: `itemView` adds `relative`, or `BAR_POSITION`
+ * for a bar across days (both set `position`, and the later `relative` would win in the
+ * stylesheet).
  *
  * @type {string}
  */
@@ -286,6 +287,21 @@ const OUTLINED_PILL: string =
   'isolate flex h-[26px] min-w-0 shrink-0 items-center gap-1.5 overflow-hidden rounded-md border px-1.5 text-left text-xs transition-colors ' +
   'hover:bg-linear-to-b hover:from-hover hover:to-hover animate-item-in motion-reduce:animate-none [&_ng-icon]:[--ng-icon__size:0.75rem] ' +
   ɵFOCUS_INSET;
+
+/**
+ * Constant BAR_POSITION
+ *
+ * @description
+ * Position of a bar across days: on its line from the row, out of the flow of its first day. A
+ * bar is in the DOM of its first day's drop list but covers the next days, and the CDK checks the
+ * element under the pointer (`elementFromPoint`) to find the list a drag is over; during a drag,
+ * while the CDK marks its day as dragging or receiving (own items and outside items alike), the
+ * bar lets the pointer through to the day beneath. It stays clickable otherwise.
+ *
+ * @type {string}
+ */
+const BAR_POSITION: string =
+  'absolute in-[.cdk-drop-list-dragging]:pointer-events-none in-[.cdk-drop-list-receiving]:pointer-events-none';
 
 /**
  * Constant OUTLINED_PILL_TONES
@@ -2890,7 +2906,7 @@ export class CwCalendarView<T> implements CalendarViewHost {
   ): ItemView {
     // A bar across days is placed on its line from the row (`top`, `left`, `width`), out of the
     // flow of its first day, so the day neither pushes it down nor clips it.
-    const position: string = view === 'bar' ? 'absolute' : 'relative';
+    const position: string = view === 'bar' ? BAR_POSITION : 'relative';
     const frame: string = outlined
       ? `${position} ${OUTLINED_PILL} ${OUTLINED_PILL_TONES[grabbed ? 'grabbed' : 'rest']}`
       : `${position} ${PILL} ${PILL_TONES[grabbed ? 'grabbed' : 'rest']}`;
