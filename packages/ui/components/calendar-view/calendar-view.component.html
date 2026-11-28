@@ -277,7 +277,9 @@
                       [cdkDragDisabled]="readonly()"
                       [attr.title]="block.title"
                       [attr.tabindex]="cell.tabStop ? 0 : -1"
-                      (cdkDragStarted)="onDragStart(block.id)"
+                      (cdkDragStarted)="
+                        onItemDragStart(block.id, $event.source.element.nativeElement)
+                      "
                       (cdkDragEnded)="onDragEnd()"
                       (click)="openItem(block.context)"
                       (keydown)="onItemKeydown($event, block.id)"

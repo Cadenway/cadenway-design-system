@@ -1543,11 +1543,22 @@ export class CwCalendarView<T> implements CalendarViewHost {
   private readonly dragging: WritableSignal<string | null> = signal<string | null>(null);
 
   /**
+   * Property barPress
+   *
+   * @description
+   * The bar last pressed with the pointer, its element and the day under the pointer; turned into
+   * `barGrab` or discarded by the next drag start.
+   *
+   * @type {{ id: string; element: HTMLElement; day: Date } | null}
+   */
+  private barPress: { id: string; element: HTMLElement; day: Date } | null = null;
+
+  /**
    * Property barGrab
    *
    * @description
-   * The bar last pressed with the pointer and the day it was pressed on; read and cleared by the
-   * drop (the CDK ends the drag before it drops, so the drag end cannot clear it).
+   * The day the bar being dragged was grabbed by, for the drag in progress only; read and cleared
+   * by the drop (the CDK ends the drag before it drops, so the drag end cannot clear it).
    *
    * @type {{ id: string; day: Date } | null}
    */
@@ -2123,12 +2134,34 @@ export class CwCalendarView<T> implements CalendarViewHost {
    * Method onDragStart
    *
    * @description
-   * Part handler (`CalendarViewHost`), not for consumers.
+   * Marks an item as being dragged, without a grabbed day: the item moves by its start. Kept with
+   * its published signature; the calendar's parts call `onItemDragStart`.
    *
    * @param {string} id - Identifier of the item.
    */
   public onDragStart(id: string): void {
     this.dragging.set(id);
+    this.barPress = null;
+    this.barGrab = null;
+  }
+
+  /**
+   * Method onItemDragStart
+   *
+   * @description
+   * Part handler (`CalendarViewHost`), not for consumers. The day a bar was pressed on is kept for
+   * this drag only when it starts from that bar element; a press that never became a drag (a
+   * click), or one on another element, is dropped here.
+   *
+   * @param {string} id - Identifier of the item.
+   * @param {HTMLElement} element - Element the drag starts from.
+   */
+  public onItemDragStart(id: string, element: HTMLElement): void {
+    this.dragging.set(id);
+    const pressed: { id: string; element: HTMLElement; day: Date } | null = this.barPress;
+    this.barPress = null;
+    this.barGrab =
+      pressed?.id === id && pressed.element === element ? { id, day: pressed.day } : null;
   }
 
   /**
@@ -2148,7 +2181,7 @@ export class CwCalendarView<T> implements CalendarViewHost {
     const index: number =
       rect.width > 0 ? Math.floor(((event.clientX - rect.left) / rect.width) * bar.days.length) : 0;
     const day: Date | undefined = bar.days.at(Math.min(Math.max(index, 0), bar.days.length - 1));
-    this.barGrab = day ? { id: bar.id, day } : null;
+    this.barPress = day ? { id: bar.id, element: target, day } : null;
   }
 
   /**
@@ -2207,18 +2240,22 @@ export class CwCalendarView<T> implements CalendarViewHost {
    * Method onDrop
    *
    * @description
-   * Moves a dragged item to its drop target, or emits `itemSchedule` for an outside item.
+   * Moves a dragged item to its drop target, or emits `itemSchedule` for an outside item; does
+   * nothing for an item released outside every day and slot.
    *
    * @param {CdkDragDrop<DropData, DropData, unknown>} event - Drag or keyboard event.
    */
   protected onDrop(event: CdkDragDrop<DropData, DropData, unknown>): void {
     this.externalOver.set(null);
+    const grab: { id: string; day: Date } | null = this.barGrab;
+    this.barGrab = null;
+    // The CDK also drops an item released outside any list, into the last list it entered: the
+    // drag is abandoned, for the calendar's items and outside items alike.
+    if (!event.isPointerOverContainer) return;
     if (this.ownsList(event.previousContainer)) {
       const entry: Entry<T> | undefined = this.entries().find(
         (candidate) => candidate.id === event.item.data,
       );
-      const grab: { id: string; day: Date } | null = this.barGrab;
-      this.barGrab = null;
       const grabbedBy: Date | undefined = entry && grab?.id === entry.id ? grab.day : undefined;
       // A bar moves by the days between the day it was grabbed by and the target, so it can land
       // back in the list it is drawn in (its first day); a pill or a block moves by its start, and
