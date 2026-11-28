@@ -1139,10 +1139,8 @@ describe('CwChart value labels', () => {
     expect(tagX()).toBeGreaterThan(barCenter('chart-1'));
   });
 
-  it('keeps wide labels of the first and last categories inside the plot', async () => {
-    fixture.componentInstance.valueFormat.set(
-      (value: number) => `${String(value)} tâches terminées`,
-    );
+  it('keeps wide labels of the first and last categories inside the plot bounds', async () => {
+    fixture.componentInstance.valueFormat.set((value: number) => `${String(value)} tâches`);
     fixture.componentInstance.current.set('S12');
     fixture.componentInstance.data.set(
       Array.from({ length: 12 }, (_, index) => ({
@@ -1159,8 +1157,13 @@ describe('CwChart value labels', () => {
         const x: number = Number(text.getAttribute('x'));
         return { left: x - half, right: x + half };
       });
+    // The value axis labels end 5 px before the plot's left bound (the gutter).
+    const tick: Element | undefined = Array.from(host.querySelectorAll('svg text')).find(
+      (text) => text.getAttribute('text-anchor') === 'end',
+    );
+    const gutter: number = Number(tick?.getAttribute('x')) + 5;
     expect(boxes).toHaveLength(2);
-    expect(boxes[0].left).toBeGreaterThanOrEqual(0);
+    expect(boxes[0].left).toBeGreaterThanOrEqual(gutter);
     expect(boxes[1].right).toBeLessThanOrEqual(width);
   });
 
