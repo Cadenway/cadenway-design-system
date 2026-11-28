@@ -273,6 +273,17 @@ const CURRENT_FILL: string = 'opacity-45';
  * @type {number}
  */
 const VALUE_LABEL_ROOM: number = 20;
+
+/**
+ * Constant MARKER_LABEL_ROOM
+ *
+ * @description
+ * Extra room above the value labels when a marker is drawn: marker labels sit on the line at
+ * y 14, so the tallest bar's value is pushed below them instead of overprinting them.
+ *
+ * @type {number}
+ */
+const MARKER_LABEL_ROOM: number = 16;
 /**
  * Constant EMPTY_HEIGHTS
  *
@@ -1427,9 +1438,11 @@ export class CwChart {
    * `current` category). One label per category: the stack total when stacked, else the category's
    * highest value, over the bar that holds it (the first on a tie); a category at 0 is labelled on
    * the baseline, one without any value is not. Negative values are neither drawn nor labelled: a
-   * category whose highest value is negative, or a stack with a negative part, gets no label. Left
-   * to right, a label that would touch the previous one is dropped. They go through `valueFormat`
-   * and are hidden from assistive technologies, which read the data table.
+   * category whose highest value is negative, or a stack with a negative part, gets no label. Labels
+   * stay inside the plot, the first and last sliding inward when wide; left to right, a label that
+   * would touch the previous one is dropped. With `markers`, the plot leaves room for the marker
+   * labels above the value labels. They go through `valueFormat` and are hidden from assistive
+   * technologies, which read the data table.
    *
    * @type {InputSignal<CwChartValueLabels>}
    * @readonly
@@ -1734,8 +1747,12 @@ export class CwChart {
     const width: number = this.width();
     const height: number = HEIGHTS[this.size()];
     const fontSize: number = AXIS_FONT_SIZES[this.size()];
+    const keys: string[] = this.keys();
+    const marked: boolean = this.markers().some((marker) => keys.includes(marker.x));
     const top: number =
-      this.type() === 'bar' && this.valueLabels() !== 'none' ? VALUE_LABEL_ROOM : TOP;
+      this.type() === 'bar' && this.valueLabels() !== 'none'
+        ? VALUE_LABEL_ROOM + (marked ? MARKER_LABEL_ROOM : 0)
+        : TOP;
     const series: CwChartSeries[] = this.visibleSeries();
     const data: readonly Readonly<Record<string, string | number | null | undefined>>[] =
       this.shownData();
@@ -1839,7 +1856,8 @@ export class CwChart {
    * stacked, else the highest value of the category (the bar itself with one series), centered on
    * the column or on the bar supplying that value (the first one on a tie). A category at 0 is
    * labelled on the baseline; one without any value, whose highest value is negative, or whose stack
-   * has a negative part gets none. Left to right, a label that
+   * has a negative part gets none. A label is kept inside the plot (edge ones slide inward) before
+   * the collision check. Left to right, a label that
    * would come within 4 px of the previous one is dropped, measured at the axis font size.
    *
    * @type {Signal<readonly BarTag[]>}
@@ -1848,7 +1866,7 @@ export class CwChart {
   protected readonly barTags: Signal<readonly BarTag[]> = computed<readonly BarTag[]>(() => {
     const labels: CwChartValueLabels = this.valueLabels();
     if (labels === 'none' || this.type() !== 'bar' || this.horizontal()) return [];
-    const { y }: { y: (value: number) => number } = this.frame();
+    const { y, width }: { y: (value: number) => number; width: number } = this.frame();
     const data: readonly Readonly<Record<string, string | number | null | undefined>>[] =
       this.shownData();
     const current: string | null = this.current();
@@ -1864,9 +1882,11 @@ export class CwChart {
       if (labels === 'peak' && !highlighted) continue;
       const text: string = format(value);
       const half: number = labelWidth(text, fontSize) / 2;
-      const x: number = this.stacked()
+      const center: number = this.stacked()
         ? category.center
         : this.tagCenter(category, data[category.index], value);
+      // Keep the label inside the plot: an edge label slides inward rather than being clipped.
+      const x: number = clamp(center, half, Math.max(half, width - half));
       if (x - half < previousRight + 4) continue;
       previousRight = x + half;
       tags.push({ key: category.key, x: round(x), y: round(y(value) - 6), text });

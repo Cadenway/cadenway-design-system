@@ -12,6 +12,7 @@ import type {
   CwChartOrientation,
   CwChartSeries,
   CwChartType,
+  CwChartValueFormat,
   CwChartValueLabels,
 } from './chart.types';
 
@@ -876,6 +877,8 @@ describe('CwChart large completion chart', () => {
       [stacked]="stacked()"
       [current]="current()"
       [valueLabels]="valueLabels()"
+      [valueFormat]="valueFormat()"
+      [markers]="markers()"
       [legend]="false"
       ariaLabel="Tâches par semaine"
     />
@@ -944,6 +947,32 @@ class LabelsHost {
    */
   public readonly valueLabels: WritableSignal<CwChartValueLabels> =
     signal<CwChartValueLabels>('peak');
+
+  /**
+   * Property valueFormat
+   *
+   * @description
+   * Formatter of the values; plain digits by default.
+   *
+   * @type {WritableSignal<CwChartValueFormat>}
+   * @readonly
+   */
+  public readonly valueFormat: WritableSignal<CwChartValueFormat> = signal<CwChartValueFormat>(
+    (value: number) => String(value),
+  );
+
+  /**
+   * Property markers
+   *
+   * @description
+   * Vertical reference lines.
+   *
+   * @type {WritableSignal<readonly CwChartMarker[]>}
+   * @readonly
+   */
+  public readonly markers: WritableSignal<readonly CwChartMarker[]> = signal<
+    readonly CwChartMarker[]
+  >([]);
   // #endregion
 }
 
@@ -1108,6 +1137,45 @@ describe('CwChart value labels', () => {
     await fixture.whenStable();
     expect(tagX()).toBeCloseTo(barCenter('chart-3'), 0);
     expect(tagX()).toBeGreaterThan(barCenter('chart-1'));
+  });
+
+  it('keeps wide labels of the first and last categories inside the plot', async () => {
+    fixture.componentInstance.valueFormat.set(
+      (value: number) => `${String(value)} tâches terminées`,
+    );
+    fixture.componentInstance.current.set('S12');
+    fixture.componentInstance.data.set(
+      Array.from({ length: 12 }, (_, index) => ({
+        week: `S${String(index + 1)}`,
+        done: index === 0 ? 1000 : 5,
+      })),
+    );
+    await fixture.whenStable();
+    const width: number = Number(host.querySelector('svg')?.getAttribute('viewBox')?.split(' ')[2]);
+    const boxes: { left: number; right: number }[] = Array.from(host.querySelectorAll('svg text'))
+      .filter((text) => text.classList.contains('font-medium'))
+      .map((text) => {
+        const half: number = (text.textContent.trim().length * 5.5) / 2;
+        const x: number = Number(text.getAttribute('x'));
+        return { left: x - half, right: x + half };
+      });
+    expect(boxes).toHaveLength(2);
+    expect(boxes[0].left).toBeGreaterThanOrEqual(0);
+    expect(boxes[1].right).toBeLessThanOrEqual(width);
+  });
+
+  it('pushes value labels below a marker label', async () => {
+    fixture.componentInstance.markers.set([{ x: 'S44', label: 'Aujourd’hui' }]);
+    await fixture.whenStable();
+    const texts: Element[] = Array.from(host.querySelectorAll('svg text'));
+    const marker: Element | undefined = texts.find(
+      (text) => text.textContent.trim() === 'Aujourd’hui',
+    );
+    const peak: Element | undefined = texts.find(
+      (text) => text.classList.contains('tabular-nums') && text.textContent.trim() === '6',
+    );
+    // Marker text ends at its baseline; the value label's box starts a font size above its own.
+    expect(Number(peak?.getAttribute('y')) - 10).toBeGreaterThan(Number(marker?.getAttribute('y')));
   });
 
   it('drops a label that would overlap its left neighbour', async () => {

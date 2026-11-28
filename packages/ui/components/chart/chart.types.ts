@@ -48,7 +48,8 @@ export type CwChartSize = 'sm' | 'default' | 'lg';
  * category. One label per category: a stacked column shows its total, grouped bars their highest
  * value over the bar that holds it; 0 sits on the baseline, and a label that would overlap its left neighbour is dropped.
  * Negative values are neither drawn nor labelled: a category whose highest value is negative, or a
- * stack with a negative part, gets no label.
+ * stack with a negative part, gets no label. Labels stay inside the plot, and with markers the plot
+ * leaves room for the marker labels above them.
  *
  * @type {'none' | 'all' | 'peak'}
  */
