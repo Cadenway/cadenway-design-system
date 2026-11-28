@@ -37,7 +37,8 @@ const BASE: string =
 const SIZES: Record<CwInputSize, string> = {
   sm: 'h-7 rounded-md px-2',
   default: 'h-8 rounded-lg px-2.5',
-  lg: 'h-9 rounded-lg px-3',
+  // Mockup App.dc.html, onboarding space name: `h-9 px-2.5`.
+  lg: 'h-9 rounded-lg px-2.5',
 };
 
 /**
