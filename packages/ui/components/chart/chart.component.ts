@@ -48,6 +48,7 @@ import type {
   CwChartSize,
   CwChartType,
   CwChartValueFormat,
+  CwChartValueLabels,
 } from './chart.types';
 
 /* Literal class strings, one per data color (Chart sheet and preview of the Design System
@@ -224,7 +225,54 @@ const PLOT: string = `relative block rounded-md ${ɵFOCUS}`;
  *
  * @type {Record<CwChartSize, number>}
  */
-const HEIGHTS: Record<CwChartSize, number> = { default: 150, sm: 120 };
+const HEIGHTS: Record<CwChartSize, number> = { default: 150, sm: 120, lg: 192 };
+
+/**
+ * Constant AXIS_FONT_SIZES
+ *
+ * @description
+ * Font size of the axis, category and value labels by chart size, in pixels: the sheet's 10 px, and
+ * `text-xs` for `lg` (mockup App.dc.html, the weekly completion chart).
+ *
+ * @type {Record<CwChartSize, number>}
+ */
+const AXIS_FONT_SIZES: Record<CwChartSize, number> = { default: 10, sm: 10, lg: 12 };
+
+/**
+ * Constant AXIS_TEXT
+ *
+ * @description
+ * Literal font-size classes matching `AXIS_FONT_SIZES`.
+ *
+ * @type {Record<CwChartSize, string>}
+ */
+const AXIS_TEXT: Record<CwChartSize, string> = {
+  default: 'text-[10px]',
+  sm: 'text-[10px]',
+  lg: 'text-xs',
+};
+
+/**
+ * Constant CURRENT_FILL
+ *
+ * @description
+ * The category still in progress is drawn lighter (mockup App.dc.html: the current week's bar is
+ * `bg-chart-1/45`).
+ *
+ * @type {string}
+ */
+const CURRENT_FILL: string = 'opacity-45';
+
+/**
+ * Constant VALUE_LABEL_ROOM
+ *
+ * @description
+ * Room kept above the plot when bars carry their value (mockup App.dc.html: `pt-5`, the value sits
+ * `-top-5` above its bar).
+ *
+ * @type {number}
+ */
+const VALUE_LABEL_ROOM: number = 20;
 /**
  * Constant EMPTY_HEIGHTS
  *
@@ -236,6 +284,7 @@ const HEIGHTS: Record<CwChartSize, number> = { default: 150, sm: 120 };
 const EMPTY_HEIGHTS: Record<CwChartSize, string> = {
   default: 'flex h-[150px] flex-col items-center justify-center gap-1.5 text-center',
   sm: 'flex h-[120px] flex-col items-center justify-center gap-1.5 text-center',
+  lg: 'flex h-48 flex-col items-center justify-center gap-1.5 text-center',
 };
 /**
  * Constant SKELETON_HEIGHTS
@@ -248,6 +297,7 @@ const EMPTY_HEIGHTS: Record<CwChartSize, string> = {
 const SKELETON_HEIGHTS: Record<CwChartSize, string> = {
   default: 'h-[150px] w-full rounded-lg',
   sm: 'h-[120px] w-full rounded-lg',
+  lg: 'h-48 w-full rounded-lg',
 };
 
 // Plot frame of the vertical charts (sheet preview: grid from y 6 to H − 22, labels at H − 7).
@@ -560,6 +610,60 @@ interface BarShape {
    * @readonly
    */
   readonly fill: string;
+
+  /**
+   * Property tag
+   *
+   * @description
+   * Value written above the bar (`valueLabels`), or undefined.
+   *
+   * @type {BarTag | undefined}
+   * @readonly
+   */
+  readonly tag?: BarTag;
+  // #endregion
+}
+
+/**
+ * Interface BarTag
+ *
+ * @description
+ * A value label drawn above a vertical bar.
+ */
+interface BarTag {
+  // #region Properties
+  /**
+   * Property x
+   *
+   * @description
+   * Horizontal center of the label.
+   *
+   * @type {number}
+   * @readonly
+   */
+  readonly x: number;
+
+  /**
+   * Property y
+   *
+   * @description
+   * Baseline of the label.
+   *
+   * @type {number}
+   * @readonly
+   */
+  readonly y: number;
+
+  /**
+   * Property text
+   *
+   * @description
+   * Formatted value.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly text: string;
   // #endregion
 }
 
@@ -1012,7 +1116,7 @@ interface MarkerShape {
  * Component CwChart
  *
  * @description
- * A dashboard chart drawn in SVG by Cadenway, without a third-party library: grouped or stacked bars, horizontal bars on a capacity track, lines, areas with a dashed reference, or a ring (Chart sheet of the Design System artifact). For one key figure use `cw-stat`; for exact values to compare row by row, `table[cwTable]`. `data` holds one entry per category, read by the `x` key; `series` lists the drawn keys in order, each with one of the five data colors (five series at most; past `maxSeries`, the last ones are summed into one « Others » series). `markers` draw vertical reference lines with a label (« Today ») on vertical bars, lines and areas, described to screen readers. The ring sums each series over `data` and shows the total with `unit` in its center. Values go through `valueFormat` (`Intl.NumberFormat` in the locale of `provideCwLocale`, `fr-FR` by default) on the axis, the tooltip, the legend and the data table; categories through `categoryFormat` in the tooltip. Accessibility: the plot is one tab stop, a `role="img"` named by `ariaLabel` (a summary of the data); a visually hidden table repeats every value; ← → (↑ ↓ for horizontal bars), Home and End move the active category, announced politely (« S44 : Terminées 18, En retard 1 ») and shown in the tooltip; Escape closes the tooltip; Enter or a click emits `categorySelect`. The legend is a row of `aria-pressed` buttons that hide or show a series. `loading` draws skeletons with `aria-busy`; without any value, the empty state shows `emptyText`. No entry animation, the tooltip follows without transition. Style hooks: `data-type`, `data-size`, `aria-busy` on the host, `data-active` on the plot.
+ * A dashboard chart drawn in SVG by Cadenway, without a third-party library: grouped or stacked bars, horizontal bars on a capacity track, lines, areas with a dashed reference, or a ring (Chart sheet of the Design System artifact). For one key figure use `cw-stat`; for exact values to compare row by row, `table[cwTable]`. `data` holds one entry per category, read by the `x` key; `series` lists the drawn keys in order, each with one of the five data colors (five series at most; past `maxSeries`, the last ones are summed into one « Others » series). `markers` draw vertical reference lines with a label (« Today ») on vertical bars, lines and areas, described to screen readers. `current` names the category still in progress, whose vertical bars are drawn lighter; `valueLabels` writes values above vertical bars (`peak`: the highest ones and `current`, as the mockup's weekly completion chart does with `size="lg"`). The ring sums each series over `data` and shows the total with `unit` in its center. Values go through `valueFormat` (`Intl.NumberFormat` in the locale of `provideCwLocale`, `fr-FR` by default) on the axis, the tooltip, the legend and the data table; categories through `categoryFormat` in the tooltip. Accessibility: the plot is one tab stop, a `role="img"` named by `ariaLabel` (a summary of the data); a visually hidden table repeats every value; ← → (↑ ↓ for horizontal bars), Home and End move the active category, announced politely (« S44 : Terminées 18, En retard 1 ») and shown in the tooltip; Escape closes the tooltip; Enter or a click emits `categorySelect`. The legend is a row of `aria-pressed` buttons that hide or show a series. `loading` draws skeletons with `aria-busy`; without any value, the empty state shows `emptyText`. No entry animation, the tooltip follows without transition. Style hooks: `data-type`, `data-size`, `aria-busy` on the host, `data-active` on the plot.
  */
 @Component({
   selector: 'cw-chart',
@@ -1103,7 +1207,7 @@ export class CwChart {
    * Property size
    *
    * @description
-   * Plot height: 150 px or 120 px.
+   * Plot height: 150 px, 120 px (`sm`) or 192 px with 12 px axis text and wider bars (`lg`).
    *
    * @type {InputSignal<CwChartSize>}
    * @readonly
@@ -1304,6 +1408,31 @@ export class CwChart {
   public readonly othersColor: InputSignal<CwChartColor> = input<CwChartColor>('chart-5');
 
   /**
+   * Property current
+   *
+   * @description
+   * The `x` value of the category still in progress (the current week): its vertical bars are drawn
+   * at 45 % opacity. Null by default.
+   *
+   * @type {InputSignal<string | null>}
+   * @readonly
+   */
+  public readonly current: InputSignal<string | null> = input<string | null>(null);
+
+  /**
+   * Property valueLabels
+   *
+   * @description
+   * Values written above vertical bars: `none` (default), `all`, or `peak` (the highest bars and the
+   * `current` category). They go through `valueFormat` and are hidden from assistive technologies,
+   * which read the data table.
+   *
+   * @type {InputSignal<CwChartValueLabels>}
+   * @readonly
+   */
+  public readonly valueLabels: InputSignal<CwChartValueLabels> = input<CwChartValueLabels>('none');
+
+  /**
    * Property categorySelect
    *
    * @description
@@ -1393,6 +1522,17 @@ export class CwChart {
    * @readonly
    */
   protected readonly plotClasses: string = PLOT;
+
+  /**
+   * Property axisText
+   *
+   * @description
+   * Font-size class of the axis, category and value labels for the current size.
+   *
+   * @type {Signal<string>}
+   * @readonly
+   */
+  protected readonly axisText: Signal<string> = computed(() => AXIS_TEXT[this.size()]);
 
   /**
    * Property legendItemClasses
@@ -1571,7 +1711,7 @@ export class CwChart {
    * @description
    * The vertical frame: size, gutters and value scale of bars, lines and areas.
    *
-   * @type {Signal<{ width: number; height: number; bottom: number; gutter: number; right: number; plotWidth: number; ticks: Tick[]; y: (value: number) => number; labelX: number; labelY: number; }>}
+   * @type {Signal<{ width: number; height: number; bottom: number; gutter: number; right: number; plotWidth: number; ticks: Tick[]; y: (value: number) => number; labelX: number; labelY: number; tickDy: number; }>}
    * @readonly
    */
   protected readonly frame: Signal<{
@@ -1585,9 +1725,13 @@ export class CwChart {
     y: (value: number) => number;
     labelX: number;
     labelY: number;
+    tickDy: number;
   }> = computed(() => {
     const width: number = this.width();
     const height: number = HEIGHTS[this.size()];
+    const fontSize: number = AXIS_FONT_SIZES[this.size()];
+    const top: number =
+      this.type() === 'bar' && this.valueLabels() !== 'none' ? VALUE_LABEL_ROOM : TOP;
     const series: CwChartSeries[] = this.visibleSeries();
     const data: readonly Readonly<Record<string, string | number | null | undefined>>[] =
       this.shownData();
@@ -1605,12 +1749,14 @@ export class CwChart {
     const scale: ValueScale = niceScale(max, this.size() === 'sm' ? 2 : 3);
     const format: CwChartValueFormat = this.valueFormat();
     const labels: string[] = scale.ticks.map((tick) => format(tick));
-    const gutter: number = round(Math.max(22, ...labels.map((label) => labelWidth(label) + 11)));
+    const gutter: number = round(
+      Math.max(22, ...labels.map((label) => labelWidth(label, fontSize) + 11)),
+    );
     const bottom: number = height - BOTTOM_GUTTER;
     const right: number = width - 2;
     const plotWidth: number = Math.max(1, right - gutter);
     const y: (value: number) => number = (value: number): number =>
-      round(bottom - (Math.max(0, value) / scale.max) * (bottom - TOP));
+      round(bottom - (Math.max(0, value) / scale.max) * (bottom - top));
     const ticks: Tick[] = scale.ticks.map((tick, index) => ({ y: y(tick), label: labels[index] }));
     return {
       width,
@@ -1623,6 +1769,8 @@ export class CwChart {
       y,
       labelX: gutter - 5,
       labelY: height - 7,
+      // Vertical centering of a tick label on its grid line: about a third of the font size.
+      tickDy: Math.round(fontSize * 0.3),
     };
   });
 
@@ -1643,7 +1791,8 @@ export class CwChart {
     const band: number = count ? plotWidth / count : plotWidth;
     const step: number = count > 1 ? plotWidth / (count - 1) : plotWidth;
     const spacing: number = bars ? band : step;
-    const widest: number = Math.max(0, ...keys.map((key) => labelWidth(key))) + 6;
+    const fontSize: number = AXIS_FONT_SIZES[this.size()];
+    const widest: number = Math.max(0, ...keys.map((key) => labelWidth(key, fontSize))) + 6;
     const every: number = Math.max(1, Math.ceil(widest / Math.max(1, spacing)));
     return keys.map((key, index) => {
       const center: number = bars
@@ -1663,6 +1812,32 @@ export class CwChart {
   });
 
   /**
+   * Property peakValue
+   *
+   * @description
+   * Highest bar of the shown data: the largest stack total when stacked, the largest single value
+   * otherwise; 0 without data.
+   *
+   * @type {Signal<number>}
+   * @readonly
+   */
+  protected readonly peakValue: Signal<number> = computed(() => {
+    const series: CwChartSeries[] = this.visibleSeries();
+    let peak: number = 0;
+    for (const row of this.shownData()) {
+      if (this.stacked()) {
+        peak = Math.max(
+          peak,
+          series.reduce((sum, item) => sum + Math.max(0, numeric(row, item.key) ?? 0), 0),
+        );
+      } else {
+        for (const item of series) peak = Math.max(peak, numeric(row, item.key) ?? 0);
+      }
+    }
+    return peak;
+  });
+
+  /**
    * Property bars
    *
    * @description
@@ -1677,12 +1852,38 @@ export class CwChart {
     const series: CwChartSeries[] = this.visibleSeries();
     const data: readonly Readonly<Record<string, string | number | null | undefined>>[] =
       this.shownData();
+    const large: boolean = this.size() === 'lg';
+    // Mockup App.dc.html, weekly completion chart: bars fill their band less a 6 px gap, up to 36 px,
+    // with 4 px top corners.
+    const radius: number = large ? 4 : 2;
+    const current: string | null = this.current();
+    const labels: CwChartValueLabels = this.valueLabels();
+    const format: CwChartValueFormat = this.valueFormat();
+    const peak: number = labels === 'peak' ? this.peakValue() : 0;
+    const tagged: (value: number, category: Category) => boolean = (
+      value: number,
+      category: Category,
+    ): boolean =>
+      labels === 'all' ||
+      (labels === 'peak' && (value === peak || (current !== null && category.key === current)));
+    const tag: (value: number, x: number, top: number) => BarTag = (
+      value: number,
+      x: number,
+      top: number,
+    ): BarTag => ({
+      x: round(x),
+      y: round(top - 6),
+      text: format(value),
+    });
     const shapes: BarShape[] = [];
     for (const category of this.categories()) {
       const row: Readonly<Record<string, string | number | null | undefined>> =
         data[category.index];
+      const tone: string = current !== null && category.key === current ? ` ${CURRENT_FILL}` : '';
       if (this.stacked()) {
-        const width: number = clamp(category.bandWidth * 0.5, 2, 16);
+        const width: number = large
+          ? clamp(category.bandWidth - 6, 2, 36)
+          : clamp(category.bandWidth * 0.5, 2, 16);
         const x: number = category.center - width / 2;
         const values: { item: CwChartSeries; value: number }[] = series
           .map((item) => ({ item, value: numeric(row, item.key) ?? 0 }))
@@ -1692,16 +1893,20 @@ export class CwChart {
           const top: number = y(sum + value);
           const height: number = y(sum) - top;
           const last: boolean = index === values.length - 1;
+          sum += value;
           shapes.push({
             id: `${category.key}:${item.key}`,
-            path: roundedRect(x, top, width, height, 2, { topLeft: last, topRight: last }),
-            fill: FILLS[item.color],
+            path: roundedRect(x, top, width, height, radius, { topLeft: last, topRight: last }),
+            fill: FILLS[item.color] + tone,
+            tag: last && tagged(sum, category) ? tag(sum, category.center, top) : undefined,
           });
-          sum += value;
         });
       } else {
         const count: number = Math.max(1, series.length);
-        const width: number = clamp((category.bandWidth * 0.8 - 2 * (count - 1)) / count, 2, 12);
+        const width: number =
+          large && count === 1
+            ? clamp(category.bandWidth - 6, 2, 36)
+            : clamp((category.bandWidth * 0.8 - 2 * (count - 1)) / count, 2, 12);
         const group: number = count * width + 2 * (count - 1);
         series.forEach((item, index) => {
           const value: number | null = numeric(row, item.key);
@@ -1710,8 +1915,12 @@ export class CwChart {
           const top: number = y(value);
           shapes.push({
             id: `${category.key}:${item.key}`,
-            path: roundedRect(x, top, width, bottom - top, 2, { topLeft: true, topRight: true }),
-            fill: FILLS[item.color],
+            path: roundedRect(x, top, width, bottom - top, radius, {
+              topLeft: true,
+              topRight: true,
+            }),
+            fill: FILLS[item.color] + tone,
+            tag: tagged(value, category) ? tag(value, x + width / 2, top) : undefined,
           });
         });
       }
@@ -1858,9 +2067,12 @@ export class CwChart {
       series.reduce((sum, item) => sum + Math.max(0, numeric(row, item.key) ?? 0), 0),
     );
     const totalLabels: string[] = totals.map((total) => format(total));
-    const valueWidth: number = Math.max(16, ...totalLabels.map((label) => labelWidth(label) + 10));
+    const valueWidth: number = Math.max(
+      16,
+      ...totalLabels.map((label) => labelWidth(label, AXIS_FONT_SIZES[this.size()]) + 10),
+    );
     const labelColumn: number = clamp(
-      Math.max(0, ...keys.map((key) => labelWidth(key))) + 8,
+      Math.max(0, ...keys.map((key) => labelWidth(key, AXIS_FONT_SIZES[this.size()]))) + 8,
       40,
       120,
     );

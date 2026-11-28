@@ -118,7 +118,7 @@
                 class="fill-accent"
               />
             }
-            <text x="0" [attr.y]="row.y + 9" class="fill-muted-foreground text-[10px]">
+            <text x="0" [attr.y]="row.y + 9" [class]="'fill-muted-foreground ' + axisText()">
               {{ row.key }}
             </text>
             <rect
@@ -136,7 +136,7 @@
               [attr.x]="rows.width"
               [attr.y]="row.y + 9.5"
               text-anchor="end"
-              class="fill-foreground text-[10px] font-medium"
+              [class]="'fill-foreground font-medium ' + axisText()"
             >
               {{ row.total }}
             </text>
@@ -161,9 +161,9 @@
             />
             <text
               [attr.x]="f.labelX"
-              [attr.y]="tick.y + 3"
+              [attr.y]="tick.y + f.tickDy"
               text-anchor="end"
-              class="fill-muted-foreground text-[10px]"
+              [class]="'fill-muted-foreground tabular-nums ' + axisText()"
             >
               {{ tick.label }}
             </text>
@@ -181,6 +181,18 @@
             }
             @for (bar of bars(); track bar.id) {
               <path [attr.d]="bar.path" [class]="bar.fill" />
+            }
+            @for (bar of bars(); track bar.id) {
+              @if (bar.tag; as tag) {
+                <text
+                  [attr.x]="tag.x"
+                  [attr.y]="tag.y"
+                  text-anchor="middle"
+                  [class]="'fill-foreground font-medium tabular-nums ' + axisText()"
+                >
+                  {{ tag.text }}
+                </text>
+              }
             }
           } @else {
             @for (line of lines(); track line.key) {
@@ -252,7 +264,7 @@
                 [attr.x]="category.center"
                 [attr.y]="f.labelY"
                 text-anchor="middle"
-                class="fill-muted-foreground text-[10px]"
+                [class]="'fill-muted-foreground ' + axisText()"
               >
                 {{ category.key }}
               </text>

@@ -12,6 +12,7 @@ import type {
   CwChartOrientation,
   CwChartSeries,
   CwChartType,
+  CwChartValueLabels,
 } from './chart.types';
 
 /**
@@ -722,5 +723,139 @@ describe('CwChart « Others » key', () => {
       x: 'Mon',
       values: { ana: 4, ben: 3, [`${CW_CHART_OTHERS_KEY}-2`]: 3 },
     });
+  });
+});
+
+/**
+ * Constant COMPLETED
+ *
+ * @description
+ * Tasks completed per week, the last eight weeks of the mockup's dashboard (App.dc.html).
+ *
+ * @type {CwChartDatum[]}
+ */
+const COMPLETED: CwChartDatum[] = [
+  { week: 'S38', done: 6 },
+  { week: 'S39', done: 8 },
+  { week: 'S40', done: 5 },
+  { week: 'S41', done: 8 },
+  { week: 'S42', done: 6 },
+  { week: 'S43', done: 9 },
+  { week: 'S44', done: 7 },
+  { week: 'S45', done: 3 },
+];
+
+/**
+ * Component CompletionHost
+ *
+ * @description
+ * Hosts the dashboards' weekly completion chart: large plot, current week, value labels.
+ */
+@Component({
+  imports: [CwChart],
+  template: `
+    <cw-chart
+      size="lg"
+      [data]="data"
+      x="week"
+      [series]="series"
+      current="S45"
+      [valueLabels]="valueLabels()"
+      [legend]="false"
+      ariaLabel="Tâches terminées par semaine, S38 à S45"
+    />
+  `,
+})
+class CompletionHost {
+  // #region Properties
+  /**
+   * Property data
+   *
+   * @description
+   * Weekly completed tasks.
+   *
+   * @type {CwChartDatum[]}
+   * @readonly
+   */
+  public readonly data: CwChartDatum[] = COMPLETED;
+
+  /**
+   * Property series
+   *
+   * @description
+   * The single completed series.
+   *
+   * @type {CwChartSeries[]}
+   * @readonly
+   */
+  public readonly series: CwChartSeries[] = [{ key: 'done', label: 'Terminées', color: 'chart-1' }];
+
+  /**
+   * Property valueLabels
+   *
+   * @description
+   * Which bars carry their value.
+   *
+   * @type {WritableSignal<CwChartValueLabels>}
+   * @readonly
+   */
+  public readonly valueLabels: WritableSignal<CwChartValueLabels> =
+    signal<CwChartValueLabels>('peak');
+  // #endregion
+}
+
+describe('CwChart large completion chart', () => {
+  let host: HTMLElement;
+  let fixture: ComponentFixture<CompletionHost>;
+
+  /**
+   * Function texts
+   *
+   * @description
+   * Reads the texts drawn in the plot.
+   * @returns {string[]} Trimmed SVG texts in document order.
+   */
+  function texts(): string[] {
+    return Array.from(host.querySelectorAll('svg text')).map((text) => text.textContent.trim());
+  }
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(CompletionHost);
+    fixture.autoDetectChanges();
+    host = fixture.nativeElement as HTMLElement;
+  });
+
+  it('draws a 192 px plot with 12 px axis text', () => {
+    const svg: SVGElement | null = host.querySelector('svg');
+    expect(svg?.getAttribute('height')).toBe('192');
+    expect(host.querySelector('cw-chart')?.getAttribute('data-size')).toBe('lg');
+    const label: Element | undefined = Array.from(host.querySelectorAll('svg text')).find(
+      (text) => text.textContent.trim() === 'S38',
+    );
+    expect(label?.classList).toContain('text-xs');
+  });
+
+  it('labels the highest bar and the current week, which is drawn lighter', () => {
+    const lighter: Element[] = Array.from(host.querySelectorAll('svg path')).filter((path) =>
+      path.classList.contains('opacity-45'),
+    );
+    expect(lighter).toHaveLength(1);
+    const values: string[] = texts().filter((text) => /^\d+$/.test(text));
+    // The axis ticks (0, 5, 10) come first, then the bar values.
+    expect(values.slice(-2)).toEqual(['9', '3']);
+  });
+
+  it('labels every bar or none', async () => {
+    fixture.componentInstance.valueLabels.set('all');
+    await fixture.whenStable();
+    expect(
+      texts()
+        .filter((text) => /^\d+$/.test(text))
+        .slice(-8),
+    ).toEqual(['6', '8', '5', '8', '6', '9', '7', '3']);
+
+    fixture.componentInstance.valueLabels.set('none');
+    await fixture.whenStable();
+    expect(texts().filter((text) => text === '9')).toHaveLength(0);
   });
 });

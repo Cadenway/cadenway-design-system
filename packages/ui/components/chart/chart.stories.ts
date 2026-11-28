@@ -433,3 +433,45 @@ export const OthersSeries: Story = {
     await expect(within(scope).queryByRole('button', { name: 'Sarah R.' })).toBeNull();
   },
 };
+
+/**
+ * Constant COMPLETED
+ *
+ * @description
+ * Tasks completed per week, the last eight weeks of the mockup's dashboard (`App.dc.html`).
+ *
+ * @type {CwChartDatum[]}
+ */
+const COMPLETED: CwChartDatum[] = [
+  { week: 'S38', done: 6 },
+  { week: 'S39', done: 8 },
+  { week: 'S40', done: 5 },
+  { week: 'S41', done: 8 },
+  { week: 'S42', done: 6 },
+  { week: 'S43', done: 9 },
+  { week: 'S44', done: 7 },
+  { week: 'S45', done: 3 },
+];
+
+/** The dashboards' weekly completion card (mockup `App.dc.html`): `size="lg"` (192 px, 12 px axis
+ *  text, wide bars), the current week lighter, values on the highest bar and the current week. */
+export const Completion: Story = {
+  render: () => ({
+    props: {
+      data: COMPLETED,
+      series: [{ key: 'done', label: 'Terminées', color: 'chart-1' }] satisfies CwChartSeries[],
+    },
+    template: `
+      <section class="flex w-[34rem] max-w-full flex-col gap-3 rounded-xl border bg-card p-4 text-card-foreground">
+        <h2 class="text-base font-semibold">Tâches terminées par semaine</h2>
+        <cw-chart size="lg" [data]="data" x="week" [series]="series" current="S45" valueLabels="peak"
+                  [legend]="false" ariaLabel="Tâches terminées par semaine, de S38 à S45" />
+      </section>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const plot: HTMLElement = within(light(canvasElement)).getByRole('img', {
+      name: 'Tâches terminées par semaine, de S38 à S45',
+    });
+    await expect(plot.querySelector('svg')).toHaveAttribute('height', '192');
+  },
+};
