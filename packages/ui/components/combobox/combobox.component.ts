@@ -58,7 +58,12 @@ import { CwComboboxEmpty } from './combobox-empty/combobox-empty.component';
 import { CwComboboxOption } from './combobox-option/combobox-option.component';
 import { EMPTY, OPTION } from './combobox.styles';
 import { COMBOBOX_HOST, type ComboboxHost } from './combobox.token';
-import type { CwComboboxCompareWith, CwComboboxFilter, CwComboboxSize } from './combobox.types';
+import type {
+  CwComboboxCompareWith,
+  CwComboboxFilter,
+  CwComboboxMinWidth,
+  CwComboboxSize,
+} from './combobox.types';
 
 /* Literal class strings (Combobox sheet and preview of the Design System artifact): the trigger has
    the classes of Select; open, it keeps the selected veil (`aria-expanded:bg-selected`). */
@@ -87,8 +92,30 @@ const SIZES: Record<CwComboboxSize, string> = {
   lg: 'h-9 rounded-lg px-3',
 };
 
+/**
+ * Constant MIN_WIDTHS
+ *
+ * @description
+ * Panel minimums by `minWidth`, the scale of `cw-menu` (mockup `App.dc.html`: 224 px for the
+ * assignees of the task creation dialog), each within the viewport less its 8 px margins. A phone
+ * sheet drops them with the trigger-width minimum (`PANEL`).
+ *
+ * @type {Record<CwComboboxMinWidth, string>}
+ */
+const MIN_WIDTHS: Record<CwComboboxMinWidth, string> = {
+  '32': 'min(8rem, calc(100vw - 1rem))',
+  '40': 'min(10rem, calc(100vw - 1rem))',
+  '48': 'min(12rem, calc(100vw - 1rem))',
+  '52': 'min(13rem, calc(100vw - 1rem))',
+  '56': 'min(14rem, calc(100vw - 1rem))',
+  '60': 'min(15rem, calc(100vw - 1rem))',
+  '64': 'min(16rem, calc(100vw - 1rem))',
+  '72': 'min(18rem, calc(100vw - 1rem))',
+};
+
 /* The panel: no padding, the search on top, the list scrolled below it; at least as wide as the
-   trigger, up to `max-w-sm`. It opens from the trigger corner and closes with `menu-out`. */
+   trigger (or `minWidth`), up to `max-w-sm`. It opens from the trigger corner and closes with
+   `menu-out`. */
 /**
  * Constant PANEL
  *
@@ -377,6 +404,22 @@ export class CwCombobox<T = unknown>
    * @type {InputSignal<CwComboboxSize>}
    */
   public readonly size: InputSignal<CwComboboxSize> = input<CwComboboxSize>('default');
+
+  /**
+   * Property minWidth
+   * @readonly
+   *
+   * @description
+   * Minimum width of the panel beyond the trigger's, on the scale of `cw-menu`'s `minWidth`: `32`
+   * (128 px) to `72` (288 px), never more than the viewport less 16 px, and none in a phone sheet.
+   * Unset by default: the panel is at least as wide as its trigger and follows its content up to
+   * `max-w-sm`.
+   *
+   * @type {InputSignal<CwComboboxMinWidth | undefined>}
+   */
+  public readonly minWidth: InputSignal<CwComboboxMinWidth | undefined> = input<
+    CwComboboxMinWidth | undefined
+  >(undefined);
 
   /**
    * Property disabled
@@ -818,6 +861,23 @@ export class CwCombobox<T = unknown>
    * @type {string}
    */
   protected readonly panelClass: string = PANEL;
+
+  /**
+   * Property panelMinWidth
+   * @readonly
+   *
+   * @description
+   * Minimum width of the open panel: the trigger's width, or the larger of it and `minWidth`. An
+   * inline style, as the trigger width is measured when the panel opens; the phone sheet's
+   * `min-w-0!` still overrides it.
+   *
+   * @type {Signal<string>}
+   */
+  protected readonly panelMinWidth: Signal<string> = computed(() => {
+    const trigger: string = `${String(this.overlay.originWidth())}px`;
+    const floor: CwComboboxMinWidth | undefined = this.minWidth();
+    return floor ? `max(${trigger}, ${MIN_WIDTHS[floor]})` : trigger;
+  });
 
   /**
    * Property hasCustomEmpty

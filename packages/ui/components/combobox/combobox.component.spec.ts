@@ -158,7 +158,7 @@ function type(field: HTMLInputElement, text: string): void {
       <cw-combobox-option value="api">API</cw-combobox-option>
     </cw-combobox>
     <cw-combobox ariaLabel="Assignés" [loading]="true" />
-    <cw-combobox ariaLabel="Personnes">
+    <cw-combobox ariaLabel="Personnes" minWidth="56">
       <cw-combobox-option value="lea">Léa Martin</cw-combobox-option>
       <cw-combobox-empty>Aucune personne trouvée</cw-combobox-empty>
     </cw-combobox>
@@ -366,6 +366,25 @@ describe('CwCombobox', () => {
 
     expect(document.body.textContent).toContain('Recherche…');
     expect(document.querySelector('[role="listbox"]')?.getAttribute('aria-busy')).toBe('true');
+  });
+
+  it('keeps the panel at least as wide as its trigger, or as minWidth when given', async () => {
+    const owner: HTMLButtonElement = trigger(host, 'Responsable');
+    owner.click();
+    await fixture.whenStable();
+    const width: number = owner.getBoundingClientRect().width;
+    expect(listbox()?.closest<HTMLElement>('[data-state]')?.style.minWidth).toBe(
+      `${String(width)}px`,
+    );
+    key(searchField(), 'Escape');
+    await fixture.whenStable();
+
+    trigger(host, 'Personnes').click();
+    await fixture.whenStable();
+    // 224 px, within the viewport less its 8 px margins.
+    const floor: string = listbox()?.closest<HTMLElement>('[data-state]')?.style.minWidth ?? '';
+    expect(floor.startsWith(`max(${String(width)}px, min(14rem, `)).toBe(true);
+    expect(floor.replaceAll(' ', '')).toMatch(/100vw/);
   });
 
   it('closes on a click outside', async () => {

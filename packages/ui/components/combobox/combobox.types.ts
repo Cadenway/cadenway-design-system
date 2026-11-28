@@ -1,3 +1,5 @@
+import type { CwMenuMinWidth } from '@cadenway/ui/components/menu';
+
 /**
  * Type CwComboboxSize
  *
@@ -7,6 +9,18 @@
  * @type {'sm' | 'default' | 'lg'}
  */
 export type CwComboboxSize = 'sm' | 'default' | 'lg';
+
+/**
+ * Type CwComboboxMinWidth
+ *
+ * @description
+ * Minimum width of the combobox panel, the scale of `cw-menu`'s `minWidth` (`CwMenuMinWidth`):
+ * `32` 128 px, `40` 160 px, `48` 192 px, `52` 208 px, `56` 224 px, `60` 240 px, `64` 256 px,
+ * `72` 288 px.
+ *
+ * @type {CwMenuMinWidth}
+ */
+export type CwComboboxMinWidth = CwMenuMinWidth;
 
 /**
  * Type CwComboboxCompareWith
