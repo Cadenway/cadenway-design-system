@@ -270,6 +270,26 @@ export const Overflow: Story = {
   },
 };
 
+/** `wrap`: the controls wrap onto a second row instead of moving into « Plus » (mockup
+ *  `App.dc.html`, the list view row, `flex-wrap`). */
+export const Wrap: Story = {
+  render: () => ({
+    template: `
+      <cw-toolbar ariaLabel="Vue Liste, sur deux lignes" wrap class="w-[360px]">
+        <button cwButton variant="outline" cwToolbarItem><ng-icon name="phosphorFunnelSimpleBold" /> Filtrer</button>
+        <button cwButton variant="outline" cwToolbarItem><ng-icon name="phosphorSortAscendingBold" /> Trier</button>
+        <button cwButton variant="outline" cwToolbarItem><ng-icon name="phosphorSquaresFourBold" /> Grouper</button>
+        <button cwButton variant="outline" cwToolbarItem><ng-icon name="phosphorDownloadSimpleBold" /> Exporter</button>
+      </cw-toolbar>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: HTMLElement = light(canvasElement);
+    await expect(within(scope).getByRole('toolbar')).not.toHaveAttribute('data-overflowing');
+    await expect(within(scope).getByRole('button', { name: 'Exporter' })).toBeVisible();
+    await expect(within(scope).queryByRole('button', { name: 'Plus d’options' })).toBeNull();
+  },
+};
+
 /** Keyboard: one Tab stop for the buttons, ← → in a loop, Home and End; the view switch keeps
  *  its own stop and its own arrows. */
 export const Keyboard: Story = {

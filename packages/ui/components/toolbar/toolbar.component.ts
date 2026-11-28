@@ -8,6 +8,7 @@ import {
   Injector,
   afterEveryRender,
   afterNextRender,
+  booleanAttribute,
   computed,
   contentChildren,
   effect,
@@ -18,6 +19,7 @@ import {
   untracked,
   viewChild,
   type InputSignal,
+  type InputSignalWithTransform,
   type OutputEmitterRef,
   type Signal,
   type WritableSignal,
@@ -104,7 +106,8 @@ function inDocumentOrder(a: ToolbarItemHandle, b: ToolbarItemHandle): number {
  * `[cwToolbarItem]` controls that are not `pinned` move one by one into the « Plus » menu, from the
  * last to the first, with no width animation. A separator before a hidden part and a group left
  * empty hide too. `data-overflowing` is set on the bar meanwhile, and `overflowChange` emits the
- * number of hidden controls each time it changes. `size` sets the gaps, the separators and the
+ * number of hidden controls each time it changes. With `wrap`, the controls wrap onto new rows
+ * instead and nothing moves into « Plus ». `size` sets the gaps, the separators and the
  * « Plus » button; give the same size to the controls (`sm` buttons and input, `sm` toggles).
  */
 @Component({
@@ -146,6 +149,21 @@ export class CwToolbar implements ToolbarHandle {
    * @type {InputSignal<CwToolbarSize>}
    */
   public readonly size: InputSignal<CwToolbarSize> = input<CwToolbarSize>('default');
+
+  /**
+   * Property wrap
+   * @readonly
+   *
+   * @description
+   * Wraps the controls onto new rows when they do not fit, instead of moving them into the
+   * « Plus » menu (mockup `App.dc.html`, the list view row: `flex-wrap`); the overflow menu then
+   * never shows. `false` by default.
+   *
+   * @type {InputSignalWithTransform<boolean, unknown>}
+   */
+  public readonly wrap: InputSignalWithTransform<boolean, unknown> = input(false, {
+    transform: booleanAttribute,
+  });
 
   /**
    * Property overflowLabel
@@ -356,7 +374,9 @@ export class CwToolbar implements ToolbarHandle {
    *
    * @type {Signal<string>}
    */
-  protected readonly classes: Signal<string> = computed(() => SIZES[this.size()]);
+  protected readonly classes: Signal<string> = computed(
+    () => `${SIZES[this.size()]}${this.wrap() ? ' flex-wrap' : ''}`,
+  );
 
   /**
    * Property keyManager
@@ -540,6 +560,12 @@ export class CwToolbar implements ToolbarHandle {
     );
     for (const item of items) item.setOverflowed(false);
     this.syncContainers();
+    if (this.wrap()) {
+      // Wrapping rows: every control stays in the bar.
+      this.hiddenItems.set([]);
+      this.syncTabIndex();
+      return;
+    }
 
     const movable: ToolbarItemHandle[] = items.filter((item) => !item.pinned).reverse();
     const hidden: ToolbarItemHandle[] = [];

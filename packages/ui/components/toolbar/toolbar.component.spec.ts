@@ -26,7 +26,12 @@ import { provideCwToolbarLabels } from './toolbar.providers';
     CwToolbarSpacer,
   ],
   template: `
-    <cw-toolbar ariaLabel="Vue Liste" [size]="size()" (overflowChange)="counts.push($event)">
+    <cw-toolbar
+      ariaLabel="Vue Liste"
+      [size]="size()"
+      [wrap]="wrap()"
+      (overflowChange)="counts.push($event)"
+    >
       <cw-toolbar-group ariaLabel="Affichage">
         <button type="button" cwToolbarItem pinned>Filtrer</button>
         <button type="button" cwToolbarItem>Trier</button>
@@ -60,6 +65,17 @@ class Host {
    * @type {WritableSignal<'default' | 'sm'>}
    */
   public readonly size: WritableSignal<'default' | 'sm'> = signal<'default' | 'sm'>('default');
+
+  /**
+   * Property wrap
+   *
+   * @description
+   * Whether the bar wraps its controls instead of moving them into « Plus ».
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  public readonly wrap: WritableSignal<boolean> = signal(false);
 
   /**
    * Property counts
@@ -346,6 +362,19 @@ describe('CwToolbar overflow', () => {
     expect(toolbar?.hasAttribute('data-overflowing')).toBe(false);
     expect(button(host, 'Grouper').style.display).toBe('');
     expect(fixture.componentInstance.counts).toEqual([2, 0]);
+  });
+
+  it('wraps its controls instead of moving them into « Plus » with wrap', async () => {
+    fixture.componentInstance.wrap.set(true);
+    await fixture.whenStable();
+    resize(250);
+    await fixture.whenStable();
+
+    const toolbar: HTMLElement | null = host.querySelector<HTMLElement>('[role="toolbar"]');
+    expect(toolbar?.hasAttribute('data-overflowing')).toBe(false);
+    expect(toolbar?.classList).toContain('flex-wrap');
+    expect(button(host, 'Grouper').style.display).toBe('');
+    expect(button(host, 'Exporter').style.display).toBe('');
   });
 
   it('never moves pinned controls', async () => {
