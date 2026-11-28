@@ -9,7 +9,7 @@
     [attr.aria-label]="ariaLabel() || null"
     [attr.aria-labelledby]="labelledBy()"
     [attr.tabindex]="inline() ? 0 : -1"
-    [class]="panelClasses"
+    [class]="panelClasses()"
     (keydown)="onKeydown($event)"
     (contextmenu)="$event.preventDefault()"
   >

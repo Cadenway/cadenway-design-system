@@ -36,6 +36,11 @@ import { CwMenu } from './menu.component';
   template: `
     <button type="button" aria-label="Actions de la tâche" [cwMenuTriggerFor]="actions">…</button>
     <button type="button" [cwMenuTriggerFor]="display">Affichage</button>
+    <button type="button" [cwMenuTriggerFor]="organization">Organisation</button>
+
+    <cw-menu #organization side="right" sideOffset="12" minWidth="64">
+      <button cwMenuItem>Paramètres de l’organisation</button>
+    </cw-menu>
 
     <cw-menu #actions align="end" (closed)="closedCount.set(closedCount() + 1)">
       <cw-menu-label>CAD-482</cw-menu-label>
@@ -482,6 +487,31 @@ describe('CwMenu', () => {
     expect(component.subtasks()).toBe(false);
     expect(subtasks.getAttribute('aria-checked')).toBe('false');
     expect(menus()).toHaveLength(1);
+  });
+
+  it('draws the check of a ticked checkbox item after its label', async () => {
+    button(host, 'Affichage').click();
+    await fixture.whenStable();
+    const subtasks: HTMLElement = item(menuNamed('Affichage'), 'Sous-tâches');
+
+    expect(subtasks.lastElementChild?.getAttribute('name')).toBe('phosphorCheckBold');
+    expect(subtasks.firstChild?.textContent?.trim()).toBe('Sous-tâches');
+
+    subtasks.click();
+    await fixture.whenStable();
+
+    expect(subtasks.querySelector('ng-icon')).toBeNull();
+  });
+
+  it('opens at its side offset with its minimum width', async () => {
+    button(host, 'Organisation').click();
+    await fixture.whenStable();
+    const panel: HTMLElement = menuNamed('Organisation');
+    const pane: HTMLElement | null = panel.closest<HTMLElement>('.cdk-overlay-pane');
+
+    expect(panel.classList).toContain('min-w-64');
+    expect(panel.classList).not.toContain('min-w-32');
+    expect(pane?.style.transform).toBe('translateX(12px)');
   });
 
   it('chooses a radio item through its group and keeps the menu open', async () => {

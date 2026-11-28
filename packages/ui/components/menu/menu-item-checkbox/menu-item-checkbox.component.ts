@@ -9,7 +9,7 @@ import { CW_MENU_ITEM } from '../menu.token';
  * Component CwMenuItemCheckbox
  *
  * @description
- * A display option ticked in a `cw-menu`: Sous-tâches, Étiquettes, Tâches terminées (DropdownMenu sheet of the Design System artifact). Put it on a native `<button>` inside the menu. `[(checked)]` is a model; a click, Enter or Space toggles it and the menu stays open. Renders `role="menuitemcheckbox"` with `aria-checked`, the check in a 16 px slot on the left (`pl-8`). `disabled` keeps it listed, skipped by the arrows.
+ * A display option ticked in a `cw-menu`: Sous-tâches, Étiquettes, Tâches terminées (DropdownMenu sheet of the Design System artifact). Put it on a native `<button>` inside the menu. `[(checked)]` is a model; a click, Enter or Space toggles it and the menu stays open. Renders `role="menuitemcheckbox"` with `aria-checked` and, while ticked, the check on the right after its label (mockup `App.dc.html`, the assignees menu: `ml-auto`), like a radio item and a selected item, so a leading avatar or icon stays aligned. `disabled` keeps it listed, skipped by the arrows.
  */
 @Component({
   selector: 'button[cwMenuItemCheckbox]',
@@ -21,7 +21,6 @@ import { CW_MENU_ITEM } from '../menu.token';
   ],
   host: {
     role: 'menuitemcheckbox',
-    class: 'pl-8',
     '[attr.aria-checked]': 'checked()',
     '[attr.data-state]': 'checked() ? "checked" : "unchecked"',
     '(click)': 'toggle()',

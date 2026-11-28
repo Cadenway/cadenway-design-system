@@ -24,6 +24,7 @@ import {
   inject,
   Injector,
   input,
+  numberAttribute,
   output,
   signal,
   TemplateRef,
@@ -52,15 +53,18 @@ import { CW_MENU_ITEM, type MenuItemHandle } from './menu.token';
 import type {
   CwMenuAlign,
   CwMenuFocus,
+  CwMenuMinWidth,
   CwMenuOpenOptions,
   CwMenuPoint,
   CwMenuSide,
 } from './menu.types';
 
 /* DropdownMenu sheet and preview of the Design System artifact; the width follows the content
-   between `min-w-32` and `max-w-sm` (integration guide, "Placement des menus"). The CDK overlay pane
-   is a flex box capped to the room left in the viewport: the panel stretches to it and scrolls.
-   Items enter with `animate-item-in`, 60 ms then +30 ms, twelve at most (preview). */
+   between the `minWidth` floor (`min-w-32` by default) and `max-w-sm` (integration guide,
+   "Placement des menus"). The CDK overlay pane is a flex box capped to the room left in the
+   viewport: the panel stretches to it and scrolls. Mockup `App.dc.html`: items enter with
+   `animate-menu-item` (`animate-menu-item-up` in a menu opened upwards), 80 ms then +35 ms
+   (`stagger-0` to `stagger-8`), twelve at most. */
 /**
  * Constant PANEL
  *
@@ -70,16 +74,36 @@ import type {
  * @type {string}
  */
 const PANEL: string =
-  'flex min-h-0 min-w-32 max-w-sm flex-col overflow-y-auto rounded-lg border bg-popover p-1 text-popover-foreground shadow-md outline-hidden ' +
+  'flex min-h-0 max-w-sm flex-col overflow-y-auto rounded-lg border bg-popover p-1 text-popover-foreground shadow-md outline-hidden ' +
   'focus-visible:ring-2 focus-visible:ring-ring ' +
   'animate-menu-in motion-reduce:animate-none data-[state=closed]:pointer-events-none data-[state=closed]:animate-menu-out ' +
-  '*:shrink-0 *:animate-item-in *:motion-reduce:animate-none ' +
-  '[&>*:nth-child(1)]:[animation-delay:60ms] [&>*:nth-child(2)]:[animation-delay:90ms] [&>*:nth-child(3)]:[animation-delay:120ms] ' +
-  '[&>*:nth-child(4)]:[animation-delay:150ms] [&>*:nth-child(5)]:[animation-delay:180ms] [&>*:nth-child(6)]:[animation-delay:210ms] ' +
-  '[&>*:nth-child(7)]:[animation-delay:240ms] [&>*:nth-child(8)]:[animation-delay:270ms] [&>*:nth-child(9)]:[animation-delay:300ms] ' +
-  '[&>*:nth-child(10)]:[animation-delay:330ms] [&>*:nth-child(11)]:[animation-delay:360ms] [&>*:nth-child(12)]:[animation-delay:390ms] ' +
+  '*:shrink-0 *:animate-menu-item data-[side=top]:*:animate-menu-item-up *:motion-reduce:animate-none ' +
+  '[&>*:nth-child(1)]:[animation-delay:80ms] [&>*:nth-child(2)]:[animation-delay:115ms] [&>*:nth-child(3)]:[animation-delay:150ms] ' +
+  '[&>*:nth-child(4)]:[animation-delay:185ms] [&>*:nth-child(5)]:[animation-delay:220ms] [&>*:nth-child(6)]:[animation-delay:255ms] ' +
+  '[&>*:nth-child(7)]:[animation-delay:290ms] [&>*:nth-child(8)]:[animation-delay:325ms] [&>*:nth-child(9)]:[animation-delay:360ms] ' +
+  '[&>*:nth-child(10)]:[animation-delay:395ms] [&>*:nth-child(11)]:[animation-delay:430ms] [&>*:nth-child(12)]:[animation-delay:465ms] ' +
   // A phone sheet (`provideCwPhoneSheets`) fills the width of its pane.
   'in-data-[presentation=sheet]:w-full in-data-[presentation=sheet]:max-w-none';
+
+/**
+ * Constant MIN_WIDTHS
+ *
+ * @description
+ * Literal minimum panel widths by `minWidth` (mockup `App.dc.html`: 208 px for the grouping menu,
+ * 224 px for the list and sort menus, 240 px for the assignees, 256 px for the organization menu).
+ *
+ * @type {Record<CwMenuMinWidth, string>}
+ */
+const MIN_WIDTHS: Record<CwMenuMinWidth, string> = {
+  '32': 'min-w-32',
+  '40': 'min-w-40',
+  '48': 'min-w-48',
+  '52': 'min-w-52',
+  '56': 'min-w-56',
+  '60': 'min-w-60',
+  '64': 'min-w-64',
+  '72': 'min-w-72',
+};
 
 /* Submenus open on the right of their item, top edges aligned (the panel's padding and border,
    5 px, sit above its first item), and flip to the left without room (sheet, anatomy 7). */
@@ -239,6 +263,33 @@ export class CwMenu {
   public readonly align: InputSignal<CwMenuAlign> = input<CwMenuAlign>('start');
 
   /**
+   * Property sideOffset
+   *
+   * @description
+   * Gap in pixels between the trigger and the panel, 4 by default; ignored for a submenu. The
+   * mockup's rail menus open 4 px right of the 56 px rail (`left-full ml-1`), so a trigger inside
+   * the rail gives the distance from its own edge to the rail's.
+   *
+   * @type {InputSignalWithTransform<number, unknown>}
+   * @readonly
+   */
+  public readonly sideOffset: InputSignalWithTransform<number, unknown> = input(4, {
+    transform: numberAttribute,
+  });
+
+  /**
+   * Property minWidth
+   *
+   * @description
+   * Minimum width of the panel, a Tailwind spacing step: `32` (128 px, default) to `72` (288 px).
+   * The width still follows the content up to `max-w-sm`.
+   *
+   * @type {InputSignal<CwMenuMinWidth>}
+   * @readonly
+   */
+  public readonly minWidth: InputSignal<CwMenuMinWidth> = input<CwMenuMinWidth>('32');
+
+  /**
    * Property ariaLabel
    *
    * @description
@@ -358,12 +409,14 @@ export class CwMenu {
    * Property panelClasses
    *
    * @description
-   * Classes applied to the menu panel.
+   * Classes applied to the menu panel, with its minimum width.
    *
-   * @type {string}
+   * @type {Signal<string>}
    * @readonly
    */
-  protected readonly panelClasses: string = PANEL;
+  protected readonly panelClasses: Signal<string> = computed(
+    () => `${PANEL} ${MIN_WIDTHS[this.minWidth()]}`,
+  );
 
   /**
    * Property labelledBy
@@ -646,7 +699,9 @@ export class CwMenu {
 
     const positions: ConnectedPosition[] = [
       ...(options.positions ??
-        (parent ? SUBMENU_POSITIONS : ɵpanelPositions(this.side(), this.align()))),
+        (parent
+        ? SUBMENU_POSITIONS
+        : ɵpanelPositions(this.side(), this.align(), this.sideOffset()))),
     ];
     // Mockup App.dc.html: on a phone the rail's menus and submenus dock above the tab bar. The
     // pane stays in the overlay container, as on a large screen: inserted after its trigger, a

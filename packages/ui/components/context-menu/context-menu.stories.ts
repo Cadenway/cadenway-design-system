@@ -125,7 +125,7 @@ const ITEMS: string = `
   <button cwMenuItem disabled>Convertir en sous-tâche</button>
   <cw-menu-separator />
   <cw-menu-group>
-    <cw-menu-label inset>Afficher sur la carte</cw-menu-label>
+    <cw-menu-label>Afficher sur la carte</cw-menu-label>
     <button cwMenuItemCheckbox [checked]="true">Sous-tâches</button>
     <button cwMenuItemCheckbox>Étiquettes</button>
   </cw-menu-group>

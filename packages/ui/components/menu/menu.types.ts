@@ -33,6 +33,17 @@ export type CwMenuAlign = 'start' | 'center' | 'end';
 export type CwMenuItemVariant = 'default' | 'destructive';
 
 /**
+ * Type CwMenuMinWidth
+ *
+ * @description
+ * Minimum width of a menu panel as a Tailwind spacing step: `32` 128 px, `40` 160 px, `48`
+ * 192 px, `52` 208 px, `56` 224 px, `60` 240 px, `64` 256 px, `72` 288 px.
+ *
+ * @type {'32' | '40' | '48' | '52' | '56' | '60' | '64' | '72'}
+ */
+export type CwMenuMinWidth = '32' | '40' | '48' | '52' | '56' | '60' | '64' | '72';
+
+/**
  * Type CwMenuFocus
  *
  * @description
