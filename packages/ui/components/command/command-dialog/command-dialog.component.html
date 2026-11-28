@@ -15,6 +15,7 @@
       @if (loading()) {
         <svg cwSpinner></svg>
       }
+      <ng-content select="[cwCommandDialogHeader]" />
     </div>
     <ng-content />
   </div>

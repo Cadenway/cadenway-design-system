@@ -27,8 +27,13 @@ import { CwCommandDialog } from './command-dialog.component';
   ],
   template: `
     <button type="button">Rechercher</button>
-    <cw-command-dialog [(open)]="open" [(search)]="search">
+    <cw-command-dialog
+      [(open)]="open"
+      [(search)]="search"
+      [clearOnEscape]="clearOnEscape()"
+    >
       <input cwCommandInput aria-label="Rechercher une commande, une tâche, un espace" />
+      <kbd cwCommandDialogHeader>Échap</kbd>
       <cw-command-list>
         <cw-command-group heading="Suggestions">
           <cw-command-item (selected)="ran.set($event); open.set(false)">
@@ -64,6 +69,17 @@ class Host {
    * @readonly
    */
   public readonly search: WritableSignal<string> = signal('');
+
+  /**
+   * Property clearOnEscape
+   *
+   * @description
+   * Whether Escape clears a typed search before closing.
+   *
+   * @type {WritableSignal<boolean>}
+   * @readonly
+   */
+  public readonly clearOnEscape: WritableSignal<boolean> = signal(true);
 
   /**
    * Property ran
@@ -162,6 +178,30 @@ describe('CwCommandDialog', () => {
     await keydown(input, { key: 'Escape' });
     expect(component.open()).toBe(false);
     expect(palette()).toBeNull();
+  });
+
+  it('closes on the first Escape with a typed search when clearOnEscape is off', async () => {
+    component.clearOnEscape.set(false);
+    component.open.set(true);
+    await fixture.whenStable();
+    const input: HTMLInputElement = field();
+    input.value = 'tableau';
+    input.dispatchEvent(new Event('input'));
+    await fixture.whenStable();
+
+    await keydown(input, { key: 'Escape' });
+
+    expect(component.open()).toBe(false);
+    expect(palette()).toBeNull();
+  });
+
+  it('projects a header element at the end of the field row', async () => {
+    component.open.set(true);
+    await fixture.whenStable();
+    const hint: Element | null | undefined = field().parentElement?.lastElementChild;
+
+    expect(hint?.tagName).toBe('KBD');
+    expect(hint?.textContent).toBe('Échap');
   });
 
   it('runs an item with Enter, empties the search when reopened and toggles with Ctrl K', async () => {

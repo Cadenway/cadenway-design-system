@@ -272,3 +272,42 @@ export const Palette: Story = {
     await waitFor(() => expect(body.queryByRole('dialog')).toBeNull());
   },
 };
+
+/**
+ * The palette as the mockup draws it (`App.dc.html`): the « Échap » hint at the end of the field
+ * row (`[cwCommandDialogHeader]`), and Escape closes at once even with a typed search
+ * (`clearOnEscape="false"`). Opened from its button, so it does not compete with `Palette` for
+ * Ctrl K.
+ */
+export const PaletteEscapeCloses: Story = {
+  render: () => ({
+    props: { open: false },
+    template: `
+      @if (cwTheme === 'light') {
+        <button cwButton variant="outline" (click)="open = true">Ouvrir la palette</button>
+        <cw-command-dialog [shortcut]="false" clearOnEscape="false" [(open)]="open">
+          <input cwCommandInput aria-label="Rechercher une commande, une tâche, un espace" placeholder="Rechercher une commande, une tâche, un espace…" />
+          <kbd cwKbd cwCommandDialogHeader>Échap</kbd>
+          <cw-command-list>${SUGGESTIONS}</cw-command-list>
+          <cw-command-footer />
+        </cw-command-dialog>
+      }`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const body: {
+      findByRole: (role: string, options: { name: string }) => Promise<HTMLElement>;
+      queryByRole: (role: string) => HTMLElement | null;
+    } = within(document.body);
+    await userEvent.click(
+      within(canvasElement).getByRole('button', { name: 'Ouvrir la palette' }),
+    );
+    const palette: HTMLElement = await body.findByRole('dialog', { name: 'Palette de commandes' });
+    const field: HTMLElement = within(palette).getByRole('combobox');
+    await waitFor(() => expect(field).toHaveFocus());
+    await expect(within(palette).getByText('Échap')).toBeVisible();
+
+    await userEvent.type(field, 'tableau');
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(body.queryByRole('dialog')).toBeNull());
+  },
+};
