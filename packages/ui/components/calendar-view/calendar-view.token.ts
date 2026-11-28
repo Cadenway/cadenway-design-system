@@ -218,6 +218,17 @@ export interface BarView extends ItemView {
    * @readonly
    */
   readonly range: string;
+
+  /**
+   * Property days
+   *
+   * @description
+   * The days the bar covers in its row, in column order, to tell which day a pointer grabs it by.
+   *
+   * @type {readonly Date[]}
+   * @readonly
+   */
+  readonly days: readonly Date[];
   // #endregion
 }
 
@@ -331,9 +342,9 @@ export interface DayView {
    * Property height
    *
    * @description
-   * Height in pixels of a month day, from the visible lines and the variant, so every line fits
-   * and the bars across days keep their positions; null for the week's all-day cells, whose
-   * classes size them.
+   * Height in pixels of a month day, shared by its week: from the lines the week's fullest day
+   * uses and the variant, so every line fits and the bars across days keep their positions; null
+   * for the week's all-day cells, whose classes size them.
    *
    * @type {number | null}
    * @readonly
@@ -630,14 +641,29 @@ export interface CalendarViewHost {
   createOn(date: Date, slot: number | null, allDay: boolean): void;
 
   /**
-   * Method onDragStart
+   * Method onItemDragStart
    *
    * @description
-   * Marks an item as being dragged.
+   * Marks an item as being dragged, and keeps the day a bar was pressed on only when this drag
+   * starts from that same bar element.
    *
    * @param {string} id - Identifier of the dragged or focused item.
+   * @param {HTMLElement} element - Element the drag starts from.
    */
-  onDragStart(id: string): void;
+  onItemDragStart(id: string, element: HTMLElement): void;
+
+  /**
+   * Method onBarPointerdown
+   *
+   * @description
+   * Records the day of a bar under the pointer when it is pressed, so a drag that starts from
+   * that bar moves the item by the days between that day and the target, not its start onto the
+   * target.
+   *
+   * @param {MouseEvent} event - Press on the bar.
+   * @param {BarView} bar - The pressed bar.
+   */
+  onBarPointerdown(event: MouseEvent, bar: BarView): void;
 
   /**
    * Method onDragEnd

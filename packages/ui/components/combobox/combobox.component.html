@@ -41,7 +41,7 @@
   <div
     #panel
     [class]="panelClass"
-    [style.min-width.px]="overlay.originWidth()"
+    [style.min-width]="panelMinWidth()"
     [attr.data-state]="overlay.closing() ? 'closed' : 'open'"
     (mousedown)="onPanelMousedown($event)"
     (focusout)="onPanelFocusout($event)"

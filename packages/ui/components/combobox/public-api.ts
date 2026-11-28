@@ -12,6 +12,7 @@ export type {
   CwComboboxCompareWith,
   CwComboboxFilter,
   CwComboboxFilterOption,
+  CwComboboxMinWidth,
   CwComboboxSize,
 } from './combobox.types';
 

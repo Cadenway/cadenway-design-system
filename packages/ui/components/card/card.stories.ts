@@ -82,6 +82,13 @@ export const Simple: Story = {
         </cw-card-content>
       </cw-card>`,
   }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const card: HTMLElement | null = light(canvasElement).querySelector('cw-card');
+    if (!card) throw new Error('Card missing');
+    // Without a footer, the card keeps its 16 px above and below.
+    await expect(getComputedStyle(card).paddingTop).toBe('16px');
+    await expect(getComputedStyle(card).paddingBottom).toBe('16px');
+  },
 };
 
 /** Consumer spacing: `class="gap-2"` wins over the card's 16 px gap, its layout defaults sitting
@@ -142,6 +149,17 @@ export const ActionsFooter: Story = {
         </cw-card-footer>
       </cw-card>`,
   }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const card: HTMLElement | null = light(canvasElement).querySelector('cw-card');
+    const footer: HTMLElement | null | undefined = card?.querySelector('cw-card-footer');
+    if (!card || !footer) throw new Error('Card or footer missing');
+    // Mockup Compte.dc.html: the card keeps its 16 px top, the footer frames itself 12 px above
+    // and below, and the card adds nothing under it.
+    await expect(getComputedStyle(card).paddingTop).toBe('16px');
+    await expect(getComputedStyle(card).paddingBottom).toBe('0px');
+    await expect(getComputedStyle(footer).paddingTop).toBe('12px');
+    await expect(getComputedStyle(footer).paddingBottom).toBe('12px');
+  },
 };
 
 /** `sm` and interactive: a tab stop with the hover veil and the focus ring. */

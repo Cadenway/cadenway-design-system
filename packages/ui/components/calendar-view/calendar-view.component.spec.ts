@@ -448,6 +448,21 @@ describe('CwCalendarView', () => {
     expect(today?.querySelector('[data-more]')?.textContent.trim()).toBe('+2 autres');
   });
 
+  it('grows only the weeks that use more lines than two', async () => {
+    component.maxPerDay.set(4);
+    await fixture.whenStable();
+    const heights: string[] = Array.from(
+      host.querySelectorAll<HTMLElement>('[role="gridcell"]'),
+      (cell) => cell.style.height,
+    );
+
+    // The week of the 12th holds its four items on four lines; the other weeks keep 76 px.
+    expect(heights.slice(14, 21)).toEqual(Array.from({ length: 7 }, () => '116px'));
+    expect(heights.filter((height) => height !== '116px')).toEqual(
+      Array.from({ length: 35 }, () => '76px'),
+    );
+  });
+
   it('keeps its 76 px days for two lines', () => {
     const today: HTMLElement | null = host.querySelector('[role="gridcell"][aria-current="date"]');
 
@@ -551,6 +566,7 @@ describe('CwCalendarView', () => {
       previousIndex: 0,
       currentIndex: 0,
       item: drag,
+      isPointerOverContainer: true,
     } as unknown as CdkDragDrop<DropData, DropData, string>);
     await fixture.whenStable();
     expect(component.moves).toEqual([
@@ -559,6 +575,105 @@ describe('CwCalendarView', () => {
     expect(cell(host, 'mardi 24 novembre 2026, 1 tâche').textContent).toContain(
       'Notifications par e-mail',
     );
+  });
+
+  /**
+   * Function dropLists
+   *
+   * @description
+   * The calendar's drop lists, one per day.
+   *
+   * @returns {CdkDropList<DropData>[]} Drop lists of the month grid.
+   */
+  function dropLists(): CdkDropList<DropData>[] {
+    return fixture.debugElement
+      .queryAll(By.directive(CdkDropList))
+      .map((element) => element.injector.get(CdkDropList) as unknown as CdkDropList<DropData>);
+  }
+
+  /**
+   * Function pressBar
+   *
+   * @description
+   * Presses the 16–18 November bar with the pointer at a share of its width.
+   *
+   * @param {number} share - Share of the bar's width under the pointer, from 0 to 1.
+   */
+  function pressBar(share: number): void {
+    const bar: HTMLButtonElement = button(host, 'Maquetter la vue Calendrier, du 16 au 18 nov.');
+    vi.spyOn(bar, 'getBoundingClientRect').mockReturnValue(new DOMRect(100, 0, 300, 26));
+    bar.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, clientX: 100 + 300 * share }));
+  }
+
+  /**
+   * Function dragTo
+   *
+   * @description
+   * Starts a pointer drag of the first drawing of the 16–18 November item (its bar, or its first
+   * pill), then releases it on a day through the CDK events.
+   *
+   * @param {number} target - Day of November the item is released on.
+   * @param {boolean} [over] - Whether the pointer is over that day when released.
+   */
+  async function dragTo(target: number, over: boolean = true): Promise<void> {
+    const lists: CdkDropList<DropData>[] = dropLists();
+    const source: CdkDropList<DropData> | undefined = lists.find((list) =>
+      list.getSortedItems().some((drag) => drag.data === 'CAD-479'),
+    );
+    const container: CdkDropList<DropData> | undefined = lists.find(
+      (list) => list.data.date.getTime() === day(target).getTime(),
+    );
+    const drag: CdkDrag<string> | undefined = source
+      ?.getSortedItems()
+      .find((candidate) => candidate.data === 'CAD-479');
+    if (!source || !container || !drag) throw new Error('Drop lists missing');
+    drag.started.emit({ source: drag, event: new MouseEvent('mousemove') });
+    container.dropped.emit({
+      previousContainer: source,
+      container,
+      previousIndex: 0,
+      currentIndex: 0,
+      item: drag,
+      isPointerOverContainer: over,
+    } as unknown as CdkDragDrop<DropData, DropData, string>);
+    await fixture.whenStable();
+  }
+
+  it('moves a bar grabbed by its middle day by the days between that day and the target', async () => {
+    pressBar(0.5);
+    await dragTo(18);
+
+    expect(component.moves).toEqual([
+      { item: TASKS[4], start: day(17), end: day(19), allDay: true },
+    ]);
+  });
+
+  it('leaves a bar dropped on the day it was grabbed by where it is', async () => {
+    pressBar(0.5);
+    await dragTo(17);
+    pressBar(0.1);
+    await dragTo(16);
+
+    expect(component.moves).toEqual([]);
+  });
+
+  it('leaves a bar released outside every day where it is', async () => {
+    pressBar(0.9);
+    await dragTo(19, false);
+
+    expect(component.moves).toEqual([]);
+  });
+
+  it('moves a pill by its start after a click on its bar that never dragged', async () => {
+    pressBar(0.9);
+    // One line a day: the bar has no line left and is drawn as a pill on each of its days.
+    component.maxPerDay.set(1);
+    await fixture.whenStable();
+    await dragTo(20);
+
+    expect(component.moves).toEqual([
+      { item: TASKS[4], start: day(20), end: day(22), allDay: true },
+    ]);
   });
 
   it('switches to the week view with its all-day row and hourly slots', async () => {
@@ -887,6 +1002,7 @@ describe('CwCalendarView planning hooks', () => {
       previousIndex: 0,
       currentIndex: 0,
       item: drag,
+      isPointerOverContainer: true,
     } as unknown as CdkDragDrop<DropData, DropData, unknown>);
     await fixture.whenStable();
 
@@ -909,6 +1025,7 @@ describe('CwCalendarView planning hooks', () => {
       previousIndex: 0,
       currentIndex: 0,
       item: { data: 'CAD-482', dropContainer: outside },
+      isPointerOverContainer: true,
     } as unknown as CdkDragDrop<DropData, DropData, unknown>);
     await fixture.whenStable();
 
@@ -1126,6 +1243,33 @@ describe('CwCalendarView outlined, with the title toolbar', () => {
     expect(today?.style.height).toBe('156px');
     expect(today?.querySelectorAll('button[title]')).toHaveLength(4);
     expect(today?.querySelector('[data-more]')).toBeNull();
+  });
+
+  it('sizes each week to the lines its fullest day uses, never below 96 px', async () => {
+    fixture.componentInstance.maxPerDay.set(3);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const rows: HTMLElement[][] = Array.from(
+      host.querySelectorAll<HTMLElement>('[role="grid"] [role="row"]'),
+    )
+      .map((row) => Array.from(row.querySelectorAll<HTMLElement>('[role="gridcell"]')))
+      .filter((cells) => cells.length > 0);
+    const heights: string[][] = rows.map((cells) => cells.map((cell) => cell.style.height));
+
+    // The week of the 12th uses three lines (two chips and « +2 autres »); the week of the 16th
+    // two (the bar and the 17th's chip); the others none or one.
+    expect(heights.map((week) => new Set(week).size)).toEqual([1, 1, 1, 1, 1, 1]);
+    expect(heights.map((week) => week[0])).toEqual([
+      '96px',
+      '96px',
+      '126px',
+      '96px',
+      '96px',
+      '96px',
+    ]);
+    const seventeenth: HTMLElement | undefined = rows.at(3)?.at(1);
+    expect(seventeenth?.textContent).toContain('Notifications par e-mail');
+    expect(seventeenth?.querySelector('[data-more]')).toBeNull();
   });
 
   it('keeps 96 px days for two lines, the mockup height', () => {

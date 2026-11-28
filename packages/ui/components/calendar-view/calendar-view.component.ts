@@ -102,8 +102,8 @@ import type {
  * Constant CELL
  *
  * @description
- * Classes for a month day cell. Its fixed 76 px fits two lines; a day holding more takes its
- * height from `defaultHeight`.
+ * Classes for a month day cell. Its 76 px fit two lines; a week whose fullest day uses more
+ * takes its height from `defaultHeight`.
  *
  * @type {string}
  */
@@ -116,8 +116,8 @@ const CELL: string =
  *
  * @description
  * Classes for a month day of the `outlined` variant (mockup App.dc.html: `min-h-24 gap-1 p-1.5`).
- * Its height is set per day from `maxPerDay` (`outlinedHeight`), at least these 96 px, so every
- * line fits and the bars across days keep their fixed line positions.
+ * Its height is set per week from the lines its fullest day uses (`outlinedHeight`), at least
+ * these 96 px, so every line fits and the bars across days keep their fixed line positions.
  *
  * @type {string}
  */
@@ -263,12 +263,14 @@ const COLUMNS: { readonly 5: 'grid grid-cols-5'; readonly 7: 'grid grid-cols-7' 
  * Constant PILL
  *
  * @description
- * Classes for an item pill.
+ * Classes for an item pill, without its position: `itemView` adds `relative`, or `BAR_POSITION`
+ * for a bar across days (both set `position`, and the later `relative` would win in the
+ * stylesheet).
  *
  * @type {string}
  */
 const PILL: string =
-  'relative isolate flex h-5 min-w-0 shrink-0 items-center gap-1 overflow-hidden rounded-sm px-1 text-left text-xs transition-colors ' +
+  'isolate flex h-5 min-w-0 shrink-0 items-center gap-1 overflow-hidden rounded-sm px-1 text-left text-xs transition-colors ' +
   'hover:bg-linear-to-b hover:from-hover hover:to-hover animate-item-in motion-reduce:animate-none [&_ng-icon]:[--ng-icon__size:0.75rem] ' +
   ɵFOCUS_INSET;
 
@@ -277,14 +279,29 @@ const PILL: string =
  *
  * @description
  * Item chip classes of the `outlined` month (mockup App.dc.html: `rounded-md border bg-card px-1.5
- * py-1 text-xs`, 26 px).
+ * py-1 text-xs`, 26 px), without its position, which `itemView` adds as for `PILL`.
  *
  * @type {string}
  */
 const OUTLINED_PILL: string =
-  'relative isolate flex h-[26px] min-w-0 shrink-0 items-center gap-1.5 overflow-hidden rounded-md border px-1.5 text-left text-xs transition-colors ' +
+  'isolate flex h-[26px] min-w-0 shrink-0 items-center gap-1.5 overflow-hidden rounded-md border px-1.5 text-left text-xs transition-colors ' +
   'hover:bg-linear-to-b hover:from-hover hover:to-hover animate-item-in motion-reduce:animate-none [&_ng-icon]:[--ng-icon__size:0.75rem] ' +
   ɵFOCUS_INSET;
+
+/**
+ * Constant BAR_POSITION
+ *
+ * @description
+ * Position of a bar across days: on its line from the row, out of the flow of its first day. A
+ * bar is in the DOM of its first day's drop list but covers the next days, and the CDK checks the
+ * element under the pointer (`elementFromPoint`) to find the list a drag is over; during a drag,
+ * while the CDK marks its day as dragging or receiving (own items and outside items alike), the
+ * bar lets the pointer through to the day beneath. It stays clickable otherwise.
+ *
+ * @type {string}
+ */
+const BAR_POSITION: string =
+  'absolute in-[.cdk-drop-list-dragging]:pointer-events-none in-[.cdk-drop-list-receiving]:pointer-events-none';
 
 /**
  * Constant OUTLINED_PILL_TONES
@@ -520,7 +537,7 @@ const OUTLINED_LINE: 30 = 30;
  * padding, the 24 px number row, the 4 px gap), the lines and their gaps, the 6 px bottom
  * padding; 96 px for two lines, the mockup's `min-h-24`.
  *
- * @param {number} lines - Visible item lines of the day (`maxPerDay`).
+ * @param {number} lines - Item lines used by the fullest day of the week, at most `maxPerDay`.
  * @returns {number} Height in pixels.
  */
 function outlinedHeight(lines: number): number {
@@ -535,7 +552,7 @@ function outlinedHeight(lines: number): number {
  * top (26 px), the 20 px lines 22 px apart, the 4 px bottom padding; at least the sheet's 76 px,
  * which two lines fit.
  *
- * @param {number} lines - Visible item lines of the day (`maxPerDay`).
+ * @param {number} lines - Item lines used by the fullest day of the week, at most `maxPerDay`.
  * @returns {number} Height in pixels.
  */
 function defaultHeight(lines: number): number {
@@ -1089,9 +1106,9 @@ export class CwCalendarView<T> implements CalendarViewHost {
    * Property variant
    *
    * @description
-   * Look of the month grid: `default`, or `outlined` (days of at least 96 px, as tall as
-   * `maxPerDay` lines need; other months on `bg-muted`, today in a filled circle, bordered item
-   * chips).
+   * Look of the month grid: `default`, or `outlined` (days of at least 96 px, each week as tall
+   * as the lines its fullest day uses; other months on `bg-muted`, today in a filled circle,
+   * bordered item chips).
    *
    * @type {InputSignal<CwCalendarViewVariant>}
    * @readonly
@@ -1141,9 +1158,10 @@ export class CwCalendarView<T> implements CalendarViewHost {
    * Property maxPerDay
    *
    * @description
-   * Lines a day in the month view before « +n autres ». In the `outlined` variant every day of
-   * the grid grows to hold them (96 px for two, +30 px a line), so no item is clipped and the bars
-   * across days keep their lines; in the default variant 76 px hold two, +22 px a line.
+   * Lines a day in the month view before « +n autres ». Each week grows to the lines its fullest
+   * day uses, up to `maxPerDay`: in the `outlined` variant 96 px hold two, +30 px a line; in the
+   * default variant 76 px hold two, +22 px a line. No item is clipped and the bars across days
+   * keep their lines; a week using fewer lines keeps the variant's minimum.
    *
    * @type {InputSignalWithTransform<number, unknown>}
    * @readonly
@@ -1280,7 +1298,9 @@ export class CwCalendarView<T> implements CalendarViewHost {
    * Property itemMove
    *
    * @description
-   * An item dropped on another day or slot.
+   * An item dropped on another day or slot, with its new span. A bar across days dragged with the
+   * pointer moves by the days between the day it was grabbed by and the drop day; a drop that
+   * leaves the span unchanged emits nothing.
    *
    * @type {OutputEmitterRef<CwCalendarItemMove<T>>}
    * @readonly
@@ -1537,6 +1557,28 @@ export class CwCalendarView<T> implements CalendarViewHost {
    * @readonly
    */
   private readonly dragging: WritableSignal<string | null> = signal<string | null>(null);
+
+  /**
+   * Property barPress
+   *
+   * @description
+   * The bar last pressed with the pointer, its element and the day under the pointer; turned into
+   * `barGrab` or discarded by the next drag start.
+   *
+   * @type {{ id: string; element: HTMLElement; day: Date } | null}
+   */
+  private barPress: { id: string; element: HTMLElement; day: Date } | null = null;
+
+  /**
+   * Property barGrab
+   *
+   * @description
+   * The day the bar being dragged was grabbed by, for the drag in progress only; read and cleared
+   * by the drop (the CDK ends the drag before it drops, so the drag end cannot clear it).
+   *
+   * @type {{ id: string; day: Date } | null}
+   */
+  private barGrab: { id: string; day: Date } | null = null;
 
   /**
    * Property dragOver
@@ -2108,12 +2150,54 @@ export class CwCalendarView<T> implements CalendarViewHost {
    * Method onDragStart
    *
    * @description
-   * Part handler (`CalendarViewHost`), not for consumers.
+   * Marks an item as being dragged, without a grabbed day: the item moves by its start. Kept with
+   * its published signature; the calendar's parts call `onItemDragStart`.
    *
    * @param {string} id - Identifier of the item.
    */
   public onDragStart(id: string): void {
     this.dragging.set(id);
+    this.barPress = null;
+    this.barGrab = null;
+  }
+
+  /**
+   * Method onItemDragStart
+   *
+   * @description
+   * Part handler (`CalendarViewHost`), not for consumers. The day a bar was pressed on is kept for
+   * this drag only when it starts from that bar element; a press that never became a drag (a
+   * click), or one on another element, is dropped here.
+   *
+   * @param {string} id - Identifier of the item.
+   * @param {HTMLElement} element - Element the drag starts from.
+   */
+  public onItemDragStart(id: string, element: HTMLElement): void {
+    this.dragging.set(id);
+    const pressed: { id: string; element: HTMLElement; day: Date } | null = this.barPress;
+    this.barPress = null;
+    this.barGrab =
+      pressed?.id === id && pressed.element === element ? { id, day: pressed.day } : null;
+  }
+
+  /**
+   * Method onBarPointerdown
+   *
+   * @description
+   * Part handler (`CalendarViewHost`), not for consumers. Measured on the press, before the CDK
+   * replaces the bar with its placeholder: the day under the pointer, from its share of the bar.
+   *
+   * @param {MouseEvent} event - Press on the bar.
+   * @param {BarView} bar - The pressed bar.
+   */
+  public onBarPointerdown(event: MouseEvent, bar: BarView): void {
+    const target: EventTarget | null = event.currentTarget;
+    if (!(target instanceof HTMLElement)) return;
+    const rect: DOMRect = target.getBoundingClientRect();
+    const index: number =
+      rect.width > 0 ? Math.floor(((event.clientX - rect.left) / rect.width) * bar.days.length) : 0;
+    const day: Date | undefined = bar.days.at(Math.min(Math.max(index, 0), bar.days.length - 1));
+    this.barPress = day ? { id: bar.id, element: target, day } : null;
   }
 
   /**
@@ -2172,18 +2256,28 @@ export class CwCalendarView<T> implements CalendarViewHost {
    * Method onDrop
    *
    * @description
-   * Moves a dragged item to its drop target, or emits `itemSchedule` for an outside item.
+   * Moves a dragged item to its drop target, or emits `itemSchedule` for an outside item; does
+   * nothing for an item released outside every day and slot.
    *
    * @param {CdkDragDrop<DropData, DropData, unknown>} event - Drag or keyboard event.
    */
   protected onDrop(event: CdkDragDrop<DropData, DropData, unknown>): void {
     this.externalOver.set(null);
-    if (event.previousContainer === event.container) return;
+    const grab: { id: string; day: Date } | null = this.barGrab;
+    this.barGrab = null;
+    // The CDK also drops an item released outside any list, into the last list it entered: the
+    // drag is abandoned, for the calendar's items and outside items alike.
+    if (!event.isPointerOverContainer) return;
     if (this.ownsList(event.previousContainer)) {
       const entry: Entry<T> | undefined = this.entries().find(
         (candidate) => candidate.id === event.item.data,
       );
-      if (entry) this.moveEntry(entry, event.container.data);
+      const grabbedBy: Date | undefined = entry && grab?.id === entry.id ? grab.day : undefined;
+      // A bar moves by the days between the day it was grabbed by and the target, so it can land
+      // back in the list it is drawn in (its first day); a pill or a block moves by its start, and
+      // its own list keeps it where it is (a 9:10 block stays off the 9:00 slot's start).
+      if (!entry || (!grabbedBy && event.previousContainer === event.container)) return;
+      this.moveEntry(entry, event.container.data, grabbedBy);
       return;
     }
     // From a list outside the calendar, connected through `dropListIds`.
@@ -2434,12 +2528,14 @@ export class CwCalendarView<T> implements CalendarViewHost {
    * Method moveEntry
    *
    * @description
-   * Gives an item its new span (duration kept) and emits `itemMove`.
+   * Gives an item its new span (duration kept) and emits `itemMove`, unless the span is unchanged.
    *
    * @param {Entry<T>} entry - Calendar entry to move or render.
    * @param {DropData} to - Target day or time slot.
+   * @param {Date} [from] - Day the item was grabbed by, which lands on the target day; its start
+   * by default.
    */
-  private moveEntry(entry: Entry<T>, to: DropData): void {
+  private moveEntry(entry: Entry<T>, to: DropData, from?: Date): void {
     const { start, end, allDay }: CwCalendarSpan = entry.span;
     let span: CwCalendarSpan;
     if (to.slot !== null) {
@@ -2451,8 +2547,15 @@ export class CwCalendarView<T> implements CalendarViewHost {
       span = { start: ɵstartOfDay(to.date), end: ɵstartOfDay(to.date), allDay: true };
     } else {
       // Onto a day: the item keeps its times and its number of days.
-      const shift: number = ɵdaysBetween(start, to.date);
+      const shift: number = ɵdaysBetween(from ?? start, to.date);
       span = { start: addDays(start, shift), end: addDays(end, shift), allDay };
+    }
+    if (
+      span.allDay === allDay &&
+      span.start.getTime() === start.getTime() &&
+      span.end.getTime() === end.getTime()
+    ) {
+      return;
     }
     this.moved.update((moved) => new Map(moved).set(entry.id, span));
     this.itemMove.emit({ item: entry.item, ...span });
@@ -2652,8 +2755,14 @@ export class CwCalendarView<T> implements CalendarViewHost {
     const outlined: boolean = !allDayRow && this.variant() === 'outlined';
     const variant: CwCalendarViewVariant = outlined ? 'outlined' : 'default';
     const line: number = outlined ? OUTLINED_LINE : LINE;
-    return days.map((date, index): DayView => {
-      const key: string = cellKey(date, null);
+    const placed: {
+      date: Date;
+      covered: { entry: Entry<T>; from: number; to: number; row: number }[];
+      reserved: number;
+      own: Entry<T>[];
+      shownSingles: Entry<T>[];
+      hidden: number;
+    }[] = days.map((date, index) => {
       const covered: { entry: Entry<T>; from: number; to: number; row: number }[] = bars.filter(
         (bar) => bar.from <= index && bar.to >= index,
       );
@@ -2663,6 +2772,27 @@ export class CwCalendarView<T> implements CalendarViewHost {
       const fits: boolean = own.length <= available;
       const shownSingles: Entry<T>[] = fits ? own : own.slice(0, Math.max(0, available - 1));
       const hidden: number = own.length - shownSingles.length;
+      return { date, covered, reserved, own, shownSingles, hidden };
+    });
+    // Mockup App.dc.html: month rows size to their content (`min-h-24`), so a week is as tall as
+    // the lines its fullest day uses (bar lines, pills, « +n autres »), never more than `lines`;
+    // the lines keep their fixed positions, so the bars across days stay aligned.
+    const usedLines: number = Math.min(
+      lines,
+      placed.reduce(
+        (max, day) =>
+          Math.max(max, day.reserved + day.shownSingles.length + (day.hidden > 0 ? 1 : 0)),
+        0,
+      ),
+    );
+    const height: number | null = allDayRow
+      ? null
+      : outlined
+        ? outlinedHeight(usedLines)
+        : defaultHeight(usedLines);
+    return placed.map((day, index): DayView => {
+      const { date, covered, reserved, own, shownSingles, hidden }: (typeof placed)[number] = day;
+      const key: string = cellKey(date, null);
       const today: boolean = ɵsameDay(date, now);
       const outside: boolean = !allDayRow && !ɵsameMonth(date, month);
       const all: Entry<T>[] = [...covered.map((bar) => bar.entry), ...own];
@@ -2689,7 +2819,7 @@ export class CwCalendarView<T> implements CalendarViewHost {
         numberClass: (outlined ? OUTLINED_NUMBERS : NUMBERS)[
           today ? 'today' : outside ? 'outside' : 'plain'
         ],
-        height: allDayRow ? null : outlined ? outlinedHeight(lines) : defaultHeight(lines),
+        height,
         headClass: HEADS[variant],
         addClass: outlined ? OUTLINED_ADD : ADD,
         spacerClass: SPACERS[variant],
@@ -2729,12 +2859,13 @@ export class CwCalendarView<T> implements CalendarViewHost {
                 from: String(bar.entry.span.start.getDate()),
                 to: formats.dayShort.format(bar.entry.span.end),
               }),
-              classes: `${base.classes} absolute${continues ? ' rounded-r-none' : ''}`,
+              classes: `${base.classes}${continues ? ' rounded-r-none' : ''}`,
               top: `${String(top + bar.row * line)}px`,
               left: `calc(100% * ${String(bar.from)} / ${String(count)} + 4px)`,
               width: `calc(100% * ${String(span)} / ${String(count)} - 8px)`,
               continues,
               range,
+              days: days.slice(bar.from, bar.to + 1),
             };
           }),
         all: all.map((entry) => this.itemView(entry, 'list', false, 0)),
@@ -2773,9 +2904,12 @@ export class CwCalendarView<T> implements CalendarViewHost {
     index: number,
     outlined: boolean = false,
   ): ItemView {
+    // A bar across days is placed on its line from the row (`top`, `left`, `width`), out of the
+    // flow of its first day, so the day neither pushes it down nor clips it.
+    const position: string = view === 'bar' ? BAR_POSITION : 'relative';
     const frame: string = outlined
-      ? `${OUTLINED_PILL} ${OUTLINED_PILL_TONES[grabbed ? 'grabbed' : 'rest']}`
-      : `${PILL} ${PILL_TONES[grabbed ? 'grabbed' : 'rest']}`;
+      ? `${position} ${OUTLINED_PILL} ${OUTLINED_PILL_TONES[grabbed ? 'grabbed' : 'rest']}`
+      : `${position} ${PILL} ${PILL_TONES[grabbed ? 'grabbed' : 'rest']}`;
     return {
       id: entry.id,
       title: entry.label,

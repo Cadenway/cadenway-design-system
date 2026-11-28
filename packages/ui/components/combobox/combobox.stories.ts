@@ -252,3 +252,28 @@ export const Keyboard: Story = {
     await expect(trigger).toHaveFocus();
   },
 };
+
+/** Minimum width: a 112 px trigger with `minWidth="56"` opens a 224 px panel, as the assignees of
+ *  the task creation dialog (mockup `App.dc.html`: `min-w-56`). */
+export const MinWidth: Story = {
+  render: () => ({
+    props: { people },
+    template: `
+      <div class="h-80 w-28">
+        <cw-combobox multiple minWidth="56" size="sm" [summary]="people" placeholder="Personnes"
+                     searchPlaceholder="Rechercher une personne…" ariaLabel="Assignés">${PEOPLE}</cw-combobox>
+      </div>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const trigger: HTMLElement = within(light(canvasElement)).getByRole('combobox', {
+      name: 'Assignés',
+    });
+    await userEvent.click(trigger);
+    const listbox: HTMLElement = within(document.body).getByRole('listbox', { name: 'Assignés' });
+    const panel: HTMLElement | null = listbox.closest<HTMLElement>('[data-state]');
+    // `offsetWidth` ignores the entrance scale of `animate-menu-in`.
+    await expect(trigger.offsetWidth).toBe(112);
+    await expect(panel?.offsetWidth).toBeGreaterThanOrEqual(224);
+    await userEvent.keyboard('{Escape}');
+  },
+};

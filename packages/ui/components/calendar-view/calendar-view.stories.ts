@@ -313,6 +313,51 @@ export const Outlined: Story = {
   },
 };
 
+/**
+ * Outlined month with `maxPerDay` at 3: each week is as tall as the lines its fullest day uses
+ * (the mockup's `min-h-24` rows), so only the week of the 12th grows to 126 px and every chip
+ * stays inside its day.
+ */
+export const OutlinedRowsFitContent: Story = {
+  render: () => ({
+    props,
+    template: `
+      <cw-calendar-view ${VIEW} variant="outlined" toolbar="title" viewToggle="false" [maxPerDay]="3" [date]="november">
+        ${ITEM}
+      </cw-calendar-view>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const cells: HTMLElement[] = Array.from(
+      light(canvasElement).querySelectorAll<HTMLElement>('[role="gridcell"]'),
+    );
+    const heights: number[] = cells.map((cell) => Math.round(cell.getBoundingClientRect().height));
+    const today: HTMLElement | undefined = cells.find((cell) => cell.ariaCurrent === 'date');
+    await expect(Math.round(today?.getBoundingClientRect().height ?? 0)).toBe(126);
+    await expect(heights.filter((height) => height === 126)).toHaveLength(7);
+    await expect(heights.filter((height) => height === 96)).toHaveLength(35);
+    for (const cell of cells) {
+      const bottom: number = cell.getBoundingClientRect().bottom;
+      for (const item of Array.from(
+        cell.querySelectorAll<HTMLElement>('button[title], [data-more]'),
+      )) {
+        await expect(item.getBoundingClientRect().bottom).toBeLessThanOrEqual(bottom + 0.5);
+      }
+    }
+    // The bar from the 16th to the 18th lies on the first line of its week, over three days
+    // (`offset*` ignores the entrance transform).
+    const bar: HTMLElement | null = light(canvasElement).querySelector<HTMLElement>(
+      'button[title="Maquetter la vue Calendrier, du 16 au 18 nov."]',
+    );
+    const sixteenth: HTMLElement | undefined = cells.find((cell) =>
+      cell.textContent.includes('lundi 16 novembre 2026'),
+    );
+    await expect(bar?.offsetTop).toBe(34);
+    await expect(
+      Math.abs((bar?.offsetWidth ?? 0) - (3 * (sixteenth?.offsetWidth ?? 0) - 8)),
+    ).toBeLessThanOrEqual(2);
+  },
+};
+
 /** Week: the all-day row, hourly slots from 9:00 to 13:00, timed blocks and the current time. */
 export const Week: Story = {
   render: () => ({
@@ -383,6 +428,82 @@ export const Keyboard: Story = {
       expect(
         scope.getByRole('gridcell', { name: /^jeudi 12 novembre 2026, 4 tâches/ }),
       ).toHaveFocus(),
+    );
+  },
+};
+
+/**
+ * Pointer drag onto a day under a bar: « Notifications de mention » dragged from the 17th to the
+ * 18th, both covered by the 16–18 bar, lands on the 18th, not on the bar's first day.
+ */
+export const DragOverBar: Story = {
+  render: () => ({
+    props,
+    template: `<cw-calendar-view ${VIEW} [date]="november">${ITEM}</cw-calendar-view>`,
+  }),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const scope: {
+      getByRole: (role: string, options?: { name?: string | RegExp }) => HTMLElement;
+    } = within(light(canvasElement));
+    const pill: HTMLElement = scope.getByRole('button', { name: 'Notifications de mention' });
+    const bar: HTMLElement = scope.getByRole('button', {
+      name: 'Maquetter la vue Calendrier, du 16 au 18 nov.',
+    });
+    const day: () => HTMLElement = () =>
+      scope.getByRole('gridcell', { name: /^mercredi 18 novembre 2026/ });
+    // Wait for the entrance animations, so the rectangles are final.
+    await waitFor(() => expect(getComputedStyle(bar).opacity).toBe('1'));
+    const from: DOMRect = pill.getBoundingClientRect();
+    const over: DOMRect = bar.getBoundingClientRect();
+    const cell: DOMRect = day().getBoundingClientRect();
+    const start: { clientX: number; clientY: number } = {
+      clientX: from.left + from.width / 2,
+      clientY: from.top + from.height / 2,
+    };
+    const end: { clientX: number; clientY: number } = {
+      clientX: cell.left + cell.width / 2,
+      clientY: over.top + over.height / 2,
+    };
+    // At rest the bar is under that point and stays clickable.
+    await expect(document.elementFromPoint(end.clientX, end.clientY)?.closest('button')).toBe(bar);
+    // Real mouse events, as the CDK reads them (`buttons` and `detail` tell them from a screen
+    // reader's simulated press).
+    const mouse: (type: string, at: { clientX: number; clientY: number }) => MouseEvent = (
+      type: string,
+      at: { clientX: number; clientY: number },
+    ): MouseEvent =>
+      new MouseEvent(type, {
+        bubbles: true,
+        cancelable: true,
+        button: 0,
+        buttons: 1,
+        detail: 1,
+        ...at,
+      });
+    const frame: () => Promise<void> = () =>
+      new Promise((resolve) => {
+        requestAnimationFrame(() => {
+          resolve();
+        });
+      });
+    pill.dispatchEvent(mouse('mousedown', start));
+    document.dispatchEvent(
+      mouse('mousemove', { clientX: start.clientX + 10, clientY: start.clientY }),
+    );
+    await frame();
+    await frame();
+    for (let step: number = 1; step <= 8; step++) {
+      document.dispatchEvent(
+        mouse('mousemove', {
+          clientX: start.clientX + ((end.clientX - start.clientX) * step) / 8,
+          clientY: start.clientY + ((end.clientY - start.clientY) * step) / 8,
+        }),
+      );
+      await frame();
+    }
+    document.dispatchEvent(mouse('mouseup', end));
+    await waitFor(() =>
+      expect(within(day()).getByRole('button', { name: 'Notifications de mention' })).toBeVisible(),
     );
   },
 };
