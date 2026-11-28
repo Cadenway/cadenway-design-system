@@ -10,6 +10,8 @@ import type { CwCalendarViewLabels, CwCalendarViewProvidedLabels } from './calen
  */
 export const CW_CALENDAR_VIEW_LABELS: Required<CwCalendarViewLabels> = {
   today: 'Aujourd’hui',
+  // Mockup App.dc.html: the group of « Aujourd’hui » and the arrows in the calendar header.
+  navigation: 'Navigation du calendrier',
   previousMonth: 'Mois précédent',
   nextMonth: 'Mois suivant',
   previousWeek: 'Semaine précédente',

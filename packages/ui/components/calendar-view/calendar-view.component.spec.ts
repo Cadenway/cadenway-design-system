@@ -429,7 +429,7 @@ describe('CwCalendarView', () => {
     button(host, 'Corriger le tri').click();
     expect(component.opened.map((task) => task.id)).toEqual(['CAD-462']);
 
-    button(host, 'Créer une tâche le 3 novembre').click();
+    button(host, 'Créer une tâche le mardi 3 novembre').click();
     expect(component.creations).toEqual([{ date: day(3), allDay: true }]);
   });
 
@@ -946,5 +946,118 @@ describe('CwCalendarView planning hooks', () => {
     expect(status?.getAttribute('aria-label')).toBe('Chargement du calendrier');
     expect(status?.getAttribute('aria-busy')).toBe('true');
     expect(host.querySelector('[role="grid"]')).toBeNull();
+  });
+});
+
+/**
+ * Component OutlinedHost
+ *
+ * @description
+ * Hosts the mockup's month: `outlined` days, the `title` header, no view toggle.
+ */
+@Component({
+  imports: [CwCalendarView],
+  template: `
+    <cw-calendar-view
+      variant="outlined"
+      toolbar="title"
+      viewToggle="false"
+      [items]="items"
+      [trackBy]="id"
+      [itemLabel]="name"
+      [itemSpan]="span"
+      [today]="today"
+      [date]="today"
+    />
+  `,
+})
+class OutlinedHost {
+  // #region Properties
+  /**
+   * Property items
+   *
+   * @description
+   * Tasks shown in the calendar.
+   *
+   * @type {Task[]}
+   * @readonly
+   */
+  public readonly items: Task[] = TASKS;
+
+  /**
+   * Property today
+   *
+   * @description
+   * The current day, Thursday 12 November 2026.
+   *
+   * @type {Date}
+   * @readonly
+   */
+  public readonly today: Date = day(12, 10, 12);
+
+  /**
+   * Property id
+   *
+   * @description
+   * Reads a task's id.
+   *
+   * @type {(task: Task) => string}
+   * @readonly
+   */
+  public readonly id: (task: Task) => string = (task) => task.id;
+
+  /**
+   * Property name
+   *
+   * @description
+   * Reads a task's name.
+   *
+   * @type {(task: Task) => string}
+   * @readonly
+   */
+  public readonly name: (task: Task) => string = (task) => task.name;
+
+  /**
+   * Property span
+   *
+   * @description
+   * Reads a task's span.
+   *
+   * @type {(task: Task) => CwCalendarSpan | null}
+   * @readonly
+   */
+  public readonly span: (task: Task) => CwCalendarSpan | null = (task) => task.span;
+  // #endregion
+}
+
+describe('CwCalendarView outlined, with the title toolbar', () => {
+  let host: HTMLElement;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [{ provide: LiveAnnouncer, useValue: { announce: () => Promise.resolve() } }],
+    });
+    const fixture: ComponentFixture<OutlinedHost> = TestBed.createComponent(OutlinedHost);
+    fixture.detectChanges();
+    host = fixture.nativeElement as HTMLElement;
+  });
+
+  it('heads the calendar with the month and groups the navigation at the end, without view toggle', () => {
+    const heading: HTMLElement | null = host.querySelector('h2');
+    const navigation: HTMLElement | null = host.querySelector(
+      '[role="group"][aria-label="Navigation du calendrier"]',
+    );
+
+    expect(heading?.textContent.trim()).toBe('Novembre 2026');
+    expect(navigation?.textContent).toContain('Aujourd’hui');
+    expect(host.querySelector('[role="radiogroup"]')).toBeNull();
+  });
+
+  it('marks the days of other months and fills the number of today', () => {
+    const outside: HTMLElement | null = host.querySelector('[role="gridcell"][data-outside]');
+    const today: HTMLElement | null = host.querySelector('[role="gridcell"][aria-current="date"]');
+
+    expect(outside?.classList).toContain('bg-muted');
+    expect(today?.querySelector('.bg-foreground')?.textContent.trim()).toBe('12');
   });
 });

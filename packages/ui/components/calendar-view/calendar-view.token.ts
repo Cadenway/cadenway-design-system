@@ -328,6 +328,39 @@ export interface DayView {
   readonly numberClass: string;
 
   /**
+   * Property headClass
+   *
+   * @description
+   * Classes for the row holding the day number and its « + » button.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly headClass: string;
+
+  /**
+   * Property addClass
+   *
+   * @description
+   * Classes for the day's « + » button.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly addClass: string;
+
+  /**
+   * Property spacerClass
+   *
+   * @description
+   * Classes for a line kept free for a bar crossing the day.
+   *
+   * @type {string}
+   * @readonly
+   */
+  readonly spacerClass: string;
+
+  /**
    * Property today
    *
    * @description

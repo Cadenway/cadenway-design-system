@@ -9,6 +9,31 @@
 export type CwCalendarViewMode = 'month' | 'week';
 
 /**
+ * Type CwCalendarViewVariant
+ *
+ * @description
+ * Look of the month grid: `default` 76 px days with flat 20 px pills; `outlined` the mockup's
+ * month (`App.dc.html`, the calendar view): 96 px days, the days of the other months on
+ * `bg-muted`, today's number in a filled circle, bordered `bg-card` item chips (26 px) and 24 px
+ * « + » buttons. The week view is the same in both.
+ *
+ * @type {'default' | 'outlined'}
+ */
+export type CwCalendarViewVariant = 'default' | 'outlined';
+
+/**
+ * Type CwCalendarViewToolbar
+ *
+ * @description
+ * Layout of the header: `default` puts « Aujourd'hui », the arrows and the title first, the view
+ * toggle at the end; `title` puts the title first as a heading (`h2`) and groups « Aujourd'hui »
+ * and the 28 px arrows at the end (mockup `App.dc.html`, the calendar view).
+ *
+ * @type {'default' | 'title'}
+ */
+export type CwCalendarViewToolbar = 'default' | 'title';
+
+/**
  * Type CwCalendarWeekStart
  *
  * @description
@@ -486,7 +511,7 @@ export interface CwCalendarViewLabels {
    * Property createOn
    *
    * @description
-   * Name of the « + » of a day: « Créer une tâche le 3 novembre ».
+   * Name of the « + » of a day: « Créer une tâche le mardi 3 novembre » (the weekday, then the date).
    *
    * @type {string}
    * @readonly
@@ -593,6 +618,17 @@ export interface CwCalendarViewLabels {
    * @readonly
    */
   readonly scheduled?: string;
+
+  /**
+   * Property navigation
+   *
+   * @description
+   * Accessible name of the group of « Aujourd’hui » and the arrows, in the `title` toolbar.
+   *
+   * @type {string | undefined}
+   * @readonly
+   */
+  readonly navigation?: string;
   // #endregion
 }
 
